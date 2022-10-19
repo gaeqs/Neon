@@ -26,6 +26,7 @@ find_package(glm CONFIG REQUIRED)
 find_package(assimp CONFIG REQUIRED)
 
 # ARUCO
+set(BUILD_UTILS OFF)
 add_subdirectory(${CMAKE_SOURCE_DIR}/lib/aruco)
 include_directories(${CMAKE_SOURCE_DIR}/lib/aruco/src)
 
@@ -38,7 +39,7 @@ list(APPEND LIBRARIES opencv_core opencv_calib3d opencv_imgcodecs opencv_videoio
 list(APPEND LIBRARIES aruco)
 list(APPEND LIBRARIES glad)
 list(APPEND LIBRARIES glfw ${GLFW_LIBRARIES})
-list(APPEND LIBRARIES assimp)
+list(APPEND LIBRARIES assimp::assimp)
 
 add_subdirectory(src)
 

@@ -83,9 +83,9 @@ void example2(){
     };
     struct PicoFlann_Array3f_Container{
         const Point3f *_array;
-        size_t _size;
-        PicoFlann_Array3f_Container(float *array,size_t Size):_array((Point3f*)array),_size(Size){}
-        inline size_t size()const{return _size;}
+        size_t _localSize;
+        PicoFlann_Array3f_Container(float *array,size_t Size):_array((Point3f*)array),_localSize(Size){}
+        inline size_t size()const{return _localSize;}
         inline const Point3f &at(int idx)const{ return _array [idx];}
     };
     std::default_random_engine generator;

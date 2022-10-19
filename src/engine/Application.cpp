@@ -2,6 +2,7 @@
 // Created by grial on 19/10/22.
 //
 
+#include <iostream>
 #include "Application.h"
 
 Application::Application(int32_t width, int32_t height) :
@@ -44,6 +45,8 @@ Result<uint32_t, std::string> Application::startGameLoop() {
     try {
         while (!glfwWindowShouldClose(_window)) {
             frames++;
+
+            glfwSwapBuffers(_window);
         }
     } catch (const std::exception& exception) {
         glfwTerminate();

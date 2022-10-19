@@ -7,11 +7,13 @@
 
 
 #include "Material.h"
+#include "Component.h"
 
-class GraphicComponent {
+class GraphicComponent : public Component {
 
     Material _material;
 
+public:
 
 };
 
