@@ -8,8 +8,6 @@ constexpr int32_t WIDTH = 800;
 constexpr int32_t HEIGHT = 600;
 
 std::shared_ptr<Room> getTestRoom() {
-    Room r;
-
     auto room = std::make_shared<Room>();
     auto gameObject = room->newGameObject();
     gameObject->newComponent<TestComponent>();

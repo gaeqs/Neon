@@ -7,8 +7,9 @@
 
 #include <any>
 #include <vector>
+#include "ComponentsHolder.h"
 
-#include "Room.h"
+class Room;
 
 class Component;
 
@@ -18,6 +19,8 @@ class GameObject {
     Room* _room;
 
     std::vector<Component*> _components;
+
+    ComponentsHolder& getRoomComponents() const;
 
 public:
 
@@ -31,7 +34,7 @@ public:
 
     template<class T>
     T* newComponent() {
-        T* component = _room->newComponent<T>();
+        T* component = getRoomComponents().newComponent<T>();
         component->_gameObject = this;
         _components.emplace_back(component);
         return component;

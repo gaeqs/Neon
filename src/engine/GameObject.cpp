@@ -3,6 +3,7 @@
 //
 
 #include "GameObject.h"
+#include "Room.h"
 
 uint64_t GAME_OBJECT_ID_GENERATOR = 0;
 
@@ -16,4 +17,8 @@ uint64_t GameObject::getId() const {
 
 Room* GameObject::getRoom() const {
     return _room;
+}
+
+ComponentsHolder& GameObject::getRoomComponents() const {
+    return _room->getComponents();
 }

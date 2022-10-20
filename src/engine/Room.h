@@ -13,6 +13,8 @@
 #include <vector>
 
 #include "Camera.h"
+#include "ComponentsHolder.h"
+#include "GameObject.h"
 #include "../util/ClusteredLinkedCollection.h"
 
 class Application;
@@ -23,32 +25,11 @@ class Room {
 
     friend class Application;
 
-    friend class GameObject;
-
-    Camera _camera;
-    std::map<std::type_index, std::shared_ptr<void>> _components;
-
-    // Pointer fixes cross-reference error.
-    ClusteredLinkedCollection<GameObject>* _gameObjects;
-
     Application* _application;
 
-    template<class T>
-    T* newComponent() {
-        auto it = _components.find(typeid(T));
-
-        if (it == _components.end()) {
-            auto pointer = std::make_shared<ClusteredLinkedCollection<T>>();
-            _components.insert(std::make_pair(
-                    std::type_index(typeid(T)),
-                    std::static_pointer_cast<void>(pointer)
-            ));
-            return pointer->emplace();
-        }
-
-        auto components = std::static_pointer_cast<ClusteredLinkedCollection<T>>(it->second);
-        return components->emplace();
-    }
+    Camera _camera;
+    ComponentsHolder _components;
+    ClusteredLinkedCollection<GameObject> _gameObjects;
 
 public:
 
@@ -63,6 +44,10 @@ public:
     const Camera& getCamera() const;
 
     Camera& getCamera();
+
+    const ComponentsHolder& getComponents() const;
+
+    ComponentsHolder& getComponents();
 
     GameObject* newGameObject();
 
