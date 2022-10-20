@@ -21,6 +21,8 @@ class GameObject;
 
 class Room {
 
+    friend class Application;
+
     friend class GameObject;
 
     Camera _camera;
@@ -61,8 +63,6 @@ public:
     const Camera& getCamera() const;
 
     Camera& getCamera();
-
-    void bindApplication(Application* application);
 
     GameObject* newGameObject();
 

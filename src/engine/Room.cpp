@@ -35,10 +35,6 @@ Camera& Room::getCamera() {
     return _camera;
 }
 
-void Room::bindApplication(Application* application) {
-    _application = application;
-}
-
 GameObject* Room::newGameObject() {
     return _gameObjects->emplace(this);
 }

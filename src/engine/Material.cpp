@@ -2,7 +2,6 @@
 // Created by grial on 19/10/22.
 //
 
-#include <cstring>
 #include "Material.h"
 #include "../gl/Shader.h"
 

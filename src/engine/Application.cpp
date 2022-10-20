@@ -2,8 +2,16 @@
 // Created by grial on 19/10/22.
 //
 
-#include <iostream>
 #include "Application.h"
+#include <iostream>
+#include "Room.h"
+
+void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
+    glViewport(0, 0, width, height);
+
+    auto* application = static_cast<Application*>(glfwGetWindowUserPointer(window));
+    application->internalForceSizeValues(width, height);
+}
 
 Application::Application(int32_t width, int32_t height) :
         _width(width), _height(height), _window(nullptr) {
@@ -32,6 +40,10 @@ Result<GLFWwindow*, std::string> Application::init() {
         return {"Failed to initialize GLAD"};
     }
 
+
+    glfwSetWindowUserPointer(_window, this);
+    glfwSetWindowSizeCallback(_window, framebuffer_size_callback);
+
     return {_window};
 }
 
@@ -44,13 +56,16 @@ Result<uint32_t, std::string> Application::startGameLoop() const {
 
     try {
         while (!glfwWindowShouldClose(_window)) {
-            frames++;
+            glfwPollEvents();
+            glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+            glClear(GL_COLOR_BUFFER_BIT);
 
             if (_room != nullptr) {
                 _room->update();
             }
 
             glfwSwapBuffers(_window);
+            frames++;
         }
     } catch (const std::exception& exception) {
         glfwTerminate();
@@ -75,5 +90,19 @@ float Application::getAspectRatio() const {
 }
 
 void Application::setRoom(const std::shared_ptr<Room>& room) {
+    if (_room != nullptr) {
+        _room->_application = nullptr;
+    }
     _room = room;
+    if (_room != nullptr) {
+        _room->_application = this;
+    }
+}
+
+void Application::internalForceSizeValues(int32_t width, int32_t height) {
+    _width = width;
+    _height = height;
+    if (_room != nullptr) {
+        _room->onResize();
+    }
 }

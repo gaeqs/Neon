@@ -11,6 +11,6 @@ void TestComponent::onUpdate() {
     GameObject* o = getGameObject();
 
     // TODO rotation not working
-    auto euler = glm::eulerAngles(o->getRoom()->getCamera().rotate(glm::vec3(1.0f, 1.0f, 0.0f), 0.1f));
+    auto euler = glm::eulerAngles(o->getRoom()->getCamera().rotate(glm::vec3(0.0f, 1.0f, 0.0f), 0.1f));
     std::cout << euler.x << ", " << euler.y << ", " << euler.z << std::endl;
 }

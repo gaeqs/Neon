@@ -2,6 +2,7 @@
 // Created by grial on 19/10/22.
 //
 
+#include <iostream>
 #include "Camera.h"
 
 
@@ -12,7 +13,7 @@ void Camera::recalculateViewMatrix() {
 
 Camera::Camera(const Frustum& frustum) :
         _position(),
-        _rotation(),
+        _rotation(glm::vec3(0.0f, 0.0f, 0.0f)),
         _rotationInverse(),
         _frustum(frustum),
         _dirtyView(false),
@@ -76,7 +77,7 @@ const glm::quat& Camera::lookAt(const glm::vec3& direction) {
 
 const glm::quat& Camera::rotate(const glm::vec3& direction, float angle) {
     _dirtyView = true;
-    _rotation = glm::angleAxis(angle, direction) * _rotation;
+    _rotation =  glm::angleAxis(angle, direction) * _rotation;
     _rotationInverse = glm::inverse(_rotation);
     return _rotation;
 }

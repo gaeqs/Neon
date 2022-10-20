@@ -8,13 +8,14 @@
 
 #include <cstdint>
 #include <string>
+#include <memory>
 
 #include "glad/glad.h"
 #include <GLFW/glfw3.h>
 
 #include "../util/Result.h"
-#include "Room.h"
 
+class Room;
 
 class Application {
 
@@ -39,6 +40,12 @@ public:
     float getAspectRatio() const;
 
     void setRoom(const std::shared_ptr<Room>& room);
+
+    //region INTERNAL CALLS
+
+    void internalForceSizeValues(int32_t width, int32_t height);
+
+    //endregion
 };
 
 
