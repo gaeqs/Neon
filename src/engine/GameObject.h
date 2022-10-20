@@ -6,6 +6,8 @@
 #define RVTRACKING_GAMEOBJECT_H
 
 #include <any>
+#include <vector>
+
 #include "Room.h"
 
 class Component;
@@ -21,17 +23,18 @@ public:
 
     GameObject(const GameObject& other) = delete;
 
-    explicit GameObject();
+    explicit GameObject(Room* room);
 
     uint64_t getId() const;
 
     Room* getRoom() const;
 
     template<class T>
-    T& newComponent() {
+    T* newComponent() {
         T* component = _room->newComponent<T>();
         component->_gameObject = this;
         _components.emplace_back(component);
+        return component;
     }
 
 

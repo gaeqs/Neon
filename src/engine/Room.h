@@ -13,8 +13,11 @@
 #include <vector>
 
 #include "Camera.h"
+#include "../util/ClusteredLinkedCollection.h"
 
 class Application;
+
+class GameObject;
 
 class Room {
 
@@ -22,7 +25,9 @@ class Room {
 
     Camera _camera;
     std::map<std::type_index, std::shared_ptr<void>> _components;
-    std::vector<GameObject> _gameObjects;
+
+    // Pointer fixes cross-reference error.
+    ClusteredLinkedCollection<GameObject>* _gameObjects;
 
     Application* _application;
 
@@ -31,13 +36,16 @@ class Room {
         auto it = _components.find(typeid(T));
 
         if (it == _components.end()) {
-            auto pointer = std::make_shared<std::vector<T>>();
-            _components.insert(std::make_pair(typeid(T), pointer));
-            return &pointer->emplace_back();
+            auto pointer = std::make_shared<ClusteredLinkedCollection<T>>();
+            _components.insert(std::make_pair(
+                    std::type_index(typeid(T)),
+                    std::static_pointer_cast<void>(pointer)
+            ));
+            return pointer->emplace();
         }
 
-        auto* components = std::static_pointer_cast<std::vector<T>>(it->second);
-        return &components->emplace_back();
+        auto components = std::static_pointer_cast<ClusteredLinkedCollection<T>>(it->second);
+        return components->emplace();
     }
 
 public:
@@ -45,6 +53,8 @@ public:
     Room(const Room& other) = delete;
 
     Room();
+
+    ~Room();
 
     Application* getApplication() const;
 
@@ -54,7 +64,7 @@ public:
 
     void bindApplication(Application* application);
 
-    GameObject& newGameObject();
+    GameObject* newGameObject();
 
     //region EVENTS
 

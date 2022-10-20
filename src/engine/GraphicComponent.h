@@ -15,6 +15,8 @@ class GraphicComponent : public Component {
 
 public:
 
+    GraphicComponent();
+
 };
 
 

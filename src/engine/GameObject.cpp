@@ -6,7 +6,7 @@
 
 uint64_t GAME_OBJECT_ID_GENERATOR = 0;
 
-GameObject::GameObject() : _id(GAME_OBJECT_ID_GENERATOR++), _room(nullptr) {
+GameObject::GameObject(Room* room) : _id(GAME_OBJECT_ID_GENERATOR++), _room(room) {
 
 }
 

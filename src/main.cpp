@@ -1,35 +1,23 @@
 #include <iostream>
-#include "engine/Application.h"
-#include "util/ClusteredLinkedCollection.h"
 #include <vector>
+
+#include "engine/Engine.h"
+#include "test/TestComponent.h"
 
 constexpr int32_t WIDTH = 800;
 constexpr int32_t HEIGHT = 600;
 
-struct Test {
-    int _i;
+std::shared_ptr<Room> getTestRoom() {
+    Room r;
 
-    Test(int i) : _i(i) {
-        std::cout << "Create " << _i << std::endl;
-    }
+    auto room = std::make_shared<Room>();
+    auto gameObject = room->newGameObject();
+    gameObject->newComponent<TestComponent>();
 
-    Test(const Test &) = delete;
-
-    ~Test() {
-        std::cout << "Destroy " << _i << std::endl;
-    }
-};
+    return room;
+}
 
 int main() {
-    ClusteredLinkedCollection<Test, 1024> collection;
-    collection.emplace(20);
-
-    std::cout << "Finished." << std::endl;
-    std::cout << "Size: " << collection.size() << std::endl;
-
-    //for (const auto& item: collection) {
-//
-    //}
 
     Application application(WIDTH, HEIGHT);
 
@@ -38,6 +26,8 @@ int main() {
         std::cerr << "[GLFW INIT]\t" << initResult.getError() << std::endl;
         return EXIT_FAILURE;
     }
+
+    application.setRoom(getTestRoom());
 
     auto loopResult = application.startGameLoop();
     if (loopResult.isOk()) {

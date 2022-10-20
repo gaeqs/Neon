@@ -5,7 +5,6 @@
 #ifndef RVTRACKING_COMPONENT_H
 #define RVTRACKING_COMPONENT_H
 
-
 #include <cstdint>
 
 class Component {
@@ -22,6 +21,14 @@ public:
     Component();
 
     uint64_t getId() const;
+
+    GameObject* getGameObject() const;
+
+    virtual void onConstruction();
+
+    virtual void onStart();
+
+    virtual void onUpdate();
 
 };
 

@@ -5,31 +5,42 @@
 #ifndef RVTRACKING_CLUSTEREDLINKEDCOLLECTION_H
 #define RVTRACKING_CLUSTEREDLINKEDCOLLECTION_H
 
-#include <array>
 #include <bitset>
+#include <functional>
+#include <iostream>
 
-template<class T, int Size>
-class ClusteredLinkedCollection;
+constexpr size_t DEFAULT_CLUSTER_SIZE = 256;
 
-template<class T, int Size>
+class AbstractClusteredLinkedCollection {
+
+public:
+
+    virtual size_t size() = 0;
+
+    virtual size_t capacity() = 0;
+
+    virtual void forEachRaw(std::function<void(void*)> function) = 0;
+
+};
+
+
+template<class Collection>
 class ClusteredLinkedCollectorIterator {
 
-    ClusteredLinkedCollection<T, Size>* _collection;
+    Collection* _collection;
     size_t _index;
 
 public:
 
     using iterator_category = std::forward_iterator_tag;
     using difference_type = std::ptrdiff_t;
-    using value_type = T;
-    using pointer = T*;
-    using reference = T&;
+    using value_type = typename Collection::ValueType;
 
-    ClusteredLinkedCollectorIterator(ClusteredLinkedCollection<T, Size>* collection, size_t index)
+    ClusteredLinkedCollectorIterator(Collection* collection, size_t index)
             : _collection(collection), _index(index) {
         while (_collection != nullptr && !_collection->_occupied[_index]) {
             ++_index;
-            if (_index >= Size) {
+            if (_index >= _collection->capacity()) {
                 _index = 0;
                 _collection = _collection->_next;
             }
@@ -37,17 +48,21 @@ public:
     }
 
 
-    reference operator*() const {
+    value_type& operator*() const {
         return _collection->_data[_index];
     }
 
-    pointer operator->() { return _collection->_data + _index; }
+    value_type* operator->() { return _collection->_data + _index; }
+
+    value_type* raw() const {
+        return _collection->_data + _index;
+    }
 
     // Prefix increment
-    ClusteredLinkedCollectorIterator<T, Size>& operator++() {
+    ClusteredLinkedCollectorIterator<Collection>& operator++() {
         do {
             ++_index;
-            if (_index >= Size) {
+            if (_index >= _collection->capacity()) {
                 _index = 0;
                 _collection = _collection->_next;
             }
@@ -57,63 +72,104 @@ public:
     }
 
     // Postfix increment
-    ClusteredLinkedCollectorIterator<T, Size> operator++(int) {
-        ClusteredLinkedCollectorIterator<T, Size> tmp = *this;
+    ClusteredLinkedCollectorIterator<Collection> operator++(int) {
+        ClusteredLinkedCollectorIterator<Collection> tmp = *this;
         ++(*this);
         return tmp;
     }
 
-    bool operator==(const ClusteredLinkedCollectorIterator<T, Size>& b) {
+    bool operator==(const ClusteredLinkedCollectorIterator<Collection>& b) const {
         return _collection == b._collection && _index == b._index;
     };
 
-    bool operator!=(const ClusteredLinkedCollectorIterator<T, Size>& b) {
+    bool operator!=(const ClusteredLinkedCollectorIterator<Collection>& b) const {
         return _collection != b._collection || _index != b._index;
     };
 
 };
 
-template<class T, int Size>
-class ClusteredLinkedCollection {
+template<class T, size_t Size = DEFAULT_CLUSTER_SIZE>
+class ClusteredLinkedCollection : public AbstractClusteredLinkedCollection {
 
-    friend class ClusteredLinkedCollectorIterator<T, Size>;
+    using ValueType = T;
 
-    T* _data;
+    friend class ClusteredLinkedCollectorIterator<ClusteredLinkedCollection<T, Size>>;
+
+    ValueType* _data;
     std::bitset<Size> _occupied;
     size_t _localSize;
 
-    ClusteredLinkedCollection<T, Size>* _next;
+    ClusteredLinkedCollection<ValueType, Size>* _next;
 
     void expand() {
         if (_next == nullptr) {
-            _next = new ClusteredLinkedCollection<T, Size>();
+            _next = new ClusteredLinkedCollection<ValueType, Size>();
         }
+    }
+
+    T* rawPointer (size_t index) {
+        return _data + index;
     }
 
 public:
 
     ClusteredLinkedCollection() : _data(), _occupied(), _localSize(0), _next(nullptr) {
-        _data = reinterpret_cast<T*>(malloc(sizeof(T) * Size));
+        _data = reinterpret_cast<ValueType*>(malloc(sizeof(ValueType) * Size));
     }
 
     ~ClusteredLinkedCollection() {
+
+        for (size_t i = 0; i < Size; ++i) {
+            if (_occupied[i]) {
+                std::destroy_at(_data + i);
+            }
+        }
+
         free(_data);
+        delete _next;
     }
 
-    size_t size() {
+    size_t size() override {
         return _localSize + (_next == nullptr ? 0 : _next->size());
     }
 
-    ClusteredLinkedCollectorIterator<T, Size> begin() {
-        return ClusteredLinkedCollectorIterator<T, Size>(this, 0);
+    size_t capacity() override {
+        return Size;
     }
 
-    ClusteredLinkedCollectorIterator<T, Size> end() {
-        return ClusteredLinkedCollectorIterator<T, Size>(nullptr, 0);
+    ClusteredLinkedCollectorIterator<ClusteredLinkedCollection<ValueType, Size>> begin() {
+        return ClusteredLinkedCollectorIterator<
+                ClusteredLinkedCollection<ValueType, Size>>(this, 0);
     }
+
+    ClusteredLinkedCollectorIterator<ClusteredLinkedCollection<ValueType, Size>> end() {
+        return ClusteredLinkedCollectorIterator<
+                ClusteredLinkedCollection<ValueType, Size>>(nullptr, 0);
+    }
+
+    void forEachRaw(std::function<void(void*)> function) override {
+        auto it = begin();
+        auto itEnd = end();
+
+        while (it != itEnd) {
+            function(it.raw());
+            ++it;
+        }
+    }
+
+    void forEach(std::function<void(ValueType*)> function) {
+        auto it = begin();
+        auto itEnd = end();
+
+        while (it != itEnd) {
+            function(it.raw());
+            ++it;
+        }
+    }
+
 
     template<class... Args>
-    T* emplace(Args&& ... values) {
+    ValueType* emplace(Args&& ... values) {
         if (_localSize == Size) {
             expand();
             _next->emplace(values...);
@@ -130,8 +186,28 @@ public:
         return std::construct_at(_data + index, values...);
     }
 
+    void remove(const ValueType& value) {
+        size_t position = 0;
+        bool found = false;
+
+        for (size_t i = 0; i < Size; ++i) {
+            if (_occupied[i] && _data[i] == value) {
+                position = i;
+                found = true;
+                break;
+            }
+        }
+
+        if (found) {
+            _occupied.flip(position);
+            --_localSize;
+            std::destroy_at(_data + position);
+        } else if (_next != nullptr) {
+            _next->remove(value);
+        }
+    }
+
 
 };
-
 
 #endif //RVTRACKING_CLUSTEREDLINKEDCOLLECTION_H

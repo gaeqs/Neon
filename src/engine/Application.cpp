@@ -35,7 +35,7 @@ Result<GLFWwindow*, std::string> Application::init() {
     return {_window};
 }
 
-Result<uint32_t, std::string> Application::startGameLoop() {
+Result<uint32_t, std::string> Application::startGameLoop() const {
     if (_window == nullptr) {
         return {"Window is not initialized"};
     }
@@ -45,6 +45,10 @@ Result<uint32_t, std::string> Application::startGameLoop() {
     try {
         while (!glfwWindowShouldClose(_window)) {
             frames++;
+
+            if (_room != nullptr) {
+                _room->update();
+            }
 
             glfwSwapBuffers(_window);
         }
@@ -58,14 +62,18 @@ Result<uint32_t, std::string> Application::startGameLoop() {
     return {frames};
 }
 
-int32_t Application::getWidth() {
+int32_t Application::getWidth() const {
     return _width;
 }
 
-int32_t Application::getHeight() {
+int32_t Application::getHeight() const {
     return _height;
 }
 
-float Application::getAspectRatio() {
+float Application::getAspectRatio() const {
     return static_cast<float>(_width) / static_cast<float>(_height);
+}
+
+void Application::setRoom(const std::shared_ptr<Room>& room) {
+    _room = room;
 }

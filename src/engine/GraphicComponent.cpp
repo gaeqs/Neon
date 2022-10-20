@@ -3,3 +3,7 @@
 //
 
 #include "GraphicComponent.h"
+
+GraphicComponent::GraphicComponent() {
+
+}

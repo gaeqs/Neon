@@ -13,6 +13,7 @@
 #include <GLFW/glfw3.h>
 
 #include "../util/Result.h"
+#include "Room.h"
 
 
 class Application {
@@ -21,19 +22,23 @@ class Application {
     int32_t _height;
     GLFWwindow* _window;
 
+    std::shared_ptr<Room> _room;
+
 public:
 
     Application(int32_t width, int32_t height);
 
     Result<GLFWwindow*, std::string> init();
 
-    Result<uint32_t, std::string> startGameLoop();
+    Result<uint32_t, std::string> startGameLoop() const;
 
-    int32_t getWidth();
+    int32_t getWidth() const;
 
-    int32_t getHeight();
+    int32_t getHeight() const;
 
-    float getAspectRatio();
+    float getAspectRatio() const;
+
+    void setRoom(const std::shared_ptr<Room>& room);
 };
 
 

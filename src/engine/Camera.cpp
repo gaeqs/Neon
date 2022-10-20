@@ -76,7 +76,7 @@ const glm::quat& Camera::lookAt(const glm::vec3& direction) {
 
 const glm::quat& Camera::rotate(const glm::vec3& direction, float angle) {
     _dirtyView = true;
-    _rotation = glm::rotate(_rotation, angle, direction);
+    _rotation = glm::angleAxis(angle, direction) * _rotation;
     _rotationInverse = glm::inverse(_rotation);
     return _rotation;
 }
