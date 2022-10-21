@@ -13,6 +13,9 @@ class Component {
 
     friend class GameObject;
 
+    template<class T> friend
+    class ComponentWrapper;
+
     uint64_t _id;
     GameObject* _gameObject;
 
@@ -21,6 +24,8 @@ public:
     Component(const Component& component) = delete;
 
     Component();
+
+    virtual ~Component() = default;
 
     uint64_t getId() const;
 
@@ -31,7 +36,6 @@ public:
     virtual void onStart();
 
     virtual void onUpdate();
-
 };
 
 

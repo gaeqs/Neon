@@ -5,9 +5,10 @@
 #include "GameObject.h"
 #include <engine/Room.h>
 
-uint64_t GAME_OBJECT_ID_GENERATOR = 0;
+uint64_t GAME_OBJECT_ID_GENERATOR = 1;
 
-GameObject::GameObject(Room* room) : _id(GAME_OBJECT_ID_GENERATOR++), _room(room) {
+GameObject::GameObject(Room* room) : _id(GAME_OBJECT_ID_GENERATOR++),
+                                     _room(room) {
 
 }
 

@@ -7,7 +7,7 @@
 #include <iostream>
 #include <engine/GameObject.h>
 
-uint64_t COMPONENT_ID_GENERATOR = 0;
+uint64_t COMPONENT_ID_GENERATOR = 1;
 
 Component::Component() : _id(COMPONENT_ID_GENERATOR++) {
 }

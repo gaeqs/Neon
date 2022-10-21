@@ -79,11 +79,13 @@ public:
         return tmp;
     }
 
-    bool operator==(const ClusteredLinkedCollectorIterator<Collection>& b) const {
+    bool
+    operator==(const ClusteredLinkedCollectorIterator<Collection>& b) const {
         return _collection == b._collection && _index == b._index;
     };
 
-    bool operator!=(const ClusteredLinkedCollectorIterator<Collection>& b) const {
+    bool
+    operator!=(const ClusteredLinkedCollectorIterator<Collection>& b) const {
         return _collection != b._collection || _index != b._index;
     };
 
@@ -108,13 +110,14 @@ class ClusteredLinkedCollection : public AbstractClusteredLinkedCollection {
         }
     }
 
-    T* rawPointer (size_t index) {
+    ValueType* rawPointer(size_t index) {
         return _data + index;
     }
 
 public:
 
-    ClusteredLinkedCollection() : _data(), _occupied(), _localSize(0), _next(nullptr) {
+    ClusteredLinkedCollection()
+            : _data(), _occupied(), _localSize(0), _next(nullptr) {
         _data = reinterpret_cast<ValueType*>(malloc(sizeof(ValueType) * Size));
     }
 
@@ -138,12 +141,14 @@ public:
         return Size;
     }
 
-    ClusteredLinkedCollectorIterator<ClusteredLinkedCollection<ValueType, Size>> begin() {
+    ClusteredLinkedCollectorIterator<ClusteredLinkedCollection<ValueType, Size>>
+    begin() {
         return ClusteredLinkedCollectorIterator<
                 ClusteredLinkedCollection<ValueType, Size>>(this, 0);
     }
 
-    ClusteredLinkedCollectorIterator<ClusteredLinkedCollection<ValueType, Size>> end() {
+    ClusteredLinkedCollectorIterator<ClusteredLinkedCollection<ValueType, Size>>
+    end() {
         return ClusteredLinkedCollectorIterator<
                 ClusteredLinkedCollection<ValueType, Size>>(nullptr, 0);
     }
@@ -187,12 +192,12 @@ public:
         return std::construct_at(_data + index, values...);
     }
 
-    void remove(const ValueType& value) {
+    void remove(const ValueType* value) {
         size_t position = 0;
         bool found = false;
 
         for (size_t i = 0; i < Size; ++i) {
-            if (_occupied[i] && _data[i] == value) {
+            if (_occupied[i] && &_data[i] == value) {
                 position = i;
                 found = true;
                 break;
@@ -203,6 +208,8 @@ public:
             _occupied.flip(position);
             --_localSize;
             std::destroy_at(_data + position);
+            memset(reinterpret_cast<void*>(_data + position), 0,
+                   sizeof(ValueType));
         } else if (_next != nullptr) {
             _next->remove(value);
         }

@@ -9,6 +9,7 @@
 #include <memory>
 #include <typeindex>
 
+#include <engine/ComponentWrapper.h>
 #include <util/ClusteredLinkedCollection.h>
 
 /**
@@ -35,7 +36,7 @@ public:
      * @return a pointer to the new component.
      */
     template<class T>
-    T* newComponent() {
+    ComponentWrapper<T> newComponent() {
         auto it = _components.find(typeid(T));
 
         if (it == _components.end()) {
@@ -44,11 +45,12 @@ public:
                     std::type_index(typeid(T)),
                     std::static_pointer_cast<void>(pointer)
             ));
-            return pointer->emplace();
+            return ComponentWrapper<T>(pointer->emplace());
         }
 
-        auto components = std::static_pointer_cast<ClusteredLinkedCollection<T>>(it->second);
-        return components->emplace();
+        auto components = std::static_pointer_cast
+                <ClusteredLinkedCollection<T>>(it->second);
+        return ComponentWrapper<T>(components->emplace());
     }
 
     /**
@@ -64,7 +66,15 @@ public:
     std::shared_ptr<ClusteredLinkedCollection<T>> getComponentsOfType() const {
         auto it = _components.find(typeid(T));
         if (it == _components.end()) return nullptr;
-        return std::static_pointer_cast<ClusteredLinkedCollection<T>>(it->second);
+        return std::static_pointer_cast<ClusteredLinkedCollection<T>>(
+                it->second);
+    }
+
+    template<class T>
+    void removeComponent (const ComponentWrapper<T>& component) {
+        auto ptr = getComponentsOfType<T>();
+        if(ptr == nullptr) return;
+        ptr->remove(component.raw());
     }
 
     /**

@@ -13,7 +13,8 @@ ComponentsHolder::ComponentsHolder()
 
 void ComponentsHolder::updateComponents() const {
     for (const auto& item: _components) {
-        auto ptr = std::static_pointer_cast<AbstractClusteredLinkedCollection>(item.second);
+        auto ptr = std::static_pointer_cast
+                <AbstractClusteredLinkedCollection>(item.second);
         ptr->forEachRaw([](void* ptr) {
             reinterpret_cast<Component*>(ptr)->onUpdate();
         });

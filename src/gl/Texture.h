@@ -14,6 +14,8 @@ class Texture {
 
 public:
 
+    Texture(const Texture& other) = delete;
+
     Texture(const char* data, int32_t width, int32_t height);
 
     ~Texture();
@@ -24,7 +26,9 @@ public:
 
     int32_t getHeight() const;
 
-    void bind (uint32_t index) const;
+    void bind(uint32_t index) const;
+
+    void updateData(const char* data, int32_t width, int32_t height);
 
 };
 

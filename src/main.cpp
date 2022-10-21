@@ -10,7 +10,21 @@ constexpr int32_t HEIGHT = 600;
 std::shared_ptr<Room> getTestRoom() {
     auto room = std::make_shared<Room>();
     auto gameObject = room->newGameObject();
-    gameObject->newComponent<TestComponent>();
+    auto component = gameObject->newComponent<TestComponent>();
+    auto component2 = gameObject->newComponent<TestComponent>();
+    std::cout << component.isValid() << std::endl;
+    std::cout << component2.isValid() << std::endl;
+    gameObject->removeComponent(component);
+    std::cout << component.isValid() << std::endl;
+    std::cout << component2.isValid() << std::endl;
+
+    auto component3 = gameObject->newComponent<TestComponent>();
+    std::cout << component3.isValid() << std::endl;
+    std::cout << component2.isValid() << std::endl;
+    gameObject->removeComponent(component2);
+    std::cout << component3.isValid() << std::endl;
+    std::cout << component2.isValid() << std::endl;
+
 
     return room;
 }

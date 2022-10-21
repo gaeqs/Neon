@@ -8,6 +8,7 @@
 #include <any>
 #include <vector>
 #include <engine/ComponentsHolder.h>
+#include <engine/ComponentWrapper.h>
 
 class Room;
 
@@ -18,7 +19,7 @@ class GameObject {
     uint64_t _id;
     Room* _room;
 
-    std::vector<Component*> _components;
+    std::vector<ComponentWrapper<Component>> _components;
 
     ComponentsHolder& getRoomComponents() const;
 
@@ -33,11 +34,17 @@ public:
     Room* getRoom() const;
 
     template<class T>
-    T* newComponent() {
-        T* component = getRoomComponents().newComponent<T>();
+    ComponentWrapper<T> newComponent() {
+        ComponentWrapper<T> component = getRoomComponents().newComponent<T>();
         component->_gameObject = this;
-        _components.emplace_back(component);
+        auto raw = *reinterpret_cast<ComponentWrapper<Component>*>(&component);
+        _components.emplace_back(raw);
         return component;
+    }
+
+    template<class T>
+    void removeComponent (ComponentWrapper<T> component) {
+        getRoomComponents().removeComponent(component);
     }
 
 
