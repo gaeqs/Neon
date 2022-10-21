@@ -8,6 +8,7 @@
 #include <bitset>
 #include <functional>
 #include <iostream>
+#include <memory>
 
 constexpr size_t DEFAULT_CLUSTER_SIZE = 256;
 

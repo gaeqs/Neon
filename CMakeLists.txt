@@ -16,9 +16,10 @@ function(add_resources out_var)
 endfunction()
 
 cmake_minimum_required(VERSION 3.23)
+set(CMAKE_CXX_STANDARD 20)
+
 project(RVTracking)
 
-set(CMAKE_CXX_STANDARD 20)
 
 find_package(OpenCV CONFIG REQUIRED)
 find_package(glfw3 CONFIG REQUIRED)
@@ -39,7 +40,12 @@ list(APPEND LIBRARIES opencv_core opencv_calib3d opencv_imgcodecs opencv_videoio
 list(APPEND LIBRARIES aruco)
 list(APPEND LIBRARIES glad)
 list(APPEND LIBRARIES glfw ${GLFW_LIBRARIES})
-list(APPEND LIBRARIES assimp::assimp)
+
+if (WIN32)
+    list(APPEND LIBRARIES assimp::assimp)
+else ()
+    list(APPEND LIBRARIES assimp)
+endif ()
 
 add_subdirectory(src)
 

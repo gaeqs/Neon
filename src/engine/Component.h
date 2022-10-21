@@ -6,6 +6,7 @@
 #define RVTRACKING_COMPONENT_H
 
 #include <cstdint>
+#include "GameObject.h"
 
 class Component {
 
