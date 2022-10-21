@@ -2,8 +2,9 @@
 // Created by grial on 19/10/22.
 //
 
-#include <glm/gtc/matrix_transform.hpp>
 #include "Frustum.h"
+
+#include <glm/gtc/matrix_transform.hpp>
 
 Frustum::Frustum(float near, float far, float aspectRatio, float fovYDegrees)
         : _near(near), _far(far), _aspectRatio(aspectRatio), _fovYDegrees(fovYDegrees) {

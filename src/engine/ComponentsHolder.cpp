@@ -4,8 +4,8 @@
 
 #include "ComponentsHolder.h"
 
-#include "Component.h"
-#include "GraphicComponent.h"
+#include <engine/Component.h>
+#include <engine/GraphicComponent.h>
 
 ComponentsHolder::ComponentsHolder()
         : _components() {

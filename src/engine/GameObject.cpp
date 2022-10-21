@@ -3,7 +3,7 @@
 //
 
 #include "GameObject.h"
-#include "Room.h"
+#include <engine/Room.h>
 
 uint64_t GAME_OBJECT_ID_GENERATOR = 0;
 

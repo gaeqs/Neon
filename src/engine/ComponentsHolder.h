@@ -9,7 +9,7 @@
 #include <memory>
 #include <typeindex>
 
-#include "../util/ClusteredLinkedCollection.h"
+#include <util/ClusteredLinkedCollection.h>
 
 /**
  * This class holds all components inside a Room.

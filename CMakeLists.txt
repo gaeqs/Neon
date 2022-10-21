@@ -47,6 +47,7 @@ else ()
     list(APPEND LIBRARIES assimp)
 endif ()
 
+include_directories(src)
 add_subdirectory(src)
 
 target_link_libraries(RVTracking ${LIBRARIES} ${CMAKE_DL_LIBS})

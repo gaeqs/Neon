@@ -2,11 +2,10 @@
 // Created by grial on 19/10/22.
 //
 
-#include <iostream>
 #include "Room.h"
-#include "GameObject.h"
-#include "Application.h"
-#include "GraphicComponent.h"
+#include <engine/GameObject.h>
+#include <engine/Application.h>
+#include <engine/GraphicComponent.h>
 
 constexpr float_t DEFAULT_FRUSTUM_NEAR = 0.1f;
 constexpr float_t DEFAULT_FRUSTUM_FAR = 1000.0f;

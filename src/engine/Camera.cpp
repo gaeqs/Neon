@@ -2,8 +2,9 @@
 // Created by grial on 19/10/22.
 //
 
-#include <iostream>
 #include "Camera.h"
+
+#include <iostream>
 
 
 void Camera::recalculateViewMatrix() {

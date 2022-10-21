@@ -5,7 +5,6 @@
 #ifndef VULKANTEST_RESOURCE_H
 #define VULKANTEST_RESOURCE_H
 
-
 #include <cstdlib>
 
 /**

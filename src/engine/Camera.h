@@ -7,7 +7,7 @@
 
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
-#include "Frustum.h"
+#include <engine/Frustum.h>
 
 class Camera {
 

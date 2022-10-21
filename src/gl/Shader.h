@@ -13,8 +13,8 @@
 
 #include <glm/glm.hpp>
 
-#include "../util/Resource.h"
-#include "../util/Result.h"
+#include <util/Resource.h>
+#include <util/Result.h>
 
 class Shader {
 

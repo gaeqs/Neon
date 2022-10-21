@@ -5,21 +5,16 @@
 #ifndef RVTRACKING_ROOM_H
 #define RVTRACKING_ROOM_H
 
-
-#include <map>
-#include <any>
-#include <typeindex>
-#include <memory>
-#include <vector>
-
-#include "Camera.h"
-#include "ComponentsHolder.h"
-#include "GameObject.h"
-#include "../util/ClusteredLinkedCollection.h"
+#include <engine/Camera.h>
+#include <engine/ComponentsHolder.h>
+#include <engine/GameObject.h>
+#include <util/ClusteredLinkedCollection.h>
 
 class Application;
 
 class GameObject;
+
+class Texture;
 
 class Room {
 

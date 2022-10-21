@@ -3,7 +3,8 @@
 //
 
 #include "Material.h"
-#include "../gl/Shader.h"
+
+#include <gl/Shader.h>
 
 const std::string& Material::getShader() const {
     return _shader;

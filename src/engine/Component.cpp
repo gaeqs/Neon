@@ -2,9 +2,10 @@
 // Created by gaelr on 19/10/2022.
 //
 
-#include <iostream>
 #include "Component.h"
-#include "GameObject.h"
+
+#include <iostream>
+#include <engine/GameObject.h>
 
 uint64_t COMPONENT_ID_GENERATOR = 0;
 

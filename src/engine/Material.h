@@ -6,8 +6,8 @@
 #define RVTRACKING_MATERIAL_H
 
 #include <string>
-#include <glm/glm.hpp>
 #include <unordered_map>
+#include <glm/glm.hpp>
 
 class Shader;
 

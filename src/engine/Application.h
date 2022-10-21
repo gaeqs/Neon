@@ -10,10 +10,10 @@
 #include <string>
 #include <memory>
 
-#include "glad/glad.h"
+#include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-#include "../util/Result.h"
+#include <util/Result.h>
 
 class Room;
 
@@ -31,7 +31,7 @@ public:
 
     Result<GLFWwindow*, std::string> init();
 
-    Result<uint32_t, std::string> startGameLoop() const;
+    Result <uint32_t, std::string> startGameLoop() const;
 
     int32_t getWidth() const;
 

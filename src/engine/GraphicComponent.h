@@ -6,8 +6,8 @@
 #define RVTRACKING_GRAPHICCOMPONENT_H
 
 
-#include "Material.h"
-#include "Component.h"
+#include <engine/Material.h>
+#include <engine/Component.h>
 
 class GraphicComponent : public Component {
 
