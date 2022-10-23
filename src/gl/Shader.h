@@ -28,6 +28,8 @@ public:
     static Result<std::shared_ptr<Shader>, std::string> newShader(
             const Resource& vertex, const Resource& fragment);
 
+    Shader(const Shader& other) = delete;
+
     explicit Shader(uint32_t id);
 
     ~Shader();

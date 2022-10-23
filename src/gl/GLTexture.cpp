@@ -2,12 +2,12 @@
 // Created by grial on 21/10/22.
 //
 
-#include "Texture.h"
+#include "GLTexture.h"
 
 #include <glad/glad.h>
 
 
-Texture::Texture(const char* data, int32_t width, int32_t height) :
+GLTexture::GLTexture(const char* data, int32_t width, int32_t height) :
         _width(width),
         _height(height) {
     glActiveTexture(0);
@@ -21,28 +21,28 @@ Texture::Texture(const char* data, int32_t width, int32_t height) :
     updateData(data, _width, _height);
 }
 
-Texture::~Texture() {
+GLTexture::~GLTexture() {
     glDeleteTextures(1, &_id);
 }
 
-uint32_t Texture::getId() const {
+uint32_t GLTexture::getId() const {
     return _id;
 }
 
-int32_t Texture::getWidth() const {
+int32_t GLTexture::getWidth() const {
     return _width;
 }
 
-int32_t Texture::getHeight() const {
+int32_t GLTexture::getHeight() const {
     return _height;
 }
 
-void Texture::bind(uint32_t index) const {
+void GLTexture::bind(uint32_t index) const {
     glActiveTexture(index);
     glBindTexture(GL_TEXTURE_2D, _id);
 }
 
-void Texture::updateData(const char* data, int32_t width, int32_t height) {
+void GLTexture::updateData(const char* data, int32_t width, int32_t height) {
     _width = width;
     _height = height;
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);

@@ -7,17 +7,18 @@
 #include <engine/Application.h>
 #include <engine/GraphicComponent.h>
 
-constexpr float_t DEFAULT_FRUSTUM_NEAR = 0.1f;
-constexpr float_t DEFAULT_FRUSTUM_FAR = 1000.0f;
-constexpr float_t DEFAULT_FRUSTUM_FOV = 1000.0f;
+constexpr float DEFAULT_FRUSTUM_NEAR = 0.1f;
+constexpr float DEFAULT_FRUSTUM_FAR = 1000.0f;
+constexpr float DEFAULT_FRUSTUM_FOV = 1000.0f;
 
 Room::Room() :
         _application(nullptr),
         _camera(Frustum(DEFAULT_FRUSTUM_NEAR, DEFAULT_FRUSTUM_FAR, 1.0f,
                         DEFAULT_FRUSTUM_FOV)),
-        _components(),
         _gameObjects(),
-        _textures() {
+        _components(),
+        _textures(),
+        _models() {
 }
 
 Room::~Room() {
@@ -35,14 +36,29 @@ Camera& Room::getCamera() {
     return _camera;
 }
 
-ComponentCollection& Room::getComponents() {
-    return _components;
-}
-
 const ComponentCollection& Room::getComponents() const {
     return _components;
 }
 
+ComponentCollection& Room::getComponents() {
+    return _components;
+}
+
+const TextureCollection& Room::getTextures() const {
+    return _textures;
+}
+
+TextureCollection& Room::getTextures() {
+    return _textures;
+}
+
+const ModelCollection& Room::getModels() const {
+    return _models;
+}
+
+ModelCollection& Room::getModels() {
+    return _models;
+}
 
 IdentifiableWrapper<GameObject> Room::newGameObject() {
     return _gameObjects.emplace(this);

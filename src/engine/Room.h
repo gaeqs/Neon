@@ -6,16 +6,19 @@
 #define RVTRACKING_ROOM_H
 
 #include <engine/Camera.h>
-#include <engine/ComponentCollection.h>
 #include <engine/GameObject.h>
-#include <engine/TextureCollection.h>
+
+#include <engine/collection/ComponentCollection.h>
+#include <engine/collection/TextureCollection.h>
+#include <engine/collection/ModelCollection.h>
+
 #include <util/ClusteredLinkedCollection.h>
 
 class Application;
 
 class GameObject;
 
-class Texture;
+class GLTexture;
 
 class Room {
 
@@ -24,9 +27,10 @@ class Room {
     Application* _application;
 
     Camera _camera;
-    ComponentCollection _components;
     ClusteredLinkedCollection<GameObject> _gameObjects;
+    ComponentCollection _components;
     TextureCollection _textures;
+    ModelCollection _models;
 
 public:
 
@@ -45,6 +49,14 @@ public:
     const ComponentCollection& getComponents() const;
 
     ComponentCollection& getComponents();
+
+    const TextureCollection& getTextures() const;
+
+    TextureCollection& getTextures();
+
+    const ModelCollection& getModels() const;
+
+    ModelCollection& getModels();
 
     IdentifiableWrapper<GameObject> newGameObject();
 

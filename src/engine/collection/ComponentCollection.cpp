@@ -4,8 +4,8 @@
 
 #include "ComponentCollection.h"
 
-#include <engine/Component.h>
-#include <engine/GraphicComponent.h>
+#include "engine/Component.h"
+#include "engine/GraphicComponent.h"
 
 ComponentCollection::ComponentCollection()
         : _components() {

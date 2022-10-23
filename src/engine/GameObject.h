@@ -7,7 +7,7 @@
 
 #include <any>
 #include <vector>
-#include <engine/ComponentCollection.h>
+#include "engine/collection/ComponentCollection.h"
 #include <engine/IdentifiableWrapper.h>
 #include <engine/Transform.h>
 #include <engine/Identifiable.h>
@@ -58,8 +58,8 @@ public:
 
     template<class T>
     void destroyComponent(IdentifiableWrapper<T> component) {
-        auto raw = IdentifiableWrapper<Component>(component.raw());
-        auto a = std::remove(_components.begin(), _components.end(), raw);
+        auto unused = std::remove(_components.begin(), _components.end(),
+                                  component.raw());
         getRoomComponents().destroyComponent(component);
     }
 

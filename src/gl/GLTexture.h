@@ -2,23 +2,23 @@
 // Created by grial on 21/10/22.
 //
 
-#ifndef RVTRACKING_TEXTURE_H
-#define RVTRACKING_TEXTURE_H
+#ifndef RVTRACKING_GLTEXTURE_H
+#define RVTRACKING_GLTEXTURE_H
 
 #include <cstdint>
 
-class Texture {
+class GLTexture {
 
     uint32_t _id;
     int32_t _width, _height;
 
 public:
 
-    Texture(const Texture& other) = delete;
+    GLTexture(const GLTexture& other) = delete;
 
-    Texture(const char* data, int32_t width, int32_t height);
+    GLTexture(const char* data, int32_t width, int32_t height);
 
-    ~Texture();
+    ~GLTexture();
 
     uint32_t getId() const;
 
@@ -33,4 +33,4 @@ public:
 };
 
 
-#endif //RVTRACKING_TEXTURE_H
+#endif //RVTRACKING_GLTEXTURE_H

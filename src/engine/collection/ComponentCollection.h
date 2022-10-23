@@ -5,24 +5,24 @@
 #ifndef RVTRACKING_COMPONENTCOLLECTION_H
 #define RVTRACKING_COMPONENTCOLLECTION_H
 
-#include <map>
+#include <unordered_map>
 #include <memory>
 #include <typeindex>
 
-#include <engine/IdentifiableWrapper.h>
-#include <util/ClusteredLinkedCollection.h>
+#include "engine/IdentifiableWrapper.h"
+#include "util/ClusteredLinkedCollection.h"
 
 /**
- * This class holds all components inside a Room.
+ * This class holds all components inside a room.
  */
 class ComponentCollection {
 
-    std::map<std::type_index, std::shared_ptr<void>> _components;
+    std::unordered_map<std::type_index, std::shared_ptr<void>> _components;
 
 public:
 
     /**
-     * Creates the holder.
+     * Creates the collection.
      */
     ComponentCollection();
 

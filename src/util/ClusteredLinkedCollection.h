@@ -192,7 +192,7 @@ public:
         return std::construct_at(_data + index, values...);
     }
 
-    void remove(const ValueType* value) {
+    bool remove(const ValueType* value) {
         size_t position = 0;
         bool found = false;
 
@@ -210,9 +210,12 @@ public:
             std::destroy_at(_data + position);
             memset(reinterpret_cast<void*>(_data + position), 0,
                    sizeof(ValueType));
+            return true;
         } else if (_next != nullptr) {
-            _next->remove(value);
+            return _next->remove(value);
         }
+
+        return false;
     }
 
 
