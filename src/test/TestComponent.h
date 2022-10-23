@@ -11,6 +11,10 @@
 
 class TestComponent : public Component {
 
+public:
+
+    ~TestComponent() override;
+
     void onUpdate() override;
 
 };

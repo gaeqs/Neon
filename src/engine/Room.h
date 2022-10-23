@@ -6,8 +6,9 @@
 #define RVTRACKING_ROOM_H
 
 #include <engine/Camera.h>
-#include <engine/ComponentsHolder.h>
+#include <engine/ComponentCollection.h>
 #include <engine/GameObject.h>
+#include <engine/TextureCollection.h>
 #include <util/ClusteredLinkedCollection.h>
 
 class Application;
@@ -23,8 +24,9 @@ class Room {
     Application* _application;
 
     Camera _camera;
-    ComponentsHolder _components;
+    ComponentCollection _components;
     ClusteredLinkedCollection<GameObject> _gameObjects;
+    TextureCollection _textures;
 
 public:
 
@@ -40,11 +42,13 @@ public:
 
     Camera& getCamera();
 
-    const ComponentsHolder& getComponents() const;
+    const ComponentCollection& getComponents() const;
 
-    ComponentsHolder& getComponents();
+    ComponentCollection& getComponents();
 
-    GameObject* newGameObject();
+    IdentifiableWrapper<GameObject> newGameObject();
+
+    void destroyGameObject(IdentifiableWrapper<GameObject> gameObject);
 
     //region EVENTS
 

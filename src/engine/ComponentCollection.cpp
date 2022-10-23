@@ -2,16 +2,16 @@
 // Created by gaelr on 20/10/2022.
 //
 
-#include "ComponentsHolder.h"
+#include "ComponentCollection.h"
 
 #include <engine/Component.h>
 #include <engine/GraphicComponent.h>
 
-ComponentsHolder::ComponentsHolder()
+ComponentCollection::ComponentCollection()
         : _components() {
 }
 
-void ComponentsHolder::updateComponents() const {
+void ComponentCollection::updateComponents() const {
     for (const auto& item: _components) {
         auto ptr = std::static_pointer_cast
                 <AbstractClusteredLinkedCollection>(item.second);
@@ -21,7 +21,7 @@ void ComponentsHolder::updateComponents() const {
     }
 }
 
-void ComponentsHolder::drawGraphicComponents() const {
+void ComponentCollection::drawGraphicComponents() const {
     auto ptr = getComponentsOfType<GraphicComponent>();
     if (ptr != nullptr) {
         ptr->forEach([](GraphicComponent* component) {

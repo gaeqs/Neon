@@ -2,20 +2,20 @@
 // Created by gaelr on 20/10/2022.
 //
 
-#ifndef RVTRACKING_COMPONENTSHOLDER_H
-#define RVTRACKING_COMPONENTSHOLDER_H
+#ifndef RVTRACKING_COMPONENTCOLLECTION_H
+#define RVTRACKING_COMPONENTCOLLECTION_H
 
 #include <map>
 #include <memory>
 #include <typeindex>
 
-#include <engine/ComponentWrapper.h>
+#include <engine/IdentifiableWrapper.h>
 #include <util/ClusteredLinkedCollection.h>
 
 /**
  * This class holds all components inside a Room.
  */
-class ComponentsHolder {
+class ComponentCollection {
 
     std::map<std::type_index, std::shared_ptr<void>> _components;
 
@@ -24,7 +24,7 @@ public:
     /**
      * Creates the holder.
      */
-    ComponentsHolder();
+    ComponentCollection();
 
     /**
      *
@@ -36,7 +36,7 @@ public:
      * @return a pointer to the new component.
      */
     template<class T>
-    ComponentWrapper<T> newComponent() {
+    IdentifiableWrapper<T> newComponent() {
         auto it = _components.find(typeid(T));
 
         if (it == _components.end()) {
@@ -45,12 +45,12 @@ public:
                     std::type_index(typeid(T)),
                     std::static_pointer_cast<void>(pointer)
             ));
-            return ComponentWrapper<T>(pointer->emplace());
+            return pointer->emplace();
         }
 
         auto components = std::static_pointer_cast
                 <ClusteredLinkedCollection<T>>(it->second);
-        return ComponentWrapper<T>(components->emplace());
+        return components->emplace();
     }
 
     /**
@@ -70,10 +70,19 @@ public:
                 it->second);
     }
 
+    /**
+     * Destroys the given component.
+     *
+     * All pointers to the given component will be invalid
+     * after this call.
+     *
+     * @tparam T the type of the component.
+     * @param component the component to be destroyed.
+     */
     template<class T>
-    void removeComponent (const ComponentWrapper<T>& component) {
+    void destroyComponent(const IdentifiableWrapper<T>& component) {
         auto ptr = getComponentsOfType<T>();
-        if(ptr == nullptr) return;
+        if (ptr == nullptr) return;
         ptr->remove(component.raw());
     }
 
@@ -95,4 +104,4 @@ public:
 };
 
 
-#endif //RVTRACKING_COMPONENTSHOLDER_H
+#endif //RVTRACKING_COMPONENTCOLLECTION_H

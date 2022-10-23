@@ -12,16 +12,16 @@ std::shared_ptr<Room> getTestRoom() {
     auto gameObject = room->newGameObject();
     auto component = gameObject->newComponent<TestComponent>();
     auto component2 = gameObject->newComponent<TestComponent>();
-    std::cout << component.isValid() << std::endl;
+    std::cout << (component != nullptr) << std::endl;
     std::cout << component2.isValid() << std::endl;
-    gameObject->removeComponent(component);
+    gameObject->destroyComponent(component);
     std::cout << component.isValid() << std::endl;
     std::cout << component2.isValid() << std::endl;
 
     auto component3 = gameObject->newComponent<TestComponent>();
     std::cout << component3.isValid() << std::endl;
     std::cout << component2.isValid() << std::endl;
-    gameObject->removeComponent(component2);
+    gameObject->destroyComponent(component2);
     std::cout << component3.isValid() << std::endl;
     std::cout << component2.isValid() << std::endl;
 

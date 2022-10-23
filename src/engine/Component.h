@@ -8,16 +8,18 @@
 #include <cstdint>
 
 #include <engine/GameObject.h>
+#include <engine/Identifiable.h>
+#include <engine/IdentifiableWrapper.h>
 
-class Component {
+class Component : public Identifiable {
 
     friend class GameObject;
 
     template<class T> friend
-    class ComponentWrapper;
+    class IdentifiableWrapper;
 
     uint64_t _id;
-    GameObject* _gameObject;
+    IdentifiableWrapper<GameObject> _gameObject;
 
 public:
 
@@ -27,9 +29,11 @@ public:
 
     virtual ~Component() = default;
 
-    uint64_t getId() const;
+    uint64_t getId() const override;
 
-    GameObject* getGameObject() const;
+    IdentifiableWrapper<GameObject> getGameObject() const;
+
+    void destroy();
 
     virtual void onConstruction();
 

@@ -2,8 +2,8 @@
 // Created by grial on 21/10/22.
 //
 
-#ifndef RVTRACKING_TEXTURESHOLDER_H
-#define RVTRACKING_TEXTURESHOLDER_H
+#ifndef RVTRACKING_TEXTURECOLLECTION_H
+#define RVTRACKING_TEXTURECOLLECTION_H
 
 #include <unordered_map>
 #include <string>
@@ -12,13 +12,13 @@
 
 #include <gl/Texture.h>
 
-class TexturesHolder {
+class TextureCollection {
 
     std::unordered_map<std::string, std::shared_ptr<Texture>> _textures;
 
 public:
 
-    TexturesHolder();
+    TextureCollection();
 
     std::weak_ptr<Texture> createTexture(
             const std::string& name, const char* data,
@@ -32,4 +32,4 @@ public:
 };
 
 
-#endif //RVTRACKING_TEXTURESHOLDER_H
+#endif //RVTRACKING_TEXTURECOLLECTION_H

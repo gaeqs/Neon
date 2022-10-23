@@ -2,12 +2,12 @@
 // Created by grial on 21/10/22.
 //
 
-#include "TexturesHolder.h"
+#include "TextureCollection.h"
 
-TexturesHolder::TexturesHolder() : _textures() {
+TextureCollection::TextureCollection() : _textures() {
 }
 
-std::weak_ptr<Texture> TexturesHolder::createTexture(
+std::weak_ptr<Texture> TextureCollection::createTexture(
         const std::string& name, const char* data,
         int32_t width, int32_t height) {
     auto texture = std::make_shared<Texture>(data, width, height);
@@ -15,12 +15,12 @@ std::weak_ptr<Texture> TexturesHolder::createTexture(
     return texture;
 }
 
-bool TexturesHolder::hasTexture(const std::string& name) {
+bool TextureCollection::hasTexture(const std::string& name) {
     return _textures.contains(name);
 }
 
 std::optional<std::weak_ptr<Texture>>
-TexturesHolder::getTexture(const std::string& name) {
+TextureCollection::getTexture(const std::string& name) {
     auto it = _textures.find(name);
     if (it != _textures.end()) {
         return it->second;
@@ -28,7 +28,7 @@ TexturesHolder::getTexture(const std::string& name) {
     return {};
 }
 
-bool TexturesHolder::removeTexture(const std::string& name) {
+bool TextureCollection::removeTexture(const std::string& name) {
     auto it = _textures.find(name);
     if (it != _textures.end()) {
         _textures.erase(it);

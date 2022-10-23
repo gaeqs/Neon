@@ -13,9 +13,11 @@ constexpr float_t DEFAULT_FRUSTUM_FOV = 1000.0f;
 
 Room::Room() :
         _application(nullptr),
-        _camera(Frustum(DEFAULT_FRUSTUM_NEAR, DEFAULT_FRUSTUM_FAR, 1.0f, DEFAULT_FRUSTUM_FOV)),
+        _camera(Frustum(DEFAULT_FRUSTUM_NEAR, DEFAULT_FRUSTUM_FAR, 1.0f,
+                        DEFAULT_FRUSTUM_FOV)),
         _components(),
-        _gameObjects() {
+        _gameObjects(),
+        _textures() {
 }
 
 Room::~Room() {
@@ -33,21 +35,26 @@ Camera& Room::getCamera() {
     return _camera;
 }
 
-ComponentsHolder& Room::getComponents() {
+ComponentCollection& Room::getComponents() {
     return _components;
 }
 
-const ComponentsHolder& Room::getComponents() const {
+const ComponentCollection& Room::getComponents() const {
     return _components;
 }
 
 
-GameObject* Room::newGameObject() {
+IdentifiableWrapper<GameObject> Room::newGameObject() {
     return _gameObjects.emplace(this);
 }
 
+void Room::destroyGameObject(IdentifiableWrapper<GameObject> gameObject) {
+    _gameObjects.remove(gameObject.raw());
+}
+
 void Room::onResize() {
-    _camera.setFrustum(_camera.getFrustum().withAspectRatio(_application->getAspectRatio()));
+    _camera.setFrustum(_camera.getFrustum().withAspectRatio(
+            _application->getAspectRatio()));
 }
 
 void Room::update() {
