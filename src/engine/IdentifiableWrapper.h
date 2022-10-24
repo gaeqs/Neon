@@ -16,6 +16,11 @@ class IdentifiableWrapper {
 
 public:
 
+    IdentifiableWrapper() :
+            _pointer(nullptr),
+            _componentId(0) {
+    }
+
     IdentifiableWrapper(T* pointer) :
             _pointer(pointer),
             _componentId(_pointer == nullptr ? 0 : _pointer->_id) {

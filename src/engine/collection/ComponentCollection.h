@@ -8,9 +8,15 @@
 #include <unordered_map>
 #include <memory>
 #include <typeindex>
+#include <queue>
+#include <iostream>
 
-#include "engine/IdentifiableWrapper.h"
-#include "util/ClusteredLinkedCollection.h"
+#include <engine/IdentifiableWrapper.h>
+#include <util/ClusteredLinkedCollection.h>
+
+class Room;
+
+class Component;
 
 /**
  * This class holds all components inside a room.
@@ -18,6 +24,9 @@
 class ComponentCollection {
 
     std::unordered_map<std::type_index, std::shared_ptr<void>> _components;
+    std::queue<IdentifiableWrapper<Component>> _notStartedComponents;
+
+    static void callOnConstruction(void* rawComponent);
 
 public:
 
@@ -45,12 +54,24 @@ public:
                     std::type_index(typeid(T)),
                     std::static_pointer_cast<void>(pointer)
             ));
-            return pointer->emplace();
+
+            T* component = pointer->emplace();
+            callOnConstruction(component);
+
+            std::cout << component << std::endl;
+            _notStartedComponents.push(static_cast<Component*>(component));
+            return component;
         }
 
         auto components = std::static_pointer_cast
                 <ClusteredLinkedCollection<T>>(it->second);
-        return components->emplace();
+
+        T* component = components->emplace();
+        callOnConstruction(component);
+        std::cout << component << std::endl;
+
+        _notStartedComponents.push(static_cast<Component*>(component));
+        return component;
     }
 
     /**
@@ -92,7 +113,7 @@ public:
      *
      * Calls onUpdate() on all components.
      */
-    void updateComponents() const;
+    void updateComponents();
 
     /**
      * THIS METHOD SHOULD ONLY BE USED BY ROOMS!
@@ -100,7 +121,7 @@ public:
      *
      * Draws all graphic components.
      */
-    void drawGraphicComponents() const;
+    void drawGraphicComponents(Room* room) const;
 };
 
 

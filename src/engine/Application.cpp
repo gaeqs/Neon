@@ -10,7 +10,8 @@
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
     glViewport(0, 0, width, height);
 
-    auto* application = static_cast<Application*>(glfwGetWindowUserPointer(window));
+    auto* application = static_cast<Application*>(glfwGetWindowUserPointer(
+            window));
     application->internalForceSizeValues(width, height);
 }
 
@@ -28,7 +29,8 @@ Result<GLFWwindow*, std::string> Application::init() {
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     // Open a window and create its OpenGL context
-    _window = glfwCreateWindow(_width, _height, "Spinning Triangle", nullptr, nullptr);
+    _window = glfwCreateWindow(_width, _height, "Spinning Triangle", nullptr,
+                               nullptr);
     if (!_window) {
         return {"Failed to open GLFW window"};
     }
@@ -63,6 +65,7 @@ Result<uint32_t, std::string> Application::startGameLoop() const {
 
             if (_room != nullptr) {
                 _room->update();
+                _room->draw();
             }
 
             glfwSwapBuffers(_window);

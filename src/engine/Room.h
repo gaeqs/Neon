@@ -18,7 +18,7 @@ class Application;
 
 class GameObject;
 
-class GLTexture;
+class Renderer;
 
 class Room {
 
@@ -31,6 +31,8 @@ class Room {
     ComponentCollection _components;
     TextureCollection _textures;
     ModelCollection _models;
+
+    std::shared_ptr<Renderer> _renderer;
 
 public:
 
@@ -57,6 +59,12 @@ public:
     const ModelCollection& getModels() const;
 
     ModelCollection& getModels();
+
+    const std::shared_ptr<Renderer>& getRenderer() const;
+
+    std::shared_ptr<Renderer>& getRenderer();
+
+    void setRenderer(const std::shared_ptr<Renderer>& renderer);
 
     IdentifiableWrapper<GameObject> newGameObject();
 

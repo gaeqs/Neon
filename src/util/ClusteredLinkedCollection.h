@@ -9,6 +9,7 @@
 #include <functional>
 #include <iostream>
 #include <memory>
+#include <cstring>
 
 constexpr size_t DEFAULT_CLUSTER_SIZE = 256;
 

@@ -5,16 +5,22 @@
 #ifndef RVTRACKING_GLSHADERRENDERER_H
 #define RVTRACKING_GLSHADERRENDERER_H
 
+#include <string>
+#include <memory>
+
 #include <engine/Renderer.h>
 #include <gl/ShaderController.h>
 
 class GLShaderRenderer : public Renderer {
 
-    std::shared_ptr<ShaderController> _shader;
+    std::unordered_map<std::string, std::shared_ptr<ShaderController>> _shaders;
 
 public:
 
-    explicit GLShaderRenderer(std::shared_ptr<ShaderController> shader);
+    GLShaderRenderer();
+
+    void insertShader(const std::string& name,
+                      std::shared_ptr<ShaderController> shader);
 
     void render(Room* room, std::shared_ptr<ComponentList> elements) override;
 

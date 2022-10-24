@@ -10,6 +10,14 @@ TestComponent::~TestComponent() {
     std::cout << "Test component " << getId() << " destroyed!" << std::endl;
 }
 
+void TestComponent::onConstruction() {
+    std::cout << "Test component created!" << std::endl;
+}
+
+void TestComponent::onStart() {
+    std::cout << "Test component started!" << std::endl;
+}
+
 void TestComponent::onUpdate() {
     std::cout << "This a test component!" << std::endl;
     auto o = getGameObject();

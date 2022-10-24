@@ -15,6 +15,10 @@ public:
 
     ~TestComponent() override;
 
+    void onConstruction() override;
+
+    void onStart() override;
+
     void onUpdate() override;
 
 };

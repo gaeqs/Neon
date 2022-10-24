@@ -22,6 +22,8 @@ public:
 
     explicit ShaderController(std::shared_ptr<Shader> shader);
 
+    const std::shared_ptr<Shader>& getShader() const;
+
     virtual void setupGlobalUniforms(Room* room) = 0;
 
     virtual void setupGraphicComponentUniforms(GraphicComponent* component) = 0;

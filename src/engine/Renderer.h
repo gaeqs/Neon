@@ -12,6 +12,8 @@
 
 class GraphicComponent;
 
+class Room;
+
 class Renderer {
 
 public:
@@ -24,7 +26,8 @@ public:
 
     virtual ~Renderer() = default;
 
-    virtual void render(std::shared_ptr<ComponentList> elements) = 0;
+    virtual void render(
+            Room* room, std::shared_ptr<ComponentList> elements) = 0;
 };
 
 

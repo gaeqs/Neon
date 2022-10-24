@@ -74,8 +74,21 @@ void Room::onResize() {
 }
 
 void Room::update() {
-
+    _components.updateComponents();
 }
 
 void Room::draw() {
+    _components.drawGraphicComponents(this);
+}
+
+const std::shared_ptr<Renderer>& Room::getRenderer() const {
+    return _renderer;
+}
+
+std::shared_ptr<Renderer>& Room::getRenderer() {
+    return _renderer;
+}
+
+void Room::setRenderer(const std::shared_ptr<Renderer>& renderer) {
+    _renderer = renderer;
 }
