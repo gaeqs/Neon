@@ -1,26 +1,9 @@
-function(add_resources out_var)
-    set(result)
-    foreach (in_f ${ARGN})
-        file(RELATIVE_PATH src_f ${CMAKE_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/${in_f})
-        set(out_f "${PROJECT_BINARY_DIR}/${src_f}.o")
-        get_filename_component(folder ${out_f} DIRECTORY)
-        file(MAKE_DIRECTORY ${folder})
-        add_custom_command(OUTPUT ${out_f}
-                COMMAND ld -r -b binary -o ${out_f} ${src_f}
-                DEPENDS ${in_f}
-                WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-                COMMENT "Building GLSL object ${src_f}"
-                VERBATIM
-                )
-        list(APPEND result ${out_f})
-    endforeach ()
-    set(${out_var} "${result}" PARENT_SCOPE)
-endfunction()
-
 cmake_minimum_required(VERSION 3.23)
 set(CMAKE_CXX_STANDARD 20)
 
 add_definitions(-DUSE_OPENGL)
+
+include(CMake/CMakeRC.cmake)
 
 project(RVTracking)
 

@@ -53,7 +53,7 @@ namespace Eigen { struct SluMatrix; }
   *
   * In order to use this module, the superlu headers must be accessible from the include paths, and your binary must be linked to the superlu library and its dependencies.
   * The dependencies depend on how superlu has been compiled.
-  * For a cmake based project, you can use our FindSuperLU.cmake module to help you in this task.
+  * For a CMake based project, you can use our FindSuperLU.CMake module to help you in this task.
   *
   */
 

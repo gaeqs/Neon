@@ -10,11 +10,11 @@
 #include <optional>
 #include <unordered_map>
 
-#include "engine/Texture.h"
-#include "engine/IdentifiableWrapper.h"
-#include "util/ClusteredLinkedCollection.h"
+#include <cmrc/cmrc.hpp>
 
-class Resource;
+#include <engine/Texture.h>
+#include <engine/IdentifiableWrapper.h>
+#include <util/ClusteredLinkedCollection.h>
 
 /**
  * This class holds all textures of a room.
@@ -46,7 +46,8 @@ public:
      * @param data the data of the PNG image.
      * @return a pointer to the new texture.
      */
-    IdentifiableWrapper<Texture> createTextureFromPNG(const Resource& resource);
+    IdentifiableWrapper<Texture> createTextureFromPNG(
+            const cmrc::file& resource);
 
     /**
      * Returns a pointer to the texture that matches the given id.

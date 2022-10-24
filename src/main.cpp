@@ -10,11 +10,14 @@
 constexpr int32_t WIDTH = 800;
 constexpr int32_t HEIGHT = 600;
 
-SHADER_RESOURCE(defaultVert, default_vert)
-SHADER_RESOURCE(defaultFrag, default_frag)
+CMRC_DECLARE(shaders);
 
 std::shared_ptr<Room> getTestRoom() {
     auto renderer = std::make_shared<GLShaderRenderer>();
+
+    auto defaultVert = cmrc::shaders::get_filesystem().open("default.vert");
+    auto defaultFrag = cmrc::shaders::get_filesystem().open("default.frag");
+
     auto shader = Shader::newShader(defaultVert, defaultFrag);
     if (!shader.isOk()) throw std::runtime_error(shader.getError());
     auto shaderController = std::make_shared<TestShaderController>(

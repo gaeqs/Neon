@@ -4,12 +4,9 @@
 
 #include "TextureCollection.h"
 
-#include <util/Resource.h>
-
 #define STB_IMAGE_IMPLEMENTATION
+
 #include <stb_image.h>
-
-
 
 TextureCollection::TextureCollection() : _textures() {
 }
@@ -23,12 +20,12 @@ IdentifiableWrapper<Texture> TextureCollection::createTexture(
 }
 
 IdentifiableWrapper<Texture>
-TextureCollection::createTextureFromPNG(const Resource& resource) {
-    auto pngPtr = (const unsigned char*) resource.data();
+TextureCollection::createTextureFromPNG(const cmrc::file& resource) {
+    auto pngPtr = (const unsigned char*) resource.begin();
     auto size = static_cast<int32_t>(resource.size());
     int32_t width, height, channels;
     auto ptr = stbi_load_from_memory(
-            pngPtr, size, &width, &height, &channels, 0);
+            pngPtr, size, &width, &height, &channels, 4);
     auto image = createTexture((const char*) ptr, width, height);
     stbi_image_free(ptr);
     return image;

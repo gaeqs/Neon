@@ -28,7 +28,7 @@ or implied, of Rafael Muñoz Salinas.
 
 #include "marker.h"
 
-/// \todo set this definition in the cmake code
+/// \todo set this definition in the CMake code
 #define _USE_MATH_DEFINES
 
 #include <opencv2/calib3d/calib3d.hpp>

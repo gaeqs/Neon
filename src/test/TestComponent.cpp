@@ -6,9 +6,10 @@
 #include "TestComponent.h"
 #include "TestVertex.h"
 
-#include <util/Resource.h>
+#include <cmrc/cmrc.hpp>
 
-RESOURCE(imageResource, src_resource_test_png);
+CMRC_DECLARE(shaders);
+CMRC_DECLARE(resources);
 
 TestComponent::~TestComponent() {
     std::cout << "Test component " << getId() << " destroyed!" << std::endl;
@@ -19,8 +20,9 @@ void TestComponent::onConstruction() {
 }
 
 void TestComponent::onStart() {
+    auto file = cmrc::resources::get_filesystem().open("test.png");
     auto image = getGameObject()->getRoom()->getTextures()
-            .createTextureFromPNG(imageResource);
+            .createTextureFromPNG(file);
 
     std::cout << image->getId() << std::endl;
 

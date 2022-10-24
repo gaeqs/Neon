@@ -36,7 +36,7 @@ extern "C" {
   *
   * In order to use this module, the cholmod headers must be accessible from the include paths, and your binary must be linked to the cholmod library and its dependencies.
   * The dependencies depend on how cholmod has been compiled.
-  * For a cmake based project, you can use our FindCholmod.cmake module to help you in this task.
+  * For a CMake based project, you can use our FindCholmod.CMake module to help you in this task.
   *
   */
 

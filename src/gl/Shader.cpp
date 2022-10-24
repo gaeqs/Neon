@@ -10,11 +10,11 @@
 constexpr int LOG_SIZE = 1024;
 
 Result<std::shared_ptr<Shader>, std::string>
-Shader::newShader(const Resource& vertex, const Resource& fragment) {
+Shader::newShader(const cmrc::file& vertex, const cmrc::file& fragment) {
     char log[LOG_SIZE];
     int32_t success;
-    const GLchar* vertexData = vertex.data();
-    const GLchar* fragmentData = fragment.data();
+    const GLchar* vertexData = vertex.begin();
+    const GLchar* fragmentData = fragment.begin();
 
     std::cout << vertexData << std::endl;
     std::cout << fragmentData << std::endl;

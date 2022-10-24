@@ -12,8 +12,8 @@
 #include <unordered_map>
 
 #include <glm/glm.hpp>
+#include <cmrc/cmrc.hpp>
 
-#include <util/Resource.h>
 #include <util/Result.h>
 
 class Shader {
@@ -26,7 +26,7 @@ class Shader {
 public:
 
     static Result<std::shared_ptr<Shader>, std::string> newShader(
-            const Resource& vertex, const Resource& fragment);
+            const cmrc::file& vertex, const cmrc::file& fragment);
 
     Shader(const Shader& other) = delete;
 
