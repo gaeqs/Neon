@@ -3,28 +3,29 @@
 
 #include "engine/Engine.h"
 #include "test/TestComponent.h"
+#include "gl/GLShaderRenderer.h"
+#include "test/TestShaderController.h"
+#include "test/TestVertex.h"
 
 constexpr int32_t WIDTH = 800;
 constexpr int32_t HEIGHT = 600;
 
+SHADER_RESOURCE(defaultVert, default_vert)
+SHADER_RESOURCE(defaultFrag, default_frag)
+
 std::shared_ptr<Room> getTestRoom() {
+    auto renderer = std::make_shared<GLShaderRenderer>();
+    auto shader = Shader::newShader(defaultVert, defaultFrag);
+    if (!shader.isOk()) throw std::runtime_error(shader.getError());
+    auto shaderController = std::make_shared<TestShaderController>(
+            shader.getResult());
+    renderer->insertShader("default", shaderController);
+
     auto room = std::make_shared<Room>();
+    room->setRenderer(renderer);
+
     auto gameObject = room->newGameObject();
-    auto component = gameObject->newComponent<TestComponent>();
-    auto component2 = gameObject->newComponent<TestComponent>();
-    std::cout << (component != nullptr) << std::endl;
-    std::cout << component2.isValid() << std::endl;
-    gameObject->destroyComponent(component);
-    std::cout << component.isValid() << std::endl;
-    std::cout << component2.isValid() << std::endl;
-
-    auto component3 = gameObject->newComponent<TestComponent>();
-    std::cout << component3.isValid() << std::endl;
-    std::cout << component2.isValid() << std::endl;
-    gameObject->destroyComponent(component2);
-    std::cout << component3.isValid() << std::endl;
-    std::cout << component2.isValid() << std::endl;
-
+    gameObject->newComponent<TestComponent>();
 
     return room;
 }

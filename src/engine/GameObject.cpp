@@ -16,7 +16,9 @@ GameObject::GameObject(Room* room) : _id(GAME_OBJECT_ID_GENERATOR++),
 
 GameObject::~GameObject() {
     for (const auto& item: _components) {
-        _room->getComponents().destroyComponent(item);
+        if (item.isValid()) {
+            _room->getComponents().destroyComponent(item);
+        }
     }
 }
 

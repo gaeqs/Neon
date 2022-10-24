@@ -5,14 +5,19 @@
 #include "Shader.h"
 
 #include <glad/glad.h>
+#include <iostream>
 
 constexpr int LOG_SIZE = 1024;
 
-Result<std::shared_ptr<Shader>, std::string> Shader::newShader(const Resource& vertex, const Resource& fragment) {
+Result<std::shared_ptr<Shader>, std::string>
+Shader::newShader(const Resource& vertex, const Resource& fragment) {
     char log[LOG_SIZE];
     int32_t success;
     const GLchar* vertexData = vertex.data();
     const GLchar* fragmentData = fragment.data();
+
+    std::cout << vertexData << std::endl;
+    std::cout << fragmentData << std::endl;
 
     uint32_t vertexShader = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vertexShader, 1, &vertexData, nullptr);
@@ -23,7 +28,7 @@ Result<std::shared_ptr<Shader>, std::string> Shader::newShader(const Resource& v
         return {"Error compiling vertex shader: " + std::string(log)};
     }
 
-    uint32_t fragmentShader = glCreateShader(GL_VERTEX_SHADER);
+    uint32_t fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
     glShaderSource(fragmentShader, 1, &fragmentData, nullptr);
     glCompileShader(fragmentShader);
     glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
@@ -83,21 +88,22 @@ void Shader::setUniform(const std::string& name, float value) {
 }
 
 void Shader::setUniform(const std::string& name, const glm::vec2& value) {
-    glUniform2fv(fetchUniformLocation(name), 2, &value[0]);
+    glUniform2fv(fetchUniformLocation(name), 1, &value[0]);
 }
 
 void Shader::setUniform(const std::string& name, const glm::vec3& value) {
-    glUniform2fv(fetchUniformLocation(name), 2, &value[0]);
+    glUniform3fv(fetchUniformLocation(name), 1, &value[0]);
 }
 
 void Shader::setUniform(const std::string& name, const glm::vec4& value) {
-    glUniform2fv(fetchUniformLocation(name), 2, &value[0]);
+    glUniform4fv(fetchUniformLocation(name), 1, &value[0]);
 }
 
 void Shader::setUniform(const std::string& name, const glm::mat4& value) {
-    glUniform2fv(fetchUniformLocation(name), 2, &value[0][0]);
+    glUniformMatrix4fv(fetchUniformLocation(name), 1, GL_FALSE, &value[0][0]);
 }
 
-void Shader::setUniform(const std::string& name, int32_t size, const float* array) {
+void
+Shader::setUniform(const std::string& name, int32_t size, const float* array) {
     glUniform1fv(fetchUniformLocation(name), size, array);
 }

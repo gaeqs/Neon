@@ -11,8 +11,17 @@
 #include <engine/Frustum.h>
 #include <engine/GameObject.h>
 #include <engine/GraphicComponent.h>
+#include <engine/Identifiable.h>
+#include <engine/IdentifiableWrapper.h>
 #include <engine/Material.h>
+#include <engine/Model.h>
 #include <engine/Renderer.h>
 #include <engine/Room.h>
+#include <engine/Texture.h>
+#include <engine/Transform.h>
+
+#include <engine/collection/ComponentCollection.h>
+#include <engine/collection/ModelCollection.h>
+#include <engine/collection/TextureCollection.h>
 
 #endif //RVTRACKING_ENGINE_H

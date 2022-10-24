@@ -59,6 +59,6 @@ public:
  * <p>
  * The resource will be placed inside a constant named after the first given parameter.
  */
-#define SHADER_RESOURCE(name, x) RESOURCE(name, shader_##x##)
+#define SHADER_RESOURCE(name, x) RESOURCE(name, src_shader_##x##)
 
 #endif //VULKANTEST_RESOURCE_H

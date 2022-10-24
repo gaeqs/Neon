@@ -9,7 +9,6 @@
 #include <memory>
 #include <typeindex>
 #include <queue>
-#include <iostream>
 
 #include <engine/IdentifiableWrapper.h>
 #include <util/ClusteredLinkedCollection.h>
@@ -57,8 +56,6 @@ public:
 
             T* component = pointer->emplace();
             callOnConstruction(component);
-
-            std::cout << component << std::endl;
             _notStartedComponents.push(static_cast<Component*>(component));
             return component;
         }
@@ -68,8 +65,6 @@ public:
 
         T* component = components->emplace();
         callOnConstruction(component);
-        std::cout << component << std::endl;
-
         _notStartedComponents.push(static_cast<Component*>(component));
         return component;
     }

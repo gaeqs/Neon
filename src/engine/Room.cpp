@@ -18,7 +18,8 @@ Room::Room() :
         _gameObjects(),
         _components(),
         _textures(),
-        _models() {
+        _models(),
+        _renderer() {
 }
 
 Room::~Room() {

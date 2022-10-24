@@ -14,6 +14,8 @@
 #include "engine/IdentifiableWrapper.h"
 #include "util/ClusteredLinkedCollection.h"
 
+class Resource;
+
 /**
  * This class holds all textures of a room.
  */
@@ -38,6 +40,13 @@ public:
      */
     IdentifiableWrapper<Texture> createTexture(
             const char* data, int32_t width, int32_t height);
+
+    /**
+     * Creates a new texture from a PNG image.
+     * @param data the data of the PNG image.
+     * @return a pointer to the new texture.
+     */
+    IdentifiableWrapper<Texture> createTextureFromPNG(const Resource& resource);
 
     /**
      * Returns a pointer to the texture that matches the given id.

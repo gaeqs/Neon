@@ -33,5 +33,6 @@ uint32_t GLModel::getIndexAmount() const {
 void GLModel::draw() const {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ebo);
     glBindVertexArray(_vao);
-    glDrawArrays(GL_TRIANGLES, 0, _indexAmount);
+    glDrawElements(GL_TRIANGLES, static_cast<int>(_indexAmount),
+                   GL_UNSIGNED_INT, 0);
 }
