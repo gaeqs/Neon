@@ -12,12 +12,12 @@ find_package(glm CONFIG REQUIRED)
 find_package(assimp CONFIG REQUIRED)
 
 # GLAD
-add_subdirectory(${CMAKE_SOURCE_DIR}/lib/glad/)
-include_directories(${CMAKE_SOURCE_DIR}/lib/glad/include)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/lib/glad/)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/lib/glad/include)
 
 # STB
-add_subdirectory(${CMAKE_SOURCE_DIR}/lib/stb/)
-include_directories(${CMAKE_SOURCE_DIR}/lib/stb/src)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/lib/stb/)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/lib/stb/src)
 
 
 list(APPEND LIBRARIES glad)
