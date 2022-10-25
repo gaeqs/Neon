@@ -3,13 +3,16 @@
 //
 
 #include "Room.h"
+
+#include <glm/glm.hpp>
+
 #include <engine/GameObject.h>
 #include <engine/Application.h>
 #include <engine/GraphicComponent.h>
 
-constexpr float DEFAULT_FRUSTUM_NEAR = 0.1f;
+constexpr float DEFAULT_FRUSTUM_NEAR = 1.0f;
 constexpr float DEFAULT_FRUSTUM_FAR = 1000.0f;
-constexpr float DEFAULT_FRUSTUM_FOV = 1000.0f;
+constexpr float DEFAULT_FRUSTUM_FOV = glm::radians(100.0f); // RADIANS
 
 Room::Room() :
         _application(nullptr),

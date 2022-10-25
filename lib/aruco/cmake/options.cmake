@@ -42,12 +42,12 @@ option(INSTALL_DOC 	"Set to ON to build/install Documentation" OFF)
 if (INSTALL_DOC)
     find_package(Doxygen REQUIRED)
     message( STATUS "INSTALL_DOC:         ${INSTALL_DOC} ")
-    include("${PROJECT_SOURCE_DIR}/CMake/generateDoc.cmake")
+    include("${PROJECT_SOURCE_DIR}/cmake/generateDoc.cmake")
     generate_documentation(${PROJECT_SOURCE_DIR}/CMake/dox.in)
 endif()
 
 # ----------------------------------------------------------------------------
 #   Uninstall target, for "make uninstall"
 # ----------------------------------------------------------------------------
-configure_file("${PROJECT_SOURCE_DIR}/CMake/cmake_uninstall.cmake.in" "${PROJECT_BINARY_DIR}/cmake_uninstall.cmake" IMMEDIATE @ONLY)
+configure_file("${PROJECT_SOURCE_DIR}/cmake/cmake_uninstall.cmake.in" "${PROJECT_BINARY_DIR}/cmake_uninstall.cmake" IMMEDIATE @ONLY)
 add_custom_target(uninstall "${CMAKE_COMMAND}" -P "${PROJECT_BINARY_DIR}/cmake_uninstall.cmake")

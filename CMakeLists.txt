@@ -22,6 +22,10 @@ include_directories(${CMAKE_SOURCE_DIR}/lib/aruco/src)
 add_subdirectory(${CMAKE_SOURCE_DIR}/lib/glad/)
 include_directories(${CMAKE_SOURCE_DIR}/lib/glad/include)
 
+# STB
+add_subdirectory(${CMAKE_SOURCE_DIR}/lib/stb/)
+include_directories(${CMAKE_SOURCE_DIR}/lib/stb/src)
+
 
 list(APPEND LIBRARIES opencv_core opencv_calib3d opencv_imgcodecs opencv_videoio opencv_imgproc opencv_features2d opencv_highgui ${THREADLIB})
 list(APPEND LIBRARIES aruco)

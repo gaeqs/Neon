@@ -100,6 +100,7 @@ void Application::setRoom(const std::shared_ptr<Room>& room) {
     _room = room;
     if (_room != nullptr) {
         _room->_application = this;
+        _room->onResize();
     }
 }
 
