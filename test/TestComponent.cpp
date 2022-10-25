@@ -24,16 +24,14 @@ void TestComponent::onStart() {
     auto image = getGameObject()->getRoom()->getTextures()
             .createTextureFromPNG(file);
 
-    std::cout << image->getId() << std::endl;
-
     std::cout << "Test component started!" << std::endl;
     auto gComponent = getGameObject()->newComponent<GraphicComponent>();
 
     std::vector<TestVertex> vertices = {
-            {{-0.5f, -0.5f, -1.5f}, {0.0f, 1.0f}},
-            {{0.5f,  -0.5f, -1.5f}, {1.0f, 1.0f}},
-            {{0.5f,  0.5f,  -1.5f}, {1.0f, 0.0f}},
-            {{-0.5f, 0.5f,  -1.5f}, {0.0f, 0.0f}},
+            {{-0.5f, -0.5f, 0.0f}, {0.0f, 1.0f}},
+            {{0.5f,  -0.5f, 0.0f}, {1.0f, 1.0f}},
+            {{0.5f,  0.5f,  0.0f}, {1.0f, 0.0f}},
+            {{-0.5f, 0.5f,  0.0f}, {0.0f, 0.0f}},
     };
 
     std::vector<uint32_t> indices = {0, 1, 2, 0, 2, 3};
@@ -41,7 +39,7 @@ void TestComponent::onStart() {
     auto model = getGameObject()->getRoom()->getModels()
             .createModel(vertices, indices);
 
-    getGameObject()->getTransform().setPosition(glm::vec3(0.3f, 0.0f, 0.5f));
+    getGameObject()->getTransform().setPosition(glm::vec3(0.3f, 0.0f, -1.0f));
 
     gComponent->getMaterial().setShader("default");
     gComponent->setModel(model);
