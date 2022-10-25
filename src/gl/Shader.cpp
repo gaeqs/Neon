@@ -16,9 +16,6 @@ Shader::newShader(const cmrc::file& vertex, const cmrc::file& fragment) {
     const GLchar* vertexData = vertex.begin();
     const GLchar* fragmentData = fragment.begin();
 
-    std::cout << vertexData << std::endl;
-    std::cout << fragmentData << std::endl;
-
     uint32_t vertexShader = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vertexShader, 1, &vertexData, nullptr);
     glCompileShader(vertexShader);

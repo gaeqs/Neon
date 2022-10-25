@@ -10,7 +10,7 @@
 #include <engine/Application.h>
 #include <engine/GraphicComponent.h>
 
-constexpr float DEFAULT_FRUSTUM_NEAR = 1.0f;
+constexpr float DEFAULT_FRUSTUM_NEAR = 0.1f;
 constexpr float DEFAULT_FRUSTUM_FAR = 1000.0f;
 constexpr float DEFAULT_FRUSTUM_FOV = glm::radians(100.0f); // RADIANS
 
