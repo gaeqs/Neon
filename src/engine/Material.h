@@ -7,15 +7,29 @@
 
 #include <string>
 #include <unordered_map>
+#include <vector>
+#include <memory>
+
 #include <glm/glm.hpp>
+
+#include <engine/IdentifiableWrapper.h>
 
 class Shader;
 
+class Texture;
+
+class Room;
+
 constexpr size_t MAX_ARRAY_SIZE = 16;
 
+enum class MaterialEntryType {
+    IMAGE,
+    DATA
+};
+
 struct MaterialEntry {
-    int32_t floatAmount;
-    float floats[MAX_ARRAY_SIZE];
+    MaterialEntryType type;
+    std::vector<char> data;
 };
 
 class Material {
@@ -29,15 +43,28 @@ public:
 
     void setShader(const std::string& shader);
 
-    template<class T>
-    void setUniform(const std::string& name, const T& value) {
-        MaterialEntry entry{};
-        entry.floatAmount = std::min(MAX_ARRAY_SIZE, sizeof(T) / 4);
-        memcpy(entry.floats, &value, std::min(MAX_ARRAY_SIZE * 4, sizeof(T)));
-        _uniformValues[name] = entry;
-    }
+    const std::unordered_map<std::string, MaterialEntry>&
+    getUniformValues() const;
 
-    void uploadUniforms(Shader& shader);
+    void setImage(const std::string& name, uint64_t imageId, uint32_t target);
+
+    void setImage(const std::string& name, IdentifiableWrapper<Texture> image,
+                  uint32_t target);
+
+    template<class T>
+    void setValue(const std::string& name, const T& value) {
+        std::vector<char> data;
+
+        size_t size = sizeof(T);
+        if ((size & 0b11) != 0) {
+            size += 4 - (size & 0b11);
+        }
+        data.resize(size);
+
+
+        memcpy(data.data(), &value, sizeof(T));
+        _uniformValues[name] = {MaterialEntryType::DATA, data};
+    }
 
 
 };

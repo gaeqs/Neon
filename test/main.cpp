@@ -1,11 +1,10 @@
 #include <iostream>
 #include <vector>
 
-#include "engine/Engine.h"
-#include "test/TestComponent.h"
-#include "gl/GLShaderRenderer.h"
-#include "test/TestShaderController.h"
-#include "test/TestVertex.h"
+#include <engine/Engine.h>
+#include <gl/GLShaderRenderer.h>
+#include "TestComponent.h"
+#include "TestShaderController.h"
 
 constexpr int32_t WIDTH = 800;
 constexpr int32_t HEIGHT = 600;

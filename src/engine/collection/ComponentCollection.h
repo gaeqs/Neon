@@ -29,6 +29,8 @@ class ComponentCollection {
 
 public:
 
+    ComponentCollection(const ComponentCollection& other) = delete;
+
     /**
      * Creates the collection.
      */

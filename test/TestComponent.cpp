@@ -6,7 +6,7 @@
 #include "TestComponent.h"
 #include "TestVertex.h"
 
-#include <cmrc/cmrc.hpp>
+#include "cmrc/cmrc.hpp"
 
 CMRC_DECLARE(shaders);
 CMRC_DECLARE(resources);
@@ -30,10 +30,10 @@ void TestComponent::onStart() {
     auto gComponent = getGameObject()->newComponent<GraphicComponent>();
 
     std::vector<TestVertex> vertices = {
-            {{-0.5f, -0.5f, -1.5f}, {0.0f, 0.0f, 1.0f}},
-            {{0.5f,  -0.5f, -1.5f}, {0.0f, 1.0f, 0.0f}},
-            {{0.5f,  0.8f,  -1.5f}, {1.0f, 0.0f, 0.0f}},
-            {{-0.5f, 0.5f,  -1.5f}, {1.0f, 1.0f, 1.0f}},
+            {{-0.5f, -0.5f, -1.5f}, {0.0f, 1.0f}},
+            {{0.5f,  -0.5f, -1.5f}, {1.0f, 1.0f}},
+            {{0.5f,  0.5f,  -1.5f}, {1.0f, 0.0f}},
+            {{-0.5f, 0.5f,  -1.5f}, {0.0f, 0.0f}},
     };
 
     std::vector<uint32_t> indices = {0, 1, 2, 0, 2, 3};
@@ -45,6 +45,7 @@ void TestComponent::onStart() {
 
     gComponent->getMaterial().setShader("default");
     gComponent->setModel(model);
+    gComponent->getMaterial().setImage("diffuse", image, 0);
 }
 
 void TestComponent::onUpdate() {

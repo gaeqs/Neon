@@ -24,6 +24,8 @@ class ModelCollection {
 
 public:
 
+    ModelCollection(const ModelCollection& other) = delete;
+
     /**
      * Creates the collection.
      */

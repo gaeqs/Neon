@@ -5,9 +5,9 @@
 #ifndef RVTRACKING_TESTSHADERCONTROLLER_H
 #define RVTRACKING_TESTSHADERCONTROLLER_H
 
-#include <engine/Engine.h>
-#include <gl/ShaderController.h>
-#include <gl/Shader.h>
+#include "engine/Engine.h"
+#include "gl/ShaderController.h"
+#include "gl/Shader.h"
 
 class TestShaderController : public ShaderController {
 
@@ -17,7 +17,7 @@ public:
 
     void setupGlobalUniforms(Room* room) override;
 
-    void setupGraphicComponentUniforms(GraphicComponent* component) override;
+    void setupAdditionalGraphicComponentUniforms(GraphicComponent* component) override;
 };
 
 

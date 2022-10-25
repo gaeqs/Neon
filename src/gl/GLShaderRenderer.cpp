@@ -7,6 +7,39 @@
 #include <utility>
 #include <unordered_set>
 
+#include <engine/Room.h>
+#include <engine/collection/TextureCollection.h>
+#include <gl/Shader.h>
+
+void GLShaderRenderer::uploadMaterialUniforms(
+        const std::shared_ptr<Shader>& shader, GraphicComponent* component) {
+    auto& textures = component->getGameObject()->getRoom()->getTextures();
+    for (const auto& item: component->getMaterial().getUniformValues()) {
+        auto& entry = item.second;
+        if (entry.type == MaterialEntryType::IMAGE) {
+            const auto* data = reinterpret_cast<const uint64_t*>(
+                    entry.data.data());
+
+            uint64_t id = data[0];
+            uint32_t target = data[1];
+            auto texture = textures.getTexture(id);
+
+            if (texture.isValid()) {
+                glActiveTexture(GL_TEXTURE0 + target);
+                glBindTexture(GL_TEXTURE_2D,
+                              texture->getImplementation().getId());
+                shader->setUniform(item.first, target);
+            }
+        } else {
+            shader->setUniform(
+                    item.first,
+                    static_cast<int32_t>(entry.data.size() >> 2),
+                    reinterpret_cast<const float*>(item.second.data.data())
+            );
+        }
+    }
+}
+
 GLShaderRenderer::GLShaderRenderer() :
         _shaders() {
 }
@@ -31,7 +64,8 @@ void GLShaderRenderer::render(
             _updated.insert(name);
         }
 
-        it->second->setupGraphicComponentUniforms(component);
+        uploadMaterialUniforms(it->second->getShader(), component);
+        it->second->setupAdditionalGraphicComponentUniforms(component);
         model->getImplementation().draw();
     });
 }

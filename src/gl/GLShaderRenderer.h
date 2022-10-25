@@ -15,6 +15,9 @@ class GLShaderRenderer : public Renderer {
 
     std::unordered_map<std::string, std::shared_ptr<ShaderController>> _shaders;
 
+    static void uploadMaterialUniforms(const std::shared_ptr<Shader>& shader,
+                                GraphicComponent* component);
+
 public:
 
     GLShaderRenderer();

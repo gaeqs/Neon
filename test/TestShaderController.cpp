@@ -12,7 +12,7 @@ void TestShaderController::setupGlobalUniforms(Room* room) {
     shader->setUniform("viewProjection", room->getCamera().getViewProjection());
 }
 
-void TestShaderController::setupGraphicComponentUniforms(
+void TestShaderController::setupAdditionalGraphicComponentUniforms(
         GraphicComponent* component) {
     auto shader = getShader();
     shader->setUniform("model",

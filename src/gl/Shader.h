@@ -40,6 +40,8 @@ public:
 
     void setUniform(const std::string& name, int value);
 
+    void setUniform(const std::string& name, unsigned int value);
+
     void setUniform(const std::string& name, float value);
 
     void setUniform(const std::string& name, const glm::vec2& value);

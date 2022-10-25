@@ -6,7 +6,7 @@
 #define RVTRACKING_TESTCOMPONENT_H
 
 
-#include "../engine/Engine.h"
+#include "engine/Engine.h"
 #include <glm/glm.hpp>
 
 class TestComponent : public Component {

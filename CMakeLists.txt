@@ -7,7 +7,6 @@ include(CMake/CMakeRC.cmake)
 
 project(RVTracking)
 
-
 find_package(OpenCV CONFIG REQUIRED)
 find_package(glfw3 CONFIG REQUIRED)
 find_package(glm CONFIG REQUIRED)
@@ -41,4 +40,6 @@ endif ()
 include_directories(src)
 add_subdirectory(src)
 
-target_link_libraries(RVTracking ${LIBRARIES} ${CMAKE_DL_LIBS})
+if (ENGINE_TESTS)
+    add_subdirectory(test)
+endif ()

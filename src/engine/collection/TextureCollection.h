@@ -26,6 +26,8 @@ class TextureCollection {
 
 public:
 
+    TextureCollection(const TextureCollection& other) = delete;
+
     /**
      * Creates the collection.
      */

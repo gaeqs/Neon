@@ -6,16 +6,16 @@
 #define RVTRACKING_TESTVERTEX_H
 
 #include <glm/glm.hpp>
-#include <glad/glad.h>
+#include "glad/glad.h"
 
 struct TestVertex {
     glm::vec3 position;
-    glm::vec3 color;
+    glm::vec2 texCoords;
 
     static void setupVAO() {
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float),
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(TestVertex),
                               (void*) 0);
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float),
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(TestVertex),
                               (void*) (3 * sizeof(float)));
         glEnableVertexAttribArray(0);
         glEnableVertexAttribArray(1);
