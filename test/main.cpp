@@ -36,7 +36,7 @@ int main() {
 
     Application application(WIDTH, HEIGHT);
 
-    auto initResult = application.init();
+    auto initResult = application.init("Test");
     if (!initResult.isOk()) {
         std::cerr << "[GLFW INIT]\t" << initResult.getError() << std::endl;
         return EXIT_FAILURE;

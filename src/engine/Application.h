@@ -29,7 +29,7 @@ public:
 
     Application(int32_t width, int32_t height);
 
-    Result<GLFWwindow*, std::string> init();
+    Result<GLFWwindow*, std::string> init(const std::string& name);
 
     Result <uint32_t, std::string> startGameLoop() const;
 

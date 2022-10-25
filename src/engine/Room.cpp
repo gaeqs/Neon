@@ -73,8 +73,10 @@ void Room::destroyGameObject(IdentifiableWrapper<GameObject> gameObject) {
 }
 
 void Room::onResize() {
-    _camera.setFrustum(_camera.getFrustum().withAspectRatio(
-            _application->getAspectRatio()));
+    if (_application->getWidth() > 0 && _application->getHeight() > 0) {
+        _camera.setFrustum(_camera.getFrustum().withAspectRatio(
+                _application->getAspectRatio()));
+    }
 }
 
 void Room::update() {

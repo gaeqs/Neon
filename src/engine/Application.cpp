@@ -19,7 +19,7 @@ Application::Application(int32_t width, int32_t height) :
         _width(width), _height(height), _window(nullptr) {
 }
 
-Result<GLFWwindow*, std::string> Application::init() {
+Result<GLFWwindow*, std::string> Application::init(const std::string& name) {
     if (!glfwInit()) {
         return {"Failed to initialize GLFW"};
     }
@@ -29,7 +29,7 @@ Result<GLFWwindow*, std::string> Application::init() {
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     // Open a window and create its OpenGL context
-    _window = glfwCreateWindow(_width, _height, "Spinning Triangle", nullptr,
+    _window = glfwCreateWindow(_width, _height, name.c_str(), nullptr,
                                nullptr);
     if (!_window) {
         return {"Failed to open GLFW window"};
