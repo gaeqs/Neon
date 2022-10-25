@@ -2,5 +2,5 @@ set(SOURCES engine/Application.cpp engine/Application.h util/Result.h gl/Shader.
 
 cmrc_add_resource_library(dummy)
 
-add_library(Engine STATIC ${SOURCES})
-target_link_libraries(Engine ${LIBRARIES} ${CMAKE_DL_LIBS} dummy)
+add_library(neon STATIC ${SOURCES})
+target_link_libraries(neon ${LIBRARIES} ${CMAKE_DL_LIBS} dummy)

@@ -24,4 +24,4 @@ cmrc_add_resource_library(
 )
 
 add_executable(Test ${TEST_SOURCES})
-target_link_libraries(Test ${LIBRARIES} ${CMAKE_DL_LIBS} Engine shaders resources)
+target_link_libraries(Test ${LIBRARIES} ${CMAKE_DL_LIBS} neon shaders resources)
