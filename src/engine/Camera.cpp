@@ -4,9 +4,6 @@
 
 #include "Camera.h"
 
-#include <iostream>
-
-
 void Camera::recalculateViewMatrix() {
     _dirtyView = false;
     _view = glm::lookAt(_position, _position + getForward(), getUp());
@@ -78,7 +75,7 @@ const glm::quat& Camera::lookAt(const glm::vec3& direction) {
 
 const glm::quat& Camera::rotate(const glm::vec3& direction, float angle) {
     _dirtyView = true;
-    _rotation =  glm::angleAxis(angle, direction) * _rotation;
+    _rotation = glm::angleAxis(angle, direction) * _rotation;
     _rotationInverse = glm::inverse(_rotation);
     return _rotation;
 }

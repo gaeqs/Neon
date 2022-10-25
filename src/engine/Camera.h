@@ -26,13 +26,15 @@ class Camera {
 
 public:
 
+    Camera(const Camera& other) = delete;
+
     Camera(const Frustum& frustum);
 
     const glm::vec3& getPosition() const;
 
     const glm::quat& getRotation() const;
 
-    const Frustum& getFrustum () const;
+    const Frustum& getFrustum() const;
 
     glm::vec3 getForward() const;
 
@@ -44,7 +46,7 @@ public:
 
     void setRotation(const glm::quat& rotation);
 
-    void setFrustum (const Frustum& frustum);
+    void setFrustum(const Frustum& frustum);
 
     const glm::vec3& move(const glm::vec3& offset);
 
@@ -54,7 +56,7 @@ public:
 
     const glm::mat4& getView();
 
-    const glm::mat4& getViewProjection ();
+    const glm::mat4& getViewProjection();
 };
 
 
