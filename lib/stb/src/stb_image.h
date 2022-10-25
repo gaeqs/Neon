@@ -255,7 +255,7 @@ RECENT REVISION HISTORY:
 // SIMD support
 //
 // The JPEG decoder will try to automatically use SIMD kernels on x86 when
-// supported by the compiler. For ARM Neon support, you must explicitly
+// supported by the compiler. For ARM neon support, you must explicitly
 // request it.
 //
 // (The old do-it-yourself SIMD API is no longer supported in the current
