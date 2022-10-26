@@ -15,9 +15,11 @@ Shader::newShader(const cmrc::file& vertex, const cmrc::file& fragment) {
     int32_t success;
     const GLchar* vertexData = vertex.begin();
     const GLchar* fragmentData = fragment.begin();
+    auto vertexSize = static_cast<int32_t>(vertex.size());
+    auto fragmentSize = static_cast<int32_t>(fragment.size());
 
     uint32_t vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertexShader, 1, &vertexData, nullptr);
+    glShaderSource(vertexShader, 1, &vertexData, &vertexSize);
     glCompileShader(vertexShader);
     glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
     if (!success) {
@@ -26,7 +28,7 @@ Shader::newShader(const cmrc::file& vertex, const cmrc::file& fragment) {
     }
 
     uint32_t fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragmentShader, 1, &fragmentData, nullptr);
+    glShaderSource(fragmentShader, 1, &fragmentData, &fragmentSize);
     glCompileShader(fragmentShader);
     glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
     if (!success) {
