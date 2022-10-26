@@ -7,6 +7,7 @@
 
 
 #include <engine/Identifiable.h>
+#include <engine/TextureFormat.h>
 
 #ifdef USE_OPENGL
 
@@ -31,7 +32,8 @@ public:
 
     Texture(const Texture& other) = delete;
 
-    Texture(const char* data, int32_t width, int32_t height);
+    Texture(const char* data, int32_t width, int32_t height,
+            TextureFormat format);
 
     uint64_t getId() const override;
 
@@ -43,7 +45,8 @@ public:
 
     uint32_t getHeight() const;
 
-    void updateData(const char* data, int32_t width, int32_t height);
+    void updateData(const char* data, int32_t width, int32_t height,
+                    TextureFormat format);
 
 };
 

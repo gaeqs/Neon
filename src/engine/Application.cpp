@@ -44,7 +44,7 @@ Result<GLFWwindow*, std::string> Application::init(const std::string& name) {
 
     // Enable vertical sync (on cards that support it)
     glfwMakeContextCurrent(_window);
-    glfwSwapInterval(1);
+    glfwSwapInterval(0);
 
     if (!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress)) {
         return {"Failed to initialize GLAD"};
@@ -74,6 +74,8 @@ Result<uint32_t, std::string> Application::startGameLoop() const {
 
             float seconds = static_cast<float>(duration.count())
                              / 1000000000.0f;
+
+            std::cout << (1 / seconds) << std::endl;
 
             if (_room != nullptr) {
                 _room->update(seconds);

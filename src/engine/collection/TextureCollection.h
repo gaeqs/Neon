@@ -13,6 +13,7 @@
 #include <cmrc/cmrc.hpp>
 
 #include <engine/Texture.h>
+#include <engine/TextureFormat.h>
 #include <engine/IdentifiableWrapper.h>
 #include <util/ClusteredLinkedCollection.h>
 
@@ -38,10 +39,12 @@ public:
      * @param data the data of the texture.
      * @param width the width of the texture.
      * @param height the height of the texture.
+     * @param format the format of the given data.
      * @return a pointer to the new texture.
      */
     IdentifiableWrapper<Texture> createTexture(
-            const char* data, int32_t width, int32_t height);
+            const char* data, int32_t width, int32_t height,
+            TextureFormat format);
 
     /**
      * Creates a new texture from a PNG image.

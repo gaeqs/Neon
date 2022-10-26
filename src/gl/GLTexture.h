@@ -6,17 +6,21 @@
 #define RVTRACKING_GLTEXTURE_H
 
 #include <cstdint>
+#include <engine/TextureFormat.h>
 
 class GLTexture {
 
     uint32_t _id;
     int32_t _width, _height;
 
+    int32_t toGLFormat(TextureFormat format);
+
 public:
 
     GLTexture(const GLTexture& other) = delete;
 
-    GLTexture(const char* data, int32_t width, int32_t height);
+    GLTexture(const char* data, int32_t width, int32_t height,
+              TextureFormat format);
 
     ~GLTexture();
 
@@ -28,7 +32,8 @@ public:
 
     void bind(uint32_t index) const;
 
-    void updateData(const char* data, int32_t width, int32_t height);
+    void updateData(const char* data, int32_t width, int32_t height,
+                    TextureFormat format);
 
 };
 

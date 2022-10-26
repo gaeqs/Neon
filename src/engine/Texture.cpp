@@ -6,9 +6,10 @@
 
 uint64_t TEXTURE_ID_GENERATOR = 1;
 
-Texture::Texture(const char* data, int32_t width, int32_t height) :
+Texture::Texture(const char* data, int32_t width, int32_t height,
+                 TextureFormat format) :
         _id(TEXTURE_ID_GENERATOR++),
-        _implementation(data, width, height) {
+        _implementation(data, width, height, format) {
 
 }
 
@@ -32,7 +33,8 @@ uint32_t Texture::getHeight() const {
     return _implementation.getHeight();
 }
 
-void Texture::updateData(const char* data, int32_t width, int32_t height) {
-    _implementation.updateData(data, width, height);
+void Texture::updateData(const char* data, int32_t width, int32_t height,
+                         TextureFormat format) {
+    _implementation.updateData(data, width, height, format);
 }
 

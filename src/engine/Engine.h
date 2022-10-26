@@ -18,6 +18,7 @@
 #include <engine/Renderer.h>
 #include <engine/Room.h>
 #include <engine/Texture.h>
+#include <engine/TextureFormat.h>
 #include <engine/Transform.h>
 
 #include <engine/collection/ComponentCollection.h>
