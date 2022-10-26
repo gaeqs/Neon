@@ -14,20 +14,26 @@ ComponentCollection::ComponentCollection()
           _notStartedComponents() {
 }
 
-void ComponentCollection::updateComponents() {
-    for (; !_notStartedComponents.empty(); _notStartedComponents.pop()) {
-        auto ptr = _notStartedComponents.front();
-
-        if (ptr.isValid()) {
-            ptr->onStart();
-        }
-    }
-
+void ComponentCollection::invokeKeyEvent(int32_t key, int32_t scancode,
+                                         int32_t action, int32_t mods) {
+    flushNotStartedComponents();
     for (const auto& item: _components) {
         auto ptr = std::static_pointer_cast
                 <AbstractClusteredLinkedCollection>(item.second);
-        ptr->forEachRaw([](void* ptr) {
-            reinterpret_cast<Component*>(ptr)->onUpdate();
+        ptr->forEachRaw([key, scancode, action, mods](void* ptr) {
+            reinterpret_cast<Component*>(ptr)->
+                    onKey(key, scancode, action, mods);
+        });
+    }
+}
+
+void ComponentCollection::updateComponents(float deltaTime) {
+    flushNotStartedComponents();
+    for (const auto& item: _components) {
+        auto ptr = std::static_pointer_cast
+                <AbstractClusteredLinkedCollection>(item.second);
+        ptr->forEachRaw([deltaTime](void* ptr) {
+            reinterpret_cast<Component*>(ptr)->onUpdate(deltaTime);
         });
     }
 }
@@ -42,4 +48,14 @@ void ComponentCollection::drawGraphicComponents(Room* room) const {
 
 void ComponentCollection::callOnConstruction(void* rawComponent) {
     reinterpret_cast<Component*>(rawComponent)->onConstruction();
+}
+
+void ComponentCollection::flushNotStartedComponents() {
+    for (; !_notStartedComponents.empty(); _notStartedComponents.pop()) {
+        auto ptr = _notStartedComponents.front();
+
+        if (ptr.isValid()) {
+            ptr->onStart();
+        }
+    }
 }

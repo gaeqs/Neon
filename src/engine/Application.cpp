@@ -15,6 +15,13 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
     application->internalForceSizeValues(width, height);
 }
 
+void key_size_callback(GLFWwindow* window, int key, int scancode, int action,
+                       int mods) {
+    auto* application = static_cast<Application*>(glfwGetWindowUserPointer(
+            window));
+    application->internalKeyEvent(key, scancode, action, mods);
+}
+
 Application::Application(int32_t width, int32_t height) :
         _width(width), _height(height), _window(nullptr) {
 }
@@ -46,6 +53,7 @@ Result<GLFWwindow*, std::string> Application::init(const std::string& name) {
 
     glfwSetWindowUserPointer(_window, this);
     glfwSetWindowSizeCallback(_window, framebuffer_size_callback);
+    glfwSetKeyCallback(_window, key_size_callback);
 
     return {_window};
 }
@@ -57,14 +65,23 @@ Result<uint32_t, std::string> Application::startGameLoop() const {
 
     uint32_t frames = 0;
 
+    auto last_tick = std::chrono::high_resolution_clock::now();
     try {
         while (!glfwWindowShouldClose(_window)) {
-            glfwPollEvents();
-            glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-            glClear(GL_COLOR_BUFFER_BIT);
+            auto now = std::chrono::high_resolution_clock::now();
+            auto duration = now - last_tick;
+            last_tick = now;
+
+            float seconds = static_cast<float>(duration.count())
+                             / 1000000000.0f;
 
             if (_room != nullptr) {
-                _room->update();
+                _room->update(seconds);
+            }
+
+            glfwPollEvents();
+
+            if (_room != nullptr) {
                 _room->draw();
             }
 
@@ -109,5 +126,12 @@ void Application::internalForceSizeValues(int32_t width, int32_t height) {
     _height = height;
     if (_room != nullptr) {
         _room->onResize();
+    }
+}
+
+void Application::internalKeyEvent(int32_t key, int32_t scancode,
+                                   int32_t action, int32_t mods) {
+    if (_room != nullptr) {
+        _room->onKey(key, scancode, action, mods);
     }
 }

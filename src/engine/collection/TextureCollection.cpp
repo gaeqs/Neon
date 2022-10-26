@@ -15,7 +15,7 @@ IdentifiableWrapper<Texture> TextureCollection::createTexture(
         const char* data, int32_t width, int32_t height) {
     auto value = IdentifiableWrapper<Texture>(
             _textures.emplace(data, width, height));
-    _texturesById.emplace(value.isValid(), value);
+    _texturesById.emplace(value->getId(), value);
     return value;
 }
 

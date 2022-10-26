@@ -39,7 +39,10 @@ public:
 
     virtual void onStart();
 
-    virtual void onUpdate();
+    virtual void onUpdate(float deltaTime);
+
+    virtual void onKey(int32_t key, int32_t scancode,
+                       int32_t action, int32_t mods);
 };
 
 

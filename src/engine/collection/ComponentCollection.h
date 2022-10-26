@@ -27,6 +27,8 @@ class ComponentCollection {
 
     static void callOnConstruction(void* rawComponent);
 
+    void flushNotStartedComponents();
+
 public:
 
     ComponentCollection(const ComponentCollection& other) = delete;
@@ -105,17 +107,27 @@ public:
     }
 
     /**
-     * THIS METHOD SHOULD ONLY BE USED BY ROOMS!
-     * USERS MUSTN'T USE THIS METHOD.
-     *
-     * Calls onUpdate() on all components.
-     */
-    void updateComponents();
+   * THIS METHOD SHOULD ONLY BE USED BY ROOMS!
+   * USERS MUSTN'T USE THIS METHOD.
+   * <p>
+   * Calls onKey() on all components.
+   */
+    void invokeKeyEvent(int32_t key, int32_t scancode,
+                        int32_t action, int32_t mods);
 
     /**
      * THIS METHOD SHOULD ONLY BE USED BY ROOMS!
      * USERS MUSTN'T USE THIS METHOD.
-     *
+     * <p>
+     * Calls onUpdate() on all components.
+     * @param deltaTime the delay between this frame and the last one, in seconds.
+     */
+    void updateComponents(float deltaTime);
+
+    /**
+     * THIS METHOD SHOULD ONLY BE USED BY ROOMS!
+     * USERS MUSTN'T USE THIS METHOD.
+     * <p>
      * Draws all graphic components.
      */
     void drawGraphicComponents(Room* room) const;

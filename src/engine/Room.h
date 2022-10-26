@@ -74,7 +74,9 @@ public:
 
     void onResize();
 
-    void update();
+    void onKey(int32_t key, int32_t scancode, int32_t action, int32_t mods);
+
+    void update(float deltaTime);
 
     void draw();
 

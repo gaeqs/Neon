@@ -31,7 +31,7 @@ public:
 
     Result<GLFWwindow*, std::string> init(const std::string& name);
 
-    Result <uint32_t, std::string> startGameLoop() const;
+    Result<uint32_t, std::string> startGameLoop() const;
 
     int32_t getWidth() const;
 
@@ -44,6 +44,9 @@ public:
     //region INTERNAL CALLS
 
     void internalForceSizeValues(int32_t width, int32_t height);
+
+    void internalKeyEvent(int32_t key, int32_t scancode,
+                          int32_t action, int32_t mods);
 
     //endregion
 };

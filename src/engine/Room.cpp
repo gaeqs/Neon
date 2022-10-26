@@ -79,8 +79,12 @@ void Room::onResize() {
     }
 }
 
-void Room::update() {
-    _components.updateComponents();
+void Room::onKey(int32_t key, int32_t scancode, int32_t action, int32_t mods) {
+    _components.invokeKeyEvent(key, scancode, action, mods);
+}
+
+void Room::update(float deltaTime) {
+    _components.updateComponents(deltaTime);
 }
 
 void Room::draw() {
