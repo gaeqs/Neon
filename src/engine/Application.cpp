@@ -75,7 +75,7 @@ Result<uint32_t, std::string> Application::startGameLoop() const {
             float seconds = static_cast<float>(duration.count())
                              / 1000000000.0f;
 
-            std::cout << (1 / seconds) << std::endl;
+            //std::cout << (1 / seconds) << std::endl;
 
             if (_room != nullptr) {
                 _room->update(seconds);
