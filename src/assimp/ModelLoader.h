@@ -155,10 +155,27 @@ public:
                       << std::endl;
             for (int p = 0; p < material->mNumProperties; ++p) {
                 auto* property = material->mProperties[p];
-                std::string data = std::string(
-                        property->mSemantic, property->mDataLength);
-                std::cout << property->mKey.C_Str() << " = "
-                          << data << std::endl;
+                std::string data = std::string(property->mData,
+                                               property->mDataLength);
+                float dataFloat = property->mDataLength >= 4
+                                  ? *(float*) property->mData
+                                  : NAN;
+                std::string dataFloatString = std::to_string(dataFloat);
+                dataFloatString.resize(20, ' ');
+                uint64_t dataInt = property->mDataLength >= 8
+                                  ? *(uint64_t*) property->mData
+                                  : NAN;
+                std::string dataIntString = std::to_string(dataInt);
+                dataIntString.resize(20, ' ');
+
+                std::string key = std::string(property->mKey.data,
+                                              property->mKey.length);
+                key.resize(20, ' ');
+
+                std::cout << key << " = "
+                          << " " << dataFloatString
+                          << " " << dataIntString
+                          << " (" << data << ")" << std::endl;
             }
         }
         std::cout << "-------------------------------" << std::endl;
