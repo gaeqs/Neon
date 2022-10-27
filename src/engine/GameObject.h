@@ -47,9 +47,9 @@ public:
 
     void destroy();
 
-    template<class T>
-    IdentifiableWrapper<T> newComponent() {
-        IdentifiableWrapper<T> component = getRoomComponents().newComponent<T>();
+    template<class T, class... Args>
+    IdentifiableWrapper<T> newComponent(Args&& ... values) {
+        IdentifiableWrapper<T> component = getRoomComponents().newComponent<T>(values...);
         component->_gameObject = this;
         auto raw = *reinterpret_cast<IdentifiableWrapper<Component>*>(&component);
         _components.emplace_back(raw);

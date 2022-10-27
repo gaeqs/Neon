@@ -45,10 +45,12 @@ public:
      *
      * Creates a new component of type T.
      * @tparam T the type of the component.
+     * @tparam Args the types of the component's constructor's parameters.
+     * @param values the parameters of the component's constructor.
      * @return a pointer to the new component.
      */
-    template<class T>
-    IdentifiableWrapper<T> newComponent() {
+    template<class T, class... Args>
+    IdentifiableWrapper<T> newComponent(Args&& ... values) {
         auto it = _components.find(typeid(T));
 
         if (it == _components.end()) {
@@ -58,7 +60,7 @@ public:
                     std::static_pointer_cast<void>(pointer)
             ));
 
-            T* component = pointer->emplace();
+            T* component = pointer->emplace(values...);
             callOnConstruction(component);
             _notStartedComponents.push(static_cast<Component*>(component));
             return component;
@@ -67,7 +69,7 @@ public:
         auto components = std::static_pointer_cast
                 <ClusteredLinkedCollection<T>>(it->second);
 
-        T* component = components->emplace();
+        T* component = components->emplace(values...);
         callOnConstruction(component);
         _notStartedComponents.push(static_cast<Component*>(component));
         return component;
