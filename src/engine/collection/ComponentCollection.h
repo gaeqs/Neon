@@ -61,8 +61,8 @@ public:
             ));
 
             T* component = pointer->emplace(values...);
-            callOnConstruction(component);
             _notStartedComponents.push(static_cast<Component*>(component));
+            callOnConstruction(component);
             return component;
         }
 
@@ -70,8 +70,8 @@ public:
                 <ClusteredLinkedCollection<T>>(it->second);
 
         T* component = components->emplace(values...);
-        callOnConstruction(component);
         _notStartedComponents.push(static_cast<Component*>(component));
+        callOnConstruction(component);
         return component;
     }
 

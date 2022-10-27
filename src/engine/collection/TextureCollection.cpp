@@ -12,7 +12,7 @@ TextureCollection::TextureCollection() : _textures() {
 }
 
 IdentifiableWrapper<Texture> TextureCollection::createTexture(
-        const char* data, int32_t width, int32_t height,
+        const void* data, int32_t width, int32_t height,
         TextureFormat format) {
     auto value = IdentifiableWrapper<Texture>(
             _textures.emplace(data, width, height, format));
@@ -22,11 +22,16 @@ IdentifiableWrapper<Texture> TextureCollection::createTexture(
 
 IdentifiableWrapper<Texture>
 TextureCollection::createTextureFromPNG(const cmrc::file& resource) {
-    auto pngPtr = (const unsigned char*) resource.begin();
-    auto size = static_cast<int32_t>(resource.size());
+    return createTextureFromPNG(resource.begin(), resource.size());
+}
+
+IdentifiableWrapper<Texture>
+TextureCollection::createTextureFromPNG(const void* data, uint32_t size) {
     int32_t width, height, channels;
     auto ptr = stbi_load_from_memory(
-            pngPtr, size, &width, &height, &channels, 4);
+            static_cast<const uint8_t*>(data),
+            static_cast<int32_t>(size),
+            &width, &height, &channels, 4);
     auto image = createTexture((const char*) ptr, width, height,
                                TextureFormat::RGBA);
     stbi_image_free(ptr);

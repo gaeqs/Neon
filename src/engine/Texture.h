@@ -32,7 +32,7 @@ public:
 
     Texture(const Texture& other) = delete;
 
-    Texture(const char* data, int32_t width, int32_t height,
+    Texture(const void* data, int32_t width, int32_t height,
             TextureFormat format);
 
     uint64_t getId() const override;

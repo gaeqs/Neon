@@ -12,6 +12,9 @@ GameObject::GameObject(Room* room) : _id(GAME_OBJECT_ID_GENERATOR++),
                                      _transform(),
                                      _room(room),
                                      _components() {
+    if(_room == nullptr) {
+        throw std::runtime_error("Room is null!");
+    }
 }
 
 GameObject::~GameObject() {

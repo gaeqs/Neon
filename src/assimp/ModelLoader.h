@@ -8,6 +8,7 @@
 #include <vector>
 #include <iostream>
 #include <memory>
+#include <string>
 
 #include <cmrc/cmrc.hpp>
 
@@ -30,7 +31,7 @@ struct ModelLoaderResult {
     bool valid;
     std::vector<Material> materials;
     std::vector<std::pair<IdentifiableWrapper<Model>, uint32_t>> models;
-    std::vector<IdentifiableWrapper<Texture>> textures;
+    std::map<std::string, IdentifiableWrapper<Texture>> textures;
 };
 
 class ModelLoader {
@@ -71,22 +72,20 @@ class ModelLoader {
         return _models.createModel(vertices, indices);
     }
 
+    void loadMaterial(
+            std::vector<Material>& vector,
+            const std::map<std::string, IdentifiableWrapper<Texture>>& textures,
+            const aiMaterial* material) const;
+
+    IdentifiableWrapper<Texture> loadTexture(const aiTexture* texture) const;
+
 public:
 
-    ModelLoader(ModelCollection& models, TextureCollection& textures) :
-            _models(models),
-            _textures(textures) {
-    }
+    ModelLoader(ModelCollection& models, TextureCollection& textures);
 
-    explicit ModelLoader(Room* room) :
-            _models(room->getModels()),
-            _textures(room->getTextures()) {
-    }
+    explicit ModelLoader(Room* room);
 
-    explicit ModelLoader(std::shared_ptr<Room> room) :
-            _models(room->getModels()),
-            _textures(room->getTextures()) {
-    }
+    explicit ModelLoader(const std::shared_ptr<Room>& room);
 
     template<typename Vertex>
     ModelLoaderResult loadModel(const cmrc::file& file) const {
@@ -104,7 +103,9 @@ public:
                 aiProcess_JoinIdenticalVertices |
                 aiProcess_GenNormals |
                 aiProcess_SortByPType |
-                aiProcess_RemoveRedundantMaterials
+                aiProcess_RemoveRedundantMaterials |
+                aiProcess_EmbedTextures |
+                aiProcess_FlipUVs
         );
         return loadModel<Vertex>(scene);
     }
@@ -122,7 +123,9 @@ public:
                 aiProcess_JoinIdenticalVertices |
                 aiProcess_GenNormals |
                 aiProcess_SortByPType |
-                aiProcess_RemoveRedundantMaterials
+                aiProcess_RemoveRedundantMaterials |
+                aiProcess_EmbedTextures |
+                aiProcess_FlipUVs
         );
         return loadModel<Vertex>(scene);
     }
@@ -132,6 +135,8 @@ public:
         if (!scene) return {false};
 
         ModelLoaderResult result = {true};
+        result.models.reserve(scene->mNumMeshes);
+        result.materials.reserve(scene->mNumMaterials);
 
         for (int meshIndex = 0; meshIndex < scene->mNumMeshes; ++meshIndex) {
             auto* mesh = scene->mMeshes[meshIndex];
@@ -139,46 +144,15 @@ public:
                     loadMesh<Vertex>(mesh), mesh->mMaterialIndex);
         }
 
-        std::cout << "---------- MATERIAL -----------" << std::endl;
+        for (int i = 0; i < scene->mNumTextures; ++i) {
+            auto name = "*" + std::to_string(i);
+            result.textures.emplace(name, loadTexture(scene->mTextures[i]));
+        }
+
         for (int i = 0; i < scene->mNumMaterials; ++i) {
             auto* material = scene->mMaterials[i];
-            std::cout << "Material: " << i << "\t| Properties: "
-                      << material->mNumProperties
-                      << std::endl;
-            std::cout << material->GetTextureCount(aiTextureType_DIFFUSE)
-                      << std::endl;
-            std::cout << material->GetTextureCount(aiTextureType_AMBIENT)
-                      << std::endl;
-            std::cout << material->GetTextureCount(aiTextureType_SPECULAR)
-                      << std::endl;
-            std::cout << material->GetTextureCount(aiTextureType_BASE_COLOR)
-                      << std::endl;
-            for (int p = 0; p < material->mNumProperties; ++p) {
-                auto* property = material->mProperties[p];
-                std::string data = std::string(property->mData,
-                                               property->mDataLength);
-                float dataFloat = property->mDataLength >= 4
-                                  ? *(float*) property->mData
-                                  : NAN;
-                std::string dataFloatString = std::to_string(dataFloat);
-                dataFloatString.resize(20, ' ');
-                uint64_t dataInt = property->mDataLength >= 8
-                                  ? *(uint64_t*) property->mData
-                                  : NAN;
-                std::string dataIntString = std::to_string(dataInt);
-                dataIntString.resize(20, ' ');
-
-                std::string key = std::string(property->mKey.data,
-                                              property->mKey.length);
-                key.resize(20, ' ');
-
-                std::cout << key << " = "
-                          << " " << dataFloatString
-                          << " " << dataIntString
-                          << " (" << data << ")" << std::endl;
-            }
+            loadMaterial(result.materials, result.textures, material);
         }
-        std::cout << "-------------------------------" << std::endl;
 
 
         return result;

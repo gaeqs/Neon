@@ -43,7 +43,7 @@ public:
      * @return a pointer to the new texture.
      */
     IdentifiableWrapper<Texture> createTexture(
-            const char* data, int32_t width, int32_t height,
+            const void* data, int32_t width, int32_t height,
             TextureFormat format);
 
     /**
@@ -53,6 +53,15 @@ public:
      */
     IdentifiableWrapper<Texture> createTextureFromPNG(
             const cmrc::file& resource);
+
+    /**
+     * Creates a new texture from a PNG image.
+     * @param data the data of the PNG image.
+     * @param size the length of the data array in bytes.
+     * @return a pointer to the new texture.
+     */
+    IdentifiableWrapper<Texture> createTextureFromPNG(
+            const void* data, uint32_t size);
 
     /**
      * Returns a pointer to the texture that matches the given id.

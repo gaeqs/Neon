@@ -47,7 +47,7 @@ set(
         util/CameraMovementComponent.cpp
         util/CameraMovementComponent.h
         engine/TextureFormat.h
-        assimp/ModelLoader.h assimp/AssimpMaterialParametrs.h)
+        assimp/ModelLoader.h assimp/AssimpMaterialParametrs.h assimp/ModelLoader.cpp util/ModelLoaderParserComponent.cpp util/ModelLoaderParserComponent.h)
 
 cmrc_add_resource_library(dummy)
 

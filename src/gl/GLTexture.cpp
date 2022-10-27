@@ -8,26 +8,24 @@
 #include <stdexcept>
 
 
-int32_t GLTexture::toGLFormat(TextureFormat format) {
+std::pair<int32_t, int32_t> GLTexture::toGLFormat(TextureFormat format) {
     switch (format) {
         case TextureFormat::RGB:
-            return GL_RGB;
+            return {GL_RGB, GL_UNSIGNED_BYTE};
         case TextureFormat::BGR:
-            return GL_BGR;
+            return {GL_BGR, GL_UNSIGNED_BYTE};
         case TextureFormat::RGBA:
-            return GL_RGBA;
+            return {GL_RGBA, GL_UNSIGNED_BYTE};
         case TextureFormat::ARGB:
-            throw std::runtime_error(
-                    "OpenGL doesn't support ARGB texture format!");
+            return {GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV};
         case TextureFormat::BGRA:
-            return GL_RGBA;
+            return {GL_RGBA, GL_UNSIGNED_BYTE};
         case TextureFormat::ABGR:
-            throw std::runtime_error(
-                    "OpenGL doesn't support ABGR texture format!");
+            return {GL_RGBA, GL_UNSIGNED_INT_8_8_8_8_REV};
     }
 }
 
-GLTexture::GLTexture(const char* data, int32_t width, int32_t height,
+GLTexture::GLTexture(const void* data, int32_t width, int32_t height,
                      TextureFormat format) :
         _width(width),
         _height(height) {
@@ -64,12 +62,14 @@ void GLTexture::bind(uint32_t index) const {
     glBindTexture(GL_TEXTURE_2D, _id);
 }
 
-void GLTexture::updateData(const char* data, int32_t width, int32_t height,
+void GLTexture::updateData(const void* data, int32_t width, int32_t height,
                            TextureFormat format) {
     _width = width;
     _height = height;
     bind(0);
+
+    auto pair = toGLFormat(format);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0,
-                 toGLFormat(format), GL_UNSIGNED_BYTE, data);
+                 pair.first, pair.second, data);
     glGenerateMipmap(GL_TEXTURE_2D);
 }
