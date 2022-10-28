@@ -4,7 +4,6 @@
 
 #include "Application.h"
 
-#include <iostream>
 #include <engine/Room.h>
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
@@ -73,7 +72,7 @@ Result<uint32_t, std::string> Application::startGameLoop() const {
             last_tick = now;
 
             float seconds = static_cast<float>(duration.count())
-                             / 1000000000.0f;
+                            / 1000000000.0f;
 
             //std::cout << (1 / seconds) << std::endl;
 

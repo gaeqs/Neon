@@ -6,6 +6,10 @@
 
 #include <assimp/AssimpMaterialParametrs.h>
 
+inline std::string internalGetTextureId (const aiString& string) {
+    return std::string(string.data, std::min(string.length, 2u));
+}
+
 ModelLoader::ModelLoader(ModelCollection& models, TextureCollection& textures) :
         _models(models),
         _textures(textures) {
@@ -67,32 +71,33 @@ void ModelLoader::loadMaterial(
         m.setValue(REFRACT_INDEX, b);
     }
     if (material->Get(AI_MATKEY_TEXTURE_DIFFUSE(0), t) == aiReturn_SUCCESS) {
-        auto texture = textures.find(std::string(t.data, t.length));
+        auto texture = textures.find(
+                std::string(t.data, std::min(t.length, 2u)));
         if (texture != textures.end()) {
             m.setImage(DIFFUSE_TEXTURE, texture->second, 0);
         }
     }
     if (material->Get(AI_MATKEY_TEXTURE_SPECULAR(0), t) == aiReturn_SUCCESS) {
-        auto texture = textures.find(std::string(t.data, t.length));
+        auto texture = textures.find(internalGetTextureId(t));
         if (texture != textures.end()) {
             m.setImage(SPECULAR_TEXTURE, texture->second, 1);
         }
     }
     if (material->Get(AI_MATKEY_TEXTURE_AMBIENT(0), t) == aiReturn_SUCCESS) {
-        auto texture = textures.find(std::string(t.data, t.length));
+        auto texture = textures.find(internalGetTextureId(t));
         if (texture != textures.end()) {
             m.setImage(AMBIENT_TEXTURE, texture->second, 2);
         }
     }
     if (material->Get(AI_MATKEY_TEXTURE_EMISSIVE(0), t) == aiReturn_SUCCESS) {
-        auto texture = textures.find(std::string(t.data, t.length));
+        auto texture = textures.find(internalGetTextureId(t));
         if (texture != textures.end()) {
             m.setImage(AMBIENT_TEXTURE, texture->second, 3);
         }
     }
     if (material->Get(AI_MATKEY_TEXTURE_DISPLACEMENT(0), t) ==
         aiReturn_SUCCESS) {
-        auto texture = textures.find(std::string(t.data, t.length));
+        auto texture = textures.find(internalGetTextureId(t));
         if (texture != textures.end()) {
             m.setImage(DISPLACEMENT_TEXTURE, texture->second, 4);
         }
