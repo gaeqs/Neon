@@ -63,7 +63,7 @@ const glm::mat4& Transform::getModel() {
     if (_dirty) {
         _dirty = false;
         _model = glm::toMat4(_rotation) * glm::scale(glm::mat4(1.0f), _scale);
-        _model = glm::translate(_model, _position);
+        _model = glm::translate(glm::mat4(1.0f), _position) * _model;
     }
 
     return _model;

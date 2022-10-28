@@ -11,8 +11,14 @@
 #include <engine/collection/TextureCollection.h>
 #include <gl/Shader.h>
 
-void GLShaderRenderer::uploadMaterialUniforms(
+void GLShaderRenderer::uploadGraphicObjectUniforms(
         const std::shared_ptr<Shader>& shader, GraphicComponent* component) {
+
+    shader->setUniform(
+            "model",
+            component->getGameObject()->getTransform().getModel()
+    );
+
     auto& textures = component->getGameObject()->getRoom()->getTextures();
     for (const auto& item: component->getMaterial().getUniformValues()) {
         auto& entry = item.second;
@@ -40,16 +46,28 @@ void GLShaderRenderer::uploadMaterialUniforms(
     }
 }
 
+void GLShaderRenderer::uploadGlobalUniforms(
+        const std::shared_ptr<Shader>& shader, Room* room) {
+    shader->setUniform(
+            "viewProjection",
+            room->getCamera().getViewProjection()
+    );
+}
+
 GLShaderRenderer::GLShaderRenderer() :
         _shaders() {
+}
+
+void GLShaderRenderer::preRenderConfiguration() {
+    glEnable(GL_DEPTH_TEST);
+    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
 void GLShaderRenderer::render(
         Room* room, std::shared_ptr<ComponentList> elements) {
 
-    glEnable(GL_DEPTH_TEST);
-    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    preRenderConfiguration();
 
     std::unordered_set<std::string> _updated;
 
@@ -64,11 +82,12 @@ void GLShaderRenderer::render(
         it->second->getShader()->use();
 
         if (!_updated.contains(name)) {
-            it->second->setupGlobalUniforms(room);
+            uploadGlobalUniforms(it->second->getShader(), room);
+            it->second->setupAdditionalGlobalUniforms(room);
             _updated.insert(name);
         }
 
-        uploadMaterialUniforms(it->second->getShader(), component);
+        uploadGraphicObjectUniforms(it->second->getShader(), component);
         it->second->setupAdditionalGraphicComponentUniforms(component);
         model->getImplementation().draw();
     });

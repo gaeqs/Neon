@@ -15,8 +15,14 @@ class GLShaderRenderer : public Renderer {
 
     std::unordered_map<std::string, std::shared_ptr<ShaderController>> _shaders;
 
-    static void uploadMaterialUniforms(const std::shared_ptr<Shader>& shader,
-                                GraphicComponent* component);
+protected:
+
+
+    virtual void uploadGlobalUniforms(
+            const std::shared_ptr<Shader>& shader, Room* room);
+
+    virtual void uploadGraphicObjectUniforms(
+            const std::shared_ptr<Shader>& shader, GraphicComponent* component);
 
 public:
 
@@ -24,6 +30,8 @@ public:
 
     void insertShader(const std::string& name,
                       std::shared_ptr<ShaderController> shader);
+
+    virtual void preRenderConfiguration();
 
     void render(Room* room, std::shared_ptr<ComponentList> elements) override;
 

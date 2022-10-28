@@ -6,11 +6,13 @@
 
 #include <engine/GraphicComponent.h>
 
+#include <utility>
+
 ModelLoaderParserComponent::ModelLoaderParserComponent(
-        const std::string& shader,
-        const ModelLoaderResult& result) :
-        _shader(shader),
-        _result(result) {
+        std::string shader,
+        ModelLoaderResult result) :
+        _shader(std::move(shader)),
+        _result(std::move(result)) {
 }
 
 void ModelLoaderParserComponent::onStart() {

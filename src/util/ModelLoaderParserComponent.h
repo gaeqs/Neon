@@ -5,18 +5,20 @@
 #ifndef VRTRACKING_MODELLOADERPARSERCOMPONENT_H
 #define VRTRACKING_MODELLOADERPARSERCOMPONENT_H
 
+#include <memory>
+
 #include <engine/Component.h>
 #include <assimp/ModelLoader.h>
 
 class ModelLoaderParserComponent : public Component {
 
     std::string _shader;
-    const ModelLoaderResult& _result;
+    ModelLoaderResult _result;
 
 public:
 
-    ModelLoaderParserComponent(const std::string& shader,
-                               const ModelLoaderResult& result);
+    ModelLoaderParserComponent(std::string  shader,
+                               ModelLoaderResult  result);
 
     void onStart() override;
 

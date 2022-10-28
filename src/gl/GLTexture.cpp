@@ -14,14 +14,15 @@ std::pair<int32_t, int32_t> GLTexture::toGLFormat(TextureFormat format) {
             return {GL_RGB, GL_UNSIGNED_BYTE};
         case TextureFormat::BGR:
             return {GL_BGR, GL_UNSIGNED_BYTE};
-        case TextureFormat::RGBA:
-            return {GL_RGBA, GL_UNSIGNED_BYTE};
         case TextureFormat::ARGB:
             return {GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV};
         case TextureFormat::BGRA:
             return {GL_RGBA, GL_UNSIGNED_BYTE};
         case TextureFormat::ABGR:
             return {GL_RGBA, GL_UNSIGNED_INT_8_8_8_8_REV};
+        case TextureFormat::RGBA:
+        default:
+            return {GL_RGBA, GL_UNSIGNED_BYTE};
     }
 }
 

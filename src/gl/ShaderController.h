@@ -28,7 +28,7 @@ public:
      * This method uploads all global uniforms required by the shader.
      * @param room the current room.
      */
-    virtual void setupGlobalUniforms(Room* room) = 0;
+    virtual void setupAdditionalGlobalUniforms(Room* room) = 0;
 
     /**
      * This method uploads all additional uniforms of a GraphicComponent
