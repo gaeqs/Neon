@@ -3,10 +3,10 @@
 in vec3 fragColor;
 in vec2 fragTexCoords;
 
-uniform sampler2D diffuse;
+uniform sampler2D diffuseTexture;
 
 out vec4 color;
 
 void main() {
-    color =  texture(diffuse, fragTexCoords);
+    color =  texture(diffuseTexture, fragTexCoords);
 }

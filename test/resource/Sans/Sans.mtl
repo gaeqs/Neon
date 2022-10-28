@@ -1,0 +1,93 @@
+# Blender MTL File: 'Sans Rig.blend'
+# Material Count: 9
+
+newmtl Material.001
+Ns 96.078431
+Ka 0.000000 0.000000 0.000000
+Kd 0.640000 0.640000 0.640000
+Ks 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 0
+map_Kd diffuse.png
+map_Ka diffuse.png
+
+newmtl Material.001_Sans_Tex.png
+Ns 96.078431
+Ka 0.000000 0.000000 0.000000
+Kd 0.640000 0.640000 0.640000
+Ks 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 0
+map_Kd diffuse.png
+
+newmtl Material.001_Sans_Tex.png.002
+Ns 96.078431
+Ka 0.000000 0.000000 0.000000
+Kd 0.640000 0.640000 0.640000
+Ks 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 0
+map_Kd diffuse.png
+
+newmtl Material.001_Sans_Tex.png.004
+Ns 96.078431
+Ka 0.000000 0.000000 0.000000
+Kd 0.640000 0.640000 0.640000
+Ks 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 0
+map_Kd diffuse.png
+
+newmtl Material.001_Sans_Tex.png.005
+Ns 96.078431
+Ka 0.000000 0.000000 0.000000
+Kd 0.640000 0.640000 0.640000
+Ks 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 0
+map_Kd diffuse.png
+
+newmtl Material.001_Sans_Tex.png.006
+Ns 96.078431
+Ka 0.000000 0.000000 0.000000
+Kd 0.640000 0.640000 0.640000
+Ks 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 0
+map_Kd diffuse.png
+
+newmtl Material.001_Sans_Tex.png.007
+Ns 96.078431
+Ka 0.000000 0.000000 0.000000
+Kd 0.640000 0.640000 0.640000
+Ks 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 0
+map_Kd diffuse.png
+
+newmtl boneblack
+Ns 92.156863
+Ka 0.000000 0.000000 0.000000
+Kd 0.000495 0.000495 0.000495
+Ks 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd diffuse.png
+
+newmtl gloweye
+Ns 92.156863
+Ka 0.000000 0.000000 0.000000
+Kd 0.493159 0.512000 0.204600
+Ks 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd diffuse.png

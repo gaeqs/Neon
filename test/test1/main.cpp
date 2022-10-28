@@ -3,8 +3,12 @@
 
 #include <engine/Engine.h>
 #include <gl/GLShaderRenderer.h>
+#include <util/CameraMovementComponent.h>
+#include <assimp/ModelLoader.h>
 #include "TestComponent.h"
 #include "TestShaderController.h"
+#include "TestVertex.h"
+#include "util/ModelLoaderParserComponent.h"
 
 constexpr int32_t WIDTH = 800;
 constexpr int32_t HEIGHT = 600;
@@ -28,6 +32,17 @@ std::shared_ptr<Room> getTestRoom() {
 
     auto gameObject = room->newGameObject();
     gameObject->newComponent<TestComponent>();
+
+    auto cameraController = room->newGameObject();
+    cameraController->newComponent<CameraMovementComponent>();
+
+
+    auto sansLoader = ModelLoader(room);
+    auto sansResult = sansLoader.loadModel<TestVertex>(R"(resource/Sans)",
+                                                       "Sans.obj");
+
+    auto sans = room->newGameObject();
+    sans->newComponent<ModelLoaderParserComponent>("default", sansResult);
 
     return room;
 }

@@ -19,7 +19,7 @@ public:
 
     void onStart() override;
 
-    void onUpdate() override;
+    void onUpdate(float deltaTime) override;
 
 };
 

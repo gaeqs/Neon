@@ -7,7 +7,7 @@
 TestShaderController::TestShaderController(
         const std::shared_ptr<Shader>& shader) : ShaderController(shader) {}
 
-void TestShaderController::setupGlobalUniforms(Room* room) {
+void TestShaderController::setupAdditionalGlobalUniforms(Room* room) {
     auto shader = getShader();
     shader->setUniform("viewProjection", room->getCamera().getViewProjection());
 }

@@ -77,7 +77,10 @@ class ModelLoader {
             const std::map<std::string, IdentifiableWrapper<Texture>>& textures,
             const aiMaterial* material) const;
 
-    IdentifiableWrapper<Texture> loadTexture(const aiTexture* texture) const;
+    IdentifiableWrapper<Texture> loadTexture(
+            const aiTexture* texture,
+            const std::map<aiTexture*,
+                    IdentifiableWrapper<Texture>>& loadedTextures) const;
 
 public:
 
@@ -144,9 +147,13 @@ public:
                     loadMesh<Vertex>(mesh), mesh->mMaterialIndex);
         }
 
+        std::map<aiTexture*, IdentifiableWrapper<Texture>> loadedTextures;
         for (int i = 0; i < scene->mNumTextures; ++i) {
+            auto* aiTexture = scene->mTextures[i];
             auto name = "*" + std::to_string(i);
-            result.textures.emplace(name, loadTexture(scene->mTextures[i]));
+            auto texture = loadTexture(aiTexture, loadedTextures);
+            result.textures.emplace(name, texture);
+            loadedTextures.emplace(aiTexture, texture);
         }
 
         for (int i = 0; i < scene->mNumMaterials; ++i) {

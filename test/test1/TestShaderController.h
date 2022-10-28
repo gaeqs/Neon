@@ -15,7 +15,7 @@ public:
 
     explicit TestShaderController(const std::shared_ptr<Shader>& shader);
 
-    void setupGlobalUniforms(Room* room) override;
+    void setupAdditionalGlobalUniforms(Room* room) override;
 
     void setupAdditionalGraphicComponentUniforms(GraphicComponent* component) override;
 };

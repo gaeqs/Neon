@@ -6,7 +6,7 @@
 
 #include <assimp/AssimpMaterialParametrs.h>
 
-inline std::string internalGetTextureId (const aiString& string) {
+inline std::string internalGetTextureId(const aiString& string) {
     return std::string(string.data, std::min(string.length, 2u));
 }
 
@@ -105,7 +105,18 @@ void ModelLoader::loadMaterial(
 }
 
 IdentifiableWrapper<Texture>
-ModelLoader::loadTexture(const aiTexture* texture) const {
+ModelLoader::loadTexture(
+        const aiTexture* texture,
+        const std::map<aiTexture*,
+                IdentifiableWrapper<Texture>>& loadedTextures) const {
+
+    // Let's check if the texture is already loaded!
+    for (const auto& [aiTexture, actualTexture]: loadedTextures) {
+        if (aiTexture->mWidth == texture->mWidth
+            && aiTexture->mHeight == texture->mHeight) {
+        }
+    }
+
     if (texture->mHeight == 0) {
         // Compressed format!
 
