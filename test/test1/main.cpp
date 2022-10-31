@@ -32,6 +32,13 @@ std::shared_ptr<Room> getTestRoom() {
 
     auto gameObject = room->newGameObject();
     gameObject->newComponent<TestComponent>();
+    gameObject->getTransform().setPosition(glm::vec3(0.0f, 0.0f, -1.0f));
+
+    auto gameObject2 = room->newGameObject();
+    gameObject2->newComponent<TestComponent>();
+
+    gameObject2->setParent(gameObject);
+    gameObject2->getTransform().setPosition(glm::vec3(0.0f, -1.0f, 0.0f));
 
     auto cameraController = room->newGameObject();
     cameraController->newComponent<CameraMovementComponent>();

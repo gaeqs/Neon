@@ -80,6 +80,13 @@ const glm::quat& Camera::rotate(const glm::vec3& direction, float angle) {
     return _rotation;
 }
 
+const glm::quat& Camera::rotate(const glm::quat& quaternion) {
+    _dirtyView = true;
+    _rotation = quaternion * _rotation;
+    _rotationInverse = glm::inverse(_rotation);
+    return _rotation;
+}
+
 const glm::mat4& Camera::getView() {
     if (_dirtyView) {
         _dirtyProjection = true;

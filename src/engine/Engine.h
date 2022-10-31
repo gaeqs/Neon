@@ -13,6 +13,7 @@
 #include <engine/GraphicComponent.h>
 #include <engine/Identifiable.h>
 #include <engine/IdentifiableWrapper.h>
+#include <engine/KeyboardEvent.h>
 #include <engine/Material.h>
 #include <engine/Model.h>
 #include <engine/Renderer.h>

@@ -17,6 +17,10 @@ class Room;
 
 class Component;
 
+class KeyboardEvent;
+
+class CursorMoveEvent;
+
 /**
  * This class holds all components inside a room.
  */
@@ -109,13 +113,20 @@ public:
     }
 
     /**
-   * THIS METHOD SHOULD ONLY BE USED BY ROOMS!
-   * USERS MUSTN'T USE THIS METHOD.
-   * <p>
-   * Calls onKey() on all components.
-   */
-    void invokeKeyEvent(int32_t key, int32_t scancode,
-                        int32_t action, int32_t mods);
+     * THIS METHOD SHOULD ONLY BE USED BY ROOMS!
+     * USERS MUSTN'T USE THIS METHOD.
+     * <p>
+     * Calls onKey() on all components.
+     */
+    void invokeKeyEvent(const KeyboardEvent& event);
+
+    /**
+     * THIS METHOD SHOULD ONLY BE USED BY ROOMS!
+     * USERS MUSTN'T USE THIS METHOD.
+     * <p>
+     * Calls onCursorMove() on all components.
+     */
+    void invokeCursorMoveEvent(const CursorMoveEvent& event);
 
     /**
      * THIS METHOD SHOULD ONLY BE USED BY ROOMS!

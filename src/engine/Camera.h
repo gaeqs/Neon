@@ -54,6 +54,8 @@ public:
 
     const glm::quat& rotate(const glm::vec3& direction, float angle);
 
+    const glm::quat& rotate(const glm::quat& quaternion);
+
     const glm::mat4& getView();
 
     const glm::mat4& getViewProjection();

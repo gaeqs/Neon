@@ -5,6 +5,8 @@
 #include "Application.h"
 
 #include <engine/Room.h>
+#include <engine/KeyboardEvent.h>
+#include <engine/CursorEvent.h>
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
     glViewport(0, 0, width, height);
@@ -18,11 +20,19 @@ void key_size_callback(GLFWwindow* window, int key, int scancode, int action,
                        int mods) {
     auto* application = static_cast<Application*>(glfwGetWindowUserPointer(
             window));
+
     application->internalKeyEvent(key, scancode, action, mods);
 }
 
+void cursor_pos_callback(GLFWwindow* window, double x, double y) {
+    auto* application = static_cast<Application*>(glfwGetWindowUserPointer(
+            window));
+    application->internalCursorPosEvent(x, y);
+}
+
 Application::Application(int32_t width, int32_t height) :
-        _width(width), _height(height), _window(nullptr) {
+        _width(width), _height(height), _window(nullptr),
+        _last_cursor_pos(0.0, 0.0) {
 }
 
 Result<GLFWwindow*, std::string> Application::init(const std::string& name) {
@@ -53,6 +63,10 @@ Result<GLFWwindow*, std::string> Application::init(const std::string& name) {
     glfwSetWindowUserPointer(_window, this);
     glfwSetWindowSizeCallback(_window, framebuffer_size_callback);
     glfwSetKeyCallback(_window, key_size_callback);
+    glfwSetCursorPosCallback(_window, cursor_pos_callback);
+
+    glfwSetInputMode(_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    glfwGetCursorPos(_window, &_last_cursor_pos.x, &_last_cursor_pos.y);
 
     return {_window};
 }
@@ -130,9 +144,30 @@ void Application::internalForceSizeValues(int32_t width, int32_t height) {
     }
 }
 
-void Application::internalKeyEvent(int32_t key, int32_t scancode,
-                                   int32_t action, int32_t mods) {
+void Application::internalKeyEvent(int key, int scancode,
+                                   int action, int mods) {
+    KeyboardEvent event{
+            mods,
+            scancode,
+            static_cast<KeyboardKey>(key),
+            static_cast<KeyboardAction>(action)
+    };
     if (_room != nullptr) {
-        _room->onKey(key, scancode, action, mods);
+        _room->onKey(event);
+    }
+}
+
+void Application::internalCursorPosEvent(double x, double y) {
+    glm::dvec2 current(x, y);
+    auto delta = current - _last_cursor_pos;
+    _last_cursor_pos = current;
+
+    CursorMoveEvent event{
+            current,
+            delta
+    };
+
+    if (_room != nullptr) {
+        _room->onCursorMove(event);
     }
 }

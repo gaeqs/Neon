@@ -12,6 +12,7 @@
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
 
 #include <util/Result.h>
 
@@ -24,6 +25,8 @@ class Application {
     GLFWwindow* _window;
 
     std::shared_ptr<Room> _room;
+
+    glm::dvec2 _last_cursor_pos;
 
 public:
 
@@ -45,8 +48,9 @@ public:
 
     void internalForceSizeValues(int32_t width, int32_t height);
 
-    void internalKeyEvent(int32_t key, int32_t scancode,
-                          int32_t action, int32_t mods);
+    void internalKeyEvent(int key, int scancode, int action, int mods);
+
+    void internalCursorPosEvent(double x, double y);
 
     //endregion
 };

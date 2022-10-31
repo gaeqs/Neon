@@ -14,15 +14,26 @@ ComponentCollection::ComponentCollection()
           _notStartedComponents() {
 }
 
-void ComponentCollection::invokeKeyEvent(int32_t key, int32_t scancode,
-                                         int32_t action, int32_t mods) {
+void ComponentCollection::invokeKeyEvent(const KeyboardEvent& event) {
     flushNotStartedComponents();
     for (const auto& item: _components) {
         auto ptr = std::static_pointer_cast
                 <AbstractClusteredLinkedCollection>(item.second);
-        ptr->forEachRaw([key, scancode, action, mods](void* ptr) {
+        ptr->forEachRaw([&event](void* ptr) {
             reinterpret_cast<Component*>(ptr)->
-                    onKey(key, scancode, action, mods);
+                    onKey(event);
+        });
+    }
+}
+
+void ComponentCollection::invokeCursorMoveEvent(const CursorMoveEvent& event) {
+    flushNotStartedComponents();
+    for (const auto& item: _components) {
+        auto ptr = std::static_pointer_cast
+                <AbstractClusteredLinkedCollection>(item.second);
+        ptr->forEachRaw([&event](void* ptr) {
+            reinterpret_cast<Component*>(ptr)->
+                    onCursorMove(event);
         });
     }
 }

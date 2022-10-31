@@ -37,6 +37,9 @@ void Component::onStart() {
 void Component::onUpdate(float deltaTime) {
 }
 
-void Component::onKey(int32_t key, int32_t scancode,
-                      int32_t action, int32_t mods) {
+void Component::onKey(const KeyboardEvent& event) {
+}
+
+void Component::onCursorMove(const CursorMoveEvent& event) {
+
 }

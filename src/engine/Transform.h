@@ -9,19 +9,33 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 
+#include <engine/IdentifiableWrapper.h>
+
+class GameObject;
+
 class Transform {
+
+    uint64_t _id;
 
     glm::vec3 _position;
     glm::quat _rotation;
     glm::vec3 _scale;
 
+    IdentifiableWrapper<GameObject> _parent;
+    uint64_t _parentIdOnLastRefresh;
 
     bool _dirty;
+    glm::mat4 _localModel;
     glm::mat4 _model;
+
 
 public:
 
     Transform();
+
+    IdentifiableWrapper<GameObject> getParent() const;
+
+    void setParent(const IdentifiableWrapper<GameObject>& parent);
 
     const glm::vec3& getPosition() const;
 

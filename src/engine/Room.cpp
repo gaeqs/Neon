@@ -79,8 +79,12 @@ void Room::onResize() {
     }
 }
 
-void Room::onKey(int32_t key, int32_t scancode, int32_t action, int32_t mods) {
-    _components.invokeKeyEvent(key, scancode, action, mods);
+void Room::onKey(const KeyboardEvent& event) {
+    _components.invokeKeyEvent(event);
+}
+
+void Room::onCursorMove(const CursorMoveEvent& event) {
+    _components.invokeCursorMoveEvent(event);
 }
 
 void Room::update(float deltaTime) {

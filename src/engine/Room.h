@@ -20,6 +20,10 @@ class GameObject;
 
 class Renderer;
 
+class KeyboardEvent;
+
+class CursorMoveEvent;
+
 class Room {
 
     friend class Application;
@@ -74,7 +78,9 @@ public:
 
     void onResize();
 
-    void onKey(int32_t key, int32_t scancode, int32_t action, int32_t mods);
+    void onKey(const KeyboardEvent& event);
+
+    void onCursorMove(const CursorMoveEvent& event);
 
     void update(float deltaTime);
 

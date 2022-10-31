@@ -39,12 +39,11 @@ void TestComponent::onStart() {
     auto model = getGameObject()->getRoom()->getModels()
             .createModel(vertices, indices);
 
-    getGameObject()->getTransform().setPosition(glm::vec3(0.3f, 0.0f, -1.0f));
-
     gComponent->getMaterial().setShader("default");
     gComponent->setModel(model);
     gComponent->getMaterial().setImage("diffuse", image, 0);
 }
 
 void TestComponent::onUpdate(float deltaTime) {
+    getGameObject()->getTransform().rotate(glm::vec3(0, 0, 1), deltaTime);
 }

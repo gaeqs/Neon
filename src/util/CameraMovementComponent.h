@@ -12,12 +12,15 @@ class CameraMovementComponent : public Component {
     bool _w, _a, _s, _d, _shift, _space;
     float _speed;
 
+    glm::vec2 _eulerAngles;
+
 public:
 
     CameraMovementComponent();
 
-    void onKey(int32_t key, int32_t scancode,
-               int32_t action, int32_t mods) override;
+    void onKey(const KeyboardEvent& event) override;
+
+    void onCursorMove(const CursorMoveEvent& event) override;
 
     void onUpdate(float deltaTime) override;
 
