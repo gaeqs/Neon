@@ -22,17 +22,14 @@ Material::getUniformValues() const {
     return _uniformValues;
 }
 
-void Material::setImage(const std::string& name, uint64_t imageId,
-                        uint32_t target) {
+void Material::setImage(const std::string& name, uint64_t imageId) {
     std::vector<char> data;
-    data.resize(sizeof(uint64_t) * 2);
-    uint64_t raw[2] = {imageId, target};
-    memcpy(data.data(), &raw, sizeof(uint64_t) * 2);
+    data.resize(sizeof(uint64_t));
+    memcpy(data.data(), &imageId, sizeof(uint64_t));
     _uniformValues[name] = {MaterialEntryType::IMAGE, data};
 }
 
 void Material::setImage(const std::string& name,
-                        IdentifiableWrapper<Texture> image,
-                        uint32_t target) {
-    setImage(name, image->getId(), target);
+                        IdentifiableWrapper<Texture> image) {
+    setImage(name, image->getId());
 }

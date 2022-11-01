@@ -19,22 +19,19 @@ void GLShaderRenderer::uploadGraphicObjectUniforms(
             component->getGameObject()->getTransform().getModel()
     );
 
+    uint32_t textureTarget = 0;
     auto& textures = component->getGameObject()->getRoom()->getTextures();
     for (const auto& item: component->getMaterial().getUniformValues()) {
         auto& entry = item.second;
         if (entry.type == MaterialEntryType::IMAGE) {
-            const auto* data = reinterpret_cast<const uint64_t*>(
-                    entry.data.data());
-
-            uint64_t id = data[0];
-            uint32_t target = data[1];
+            auto id = *reinterpret_cast<const uint64_t*>(entry.data.data());
             auto texture = textures.getTexture(id);
-
             if (texture.isValid()) {
-                glActiveTexture(GL_TEXTURE0 + target);
+                glActiveTexture(GL_TEXTURE0 + textureTarget);
                 glBindTexture(GL_TEXTURE_2D,
                               texture->getImplementation().getId());
-                shader->setUniform(item.first, target);
+                shader->setUniform(item.first, textureTarget);
+                ++textureTarget;
             }
         } else {
             shader->setUniform(

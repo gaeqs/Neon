@@ -19,13 +19,16 @@ Room::Room() :
         _camera(Frustum(DEFAULT_FRUSTUM_NEAR, DEFAULT_FRUSTUM_FAR, 1.0f,
                         DEFAULT_FRUSTUM_FOV)),
         _gameObjects(),
-        _components(),
+        _components(this),
         _textures(),
         _models(),
         _renderer() {
 }
 
 Room::~Room() {
+    for (auto& item: _gameObjects) {
+        item.destroy();
+    }
 }
 
 Application* Room::getApplication() const {

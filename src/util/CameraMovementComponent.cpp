@@ -50,7 +50,7 @@ void CameraMovementComponent::onKey(const KeyboardEvent& event) {
 }
 
 void CameraMovementComponent::onCursorMove(const CursorMoveEvent& event) {
-    constexpr auto LIMIT = static_cast<float>(M_PI_2) - 0.1f;
+    constexpr float LIMIT = 1.5707963f - 0.1f; // PI / 2 - 0.1
 
     auto& camera = getRoom()->getCamera();
 

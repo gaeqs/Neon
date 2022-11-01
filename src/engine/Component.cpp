@@ -22,7 +22,7 @@ IdentifiableWrapper<GameObject> Component::getGameObject() const {
 
 void Component::destroy() {
     if (_gameObject.isValid()) {
-        _gameObject->destroyComponent<Component>(this);
+        _gameObject->destroyComponent(this);
     }
 }
 

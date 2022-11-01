@@ -51,13 +51,13 @@ public:
 
 
     value_type& operator*() const {
-        return _collection->_data[_index];
+        return _collection->rawPointer(_index)[0];
     }
 
-    value_type* operator->() { return _collection->_data + _index; }
+    value_type* operator->() { return _collection->rawPointer(_index); }
 
     value_type* raw() const {
-        return _collection->_data + _index;
+        return _collection->rawPointer(_index);
     }
 
     // Prefix increment
@@ -99,32 +99,38 @@ class ClusteredLinkedCollection : public AbstractClusteredLinkedCollection {
 
     friend class ClusteredLinkedCollectorIterator<ClusteredLinkedCollection<T, Size>>;
 
-    ValueType* _data;
+    size_t _objectSize;
+
+    char* _data;
     std::bitset<Size> _occupied;
     size_t _localSize;
 
-    ClusteredLinkedCollection<ValueType, Size>* _next;
+    ClusteredLinkedCollection<T, Size>* _next;
 
     void expand() {
         if (_next == nullptr) {
-            _next = new ClusteredLinkedCollection<ValueType, Size>();
+            _next = new ClusteredLinkedCollection<T, Size>();
         }
     }
 
-    ValueType* rawPointer(size_t index) {
-        return _data + index;
+    T* rawPointer(size_t index) {
+        return reinterpret_cast<T*>(_data + index * _objectSize);
     }
 
 public:
 
-    ClusteredLinkedCollection()
-            : _data(), _occupied(), _localSize(0), _next(nullptr) {
-        _data = reinterpret_cast<ValueType*>(malloc(sizeof(ValueType) * Size));
+    ClusteredLinkedCollection() :
+            _objectSize(sizeof(T)),
+            _data(),
+            _occupied(),
+            _localSize(0),
+            _next(nullptr) {
+        _data = reinterpret_cast<char*>(malloc(sizeof(T) * Size));
     }
 
     ~ClusteredLinkedCollection() {
 
-        for (size_t i = 0; i < Size; ++i) {
+        for (size_t i = 0; i < Size; i += _objectSize) {
             if (_occupied[i]) {
                 std::destroy_at(_data + i);
             }
@@ -142,16 +148,16 @@ public:
         return Size;
     }
 
-    ClusteredLinkedCollectorIterator<ClusteredLinkedCollection<ValueType, Size>>
+    ClusteredLinkedCollectorIterator<ClusteredLinkedCollection<T, Size>>
     begin() {
         return ClusteredLinkedCollectorIterator<
-                ClusteredLinkedCollection<ValueType, Size>>(this, 0);
+                ClusteredLinkedCollection<T, Size>>(this, 0);
     }
 
-    ClusteredLinkedCollectorIterator<ClusteredLinkedCollection<ValueType, Size>>
+    ClusteredLinkedCollectorIterator<ClusteredLinkedCollection<T, Size>>
     end() {
         return ClusteredLinkedCollectorIterator<
-                ClusteredLinkedCollection<ValueType, Size>>(nullptr, 0);
+                ClusteredLinkedCollection<T, Size>>(nullptr, 0);
     }
 
     void forEachRaw(std::function<void(void*)> function) override {
@@ -164,7 +170,7 @@ public:
         }
     }
 
-    void forEach(std::function<void(ValueType*)> function) {
+    void forEach(std::function<void(T*)> function) {
         auto it = begin();
         auto itEnd = end();
 
@@ -176,7 +182,7 @@ public:
 
 
     template<class... Args>
-    ValueType* emplace(Args&& ... values) {
+    T* emplace(Args&& ... values) {
         if (_localSize == Size) {
             expand();
             _next->emplace(values...);
@@ -190,15 +196,16 @@ public:
         _occupied.flip(index);
         ++_localSize;
 
-        return std::construct_at(_data + index, values...);
+        auto* ptr = reinterpret_cast<T*>(_data + index * _objectSize);
+        return std::construct_at(ptr, values...);
     }
 
-    bool remove(const ValueType* value) {
+    bool remove(const T* value) {
         size_t position = 0;
         bool found = false;
 
         for (size_t i = 0; i < Size; ++i) {
-            if (_occupied[i] && &_data[i] == value) {
+            if (_occupied[i] && rawPointer(i) == value) {
                 position = i;
                 found = true;
                 break;
@@ -206,11 +213,11 @@ public:
         }
 
         if (found) {
+            auto* ptr = reinterpret_cast<T*>(_data + position * _objectSize);
             _occupied.flip(position);
             --_localSize;
-            std::destroy_at(_data + position);
-            memset(reinterpret_cast<void*>(_data + position), 0,
-                   sizeof(ValueType));
+            std::destroy_at(ptr);
+            memset(ptr, 0, _objectSize);
             return true;
         } else if (_next != nullptr) {
             return _next->remove(value);

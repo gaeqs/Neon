@@ -41,7 +41,7 @@ void TestComponent::onStart() {
 
     gComponent->getMaterial().setShader("default");
     gComponent->setModel(model);
-    gComponent->getMaterial().setImage("diffuse", image, 0);
+    gComponent->getMaterial().setImage("diffuse", image);
 }
 
 void TestComponent::onUpdate(float deltaTime) {

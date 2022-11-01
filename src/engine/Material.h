@@ -46,10 +46,9 @@ public:
     const std::unordered_map<std::string, MaterialEntry>&
     getUniformValues() const;
 
-    void setImage(const std::string& name, uint64_t imageId, uint32_t target);
+    void setImage(const std::string& name, uint64_t imageId);
 
-    void setImage(const std::string& name, IdentifiableWrapper<Texture> image,
-                  uint32_t target);
+    void setImage(const std::string& name, IdentifiableWrapper<Texture> image);
 
     template<class T>
     void setValue(const std::string& name, const T& value) {

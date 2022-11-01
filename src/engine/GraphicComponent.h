@@ -19,6 +19,8 @@ public:
 
     GraphicComponent();
 
+    ~GraphicComponent() override;
+
     const Material& getMaterial() const;
 
     Material& getMaterial();

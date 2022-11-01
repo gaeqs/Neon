@@ -21,7 +21,7 @@ GameObject::GameObject(Room* room) : _id(GAME_OBJECT_ID_GENERATOR++),
 GameObject::~GameObject() {
     for (const auto& item: _components) {
         if (item.isValid()) {
-            _room->getComponents().destroyComponent(item);
+            item->destroy();
         }
     }
 }
@@ -48,4 +48,12 @@ void GameObject::destroy() {
 
 ComponentCollection& GameObject::getRoomComponents() const {
     return _room->getComponents();
+}
+
+void GameObject::destroyComponent(IdentifiableWrapper<Component> component) {
+    auto it = std::remove(_components.begin(), _components.end(),
+                          component.raw());
+    if (it != _components.end()) {
+        getRoomComponents().destroyComponent(component);
+    }
 }

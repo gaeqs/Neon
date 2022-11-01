@@ -17,6 +17,8 @@ class Room;
 
 class Component;
 
+class GraphicComponent;
+
 class KeyboardEvent;
 
 class CursorMoveEvent;
@@ -26,6 +28,7 @@ class CursorMoveEvent;
  */
 class ComponentCollection {
 
+    Room* _room;
     std::unordered_map<std::type_index, std::shared_ptr<void>> _components;
     std::queue<IdentifiableWrapper<Component>> _notStartedComponents;
 
@@ -40,7 +43,7 @@ public:
     /**
      * Creates the collection.
      */
-    ComponentCollection();
+    ComponentCollection(Room* room);
 
     /**
      *
@@ -92,7 +95,7 @@ public:
     std::shared_ptr<ClusteredLinkedCollection<T>> getComponentsOfType() const {
         auto it = _components.find(typeid(T));
         if (it == _components.end()) return nullptr;
-        return std::static_pointer_cast<ClusteredLinkedCollection<T>>(
+        return std::reinterpret_pointer_cast<ClusteredLinkedCollection<T>>(
                 it->second);
     }
 
@@ -102,15 +105,9 @@ public:
      * All pointers to the given component will be invalid
      * after this call.
      *
-     * @tparam T the type of the component.
      * @param component the component to be destroyed.
      */
-    template<class T>
-    void destroyComponent(const IdentifiableWrapper<T>& component) {
-        auto ptr = getComponentsOfType<T>();
-        if (ptr == nullptr) return;
-        ptr->remove(component.raw());
-    }
+    void destroyComponent(const IdentifiableWrapper<Component>& component);
 
     /**
      * THIS METHOD SHOULD ONLY BE USED BY ROOMS!

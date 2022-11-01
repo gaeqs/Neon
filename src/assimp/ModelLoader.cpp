@@ -74,32 +74,32 @@ void ModelLoader::loadMaterial(
         auto texture = textures.find(
                 std::string(t.data, std::min(t.length, 2u)));
         if (texture != textures.end()) {
-            m.setImage(DIFFUSE_TEXTURE, texture->second, 0);
+            m.setImage(DIFFUSE_TEXTURE, texture->second);
         }
     }
     if (material->Get(AI_MATKEY_TEXTURE_SPECULAR(0), t) == aiReturn_SUCCESS) {
         auto texture = textures.find(internalGetTextureId(t));
         if (texture != textures.end()) {
-            m.setImage(SPECULAR_TEXTURE, texture->second, 1);
+            m.setImage(SPECULAR_TEXTURE, texture->second);
         }
     }
     if (material->Get(AI_MATKEY_TEXTURE_AMBIENT(0), t) == aiReturn_SUCCESS) {
         auto texture = textures.find(internalGetTextureId(t));
         if (texture != textures.end()) {
-            m.setImage(AMBIENT_TEXTURE, texture->second, 2);
+            m.setImage(AMBIENT_TEXTURE, texture->second);
         }
     }
     if (material->Get(AI_MATKEY_TEXTURE_EMISSIVE(0), t) == aiReturn_SUCCESS) {
         auto texture = textures.find(internalGetTextureId(t));
         if (texture != textures.end()) {
-            m.setImage(AMBIENT_TEXTURE, texture->second, 3);
+            m.setImage(AMBIENT_TEXTURE, texture->second);
         }
     }
     if (material->Get(AI_MATKEY_TEXTURE_DISPLACEMENT(0), t) ==
         aiReturn_SUCCESS) {
         auto texture = textures.find(internalGetTextureId(t));
         if (texture != textures.end()) {
-            m.setImage(DISPLACEMENT_TEXTURE, texture->second, 4);
+            m.setImage(DISPLACEMENT_TEXTURE, texture->second);
         }
     }
 }

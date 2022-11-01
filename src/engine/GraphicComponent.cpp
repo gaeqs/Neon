@@ -31,3 +31,6 @@ IdentifiableWrapper<Model>& GraphicComponent::getModel() {
 void GraphicComponent::setModel(const IdentifiableWrapper<Model>& model) {
     _model = model;
 }
+
+GraphicComponent::~GraphicComponent() {
+}

@@ -9,9 +9,21 @@
 #include <engine/Component.h>
 #include <engine/GraphicComponent.h>
 
-ComponentCollection::ComponentCollection()
-        : _components(),
-          _notStartedComponents() {
+ComponentCollection::ComponentCollection(Room* room) :
+        _room(room),
+        _components(),
+        _notStartedComponents() {
+}
+
+void ComponentCollection::destroyComponent(
+        const IdentifiableWrapper<Component>& component) {
+    auto& type = typeid(*component.raw());
+    auto it = _components.find(type);
+    if (it == _components.end()) return;
+
+    auto collection = std::reinterpret_pointer_cast<
+            ClusteredLinkedCollection<Component>>(it->second);
+    collection->remove(component.raw());
 }
 
 void ComponentCollection::invokeKeyEvent(const KeyboardEvent& event) {

@@ -164,18 +164,9 @@ public:
      * <p>
      * Using this method directly is not recommended. Use
      * Component#destroy() instead.
-     * @tparam T the type of the component.
      * @param component the component.
      */
-    template<class T>
-    requires std::is_base_of_v<Component, T>
-    void destroyComponent(IdentifiableWrapper<T> component) {
-        auto it = std::remove(_components.begin(), _components.end(),
-                              component.raw());
-        if (it != _components.end()) {
-            getRoomComponents().destroyComponent(component);
-        }
-    }
+    void destroyComponent(IdentifiableWrapper<Component> component);
 
     /**
      * Returns the first component inside this game object
