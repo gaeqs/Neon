@@ -9,8 +9,10 @@
 #include <engine/GameObject.h>
 
 #include <engine/collection/ComponentCollection.h>
+#include <engine/collection/IdentifiableCollection.h>
 #include <engine/collection/TextureCollection.h>
-#include <engine/collection/ModelCollection.h>
+#include <engine/shader/ShaderUniformBuffer.h>
+#include <engine/model/Model.h>
 
 #include <util/ClusteredLinkedCollection.h>
 
@@ -34,7 +36,8 @@ class Room {
     ClusteredLinkedCollection<GameObject> _gameObjects;
     ComponentCollection _components;
     TextureCollection _textures;
-    ModelCollection _models;
+    IdentifiableCollection<Model> _models;
+    IdentifiableCollection<ShaderUniformBuffer> _shaderUniformBuffers;
 
     std::shared_ptr<Renderer> _renderer;
 
@@ -60,9 +63,14 @@ public:
 
     TextureCollection& getTextures();
 
-    const ModelCollection& getModels() const;
+    const IdentifiableCollection<Model>& getModels() const;
 
-    ModelCollection& getModels();
+    IdentifiableCollection<Model>& getModels();
+
+    const IdentifiableCollection<ShaderUniformBuffer>&
+    getShaderUniformBuffers() const;
+
+    IdentifiableCollection<ShaderUniformBuffer>& getShaderUniformBuffers();
 
     const std::shared_ptr<Renderer>& getRenderer() const;
 

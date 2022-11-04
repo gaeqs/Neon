@@ -15,7 +15,6 @@
 #include <engine/IdentifiableWrapper.h>
 #include <engine/KeyboardEvent.h>
 #include <engine/Material.h>
-#include <engine/Model.h>
 #include <engine/Renderer.h>
 #include <engine/Room.h>
 #include <engine/Texture.h>
@@ -23,7 +22,13 @@
 #include <engine/Transform.h>
 
 #include <engine/collection/ComponentCollection.h>
-#include <engine/collection/ModelCollection.h>
+#include <engine/collection/IdentifiableCollection.h>
 #include <engine/collection/TextureCollection.h>
+
+#include <engine/model/Mesh.h>
+#include <engine/model/Model.h>
+#include <engine/model/DefaultInstancingData.h>
+
+#include <engine/shader/ShaderUniformBuffer.h>
 
 #endif //RVTRACKING_ENGINE_H

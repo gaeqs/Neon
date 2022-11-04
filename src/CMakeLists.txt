@@ -35,25 +35,30 @@ set(
         engine/Identifiable.h
         engine/Texture.cpp
         engine/Texture.h
-        engine/Model.cpp
-        engine/Model.h gl/GLModel.cpp
-        gl/GLModel.h
-        engine/collection/ModelCollection.h
-        engine/collection/ModelCollection.cpp
+        gl/GLMesh.cpp
+        gl/GLMesh.h
         gl/GLShaderRenderer.cpp
         gl/GLShaderRenderer.h
-        gl/ShaderController.cpp
-        gl/ShaderController.h
-        util/CameraMovementComponent.cpp
-        util/CameraMovementComponent.h
+        util/component/CameraMovementComponent.cpp
+        util/component/CameraMovementComponent.h
         engine/TextureFormat.h
         assimp/ModelLoader.h
-        assimp/AssimpMaterialParametrs.h
+        assimp/AssimpMaterialParameters.h
         assimp/ModelLoader.cpp
-        util/ModelLoaderParserComponent.cpp
-        util/ModelLoaderParserComponent.h
         engine/KeyboardEvent.h
-        engine/CursorEvent.h)
+        engine/CursorEvent.h
+        engine/model/Mesh.cpp
+        engine/model/Mesh.h
+        engine/model/Model.cpp
+        engine/model/Model.h
+        gl/GLModel.cpp
+        gl/GLModel.h
+        engine/shader/ShaderUniformBuffer.cpp
+        engine/shader/ShaderUniformBuffer.h
+        gl/GLShaderUniformBuffer.cpp
+        gl/GLShaderUniformBuffer.h
+        engine/collection/IdentifiableCollection.h
+        engine/model/DefaultInstancingData.h)
 
 cmrc_add_resource_library(dummy)
 

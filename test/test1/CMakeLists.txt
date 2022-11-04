@@ -3,10 +3,9 @@ set(
         main.cpp
         TestComponent.cpp
         TestComponent.h
-        TestShaderController.cpp
-        TestShaderController.h
         TestVertex.h
-)
+        GlobalParametersUpdaterComponent.cpp
+        GlobalParametersUpdaterComponent.h)
 
 cmrc_add_resource_library(
         shaders

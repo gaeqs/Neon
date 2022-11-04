@@ -59,12 +59,21 @@ TextureCollection& Room::getTextures() {
     return _textures;
 }
 
-const ModelCollection& Room::getModels() const {
+const IdentifiableCollection<Model>& Room::getModels() const {
     return _models;
 }
 
-ModelCollection& Room::getModels() {
+IdentifiableCollection<Model>& Room::getModels() {
     return _models;
+}
+
+const IdentifiableCollection<ShaderUniformBuffer>&
+Room::getShaderUniformBuffers() const {
+    return _shaderUniformBuffers;
+}
+
+IdentifiableCollection<ShaderUniformBuffer>& Room::getShaderUniformBuffers() {
+    return _shaderUniformBuffers;
 }
 
 IdentifiableWrapper<GameObject> Room::newGameObject() {

@@ -9,47 +9,8 @@
 
 #include <engine/Room.h>
 #include <engine/collection/TextureCollection.h>
+#include <engine/GraphicComponent.h>
 #include <gl/Shader.h>
-
-void GLShaderRenderer::uploadGraphicObjectUniforms(
-        const std::shared_ptr<Shader>& shader, GraphicComponent* component) {
-
-    shader->setUniform(
-            "model",
-            component->getGameObject()->getTransform().getModel()
-    );
-
-    uint32_t textureTarget = 0;
-    auto& textures = component->getGameObject()->getRoom()->getTextures();
-    for (const auto& item: component->getMaterial().getUniformValues()) {
-        auto& entry = item.second;
-        if (entry.type == MaterialEntryType::IMAGE) {
-            auto id = *reinterpret_cast<const uint64_t*>(entry.data.data());
-            auto texture = textures.getTexture(id);
-            if (texture.isValid()) {
-                glActiveTexture(GL_TEXTURE0 + textureTarget);
-                glBindTexture(GL_TEXTURE_2D,
-                              texture->getImplementation().getId());
-                shader->setUniform(item.first, textureTarget);
-                ++textureTarget;
-            }
-        } else {
-            shader->setUniform(
-                    item.first,
-                    static_cast<int32_t>(entry.data.size() >> 2),
-                    reinterpret_cast<const float*>(item.second.data.data())
-            );
-        }
-    }
-}
-
-void GLShaderRenderer::uploadGlobalUniforms(
-        const std::shared_ptr<Shader>& shader, Room* room) {
-    shader->setUniform(
-            "viewProjection",
-            room->getCamera().getViewProjection()
-    );
-}
 
 GLShaderRenderer::GLShaderRenderer() :
         _shaders() {
@@ -66,31 +27,24 @@ void GLShaderRenderer::render(
 
     preRenderConfiguration();
 
-    std::unordered_set<std::string> _updated;
-
-    elements->forEach([&](GraphicComponent* component) {
-        auto& model = component->getModel();
-        if (!model.isValid()) return;
-
-        auto& name = component->getMaterial().getShader();
+    room->getModels().forEach([&](Model* model) {
+        auto& name = model->getShader();
         auto it = _shaders.find(name);
-        if (it == _shaders.end()) return;
-
-        it->second->getShader()->use();
-
-        if (!_updated.contains(name)) {
-            uploadGlobalUniforms(it->second->getShader(), room);
-            it->second->setupAdditionalGlobalUniforms(room);
-            _updated.insert(name);
+        if (it == _shaders.end()) {
+            std::cerr << "Shader \"" << name
+                      << "\" not found. Skipping model "
+                      << model->getId() << "." << std::endl;
+            return;
         }
 
-        uploadGraphicObjectUniforms(it->second->getShader(), component);
-        it->second->setupAdditionalGraphicComponentUniforms(component);
-        model->getImplementation().draw();
+        model->getImplementation().draw(
+                it->second.get(),
+                room->getTextures()
+        );
     });
 }
 
 void GLShaderRenderer::insertShader(const std::string& name,
-                                    std::shared_ptr<ShaderController> shader) {
+                                    std::shared_ptr<Shader> shader) {
     _shaders[name] = std::move(shader);
 }

@@ -25,7 +25,7 @@ void TestComponent::onStart() {
             .createTextureFromPNG(file);
 
     std::cout << "Test component started!" << std::endl;
-    auto gComponent = getGameObject()->newComponent<GraphicComponent>();
+    _graphic = getGameObject()->newComponent<GraphicComponent>();
 
     std::vector<TestVertex> vertices = {
             {{-0.5f, -0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
@@ -36,12 +36,17 @@ void TestComponent::onStart() {
 
     std::vector<uint32_t> indices = {0, 1, 2, 0, 2, 3};
 
-    auto model = getGameObject()->getRoom()->getModels()
-            .createModel(vertices, indices);
+    std::vector<std::unique_ptr<Mesh>> meshes;
 
-    gComponent->getMaterial().setShader("default");
-    gComponent->setModel(model);
-    gComponent->getMaterial().setImage("diffuse", image);
+    auto mesh = std::make_unique<Mesh>();
+    mesh->getMaterial().setImage("diffuse", image);
+    mesh->uploadVertexData(vertices, indices);
+    meshes.push_back(std::move(mesh));
+
+    auto model = getRoom()->getModels().create(meshes);
+    model->setShader("default");
+
+    _graphic->setModel(model);
 }
 
 void TestComponent::onUpdate(float deltaTime) {

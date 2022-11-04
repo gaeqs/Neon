@@ -4,13 +4,14 @@
 
 #include "ModelLoader.h"
 
-#include <assimp/AssimpMaterialParametrs.h>
+#include <assimp/AssimpMaterialParameters.h>
 
 inline std::string internalGetTextureId(const aiString& string) {
     return std::string(string.data, std::min(string.length, 2u));
 }
 
-ModelLoader::ModelLoader(ModelCollection& models, TextureCollection& textures) :
+ModelLoader::ModelLoader(IdentifiableCollection<Model>& models,
+                         TextureCollection& textures) :
         _models(models),
         _textures(textures) {
 }
@@ -132,7 +133,7 @@ ModelLoader::loadTexture(
 
 
     // Value is always ARGB8888
-    return _textures.createTexture(
+    return _textures.create(
             texture->pcData,
             static_cast<int32_t>(texture->mWidth),
             static_cast<int32_t>(texture->mHeight),

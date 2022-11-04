@@ -17,11 +17,12 @@
 #include <assimp/postprocess.h>
 #include <assimp/IOSystem.hpp>
 
-#include <engine/collection/ModelCollection.h>
+#include <engine/collection/IdentifiableCollection.h>
 #include <engine/collection/TextureCollection.h>
 #include <engine/Room.h>
 #include <engine/IdentifiableWrapper.h>
-#include <engine/Model.h>
+#include <engine/model/Model.h>
+#include <engine/model/Mesh.h>
 #include <engine/Texture.h>
 #include <engine/Material.h>
 
@@ -29,18 +30,16 @@
 
 struct ModelLoaderResult {
     bool valid;
-    std::vector<Material> materials;
-    std::vector<std::pair<IdentifiableWrapper<Model>, uint32_t>> models;
-    std::map<std::string, IdentifiableWrapper<Texture>> textures;
+    IdentifiableWrapper<Model> model;
 };
 
 class ModelLoader {
 
-    ModelCollection& _models;
+    IdentifiableCollection<Model>& _models;
     TextureCollection& _textures;
 
     template<typename Vertex>
-    IdentifiableWrapper<Model> loadMesh(aiMesh* mesh) const {
+    std::unique_ptr<Mesh> loadMesh(aiMesh* mesh) const {
         std::vector<Vertex> vertices;
         vertices.resize(mesh->mNumVertices);
 
@@ -69,7 +68,10 @@ class ModelLoader {
             indices.push_back(face.mIndices[2]);
         }
 
-        return _models.createModel(vertices, indices);
+
+        auto result = std::make_unique<Mesh>();
+        result->uploadVertexData(vertices, indices);
+        return std::move(result);
     }
 
     void loadMaterial(
@@ -84,14 +86,15 @@ class ModelLoader {
 
 public:
 
-    ModelLoader(ModelCollection& models, TextureCollection& textures);
+    ModelLoader(IdentifiableCollection<Model>& models,
+                TextureCollection& textures);
 
     explicit ModelLoader(Room* room);
 
     explicit ModelLoader(const std::shared_ptr<Room>& room);
 
     template<typename Vertex>
-    ModelLoaderResult loadModel(const cmrc::file& file) const {
+    [[nodiscard]] ModelLoaderResult loadModel(const cmrc::file& file) const {
         return loadModel<Vertex>(file.begin(), file.size());
     }
 
@@ -138,29 +141,35 @@ public:
         if (!scene) return {false};
 
         ModelLoaderResult result = {true};
-        result.models.reserve(scene->mNumMeshes);
-        result.materials.reserve(scene->mNumMaterials);
 
-        for (int meshIndex = 0; meshIndex < scene->mNumMeshes; ++meshIndex) {
-            auto* mesh = scene->mMeshes[meshIndex];
-            result.models.emplace_back(
-                    loadMesh<Vertex>(mesh), mesh->mMaterialIndex);
-        }
+        std::map<std::string, IdentifiableWrapper<Texture>> textures;
+        std::vector<std::unique_ptr<Mesh>> meshes;
+        std::vector<Material> materials;
+        meshes.reserve(scene->mNumMeshes);
+        materials.reserve(scene->mNumMaterials);
 
         std::map<aiTexture*, IdentifiableWrapper<Texture>> loadedTextures;
         for (int i = 0; i < scene->mNumTextures; ++i) {
             auto* aiTexture = scene->mTextures[i];
             auto name = "*" + std::to_string(i);
             auto texture = loadTexture(aiTexture, loadedTextures);
-            result.textures.emplace(name, texture);
+            textures.emplace(name, texture);
             loadedTextures.emplace(aiTexture, texture);
         }
 
         for (int i = 0; i < scene->mNumMaterials; ++i) {
             auto* material = scene->mMaterials[i];
-            loadMaterial(result.materials, result.textures, material);
+            loadMaterial(materials, textures, material);
         }
 
+        for (int meshIndex = 0; meshIndex < scene->mNumMeshes; ++meshIndex) {
+            auto* mesh = scene->mMeshes[meshIndex];
+            auto meshResult = loadMesh<Vertex>(mesh);
+            meshResult->setMaterial(materials[mesh->mMaterialIndex]);
+            meshes.emplace_back(std::move(meshResult));
+        }
+
+        result.model = _models.create(meshes);
 
         return result;
     }

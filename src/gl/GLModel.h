@@ -1,66 +1,76 @@
 //
-// Created by gaelr on 23/10/2022.
+// Created by gaelr on 03/11/2022.
 //
 
-#ifndef RVTRACKING_GLMODEL_H
-#define RVTRACKING_GLMODEL_H
-
+#ifndef NEON_GLMODEL_H
+#define NEON_GLMODEL_H
 
 #include <cstdint>
-#include <vector>
+#include <queue>
+#include <unordered_set>
+#include <unordered_map>
+#include <string>
+#include <memory>
+#include <typeindex>
 
-#include <glad/glad.h>
+#include <util/Result.h>
+#include <engine/IdentifiableWrapper.h>
+
+#include <gl/GLMesh.h>
+
+class Shader;
+
+class Texture;
+
+class TextureCollection;
 
 class GLModel {
 
-    uint32_t _vao;
-    uint32_t _vbo;
-    uint32_t _ebo;
+    static constexpr uint32_t BUFFER_DEFAULT_SIZE = 1024;
 
-    uint32_t _vertexAmount;
-    uint32_t _indexAmount;
+    std::vector<GLMesh*> _meshes;
+
+    uint32_t _instancingBuffer;
+
+    std::type_index _instancingStructType;
+    size_t _instancingStructSize;
+
+    std::vector<uint32_t*> _positions;
+
+    void reinitializeBuffer() const;
 
 public:
 
-    GLModel(const GLModel& other) = delete;
-
-    template<class Vertex>
-    GLModel(std::vector<Vertex> vertices, std::vector<uint32_t> indices):
-            _vao(0),
-            _vbo(0),
-            _ebo(0),
-            _vertexAmount(vertices.size()),
-            _indexAmount(indices.size()) {
-        glGenVertexArrays(1, &_vao);
-        glGenBuffers(1, &_vbo);
-        glGenBuffers(1, &_ebo);
-
-        glBindVertexArray(_vao);
-        glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertices.size(),
-                     vertices.data(),GL_STATIC_DRAW);
-
-        Vertex::setupVAO();
-
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ebo);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint32_t) * indices.size(),
-                     indices.data(), GL_STATIC_DRAW);
-    }
+    explicit GLModel(std::vector<GLMesh*> meshes);
 
     ~GLModel();
 
-    uint32_t getVao() const;
+    [[nodiscard]] const std::type_index& getInstancingStructType() const;
 
-    uint32_t getVbo() const;
+    template<class InstanceData>
+    void defineInstanceStruct() {
+        _instancingStructType = typeid(InstanceData);
+        _instancingStructSize = sizeof(InstanceData);
+        reinitializeBuffer();
+        for (const auto& mesh: _meshes) {
+            mesh->configureInstancingBuffer<InstanceData>(_instancingBuffer);
+        }
+    }
 
-    uint32_t getEbo() const;
+    [[nodiscard]] Result<uint32_t*, std::string> createInstance();
 
-    uint32_t getVertexAmount() const;
+    bool freeInstance(uint32_t id);
 
-    uint32_t getIndexAmount() const;
+    template<class InstanceData>
+    void uploadData(uint32_t id, const InstanceData& data) {
+        uploadDataRaw(id, &data);
+    }
 
-    void draw() const;
+    void uploadDataRaw(uint32_t id, const void* raw) const;
+
+    void draw(Shader* shader, TextureCollection& textures) const;
+
 };
 
 
-#endif //RVTRACKING_GLMODEL_H
+#endif //NEON_GLMODEL_H

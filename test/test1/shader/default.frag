@@ -8,5 +8,5 @@ uniform sampler2D diffuseTexture;
 out vec4 color;
 
 void main() {
-    color =  texture(diffuseTexture, fragTexCoords);
+    color = texture(diffuseTexture, fragTexCoords);
 }

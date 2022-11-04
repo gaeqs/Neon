@@ -5,34 +5,38 @@
 #ifndef RVTRACKING_GRAPHICCOMPONENT_H
 #define RVTRACKING_GRAPHICCOMPONENT_H
 
+#include <optional>
 
+#include <engine/IdentifiableWrapper.h>
 #include <engine/Material.h>
 #include <engine/Component.h>
-#include <engine/Model.h>
+#include <engine/model/Model.h>
 
 class GraphicComponent : public Component {
 
-    Material _material;
     IdentifiableWrapper<Model> _model;
+    std::optional<uint32_t*> _modelTargetId;
 
 public:
 
     GraphicComponent();
 
+    explicit GraphicComponent(IdentifiableWrapper<Model> model);
+
     ~GraphicComponent() override;
 
-    const Material& getMaterial() const;
-
-    Material& getMaterial();
-
-    void setMaterial(const Material& material);
-
-    const IdentifiableWrapper<Model>& getModel() const;
-
-    IdentifiableWrapper<Model>& getModel();
+    [[nodiscard]] const IdentifiableWrapper<Model>& getModel() const;
 
     void setModel(const IdentifiableWrapper<Model>& model);
 
+    template<class InstanceData>
+    void uploadData(const InstanceData& data) {
+        if (_modelTargetId.has_value()) {
+            _model->uploadData(*_modelTargetId.value(), data);
+        }
+    }
+
+    void onUpdate(float deltaTime) override;
 };
 
 

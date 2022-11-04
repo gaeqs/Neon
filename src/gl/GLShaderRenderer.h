@@ -9,27 +9,20 @@
 #include <memory>
 
 #include <engine/Renderer.h>
-#include <gl/ShaderController.h>
+#include <gl/Shader.h>
+
+class GraphicComponent;
 
 class GLShaderRenderer : public Renderer {
 
-    std::unordered_map<std::string, std::shared_ptr<ShaderController>> _shaders;
-
-protected:
-
-
-    virtual void uploadGlobalUniforms(
-            const std::shared_ptr<Shader>& shader, Room* room);
-
-    virtual void uploadGraphicObjectUniforms(
-            const std::shared_ptr<Shader>& shader, GraphicComponent* component);
+    std::unordered_map<std::string, std::shared_ptr<Shader>> _shaders;
 
 public:
 
     GLShaderRenderer();
 
     void insertShader(const std::string& name,
-                      std::shared_ptr<ShaderController> shader);
+                      std::shared_ptr<Shader> shader);
 
     virtual void preRenderConfiguration();
 

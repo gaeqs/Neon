@@ -8,7 +8,8 @@
 #include <cstdint>
 
 class Identifiable {
-    virtual uint64_t getId() const = 0;
+public:
+    [[nodiscard]] virtual uint64_t getId() const = 0;
 };
 
 #endif //RVTRACKING_IDENTIFIABLE_H

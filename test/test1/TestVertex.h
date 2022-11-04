@@ -6,14 +6,14 @@
 #define RVTRACKING_TESTVERTEX_H
 
 #include <glm/glm.hpp>
-#include "glad/glad.h"
+#include <glad/glad.h>
 
 struct TestVertex {
     glm::vec3 position;
     glm::vec3 normal;
     glm::vec2 texCoords;
 
-    static void setupVAO() {
+    static uint32_t setupVAO() {
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(TestVertex),
                               (void*) 0);
         glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(TestVertex),
@@ -23,6 +23,7 @@ struct TestVertex {
         glEnableVertexAttribArray(0);
         glEnableVertexAttribArray(1);
         glEnableVertexAttribArray(2);
+        return 3;
     }
 
     static TestVertex fromAssimp(

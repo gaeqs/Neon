@@ -3,12 +3,11 @@
 
 #include <engine/Engine.h>
 #include <gl/GLShaderRenderer.h>
-#include <util/CameraMovementComponent.h>
+#include "util/component/CameraMovementComponent.h"
 #include <assimp/ModelLoader.h>
 #include "TestComponent.h"
-#include "TestShaderController.h"
 #include "TestVertex.h"
-#include "util/ModelLoaderParserComponent.h"
+#include "GlobalParametersUpdaterComponent.h"
 
 constexpr int32_t WIDTH = 800;
 constexpr int32_t HEIGHT = 600;
@@ -23,12 +22,13 @@ std::shared_ptr<Room> getTestRoom() {
 
     auto shader = Shader::newShader(defaultVert, defaultFrag);
     if (!shader.isOk()) throw std::runtime_error(shader.getError());
-    auto shaderController = std::make_shared<TestShaderController>(
-            shader.getResult());
-    renderer->insertShader("default", shaderController);
+    renderer->insertShader("default", shader.getResult());
 
     auto room = std::make_shared<Room>();
     room->setRenderer(renderer);
+
+    auto parametersUpdater = room->newGameObject();
+    parametersUpdater->newComponent<GlobalParametersUpdaterComponent>();
 
     auto gameObject = room->newGameObject();
     gameObject->newComponent<TestComponent>();
@@ -45,11 +45,15 @@ std::shared_ptr<Room> getTestRoom() {
 
 
     auto sansLoader = ModelLoader(room);
-    auto sansResult = sansLoader.loadModel<TestVertex>(R"(resource/Sans)",
-                                                       "Sans.obj");
+    auto sansModel = sansLoader.loadModel<TestVertex>(
+            R"(resource/Sans)", "Sans.obj").model;
+    sansModel->setShader("default");
 
-    auto sans = room->newGameObject();
-    sans->newComponent<ModelLoaderParserComponent>("default", sansResult);
+    for (int i = 0; i < 100; i++) {
+        auto sans = room->newGameObject();
+        sans->newComponent<GraphicComponent>(sansModel);
+        sans->getTransform().setPosition(glm::vec3(i, 0, 0));
+    }
 
     return room;
 }

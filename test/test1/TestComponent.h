@@ -11,6 +11,8 @@
 
 class TestComponent : public Component {
 
+    IdentifiableWrapper<GraphicComponent> _graphic;
+
 public:
 
     ~TestComponent() override;
