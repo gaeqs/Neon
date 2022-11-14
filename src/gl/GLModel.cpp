@@ -25,7 +25,8 @@ GLModel::GLModel(std::vector<GLMesh*> meshes) :
     glGenBuffers(1, &_instancingBuffer);
     reinitializeBuffer();
     for (const auto& mesh: _meshes) {
-        mesh->configureInstancingBuffer<DefaultInstancingData>(_instancingBuffer);
+        mesh->configureInstancingBuffer<DefaultInstancingData>(
+                _instancingBuffer);
     }
 }
 
@@ -93,6 +94,7 @@ void GLModel::uploadDataRaw(uint32_t id, const void* raw) const {
 }
 
 void GLModel::draw(Shader* shader, TextureCollection& textures) const {
+    if (_positions.empty()) return;
     shader->use();
     for (const auto& item: _meshes) {
         item->draw(shader, textures, _positions.size());

@@ -28,7 +28,6 @@ class CursorMoveEvent;
  */
 class ComponentCollection {
 
-    Room* _room;
     std::unordered_map<std::type_index, std::shared_ptr<void>> _components;
     std::queue<IdentifiableWrapper<Component>> _notStartedComponents;
 
@@ -43,7 +42,7 @@ public:
     /**
      * Creates the collection.
      */
-    ComponentCollection(Room* room);
+    ComponentCollection();
 
     /**
      *

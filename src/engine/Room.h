@@ -28,8 +28,6 @@ class CursorMoveEvent;
 
 class Room {
 
-    friend class Application;
-
     Application* _application;
 
     Camera _camera;
@@ -45,34 +43,34 @@ public:
 
     Room(const Room& other) = delete;
 
-    Room();
+    explicit Room(Application* application);
 
     ~Room();
 
-    Application* getApplication() const;
+    [[nodiscard]] Application* getApplication() const;
 
-    const Camera& getCamera() const;
+    [[nodiscard]] const Camera& getCamera() const;
 
     Camera& getCamera();
 
-    const ComponentCollection& getComponents() const;
+    [[nodiscard]] const ComponentCollection& getComponents() const;
 
     ComponentCollection& getComponents();
 
-    const TextureCollection& getTextures() const;
+    [[nodiscard]] const TextureCollection& getTextures() const;
 
     TextureCollection& getTextures();
 
-    const IdentifiableCollection<Model>& getModels() const;
+    [[nodiscard]] const IdentifiableCollection<Model>& getModels() const;
 
     IdentifiableCollection<Model>& getModels();
 
-    const IdentifiableCollection<ShaderUniformBuffer>&
+    [[nodiscard]] const IdentifiableCollection<ShaderUniformBuffer>&
     getShaderUniformBuffers() const;
 
     IdentifiableCollection<ShaderUniformBuffer>& getShaderUniformBuffers();
 
-    const std::shared_ptr<Renderer>& getRenderer() const;
+    [[nodiscard]] const std::shared_ptr<Renderer>& getRenderer() const;
 
     std::shared_ptr<Renderer>& getRenderer();
 

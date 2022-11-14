@@ -4,12 +4,14 @@
 
 #include "Texture.h"
 
+#include <engine/Room.h>
+
 uint64_t TEXTURE_ID_GENERATOR = 1;
 
-Texture::Texture(const void* data, int32_t width, int32_t height,
+Texture::Texture(Room* room, const void* data, int32_t width, int32_t height,
                  TextureFormat format) :
         _id(TEXTURE_ID_GENERATOR++),
-        _implementation(data, width, height, format) {
+        _implementation(room, data, width, height, format) {
 
 }
 

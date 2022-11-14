@@ -14,14 +14,15 @@ constexpr float DEFAULT_FRUSTUM_NEAR = 0.1f;
 constexpr float DEFAULT_FRUSTUM_FAR = 1000.0f;
 constexpr float DEFAULT_FRUSTUM_FOV = glm::radians(100.0f); // RADIANS
 
-Room::Room() :
-        _application(nullptr),
+Room::Room(Application* application) :
+        _application(application),
         _camera(Frustum(DEFAULT_FRUSTUM_NEAR, DEFAULT_FRUSTUM_FAR, 1.0f,
                         DEFAULT_FRUSTUM_FOV)),
         _gameObjects(),
-        _components(this),
-        _textures(),
-        _models(),
+        _components(),
+        _textures(this),
+        _models(this),
+        _shaderUniformBuffers(this),
         _renderer() {
 }
 

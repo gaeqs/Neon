@@ -10,15 +10,40 @@
 #include <string>
 #include <memory>
 
+#include <glm/glm.hpp>
+#include <util/Result.h>
+
+#ifdef USE_OPENGL
+
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include <glm/glm.hpp>
+#include <gl/GLApplication.h>
 
-#include <util/Result.h>
+#endif
+#ifdef USE_VULKAN
+
+#define GLFW_INCLUDE_VULKAN
+
+#include <GLFW/glfw3.h>
+#include <vulkan/VKApplication.h>
+
+#endif
+
 
 class Room;
 
 class Application {
+
+public:
+
+#ifdef USE_OPENGL
+    using Implementation = GLApplication;
+#endif
+#ifdef USE_VULKAN
+    using Implementation = VKApplication;
+#endif
+
+protected:
 
     int32_t _width;
     int32_t _height;
@@ -28,19 +53,27 @@ class Application {
 
     glm::dvec2 _last_cursor_pos;
 
+    Implementation _implementation;
+
 public:
 
     Application(int32_t width, int32_t height);
 
+    ~Application();
+
     Result<GLFWwindow*, std::string> init(const std::string& name);
 
-    Result<uint32_t, std::string> startGameLoop() const;
+    [[nodiscard]] Result<uint32_t, std::string> startGameLoop();
 
-    int32_t getWidth() const;
+    [[nodiscard]] const Implementation& getImplementation() const;
 
-    int32_t getHeight() const;
+    [[nodiscard]] Implementation& getImplementation();
 
-    float getAspectRatio() const;
+    [[nodiscard]] int32_t getWidth() const;
+
+    [[nodiscard]] int32_t getHeight() const;
+
+    [[nodiscard]] float getAspectRatio() const;
 
     void setRoom(const std::shared_ptr<Room>& room);
 

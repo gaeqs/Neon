@@ -9,8 +9,6 @@
 #include <engine/CursorEvent.h>
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
-    glViewport(0, 0, width, height);
-
     auto* application = static_cast<Application*>(glfwGetWindowUserPointer(
             window));
     application->internalForceSizeValues(width, height);
@@ -31,8 +29,16 @@ void cursor_pos_callback(GLFWwindow* window, double x, double y) {
 }
 
 Application::Application(int32_t width, int32_t height) :
-        _width(width), _height(height), _window(nullptr),
-        _last_cursor_pos(0.0, 0.0) {
+        _width(width),
+        _height(height),
+        _window(nullptr),
+        _room(nullptr),
+        _last_cursor_pos(0.0, 0.0),
+        _implementation() {
+}
+
+Application::~Application() {
+    glfwTerminate();
 }
 
 Result<GLFWwindow*, std::string> Application::init(const std::string& name) {
@@ -40,13 +46,9 @@ Result<GLFWwindow*, std::string> Application::init(const std::string& name) {
         return {"Failed to initialize GLFW"};
     }
 
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    _implementation.preWindowCreation();
 
-    // Open a window and create its OpenGL context
-    _window = glfwCreateWindow(_width, _height, name.c_str(), nullptr,
-                               nullptr);
+    _window = glfwCreateWindow(_width, _height, name.c_str(), nullptr, nullptr);
     if (!_window) {
         return {"Failed to open GLFW window"};
     }
@@ -54,11 +56,6 @@ Result<GLFWwindow*, std::string> Application::init(const std::string& name) {
     // Enable vertical sync (on cards that support it)
     glfwMakeContextCurrent(_window);
     glfwSwapInterval(0);
-
-    if (!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress)) {
-        return {"Failed to initialize GLAD"};
-    }
-
 
     glfwSetWindowUserPointer(_window, this);
     glfwSetWindowSizeCallback(_window, framebuffer_size_callback);
@@ -68,10 +65,12 @@ Result<GLFWwindow*, std::string> Application::init(const std::string& name) {
     glfwSetInputMode(_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     glfwGetCursorPos(_window, &_last_cursor_pos.x, &_last_cursor_pos.y);
 
+    _implementation.postWindowCreation(_window);
+
     return {_window};
 }
 
-Result<uint32_t, std::string> Application::startGameLoop() const {
+Result<uint32_t, std::string> Application::startGameLoop() {
     if (_window == nullptr) {
         return {"Window is not initialized"};
     }
@@ -90,9 +89,13 @@ Result<uint32_t, std::string> Application::startGameLoop() const {
 
             //std::cout << (1 / seconds) << std::endl;
 
+            _implementation.preUpdate();
+
             if (_room != nullptr) {
                 _room->update(seconds);
             }
+
+            _implementation.preDraw();
 
             glfwPollEvents();
 
@@ -100,17 +103,23 @@ Result<uint32_t, std::string> Application::startGameLoop() const {
                 _room->draw();
             }
 
-            glfwSwapBuffers(_window);
+            _implementation.postDraw();
+
             frames++;
         }
     } catch (const std::exception& exception) {
-        glfwTerminate();
         return {exception.what()};
     }
 
-    glfwTerminate();
-
     return {frames};
+}
+
+const Application::Implementation& Application::getImplementation() const {
+    return _implementation;
+}
+
+Application::Implementation& Application::getImplementation() {
+    return _implementation;
 }
 
 int32_t Application::getWidth() const {
@@ -126,14 +135,10 @@ float Application::getAspectRatio() const {
 }
 
 void Application::setRoom(const std::shared_ptr<Room>& room) {
-    if (_room != nullptr) {
-        _room->_application = nullptr;
+    if (room != nullptr && room->getApplication() != this) {
+        throw std::runtime_error("Room's application is not this application!");
     }
     _room = room;
-    if (_room != nullptr) {
-        _room->_application = this;
-        _room->onResize();
-    }
 }
 
 void Application::internalForceSizeValues(int32_t width, int32_t height) {

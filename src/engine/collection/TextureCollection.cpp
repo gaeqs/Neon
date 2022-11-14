@@ -8,6 +8,10 @@
 
 #include <stb_image.h>
 
+TextureCollection::TextureCollection(Room* room)
+        : IdentifiableCollection(room) {
+}
+
 IdentifiableWrapper<Texture>
 TextureCollection::createTextureFromPNG(const cmrc::file& resource) {
     return createTextureFromPNG(resource.begin(), resource.size());

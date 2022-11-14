@@ -10,12 +10,16 @@
 #include <engine/collection/IdentifiableCollection.h>
 #include <engine/Texture.h>
 
+class Room;
+
 /**
  * This class holds all textures of a room.
  */
 class TextureCollection : public IdentifiableCollection<Texture> {
 
 public:
+
+    explicit TextureCollection(Room* room);
 
     /**
      * Creates a new texture from a PNG image.

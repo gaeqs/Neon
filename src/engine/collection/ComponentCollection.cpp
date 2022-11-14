@@ -9,8 +9,7 @@
 #include <engine/Component.h>
 #include <engine/GraphicComponent.h>
 
-ComponentCollection::ComponentCollection(Room* room) :
-        _room(room),
+ComponentCollection::ComponentCollection() :
         _components(),
         _notStartedComponents() {
 }

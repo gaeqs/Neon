@@ -3,8 +3,9 @@
 
 #include <engine/Engine.h>
 #include <gl/GLShaderRenderer.h>
-#include "util/component/CameraMovementComponent.h"
+#include <util/component/CameraMovementComponent.h>
 #include <assimp/ModelLoader.h>
+
 #include "TestComponent.h"
 #include "TestVertex.h"
 #include "GlobalParametersUpdaterComponent.h"
@@ -44,15 +45,18 @@ std::shared_ptr<Room> getTestRoom() {
     cameraController->newComponent<CameraMovementComponent>();
 
 
-    auto sansLoader = ModelLoader(room);
-    auto sansModel = sansLoader.loadModel<TestVertex>(
+    auto sansModel = ModelLoader(room).loadModel<TestVertex>(
             R"(resource/Sans)", "Sans.obj").model;
     sansModel->setShader("default");
 
+    int q = static_cast<int>(std::sqrt(100));
     for (int i = 0; i < 100; i++) {
         auto sans = room->newGameObject();
         sans->newComponent<GraphicComponent>(sansModel);
-        sans->getTransform().setPosition(glm::vec3(i, 0, 0));
+
+        float x = static_cast<float>(i % q) * 3.0f;
+        float y = static_cast<float>(i / q) * 3.0f;
+        sans->getTransform().setPosition(glm::vec3(x, y, 0));
     }
 
     return room;

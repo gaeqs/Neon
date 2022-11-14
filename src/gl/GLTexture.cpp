@@ -26,8 +26,8 @@ std::pair<int32_t, int32_t> GLTexture::toGLFormat(TextureFormat format) {
     }
 }
 
-GLTexture::GLTexture(const void* data, int32_t width, int32_t height,
-                     TextureFormat format) :
+GLTexture::GLTexture([[maybe_unused]] Room* room, const void* data,
+                     int32_t width, int32_t height, TextureFormat format) :
         _width(width),
         _height(height) {
     glActiveTexture(0);

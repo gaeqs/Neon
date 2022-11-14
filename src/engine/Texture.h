@@ -15,13 +15,14 @@
 
 #endif
 
+class Room;
+
 class Texture : public Identifiable {
 
     template<class T> friend
     class IdentifiableWrapper;
 
 #ifdef USE_OPENGL
-
     using Implementation = GLTexture;
 #endif
 
@@ -32,8 +33,8 @@ public:
 
     Texture(const Texture& other) = delete;
 
-    Texture(const void* data, int32_t width, int32_t height,
-            TextureFormat format);
+    Texture(Room* room, const void* data,
+            int32_t width, int32_t height, TextureFormat format);
 
     uint64_t getId() const override;
 
