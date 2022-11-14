@@ -5,8 +5,12 @@
 #include "GLShaderUniformBuffer.h"
 
 #include <glad/glad.h>
+#include <algorithm>
 
-GLShaderUniformBuffer::GLShaderUniformBuffer() : _id(0) {
+GLShaderUniformBuffer::GLShaderUniformBuffer(
+        [[maybe_unused]] Application* application, uint32_t size) :
+        _id(0),
+        _size(static_cast<size_t>(size)) {
     glGenBuffers(1, &_id);
 }
 
@@ -20,7 +24,10 @@ void GLShaderUniformBuffer::setBindingPoint(uint32_t point) const {
 
 void GLShaderUniformBuffer::uploadData(const void* data, size_t size) const {
     glBindBuffer(GL_UNIFORM_BUFFER, _id);
-    glBufferData(GL_UNIFORM_BUFFER, static_cast<int32_t>(size),
+    glBufferData(GL_UNIFORM_BUFFER, static_cast<int32_t>(std::min(_size, size)),
                  data, GL_DYNAMIC_DRAW);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
+}
+
+void GLShaderUniformBuffer::prepareForFrame() const {
 }

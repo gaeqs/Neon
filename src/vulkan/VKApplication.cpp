@@ -753,6 +753,14 @@ VKApplication::~VKApplication() {
     vkDestroyInstance(_instance, nullptr);
 }
 
+uint32_t VKApplication::getCurrentFrame() const {
+    return _currentFrame;
+}
+
+uint32_t VKApplication::getMaxFramesInFlight() const {
+    return MAX_FRAMES_IN_FLIGHT;
+}
+
 VkInstance VKApplication::getInstance() const {
     return _instance;
 }

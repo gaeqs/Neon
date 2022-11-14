@@ -137,6 +137,10 @@ public:
 
     void internalCursorPosEvent(double x, double y);
 
+    [[nodiscard]] uint32_t getCurrentFrame() const;
+
+    [[nodiscard]] uint32_t getMaxFramesInFlight() const;
+
     [[nodiscard]] VkInstance getInstance() const;
 
     [[nodiscard]] VkPhysicalDevice getPhysicalDevice() const;

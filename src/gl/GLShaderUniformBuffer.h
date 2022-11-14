@@ -7,19 +7,24 @@
 
 #include <cstdint>
 
+class Application;
+
 class GLShaderUniformBuffer {
 
     uint32_t _id;
+    size_t _size;
 
 public:
 
-    GLShaderUniformBuffer();
+    GLShaderUniformBuffer(Application* application, uint32_t size);
 
     ~GLShaderUniformBuffer();
 
     void setBindingPoint(uint32_t point) const;
 
     void uploadData(const void* data, size_t size) const;
+
+    void prepareForFrame() const;
 
 };
 

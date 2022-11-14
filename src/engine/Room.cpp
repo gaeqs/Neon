@@ -105,6 +105,9 @@ void Room::update(float deltaTime) {
 }
 
 void Room::draw() {
+    _shaderUniformBuffers.forEach([](ShaderUniformBuffer* uniform) {
+        uniform->prepareForFrame();
+    });
     _components.drawGraphicComponents(this);
 }
 
