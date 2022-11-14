@@ -41,9 +41,9 @@ VkFormat VKTexture::getImageFormat(TextureFormat format) {
     }
 }
 
-VKTexture::VKTexture(Room* room, const void* data,
+VKTexture::VKTexture(Application* application, const void* data,
                      int32_t width, int32_t height, TextureFormat format) :
-        _vkApplication(&room->getApplication()->getImplementation()),
+        _vkApplication(&application->getImplementation()),
         _width(width),
         _height(height),
         _stagingBuffer(
@@ -56,7 +56,9 @@ VKTexture::VKTexture(Room* room, const void* data,
                 getPixelSize(format) * width * height
         ),
         _image(VK_NULL_HANDLE),
-        _imageMemory(VK_NULL_HANDLE) {
+        _imageMemory(VK_NULL_HANDLE),
+        _imageView(VK_NULL_HANDLE),
+        _sampler(VK_NULL_HANDLE) {
 
     VkImageCreateInfo imageInfo{};
     imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
@@ -137,9 +139,38 @@ VKTexture::VKTexture(Room* room, const void* data,
             _image,
             imageInfo.format
     );
+
+    VkPhysicalDeviceProperties properties{};
+    vkGetPhysicalDeviceProperties(
+            _vkApplication->getPhysicalDevice(),
+            &properties
+    );
+
+    VkSamplerCreateInfo samplerInfo{};
+    samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+    samplerInfo.magFilter = VK_FILTER_LINEAR;
+    samplerInfo.minFilter = VK_FILTER_LINEAR;
+    samplerInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+    samplerInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+    samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+    samplerInfo.anisotropyEnable = VK_TRUE;
+    samplerInfo.maxAnisotropy = properties.limits.maxSamplerAnisotropy;
+    samplerInfo.unnormalizedCoordinates = VK_FALSE;
+    samplerInfo.compareEnable = VK_FALSE;
+    samplerInfo.compareOp = VK_COMPARE_OP_ALWAYS;
+    samplerInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
+    samplerInfo.mipLodBias = 0.0f;
+    samplerInfo.minLod = 0.0f;
+    samplerInfo.maxLod = 0.0f;
+
+    if (vkCreateSampler(_vkApplication->getDevice(), &samplerInfo, nullptr,
+                        &_sampler) != VK_SUCCESS) {
+        throw std::runtime_error("Failed to create texture sampler!");
+    }
 }
 
 VKTexture::~VKTexture() {
+    vkDestroySampler(_vkApplication->getDevice(), _sampler, nullptr);
     vkDestroyImageView(_vkApplication->getDevice(), _imageView, nullptr);
     vkDestroyImage(_vkApplication->getDevice(), _image, nullptr);
     vkFreeMemory(_vkApplication->getDevice(), _imageMemory, nullptr);

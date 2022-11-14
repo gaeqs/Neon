@@ -6,9 +6,9 @@
 
 uint64_t MESH_ID_GENERATOR = 1;
 
-Mesh::Mesh() :
+Mesh::Mesh(Application* application) :
         _id(MESH_ID_GENERATOR++),
-        _implementation(_material),
+        _implementation(application, _material),
         _material() {
 
 }

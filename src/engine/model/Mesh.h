@@ -5,6 +5,7 @@
 #ifndef NEON_MESH_H
 #define NEON_MESH_H
 
+
 #include <vector>
 
 #include <engine/Identifiable.h>
@@ -15,6 +16,8 @@
 #include <gl/GLMesh.h>
 
 #endif
+
+class Application;
 
 class Mesh : public Identifiable {
 
@@ -34,7 +37,7 @@ private:
 
 public:
 
-    Mesh();
+    Mesh(Application* application);
 
     [[nodiscard]] uint64_t getId() const override;
 

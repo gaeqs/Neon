@@ -16,6 +16,8 @@ class Shader;
 
 class TextureCollection;
 
+class Application;
+
 class GLMesh {
 
     uint32_t _vao;
@@ -32,7 +34,7 @@ public:
 
     GLMesh(const GLMesh& other) = delete;
 
-    explicit GLMesh(Material& material);
+    explicit GLMesh(Application* application, Material& material);
 
     ~GLMesh();
 

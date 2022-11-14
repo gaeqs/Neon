@@ -360,10 +360,13 @@ VKApplication::isDeviceSuitable(VkPhysicalDevice device, bool onlyDiscrete) {
     bool swapChainAdequate = !swapChainSupport.formats.empty() &&
                              !swapChainSupport.presentModes.empty();
 
+    VkPhysicalDeviceFeatures supportedFeatures;
+    vkGetPhysicalDeviceFeatures(device, &supportedFeatures);
+
     return (!onlyDiscrete || deviceProperties.deviceType ==
                              VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU) &&
            families.isComplete() && requiredExtensions.empty() &&
-           swapChainAdequate;
+           swapChainAdequate && supportedFeatures.samplerAnisotropy;
 }
 
 VKQueueFamilyIndices VKApplication::findQueueFamilies(VkPhysicalDevice device) {

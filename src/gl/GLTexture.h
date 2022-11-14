@@ -9,7 +9,7 @@
 #include <utility>
 #include <engine/TextureFormat.h>
 
-class Room;
+class Application;
 
 class GLTexture {
 
@@ -22,7 +22,8 @@ public:
 
     GLTexture(const GLTexture& other) = delete;
 
-    GLTexture(Room* room, const void* data, int32_t width, int32_t height,
+    GLTexture(Application* application, const void* data,
+              int32_t width, int32_t height,
               TextureFormat format);
 
     ~GLTexture();

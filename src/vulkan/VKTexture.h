@@ -10,7 +10,7 @@
 #include <engine/TextureFormat.h>
 #include <vulkan/buffer/SimpleBuffer.h>
 
-class Room;
+class Application;
 
 class VKApplication;
 
@@ -23,8 +23,8 @@ class VKTexture {
 
     VkImage _image;
     VkDeviceMemory _imageMemory;
-
     VkImageView _imageView;
+    VkSampler _sampler;
 
     static uint32_t getPixelSize(TextureFormat format);
 
@@ -36,7 +36,8 @@ public:
 
     VKTexture(const VKTexture& other) = delete;
 
-    VKTexture(Room* room, const void* data, int32_t width, int32_t height,
+    VKTexture(Application* application, const void* data,
+              int32_t width, int32_t height,
               TextureFormat format);
 
     ~VKTexture();

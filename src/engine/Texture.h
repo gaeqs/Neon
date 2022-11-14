@@ -14,8 +14,14 @@
 #include <gl/GLTexture.h>
 
 #endif
+#ifdef USE_VULKAN
 
-class Room;
+#include <vulkan/VKTexture.h>
+
+#endif
+
+
+class Application;
 
 class Texture : public Identifiable {
 
@@ -25,6 +31,9 @@ class Texture : public Identifiable {
 #ifdef USE_OPENGL
     using Implementation = GLTexture;
 #endif
+#ifdef USE_VULKAN
+    using Implementation = VKTexture;
+#endif
 
     uint64_t _id;
     Implementation _implementation;
@@ -33,7 +42,7 @@ public:
 
     Texture(const Texture& other) = delete;
 
-    Texture(Room* room, const void* data,
+    Texture(Application* application, const void* data,
             int32_t width, int32_t height, TextureFormat format);
 
     uint64_t getId() const override;

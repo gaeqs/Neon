@@ -4,10 +4,12 @@
 
 #include "GLMesh.h"
 
+#include <engine/Application.h>
 #include <engine/collection/TextureCollection.h>
 #include <gl/Shader.h>
 
-GLMesh::GLMesh(Material& material) :
+GLMesh::GLMesh([[maybe_unused]] Application* application,
+               Material& material) :
         _vao(0),
         _vbo(0),
         _ebo(0),

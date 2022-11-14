@@ -7,7 +7,6 @@
 #include <glad/glad.h>
 #include <stdexcept>
 
-
 std::pair<int32_t, int32_t> GLTexture::toGLFormat(TextureFormat format) {
     switch (format) {
         case TextureFormat::RGB:
@@ -26,8 +25,10 @@ std::pair<int32_t, int32_t> GLTexture::toGLFormat(TextureFormat format) {
     }
 }
 
-GLTexture::GLTexture([[maybe_unused]] Room* room, const void* data,
-                     int32_t width, int32_t height, TextureFormat format) :
+GLTexture::GLTexture([[maybe_unused]] Application* application,
+                     const void* data,
+                     int32_t width, int32_t height,
+                     TextureFormat format) :
         _width(width),
         _height(height) {
     glActiveTexture(0);
