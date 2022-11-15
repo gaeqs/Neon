@@ -4,13 +4,13 @@
 
 #include "VKMesh.h"
 
-#include <vulkan/VKApplication.h>
 #include <engine/Application.h>
+#include <vulkan/VKApplication.h>
+#include <vulkan/VKShaderProgram.h>
 
 void VKMesh::createGraphicPipeline(
-        const VkVertexInputBindingDescription& bindingDescription,
-        const std::vector<VkVertexInputAttributeDescription>& attributeDescriptions,
-        const std::vector<std::shared_ptr<GLShaderProgram>>& shaders) {
+        VKShaderProgram* shader,
+        const IdentifiableCollection<ShaderUniformBuffer>& uniforms) {
 
     std::vector<VkDynamicState> dynamicStates = {
             VK_DYNAMIC_STATE_VIEWPORT,
@@ -25,9 +25,9 @@ void VKMesh::createGraphicPipeline(
     VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
     vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
     vertexInputInfo.vertexBindingDescriptionCount = 1;
-    vertexInputInfo.pVertexBindingDescriptions = &bindingDescription;
-    vertexInputInfo.vertexAttributeDescriptionCount = attributeDescriptions.size();
-    vertexInputInfo.pVertexAttributeDescriptions = attributeDescriptions.data();
+    vertexInputInfo.pVertexBindingDescriptions = &_bindingDescription;
+    vertexInputInfo.vertexAttributeDescriptionCount = _attributeDescriptions.size();
+    vertexInputInfo.pVertexAttributeDescriptions = _attributeDescriptions.data();
 
     VkPipelineInputAssemblyStateCreateInfo inputAssembly{};
     inputAssembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
@@ -86,15 +86,15 @@ void VKMesh::createGraphicPipeline(
 
 
     std::vector<VkDescriptorSetLayout> uniformInfos;
-    uniformInfos.reserve(_uniforms.getSize());
-    _uniforms.forEach([&uniformInfos](const ShaderUniformBuffer* buffer) {
+    uniformInfos.reserve(uniforms.getSize());
+    uniforms.forEach([&uniformInfos](const ShaderUniformBuffer* buffer) {
         auto layout = buffer->getImplementation().getDescriptorSetLayout();
         uniformInfos.push_back(layout);
     });
 
     VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
     pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-    pipelineLayoutInfo.setLayoutCount = _uniforms.getSize();
+    pipelineLayoutInfo.setLayoutCount = uniforms.getSize();
     pipelineLayoutInfo.pSetLayouts = uniformInfos.data();
     pipelineLayoutInfo.pushConstantRangeCount = 0;
     pipelineLayoutInfo.pPushConstantRanges = nullptr;
@@ -105,17 +105,10 @@ void VKMesh::createGraphicPipeline(
         throw std::runtime_error("Failed to create pipeline layout!");
     }
 
-    std::vector<VkPipelineShaderStageCreateInfo> shaderInfos;
-    shaderInfos.reserve(shaders.size());
-    for (const auto& item: shaders) {
-        shaderInfos.push_back(item->getInfo());
-    }
-
-
     VkGraphicsPipelineCreateInfo pipelineInfo{};
     pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
-    pipelineInfo.stageCount = shaderInfos.size();
-    pipelineInfo.pStages = shaderInfos.data();
+    pipelineInfo.stageCount = shader->getShaders().size();
+    pipelineInfo.pStages = shader->getShaders().data();
 
 
     pipelineInfo.pVertexInputState = &vertexInputInfo;
@@ -147,16 +140,34 @@ void VKMesh::destroyGraphicPipeline() {
     }
 }
 
-VKMesh::VKMesh(Application* application,
-               const IdentifiableCollection<ShaderUniformBuffer>& uniforms,
-               Material& material) :
+VKMesh::VKMesh(Application* application, Material& material) :
         _vkApplication(&application->getImplementation()),
         _pipelineLayout(VK_NULL_HANDLE),
         _renderPass(VK_NULL_HANDLE),
         _pipeline(VK_NULL_HANDLE),
-        _uniforms(uniforms) {
+        _attributeDescriptions(),
+        _bindingDescription({}),
+        _currentShader(),
+        _currentUniformStatus(0),
+        _dirty(true) {
 }
 
 VKMesh::~VKMesh() {
     destroyGraphicPipeline();
+}
+
+void VKMesh::draw(
+        const std::string& shaderName,
+        VKShaderProgram* shader,
+        const IdentifiableCollection<ShaderUniformBuffer>& uniforms) {
+    _dirty |= _currentShader == shaderName
+              || uniforms.getModificationId() != _currentUniformStatus;
+    _currentShader = shaderName;
+    _currentUniformStatus = uniforms.getModificationId();
+
+    if (_dirty) {
+        _dirty = false;
+        destroyGraphicPipeline();
+        createGraphicPipeline(shader, uniforms);
+    }
 }

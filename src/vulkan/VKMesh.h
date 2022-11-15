@@ -16,6 +16,8 @@ class Application;
 
 class VKApplication;
 
+class VKShaderProgram;
+
 class VKMesh {
 
     VKApplication* _vkApplication;
@@ -24,22 +26,23 @@ class VKMesh {
     VkRenderPass _renderPass;
     VkPipeline _pipeline;
 
-    const IdentifiableCollection<ShaderUniformBuffer>& _uniforms;
+    std::vector<VkVertexInputAttributeDescription> _attributeDescriptions;
+    VkVertexInputBindingDescription _bindingDescription;
 
+    std::string _currentShader;
+    uint64_t _currentUniformStatus;
+
+    bool _dirty;
 
     void createGraphicPipeline(
-            const VkVertexInputBindingDescription& bindingDescription,
-            const std::vector<VkVertexInputAttributeDescription>&
-            attributeDescriptions,
-            const std::vector<std::shared_ptr<GLShaderProgram>>& shaders);
+            VKShaderProgram* shader,
+            const IdentifiableCollection<ShaderUniformBuffer>& uniforms);
 
     void destroyGraphicPipeline();
 
 public:
 
-    VKMesh(Application* application,
-           const IdentifiableCollection<ShaderUniformBuffer>& uniforms,
-           Material& material);
+    VKMesh(Application* application, Material& material);
 
     ~VKMesh();
 
@@ -47,19 +50,16 @@ public:
     void uploadData(const std::vector<Vertex>& vertices,
                     const std::vector<uint32_t>& indices) {
 
-        std::vector<VkVertexInputAttributeDescription> attributeDescriptions =
-                Vertex::getAttributeDescriptions();
+        _attributeDescriptions = Vertex::getAttributeDescriptions();
+        _bindingDescription = Vertex::getBindingDescription();
 
-        VkVertexInputBindingDescription bindingDescription =
-                Vertex::getBindingDescription();
-
-        destroyGraphicPipeline();
-        createGraphicPipeline(
-                bindingDescription,
-                attributeDescriptions,
-
-        );
+        _dirty = true;
     }
+
+    void draw(
+            const std::string& shaderName,
+            VKShaderProgram* shader,
+            const IdentifiableCollection<ShaderUniformBuffer>& uniforms);
 
 };
 

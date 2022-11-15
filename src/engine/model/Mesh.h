@@ -47,8 +47,7 @@ private:
 
 public:
 
-    Mesh(Application* application,
-         const IdentifiableCollection<ShaderUniformBuffer>& uniforms);
+    Mesh(Application* application);
 
     [[nodiscard]] uint64_t getId() const override;
 

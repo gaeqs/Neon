@@ -29,7 +29,7 @@ public:
             _modificationId(0) {
     }
 
-    [[nodiscard]] uint64_t getModificationId() {
+    [[nodiscard]] uint64_t getModificationId() const {
         return _modificationId;
     }
 

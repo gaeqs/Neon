@@ -8,10 +8,7 @@
 #include <engine/collection/TextureCollection.h>
 #include <gl/GLShaderProgram.h>
 
-GLMesh::GLMesh([[maybe_unused]] Application* application,
-               [[maybe_unused]] const IdentifiableCollection<
-                       ShaderUniformBuffer>& uniforms,
-               Material& material) :
+GLMesh::GLMesh([[maybe_unused]] Application* application, Material& material) :
         _vao(0),
         _vbo(0),
         _ebo(0),

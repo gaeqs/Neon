@@ -36,9 +36,7 @@ public:
 
     GLMesh(const GLMesh& other) = delete;
 
-    GLMesh(Application* application,
-           const IdentifiableCollection<ShaderUniformBuffer>& uniforms,
-           Material& material);
+    GLMesh(Application* application, Material& material);
 
     ~GLMesh();
 
