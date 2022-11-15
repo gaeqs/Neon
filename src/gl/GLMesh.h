@@ -11,8 +11,10 @@
 
 #include <glad/glad.h>
 #include <engine/Material.h>
+#include <engine/collection/IdentifiableCollection.h>
+#include <engine/shader/ShaderUniformBuffer.h>
 
-class Shader;
+class GLShaderProgram;
 
 class TextureCollection;
 
@@ -34,7 +36,9 @@ public:
 
     GLMesh(const GLMesh& other) = delete;
 
-    explicit GLMesh(Application* application, Material& material);
+    GLMesh(Application* application,
+           const IdentifiableCollection<ShaderUniformBuffer>& uniforms,
+           Material& material);
 
     ~GLMesh();
 
@@ -51,8 +55,8 @@ public:
     [[nodiscard]] uint32_t getAttributeAmount() const;
 
     template<class Vertex>
-    void uploadData(std::vector<Vertex> vertices,
-                    std::vector<uint32_t> indices) {
+    void uploadData(const std::vector<Vertex>& vertices,
+                    const std::vector<uint32_t>& indices) {
         _vertexAmount = vertices.size();
         _indexAmount = indices.size();
 
@@ -75,7 +79,7 @@ public:
         InstanceData::setupInstancingVAO(_attributeAmount);
     }
 
-    void draw(Shader* shader, TextureCollection& textures,
+    void draw(GLShaderProgram* shader, TextureCollection& textures,
               uint32_t instances) const;
 };
 

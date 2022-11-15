@@ -28,4 +28,13 @@ void ShaderUniformBuffer::prepareForFrame() {
     _implementation.prepareForFrame();
 }
 
+const ShaderUniformBuffer::Implementation&
+ShaderUniformBuffer::getImplementation() const {
+    return _implementation;
+}
+
+ShaderUniformBuffer::Implementation& ShaderUniformBuffer::getImplementation() {
+    return _implementation;
+}
+
 

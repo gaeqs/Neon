@@ -21,7 +21,7 @@ std::shared_ptr<Room> getTestRoom() {
     auto defaultVert = cmrc::shaders::get_filesystem().open("default.vert");
     auto defaultFrag = cmrc::shaders::get_filesystem().open("default.frag");
 
-    auto shader = Shader::newShader(defaultVert, defaultFrag);
+    auto shader = GLShaderProgram::newShader(defaultVert, defaultFrag);
     if (!shader.isOk()) throw std::runtime_error(shader.getError());
     renderer->insertShader("default", shader.getResult());
 

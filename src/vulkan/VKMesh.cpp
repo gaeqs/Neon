@@ -4,14 +4,13 @@
 
 #include "VKMesh.h"
 
-VKMesh::VKMesh(Application* application, Material& material) {
-
-}
+#include <vulkan/VKApplication.h>
+#include <engine/Application.h>
 
 void VKMesh::createGraphicPipeline(
         const VkVertexInputBindingDescription& bindingDescription,
         const std::vector<VkVertexInputAttributeDescription>& attributeDescriptions,
-        const std::vector<std::shared_ptr<Shader>>& shaders) {
+        const std::vector<std::shared_ptr<GLShaderProgram>>& shaders) {
 
     std::vector<VkDynamicState> dynamicStates = {
             VK_DYNAMIC_STATE_VIEWPORT,
@@ -87,19 +86,21 @@ void VKMesh::createGraphicPipeline(
 
 
     std::vector<VkDescriptorSetLayout> uniformInfos;
-    uniformInfos.reserve(_uniforms.size());
-    for (const auto& item: _uniforms) {
-        uniformInfos.push_back(item->getDescriptorSetLayout());
-    }
+    uniformInfos.reserve(_uniforms.getSize());
+    _uniforms.forEach([&uniformInfos](const ShaderUniformBuffer* buffer) {
+        auto layout = buffer->getImplementation().getDescriptorSetLayout();
+        uniformInfos.push_back(layout);
+    });
 
     VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
     pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-    pipelineLayoutInfo.setLayoutCount = _uniforms.size();
+    pipelineLayoutInfo.setLayoutCount = _uniforms.getSize();
     pipelineLayoutInfo.pSetLayouts = uniformInfos.data();
     pipelineLayoutInfo.pushConstantRangeCount = 0;
     pipelineLayoutInfo.pPushConstantRanges = nullptr;
 
-    if (vkCreatePipelineLayout(_device, &pipelineLayoutInfo, nullptr,
+    if (vkCreatePipelineLayout(_vkApplication->getDevice(),
+                               &pipelineLayoutInfo, nullptr,
                                &_pipelineLayout) != VK_SUCCESS) {
         throw std::runtime_error("Failed to create pipeline layout!");
     }
@@ -130,9 +131,32 @@ void VKMesh::createGraphicPipeline(
     pipelineInfo.subpass = 0;
 
     if (vkCreateGraphicsPipelines(
-            _device, VK_NULL_HANDLE, 1, &pipelineInfo,
-            nullptr, &_graphicsPipeline) != VK_SUCCESS) {
+            _vkApplication->getDevice(), VK_NULL_HANDLE, 1, &pipelineInfo,
+            nullptr, &_pipeline) != VK_SUCCESS) {
         throw std::runtime_error("Failed to create graphics pipeline!");
     }
 
+}
+
+void VKMesh::destroyGraphicPipeline() {
+    if (_pipeline != VK_NULL_HANDLE) {
+        auto device = _vkApplication->getDevice();
+        vkDestroyPipeline(device, _pipeline, nullptr);
+        vkDestroyPipelineLayout(device, _pipelineLayout, nullptr);
+        vkDestroyRenderPass(device, _renderPass, nullptr);
+    }
+}
+
+VKMesh::VKMesh(Application* application,
+               const IdentifiableCollection<ShaderUniformBuffer>& uniforms,
+               Material& material) :
+        _vkApplication(&application->getImplementation()),
+        _pipelineLayout(VK_NULL_HANDLE),
+        _renderPass(VK_NULL_HANDLE),
+        _pipeline(VK_NULL_HANDLE),
+        _uniforms(uniforms) {
+}
+
+VKMesh::~VKMesh() {
+    destroyGraphicPipeline();
 }

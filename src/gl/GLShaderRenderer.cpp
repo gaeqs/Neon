@@ -10,7 +10,7 @@
 #include <engine/Room.h>
 #include <engine/collection/TextureCollection.h>
 #include <engine/GraphicComponent.h>
-#include <gl/Shader.h>
+#include <gl/GLShaderProgram.h>
 
 GLShaderRenderer::GLShaderRenderer() :
         _shaders() {
@@ -31,7 +31,7 @@ void GLShaderRenderer::render(
         auto& name = model->getShader();
         auto it = _shaders.find(name);
         if (it == _shaders.end()) {
-            std::cerr << "Shader \"" << name
+            std::cerr << "GLShaderProgram \"" << name
                       << "\" not found. Skipping model "
                       << model->getId() << "." << std::endl;
             return;
@@ -45,6 +45,6 @@ void GLShaderRenderer::render(
 }
 
 void GLShaderRenderer::insertShader(const std::string& name,
-                                    std::shared_ptr<Shader> shader) {
+                                    std::shared_ptr<GLShaderProgram> shader) {
     _shaders[name] = std::move(shader);
 }

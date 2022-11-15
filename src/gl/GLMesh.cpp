@@ -6,9 +6,11 @@
 
 #include <engine/Application.h>
 #include <engine/collection/TextureCollection.h>
-#include <gl/Shader.h>
+#include <gl/GLShaderProgram.h>
 
 GLMesh::GLMesh([[maybe_unused]] Application* application,
+               [[maybe_unused]] const IdentifiableCollection<
+                       ShaderUniformBuffer>& uniforms,
                Material& material) :
         _vao(0),
         _vbo(0),
@@ -51,7 +53,7 @@ uint32_t GLMesh::getAttributeAmount() const {
     return _attributeAmount;
 }
 
-void GLMesh::draw(Shader* shader, TextureCollection& textures,
+void GLMesh::draw(GLShaderProgram* shader, TextureCollection& textures,
                   uint32_t instances) const {
 
     uint32_t textureTarget = 0;

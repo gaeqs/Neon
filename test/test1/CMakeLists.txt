@@ -5,7 +5,10 @@ set(
         TestComponent.h
         TestVertex.h
         GlobalParametersUpdaterComponent.cpp
-        GlobalParametersUpdaterComponent.h)
+        GlobalParametersUpdaterComponent.h
+)
+
+compile_shaders(SHADERS shader/default.vert)
 
 cmrc_add_resource_library(
         shaders
@@ -14,6 +17,8 @@ cmrc_add_resource_library(
         shader/default.vert
         shader/default.frag
 )
+
+cmrc_add_resources(shaders WHENCE ${PROJECT_BINARY_DIR} ${SHADERS})
 
 cmrc_add_resource_library(
         resources

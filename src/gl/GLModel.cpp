@@ -8,7 +8,7 @@
 #include <glad/glad.h>
 
 #include <engine/model/DefaultInstancingData.h>
-#include <gl/Shader.h>
+#include <gl/GLShaderProgram.h>
 
 void GLModel::reinitializeBuffer() const {
     glBindBuffer(GL_ARRAY_BUFFER, _instancingBuffer);
@@ -93,7 +93,7 @@ void GLModel::uploadDataRaw(uint32_t id, const void* raw) const {
                     _instancingStructSize, raw);
 }
 
-void GLModel::draw(Shader* shader, TextureCollection& textures) const {
+void GLModel::draw(GLShaderProgram* shader, TextureCollection& textures) const {
     if (_positions.empty()) return;
     shader->use();
     for (const auto& item: _meshes) {

@@ -10,10 +10,17 @@
 
 #include <engine/Identifiable.h>
 #include <engine/Material.h>
+#include <engine/shader/ShaderUniformBuffer.h>
+#include <engine/collection/IdentifiableCollection.h>
 
 #ifdef USE_OPENGL
 
 #include <gl/GLMesh.h>
+
+#endif
+#ifdef USE_VULKAN
+
+#include <vulkan/VKMesh.h>
 
 #endif
 
@@ -28,6 +35,9 @@ public:
 #ifdef USE_OPENGL
     using Implementation = GLMesh;
 #endif
+#ifdef USE_VULKAN
+    using Implementation = VKMesh;
+#endif
 
 private:
 
@@ -37,7 +47,8 @@ private:
 
 public:
 
-    Mesh(Application* application);
+    Mesh(Application* application,
+         const IdentifiableCollection<ShaderUniformBuffer>& uniforms);
 
     [[nodiscard]] uint64_t getId() const override;
 
@@ -46,8 +57,8 @@ public:
     [[nodiscard]] const Implementation& getImplementation() const;
 
     template<class Vertex>
-    void uploadVertexData(std::vector<Vertex> vertices,
-                          std::vector<uint32_t> indices) {
+    void uploadVertexData(const std::vector<Vertex>& vertices,
+                          const std::vector<uint32_t>& indices) {
         _implementation.uploadData(vertices, indices);
     }
 

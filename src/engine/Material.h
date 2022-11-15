@@ -14,7 +14,7 @@
 
 #include <engine/IdentifiableWrapper.h>
 
-class Shader;
+class GLShaderProgram;
 
 class Texture;
 

@@ -10,29 +10,35 @@
 #include <string>
 #include <memory>
 #include <unordered_map>
+#include <optional>
 
 #include <glm/glm.hpp>
 #include <cmrc/cmrc.hpp>
 
-#include <util/Result.h>
+#include <engine/shader/ShaderType.h>
 
-class Shader {
+class Application;
 
-    uint32_t _id;
+class GLShaderProgram {
+
+    static uint32_t getGLShaderType(ShaderType type);
+
+    std::optional<uint32_t> _id;
     std::unordered_map<std::string, int32_t> _uniformLocations;
+
 
     int32_t fetchUniformLocation(const std::string& name);
 
 public:
 
-    static Result<std::shared_ptr<Shader>, std::string> newShader(
-            const cmrc::file& vertex, const cmrc::file& fragment);
+    GLShaderProgram(const GLShaderProgram& other) = delete;
 
-    Shader(const Shader& other) = delete;
+    explicit GLShaderProgram(Application* application);
 
-    explicit Shader(uint32_t id);
+    ~GLShaderProgram();
 
-    ~Shader();
+    std::optional<std::string>
+    compile(const std::unordered_map<ShaderType, cmrc::file>& raw);
 
     void use() const;
 

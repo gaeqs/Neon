@@ -42,6 +42,10 @@ public:
 
     ShaderUniformBuffer(Application* application, uint32_t size);
 
+    [[nodiscard]] const Implementation& getImplementation() const;
+
+    [[nodiscard]] Implementation& getImplementation();
+
     [[nodiscard]] uint64_t getId() const override;
 
     void setBindingPoint(uint32_t point) const;

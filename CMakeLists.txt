@@ -1,3 +1,21 @@
+function(compile_shaders out_var)
+    set(result)
+    foreach (in_rel_f ${ARGN})
+        set(in_f shader/${in_rel_f})
+        file(RELATIVE_PATH src_f ${CMAKE_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/${in_f})
+        set(out_spv_f "${PROJECT_BINARY_DIR}/${in_f}.spv")
+        add_custom_command(OUTPUT ${out_spv_f}
+                COMMAND glslc ${src_f} -o ${out_spv_f}
+                DEPENDS ${in_f}
+                WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+                COMMENT "Generating SPV file ${out_spv_f}"
+                VERBATIM
+                )
+        list(APPEND result ${out_spv_f})
+    endforeach ()
+    set(${out_var} "${result}" PARENT_SCOPE)
+endfunction()
+
 cmake_minimum_required(VERSION 3.23)
 set(CMAKE_CXX_STANDARD 20)
 

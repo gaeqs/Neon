@@ -17,9 +17,9 @@ class AbstractClusteredLinkedCollection {
 
 public:
 
-    virtual size_t size() = 0;
+    virtual size_t size() const = 0;
 
-    virtual size_t capacity() = 0;
+    virtual size_t capacity() const = 0;
 
     virtual void forEachRaw(std::function<void(void*)> function) = 0;
 
@@ -54,7 +54,7 @@ public:
         return _collection->rawPointer(_index)[0];
     }
 
-    value_type* operator->() { return _collection->rawPointer(_index); }
+    value_type* operator->() const { return _collection->rawPointer(_index); }
 
     value_type* raw() const {
         return _collection->rawPointer(_index);
@@ -92,12 +92,83 @@ public:
 
 };
 
+template<class Collection>
+class ConstClusteredLinkedCollectorIterator {
+
+    const Collection* _collection;
+    size_t _index;
+
+public:
+
+    using iterator_category = std::forward_iterator_tag;
+    using difference_type = std::ptrdiff_t;
+    using value_type = typename Collection::ValueType;
+
+    ConstClusteredLinkedCollectorIterator(const Collection* collection,
+                                          size_t index)
+            : _collection(collection), _index(index) {
+        while (_collection != nullptr && !_collection->_occupied[_index]) {
+            ++_index;
+            if (_index >= _collection->capacity()) {
+                _index = 0;
+                _collection = _collection->_next;
+            }
+        }
+    }
+
+
+    const value_type& operator*() const {
+        return _collection->rawPointer(_index)[0];
+    }
+
+    const value_type* operator->() const {
+        return _collection->rawPointer(_index);
+    }
+
+    const value_type* raw() const {
+        return _collection->rawPointer(_index);
+    }
+
+    // Prefix increment
+    ConstClusteredLinkedCollectorIterator<Collection>& operator++() {
+        do {
+            ++_index;
+            if (_index >= _collection->capacity()) {
+                _index = 0;
+                _collection = _collection->_next;
+            }
+        } while (_collection != nullptr && !_collection->_occupied[_index]);
+
+        return *this;
+    }
+
+    // Postfix increment
+    ConstClusteredLinkedCollectorIterator<Collection> operator++(int) {
+        ConstClusteredLinkedCollectorIterator<Collection> tmp = *this;
+        ++(*this);
+        return tmp;
+    }
+
+    bool
+    operator==(const ConstClusteredLinkedCollectorIterator<Collection>& b) const {
+        return _collection == b._collection && _index == b._index;
+    };
+
+    bool
+    operator!=(const ConstClusteredLinkedCollectorIterator<Collection>& b) const {
+        return _collection != b._collection || _index != b._index;
+    };
+
+};
+
 template<class T, size_t Size = DEFAULT_CLUSTER_SIZE>
 class ClusteredLinkedCollection : public AbstractClusteredLinkedCollection {
 
     using ValueType = T;
 
     friend class ClusteredLinkedCollectorIterator<ClusteredLinkedCollection<T, Size>>;
+
+    friend class ConstClusteredLinkedCollectorIterator<ClusteredLinkedCollection<T, Size>>;
 
     size_t _objectSize;
 
@@ -113,7 +184,7 @@ class ClusteredLinkedCollection : public AbstractClusteredLinkedCollection {
         }
     }
 
-    T* rawPointer(size_t index) {
+    T* rawPointer(size_t index) const {
         return reinterpret_cast<T*>(_data + index * _objectSize);
     }
 
@@ -140,11 +211,11 @@ public:
         delete _next;
     }
 
-    size_t size() override {
+    size_t size() const override {
         return _localSize + (_next == nullptr ? 0 : _next->size());
     }
 
-    size_t capacity() override {
+    size_t capacity() const override {
         return Size;
     }
 
@@ -154,9 +225,21 @@ public:
                 ClusteredLinkedCollection<T, Size>>(this, 0);
     }
 
+    ConstClusteredLinkedCollectorIterator<ClusteredLinkedCollection<T, Size>>
+    cbegin() const {
+        return ConstClusteredLinkedCollectorIterator<
+                ClusteredLinkedCollection<T, Size>>(this, 0);
+    }
+
     ClusteredLinkedCollectorIterator<ClusteredLinkedCollection<T, Size>>
     end() {
         return ClusteredLinkedCollectorIterator<
+                ClusteredLinkedCollection<T, Size>>(nullptr, 0);
+    }
+
+    ConstClusteredLinkedCollectorIterator<ClusteredLinkedCollection<T, Size>>
+    cend() const {
+        return ConstClusteredLinkedCollectorIterator<
                 ClusteredLinkedCollection<T, Size>>(nullptr, 0);
     }
 
@@ -173,6 +256,16 @@ public:
     void forEach(std::function<void(T*)> function) {
         auto it = begin();
         auto itEnd = end();
+
+        while (it != itEnd) {
+            function(it.raw());
+            ++it;
+        }
+    }
+
+    void forEach(std::function<void(const T*)> function) const {
+        auto it = cbegin();
+        auto itEnd = cend();
 
         while (it != itEnd) {
             function(it.raw());

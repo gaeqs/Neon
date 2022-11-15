@@ -18,7 +18,7 @@
 
 #include <gl/GLMesh.h>
 
-class Shader;
+class GLShaderProgram;
 
 class Texture;
 
@@ -68,7 +68,7 @@ public:
 
     void uploadDataRaw(uint32_t id, const void* raw) const;
 
-    void draw(Shader* shader, TextureCollection& textures) const;
+    void draw(GLShaderProgram* shader, TextureCollection& textures) const;
 
 };
 
