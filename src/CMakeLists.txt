@@ -82,7 +82,7 @@ set(
         engine/shader/ShaderProgram.h
         engine/shader/ShaderType.h
         vulkan/VKShaderProgram.cpp
-        vulkan/VKShaderProgram.h)
+        vulkan/VKShaderProgram.h vulkan/VKModel.cpp vulkan/VKModel.h)
 
 cmrc_add_resource_library(dummy)
 
