@@ -10,7 +10,7 @@
 #include <engine/collection/IdentifiableCollection.h>
 #include <engine/Texture.h>
 
-class Room;
+class Application;
 
 /**
  * This class holds all textures of a room.
@@ -19,11 +19,11 @@ class TextureCollection : public IdentifiableCollection<Texture> {
 
 public:
 
-    explicit TextureCollection(Room* room);
+    explicit TextureCollection(Application* application);
 
     /**
      * Creates a new texture from a PNG image.
-     * @param data the data of the PNG image.
+     * @param resource the data of the PNG image.
      * @return a pointer to the new texture.
      */
     IdentifiableWrapper<Texture> createTextureFromPNG(

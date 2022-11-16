@@ -10,6 +10,7 @@
 struct DefaultInstancingData {
     glm::mat4 model;
 
+#ifdef USE_OPENGL
     static void setupInstancingVAO(uint32_t first) {
         for (int i = 0; i < 4; ++i) {
             int id = i + first;
@@ -20,6 +21,7 @@ struct DefaultInstancingData {
             glVertexAttribDivisor(id, 1);
         }
     }
+#endif
 
 };
 

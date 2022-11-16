@@ -6,6 +6,7 @@
 
 #include <engine/Application.h>
 #include <vulkan/buffer/SimpleBuffer.h>
+#include <cstring>
 
 VKShaderUniformBuffer::VKShaderUniformBuffer(
         Application* application, uint32_t size) :
@@ -112,7 +113,7 @@ VKShaderUniformBuffer::~VKShaderUniformBuffer() {
                                  _descriptorSetLayout, nullptr);
 }
 
-void VKShaderUniformBuffer::setBindingPoint(uint32_t point) const {
+void VKShaderUniformBuffer::setBindingPoint(uint32_t point) {
     _bindingPoint = point;
 }
 

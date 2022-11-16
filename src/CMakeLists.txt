@@ -3,8 +3,6 @@ set(
         engine/Application.cpp
         engine/Application.h
         util/Result.h
-        gl/GLShaderProgram.cpp
-        gl/GLShaderProgram.h
         engine/Room.cpp
         engine/Room.h
         engine/Camera.cpp
@@ -25,8 +23,6 @@ set(
         engine/Engine.h
         engine/collection/ComponentCollection.cpp
         engine/collection/ComponentCollection.h
-        gl/GLTexture.cpp
-        gl/GLTexture.h
         engine/collection/TextureCollection.cpp
         engine/collection/TextureCollection.h
         engine/IdentifiableWrapper.h
@@ -35,10 +31,11 @@ set(
         engine/Identifiable.h
         engine/Texture.cpp
         engine/Texture.h
-        gl/GLMesh.cpp
-        gl/GLMesh.h
-        gl/GLShaderRenderer.cpp
-        gl/GLShaderRenderer.h
+        engine/shader/ShaderProgram.cpp
+        engine/shader/ShaderProgram.h
+        engine/shader/ShaderType.h
+        engine/collection/IdentifiableCollection.h
+        engine/model/DefaultInstancingData.h
         util/component/CameraMovementComponent.cpp
         util/component/CameraMovementComponent.h
         engine/TextureFormat.h
@@ -51,38 +48,51 @@ set(
         engine/model/Mesh.h
         engine/model/Model.cpp
         engine/model/Model.h
-        gl/GLModel.cpp
-        gl/GLModel.h
         engine/shader/ShaderUniformBuffer.cpp
         engine/shader/ShaderUniformBuffer.h
-        gl/GLShaderUniformBuffer.cpp
-        gl/GLShaderUniformBuffer.h
-        engine/collection/IdentifiableCollection.h
-        engine/model/DefaultInstancingData.h
-        gl/GLApplication.cpp
-        gl/GLApplication.h
-        vulkan/VKApplication.cpp
-        vulkan/VKApplication.h
-        vulkan/VKSwapChainSupportDetails.h
-        vulkan/VKQueueFamilyIndices.h
-        vulkan/VKTexture.cpp
-        vulkan/VKTexture.h
-        vulkan/buffer/Buffer.h
-        vulkan/buffer/SimpleBuffer.cpp
-        vulkan/buffer/SimpleBuffer.h
-        vulkan/buffer/StagingBuffer.cpp
-        vulkan/buffer/StagingBuffer.h
-        vulkan/util/VKUtil.cpp
-        vulkan/util/VKUtil.h
-        vulkan/VKMesh.cpp
-        vulkan/VKMesh.h
-        vulkan/VKShaderUniformBuffer.cpp
-        vulkan/VKShaderUniformBuffer.h
-        engine/shader/ShaderProgram.cpp
-        engine/shader/ShaderProgram.h
-        engine/shader/ShaderType.h
-        vulkan/VKShaderProgram.cpp
-        vulkan/VKShaderProgram.h vulkan/VKModel.cpp vulkan/VKModel.h)
+)
+
+
+if (VULKAN_MODE)
+    list(APPEND SOURCES
+            vulkan/VKApplication.cpp
+            vulkan/VKApplication.h
+            vulkan/VKSwapChainSupportDetails.h
+            vulkan/VKQueueFamilyIndices.h
+            vulkan/VKTexture.cpp
+            vulkan/VKTexture.h
+            vulkan/buffer/Buffer.h
+            vulkan/buffer/SimpleBuffer.cpp
+            vulkan/buffer/SimpleBuffer.h
+            vulkan/buffer/StagingBuffer.cpp
+            vulkan/buffer/StagingBuffer.h
+            vulkan/util/VKUtil.cpp
+            vulkan/util/VKUtil.h
+            vulkan/VKMesh.cpp
+            vulkan/VKMesh.h
+            vulkan/VKShaderUniformBuffer.cpp
+            vulkan/VKShaderUniformBuffer.h
+            vulkan/VKShaderProgram.cpp
+            vulkan/VKShaderProgram.h
+            vulkan/VKModel.cpp
+            vulkan/VKModel.h)
+else ()
+    list(APPEND SOURCES
+            gl/GLTexture.cpp
+            gl/GLTexture.h
+            gl/GLModel.cpp
+            gl/GLModel.h
+            gl/GLShaderUniformBuffer.cpp
+            gl/GLShaderUniformBuffer.h
+            gl/GLApplication.cpp
+            gl/GLApplication.h
+            gl/GLShaderProgram.cpp
+            gl/GLShaderProgram.h
+            gl/GLMesh.cpp
+            gl/GLMesh.h
+            gl/GLShaderRenderer.cpp
+            gl/GLShaderRenderer.h)
+endif ()
 
 cmrc_add_resource_library(dummy)
 

@@ -8,8 +8,7 @@ set(
         GlobalParametersUpdaterComponent.h
 )
 
-compile_shaders(SHADERS shader/default.vert)
-
+compile_shaders(SHADERS shader/default.vert shader/default.frag)
 cmrc_add_resource_library(
         shaders
         NAMESPACE shaders

@@ -1,7 +1,6 @@
 function(compile_shaders out_var)
     set(result)
-    foreach (in_rel_f ${ARGN})
-        set(in_f shader/${in_rel_f})
+    foreach (in_f ${ARGN})
         file(RELATIVE_PATH src_f ${CMAKE_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/${in_f})
         set(out_spv_f "${PROJECT_BINARY_DIR}/${in_f}.spv")
         add_custom_command(OUTPUT ${out_spv_f}

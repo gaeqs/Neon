@@ -20,9 +20,9 @@ Room::Room(Application* application) :
                         DEFAULT_FRUSTUM_FOV)),
         _gameObjects(),
         _components(),
-        _textures(this),
-        _models(this),
-        _shaderUniformBuffers(this),
+        _textures(application),
+        _models(application),
+        _shaderUniformBuffers(application),
         _renderer() {
 }
 

@@ -48,7 +48,7 @@ public:
 
     [[nodiscard]] uint64_t getId() const override;
 
-    void setBindingPoint(uint32_t point) const;
+    void setBindingPoint(uint32_t point);
 
     void uploadData(const void* data, size_t size);
 

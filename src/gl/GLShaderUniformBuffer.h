@@ -6,6 +6,7 @@
 #define NEON_GLSHADERUNIFORMBUFFER_H
 
 #include <cstdint>
+#include <cstdlib>
 
 class Application;
 

@@ -24,6 +24,11 @@ namespace vulkan_util {
     void copyBuffer(VkDevice device, VkCommandPool pool, VkQueue queue,
                     VkBuffer source, VkBuffer destiny, VkDeviceSize size);
 
+    void copyBuffer(VkDevice device, VkCommandPool pool, VkQueue queue,
+                    VkBuffer source, VkBuffer destiny,
+                    VkDeviceSize sourceOffset, VkDeviceSize destinyOffset,
+                    VkDeviceSize size);
+
     void transitionImageLayout(
             VkDevice device, VkCommandPool pool, VkQueue queue,
             VkImage image, VkFormat format,

@@ -18,6 +18,8 @@
 
 #include <gl/GLMesh.h>
 
+class Application;
+
 class GLShaderProgram;
 
 class Texture;
@@ -41,7 +43,7 @@ class GLModel {
 
 public:
 
-    explicit GLModel(std::vector<GLMesh*> meshes);
+    GLModel(Application* application, std::vector<GLMesh*> meshes);
 
     ~GLModel();
 
@@ -49,6 +51,7 @@ public:
 
     template<class InstanceData>
     void defineInstanceStruct() {
+        if (_instancingStructType == typeid(InstanceData)) return;
         _instancingStructType = typeid(InstanceData);
         _instancingStructSize = sizeof(InstanceData);
         reinitializeBuffer();

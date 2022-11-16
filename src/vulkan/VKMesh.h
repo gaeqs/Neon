@@ -11,6 +11,8 @@
 #include <vulkan/vulkan.h>
 #include <engine/collection/IdentifiableCollection.h>
 #include <engine/shader/ShaderUniformBuffer.h>
+#include <vulkan/VKApplication.h>
+#include <vulkan/buffer/SimpleBuffer.h>
 
 class Application;
 
@@ -25,6 +27,9 @@ class VKMesh {
     VkPipelineLayout _pipelineLayout;
     VkRenderPass _renderPass;
     VkPipeline _pipeline;
+
+    std::optional<std::unique_ptr<SimpleBuffer>> _vertexBuffer;
+    std::optional<std::unique_ptr<SimpleBuffer>> _indexBuffer;
 
     std::vector<VkVertexInputAttributeDescription> _attributeDescriptions;
     VkVertexInputBindingDescription _bindingDescription;
@@ -53,10 +58,25 @@ public:
         _attributeDescriptions = Vertex::getAttributeDescriptions();
         _bindingDescription = Vertex::getBindingDescription();
 
+        _vertexBuffer = std::make_unique<SimpleBuffer>(
+                _vkApplication->getPhysicalDevice(),
+                _vkApplication->getDevice(),
+                VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
+                VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT,
+                vertices);
+
+        _indexBuffer = std::make_unique<SimpleBuffer>(
+                _vkApplication->getPhysicalDevice(),
+                _vkApplication->getDevice(),
+                VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
+                VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT,
+                indices);
+
         _dirty = true;
     }
 
     void draw(
+            VkCommandBuffer commandBuffer,
             const std::string& shaderName,
             VKShaderProgram* shader,
             const IdentifiableCollection<ShaderUniformBuffer>& uniforms);

@@ -16,7 +16,7 @@ uint64_t ShaderUniformBuffer::getId() const {
     return _id;
 }
 
-void ShaderUniformBuffer::setBindingPoint(uint32_t point) const {
+void ShaderUniformBuffer::setBindingPoint(uint32_t point) {
     _implementation.setBindingPoint(point);
 }
 

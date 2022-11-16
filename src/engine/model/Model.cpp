@@ -19,9 +19,10 @@ std::vector<Mesh::Implementation*> Model::getMeshImplementations(
     return vector;
 }
 
-Model::Model(std::vector<std::unique_ptr<Mesh>>& meshes) :
+Model::Model(Application* application,
+             std::vector<std::unique_ptr<Mesh>>& meshes) :
         _id(MODEL_ID_GENERATOR++),
-        _implementation(getMeshImplementations(meshes)),
+        _implementation(application, getMeshImplementations(meshes)),
         _meshes(std::move(meshes)),
         _shader() {
 }
@@ -58,6 +59,6 @@ bool Model::freeInstance(uint32_t id) {
     return _implementation.freeInstance(id);
 }
 
-void Model::uploadDataRaw(uint32_t id, const void* raw) const {
+void Model::uploadDataRaw(uint32_t id, const void* raw) {
     _implementation.uploadDataRaw(id, raw);
 }

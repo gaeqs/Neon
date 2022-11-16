@@ -37,7 +37,7 @@ public:
 
     ~VKShaderUniformBuffer();
 
-    void setBindingPoint(uint32_t point) const;
+    void setBindingPoint(uint32_t point);
 
     void uploadData(const void* data, size_t size);
 

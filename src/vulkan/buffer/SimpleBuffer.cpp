@@ -5,6 +5,7 @@
 #include "SimpleBuffer.h"
 
 #include <vulkan/util/VKUtil.h>
+#include <cstring>
 
 std::optional<std::shared_ptr<BufferMap<char>>> SimpleBuffer::rawMap() {
     return std::make_shared<SimpleBufferMap<char>>(_device, _vertexBufferMemory,

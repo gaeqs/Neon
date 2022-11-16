@@ -68,6 +68,22 @@ namespace vulkan_util {
         endSingleTimeCommandBuffer(device, queue, pool, buffer);
     }
 
+    void copyBuffer(VkDevice device, VkCommandPool pool, VkQueue queue,
+                    VkBuffer source, VkBuffer destiny,
+                    VkDeviceSize sourceOffset, VkDeviceSize destinyOffset,
+                    VkDeviceSize size) {
+        auto buffer = beginSingleTimeCommandBuffer(device, pool);
+
+        VkBufferCopy copyRegion{};
+        copyRegion.size = size;
+        copyRegion.srcOffset = sourceOffset;
+        copyRegion.dstOffset = destinyOffset;
+        vkCmdCopyBuffer(buffer, source, destiny, 1, &copyRegion);
+
+        endSingleTimeCommandBuffer(device, queue, pool, buffer);
+    }
+
+
     void transitionImageLayout(
             VkDevice device, VkCommandPool pool, VkQueue queue,
             VkImage image, VkFormat format,

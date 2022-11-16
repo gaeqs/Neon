@@ -12,20 +12,20 @@
 #include <engine/IdentifiableWrapper.h>
 #include <util/ClusteredLinkedCollection.h>
 
-class Room;
+class Application;
 
 template<class T> requires std::is_base_of_v<Identifiable, T>
 class IdentifiableCollection {
 
-    Room* _room;
+    Application* _application;
     ClusteredLinkedCollection<T> _cluster;
     std::unordered_map<uint64_t, IdentifiableWrapper<T>> _idMap;
     uint64_t _modificationId;
 
 public:
 
-    explicit IdentifiableCollection(Room* room) :
-            _room(room),
+    explicit IdentifiableCollection(Application* application) :
+            _application(application),
             _modificationId(0) {
     }
 
@@ -39,7 +39,7 @@ public:
 
     template<class... Args>
     IdentifiableWrapper<T> create(Args&& ... values) {
-        IdentifiableWrapper<T> ptr = _cluster.emplace(_room, values...);
+        IdentifiableWrapper<T> ptr = _cluster.emplace(_application, values...);
         _idMap[ptr->getId()] = ptr;
         ++_modificationId;
         return ptr;

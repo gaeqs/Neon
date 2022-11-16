@@ -145,6 +145,8 @@ VKMesh::VKMesh(Application* application, Material& material) :
         _pipelineLayout(VK_NULL_HANDLE),
         _renderPass(VK_NULL_HANDLE),
         _pipeline(VK_NULL_HANDLE),
+        _vertexBuffer(),
+        _indexBuffer(),
         _attributeDescriptions(),
         _bindingDescription({}),
         _currentShader(),
@@ -157,9 +159,13 @@ VKMesh::~VKMesh() {
 }
 
 void VKMesh::draw(
+        VkCommandBuffer commandBuffer,
         const std::string& shaderName,
         VKShaderProgram* shader,
         const IdentifiableCollection<ShaderUniformBuffer>& uniforms) {
+
+    if (!_vertexBuffer.has_value()) return;
+
     _dirty |= _currentShader == shaderName
               || uniforms.getModificationId() != _currentUniformStatus;
     _currentShader = shaderName;
@@ -170,4 +176,23 @@ void VKMesh::draw(
         destroyGraphicPipeline();
         createGraphicPipeline(shader, uniforms);
     }
+
+    VkBuffer buffers[] = {_vertexBuffer.value()->getRaw()};
+    VkDeviceSize offsets[] = {0};
+
+    vkCmdBindPipeline(commandBuffer,
+                      VK_PIPELINE_BIND_POINT_GRAPHICS,
+                      _pipeline);
+    vkCmdBindVertexBuffers(commandBuffer, 0, 1, buffers, offsets);
+    vkCmdBindIndexBuffer(commandBuffer,
+                         _indexBuffer.value()->getRaw(),
+                         0, VK_INDEX_TYPE_UINT32);
+
+    uniforms.forEach([commandBuffer, this](const ShaderUniformBuffer* uniform) {
+        uniform->getImplementation().bind(commandBuffer, _pipelineLayout);
+    });
+
+    vkCmdDrawIndexed(commandBuffer,
+                     _indexBuffer.value()->size() / sizeof(uint32_t),
+                     1, 0, 0, 0);
 }

@@ -16,7 +16,8 @@ void GLModel::reinitializeBuffer() const {
                  nullptr, GL_DYNAMIC_DRAW);
 }
 
-GLModel::GLModel(std::vector<GLMesh*> meshes) :
+GLModel::GLModel([[maybe_unused]] Application* application,
+                 std::vector<GLMesh*> meshes) :
         _meshes(std::move(meshes)),
         _instancingBuffer(0),
         _instancingStructType(std::type_index(typeid(DefaultInstancingData))),

@@ -8,8 +8,8 @@
 
 #include <stb_image.h>
 
-TextureCollection::TextureCollection(Room* room)
-        : IdentifiableCollection(room) {
+TextureCollection::TextureCollection(Application* application)
+        : IdentifiableCollection(application) {
 }
 
 IdentifiableWrapper<Texture>

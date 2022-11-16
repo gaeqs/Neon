@@ -22,6 +22,7 @@
 
 #endif
 
+class Application;
 
 class Model : public Identifiable {
 
@@ -51,7 +52,8 @@ private:
 
 public:
 
-    explicit Model(std::vector<std::unique_ptr<Mesh>>& meshes);
+    explicit Model(Application* application,
+                   std::vector<std::unique_ptr<Mesh>>& meshes);
 
     [[nodiscard]] uint64_t getId() const override;
 
@@ -79,7 +81,7 @@ public:
         _implementation.uploadData(id, data);
     }
 
-    void uploadDataRaw(uint32_t id, const void* raw) const;
+    void uploadDataRaw(uint32_t id, const void* raw);
 
 };
 
