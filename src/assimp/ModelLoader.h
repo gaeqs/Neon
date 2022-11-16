@@ -35,6 +35,7 @@ struct ModelLoaderResult {
 
 class ModelLoader {
 
+    Application* _application;
     IdentifiableCollection<Model>& _models;
     TextureCollection& _textures;
 
@@ -69,7 +70,7 @@ class ModelLoader {
         }
 
 
-        auto result = std::make_unique<Mesh>();
+        auto result = std::make_unique<Mesh>(_application);
         result->uploadVertexData(vertices, indices);
         return std::move(result);
     }
@@ -86,8 +87,10 @@ class ModelLoader {
 
 public:
 
-    ModelLoader(IdentifiableCollection<Model>& models,
-                TextureCollection& textures);
+    ModelLoader(
+            Application* _application,
+            IdentifiableCollection<Model>& models,
+            TextureCollection& textures);
 
     explicit ModelLoader(Room* room);
 

@@ -23,6 +23,7 @@ class VKShaderProgram;
 class VKMesh {
 
     VKApplication* _vkApplication;
+    Material& _material;
 
     VkPipelineLayout _pipelineLayout;
     VkRenderPass _renderPass;
@@ -32,7 +33,9 @@ class VKMesh {
     std::optional<std::unique_ptr<SimpleBuffer>> _indexBuffer;
 
     std::vector<VkVertexInputAttributeDescription> _attributeDescriptions;
+    std::vector<VkVertexInputAttributeDescription> _instancingAttributeDescriptions;
     VkVertexInputBindingDescription _bindingDescription;
+    VkVertexInputBindingDescription _instancingBindingDescription;
 
     std::string _currentShader;
     uint64_t _currentUniformStatus;
@@ -50,6 +53,15 @@ public:
     VKMesh(Application* application, Material& material);
 
     ~VKMesh();
+
+    template<class InstancingData>
+    void configureInstancingBuffer() {
+        _instancingAttributeDescriptions =
+                InstancingData::getInstancingAttributeDescriptions();
+        _instancingBindingDescription =
+                InstancingData::getInstancingBindingDescription();
+        _dirty = true;
+    }
 
     template<class Vertex>
     void uploadData(const std::vector<Vertex>& vertices,
@@ -77,8 +89,9 @@ public:
 
     void draw(
             VkCommandBuffer commandBuffer,
-            const std::string& shaderName,
             VKShaderProgram* shader,
+            VkBuffer instancingBuffer,
+            uint32_t instancingElements,
             const IdentifiableCollection<ShaderUniformBuffer>& uniforms);
 
 };

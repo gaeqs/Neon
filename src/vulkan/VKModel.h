@@ -45,6 +45,9 @@ public:
         _instancingStructType = typeid(InstanceData);
         _instancingStructSize = sizeof(InstanceData);
         reinitializeBuffer();
+        for (const auto& mesh: _meshes) {
+            mesh->configureInstancingBuffer<InstanceData>();
+        }
     }
 
     [[nodiscard]] Result<uint32_t*, std::string> createInstance();
@@ -57,6 +60,10 @@ public:
     }
 
     void uploadDataRaw(uint32_t id, const void* raw);
+
+    void draw(VkCommandBuffer buffer,
+              VKShaderProgram* shader,
+              const IdentifiableCollection<ShaderUniformBuffer>& uniforms);
 
 };
 

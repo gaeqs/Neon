@@ -12,12 +12,14 @@ GlobalParametersUpdaterComponent::
 }
 
 void GlobalParametersUpdaterComponent::onStart() {
-    _buffer = getRoom()->getShaderUniformBuffers().create();
+    _buffer = getRoom()->getShaderUniformBuffers().create(
+            static_cast<uint32_t>(sizeof(GlobalParameters))
+    );
     _buffer->setBindingPoint(0);
 }
 
 void GlobalParametersUpdaterComponent::onUpdate(float deltaTime) {
-    _buffer->uploadData(GlobalParameters {
-        getRoom()->getCamera().getViewProjection()
+    _buffer->uploadData(GlobalParameters{
+            getRoom()->getCamera().getViewProjection()
     });
 }

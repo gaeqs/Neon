@@ -34,6 +34,9 @@ VKModel::VKModel(Application* application, std::vector<VKMesh*> meshes) :
                 VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
                 _instancingStructSize * BUFFER_DEFAULT_SIZE
         ) {
+    for (const auto& mesh: _meshes) {
+        mesh->configureInstancingBuffer<DefaultInstancingData>();
+    }
 }
 
 const std::type_index& VKModel::getInstancingStructType() const {
@@ -99,5 +102,15 @@ void VKModel::uploadDataRaw(uint32_t id, const void* raw) {
         memcpy(map.value()->raw() + _instancingStructSize * id,
                raw,
                _instancingStructSize);
+    }
+}
+
+void VKModel::draw(VkCommandBuffer buffer,
+                   VKShaderProgram* shader,
+                   const IdentifiableCollection<ShaderUniformBuffer>& uniforms) {
+    if (_positions.empty()) return;
+    for (const auto& item: _meshes) {
+        item->draw(buffer, shader, _instancingBuffer.getRaw(),
+                   _positions.size(), uniforms);
     }
 }

@@ -1,8 +1,10 @@
 #include <iostream>
 #include <vector>
+#include <filesystem>
 
 #include <engine/Engine.h>
-#include <gl/GLShaderRenderer.h>
+#include <engine/shader/ShaderProgram.h>
+#include <vulkan/VKShaderRenderer.h>
 #include <util/component/CameraMovementComponent.h>
 #include <assimp/ModelLoader.h>
 
@@ -15,17 +17,21 @@ constexpr int32_t HEIGHT = 600;
 
 CMRC_DECLARE(shaders);
 
-std::shared_ptr<Room> getTestRoom() {
-    auto renderer = std::make_shared<GLShaderRenderer>();
+std::shared_ptr<Room> getTestRoom(Application* application) {
+    auto renderer = std::make_shared<VKShaderRenderer>(application);
 
-    auto defaultVert = cmrc::shaders::get_filesystem().open("default.vert");
-    auto defaultFrag = cmrc::shaders::get_filesystem().open("default.frag");
+    auto defaultVert = cmrc::shaders::get_filesystem().open("shader/default.vert.spv");
+    auto defaultFrag = cmrc::shaders::get_filesystem().open("shader/default.frag.spv");
 
-    auto shader = GLShaderProgram::newShader(defaultVert, defaultFrag);
-    if (!shader.isOk()) throw std::runtime_error(shader.getError());
-    renderer->insertShader("default", shader.getResult());
+    auto shader = std::make_shared<ShaderProgram>(application);
+    shader->addShader(ShaderType::VERTEX, defaultVert);
+    shader->addShader(ShaderType::FRAGMENT, defaultFrag);
 
-    auto room = std::make_shared<Room>();
+    auto result = shader->compile();
+    if (result.has_value()) throw std::runtime_error(result.value());
+    renderer->insertShader("default", shader);
+
+    auto room = std::make_shared<Room>(application);
     room->setRenderer(renderer);
 
     auto parametersUpdater = room->newGameObject();
@@ -45,8 +51,15 @@ std::shared_ptr<Room> getTestRoom() {
     cameraController->newComponent<CameraMovementComponent>();
 
 
-    auto sansModel = ModelLoader(room).loadModel<TestVertex>(
-            R"(resource/Sans)", "Sans.obj").model;
+    auto sansResult = ModelLoader(room).loadModel<TestVertex>(
+            R"(resource/Sans)", "Sans.obj");
+
+    if(!sansResult.valid) {
+        std::cout << "Couldn't load Sans model!" << std::endl;
+        std::cout << std::filesystem::current_path() << std::endl;
+        exit(1);
+    }
+    auto sansModel = sansResult.model;
     sansModel->setShader("default");
 
     int q = static_cast<int>(std::sqrt(100));
@@ -72,7 +85,7 @@ int main() {
         return EXIT_FAILURE;
     }
 
-    application.setRoom(getTestRoom());
+    application.setRoom(getTestRoom(&application));
 
     auto loopResult = application.startGameLoop();
     if (loopResult.isOk()) {

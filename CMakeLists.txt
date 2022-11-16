@@ -3,6 +3,8 @@ function(compile_shaders out_var)
     foreach (in_f ${ARGN})
         file(RELATIVE_PATH src_f ${CMAKE_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/${in_f})
         set(out_spv_f "${PROJECT_BINARY_DIR}/${in_f}.spv")
+        get_filename_component(parent ${out_spv_f} PATH)
+        file(MAKE_DIRECTORY ${parent})
         add_custom_command(OUTPUT ${out_spv_f}
                 COMMAND glslc ${src_f} -o ${out_spv_f}
                 DEPENDS ${in_f}
@@ -43,12 +45,9 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/lib/glad/include)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/lib/stb/)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/lib/stb/src)
 
-list(APPEND LIBRARIES glad)
-list(APPEND LIBRARIES glfw ${GLFW_LIBRARIES})
-list(APPEND LIBRARIES ${VULKAN_LIB_LIST})
-
 if (WIN32)
     list(APPEND LIBRARIES assimp::assimp)
+
     include_directories(AFTER ${VULKAN_PATH}/Include)
     link_directories(${VULKAN_PATH}/Bin;${VULKAN_PATH}/Lib;)
     set(VULKAN_LIB_LIST "vulkan-1")
@@ -56,6 +55,10 @@ else ()
     list(APPEND LIBRARIES assimp)
     set(VULKAN_LIB_LIST "vulkan")
 endif ()
+
+list(APPEND LIBRARIES glad)
+list(APPEND LIBRARIES glfw ${GLFW_LIBRARIES})
+list(APPEND LIBRARIES ${VULKAN_LIB_LIST})
 
 include_directories(src)
 add_subdirectory(src)

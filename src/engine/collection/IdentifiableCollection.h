@@ -24,6 +24,8 @@ class IdentifiableCollection {
 
 public:
 
+    IdentifiableCollection(const IdentifiableCollection& other) = delete;
+
     explicit IdentifiableCollection(Application* application) :
             _application(application),
             _modificationId(0) {

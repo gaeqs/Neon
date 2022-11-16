@@ -50,7 +50,7 @@ set(
         engine/model/Model.h
         engine/shader/ShaderUniformBuffer.cpp
         engine/shader/ShaderUniformBuffer.h
-)
+        vulkan/VKShaderRenderer.cpp vulkan/VKShaderRenderer.h)
 
 
 if (VULKAN_MODE)
@@ -100,7 +100,7 @@ add_library(neon STATIC ${SOURCES})
 target_link_libraries(neon PUBLIC ${LIBRARIES} ${CMAKE_DL_LIBS} dummy)
 
 if (VULKAN_MODE)
-    target_compile_definitions(neon PUBLIC USE_OPENGL)
-else ()
     target_compile_definitions(neon PUBLIC USE_VULKAN)
+else ()
+    target_compile_definitions(neon PUBLIC USE_OPENGL)
 endif ()

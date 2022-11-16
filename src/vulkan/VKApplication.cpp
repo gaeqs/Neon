@@ -56,6 +56,7 @@ void VKApplication::preWindowCreation() {
 }
 
 void VKApplication::postWindowCreation(GLFWwindow* window) {
+    _window = window;
     createInstance();
     setupDebugMessenger();
     createSurface();

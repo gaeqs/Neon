@@ -39,6 +39,7 @@ public:
     using Implementation = VKShaderProgram;
 #endif
 
+private:
     uint64_t _id;
     bool _compiled;
     std::unordered_map<ShaderType, cmrc::file> _rawShaders;
@@ -46,11 +47,16 @@ public:
 
 public:
 
-    uint64_t getId() const override;
 
     ShaderProgram(const ShaderProgram& other) = delete;
 
     explicit ShaderProgram(Application* application);
+
+    [[nodiscard]] uint64_t getId() const override;
+
+    const Implementation& getImplementation() const;
+
+    Implementation& getImplementation();
 
     bool addShader(ShaderType type, cmrc::file resource);
 

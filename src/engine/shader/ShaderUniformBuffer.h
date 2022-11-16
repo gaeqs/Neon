@@ -53,7 +53,7 @@ public:
     void uploadData(const void* data, size_t size);
 
     template<class T>
-    void uploadData(const T& data) const {
+    void uploadData(const T& data) {
         uploadData(&data, sizeof(T));
     }
 

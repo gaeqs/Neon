@@ -10,13 +10,17 @@ inline std::string internalGetTextureId(const aiString& string) {
     return std::string(string.data, std::min(string.length, 2u));
 }
 
-ModelLoader::ModelLoader(IdentifiableCollection<Model>& models,
-                         TextureCollection& textures) :
+ModelLoader::ModelLoader(
+        Application* application,
+        IdentifiableCollection<Model>& models,
+        TextureCollection& textures) :
+        _application(application),
         _models(models),
         _textures(textures) {
 }
 
 ModelLoader::ModelLoader(Room* room) :
+        _application(room->getApplication()),
         _models(room->getModels()),
         _textures(room->getTextures()) {
 }

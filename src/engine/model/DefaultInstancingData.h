@@ -22,6 +22,31 @@ struct DefaultInstancingData {
         }
     }
 #endif
+#ifdef USE_VULKAN
+
+    static VkVertexInputBindingDescription getInstancingBindingDescription() {
+        VkVertexInputBindingDescription bindingDescription{};
+        bindingDescription.binding = 1;
+        bindingDescription.stride = sizeof(DefaultInstancingData);
+        bindingDescription.inputRate = VK_VERTEX_INPUT_RATE_INSTANCE;
+        return bindingDescription;
+    }
+
+    static std::vector<VkVertexInputAttributeDescription>
+    getInstancingAttributeDescriptions() {
+        std::vector<VkVertexInputAttributeDescription> values;
+        values.reserve(4);
+
+        for (uint32_t i = 0; i < 4; ++i) {
+            values.push_back(VkVertexInputAttributeDescription{
+                    i, 1, VK_FORMAT_R32G32B32A32_SFLOAT,
+                    static_cast<uint32_t>(sizeof(float) * 4 * i)}
+            );
+        }
+        return values;
+    }
+
+#endif
 
 };
 

@@ -18,6 +18,14 @@ uint64_t ShaderProgram::getId() const {
     return _id;
 }
 
+const ShaderProgram::Implementation& ShaderProgram::getImplementation() const {
+    return _implementation;
+}
+
+ShaderProgram::Implementation& ShaderProgram::getImplementation() {
+    return _implementation;
+}
+
 bool ShaderProgram::addShader(ShaderType type, cmrc::file resource) {
     if (_compiled) return false;
     _rawShaders[type] = resource;

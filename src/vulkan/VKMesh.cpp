@@ -22,12 +22,25 @@ void VKMesh::createGraphicPipeline(
     dynamicState.dynamicStateCount = static_cast<uint32_t>(dynamicStates.size());
     dynamicState.pDynamicStates = dynamicStates.data();
 
+    VkVertexInputBindingDescription bindingDescriptions[] = {
+            _bindingDescription, _instancingBindingDescription};
+
+    std::vector<VkVertexInputAttributeDescription> attributeDescriptions;
+    attributeDescriptions.reserve(_instancingAttributeDescriptions.size() +
+                                  _attributeDescriptions.size());
+    attributeDescriptions.insert(attributeDescriptions.end(),
+                                 _attributeDescriptions.begin(),
+                                 _attributeDescriptions.end());
+    attributeDescriptions.insert(attributeDescriptions.end(),
+                                 _instancingAttributeDescriptions.begin(),
+                                 _instancingAttributeDescriptions.end());
+
     VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
     vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-    vertexInputInfo.vertexBindingDescriptionCount = 1;
-    vertexInputInfo.pVertexBindingDescriptions = &_bindingDescription;
-    vertexInputInfo.vertexAttributeDescriptionCount = _attributeDescriptions.size();
-    vertexInputInfo.pVertexAttributeDescriptions = _attributeDescriptions.data();
+    vertexInputInfo.vertexBindingDescriptionCount = 2;
+    vertexInputInfo.pVertexBindingDescriptions = bindingDescriptions;
+    vertexInputInfo.vertexAttributeDescriptionCount = attributeDescriptions.size();
+    vertexInputInfo.pVertexAttributeDescriptions = attributeDescriptions.data();
 
     VkPipelineInputAssemblyStateCreateInfo inputAssembly{};
     inputAssembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
@@ -142,13 +155,16 @@ void VKMesh::destroyGraphicPipeline() {
 
 VKMesh::VKMesh(Application* application, Material& material) :
         _vkApplication(&application->getImplementation()),
+        _material(material),
         _pipelineLayout(VK_NULL_HANDLE),
         _renderPass(VK_NULL_HANDLE),
         _pipeline(VK_NULL_HANDLE),
         _vertexBuffer(),
         _indexBuffer(),
         _attributeDescriptions(),
+        _instancingAttributeDescriptions(),
         _bindingDescription({}),
+        _instancingBindingDescription({}),
         _currentShader(),
         _currentUniformStatus(0),
         _dirty(true) {
@@ -160,15 +176,16 @@ VKMesh::~VKMesh() {
 
 void VKMesh::draw(
         VkCommandBuffer commandBuffer,
-        const std::string& shaderName,
         VKShaderProgram* shader,
+        VkBuffer instancingBuffer,
+        uint32_t instancingElements,
         const IdentifiableCollection<ShaderUniformBuffer>& uniforms) {
 
     if (!_vertexBuffer.has_value()) return;
 
-    _dirty |= _currentShader == shaderName
+    _dirty |= _currentShader == _material.getShader()
               || uniforms.getModificationId() != _currentUniformStatus;
-    _currentShader = shaderName;
+    _currentShader = _material.getShader();
     _currentUniformStatus = uniforms.getModificationId();
 
     if (_dirty) {
@@ -177,22 +194,21 @@ void VKMesh::draw(
         createGraphicPipeline(shader, uniforms);
     }
 
-    VkBuffer buffers[] = {_vertexBuffer.value()->getRaw()};
-    VkDeviceSize offsets[] = {0};
+    VkBuffer buffers[] = {_vertexBuffer.value()->getRaw(), instancingBuffer};
+    VkDeviceSize offsets[] = {0, 0};
 
     vkCmdBindPipeline(commandBuffer,
                       VK_PIPELINE_BIND_POINT_GRAPHICS,
                       _pipeline);
-    vkCmdBindVertexBuffers(commandBuffer, 0, 1, buffers, offsets);
+    vkCmdBindVertexBuffers(commandBuffer, 0, 2, buffers, offsets);
     vkCmdBindIndexBuffer(commandBuffer,
                          _indexBuffer.value()->getRaw(),
                          0, VK_INDEX_TYPE_UINT32);
-
     uniforms.forEach([commandBuffer, this](const ShaderUniformBuffer* uniform) {
         uniform->getImplementation().bind(commandBuffer, _pipelineLayout);
     });
 
     vkCmdDrawIndexed(commandBuffer,
                      _indexBuffer.value()->size() / sizeof(uint32_t),
-                     1, 0, 0, 0);
+                     instancingElements, 0, 0, 0);
 }
