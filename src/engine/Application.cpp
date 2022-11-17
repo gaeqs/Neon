@@ -62,9 +62,6 @@ Result<GLFWwindow*, std::string> Application::init(const std::string& name) {
     glfwSetKeyCallback(_window, key_size_callback);
     glfwSetCursorPosCallback(_window, cursor_pos_callback);
 
-    glfwSetInputMode(_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-    glfwGetCursorPos(_window, &_last_cursor_pos.x, &_last_cursor_pos.y);
-
     _implementation.postWindowCreation(_window);
 
     return {_window};
@@ -139,6 +136,15 @@ void Application::setRoom(const std::shared_ptr<Room>& room) {
         throw std::runtime_error("Room's application is not this application!");
     }
     _room = room;
+}
+
+void Application::lockMouse(bool lock) {
+    if (lock) {
+        glfwSetInputMode(_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        glfwGetCursorPos(_window, &_last_cursor_pos.x, &_last_cursor_pos.y);
+    } else {
+        glfwSetInputMode(_window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+    }
 }
 
 void Application::internalForceSizeValues(int32_t width, int32_t height) {

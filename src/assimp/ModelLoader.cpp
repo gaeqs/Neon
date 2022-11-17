@@ -26,6 +26,7 @@ ModelLoader::ModelLoader(Room* room) :
 }
 
 ModelLoader::ModelLoader(const std::shared_ptr<Room>& room) :
+        _application(room->getApplication()),
         _models(room->getModels()),
         _textures(room->getTextures()) {
 }

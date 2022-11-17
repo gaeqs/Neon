@@ -15,6 +15,8 @@ uint32_t GLShaderProgram::getGLShaderType(ShaderType type) {
             return GL_VERTEX_SHADER;
         case ShaderType::FRAGMENT:
             return GL_FRAGMENT_SHADER;
+        default:
+            return GL_VERTEX_SHADER;
     }
 }
 

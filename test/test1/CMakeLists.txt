@@ -6,7 +6,7 @@ set(
         TestVertex.h
         GlobalParametersUpdaterComponent.cpp
         GlobalParametersUpdaterComponent.h
-)
+        LockMouseComponent.cpp LockMouseComponent.h)
 
 compile_shaders(SHADERS shader/default.vert shader/default.frag)
 cmrc_add_resource_library(

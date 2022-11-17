@@ -6,7 +6,6 @@
 
 #include <stdexcept>
 #include <iostream>
-#include <algorithm>
 #include <cstring>
 
 static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
@@ -415,8 +414,9 @@ void VKApplication::createLogicalDevice() {
         queueCreateInfos.push_back(queueCreateInfo);
     }
 
-
     VkPhysicalDeviceFeatures deviceFeatures{};
+    deviceFeatures.samplerAnisotropy = VK_TRUE;
+
     VkDeviceCreateInfo createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
     createInfo.queueCreateInfoCount = queueCreateInfos.size();

@@ -77,6 +77,8 @@ public:
 
     void setRoom(const std::shared_ptr<Room>& room);
 
+    void lockMouse(bool lock);
+
     //region INTERNAL CALLS
 
     void internalForceSizeValues(int32_t width, int32_t height);

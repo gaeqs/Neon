@@ -11,6 +11,7 @@
 #include "TestComponent.h"
 #include "TestVertex.h"
 #include "GlobalParametersUpdaterComponent.h"
+#include "LockMouseComponent.h"
 
 constexpr int32_t WIDTH = 800;
 constexpr int32_t HEIGHT = 600;
@@ -36,6 +37,7 @@ std::shared_ptr<Room> getTestRoom(Application* application) {
 
     auto parametersUpdater = room->newGameObject();
     parametersUpdater->newComponent<GlobalParametersUpdaterComponent>();
+    parametersUpdater->newComponent<LockMouseComponent>();
 
     auto gameObject = room->newGameObject();
     gameObject->newComponent<TestComponent>();
