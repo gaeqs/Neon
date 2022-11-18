@@ -21,8 +21,8 @@ CMRC_DECLARE(shaders);
 std::shared_ptr<Room> getTestRoom(Application* application) {
     auto renderer = std::make_shared<VKShaderRenderer>(application);
 
-    auto defaultVert = cmrc::shaders::get_filesystem().open("shader/default.vert.spv");
-    auto defaultFrag = cmrc::shaders::get_filesystem().open("shader/default.frag.spv");
+    auto defaultVert = cmrc::shaders::get_filesystem().open("default.vert");
+    auto defaultFrag = cmrc::shaders::get_filesystem().open("default.frag");
 
     auto shader = std::make_shared<ShaderProgram>(application);
     shader->addShader(ShaderType::VERTEX, defaultVert);

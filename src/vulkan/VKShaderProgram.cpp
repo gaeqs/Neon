@@ -5,6 +5,7 @@
 #include "VKShaderProgram.h"
 
 #include <engine/Application.h>
+#include <vulkan/spirv/SPIRVCompiler.h>
 
 VkShaderStageFlagBits VKShaderProgram::getStage(ShaderType type) {
     switch (type) {
@@ -38,11 +39,20 @@ VKShaderProgram::compile(
         const std::unordered_map<ShaderType, cmrc::file>& raw) {
     deleteShaders();
 
+    SPIRVCompiler compiler;
+
     for (const auto& [type, resource]: raw) {
+
+        auto result = compiler.GLSLtoSPV(getStage(type), resource.begin());
+
+        if (!result.isOk()) {
+            return result.getError();
+        }
+
         VkShaderModuleCreateInfo moduleInfo{};
         moduleInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-        moduleInfo.codeSize = resource.size();
-        moduleInfo.pCode = reinterpret_cast<const uint32_t*>(resource.begin());
+        moduleInfo.codeSize = result.getResult().size();
+        moduleInfo.pCode = result.getResult().data();
 
         VkShaderModule shaderModule;
 

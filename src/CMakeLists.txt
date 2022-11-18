@@ -49,7 +49,7 @@ set(
         engine/model/Model.cpp
         engine/model/Model.h
         engine/shader/ShaderUniformBuffer.cpp
-        engine/shader/ShaderUniformBuffer.h)
+        engine/shader/ShaderUniformBuffer.h vulkan/spirv/SPIRVCompiler.cpp vulkan/spirv/SPIRVCompiler.h)
 
 
 if (VULKAN_MODE)

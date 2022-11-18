@@ -8,7 +8,6 @@ set(
         GlobalParametersUpdaterComponent.h
         LockMouseComponent.cpp LockMouseComponent.h)
 
-compile_shaders(SHADERS shader/default.vert shader/default.frag)
 cmrc_add_resource_library(
         shaders
         NAMESPACE shaders
@@ -16,8 +15,6 @@ cmrc_add_resource_library(
         shader/default.vert
         shader/default.frag
 )
-
-cmrc_add_resources(shaders WHENCE ${PROJECT_BINARY_DIR} ${SHADERS})
 
 cmrc_add_resource_library(
         resources

@@ -23,6 +23,7 @@ set(CMAKE_CXX_STANDARD 20)
 option(VULKAN_MODE "Enables Vulkan" OFF)
 option(NEON_TESTS "Enables Neon tests" OFF)
 
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMake")
 include(CMake/CMakeRC.cmake)
 
 project(neon)
@@ -30,6 +31,7 @@ project(neon)
 find_package(glfw3 CONFIG REQUIRED)
 find_package(glm CONFIG REQUIRED)
 find_package(assimp CONFIG REQUIRED)
+find_package(GLSLang COMPONENTS GLSLang SPIRV REQUIRED)
 find_package(Vulkan REQUIRED)
 
 # Try extracting VulkanSDK path from ${Vulkan_INCLUDE_DIRS}
@@ -60,6 +62,7 @@ endif ()
 list(APPEND LIBRARIES glad)
 list(APPEND LIBRARIES glfw ${GLFW_LIBRARIES})
 list(APPEND LIBRARIES ${VULKAN_LIB_LIST})
+list(APPEND LIBRARIES GLSLang::GLSLang GLSLang::SPIRV)
 
 include_directories(src)
 add_subdirectory(src)
