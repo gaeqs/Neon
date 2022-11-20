@@ -92,14 +92,13 @@ Result<uint32_t, std::string> Application::startGameLoop() {
                 _room->update(seconds);
             }
 
-            _implementation.preDraw();
 
             glfwPollEvents();
 
+            _implementation.preDraw();
             if (_room != nullptr) {
                 _room->draw();
             }
-
             _implementation.postDraw();
 
             frames++;

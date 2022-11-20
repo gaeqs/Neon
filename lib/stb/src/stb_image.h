@@ -209,7 +209,7 @@ RECENT REVISION HISTORY:
 //
 // UNICODE:
 //
-//   If compiling for Windows and you wish to use Unicode filenames, compile
+//   If compiling for Windows and you wish to use Unicode filenames, addShader
 //   with
 //       #define STBI_WINDOWS_UTF8
 //   and pass utf8-encoded filenames. Call stbi_convert_wchar_to_utf8 to convert
@@ -693,7 +693,7 @@ typedef unsigned char validate_uint32[sizeof(stbi__uint32)==4 ? 1 : -1];
 #endif
 
 #if defined(__GNUC__) && defined(STBI__X86_TARGET) && !defined(__SSE2__) && !defined(STBI_NO_SIMD)
-// gcc doesn't support sse2 intrinsics unless you compile with -msse2,
+// gcc doesn't support sse2 intrinsics unless you addShader with -msse2,
 // which in turn means it gets to use SSE2 everywhere. This is unfortunate,
 // but previous attempts to provide the SSE2 functions with runtime
 // detection caused numerous issues. The way architecture extensions are
@@ -761,7 +761,7 @@ static int stbi__sse2_available(void)
 #if !defined(STBI_NO_JPEG) && defined(STBI_SSE2)
 static int stbi__sse2_available(void)
 {
-   // If we're even attempting to compile this on GCC/Clang, that means
+   // If we're even attempting to addShader this on GCC/Clang, that means
    // -msse2 is on, which means the compiler is allowed to use SSE2
    // instructions at will, and so are we.
    return 1;
@@ -7878,7 +7878,7 @@ SOFTWARE.
 ------------------------------------------------------------------------------
 ALTERNATIVE B - Public Domain (www.unlicense.org)
 This is free and unencumbered software released into the public domain.
-Anyone is free to copy, modify, publish, use, compile, sell, or distribute this
+Anyone is free to copy, modify, publish, use, addShader, sell, or distribute this
 software, either in source code form or as a compiled binary, for any purpose,
 commercial or non-commercial, and by any means.
 In jurisdictions that recognize copyright laws, the author or authors of this

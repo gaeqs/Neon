@@ -39,7 +39,7 @@ struct DefaultInstancingData {
 
         for (uint32_t i = 0; i < 4; ++i) {
             values.push_back(VkVertexInputAttributeDescription{
-                    i, 1, VK_FORMAT_R32G32B32A32_SFLOAT,
+                    i + 3, 1, VK_FORMAT_R32G32B32A32_SFLOAT,
                     static_cast<uint32_t>(sizeof(float) * 4 * i)}
             );
         }

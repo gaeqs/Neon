@@ -31,6 +31,7 @@ class VKMesh {
 
     std::optional<std::unique_ptr<SimpleBuffer>> _vertexBuffer;
     std::optional<std::unique_ptr<SimpleBuffer>> _indexBuffer;
+    uint32_t _indexAmount;
 
     std::vector<VkVertexInputAttributeDescription> _attributeDescriptions;
     std::vector<VkVertexInputAttributeDescription> _instancingAttributeDescriptions;
@@ -83,6 +84,8 @@ public:
                 VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
                 VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT,
                 indices);
+
+        _indexAmount = indices.size();
 
         _dirty = true;
     }

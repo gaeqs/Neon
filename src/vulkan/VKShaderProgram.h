@@ -41,7 +41,6 @@ public:
 
     [[nodiscard]] const std::vector<VkPipelineShaderStageCreateInfo>&
     getShaders() const;
-
 };
 
 

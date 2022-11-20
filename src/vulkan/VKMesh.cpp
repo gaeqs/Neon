@@ -133,7 +133,7 @@ void VKMesh::createGraphicPipeline(
     pipelineInfo.pColorBlendState = &colorBlending;
     pipelineInfo.pDynamicState = &dynamicState;
     pipelineInfo.layout = _pipelineLayout;
-    pipelineInfo.renderPass = _renderPass;
+    pipelineInfo.renderPass = _vkApplication->getRenderPass();
     pipelineInfo.subpass = 0;
 
     if (vkCreateGraphicsPipelines(
@@ -161,6 +161,7 @@ VKMesh::VKMesh(Application* application, Material& material) :
         _pipeline(VK_NULL_HANDLE),
         _vertexBuffer(),
         _indexBuffer(),
+        _indexAmount(0),
         _attributeDescriptions(),
         _instancingAttributeDescriptions(),
         _bindingDescription({}),
@@ -208,7 +209,5 @@ void VKMesh::draw(
         uniform->getImplementation().bind(commandBuffer, _pipelineLayout);
     });
 
-    vkCmdDrawIndexed(commandBuffer,
-                     _indexBuffer.value()->size() / sizeof(uint32_t),
-                     instancingElements, 0, 0, 0);
+    vkCmdDrawIndexed(commandBuffer, _indexAmount, instancingElements, 0, 0, 0);
 }

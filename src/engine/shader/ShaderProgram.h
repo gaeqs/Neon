@@ -54,11 +54,19 @@ public:
 
     [[nodiscard]] uint64_t getId() const override;
 
-    const Implementation& getImplementation() const;
+    [[nodiscard]] const Implementation& getImplementation() const;
 
     Implementation& getImplementation();
 
     bool addShader(ShaderType type, cmrc::file resource);
+
+    /*bool defineBinding(uint32_t binding, uint32_t size, bool instanceMode);
+
+    bool defineAttribute(
+            uint32_t location,
+            uint32_t binding,
+            uint32_t sizeInFloats,
+            uint32_t bindingOffset);*/
 
     std::optional<std::string> compile();
 

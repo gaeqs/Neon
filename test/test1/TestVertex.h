@@ -47,7 +47,7 @@ struct TestVertex {
                 1, 0, VK_FORMAT_R32G32B32_SFLOAT,
                 static_cast<uint32_t>(offsetof(TestVertex, normal))};
         VkVertexInputAttributeDescription texCoordsDescription{
-                1, 0, VK_FORMAT_R32G32_SFLOAT,
+                2, 0, VK_FORMAT_R32G32_SFLOAT,
                 static_cast<uint32_t>(offsetof(TestVertex, texCoords))};
 
         return {positionDescription, normalDescription, texCoordsDescription};

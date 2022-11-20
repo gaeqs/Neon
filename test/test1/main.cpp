@@ -12,6 +12,7 @@
 #include "TestVertex.h"
 #include "GlobalParametersUpdaterComponent.h"
 #include "LockMouseComponent.h"
+#include "ConstantRotationComponent.h"
 
 constexpr int32_t WIDTH = 800;
 constexpr int32_t HEIGHT = 600;
@@ -68,6 +69,7 @@ std::shared_ptr<Room> getTestRoom(Application* application) {
     for (int i = 0; i < 100; i++) {
         auto sans = room->newGameObject();
         sans->newComponent<GraphicComponent>(sansModel);
+        sans->newComponent<ConstantRotationComponent>();
 
         float x = static_cast<float>(i % q) * 3.0f;
         float y = static_cast<float>(i / q) * 3.0f;

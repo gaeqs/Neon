@@ -157,6 +157,8 @@ public:
 
     [[nodiscard]] VkCommandPool getCommandPool() const;
 
+    [[nodiscard]] VkRenderPass getRenderPass() const;
+
     [[nodiscard]] VkCommandBuffer getCurrentCommandBuffer() const;
 
 };

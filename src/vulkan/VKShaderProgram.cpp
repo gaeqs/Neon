@@ -27,7 +27,8 @@ void VKShaderProgram::deleteShaders() {
 }
 
 VKShaderProgram::VKShaderProgram(Application* application) :
-        _vkApplication(&application->getImplementation()) {
+        _vkApplication(&application->getImplementation()),
+        _shaders() {
 }
 
 VKShaderProgram::~VKShaderProgram() {
@@ -42,17 +43,21 @@ VKShaderProgram::compile(
     SPIRVCompiler compiler;
 
     for (const auto& [type, resource]: raw) {
+        auto error = compiler.addShader(getStage(type), resource.begin());
+        if (error.has_value()) return error;
+    }
 
-        auto result = compiler.GLSLtoSPV(getStage(type), resource.begin());
+    auto error = compiler.compile();
+    if (error.has_value()) return error;
 
-        if (!result.isOk()) {
-            return result.getError();
-        }
+    for (const auto& [type, _]: raw) {
+        auto stage = getStage(type);
+        auto result = compiler.getStage(stage).getResult(); // Always OK.
 
         VkShaderModuleCreateInfo moduleInfo{};
         moduleInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-        moduleInfo.codeSize = result.getResult().size();
-        moduleInfo.pCode = result.getResult().data();
+        moduleInfo.codeSize = result.size() * sizeof(uint32_t);
+        moduleInfo.pCode = result.data();
 
         VkShaderModule shaderModule;
 
@@ -63,7 +68,7 @@ VKShaderProgram::compile(
 
         VkPipelineShaderStageCreateInfo stageInfo{};
         stageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-        stageInfo.stage = getStage(type);
+        stageInfo.stage = stage;
         stageInfo.module = shaderModule;
         stageInfo.pName = "main";
 
@@ -77,5 +82,4 @@ const std::vector<VkPipelineShaderStageCreateInfo>&
 VKShaderProgram::getShaders() const {
     return _shaders;
 }
-
 

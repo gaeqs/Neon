@@ -4,8 +4,6 @@
 
 #include "Frustum.h"
 
-#include <iostream>
-
 #include <glm/gtc/matrix_transform.hpp>
 
 Frustum::Frustum(float near, float far, float aspectRatio, float fovYDegrees) :
@@ -14,6 +12,9 @@ Frustum::Frustum(float near, float far, float aspectRatio, float fovYDegrees) :
         _aspectRatio(aspectRatio),
         _fovYDegrees(fovYDegrees),
         _projection(glm::perspective(fovYDegrees, aspectRatio, near, far)) {
+#ifdef USE_VULKAN
+    _projection[1][1] *= -1;
+#endif
 }
 
 const glm::mat4& Frustum::getProjection() const {

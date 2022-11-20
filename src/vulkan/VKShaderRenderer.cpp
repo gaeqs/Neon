@@ -20,10 +20,6 @@ void VKShaderRenderer::insertShader(const std::string& name,
 void VKShaderRenderer::render(Room* room,
                               std::shared_ptr<ComponentList> elements) {
 
-    auto commandBuffer = vulkan_util::beginSingleTimeCommandBuffer(
-            _vkApplication->getDevice(),
-            _vkApplication->getCommandPool()
-    );
 
     room->getModels().forEach([&](Model* model) {
         auto& name = model->getShader();
@@ -36,7 +32,7 @@ void VKShaderRenderer::render(Room* room,
         }
 
         model->getImplementation().draw(
-                commandBuffer,
+                _vkApplication->getCurrentCommandBuffer(),
                 &it->second->getImplementation(),
                 room->getShaderUniformBuffers()
         );

@@ -3,18 +3,12 @@
 //
 
 #include "SPIRVCompiler.h"
+#include <iostream>
 
-constexpr int DEFAULT_VERSION = 100;
+constexpr int DEFAULT_VERSION = 450;
 
 static bool GLSLANG_INITIALIZED = false;
 
-
-SPIRVCompiler::SPIRVCompiler() {
-    if (!GLSLANG_INITIALIZED) {
-        glslang::InitializeProcess();
-        GLSLANG_INITIALIZED = true;
-    }
-}
 
 TBuiltInResource SPIRVCompiler::generateDefaultResources() {
     TBuiltInResource resources{};
@@ -161,26 +155,72 @@ SPIRVCompiler::getLanguage(const VkShaderStageFlagBits& shaderType) {
     }
 }
 
-Result<std::vector<uint32_t>, std::string>
-SPIRVCompiler::GLSLtoSPV(const VkShaderStageFlagBits& shaderType,
-                         const char* source) {
-    EShLanguage language = getLanguage(shaderType);
-    glslang::TShader shader(language);
-    glslang::TProgram program;
+SPIRVCompiler::SPIRVCompiler() :
+        _compiled(false),
+        _shaders(),
+        _program(),
+        _resources(generateDefaultResources()) {
+    if (!GLSLANG_INITIALIZED) {
+        glslang::InitializeProcess();
+        GLSLANG_INITIALIZED = true;
+    }
+}
 
-    auto resources = generateDefaultResources();
+SPIRVCompiler::~SPIRVCompiler() {
+    for (const auto& item: _shaders) {
+        delete item;
+    }
+}
+
+std::optional<std::string>
+SPIRVCompiler::addShader(const VkShaderStageFlagBits& shaderType,
+                         const char* source) {
+    auto language = getLanguage(shaderType);
+    auto* shader = new glslang::TShader(language);
+
     auto messages = static_cast<EShMessages>(
             EShMsgSpvRules | EShMsgVulkanRules);
 
+    shader->setStrings(&source, 1);
 
-    shader.setStrings(&source, 1);
-    if (!shader.parse(&resources, DEFAULT_VERSION, false, messages)) {
-        std::string infoLog(shader.getInfoLog());
-        std::string infoDebugLog(shader.getInfoDebugLog());
+    shader->setEnvInput(glslang::EShSourceGlsl, language,
+                        glslang::EShClientVulkan, DEFAULT_VERSION);
+    shader->setEnvClient(glslang::EShClientVulkan,
+                         glslang::EShTargetVulkan_1_3);
+    shader->setEnvTarget(glslang::EShTargetSpv, glslang::EShTargetSpv_1_6);
+
+    if (!shader->parse(&_resources, DEFAULT_VERSION, false, messages)) {
+        std::string infoLog(shader->getInfoLog());
+        std::string infoDebugLog(shader->getInfoDebugLog());
+        delete shader;
         return {infoLog + "\n" + infoDebugLog};
     }
+    _shaders.push_back(shader);
+    _program.addShader(shader);
+    return {};
+}
 
+std::optional<std::string> SPIRVCompiler::compile() {
+    auto messages = static_cast<EShMessages>(
+            EShMsgSpvRules | EShMsgVulkanRules);
+    if (!_program.link(messages)) {
+        std::string infoLog(_program.getInfoLog());
+        std::string infoDebugLog(_program.getInfoDebugLog());
+        return {infoLog + "\n" + infoDebugLog};
+    }
+    _compiled = true;
+
+    return {};
+}
+
+Result<std::vector<uint32_t>, std::string>
+SPIRVCompiler::getStage(const VkShaderStageFlagBits& shaderType) {
+    if (!_compiled) {
+        return {"Shader is not compiled!"};
+    }
+
+    auto* intermediate = _program.getIntermediate(getLanguage(shaderType));
     std::vector<uint32_t> result;
-    glslang::GlslangToSpv(*shader.getIntermediate(), result);
+    glslang::GlslangToSpv(*intermediate, result);
     return {result};
 }

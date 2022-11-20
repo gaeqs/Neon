@@ -7,6 +7,7 @@
 #include <stdexcept>
 #include <iostream>
 #include <cstring>
+#include <algorithm>
 
 static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
         VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
@@ -797,4 +798,8 @@ VkCommandPool VKApplication::getCommandPool() const {
 
 VkCommandBuffer VKApplication::getCurrentCommandBuffer() const {
     return _commandBuffers[_currentFrame];
+}
+
+VkRenderPass VKApplication::getRenderPass() const {
+    return _renderPass;
 }

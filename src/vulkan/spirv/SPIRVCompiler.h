@@ -7,6 +7,7 @@
 
 #include <vector>
 #include <string>
+#include <optional>
 
 #include <vulkan/vulkan.h>
 #include <glslang/SPIRV/GlslangToSpv.h>
@@ -19,13 +20,24 @@ class SPIRVCompiler {
 
     static EShLanguage getLanguage(const VkShaderStageFlagBits& shaderType);
 
+    bool _compiled;
+    std::vector<glslang::TShader*> _shaders;
+    glslang::TProgram _program;
+    TBuiltInResource _resources;
+
 public:
 
     SPIRVCompiler();
 
-    Result<std::vector<uint32_t>, std::string>
-    GLSLtoSPV(const VkShaderStageFlagBits& shaderType, const char* source);
+    ~SPIRVCompiler();
 
+    std::optional<std::string>
+    addShader(const VkShaderStageFlagBits& shaderType, const char* source);
+
+    std::optional<std::string> compile();
+
+    Result<std::vector<uint32_t>, std::string>
+    getStage(const VkShaderStageFlagBits& shaderType);
 };
 
 
