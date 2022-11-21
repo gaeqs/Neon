@@ -38,13 +38,13 @@ void GLShaderRenderer::render(
         }
 
         model->getImplementation().draw(
-                it->second.get(),
+                &it->second.get()->getImplementation(),
                 room->getTextures()
         );
     });
 }
 
 void GLShaderRenderer::insertShader(const std::string& name,
-                                    std::shared_ptr<GLShaderProgram> shader) {
+                                    std::shared_ptr<ShaderProgram> shader) {
     _shaders[name] = std::move(shader);
 }

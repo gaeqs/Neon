@@ -73,7 +73,7 @@ public:
                  VkBufferUsageFlags usage, VkMemoryPropertyFlags properties,
                  const std::vector<T>& data):
             SimpleBuffer(physicalDevice, device, usage, properties, data.data(),
-                         data.size()) {
+                         data.size() * sizeof(T)) {
     }
 
     SimpleBuffer(VkPhysicalDevice physicalDevice, VkDevice device,

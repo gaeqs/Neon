@@ -186,8 +186,8 @@ SPIRVCompiler::addShader(const VkShaderStageFlagBits& shaderType,
     shader->setEnvInput(glslang::EShSourceGlsl, language,
                         glslang::EShClientVulkan, DEFAULT_VERSION);
     shader->setEnvClient(glslang::EShClientVulkan,
-                         glslang::EShTargetVulkan_1_3);
-    shader->setEnvTarget(glslang::EShTargetSpv, glslang::EShTargetSpv_1_6);
+                         glslang::EShTargetVulkan_1_1);
+    shader->setEnvTarget(glslang::EShTargetSpv, glslang::EShTargetSpv_1_0);
 
     if (!shader->parse(&_resources, DEFAULT_VERSION, false, messages)) {
         std::string infoLog(shader->getInfoLog());

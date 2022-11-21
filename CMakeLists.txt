@@ -31,8 +31,8 @@ project(neon)
 find_package(glfw3 CONFIG REQUIRED)
 find_package(glm CONFIG REQUIRED)
 find_package(assimp CONFIG REQUIRED)
-find_package(glslang CONFIG REQUIRED)
 find_package(Vulkan REQUIRED)
+find_package(Glslang REQUIRED)
 
 # Try extracting VulkanSDK path from ${Vulkan_INCLUDE_DIRS}
 if (NOT ${Vulkan_INCLUDE_DIRS} STREQUAL "")
@@ -62,7 +62,7 @@ endif ()
 list(APPEND LIBRARIES glad)
 list(APPEND LIBRARIES glfw ${GLFW_LIBRARIES})
 list(APPEND LIBRARIES ${VULKAN_LIB_LIST})
-list(APPEND LIBRARIES SPIRV glslang)
+list(APPEND LIBRARIES Glslang::SPIRV Glslang::Glslang)
 
 include_directories(src)
 add_subdirectory(src)

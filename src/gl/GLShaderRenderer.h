@@ -9,20 +9,20 @@
 #include <memory>
 
 #include <engine/Renderer.h>
-#include <gl/GLShaderProgram.h>
+#include <engine/shader/ShaderProgram.h>
 
 class GraphicComponent;
 
 class GLShaderRenderer : public Renderer {
 
-    std::unordered_map<std::string, std::shared_ptr<GLShaderProgram>> _shaders;
+    std::unordered_map<std::string, std::shared_ptr<ShaderProgram>> _shaders;
 
 public:
 
     GLShaderRenderer();
 
     void insertShader(const std::string& name,
-                      std::shared_ptr<GLShaderProgram> shader);
+                      std::shared_ptr<ShaderProgram> shader);
 
     virtual void preRenderConfiguration();
 
