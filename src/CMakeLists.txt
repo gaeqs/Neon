@@ -49,7 +49,7 @@ set(
         engine/model/Model.cpp
         engine/model/Model.h
         engine/shader/ShaderUniformBuffer.cpp
-        engine/shader/ShaderUniformBuffer.h vulkan/spirv/SPIRVCompiler.cpp vulkan/spirv/SPIRVCompiler.h)
+        engine/shader/ShaderUniformBuffer.h)
 
 
 if (VULKAN_MODE)
@@ -76,7 +76,10 @@ if (VULKAN_MODE)
             vulkan/VKModel.cpp
             vulkan/VKModel.h
             vulkan/VKShaderRenderer.cpp
-            vulkan/VKShaderRenderer.h)
+            vulkan/VKShaderRenderer.h
+            vulkan/spirv/SPIRVCompiler.cpp
+            vulkan/spirv/SPIRVCompiler.h
+            vulkan/VKShaderUniform.h)
 else ()
     list(APPEND SOURCES
             gl/GLTexture.cpp

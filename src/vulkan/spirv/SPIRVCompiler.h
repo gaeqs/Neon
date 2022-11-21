@@ -13,6 +13,7 @@
 #include <glslang/SPIRV/GlslangToSpv.h>
 
 #include <util/Result.h>
+#include <vulkan/VKShaderUniform.h>
 
 class SPIRVCompiler {
 
@@ -38,6 +39,9 @@ public:
 
     Result<std::vector<uint32_t>, std::string>
     getStage(const VkShaderStageFlagBits& shaderType);
+
+    [[nodiscard]] std::vector<VKShaderUniform> getUniforms() const;
+
 };
 
 

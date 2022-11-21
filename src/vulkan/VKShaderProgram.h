@@ -19,12 +19,15 @@ class Application;
 
 class VKApplication;
 
+class VKShaderUniform;
+
 class VKShaderProgram {
 
     static VkShaderStageFlagBits getStage(ShaderType type);
 
     VKApplication* _vkApplication;
     std::vector<VkPipelineShaderStageCreateInfo> _shaders;
+    std::vector<VKShaderUniform> _uniforms;
 
     void deleteShaders();
 
@@ -41,6 +44,8 @@ public:
 
     [[nodiscard]] const std::vector<VkPipelineShaderStageCreateInfo>&
     getShaders() const;
+
+    [[nodiscard]] const std::vector<VKShaderUniform>& getUniforms() const;
 };
 
 

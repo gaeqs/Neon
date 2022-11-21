@@ -210,6 +210,8 @@ std::optional<std::string> SPIRVCompiler::compile() {
     }
     _compiled = true;
 
+    _program.buildReflection();
+
     return {};
 }
 
@@ -223,4 +225,18 @@ SPIRVCompiler::getStage(const VkShaderStageFlagBits& shaderType) {
     std::vector<uint32_t> result;
     glslang::GlslangToSpv(*intermediate, result);
     return {result};
+}
+
+std::vector<VKShaderUniform> SPIRVCompiler::getUniforms() const {
+    std::vector<VKShaderUniform> uniforms;
+    uniforms.resize(_program.getNumUniformVariables());
+    for (int i = 0; i < _program.getNumUniformVariables(); ++i) {
+        auto& current = uniforms[i];
+        auto& reflection = _program.getUniform(i);
+        current.name = reflection.name;
+        current.offset = reflection.offset;
+        current.stages = reflection.stages;
+    }
+
+    return uniforms;
 }

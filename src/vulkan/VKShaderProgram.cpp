@@ -28,7 +28,8 @@ void VKShaderProgram::deleteShaders() {
 
 VKShaderProgram::VKShaderProgram(Application* application) :
         _vkApplication(&application->getImplementation()),
-        _shaders() {
+        _shaders(),
+        _uniforms() {
 }
 
 VKShaderProgram::~VKShaderProgram() {
@@ -75,11 +76,17 @@ VKShaderProgram::compile(
         _shaders.push_back(stageInfo);
     }
 
+    _uniforms = compiler.getUniforms();
+
     return {};
 }
 
 const std::vector<VkPipelineShaderStageCreateInfo>&
 VKShaderProgram::getShaders() const {
     return _shaders;
+}
+
+const std::vector<VKShaderUniform>& VKShaderProgram::getUniforms() const {
+    return _uniforms;
 }
 
