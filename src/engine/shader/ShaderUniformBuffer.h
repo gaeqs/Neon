@@ -20,6 +20,8 @@
 
 class Application;
 
+class ShaderUniformDescriptor;
+
 class ShaderUniformBuffer : public Identifiable {
 
     template<class T> friend
@@ -40,7 +42,8 @@ private:
 
 public:
 
-    ShaderUniformBuffer(Application* application, uint32_t size);
+    explicit ShaderUniformBuffer(
+            const std::shared_ptr<ShaderUniformDescriptor>& descriptor);
 
     [[nodiscard]] const Implementation& getImplementation() const;
 
@@ -50,7 +53,9 @@ public:
 
     void setBindingPoint(uint32_t point);
 
-    void uploadData(const void* data, size_t size);
+    void uploadData(uint32_t index, const void* data, size_t size);
+
+    void setTexture(uint32_t index, IdentifiableWrapper<Texture> texture);
 
     template<class T>
     void uploadData(const T& data) {

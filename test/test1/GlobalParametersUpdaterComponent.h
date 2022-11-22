@@ -13,8 +13,6 @@ struct GlobalParameters {
 
 class GlobalParametersUpdaterComponent : public Component {
 
-    IdentifiableWrapper<ShaderUniformBuffer> _buffer;
-
 public:
 
     ~GlobalParametersUpdaterComponent() override;

@@ -7,7 +7,10 @@
 
 
 #include <cstdint>
+#include <vector>
 #include <vulkan/vulkan.h>
+
+class InputDescription;
 
 namespace vulkan_util {
 
@@ -40,6 +43,11 @@ namespace vulkan_util {
 
     VkImageView createImageView(
             VkDevice device, VkImage image, VkFormat format);
+
+    std::pair<VkVertexInputBindingDescription,
+            std::vector<VkVertexInputAttributeDescription>>
+    toVulkanDescription(uint32_t binding, uint32_t startLocation,
+                        const InputDescription& description);
 
 };
 

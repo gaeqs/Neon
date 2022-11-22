@@ -22,7 +22,7 @@
 
 #endif
 
-class Application;
+class Room;
 
 class Model : public Identifiable {
 
@@ -52,7 +52,7 @@ private:
 
 public:
 
-    explicit Model(Application* application,
+    explicit Model(Room* room,
                    std::vector<std::unique_ptr<Mesh>>& meshes);
 
     [[nodiscard]] uint64_t getId() const override;

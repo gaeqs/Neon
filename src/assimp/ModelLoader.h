@@ -24,7 +24,7 @@
 #include <engine/model/Model.h>
 #include <engine/model/Mesh.h>
 #include <engine/Texture.h>
-#include <engine/Material.h>
+#include "engine/shader/Material.h"
 
 #include <glm/glm.hpp>
 

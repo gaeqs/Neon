@@ -4,6 +4,8 @@
 
 #include "Model.h"
 
+#include <engine/Room.h>
+
 uint64_t MODEL_ID_GENERATOR = 1;
 
 std::vector<Mesh::Implementation*> Model::getMeshImplementations(
@@ -19,10 +21,10 @@ std::vector<Mesh::Implementation*> Model::getMeshImplementations(
     return vector;
 }
 
-Model::Model(Application* application,
+Model::Model(Room* room,
              std::vector<std::unique_ptr<Mesh>>& meshes) :
         _id(MODEL_ID_GENERATOR++),
-        _implementation(application, getMeshImplementations(meshes)),
+        _implementation(room->getApplication(), getMeshImplementations(meshes)),
         _meshes(std::move(meshes)),
         _shader() {
 }

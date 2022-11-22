@@ -9,7 +9,7 @@
 #include <vector>
 
 #include <engine/Identifiable.h>
-#include <engine/Material.h>
+#include "engine/shader/Material.h"
 #include <engine/shader/ShaderUniformBuffer.h>
 #include <engine/collection/IdentifiableCollection.h>
 
@@ -24,7 +24,7 @@
 
 #endif
 
-class Application;
+class Room;
 
 class Mesh : public Identifiable {
 
@@ -47,7 +47,7 @@ private:
 
 public:
 
-    Mesh(Application* application);
+    Mesh(Room* room);
 
     [[nodiscard]] uint64_t getId() const override;
 

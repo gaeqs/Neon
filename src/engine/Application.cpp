@@ -81,19 +81,17 @@ Result<uint32_t, std::string> Application::startGameLoop() {
             auto duration = now - last_tick;
             last_tick = now;
 
-            float seconds = static_cast<float>(duration.count())
-                            / 1000000000.0f;
+            float seconds = static_cast<float>(duration.count()) * 10.0e-9f;
 
             //std::cout << (1 / seconds) << std::endl;
 
             _implementation.preUpdate();
 
+            glfwPollEvents();
+
             if (_room != nullptr) {
                 _room->update(seconds);
             }
-
-
-            glfwPollEvents();
 
             _implementation.preDraw();
             if (_room != nullptr) {
@@ -101,7 +99,7 @@ Result<uint32_t, std::string> Application::startGameLoop() {
             }
             _implementation.postDraw();
 
-            frames++;
+            ++frames;
         }
     } catch (const std::exception& exception) {
         return {exception.what()};

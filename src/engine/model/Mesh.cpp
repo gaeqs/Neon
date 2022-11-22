@@ -4,11 +4,13 @@
 
 #include "Mesh.h"
 
+#include <engine/Room.h>
+
 uint64_t MESH_ID_GENERATOR = 1;
 
-Mesh::Mesh(Application* application) :
+Mesh::Mesh(Room* room) :
         _id(MESH_ID_GENERATOR++),
-        _implementation(application, _material),
+        _implementation(room->getApplication(), _material),
         _material() {
 
 }

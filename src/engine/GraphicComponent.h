@@ -8,7 +8,7 @@
 #include <optional>
 
 #include <engine/IdentifiableWrapper.h>
-#include <engine/Material.h>
+#include "engine/shader/Material.h"
 #include <engine/Component.h>
 #include <engine/model/Model.h>
 

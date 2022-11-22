@@ -8,6 +8,7 @@
 #include <vector>
 #include <memory>
 #include <vulkan/vulkan.h>
+#include <engine/IdentifiableWrapper.h>
 #include <engine/shader/ShaderUniformBinding.h>
 #include <vulkan/shader/VKShaderUniformDescriptor.h>
 
@@ -17,6 +18,10 @@ class Application;
 
 class Buffer;
 
+class Texture;
+
+class ShaderUniformDescriptor;
+
 class VKShaderUniformBuffer {
 
     VKApplication* _vkApplication;
@@ -24,15 +29,18 @@ class VKShaderUniformBuffer {
 
     std::vector<std::vector<std::shared_ptr<Buffer>>> _buffers;
     std::vector<VkDescriptorSet> _descriptorSets;
-    std::vector<bool> _updated;
+    std::vector<UniformBindingType> _types;
+    std::vector<std::vector<bool>> _updated;
     std::vector<std::vector<char>> _data;
+    std::vector<IdentifiableWrapper<Texture>> _textures;
 
     uint32_t _currentImage;
     uint32_t _bindingPoint; // In vulkan this is the "set" parameter.
 
 public:
 
-    VKShaderUniformBuffer(const VKShaderUniformDescriptor& descriptor);
+    explicit VKShaderUniformBuffer(
+            const std::shared_ptr<ShaderUniformDescriptor>& descriptor);
 
     ~VKShaderUniformBuffer();
 
@@ -40,9 +48,9 @@ public:
 
     void uploadData(uint32_t index, const void* data, size_t size);
 
-    void prepareForFrame();
+    void setTexture(uint32_t index, IdentifiableWrapper<Texture> texture);
 
-    VkDescriptorSetLayout getDescriptorSetLayout() const;
+    void prepareForFrame();
 
     void bind(VkCommandBuffer commandBuffer, VkPipelineLayout layout) const;
 };

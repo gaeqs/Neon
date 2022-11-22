@@ -4,27 +4,36 @@
 
 #include "VKShaderUniformBuffer.h"
 
-#include "engine/Application.h"
-#include "vulkan/buffer/SimpleBuffer.h"
+#include <engine/shader/ShaderUniformDescriptor.h>
+#include <vulkan/buffer/SimpleBuffer.h>
 #include <cstring>
 
 VKShaderUniformBuffer::VKShaderUniformBuffer(
-        const VKShaderUniformDescriptor& descriptor) :
-        _vkApplication(descriptor.getVkApplication()),
+        const std::shared_ptr<ShaderUniformDescriptor>& descriptor) :
+        _vkApplication(descriptor->getImplementation().getVkApplication()),
         _descriptorPool(VK_NULL_HANDLE),
         _buffers(),
         _descriptorSets(),
+        _types(),
         _updated(),
         _data(),
+        _textures(),
         _currentImage(0),
         _bindingPoint(0) {
 
-    auto& bindings = descriptor.getBindings();
+    auto& bindings = descriptor->getBindings();
 
     _buffers.reserve(bindings.size());
+    _types.reserve(bindings.size());
     _data.reserve(bindings.size());
+    _updated.reserve(bindings.size());
+
+    _textures.resize(bindings.size());
 
     for (const auto& binding: bindings) {
+        _updated.emplace_back(binding.size, false);
+        _types.emplace_back(binding.type);
+
         if (binding.type == UniformBindingType::IMAGE) {
             _buffers.emplace_back();
             _data.emplace_back();
@@ -62,7 +71,7 @@ VKShaderUniformBuffer::VKShaderUniformBuffer(
 
     std::vector<VkDescriptorSetLayout> layouts(
             _vkApplication->getMaxFramesInFlight(),
-            descriptor.getDescriptorSetLayout()
+            descriptor->getImplementation().getDescriptorSetLayout()
     );
 
     VkDescriptorSetAllocateInfo allocInfo{};
@@ -103,34 +112,11 @@ VKShaderUniformBuffer::VKShaderUniformBuffer(
 
                 vkUpdateDescriptorSets(_vkApplication->getDevice(),
                                        1, &descriptorWrite, 0, nullptr);
-            } else if (binding.type == UniformBindingType::IMAGE) {
-
-                if (binding.texture.isValid()) {
-                    auto& impl = binding.texture->getImplementation();
-
-                    VkDescriptorImageInfo imageInfo{};
-                    imageInfo.imageView = binding.texture->
-                            getImplementation().getImageView();
-                    imageInfo.sampler = binidng;
-                    imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-
-                    VkWriteDescriptorSet descriptorWrite{};
-                    descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-                    descriptorWrite.dstSet = _descriptorSets[frame];
-                    descriptorWrite.dstBinding = bindingIndex;
-                    descriptorWrite.dstArrayElement = 0;
-
-                    descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-                    descriptorWrite.descriptorCount = 1;
-                    descriptorWrite.pImageInfo = &
-                }
             }
         }
 
 
     }
-
-    _updated.resize(_vkApplication->getMaxFramesInFlight());
 }
 
 VKShaderUniformBuffer::~VKShaderUniformBuffer() {
@@ -145,25 +131,66 @@ void VKShaderUniformBuffer::setBindingPoint(uint32_t point) {
 void VKShaderUniformBuffer::uploadData(uint32_t index,
                                        const void* data,
                                        size_t size) {
+    if (_types[index] != UniformBindingType::BUFFER) return;
     auto& vector = _data[index];
     auto finalSize = std::min(size, vector.size());
-    memcpy(_data.data(), data, finalSize);
-    std::fill(_updated.begin(), _updated.end(), false);
+    memcpy(vector.data(), data, finalSize);
+    std::fill(_updated[index].begin(), _updated[index].end(), false);
+}
+
+void VKShaderUniformBuffer::setTexture(
+        uint32_t index,
+        IdentifiableWrapper<Texture> texture) {
+    if (_types[index] != UniformBindingType::IMAGE) return;
+    _textures[index] = texture;
+    std::fill(_updated[index].begin(), _updated[index].end(), false);
 }
 
 void VKShaderUniformBuffer::prepareForFrame() {
     uint32_t frame = _vkApplication->getCurrentFrame();
-    if (_updated[frame]) return;
-    _updated[frame] = true;
+    for (int index = 0; index < _updated.size(); ++index) {
+        auto& updated = _updated[index];
+        if (updated[frame]) continue;
+        updated[frame] = true;
 
-    auto optional = _buffers[frame]->map<char>();
-    if (optional.has_value()) {
-        memcpy(optional.value()->raw(), _data.data(), _data.size());
+        switch (_types[index]) {
+            case UniformBindingType::BUFFER: {
+                auto optional = _buffers[index][frame]->map<char>();
+                if (optional.has_value()) {
+                    auto& data = _data[index];
+                    memcpy(optional.value()->raw(), data.data(), data.size());
+                }
+            }
+                break;
+            case UniformBindingType::IMAGE: {
+                auto texture = _textures[index];
+                if (texture.isValid()) {
+                    auto& impl = texture->getImplementation();
+
+                    VkDescriptorImageInfo imageInfo{};
+                    imageInfo.imageView = impl.getImageView();
+                    imageInfo.sampler = impl.getSampler();
+                    imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+
+                    VkWriteDescriptorSet descriptorWrite{};
+                    descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+                    descriptorWrite.dstSet = _descriptorSets[frame];
+                    descriptorWrite.dstBinding = index;
+                    descriptorWrite.dstArrayElement = 0;
+
+                    descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+                    descriptorWrite.descriptorCount = 1;
+                    descriptorWrite.pImageInfo = &imageInfo;
+
+                    vkUpdateDescriptorSets(_vkApplication->getDevice(),
+                                           1, &descriptorWrite, 0, nullptr);
+                }
+            }
+                break;
+        }
+
+
     }
-}
-
-VkDescriptorSetLayout VKShaderUniformBuffer::getDescriptorSetLayout() const {
-    return _descriptorSetLayout;
 }
 
 void VKShaderUniformBuffer::bind(VkCommandBuffer commandBuffer,

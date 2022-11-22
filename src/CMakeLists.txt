@@ -13,8 +13,8 @@ set(
         engine/Renderer.h
         engine/GraphicComponent.cpp
         engine/GraphicComponent.h
-        engine/Material.cpp
-        engine/Material.h
+        engine/shader/Material.cpp
+        engine/shader/Material.h
         engine/GameObject.cpp
         engine/GameObject.h
         engine/Component.cpp
@@ -50,7 +50,7 @@ set(
         engine/model/Model.h
         engine/shader/ShaderUniformBuffer.cpp
         engine/shader/ShaderUniformBuffer.h
-        engine/shader/ShaderUniformBinding.h)
+        engine/shader/ShaderUniformBinding.h engine/shader/ShaderUniformDescriptor.cpp engine/shader/ShaderUniformDescriptor.h vulkan/shader/VKMaterial.cpp vulkan/shader/VKMaterial.h engine/model/InputDescription.cpp engine/model/InputDescription.h)
 
 
 if (VULKAN_MODE)

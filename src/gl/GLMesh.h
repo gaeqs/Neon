@@ -10,7 +10,7 @@
 #include <vector>
 
 #include <glad/glad.h>
-#include <engine/Material.h>
+#include "engine/shader/Material.h"
 #include <engine/collection/IdentifiableCollection.h>
 #include <engine/shader/ShaderUniformBuffer.h>
 

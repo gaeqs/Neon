@@ -21,7 +21,7 @@
 #endif
 
 
-class Application;
+class Room;
 
 class Texture : public Identifiable {
 
@@ -42,7 +42,7 @@ public:
 
     Texture(const Texture& other) = delete;
 
-    Texture(Application* application, const void* data,
+    Texture(Room* room, const void* data,
             int32_t width, int32_t height, TextureFormat format);
 
     uint64_t getId() const override;

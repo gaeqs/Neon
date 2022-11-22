@@ -20,12 +20,23 @@ constexpr int32_t HEIGHT = 600;
 CMRC_DECLARE(shaders);
 
 std::shared_ptr<Room> getTestRoom(Application* application) {
+
+    std::vector<ShaderUniformBinding> globalBindings = {ShaderUniformBinding{
+            UniformBindingType::BUFFER, sizeof(GlobalParameters)
+    }};
+
+    auto globalDescriptor = std::make_shared<ShaderUniformDescriptor>(
+            application, globalBindings
+    );
+
+    auto room = std::make_shared<Room>(application, globalDescriptor);
+
     auto renderer = std::make_shared<VKShaderRenderer>(application);
 
     auto defaultVert = cmrc::shaders::get_filesystem().open("default.vert");
     auto defaultFrag = cmrc::shaders::get_filesystem().open("default.frag");
 
-    auto shader = std::make_shared<ShaderProgram>(application);
+    auto shader = std::make_shared<ShaderProgram>(room.get());
     shader->addShader(ShaderType::VERTEX, defaultVert);
     shader->addShader(ShaderType::FRAGMENT, defaultFrag);
 
@@ -33,7 +44,6 @@ std::shared_ptr<Room> getTestRoom(Application* application) {
     if (result.has_value()) throw std::runtime_error(result.value());
     renderer->insertShader("default", shader);
 
-    auto room = std::make_shared<Room>(application);
     room->setRenderer(renderer);
 
     auto parametersUpdater = room->newGameObject();
@@ -57,7 +67,7 @@ std::shared_ptr<Room> getTestRoom(Application* application) {
     auto sansResult = ModelLoader(room).loadModel<TestVertex>(
             R"(resource/Sans)", "Sans.obj");
 
-    if(!sansResult.valid) {
+    if (!sansResult.valid) {
         std::cout << "Couldn't load Sans model!" << std::endl;
         std::cout << std::filesystem::current_path() << std::endl;
         exit(1);

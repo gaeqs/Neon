@@ -2,8 +2,11 @@
 // Created by gaelr on 11/11/2022.
 //
 
-#include <stdexcept>
 #include "VKUtil.h"
+
+#include <stdexcept>
+
+#include <engine/model/InputDescription.h>
 
 namespace vulkan_util {
 
@@ -202,6 +205,57 @@ namespace vulkan_util {
         }
 
         return imageView;
+    }
+
+    std::pair<VkVertexInputBindingDescription,
+            std::vector<VkVertexInputAttributeDescription>>
+    toVulkanDescription(uint32_t binding, uint32_t startLocation,
+                        const InputDescription& description) {
+
+        const VkFormat FORMATS[] = {
+                VK_FORMAT_R32_SFLOAT,
+                VK_FORMAT_R32G32_SFLOAT,
+                VK_FORMAT_R32G32B32_SFLOAT,
+                VK_FORMAT_R32G32B32A32_SFLOAT
+        };
+
+        VkVertexInputBindingDescription bindingDescription{};
+        bindingDescription.binding = binding;
+        bindingDescription.stride = description.stride;
+        bindingDescription.inputRate = description.rate == InputRate::VERTEX
+                                       ? VK_VERTEX_INPUT_RATE_VERTEX
+                                       : VK_VERTEX_INPUT_RATE_INSTANCE;
+
+        std::vector<VkVertexInputAttributeDescription> attributes;
+
+        uint32_t location = startLocation;
+        for (const auto& attribute: description.attributes) {
+            uint32_t size = attribute.sizeInFloats;
+            uint32_t offset = attribute.offsetInBytes;
+
+            while (size > 4) {
+                VkVertexInputAttributeDescription vkAttribute{
+                        location++,
+                        binding,
+                        VK_FORMAT_R32G32B32A32_SFLOAT,
+                        offset
+                };
+                attributes.push_back(vkAttribute);
+
+                size -= 4;
+                offset += sizeof(float) * 4;
+            }
+
+            VkVertexInputAttributeDescription vkAttribute{
+                    location++,
+                    binding,
+                    FORMATS[size - 1],
+                    offset
+            };
+            attributes.push_back(vkAttribute);
+        }
+
+        return {bindingDescription, attributes};
     }
 
 };

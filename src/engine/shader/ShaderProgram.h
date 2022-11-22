@@ -24,7 +24,7 @@
 
 #endif
 
-class Application;
+class Room;
 
 class ShaderProgram : public Identifiable {
 
@@ -50,7 +50,7 @@ public:
 
     ShaderProgram(const ShaderProgram& other) = delete;
 
-    explicit ShaderProgram(Application* application);
+    explicit ShaderProgram(Room* room);
 
     [[nodiscard]] uint64_t getId() const override;
 

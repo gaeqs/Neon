@@ -14,15 +14,18 @@ constexpr float DEFAULT_FRUSTUM_NEAR = 0.1f;
 constexpr float DEFAULT_FRUSTUM_FAR = 1000.0f;
 constexpr float DEFAULT_FRUSTUM_FOV = glm::radians(100.0f); // RADIANS
 
-Room::Room(Application* application) :
+Room::Room(Application* application,
+           const std::shared_ptr<ShaderUniformDescriptor>& descriptor) :
         _application(application),
         _camera(Frustum(DEFAULT_FRUSTUM_NEAR, DEFAULT_FRUSTUM_FAR, 1.0f,
                         DEFAULT_FRUSTUM_FOV)),
         _gameObjects(),
         _components(),
-        _textures(application),
-        _models(application),
-        _shaderUniformBuffers(application),
+        _textures(this),
+        _models(this),
+        _shaders(this),
+        _globalUniformDescriptor(descriptor),
+        _globalUniformBuffer(descriptor),
         _renderer() {
 }
 
@@ -68,13 +71,25 @@ IdentifiableCollection<Model>& Room::getModels() {
     return _models;
 }
 
-const IdentifiableCollection<ShaderUniformBuffer>&
-Room::getShaderUniformBuffers() const {
-    return _shaderUniformBuffers;
+const std::shared_ptr<ShaderUniformDescriptor>&
+Room::getGlobalUniformDescriptor() const {
+    return _globalUniformDescriptor;
 }
 
-IdentifiableCollection<ShaderUniformBuffer>& Room::getShaderUniformBuffers() {
-    return _shaderUniformBuffers;
+const ShaderUniformBuffer& Room::getGlobalUniformBuffer() const {
+    return _globalUniformBuffer;
+}
+
+ShaderUniformBuffer& Room::getGlobalUniformBuffer() {
+    return _globalUniformBuffer;
+}
+
+const IdentifiableCollection<ShaderProgram>& Room::getShaders() const {
+    return _shaders;
+}
+
+IdentifiableCollection<ShaderProgram>& Room::getShaders() {
+    return _shaders;
 }
 
 IdentifiableWrapper<GameObject> Room::newGameObject() {
@@ -105,9 +120,7 @@ void Room::update(float deltaTime) {
 }
 
 void Room::draw() {
-    _shaderUniformBuffers.forEach([](ShaderUniformBuffer* uniform) {
-        uniform->prepareForFrame();
-    });
+    _globalUniformBuffer.prepareForFrame();
     _components.drawGraphicComponents(this);
 }
 

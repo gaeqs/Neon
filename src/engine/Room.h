@@ -12,6 +12,8 @@
 #include <engine/collection/IdentifiableCollection.h>
 #include <engine/collection/TextureCollection.h>
 #include <engine/shader/ShaderUniformBuffer.h>
+#include <engine/shader/ShaderUniformDescriptor.h>
+#include <engine/shader/ShaderProgram.h>
 #include <engine/model/Model.h>
 
 #include <util/ClusteredLinkedCollection.h>
@@ -35,7 +37,10 @@ class Room {
     ComponentCollection _components;
     TextureCollection _textures;
     IdentifiableCollection<Model> _models;
-    IdentifiableCollection<ShaderUniformBuffer> _shaderUniformBuffers;
+    IdentifiableCollection<ShaderProgram> _shaders;
+
+    std::shared_ptr<ShaderUniformDescriptor> _globalUniformDescriptor;
+    ShaderUniformBuffer _globalUniformBuffer;
 
     std::shared_ptr<Renderer> _renderer;
 
@@ -43,7 +48,8 @@ public:
 
     Room(const Room& other) = delete;
 
-    explicit Room(Application* application);
+    Room(Application* application,
+         const std::shared_ptr<ShaderUniformDescriptor>& descriptor);
 
     ~Room();
 
@@ -51,32 +57,39 @@ public:
 
     [[nodiscard]] const Camera& getCamera() const;
 
-    Camera& getCamera();
+    [[nodiscard]] Camera& getCamera();
 
     [[nodiscard]] const ComponentCollection& getComponents() const;
 
-    ComponentCollection& getComponents();
+    [[nodiscard]] ComponentCollection& getComponents();
 
     [[nodiscard]] const TextureCollection& getTextures() const;
 
-    TextureCollection& getTextures();
+    [[nodiscard]] TextureCollection& getTextures();
 
     [[nodiscard]] const IdentifiableCollection<Model>& getModels() const;
 
-    IdentifiableCollection<Model>& getModels();
+    [[nodiscard]] IdentifiableCollection<Model>& getModels();
 
-    [[nodiscard]] const IdentifiableCollection<ShaderUniformBuffer>&
-    getShaderUniformBuffers() const;
+    [[nodiscard]] const std::shared_ptr<ShaderUniformDescriptor>&
+    getGlobalUniformDescriptor() const;
 
-    IdentifiableCollection<ShaderUniformBuffer>& getShaderUniformBuffers();
+    [[nodiscard]] const ShaderUniformBuffer& getGlobalUniformBuffer() const;
+
+    [[nodiscard]] ShaderUniformBuffer& getGlobalUniformBuffer();
+
+    [[nodiscard]] const IdentifiableCollection<ShaderProgram>&
+    getShaders() const;
+
+    [[nodiscard]] IdentifiableCollection<ShaderProgram>& getShaders();
 
     [[nodiscard]] const std::shared_ptr<Renderer>& getRenderer() const;
 
-    std::shared_ptr<Renderer>& getRenderer();
+    [[nodiscard]] std::shared_ptr<Renderer>& getRenderer();
 
     void setRenderer(const std::shared_ptr<Renderer>& renderer);
 
-    IdentifiableWrapper<GameObject> newGameObject();
+    [[nodiscard]] IdentifiableWrapper<GameObject> newGameObject();
 
     void destroyGameObject(IdentifiableWrapper<GameObject> gameObject);
 

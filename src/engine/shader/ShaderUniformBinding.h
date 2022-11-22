@@ -17,7 +17,9 @@ enum class UniformBindingType {
 struct ShaderUniformBinding {
     UniformBindingType type;
     uint32_t size;
-    IdentifiableWrapper<Texture> texture;
+
+    ShaderUniformBinding(UniformBindingType type, uint32_t size)
+            : type(type), size(size) {}
 };
 
 

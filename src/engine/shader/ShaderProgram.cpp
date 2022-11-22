@@ -4,13 +4,15 @@
 
 #include "ShaderProgram.h"
 
+#include <engine/Room.h>
+
 uint64_t SHADER_PROGRAM_ID_GENERATOR = 1;
 
-ShaderProgram::ShaderProgram(Application* application) :
+ShaderProgram::ShaderProgram(Room* room) :
         _id(SHADER_PROGRAM_ID_GENERATOR++),
         _compiled(false),
         _rawShaders(),
-        _implementation(application) {
+        _implementation(room->getApplication()) {
 
 }
 
