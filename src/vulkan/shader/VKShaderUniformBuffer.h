@@ -8,6 +8,8 @@
 #include <vector>
 #include <memory>
 #include <vulkan/vulkan.h>
+#include <engine/shader/ShaderUniformBinding.h>
+#include <vulkan/shader/VKShaderUniformDescriptor.h>
 
 class VKApplication;
 
@@ -18,28 +20,25 @@ class Buffer;
 class VKShaderUniformBuffer {
 
     VKApplication* _vkApplication;
-    VkDescriptorSetLayout _descriptorSetLayout;
     VkDescriptorPool _descriptorPool;
 
-    std::vector<std::shared_ptr<Buffer>> _buffers;
+    std::vector<std::vector<std::shared_ptr<Buffer>>> _buffers;
     std::vector<VkDescriptorSet> _descriptorSets;
     std::vector<bool> _updated;
+    std::vector<std::vector<char>> _data;
+
     uint32_t _currentImage;
-
-    size_t _maxSize;
-    std::vector<char> _data;
-
     uint32_t _bindingPoint; // In vulkan this is the "set" parameter.
 
 public:
 
-    VKShaderUniformBuffer(Application* application, uint32_t size);
+    VKShaderUniformBuffer(const VKShaderUniformDescriptor& descriptor);
 
     ~VKShaderUniformBuffer();
 
     void setBindingPoint(uint32_t point);
 
-    void uploadData(const void* data, size_t size);
+    void uploadData(uint32_t index, const void* data, size_t size);
 
     void prepareForFrame();
 

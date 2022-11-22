@@ -46,6 +46,10 @@ public:
 
     [[nodiscard]] int32_t getHeight() const;
 
+    [[nodiscard]] VkImageView getImageView() const;
+
+    [[nodiscard]] VkSampler getSampler() const;
+
     void updateData(const void* data, int32_t width, int32_t height,
                     TextureFormat format);
 

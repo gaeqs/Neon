@@ -20,7 +20,7 @@
 #endif
 #ifdef USE_VULKAN
 
-#include <vulkan/VKShaderProgram.h>
+#include <vulkan/shader/VKShaderProgram.h>
 
 #endif
 

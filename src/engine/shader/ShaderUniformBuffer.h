@@ -14,7 +14,7 @@
 #endif
 #ifdef USE_VULKAN
 
-#include <vulkan/VKShaderUniformBuffer.h>
+#include "vulkan/shader/VKShaderUniformBuffer.h"
 
 #endif
 

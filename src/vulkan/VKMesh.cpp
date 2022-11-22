@@ -6,7 +6,7 @@
 
 #include <engine/Application.h>
 #include <vulkan/VKApplication.h>
-#include <vulkan/VKShaderProgram.h>
+#include "vulkan/shader/VKShaderProgram.h"
 
 void VKMesh::createGraphicPipeline(
         VKShaderProgram* shader,

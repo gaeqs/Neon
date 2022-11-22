@@ -224,3 +224,11 @@ void VKTexture::updateData(const void* data, int32_t width, int32_t height,
             VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
     );
 }
+
+VkImageView VKTexture::getImageView() const {
+    return _imageView;
+}
+
+VkSampler VKTexture::getSampler() const {
+    return _sampler;
+}

@@ -40,7 +40,7 @@ public:
     Result<std::vector<uint32_t>, std::string>
     getStage(const VkShaderStageFlagBits& shaderType);
 
-    [[nodiscard]] std::vector<VKShaderUniform> getUniforms() const;
+    std::vector<VKShaderUniform> getUniforms() const;
 
 };
 

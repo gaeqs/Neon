@@ -9,17 +9,17 @@
 #include <optional>
 #include <string>
 
-#include <cmrc/cmrc.hpp>
+#include "cmrc/cmrc.hpp"
 
 #include <vulkan/vulkan.h>
 
-#include <engine/shader/ShaderType.h>
+#include "engine/shader/ShaderType.h"
 
 class Application;
 
 class VKApplication;
 
-class VKShaderUniform;
+struct VKShaderUniform;
 
 class VKShaderProgram {
 

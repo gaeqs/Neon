@@ -4,8 +4,9 @@
 
 #include "VKShaderProgram.h"
 
-#include <engine/Application.h>
-#include <vulkan/spirv/SPIRVCompiler.h>
+#include "engine/Application.h"
+#include "vulkan/VKShaderUniform.h"
+#include "vulkan/spirv/SPIRVCompiler.h"
 
 VkShaderStageFlagBits VKShaderProgram::getStage(ShaderType type) {
     switch (type) {
