@@ -60,56 +60,25 @@ VKTexture::VKTexture(Application* application, const void* data,
         _imageView(VK_NULL_HANDLE),
         _sampler(VK_NULL_HANDLE) {
 
-    VkImageCreateInfo imageInfo{};
-    imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
-    imageInfo.imageType = VK_IMAGE_TYPE_2D;
-    imageInfo.extent.width = static_cast<uint32_t>(width);
-    imageInfo.extent.height = static_cast<uint32_t>(height);
-    imageInfo.extent.depth = 1;
-    imageInfo.mipLevels = 1;
-    imageInfo.arrayLayers = 1;
+    VkFormat vkFormat = getImageFormat(format);
 
-    imageInfo.format = getImageFormat(format);
-    imageInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
-    imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-    imageInfo.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT
-                      | VK_IMAGE_USAGE_SAMPLED_BIT;
-    imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-    imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
-    imageInfo.flags = 0;
+    auto pair = vulkan_util::createImage(
+            _vkApplication->getDevice(),
+            _vkApplication->getPhysicalDevice(),
+            width,
+            height,
+            VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
+            vkFormat);
 
-    if (vkCreateImage(_stagingBuffer.getDevice(), &imageInfo,
-                      nullptr, &_image) != VK_SUCCESS) {
-        throw std::runtime_error("Failed to create image!");
-    }
-
-    VkMemoryRequirements memRequirements;
-    vkGetImageMemoryRequirements(_stagingBuffer.getDevice(),
-                                 _image, &memRequirements);
-
-    VkMemoryAllocateInfo allocInfo{};
-    allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-    allocInfo.allocationSize = memRequirements.size;
-    allocInfo.memoryTypeIndex = vulkan_util::findMemoryType(
-            _stagingBuffer.getPhysicalDevice(),
-            memRequirements.memoryTypeBits,
-            VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
-    );
-
-    if (vkAllocateMemory(_stagingBuffer.getDevice(), &allocInfo, nullptr,
-                         &_imageMemory) !=
-        VK_SUCCESS) {
-        throw std::runtime_error("failed to allocate image memory!");
-    }
-
-    vkBindImageMemory(_stagingBuffer.getDevice(), _image, _imageMemory, 0);
+    _image = pair.first;
+    _imageMemory = pair.second;
 
     vulkan_util::transitionImageLayout(
             _vkApplication->getDevice(),
             _vkApplication->getCommandPool(),
             _vkApplication->getGraphicsQueue(),
             _image,
-            imageInfo.format,
+            vkFormat,
             VK_IMAGE_LAYOUT_UNDEFINED,
             VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL
     );
@@ -129,7 +98,7 @@ VKTexture::VKTexture(Application* application, const void* data,
             _vkApplication->getCommandPool(),
             _vkApplication->getGraphicsQueue(),
             _image,
-            imageInfo.format,
+            vkFormat,
             VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
             VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
     );
@@ -137,7 +106,8 @@ VKTexture::VKTexture(Application* application, const void* data,
     _imageView = vulkan_util::createImageView(
             _vkApplication->getDevice(),
             _image,
-            imageInfo.format
+            vkFormat,
+            VK_IMAGE_ASPECT_COLOR_BIT
     );
 
     VkPhysicalDeviceProperties properties{};

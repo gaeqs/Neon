@@ -49,6 +49,11 @@ class VKApplication {
     std::vector<VkImageView> _swapChainImageViews;
     std::vector<VkFramebuffer> _swapChainFramebuffers;
 
+    VkImage _depthImage;
+    VkFormat _depthImageFormat;
+    VkDeviceMemory _depthImageMemory;
+    VkImageView _depthImageView;
+
     bool _framebufferResized;
 
     VkRenderPass _renderPass;
@@ -96,6 +101,8 @@ class VKApplication {
     VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities);
 
     void createImageViews();
+
+    void createDepthImages();
 
     void createRenderPass();
 

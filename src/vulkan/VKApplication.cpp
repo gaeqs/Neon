@@ -9,6 +9,8 @@
 #include <cstring>
 #include <algorithm>
 
+#include <vulkan/util/VKUtil.h>
+
 static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
         VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
         VkDebugUtilsMessageTypeFlagsEXT messageType,
@@ -63,10 +65,11 @@ void VKApplication::postWindowCreation(GLFWwindow* window) {
     pickPhysicalDevice();
     createLogicalDevice();
     createSwapChain();
+    createCommandPool();
     createImageViews();
+    createDepthImages();
     createRenderPass();
     createFrameBuffers();
-    createCommandPool();
     createCommandBuffers();
     createSyncObjects();
 }
@@ -116,9 +119,11 @@ void VKApplication::preDraw() {
     renderPassInfo.renderArea.offset = {0, 0};
     renderPassInfo.renderArea.extent = _swapChainExtent;
 
-    VkClearValue clearColor = {0.0f, 0.0f, 0.0f, 1.0f};
-    renderPassInfo.clearValueCount = 1;
-    renderPassInfo.pClearValues = &clearColor;
+    VkClearValue clearColors[2];
+    clearColors[0].color = {0.0f, 0.0f, 0.0f, 1.0f};
+    clearColors[1].depthStencil = {1.0f, 0};
+    renderPassInfo.clearValueCount = 2;
+    renderPassInfo.pClearValues = clearColors;
 
     vkCmdBeginRenderPass(commandBuffer, &renderPassInfo,
                          VK_SUBPASS_CONTENTS_INLINE);
@@ -590,6 +595,35 @@ void VKApplication::createImageViews() {
     }
 }
 
+void VKApplication::createDepthImages() {
+    auto format = vulkan_util::findSupportedFormat(
+            _physicalDevice,
+            {VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT,
+             VK_FORMAT_D24_UNORM_S8_UINT},
+            VK_IMAGE_TILING_OPTIMAL,
+            VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT
+    );
+    if (!format.has_value()) {
+        throw std::runtime_error("Couldn't find depth format!");
+    }
+
+    _depthImageFormat = format.value();
+
+    auto pair = vulkan_util::createImage(
+            _device,
+            _physicalDevice,
+            _swapChainExtent.width,
+            _swapChainExtent.height,
+            VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
+            _depthImageFormat);
+
+    _depthImage = pair.first;
+    _depthImageMemory = pair.second;
+
+    _depthImageView = vulkan_util::createImageView(
+            _device, _depthImage, _depthImageFormat, VK_IMAGE_ASPECT_DEPTH_BIT);
+}
+
 void VKApplication::createRenderPass() {
     VkAttachmentDescription colorAttachment{};
     colorAttachment.format = _swapChainImageFormat;
@@ -601,23 +635,40 @@ void VKApplication::createRenderPass() {
     colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
     colorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 
+    VkAttachmentDescription depthAttachment{};
+    depthAttachment.format = _depthImageFormat;
+    depthAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
+    depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+    depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+    depthAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+    depthAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+    depthAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+    depthAttachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
     VkAttachmentReference colorAttachmentRef{};
     colorAttachmentRef.attachment = 0;
     colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+    VkAttachmentReference depthAttachmentRef{};
+    depthAttachmentRef.attachment = 1;
+    depthAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
     VkSubpassDescription subpass{};
     subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
     subpass.colorAttachmentCount = 1;
     subpass.pColorAttachments = &colorAttachmentRef;
+    subpass.pDepthStencilAttachment = &depthAttachmentRef;
+
+    VkAttachmentDescription attachments[] = {colorAttachment, depthAttachment};
 
     VkRenderPassCreateInfo renderPassInfo{};
     renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-    renderPassInfo.attachmentCount = 1;
-    renderPassInfo.pAttachments = &colorAttachment;
+    renderPassInfo.attachmentCount = 2;
+    renderPassInfo.pAttachments = attachments;
     renderPassInfo.subpassCount = 1;
     renderPassInfo.pSubpasses = &subpass;
 
-    VkSubpassDependency dependency{};
+    VkSubpassDependency dependency = {};
     dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
     dependency.dstSubpass = 0;
     dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
@@ -625,8 +676,21 @@ void VKApplication::createRenderPass() {
     dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
     dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
 
-    renderPassInfo.dependencyCount = 1;
-    renderPassInfo.pDependencies = &dependency;
+
+    VkSubpassDependency depthDependency{};
+    depthDependency.srcSubpass = VK_SUBPASS_EXTERNAL;
+    depthDependency.dstSubpass = 0;
+    depthDependency.srcStageMask = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT |
+                                   VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
+    depthDependency.srcAccessMask = 0;
+    depthDependency.dstStageMask = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT |
+                                   VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
+    depthDependency.dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+
+    VkSubpassDependency dependencies[] = {dependency, depthDependency};
+
+    renderPassInfo.dependencyCount = 2;
+    renderPassInfo.pDependencies = dependencies;
 
     if (vkCreateRenderPass(_device, &renderPassInfo, nullptr, &_renderPass) !=
         VK_SUCCESS) {
@@ -637,14 +701,16 @@ void VKApplication::createRenderPass() {
 void VKApplication::createFrameBuffers() {
     _swapChainFramebuffers.resize(_swapChainImageViews.size());
     for (int i = 0; i < _swapChainImageViews.size(); ++i) {
+
         VkImageView attachments[] = {
-                _swapChainImageViews[i]
+                _swapChainImageViews[i],
+                _depthImageView
         };
 
         VkFramebufferCreateInfo framebufferInfo{};
         framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
         framebufferInfo.renderPass = _renderPass;
-        framebufferInfo.attachmentCount = 1;
+        framebufferInfo.attachmentCount = 2;
         framebufferInfo.pAttachments = attachments;
         framebufferInfo.width = _swapChainExtent.width;
         framebufferInfo.height = _swapChainExtent.height;
@@ -670,7 +736,6 @@ void VKApplication::createCommandPool() {
         VK_SUCCESS) {
         throw std::runtime_error("Failed to create command pool!");
     }
-
 }
 
 void VKApplication::createCommandBuffers() {
@@ -720,10 +785,15 @@ void VKApplication::recreateSwapChain() {
 
     createSwapChain();
     createImageViews();
+    createDepthImages();
     createFrameBuffers();
 }
 
 void VKApplication::cleanupSwapChain() {
+    vkDestroyImageView(_device, _depthImageView, nullptr);
+    vkDestroyImage(_device, _depthImage, nullptr);
+    vkFreeMemory(_device, _depthImageMemory, nullptr);
+
     for (auto& _swapChainFramebuffer: _swapChainFramebuffers) {
         vkDestroyFramebuffer(_device, _swapChainFramebuffer, nullptr);
     }

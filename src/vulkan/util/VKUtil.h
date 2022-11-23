@@ -8,6 +8,7 @@
 
 #include <cstdint>
 #include <vector>
+#include <optional>
 #include <vulkan/vulkan.h>
 
 struct InputDescription;
@@ -32,6 +33,14 @@ namespace vulkan_util {
                     VkDeviceSize sourceOffset, VkDeviceSize destinyOffset,
                     VkDeviceSize size);
 
+    std::pair<VkImage, VkDeviceMemory> createImage(
+            VkDevice device,
+            VkPhysicalDevice physicalDevice,
+            uint32_t width,
+            uint32_t height,
+            VkImageUsageFlags usage,
+            VkFormat format);
+
     void transitionImageLayout(
             VkDevice device, VkCommandPool pool, VkQueue queue,
             VkImage image, VkFormat format,
@@ -41,8 +50,17 @@ namespace vulkan_util {
             VkDevice device, VkCommandPool pool, VkQueue queue,
             VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
 
+    std::optional<VkFormat> findSupportedFormat(
+            VkPhysicalDevice physicalDevice,
+            const std::vector<VkFormat>& candidates,
+            VkImageTiling tiling,
+            VkFormatFeatureFlags features);
+
     VkImageView createImageView(
-            VkDevice device, VkImage image, VkFormat format);
+            VkDevice device,
+            VkImage image,
+            VkFormat format,
+            VkImageAspectFlags aspectFlags);
 
     std::pair<VkVertexInputBindingDescription,
             std::vector<VkVertexInputAttributeDescription>>
