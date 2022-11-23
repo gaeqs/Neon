@@ -44,8 +44,6 @@ void TestComponent::onStart() {
     //meshes.push_back(std::move(mesh));
 
     auto model = getRoom()->getModels().create(meshes);
-    model->setShader("default");
-
     _graphic->setModel(model);
 }
 

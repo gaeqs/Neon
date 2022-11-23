@@ -20,7 +20,8 @@ VKMaterial::VKMaterial(
         _vkApplication(&room->getApplication()->getImplementation()),
         _pipelineLayout(VK_NULL_HANDLE),
         _pipeline(VK_NULL_HANDLE),
-        _pushConstants() {
+        _pushConstants(),
+        _pushConstantStages(0) {
 
     std::vector<VkDynamicState> dynamicStates = {
             VK_DYNAMIC_STATE_VIEWPORT,
@@ -115,12 +116,35 @@ VKMaterial::VKMaterial(
                     ->getImplementation().getDescriptorSetLayout()
     };
 
+
     VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
     pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
     pipelineLayoutInfo.setLayoutCount = 2;
     pipelineLayoutInfo.pSetLayouts = uniformInfos;
-    pipelineLayoutInfo.pushConstantRangeCount = 0;
-    pipelineLayoutInfo.pPushConstantRanges = nullptr;
+
+    auto& blocks = _material->getShader()
+            ->getImplementation().getUniformBlocks();
+
+    if (blocks.empty()) {
+        pipelineLayoutInfo.pushConstantRangeCount = 0;
+        pipelineLayoutInfo.pPushConstantRanges = nullptr;
+    } else {
+        VkPushConstantRange range;
+        range.offset = 0;
+        range.size = 0;
+        range.stageFlags = 0;
+
+        for (const auto& [name, block]: blocks) {
+            range.size = std::max(range.size, block.size);
+            range.stageFlags |= block.stages;
+        }
+
+        _pushConstants.resize(range.size, 0);
+        _pushConstantStages = range.stageFlags;
+
+        pipelineLayoutInfo.pushConstantRangeCount = 1;
+        pipelineLayoutInfo.pPushConstantRanges = &range;
+    }
 
     if (vkCreatePipelineLayout(_vkApplication->getDevice(),
                                &pipelineLayoutInfo, nullptr,
@@ -152,11 +176,6 @@ VKMaterial::VKMaterial(
             nullptr, &_pipeline) != VK_SUCCESS) {
         throw std::runtime_error("Failed to create graphics pipeline!");
     }
-
-    for (const auto& item: material->getShader()->
-            getImplementation().getUniformBlockSizes()) {
-        _pushConstants.emplace(item.first, std::vector<char>(item.second, 0));
-    }
 }
 
 VKMaterial::~VKMaterial() {
@@ -182,29 +201,23 @@ void VKMaterial::pushConstant(
     if (uniformIt == uniforms.end()) return;
     auto& uniform = uniformIt->second;
 
-    auto constantIt = _pushConstants.find(uniform.blockIndex);
-    if (constantIt == _pushConstants.end()) return;
-    auto& constant = constantIt->second;
-
     // Clamp
-    if (uniform.offset >= constant.size()) return;
+    if (uniform.offset >= _pushConstants.size()) return;
 
     uint32_t from = uniform.offset;
-    uint32_t to = std::min(from + size, static_cast<uint32_t>(constant.size()));
-    memcpy(constant.data() + from, data, to - from);
+    uint32_t to = std::min(from + size, static_cast<uint32_t>(
+            _pushConstants.size()));
+    memcpy(_pushConstants.data() + from, data, to - from);
 }
 
 void VKMaterial::uploadConstants(VkCommandBuffer buffer) const {
-    auto& blocks = _material->getShader()
-            ->getImplementation().getUniformBlocks();
-    for (const auto& [name, block]: blocks) {
-        vkCmdPushConstants(
-                buffer,
-                _pipelineLayout,
-                block.stages,
-                0,
-                block.size,
-                _pushConstants.find(block.index)->second.data()
-        );
-    }
+    if(_pushConstantStages == 0) return;
+    vkCmdPushConstants(
+            buffer,
+            _pipelineLayout,
+            _pushConstantStages,
+            0,
+            _pushConstants.size(),
+            _pushConstants.data()
+    );
 }

@@ -29,7 +29,8 @@ class VKMaterial {
     VkPipelineLayout _pipelineLayout;
     VkPipeline _pipeline;
 
-    std::unordered_map<uint32_t, std::vector<char>> _pushConstants;
+    std::vector<char> _pushConstants;
+    VkShaderStageFlags _pushConstantStages;
 
 public:
 

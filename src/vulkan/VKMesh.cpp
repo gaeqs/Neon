@@ -32,6 +32,9 @@ void VKMesh::draw(
     vkCmdBindPipeline(commandBuffer,
                       VK_PIPELINE_BIND_POINT_GRAPHICS,
                       mat.getPipeline());
+
+    mat.uploadConstants(commandBuffer);
+
     vkCmdBindVertexBuffers(commandBuffer, 0, 2, buffers, offsets);
     vkCmdBindIndexBuffer(commandBuffer,
                          _indexBuffer.value()->getRaw(),

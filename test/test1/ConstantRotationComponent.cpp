@@ -7,6 +7,6 @@
 void ConstantRotationComponent::onUpdate(float deltaTime) {
     getGameObject()->getTransform().rotate(
             glm::vec3(0, 1, 0),
-            deltaTime
+            deltaTime / 10.0f
     );
 }

@@ -76,7 +76,6 @@ std::shared_ptr<Room> getTestRoom(Application* application) {
         exit(1);
     }
     auto sansModel = sansResult.model;
-    sansModel->setShader("default");
 
     int q = static_cast<int>(std::sqrt(100));
     for (int i = 0; i < 100; i++) {

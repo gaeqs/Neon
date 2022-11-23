@@ -30,7 +30,7 @@ void VKShaderProgram::deleteShaders() {
 VKShaderProgram::VKShaderProgram(Application* application) :
         _vkApplication(&application->getImplementation()),
         _shaders(),
-        _uniformBlockSizes(),
+        _uniformBlocks(),
         _uniforms() {
 }
 

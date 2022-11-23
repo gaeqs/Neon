@@ -44,8 +44,6 @@ private:
 
     std::vector<std::unique_ptr<Mesh>> _meshes;
 
-    std::string _shader;
-
     static std::vector<Mesh::Implementation*> getMeshImplementations(
             const std::vector<std::unique_ptr<Mesh>>& meshes
     );
@@ -62,10 +60,6 @@ public:
     [[nodiscard]] Model::Implementation& getImplementation();
 
     [[nodiscard]] const Model::Implementation& getImplementation() const;
-
-    [[nodiscard]] const std::string& getShader() const;
-
-    void setShader(const std::string& shader);
 
     [[nodiscard]] const std::type_index& getInstancingStructType() const;
 

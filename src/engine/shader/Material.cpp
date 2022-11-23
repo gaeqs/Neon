@@ -17,7 +17,7 @@ Material::Material(
         _uniformDescriptor(descriptor),
         _uniformBuffer(descriptor),
         _implementation(room, this, vertexDescription, instanceDescription) {
-
+    _uniformBuffer.setBindingPoint(1);
 }
 
 uint64_t Material::getId() const {

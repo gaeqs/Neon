@@ -28,6 +28,7 @@ Room::Room(Application* application,
         _globalUniformDescriptor(descriptor),
         _globalUniformBuffer(descriptor),
         _renderer() {
+    _globalUniformBuffer.setBindingPoint(0);
 }
 
 Room::~Room() {

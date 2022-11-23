@@ -25,8 +25,7 @@ Model::Model(Room* room,
              std::vector<std::unique_ptr<Mesh>>& meshes) :
         _id(MODEL_ID_GENERATOR++),
         _implementation(room->getApplication(), getMeshImplementations(meshes)),
-        _meshes(std::move(meshes)),
-        _shader() {
+        _meshes(std::move(meshes)) {
 }
 
 uint64_t Model::getId() const {
@@ -39,14 +38,6 @@ Model::Implementation& Model::getImplementation() {
 
 const Model::Implementation& Model::getImplementation() const {
     return _implementation;
-}
-
-const std::string& Model::getShader() const {
-    return _shader;
-}
-
-void Model::setShader(const std::string& shader) {
-    _shader = shader;
 }
 
 const std::type_index& Model::getInstancingStructType() const {

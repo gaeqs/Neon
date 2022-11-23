@@ -188,6 +188,7 @@ public:
         }
 
         result.model = _room->getModels().create(meshes);
+        result.model->defineInstanceStruct<Instance>();
 
         return result;
     }
