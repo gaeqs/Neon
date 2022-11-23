@@ -20,21 +20,10 @@ void VKShaderRenderer::insertShader(const std::string& name,
 void VKShaderRenderer::render(Room* room,
                               std::shared_ptr<ComponentList> elements) {
 
-
     room->getModels().forEach([&](Model* model) {
-        auto& name = model->getShader();
-        auto it = _shaders.find(name);
-        if (it == _shaders.end()) {
-            std::cerr << "GLShaderProgram \"" << name
-                      << "\" not found. Skipping model "
-                      << model->getId() << "." << std::endl;
-            return;
-        }
-
         model->getImplementation().draw(
                 _vkApplication->getCurrentCommandBuffer(),
-                &it->second->getImplementation(),
-                room->getShaderUniformBuffers()
+                &room->getGlobalUniformBuffer()
         );
     });
 }

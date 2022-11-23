@@ -20,6 +20,7 @@
 #ifdef USE_VULKAN
 
 #include <vulkan/shader/VKMaterial.h>
+#include <assimp/types.h>
 
 #endif
 
@@ -69,10 +70,13 @@ public:
     [[nodiscard]] const std::shared_ptr<ShaderUniformDescriptor>&
     getUniformDescriptor() const;
 
-    const Implementation& getImplementation() const;
+    [[nodiscard]] const Implementation& getImplementation() const;
 
     Implementation& getImplementation();
 
+    template<class T>
+    void setValue(const std::string key, const T& value) {
+    }
 };
 
 

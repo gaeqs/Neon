@@ -52,6 +52,8 @@ private:
 
 public:
 
+    Model(const Model& other) = delete;
+
     explicit Model(Room* room,
                    std::vector<std::unique_ptr<Mesh>>& meshes);
 

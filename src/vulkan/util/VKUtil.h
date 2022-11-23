@@ -10,7 +10,7 @@
 #include <vector>
 #include <vulkan/vulkan.h>
 
-class InputDescription;
+struct InputDescription;
 
 namespace vulkan_util {
 

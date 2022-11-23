@@ -43,11 +43,13 @@ private:
 
     uint64_t _id;
     Implementation _implementation;
-    Material _material;
+    IdentifiableWrapper<Material> _material;
 
 public:
 
-    Mesh(Room* room);
+    Mesh(const Mesh& other) = delete;
+
+    Mesh(Room* room, IdentifiableWrapper<Material> material);
 
     [[nodiscard]] uint64_t getId() const override;
 
@@ -61,11 +63,9 @@ public:
         _implementation.uploadData(vertices, indices);
     }
 
-    Material& getMaterial();
+    [[nodiscard]] IdentifiableWrapper<Material> getMaterial() const;
 
-    [[nodiscard]] const Material& getMaterial() const;
-
-    void setMaterial(const Material& material);
+    void setMaterial(const IdentifiableWrapper<Material>& material);
 
 };
 

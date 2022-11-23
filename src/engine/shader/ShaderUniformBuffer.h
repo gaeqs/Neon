@@ -58,8 +58,8 @@ public:
     void setTexture(uint32_t index, IdentifiableWrapper<Texture> texture);
 
     template<class T>
-    void uploadData(const T& data) {
-        uploadData(&data, sizeof(T));
+    void uploadData(uint32_t index, const T& data) {
+        uploadData(index, &data, sizeof(T));
     }
 
     void prepareForFrame();

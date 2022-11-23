@@ -64,7 +64,7 @@ std::shared_ptr<Room> getTestRoom(Application* application) {
     cameraController->newComponent<CameraMovementComponent>();
 
 
-    auto sansResult = ModelLoader(room).loadModel<TestVertex>(
+    /*auto sansResult = ModelLoader(room).loadModel<TestVertex>(
             R"(resource/Sans)", "Sans.obj");
 
     if (!sansResult.valid) {
@@ -84,7 +84,7 @@ std::shared_ptr<Room> getTestRoom(Application* application) {
         float x = static_cast<float>(i % q) * 3.0f;
         float y = static_cast<float>(i / q) * 3.0f;
         sans->getTransform().setPosition(glm::vec3(x, y, 0));
-    }
+    }*/
 
     return room;
 }

@@ -13,6 +13,7 @@ void GlobalParametersUpdaterComponent::onStart() {
 
 void GlobalParametersUpdaterComponent::onUpdate(float deltaTime) {
     getRoom()->getGlobalUniformBuffer().uploadData<GlobalParameters>(
+            0,
             GlobalParameters{
                     getRoom()->getCamera().getViewProjection()
             });

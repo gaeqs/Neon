@@ -24,7 +24,7 @@ class VKShaderProgram;
 class VKMesh {
 
     VKApplication* _vkApplication;
-    Material& _material;
+    IdentifiableWrapper<Material>& _material;
 
     std::optional<std::unique_ptr<SimpleBuffer>> _vertexBuffer;
     std::optional<std::unique_ptr<SimpleBuffer>> _indexBuffer;
@@ -32,7 +32,9 @@ class VKMesh {
 
 public:
 
-    VKMesh(Application* application, Material& material);
+    VKMesh(const VKMesh& other) = delete;
+
+    VKMesh(Application* application, IdentifiableWrapper<Material>& material);
 
     template<class Vertex>
     void uploadData(const std::vector<Vertex>& vertices,
@@ -59,7 +61,7 @@ public:
             VkCommandBuffer commandBuffer,
             VkBuffer instancingBuffer,
             uint32_t instancingElements,
-            const std::vector<const ShaderUniformBuffer*>& uniforms);
+            const ShaderUniformBuffer* global);
 
 };
 

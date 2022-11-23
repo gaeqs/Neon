@@ -44,6 +44,8 @@ public:
     ShaderUniformDescriptor(Application* application,
                             const std::vector<ShaderUniformBinding>& bindings);
 
+    [[nodiscard]] uint64_t getId() const override;
+
     [[nodiscard]] const Implementation& getImplementation() const;
 
     [[nodiscard]] Implementation& getImplementation();

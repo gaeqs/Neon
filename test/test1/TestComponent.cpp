@@ -38,10 +38,10 @@ void TestComponent::onStart() {
 
     std::vector<std::unique_ptr<Mesh>> meshes;
 
-    auto mesh = std::make_unique<Mesh>(getRoom()->getApplication());
-    mesh->getMaterial().setImage("diffuse", image);
-    mesh->uploadVertexData(vertices, indices);
-    meshes.push_back(std::move(mesh));
+    //auto mesh = std::make_unique<Mesh>(getRoom()->getApplication());
+    //mesh->getMaterial().setImage("diffuse", image);
+    //mesh->uploadVertexData(vertices, indices);
+    //meshes.push_back(std::move(mesh));
 
     auto model = getRoom()->getModels().create(meshes);
     model->setShader("default");

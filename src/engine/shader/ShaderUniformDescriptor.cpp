@@ -28,3 +28,7 @@ const std::vector<ShaderUniformBinding>&
 ShaderUniformDescriptor::getBindings() const {
     return _implementation.getBindings();
 }
+
+uint64_t ShaderUniformDescriptor::getId() const {
+    return _id;
+}

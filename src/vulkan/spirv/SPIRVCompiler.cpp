@@ -211,6 +211,7 @@ std::optional<std::string> SPIRVCompiler::compile() {
     _compiled = true;
 
     _program.buildReflection();
+    _program.dumpReflection();
 
     return {};
 }

@@ -35,6 +35,8 @@ class VKModel {
 
 public:
 
+    VKModel(const VKModel& other) = delete;
+
     VKModel(Application* application, std::vector<VKMesh*> meshes);
 
     [[nodiscard]] const std::type_index& getInstancingStructType() const;
@@ -58,9 +60,7 @@ public:
 
     void uploadDataRaw(uint32_t id, const void* raw);
 
-    void draw(VkCommandBuffer buffer,
-              VKShaderProgram* shader,
-              const IdentifiableCollection<ShaderUniformBuffer>& uniforms);
+    void draw(VkCommandBuffer buffer, const ShaderUniformBuffer* global);
 
 };
 
