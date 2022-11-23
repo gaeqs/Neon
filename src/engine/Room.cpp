@@ -24,6 +24,7 @@ Room::Room(Application* application,
         _textures(this),
         _models(this),
         _shaders(this),
+        _materials(this),
         _globalUniformDescriptor(descriptor),
         _globalUniformBuffer(descriptor),
         _renderer() {
@@ -134,4 +135,12 @@ std::shared_ptr<Renderer>& Room::getRenderer() {
 
 void Room::setRenderer(const std::shared_ptr<Renderer>& renderer) {
     _renderer = renderer;
+}
+
+const IdentifiableCollection<Material>& Room::getMaterials() const {
+    return _materials;
+}
+
+IdentifiableCollection<Material>& Room::getMaterials() {
+    return _materials;
 }

@@ -4,7 +4,9 @@
 
 #include "VKMaterial.h"
 
-#include <engine/Application.h>
+#include <algorithm>
+#include <cstring>
+
 #include <engine/Room.h>
 #include <engine/shader/Material.h>
 
@@ -14,9 +16,11 @@ VKMaterial::VKMaterial(
         Room* room, Material* material,
         const InputDescription& vertexDescription,
         const InputDescription& instanceDescription) :
+        _material(material),
         _vkApplication(&room->getApplication()->getImplementation()),
         _pipelineLayout(VK_NULL_HANDLE),
-        _pipeline(VK_NULL_HANDLE) {
+        _pipeline(VK_NULL_HANDLE),
+        _pushConstants() {
 
     std::vector<VkDynamicState> dynamicStates = {
             VK_DYNAMIC_STATE_VIEWPORT,
@@ -148,6 +152,11 @@ VKMaterial::VKMaterial(
             nullptr, &_pipeline) != VK_SUCCESS) {
         throw std::runtime_error("Failed to create graphics pipeline!");
     }
+
+    for (const auto& item: material->getShader()->
+            getImplementation().getUniformBlockSizes()) {
+        _pushConstants.emplace(item.first, std::vector<char>(item.second, 0));
+    }
 }
 
 VKMaterial::~VKMaterial() {
@@ -164,4 +173,38 @@ VkPipelineLayout VKMaterial::getPipelineLayout() const {
 
 VkPipeline VKMaterial::getPipeline() const {
     return _pipeline;
+}
+
+void VKMaterial::pushConstant(
+        const std::string& name, const void* data, uint32_t size) {
+    auto& uniforms = _material->getShader()->getImplementation().getUniforms();
+    auto uniformIt = uniforms.find(name);
+    if (uniformIt == uniforms.end()) return;
+    auto& uniform = uniformIt->second;
+
+    auto constantIt = _pushConstants.find(uniform.blockIndex);
+    if (constantIt == _pushConstants.end()) return;
+    auto& constant = constantIt->second;
+
+    // Clamp
+    if (uniform.offset >= constant.size()) return;
+
+    uint32_t from = uniform.offset;
+    uint32_t to = std::min(from + size, static_cast<uint32_t>(constant.size()));
+    memcpy(constant.data() + from, data, to - from);
+}
+
+void VKMaterial::uploadConstants(VkCommandBuffer buffer) const {
+    auto& blocks = _material->getShader()
+            ->getImplementation().getUniformBlocks();
+    for (const auto& [name, block]: blocks) {
+        vkCmdPushConstants(
+                buffer,
+                _pipelineLayout,
+                block.stages,
+                0,
+                block.size,
+                _pushConstants.find(block.index)->second.data()
+        );
+    }
 }

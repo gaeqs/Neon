@@ -74,8 +74,11 @@ public:
 
     Implementation& getImplementation();
 
+    void pushConstant(const std::string& name, const void* data, uint32_t size);
+
     template<class T>
-    void setValue(const std::string key, const T& value) {
+    void pushConstant(const std::string key, const T& value) {
+        pushConstant(key, &value, sizeof(T));
     }
 };
 

@@ -12,9 +12,10 @@ VKShaderRenderer::VKShaderRenderer(Application* application) :
 
 }
 
-void VKShaderRenderer::insertShader(const std::string& name,
-                                    std::shared_ptr<ShaderProgram> shader) {
-    _shaders[name] = std::move(shader);
+void VKShaderRenderer::insertShader(
+        const std::string& name,
+        IdentifiableWrapper<ShaderProgram> shader) {
+    _shaders[name] = shader;
 }
 
 void VKShaderRenderer::render(Room* room,

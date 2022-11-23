@@ -18,6 +18,7 @@ layout (push_constant) uniform VConstants {
 layout(location = 0) out vec2 fragTexCoords;
 
 void main() {
-    gl_Position = viewProjection * model * vec4(vertex, 1.0f) + a + b;
+    gl_Position = viewProjection * model * vec4(vertex, 1.0f)
+    + a + b;
     fragTexCoords = texCoords;
 }

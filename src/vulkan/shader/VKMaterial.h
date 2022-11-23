@@ -6,7 +6,11 @@
 #define NEON_VKMATERIAL_H
 
 #include <vector>
+#include <unordered_map>
+#include <string>
+
 #include <vulkan/vulkan.h>
+
 #include <engine/model/InputDescription.h>
 
 class Application;
@@ -19,9 +23,13 @@ class Material;
 
 class VKMaterial {
 
+    Material* _material;
+
     VKApplication* _vkApplication;
     VkPipelineLayout _pipelineLayout;
     VkPipeline _pipeline;
+
+    std::unordered_map<uint32_t, std::vector<char>> _pushConstants;
 
 public:
 
@@ -37,6 +45,9 @@ public:
 
     [[nodiscard]] VkPipeline getPipeline() const;
 
+    void pushConstant(const std::string& name, const void* data, uint32_t size);
+
+    void uploadConstants(VkCommandBuffer buffer) const;
 };
 
 

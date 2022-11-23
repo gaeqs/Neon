@@ -36,7 +36,7 @@ std::shared_ptr<Room> getTestRoom(Application* application) {
     auto defaultVert = cmrc::shaders::get_filesystem().open("default.vert");
     auto defaultFrag = cmrc::shaders::get_filesystem().open("default.frag");
 
-    auto shader = std::make_shared<ShaderProgram>(room.get());
+    auto shader = room->getShaders().create();
     shader->addShader(ShaderType::VERTEX, defaultVert);
     shader->addShader(ShaderType::FRAGMENT, defaultFrag);
 
@@ -64,8 +64,11 @@ std::shared_ptr<Room> getTestRoom(Application* application) {
     cameraController->newComponent<CameraMovementComponent>();
 
 
-    /*auto sansResult = ModelLoader(room).loadModel<TestVertex>(
-            R"(resource/Sans)", "Sans.obj");
+    auto sansResult = ModelLoader(room).loadModel
+            <TestVertex, DefaultInstancingData>(
+            shader,
+            R"(resource/Sans)",
+            "Sans.obj");
 
     if (!sansResult.valid) {
         std::cout << "Couldn't load Sans model!" << std::endl;
@@ -84,7 +87,7 @@ std::shared_ptr<Room> getTestRoom(Application* application) {
         float x = static_cast<float>(i % q) * 3.0f;
         float y = static_cast<float>(i / q) * 3.0f;
         sans->getTransform().setPosition(glm::vec3(x, y, 0));
-    }*/
+    }
 
     return room;
 }

@@ -8,6 +8,7 @@
 #include <vector>
 #include <string>
 #include <optional>
+#include <unordered_map>
 
 #include <vulkan/vulkan.h>
 #include <glslang/SPIRV/GlslangToSpv.h>
@@ -40,7 +41,11 @@ public:
     Result<std::vector<uint32_t>, std::string>
     getStage(const VkShaderStageFlagBits& shaderType);
 
-    std::vector<VKShaderUniform> getUniforms() const;
+    [[nodiscard]] std::unordered_map<std::string, VKShaderUniformBlock>
+    getUniformBlocks() const;
+
+    [[nodiscard]] std::unordered_map<std::string, VKShaderUniform>
+    getUniforms() const;
 
 };
 

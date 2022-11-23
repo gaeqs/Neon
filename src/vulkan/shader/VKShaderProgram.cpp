@@ -4,9 +4,9 @@
 
 #include "VKShaderProgram.h"
 
-#include "engine/Application.h"
-#include "vulkan/VKShaderUniform.h"
-#include "vulkan/spirv/SPIRVCompiler.h"
+#include <engine/Application.h>
+#include <vulkan/VKShaderUniform.h>
+#include <vulkan/spirv/SPIRVCompiler.h>
 
 VkShaderStageFlagBits VKShaderProgram::getStage(ShaderType type) {
     switch (type) {
@@ -30,6 +30,7 @@ void VKShaderProgram::deleteShaders() {
 VKShaderProgram::VKShaderProgram(Application* application) :
         _vkApplication(&application->getImplementation()),
         _shaders(),
+        _uniformBlockSizes(),
         _uniforms() {
 }
 
@@ -77,6 +78,7 @@ VKShaderProgram::compile(
         _shaders.push_back(stageInfo);
     }
 
+    _uniformBlocks = compiler.getUniformBlocks();
     _uniforms = compiler.getUniforms();
 
     return {};
@@ -87,7 +89,14 @@ VKShaderProgram::getShaders() const {
     return _shaders;
 }
 
-const std::vector<VKShaderUniform>& VKShaderProgram::getUniforms() const {
+const std::unordered_map<std::string, VKShaderUniform>&
+VKShaderProgram::getUniforms() const {
     return _uniforms;
 }
+
+const std::unordered_map<std::string, VKShaderUniformBlock>&
+VKShaderProgram::getUniformBlocks() const {
+    return _uniformBlocks;
+}
+
 

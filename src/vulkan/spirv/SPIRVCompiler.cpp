@@ -228,15 +228,54 @@ SPIRVCompiler::getStage(const VkShaderStageFlagBits& shaderType) {
     return {result};
 }
 
-std::vector<VKShaderUniform> SPIRVCompiler::getUniforms() const {
-    std::vector<VKShaderUniform> uniforms;
-    uniforms.resize(_program.getNumUniformVariables());
+[[nodiscard]] std::unordered_map<std::string, VKShaderUniformBlock>
+SPIRVCompiler::getUniformBlocks() const {
+    std::unordered_map<std::string, VKShaderUniformBlock> sizes;
+
+    for (int i = 0; i < _program.getNumUniformBlocks(); ++i) {
+        auto& reflection = _program.getUniformBlock(i);
+        if (reflection.getBinding() == -1) {
+            auto current = VKShaderUniformBlock{
+                    reflection.name,
+                    static_cast<uint32_t>(i),
+                    static_cast<uint32_t>(reflection.getBinding()),
+                    static_cast<uint32_t>(reflection.size),
+                    reflection.stages,
+                    reflection.stages
+            };
+
+            sizes.emplace(reflection.name, current);
+        }
+    }
+
+    return sizes;
+}
+
+std::unordered_map<std::string, VKShaderUniform>
+SPIRVCompiler::getUniforms() const {
+    std::unordered_set<uint32_t> validIndices;
+
+    for (int i = 0; i < _program.getNumUniformBlocks(); ++i) {
+        if (_program.getUniformBlockBinding(i) == -1) {
+            validIndices.insert(i);
+        }
+    }
+
+    std::unordered_map<std::string, VKShaderUniform> uniforms;
+    uniforms.reserve(_program.getNumUniformVariables());
     for (int i = 0; i < _program.getNumUniformVariables(); ++i) {
-        auto& current = uniforms[i];
         auto& reflection = _program.getUniform(i);
-        current.name = reflection.name;
-        current.offset = reflection.offset;
-        current.stages = reflection.stages;
+
+        if (!validIndices.contains(reflection.index)) continue;
+
+        auto current = VKShaderUniform{
+                reflection.name,
+                static_cast<uint32_t>(reflection.index),
+                static_cast<uint32_t>(reflection.offset),
+                reflection.stages
+        };
+
+        uniforms.emplace(reflection.name, current);
     }
 
     return uniforms;

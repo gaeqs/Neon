@@ -48,3 +48,8 @@ const Material::Implementation& Material::getImplementation() const {
 Material::Implementation& Material::getImplementation() {
     return _implementation;
 }
+
+void Material::pushConstant(
+        const std::string& name, const void* data, uint32_t size) {
+    _implementation.pushConstant(name, data, size);
+}

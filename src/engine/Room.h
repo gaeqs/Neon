@@ -14,6 +14,7 @@
 #include <engine/shader/ShaderUniformBuffer.h>
 #include <engine/shader/ShaderUniformDescriptor.h>
 #include <engine/shader/ShaderProgram.h>
+#include <engine/shader/Material.h>
 #include <engine/model/Model.h>
 
 #include <util/ClusteredLinkedCollection.h>
@@ -38,6 +39,7 @@ class Room {
     TextureCollection _textures;
     IdentifiableCollection<Model> _models;
     IdentifiableCollection<ShaderProgram> _shaders;
+    IdentifiableCollection<Material> _materials;
 
     std::shared_ptr<ShaderUniformDescriptor> _globalUniformDescriptor;
     ShaderUniformBuffer _globalUniformBuffer;
@@ -82,6 +84,10 @@ public:
     getShaders() const;
 
     [[nodiscard]] IdentifiableCollection<ShaderProgram>& getShaders();
+
+    [[nodiscard]] const IdentifiableCollection<Material>& getMaterials() const;
+
+    [[nodiscard]] IdentifiableCollection<Material>& getMaterials();
 
     [[nodiscard]] const std::shared_ptr<Renderer>& getRenderer() const;
 
