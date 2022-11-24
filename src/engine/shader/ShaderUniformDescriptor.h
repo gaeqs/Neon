@@ -9,8 +9,6 @@
 #include <engine/Identifiable.h>
 #include <engine/shader/ShaderUniformBinding.h>
 
-#ifdef USE_OPENGL
-#endif
 #ifdef USE_VULKAN
 
 #include "vulkan/shader/VKShaderUniformDescriptor.h"
@@ -25,9 +23,6 @@ class ShaderUniformDescriptor : public Identifiable {
     class IdentifiableWrapper;
 
 public:
-#ifdef USE_OPENGL
-    using Implementation = GLShaderUniformBuffer;
-#endif
 #ifdef USE_VULKAN
     using Implementation = VKShaderUniformDescriptor;
 #endif

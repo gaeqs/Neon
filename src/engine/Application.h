@@ -13,13 +13,6 @@
 #include <glm/glm.hpp>
 #include <util/Result.h>
 
-#ifdef USE_OPENGL
-
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-#include <gl/GLApplication.h>
-
-#endif
 #ifdef USE_VULKAN
 
 #define GLFW_INCLUDE_VULKAN
@@ -36,9 +29,6 @@ class Application {
 
 public:
 
-#ifdef USE_OPENGL
-    using Implementation = GLApplication;
-#endif
 #ifdef USE_VULKAN
     using Implementation = VKApplication;
 #endif

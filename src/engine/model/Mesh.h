@@ -13,11 +13,6 @@
 #include <engine/shader/ShaderUniformBuffer.h>
 #include <engine/collection/IdentifiableCollection.h>
 
-#ifdef USE_OPENGL
-
-#include <gl/GLMesh.h>
-
-#endif
 #ifdef USE_VULKAN
 
 #include <vulkan/VKMesh.h>
@@ -32,9 +27,6 @@ class Mesh : public Identifiable {
     class IdentifiableWrapper;
 
 public:
-#ifdef USE_OPENGL
-    using Implementation = GLMesh;
-#endif
 #ifdef USE_VULKAN
     using Implementation = VKMesh;
 #endif

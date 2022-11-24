@@ -11,11 +11,6 @@
 #include <engine/Identifiable.h>
 #include <engine/model/Mesh.h>
 
-#ifdef USE_OPENGL
-
-#include <gl/GLModel.h>
-
-#endif
 #ifdef USE_VULKAN
 
 #include <vulkan/VKModel.h>
@@ -30,9 +25,6 @@ class Model : public Identifiable {
     class IdentifiableWrapper;
 
 public:
-#ifdef USE_OPENGL
-    using Implementation = GLModel;
-#endif
 #ifdef USE_VULKAN
     using Implementation = VKModel;
 #endif

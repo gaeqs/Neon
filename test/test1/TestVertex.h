@@ -24,52 +24,6 @@ struct TestVertex {
         return description;
     }
 
-
-#ifdef USE_OPENGL
-#include <glm/glm.hpp>
-#include <glad/glad.h>
-    static uint32_t setupVAO() {
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(TestVertex),
-                              (void*) 0);
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(TestVertex),
-                              (void*) (3 * sizeof(float)));
-        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(TestVertex),
-                              (void*) (6 * sizeof(float)));
-        glEnableVertexAttribArray(0);
-        glEnableVertexAttribArray(1);
-        glEnableVertexAttribArray(2);
-        return 3;
-    }
-#endif
-
-#ifdef USE_VULKAN
-
-    static VkVertexInputBindingDescription getBindingDescription() {
-        VkVertexInputBindingDescription bindingDescription{};
-        bindingDescription.binding = 0;
-        bindingDescription.stride = sizeof(TestVertex);
-        bindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
-        return bindingDescription;
-    }
-
-    static std::vector<VkVertexInputAttributeDescription>
-    getAttributeDescriptions() {
-
-        VkVertexInputAttributeDescription positionDescription{
-                0, 0, VK_FORMAT_R32G32B32_SFLOAT,
-                static_cast<uint32_t>(offsetof(TestVertex, position))};
-        VkVertexInputAttributeDescription normalDescription{
-                1, 0, VK_FORMAT_R32G32B32_SFLOAT,
-                static_cast<uint32_t>(offsetof(TestVertex, normal))};
-        VkVertexInputAttributeDescription texCoordsDescription{
-                2, 0, VK_FORMAT_R32G32_SFLOAT,
-                static_cast<uint32_t>(offsetof(TestVertex, texCoords))};
-
-        return {positionDescription, normalDescription, texCoordsDescription};
-    }
-
-#endif
-
     static TestVertex fromAssimp(
             const glm::vec3& position,
             const glm::vec3& normal,

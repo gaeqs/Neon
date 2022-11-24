@@ -9,11 +9,6 @@
 #include <engine/Identifiable.h>
 #include <engine/TextureFormat.h>
 
-#ifdef USE_OPENGL
-
-#include <gl/GLTexture.h>
-
-#endif
 #ifdef USE_VULKAN
 
 #include <vulkan/VKTexture.h>
@@ -28,9 +23,6 @@ class Texture : public Identifiable {
     template<class T> friend
     class IdentifiableWrapper;
 
-#ifdef USE_OPENGL
-    using Implementation = GLTexture;
-#endif
 #ifdef USE_VULKAN
     using Implementation = VKTexture;
 #endif

@@ -13,11 +13,6 @@
 #include <engine/Identifiable.h>
 #include <engine/shader/ShaderType.h>
 
-#ifdef USE_OPENGL
-
-#include <gl/GLShaderProgram.h>
-
-#endif
 #ifdef USE_VULKAN
 
 #include <vulkan/shader/VKShaderProgram.h>
@@ -32,9 +27,6 @@ class ShaderProgram : public Identifiable {
     class IdentifiableWrapper;
 
 public:
-#ifdef USE_OPENGL
-    using Implementation = GLShaderProgram;
-#endif
 #ifdef USE_VULKAN
     using Implementation = VKShaderProgram;
 #endif
