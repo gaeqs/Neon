@@ -88,8 +88,9 @@ std::shared_ptr<Room> getTestRoom(Application* application) {
     }
     auto sansModel = sansResult.model;
 
-    int q = static_cast<int>(std::sqrt(600));
-    for (int i = 0; i < 600; i++) {
+    constexpr int AMOUNT = 200;
+    int q = static_cast<int>(std::sqrt(AMOUNT));
+    for (int i = 0; i < AMOUNT; i++) {
         auto sans = room->newGameObject();
         sans->newComponent<GraphicComponent>(sansModel);
         sans->newComponent<ConstantRotationComponent>();

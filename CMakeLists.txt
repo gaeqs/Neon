@@ -40,10 +40,6 @@ if (NOT ${Vulkan_INCLUDE_DIRS} STREQUAL "")
     STRING(REGEX REPLACE "/Include" "" VULKAN_PATH ${VULKAN_PATH})
 endif ()
 
-# GLAD
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/lib/glad/)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/lib/glad/include)
-
 # STB
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/lib/stb/)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/lib/stb/src)
@@ -59,7 +55,6 @@ else ()
     set(VULKAN_LIB_LIST "vulkan")
 endif ()
 
-list(APPEND LIBRARIES glad)
 list(APPEND LIBRARIES glfw ${GLFW_LIBRARIES})
 list(APPEND LIBRARIES ${VULKAN_LIB_LIST})
 list(APPEND LIBRARIES Glslang::SPIRV Glslang::Glslang)
