@@ -32,32 +32,32 @@ class VKApplication {
             VK_KHR_SWAPCHAIN_EXTENSION_NAME,
     };
 
-    GLFWwindow* _window;
+    GLFWwindow* _window{};
 
-    VkInstance _instance;
-    VkDebugUtilsMessengerEXT _debugMessenger;
-    VkPhysicalDevice _physicalDevice;
-    VkDevice _device;
-    VkQueue _graphicsQueue;
-    VkQueue _presentQueue;
-    VkSurfaceKHR _surface;
+    VkInstance _instance{};
+    VkDebugUtilsMessengerEXT _debugMessenger{};
+    VkPhysicalDevice _physicalDevice{};
+    VkDevice _device{};
+    VkQueue _graphicsQueue{};
+    VkQueue _presentQueue{};
+    VkSurfaceKHR _surface{};
 
-    VkSwapchainKHR _swapChain;
+    VkSwapchainKHR _swapChain{};
     std::vector<VkImage> _swapChainImages;
     VkFormat _swapChainImageFormat;
-    VkExtent2D _swapChainExtent;
+    VkExtent2D _swapChainExtent{};
     std::vector<VkImageView> _swapChainImageViews;
     std::vector<VkFramebuffer> _swapChainFramebuffers;
 
-    VkImage _depthImage;
+    VkImage _depthImage{};
     VkFormat _depthImageFormat;
-    VkDeviceMemory _depthImageMemory;
-    VkImageView _depthImageView;
+    VkDeviceMemory _depthImageMemory{};
+    VkImageView _depthImageView{};
 
-    bool _framebufferResized;
+    bool _framebufferResized{};
 
-    VkRenderPass _renderPass;
-    VkCommandPool _commandPool;
+    VkRenderPass _renderPass{};
+    VkCommandPool _commandPool{};
 
     std::vector<VkCommandBuffer> _commandBuffers;
     std::vector<VkSemaphore> _imageAvailableSemaphores;
@@ -66,7 +66,7 @@ class VKApplication {
 
     uint32_t _currentFrame = 0;
 
-    uint32_t _imageIndex;
+    uint32_t _imageIndex{};
 
     // region VULKAN INITIALIZATION
 
@@ -132,7 +132,7 @@ public:
 
     void postWindowCreation(GLFWwindow* window);
 
-    void preUpdate();
+    bool preUpdate();
 
     void preDraw();
 

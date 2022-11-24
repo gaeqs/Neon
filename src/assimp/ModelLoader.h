@@ -82,7 +82,7 @@ class ModelLoader {
             std::vector<IdentifiableWrapper<Material>>& vector,
             IdentifiableWrapper<ShaderProgram> shader,
             const std::shared_ptr<ShaderUniformDescriptor>& materialDescriptor,
-            const std::map<std::strinAg, IdentifiableWrapper<Texture>>& textures,
+            const std::map<std::string, IdentifiableWrapper<Texture>>& textures,
             const InputDescription& vertexDescription,
             const InputDescription& instanceDescription,
             const aiMaterial* material) const;

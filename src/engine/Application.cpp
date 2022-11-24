@@ -85,19 +85,19 @@ Result<uint32_t, std::string> Application::startGameLoop() {
 
             //std::cout << (1 / seconds) << std::endl;
 
-            _implementation.preUpdate();
+            if (_implementation.preUpdate()) {
+                glfwPollEvents();
 
-            glfwPollEvents();
+                if (_room != nullptr) {
+                    _room->update(seconds);
+                }
 
-            if (_room != nullptr) {
-                _room->update(seconds);
+                _implementation.preDraw();
+                if (_room != nullptr) {
+                    _room->draw();
+                }
+                _implementation.postDraw();
             }
-
-            _implementation.preDraw();
-            if (_room != nullptr) {
-                _room->draw();
-            }
-            _implementation.postDraw();
 
             ++frames;
         }

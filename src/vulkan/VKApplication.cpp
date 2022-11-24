@@ -74,13 +74,14 @@ void VKApplication::postWindowCreation(GLFWwindow* window) {
     createSyncObjects();
 }
 
-void VKApplication::preUpdate() {
+bool VKApplication::preUpdate() {
     vkWaitForFences(_device, 1, &_inFlightFences[_currentFrame], VK_TRUE,
                     UINT64_MAX);
 
     if (_framebufferResized) {
         _framebufferResized = false;
         recreateSwapChain();
+        return false;
     }
 
     VkResult result = vkAcquireNextImageKHR(
@@ -90,12 +91,14 @@ void VKApplication::preUpdate() {
 
     if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR) {
         recreateSwapChain();
-        return;
+        return false;
     } else if (result != VK_SUCCESS) {
         throw std::runtime_error("Failed to acquire swap chain image!");
     }
 
     vkResetFences(_device, 1, &_inFlightFences[_currentFrame]);
+
+    return true;
 }
 
 void VKApplication::preDraw() {
