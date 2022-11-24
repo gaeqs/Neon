@@ -53,3 +53,8 @@ void Material::pushConstant(
         const std::string& name, const void* data, uint32_t size) {
     _implementation.pushConstant(name, data, size);
 }
+
+void Material::setTexture(const std::string& name,
+                          IdentifiableWrapper<Texture> texture) {
+    _implementation.setTexture(name, texture);
+}

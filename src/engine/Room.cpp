@@ -122,7 +122,6 @@ void Room::update(float deltaTime) {
 }
 
 void Room::draw() {
-    _globalUniformBuffer.prepareForFrame();
     _components.drawGraphicComponents(this);
 }
 

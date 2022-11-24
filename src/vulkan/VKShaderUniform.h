@@ -25,5 +25,12 @@ struct VKShaderUniform {
     uint32_t stages;
 };
 
+struct VKShaderSampler {
+    std::string name;
+    uint32_t binding;
+    uint32_t stages;
+};
+
+
 
 #endif //NEON_VKSHADERUNIFORM_H

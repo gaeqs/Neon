@@ -20,6 +20,11 @@ void VKShaderRenderer::insertShader(
 
 void VKShaderRenderer::render(Room* room,
                               std::shared_ptr<ComponentList> elements) {
+    room->getGlobalUniformBuffer().prepareForFrame();
+
+    room->getMaterials().forEach([](Material* material) {
+        material->getUniformBuffer().prepareForFrame();
+    });
 
     room->getModels().forEach([&](Model* model) {
         model->getImplementation().draw(

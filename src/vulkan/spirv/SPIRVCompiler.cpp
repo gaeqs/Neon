@@ -174,14 +174,15 @@ SPIRVCompiler::~SPIRVCompiler() {
 
 std::optional<std::string>
 SPIRVCompiler::addShader(const VkShaderStageFlagBits& shaderType,
-                         const char* source) {
+                         const std::string& source) {
     auto language = getLanguage(shaderType);
     auto* shader = new glslang::TShader(language);
 
     auto messages = static_cast<EShMessages>(
             EShMsgSpvRules | EShMsgVulkanRules);
 
-    shader->setStrings(&source, 1);
+    const char* value = source.data();
+    shader->setStrings(&value, 1);
 
     shader->setEnvInput(glslang::EShSourceGlsl, language,
                         glslang::EShClientVulkan, DEFAULT_VERSION);
@@ -272,6 +273,27 @@ SPIRVCompiler::getUniforms() const {
                 reflection.name,
                 static_cast<uint32_t>(reflection.index),
                 static_cast<uint32_t>(reflection.offset),
+                reflection.stages
+        };
+
+        uniforms.emplace(reflection.name, current);
+    }
+
+    return uniforms;
+}
+
+std::unordered_map<std::string, VKShaderSampler>
+SPIRVCompiler::getSamplers() const {
+    std::unordered_map<std::string, VKShaderSampler> uniforms;
+    uniforms.reserve(_program.getNumUniformVariables());
+    for (int i = 0; i < _program.getNumUniformVariables(); ++i) {
+        auto& reflection = _program.getUniform(i);
+
+        if (!reflection.getType()->isTexture()) continue;
+
+        auto current = VKShaderSampler{
+                reflection.name,
+                static_cast<uint32_t>(reflection.getBinding()),
                 reflection.stages
         };
 

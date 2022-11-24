@@ -9,7 +9,11 @@
 
 class ConstantRotationComponent : public Component {
 
+    float _speed;
+
 public:
+
+    void onStart() override;
 
     void onUpdate(float deltaTime) override;
 

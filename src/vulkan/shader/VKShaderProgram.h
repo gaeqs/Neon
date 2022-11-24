@@ -30,6 +30,7 @@ class VKShaderProgram {
 
     std::unordered_map<std::string, VKShaderUniformBlock> _uniformBlocks;
     std::unordered_map<std::string, VKShaderUniform> _uniforms;
+    std::unordered_map<std::string, VKShaderSampler> _samplers;
 
     void deleteShaders();
 
@@ -52,6 +53,9 @@ public:
 
     [[nodiscard]] const std::unordered_map<std::string, VKShaderUniformBlock>&
     getUniformBlocks() const;
+
+    [[nodiscard]] const std::unordered_map<std::string, VKShaderSampler>&
+    getSamplers() const;
 };
 
 

@@ -278,7 +278,7 @@ public:
     T* emplace(Args&& ... values) {
         if (_localSize == Size) {
             expand();
-            _next->emplace(values...);
+            return _next->emplace(values...);
         }
 
 

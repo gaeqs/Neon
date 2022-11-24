@@ -11,6 +11,8 @@
 
 #include <vulkan/vulkan.h>
 
+#include <engine/IdentifiableWrapper.h>
+#include <engine/Texture.h>
 #include <engine/model/InputDescription.h>
 
 class Application;
@@ -49,6 +51,9 @@ public:
     void pushConstant(const std::string& name, const void* data, uint32_t size);
 
     void uploadConstants(VkCommandBuffer buffer) const;
+
+    void setTexture(const std::string& name,
+                  IdentifiableWrapper<Texture> texture);
 };
 
 

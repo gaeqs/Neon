@@ -21,6 +21,7 @@ ModelLoader::ModelLoader(const std::shared_ptr<Room>& room) :
 void ModelLoader::loadMaterial(
         std::vector<IdentifiableWrapper<Material>>& vector,
         IdentifiableWrapper<ShaderProgram> shader,
+        const std::shared_ptr<ShaderUniformDescriptor>& materialDescriptor,
         const std::map<std::string, IdentifiableWrapper<Texture>>& textures,
         const InputDescription& vertexDescription,
         const InputDescription& instanceDescription,
@@ -28,7 +29,7 @@ void ModelLoader::loadMaterial(
 
     auto m = _room->getMaterials().create(
             shader,
-            _room->getGlobalUniformDescriptor(),
+            materialDescriptor,
             vertexDescription,
             instanceDescription);
     vector.push_back(m);
@@ -75,32 +76,32 @@ void ModelLoader::loadMaterial(
         auto texture = textures.find(
                 std::string(t.data, std::min(t.length, 2u)));
         if (texture != textures.end()) {
-            //m->setImage(DIFFUSE_TEXTURE, texture->second);
+            m->setTexture(DIFFUSE_TEXTURE, texture->second);
         }
     }
     if (material->Get(AI_MATKEY_TEXTURE_SPECULAR(0), t) == aiReturn_SUCCESS) {
         auto texture = textures.find(internalGetTextureId(t));
         if (texture != textures.end()) {
-            //m->setImage(SPECULAR_TEXTURE, texture->second);
+            m->setTexture(SPECULAR_TEXTURE, texture->second);
         }
     }
     if (material->Get(AI_MATKEY_TEXTURE_AMBIENT(0), t) == aiReturn_SUCCESS) {
         auto texture = textures.find(internalGetTextureId(t));
         if (texture != textures.end()) {
-            //m->setImage(AMBIENT_TEXTURE, texture->second);
+            m->setTexture(AMBIENT_TEXTURE, texture->second);
         }
     }
     if (material->Get(AI_MATKEY_TEXTURE_EMISSIVE(0), t) == aiReturn_SUCCESS) {
         auto texture = textures.find(internalGetTextureId(t));
         if (texture != textures.end()) {
-            //m->setImage(AMBIENT_TEXTURE, texture->second);
+            m->setTexture(AMBIENT_TEXTURE, texture->second);
         }
     }
     if (material->Get(AI_MATKEY_TEXTURE_DISPLACEMENT(0), t) ==
         aiReturn_SUCCESS) {
         auto texture = textures.find(internalGetTextureId(t));
         if (texture != textures.end()) {
-            //m->setImage(DISPLACEMENT_TEXTURE, texture->second);
+            m->setTexture(DISPLACEMENT_TEXTURE, texture->second);
         }
     }
 }

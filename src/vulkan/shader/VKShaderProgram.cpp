@@ -31,7 +31,8 @@ VKShaderProgram::VKShaderProgram(Application* application) :
         _vkApplication(&application->getImplementation()),
         _shaders(),
         _uniformBlocks(),
-        _uniforms() {
+        _uniforms(),
+        _samplers() {
 }
 
 VKShaderProgram::~VKShaderProgram() {
@@ -46,8 +47,12 @@ VKShaderProgram::compile(
     SPIRVCompiler compiler;
 
     for (const auto& [type, resource]: raw) {
-        auto error = compiler.addShader(getStage(type), resource.begin());
-        if (error.has_value()) return error;
+        auto code = std::string(resource.begin(), resource.end());
+        auto error = compiler.addShader(getStage(type), code);
+        if (error.has_value()) {
+            return "Error compiling shader:\n"
+                   + code + "\n" + error.value();
+        }
     }
 
     auto error = compiler.compile();
@@ -80,6 +85,7 @@ VKShaderProgram::compile(
 
     _uniformBlocks = compiler.getUniformBlocks();
     _uniforms = compiler.getUniforms();
+    _samplers = compiler.getSamplers();
 
     return {};
 }
@@ -97,6 +103,11 @@ VKShaderProgram::getUniforms() const {
 const std::unordered_map<std::string, VKShaderUniformBlock>&
 VKShaderProgram::getUniformBlocks() const {
     return _uniformBlocks;
+}
+
+const std::unordered_map<std::string, VKShaderSampler>&
+VKShaderProgram::getSamplers() const {
+    return _samplers;
 }
 
 

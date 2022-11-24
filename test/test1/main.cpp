@@ -63,10 +63,21 @@ std::shared_ptr<Room> getTestRoom(Application* application) {
     auto cameraController = room->newGameObject();
     cameraController->newComponent<CameraMovementComponent>();
 
+    std::vector<ShaderUniformBinding> sansMaterialBindings = {
+            ShaderUniformBinding{
+                    UniformBindingType::IMAGE, 0
+            }};
+
+
+    auto sansMaterialDescriptor = std::make_shared<ShaderUniformDescriptor>(
+            application,
+            sansMaterialBindings
+    );
 
     auto sansResult = ModelLoader(room).loadModel
             <TestVertex, DefaultInstancingData>(
             shader,
+            sansMaterialDescriptor,
             R"(resource/Sans)",
             "Sans.obj");
 
@@ -77,15 +88,15 @@ std::shared_ptr<Room> getTestRoom(Application* application) {
     }
     auto sansModel = sansResult.model;
 
-    int q = static_cast<int>(std::sqrt(100));
-    for (int i = 0; i < 100; i++) {
+    int q = static_cast<int>(std::sqrt(600));
+    for (int i = 0; i < 600; i++) {
         auto sans = room->newGameObject();
         sans->newComponent<GraphicComponent>(sansModel);
         sans->newComponent<ConstantRotationComponent>();
 
         float x = static_cast<float>(i % q) * 3.0f;
-        float y = static_cast<float>(i / q) * 3.0f;
-        sans->getTransform().setPosition(glm::vec3(x, y, 0));
+        float z = static_cast<float>(i / q) * 3.0f;
+        sans->getTransform().setPosition(glm::vec3(x, 0, z));
     }
 
     return room;

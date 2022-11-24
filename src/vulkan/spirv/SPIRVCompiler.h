@@ -34,7 +34,8 @@ public:
     ~SPIRVCompiler();
 
     std::optional<std::string>
-    addShader(const VkShaderStageFlagBits& shaderType, const char* source);
+    addShader(const VkShaderStageFlagBits& shaderType,
+              const std::string& source);
 
     std::optional<std::string> compile();
 
@@ -46,6 +47,9 @@ public:
 
     [[nodiscard]] std::unordered_map<std::string, VKShaderUniform>
     getUniforms() const;
+
+    [[nodiscard]] std::unordered_map<std::string, VKShaderSampler>
+    getSamplers() const;
 
 };
 

@@ -546,7 +546,7 @@ VkPresentModeKHR VKApplication::chooseSwapPresentMode(
         }
     }
 
-    return VK_PRESENT_MODE_FIFO_KHR;
+    return VK_PRESENT_MODE_IMMEDIATE_KHR;
 }
 
 VkExtent2D
@@ -622,6 +622,15 @@ void VKApplication::createDepthImages() {
 
     _depthImageView = vulkan_util::createImageView(
             _device, _depthImage, _depthImageFormat, VK_IMAGE_ASPECT_DEPTH_BIT);
+
+    vulkan_util::transitionImageLayout(
+            _device,
+            _commandPool,
+            _graphicsQueue,
+            _depthImage,
+            _depthImageFormat,
+            VK_IMAGE_LAYOUT_UNDEFINED,
+            VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
 }
 
 void VKApplication::createRenderPass() {

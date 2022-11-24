@@ -30,13 +30,17 @@ VKShaderUniformBuffer::VKShaderUniformBuffer(
 
     _textures.resize(bindings.size());
 
+    uint32_t bufferAmount = 0;
+    uint32_t textureAmount = 0;
+
     for (const auto& binding: bindings) {
-        _updated.emplace_back(binding.size, false);
+        _updated.emplace_back( _vkApplication->getMaxFramesInFlight(), false);
         _types.emplace_back(binding.type);
 
         if (binding.type == UniformBindingType::IMAGE) {
             _buffers.emplace_back();
             _data.emplace_back();
+            ++textureAmount;
         } else {
             std::vector<std::shared_ptr<Buffer>> buffers;
             for (int i = 0; i < _vkApplication->getMaxFramesInFlight(); ++i) {
@@ -49,18 +53,27 @@ VKShaderUniformBuffer::VKShaderUniformBuffer(
             }
             _buffers.push_back(buffers);
             _data.emplace_back(binding.size, 0);
+            ++bufferAmount;
         }
     }
 
+    std::vector<VkDescriptorPoolSize> pools;
 
-    VkDescriptorPoolSize poolSize{};
-    poolSize.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-    poolSize.descriptorCount = _vkApplication->getMaxFramesInFlight();
+    if (bufferAmount > 0) {
+        pools.push_back({VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+                         bufferAmount *
+                         _vkApplication->getMaxFramesInFlight()});
+    }
+    if(textureAmount > 0) {
+        pools.push_back({VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+                         textureAmount *
+                         _vkApplication->getMaxFramesInFlight()});
+    }
 
     VkDescriptorPoolCreateInfo poolInfo{};
     poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-    poolInfo.poolSizeCount = 1;
-    poolInfo.pPoolSizes = &poolSize;
+    poolInfo.poolSizeCount = pools.size();
+    poolInfo.pPoolSizes = pools.data();
     poolInfo.maxSets = _vkApplication->getMaxFramesInFlight();
 
     if (vkCreateDescriptorPool(

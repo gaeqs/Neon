@@ -14,6 +14,7 @@
 
 #include <engine/Identifiable.h>
 #include <engine/IdentifiableWrapper.h>
+#include <engine/Texture.h>
 #include <engine/shader/ShaderUniformBuffer.h>
 #include <engine/model/InputDescription.h>
 
@@ -80,6 +81,9 @@ public:
     void pushConstant(const std::string key, const T& value) {
         pushConstant(key, &value, sizeof(T));
     }
+
+    void setTexture(const std::string& name,
+                    IdentifiableWrapper<Texture> texture);
 };
 
 

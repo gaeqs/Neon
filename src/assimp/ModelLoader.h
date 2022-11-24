@@ -27,6 +27,7 @@
 #include <engine/Texture.h>
 #include <engine/shader/Material.h>
 #include <engine/shader/ShaderProgram.h>
+#include <engine/shader/ShaderUniformDescriptor.h>
 
 #include <glm/glm.hpp>
 
@@ -80,7 +81,8 @@ class ModelLoader {
     void loadMaterial(
             std::vector<IdentifiableWrapper<Material>>& vector,
             IdentifiableWrapper<ShaderProgram> shader,
-            const std::map<std::string, IdentifiableWrapper<Texture>>& textures,
+            const std::shared_ptr<ShaderUniformDescriptor>& materialDescriptor,
+            const std::map<std::strinAg, IdentifiableWrapper<Texture>>& textures,
             const InputDescription& vertexDescription,
             const InputDescription& instanceDescription,
             const aiMaterial* material) const;
@@ -99,14 +101,17 @@ public:
     template<class Vertex, class Instance>
     [[nodiscard]] ModelLoaderResult loadModel(
             IdentifiableWrapper<ShaderProgram> shader,
+            const std::shared_ptr<ShaderUniformDescriptor>& materialDescriptor,
             const cmrc::file& file) const {
-        return loadModel<Vertex, Instance>(shader, file.begin(), file.size());
+        return loadModel<Vertex, Instance>(
+                shader, materialDescriptor, file.begin(), file.size());
     }
 
     template<class Vertex, class Instance>
     [[nodiscard]]ModelLoaderResult
     loadModel(
             IdentifiableWrapper<ShaderProgram> shader,
+            const std::shared_ptr<ShaderUniformDescriptor>& materialDescriptor,
             const void* buffer,
             size_t length) const {
         Assimp::Importer importer;
@@ -122,12 +127,13 @@ public:
                 aiProcess_EmbedTextures |
                 aiProcess_FlipUVs
         );
-        return loadModel<Vertex, Instance>(shader, scene);
+        return loadModel<Vertex, Instance>(shader, materialDescriptor, scene);
     }
 
     template<class Vertex, class Instance>
     [[nodiscard]]ModelLoaderResult loadModel(
             IdentifiableWrapper<ShaderProgram> shader,
+            const std::shared_ptr<ShaderUniformDescriptor>& materialDescriptor,
             const std::string& directory,
             const std::string& fileName) const {
         Assimp::Importer importer;
@@ -144,12 +150,13 @@ public:
                 aiProcess_EmbedTextures |
                 aiProcess_FlipUVs
         );
-        return loadModel<Vertex, Instance>(shader, scene);
+        return loadModel<Vertex, Instance>(shader, materialDescriptor, scene);
     }
 
     template<class Vertex, class Instance>
     [[nodiscard]] ModelLoaderResult loadModel(
             IdentifiableWrapper<ShaderProgram> shader,
+            const std::shared_ptr<ShaderUniformDescriptor>& materialDescriptor,
             const aiScene* scene) const {
         if (!scene) return {false};
 
@@ -175,15 +182,19 @@ public:
 
         for (int i = 0; i < scene->mNumMaterials; ++i) {
             auto* material = scene->mMaterials[i];
-            loadMaterial(materials, shader, textures,
+            loadMaterial(materials, shader, materialDescriptor, textures,
                          vertexDescription, instanceDescription, material);
         }
 
+        uint32_t vertices = 0;
+        uint32_t faces = 0;
         for (int meshIndex = 0; meshIndex < scene->mNumMeshes; ++meshIndex) {
             auto* mesh = scene->mMeshes[meshIndex];
             auto meshResult = loadMesh<Vertex>(
                     mesh,
                     materials[mesh->mMaterialIndex]);
+            vertices += mesh->mNumVertices;
+            faces += mesh->mNumFaces;
             meshes.emplace_back(std::move(meshResult));
         }
 

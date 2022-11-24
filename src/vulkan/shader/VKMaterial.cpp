@@ -223,7 +223,7 @@ void VKMaterial::pushConstant(
 }
 
 void VKMaterial::uploadConstants(VkCommandBuffer buffer) const {
-    if(_pushConstantStages == 0) return;
+    if (_pushConstantStages == 0) return;
     vkCmdPushConstants(
             buffer,
             _pipelineLayout,
@@ -232,4 +232,15 @@ void VKMaterial::uploadConstants(VkCommandBuffer buffer) const {
             _pushConstants.size(),
             _pushConstants.data()
     );
+}
+
+void VKMaterial::setTexture(const std::string& name,
+                            IdentifiableWrapper<Texture> texture) {
+    auto& samplers = _material->getShader()->getImplementation().getSamplers();
+    auto samplerIt = samplers.find(name);
+    if (samplerIt == samplers.end()) return;
+
+    _material->getUniformBuffer().setTexture(
+            samplerIt->second.binding,
+            texture);
 }
