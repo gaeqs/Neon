@@ -47,8 +47,7 @@ VKTexture::VKTexture(Application* application, const void* data,
         _width(width),
         _height(height),
         _stagingBuffer(
-                _vkApplication->getPhysicalDevice(),
-                _vkApplication->getDevice(),
+                _vkApplication,
                 VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
                 VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
                 VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
@@ -74,9 +73,7 @@ VKTexture::VKTexture(Application* application, const void* data,
     _imageMemory = pair.second;
 
     vulkan_util::transitionImageLayout(
-            _vkApplication->getDevice(),
-            _vkApplication->getCommandPool(),
-            _vkApplication->getGraphicsQueue(),
+            _vkApplication,
             _image,
             vkFormat,
             VK_IMAGE_LAYOUT_UNDEFINED,
@@ -84,9 +81,7 @@ VKTexture::VKTexture(Application* application, const void* data,
     );
 
     vulkan_util::copyBufferToImage(
-            _vkApplication->getDevice(),
-            _vkApplication->getCommandPool(),
-            _vkApplication->getGraphicsQueue(),
+            _vkApplication,
             _stagingBuffer.getRaw(),
             _image,
             width,
@@ -94,9 +89,7 @@ VKTexture::VKTexture(Application* application, const void* data,
     );
 
     vulkan_util::transitionImageLayout(
-            _vkApplication->getDevice(),
-            _vkApplication->getCommandPool(),
-            _vkApplication->getGraphicsQueue(),
+            _vkApplication,
             _image,
             vkFormat,
             VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
@@ -165,9 +158,7 @@ void VKTexture::updateData(const void* data, int32_t width, int32_t height,
 
     auto vkFormat = getImageFormat(format);
     vulkan_util::transitionImageLayout(
-            _vkApplication->getDevice(),
-            _vkApplication->getCommandPool(),
-            _vkApplication->getGraphicsQueue(),
+            _vkApplication,
             _image,
             vkFormat,
             VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
@@ -175,9 +166,7 @@ void VKTexture::updateData(const void* data, int32_t width, int32_t height,
     );
 
     vulkan_util::copyBufferToImage(
-            _vkApplication->getDevice(),
-            _vkApplication->getCommandPool(),
-            _vkApplication->getGraphicsQueue(),
+            _vkApplication,
             _stagingBuffer.getRaw(),
             _image,
             width,
@@ -185,9 +174,7 @@ void VKTexture::updateData(const void* data, int32_t width, int32_t height,
     );
 
     vulkan_util::transitionImageLayout(
-            _vkApplication->getDevice(),
-            _vkApplication->getCommandPool(),
-            _vkApplication->getGraphicsQueue(),
+            _vkApplication,
             _image,
             vkFormat,
             VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,

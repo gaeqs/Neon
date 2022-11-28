@@ -7,6 +7,7 @@
 #include <stdexcept>
 
 #include <engine/model/InputDescription.h>
+#include <vulkan/VKApplication.h>
 
 namespace vulkan_util {
 
@@ -60,30 +61,26 @@ namespace vulkan_util {
         vkFreeCommandBuffers(device, pool, 1, &buffer);
     }
 
-    void copyBuffer(VkDevice device, VkCommandPool pool, VkQueue queue,
+    void copyBuffer(VKApplication* application,
                     VkBuffer source, VkBuffer destiny, VkDeviceSize size) {
-        auto buffer = beginSingleTimeCommandBuffer(device, pool);
 
         VkBufferCopy copyRegion{};
         copyRegion.size = size;
-        vkCmdCopyBuffer(buffer, source, destiny, 1, &copyRegion);
-
-        endSingleTimeCommandBuffer(device, queue, pool, buffer);
+        vkCmdCopyBuffer(application->getCurrentCommandBuffer(),
+                        source, destiny, 1, &copyRegion);
     }
 
-    void copyBuffer(VkDevice device, VkCommandPool pool, VkQueue queue,
+    void copyBuffer(VKApplication* application,
                     VkBuffer source, VkBuffer destiny,
                     VkDeviceSize sourceOffset, VkDeviceSize destinyOffset,
                     VkDeviceSize size) {
-        auto buffer = beginSingleTimeCommandBuffer(device, pool);
-
         VkBufferCopy copyRegion{};
         copyRegion.size = size;
         copyRegion.srcOffset = sourceOffset;
         copyRegion.dstOffset = destinyOffset;
-        vkCmdCopyBuffer(buffer, source, destiny, 1, &copyRegion);
+        vkCmdCopyBuffer(application->getCurrentCommandBuffer(),
+                        source, destiny, 1, &copyRegion);
 
-        endSingleTimeCommandBuffer(device, queue, pool, buffer);
     }
 
     std::pair<VkImage, VkDeviceMemory> createImage(
@@ -142,11 +139,9 @@ namespace vulkan_util {
     }
 
     void transitionImageLayout(
-            VkDevice device, VkCommandPool pool, VkQueue queue,
+            VKApplication* application,
             VkImage image, VkFormat format,
             VkImageLayout oldLayout, VkImageLayout newLayout) {
-
-        auto buffer = beginSingleTimeCommandBuffer(device, pool);
 
         VkImageMemoryBarrier barrier{};
         barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
@@ -191,7 +186,7 @@ namespace vulkan_util {
             destinationStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
 
         } else if (oldLayout == VK_IMAGE_LAYOUT_UNDEFINED && newLayout ==
-                   VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL) {
+                                                             VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL) {
             barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
 
             if (format == VK_FORMAT_D32_SFLOAT_S8_UINT ||
@@ -210,19 +205,37 @@ namespace vulkan_util {
             throw std::invalid_argument("unsupported layout transition!");
         }
 
-        vkCmdPipelineBarrier(
-                buffer, sourceStage, destinationStage,
-                0, 0, nullptr, 0,
-                nullptr, 1, &barrier
-        );
+        if (application->isRecordingCommandBuffer()) {
+            vkCmdPipelineBarrier(
+                    application->getCurrentCommandBuffer(),
+                    sourceStage, destinationStage,
+                    0, 0, nullptr, 0,
+                    nullptr, 1, &barrier
+            );
+        } else {
+            auto commandBuffer = beginSingleTimeCommandBuffer(
+                    application->getDevice(),
+                    application->getCommandPool()
+            );
+            vkCmdPipelineBarrier(
+                    commandBuffer,
+                    sourceStage, destinationStage,
+                    0, 0, nullptr, 0,
+                    nullptr, 1, &barrier
+            );
 
-        endSingleTimeCommandBuffer(device, queue, pool, buffer);
+            endSingleTimeCommandBuffer(
+                    application->getDevice(),
+                    application->getGraphicsQueue(),
+                    application->getCommandPool(),
+                    commandBuffer
+            );
+        }
     }
 
     void copyBufferToImage(
-            VkDevice device, VkCommandPool pool, VkQueue queue,
+            VKApplication* application,
             VkBuffer buffer, VkImage image, uint32_t width, uint32_t height) {
-        auto cBuffer = beginSingleTimeCommandBuffer(device, pool);
 
         VkBufferImageCopy region{};
         region.bufferOffset = 0;
@@ -241,16 +254,35 @@ namespace vulkan_util {
                 1
         };
 
-        vkCmdCopyBufferToImage(
-                cBuffer,
-                buffer,
-                image,
-                VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-                1,
-                &region
-        );
-
-        endSingleTimeCommandBuffer(device, queue, pool, cBuffer);
+        if (application->isRecordingCommandBuffer()) {
+            vkCmdCopyBufferToImage(
+                    application->getCurrentCommandBuffer(),
+                    buffer,
+                    image,
+                    VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+                    1,
+                    &region
+            );
+        } else {
+            auto commandBuffer = beginSingleTimeCommandBuffer(
+                    application->getDevice(),
+                    application->getCommandPool()
+            );
+            vkCmdCopyBufferToImage(
+                    commandBuffer,
+                    buffer,
+                    image,
+                    VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+                    1,
+                    &region
+            );
+            endSingleTimeCommandBuffer(
+                    application->getDevice(),
+                    application->getGraphicsQueue(),
+                    application->getCommandPool(),
+                    commandBuffer
+            );
+        }
     }
 
     std::optional<VkFormat> findSupportedFormat(
@@ -350,4 +382,4 @@ namespace vulkan_util {
         return {bindingDescription, attributes};
     }
 
-};
+}

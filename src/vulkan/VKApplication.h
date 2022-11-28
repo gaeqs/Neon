@@ -60,6 +60,8 @@ class VKApplication {
     VkCommandPool _commandPool{};
 
     std::vector<VkCommandBuffer> _commandBuffers;
+    bool _recording = false;
+
     std::vector<VkSemaphore> _imageAvailableSemaphores;
     std::vector<VkSemaphore> _renderFinishedSemaphores;
     std::vector<VkFence> _inFlightFences;
@@ -167,6 +169,8 @@ public:
     [[nodiscard]] VkRenderPass getRenderPass() const;
 
     [[nodiscard]] VkCommandBuffer getCurrentCommandBuffer() const;
+
+    [[nodiscard]] bool isRecordingCommandBuffer() const;
 
 };
 

@@ -41,15 +41,13 @@ public:
                     const std::vector<uint32_t>& indices) {
 
         _vertexBuffer = std::make_unique<SimpleBuffer>(
-                _vkApplication->getPhysicalDevice(),
-                _vkApplication->getDevice(),
+                _vkApplication,
                 VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
                 VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT,
                 vertices);
 
         _indexBuffer = std::make_unique<SimpleBuffer>(
-                _vkApplication->getPhysicalDevice(),
-                _vkApplication->getDevice(),
+                _vkApplication,
                 VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
                 VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT,
                 indices);

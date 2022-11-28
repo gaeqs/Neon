@@ -10,6 +10,8 @@
 
 #include <vulkan/vulkan.h>
 
+class VKApplication;
+
 template<class T>
 class BufferMap {
 
@@ -57,9 +59,7 @@ public:
 
     virtual VkBuffer getRaw() const = 0;
 
-    virtual VkPhysicalDevice getPhysicalDevice() const = 0;
-
-    virtual VkDevice getDevice() const = 0;
+    virtual VKApplication* getApplication() const = 0;
 
     template<class T>
     std::optional<std::shared_ptr<BufferMap<T>>> map() {

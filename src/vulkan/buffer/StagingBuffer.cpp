@@ -16,31 +16,20 @@ VkBuffer StagingBuffer::getRaw() const {
     return _deviceBuffer.getRaw();
 }
 
-VkPhysicalDevice StagingBuffer::getPhysicalDevice() const {
-    return _stagingBuffer.getPhysicalDevice();
-}
-
-VkDevice StagingBuffer::getDevice() const {
-    return _stagingBuffer.getDevice();
-}
-
 std::optional<std::shared_ptr<BufferMap<char>>> StagingBuffer::rawMap() {
-    return std::make_shared<StagingBufferMap<char>>(_queue, _commandPool,
-                                                    _stagingBuffer,
-                                                    _deviceBuffer);
+    return std::make_shared<StagingBufferMap<char>>(
+            _application, _stagingBuffer, _deviceBuffer);
 }
 
-StagingBuffer::StagingBuffer(VkQueue queue, VkCommandPool commandPool,
-                             VkPhysicalDevice physicalDevice, VkDevice device,
+StagingBuffer::StagingBuffer(VKApplication* application,
                              VkBufferUsageFlags usage, uint32_t sizeInBytes) :
-        _stagingBuffer(physicalDevice, device, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+        _application(application),
+        _stagingBuffer(_application, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
                        VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
                        VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, sizeInBytes),
-        _deviceBuffer(physicalDevice, device,
+        _deviceBuffer(_application,
                       VK_BUFFER_USAGE_TRANSFER_DST_BIT | usage,
-                      VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, sizeInBytes),
-        _commandPool(commandPool),
-        _queue(queue) {
+                      VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, sizeInBytes) {
 }
 
 
@@ -60,6 +49,6 @@ const SimpleBuffer& StagingBuffer::getDeviceBuffer() const {
     return _deviceBuffer;
 }
 
-VkCommandPool StagingBuffer::getCommandPool() const {
-    return _commandPool;
+VKApplication* StagingBuffer::getApplication() const {
+    return _application;
 }

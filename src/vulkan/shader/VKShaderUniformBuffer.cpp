@@ -45,8 +45,7 @@ VKShaderUniformBuffer::VKShaderUniformBuffer(
             std::vector<std::shared_ptr<Buffer>> buffers;
             for (int i = 0; i < _vkApplication->getMaxFramesInFlight(); ++i) {
                 buffers.push_back(std::make_shared<SimpleBuffer>(
-                        _vkApplication->getPhysicalDevice(),
-                        _vkApplication->getDevice(),
+                        _vkApplication,
                         VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
                         VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT,
                         binding.size));

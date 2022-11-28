@@ -7,7 +7,10 @@
 
 #include <vector>
 #include <stdexcept>
-#include "Buffer.h"
+
+#include <vulkan/buffer/Buffer.h>
+
+class VKApplication;
 
 template<class T>
 class SimpleBufferMap : public BufferMap<T> {
@@ -55,8 +58,7 @@ class SimpleBuffer : public Buffer {
 
     size_t _size;
 
-    VkPhysicalDevice _physicalDevice;
-    VkDevice _device;
+    VKApplication* _application;
     VkBuffer _vertexBuffer;
     VkDeviceMemory _vertexBufferMemory;
 
@@ -69,18 +71,18 @@ public:
     SimpleBuffer(const SimpleBuffer& other) = delete;
 
     template<class T>
-    SimpleBuffer(VkPhysicalDevice physicalDevice, VkDevice device,
+    SimpleBuffer(VKApplication* application,
                  VkBufferUsageFlags usage, VkMemoryPropertyFlags properties,
                  const std::vector<T>& data):
-            SimpleBuffer(physicalDevice, device, usage, properties, data.data(),
+            SimpleBuffer(application, usage, properties, data.data(),
                          data.size() * sizeof(T)) {
     }
 
-    SimpleBuffer(VkPhysicalDevice physicalDevice, VkDevice device,
+    SimpleBuffer(VKApplication* application,
                  VkBufferUsageFlags usage, VkMemoryPropertyFlags properties,
                  uint32_t sizeInBytes);
 
-    SimpleBuffer(VkPhysicalDevice physicalDevice, VkDevice device,
+    SimpleBuffer(VKApplication* application,
                  VkBufferUsageFlags usage, VkMemoryPropertyFlags properties,
                  const void* data, uint32_t sizeInBytes);
 
@@ -92,9 +94,7 @@ public:
 
     [[nodiscard]] VkBuffer getRaw() const override;
 
-    [[nodiscard]] VkPhysicalDevice getPhysicalDevice() const override;
-
-    [[nodiscard]] VkDevice getDevice() const override;
+    [[nodiscard]] VKApplication* getApplication() const override;
 };
 
 

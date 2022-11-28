@@ -98,22 +98,26 @@ bool VKApplication::preUpdate() {
 
     vkResetFences(_device, 1, &_inFlightFences[_currentFrame]);
 
-    return true;
-}
-
-void VKApplication::preDraw() {
     vkResetCommandBuffer(_commandBuffers[_currentFrame], 0);
-
-    auto commandBuffer = _commandBuffers[_currentFrame];
 
     VkCommandBufferBeginInfo beginInfo{};
     beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
     beginInfo.flags = 0; // Optional
     beginInfo.pInheritanceInfo = nullptr; // Optional
 
-    if (vkBeginCommandBuffer(commandBuffer, &beginInfo) != VK_SUCCESS) {
+    if (vkBeginCommandBuffer(_commandBuffers[_currentFrame], &beginInfo)
+        != VK_SUCCESS) {
         throw std::runtime_error("Failed to begin recording command buffer!");
     }
+
+    _recording = true;
+
+
+    return true;
+}
+
+void VKApplication::preDraw() {
+    auto commandBuffer = _commandBuffers[_currentFrame];
 
     VkRenderPassBeginInfo renderPassInfo{};
     renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
@@ -154,6 +158,8 @@ void VKApplication::postDraw() {
     if (vkEndCommandBuffer(commandBuffer) != VK_SUCCESS) {
         throw std::runtime_error("Failed to record command buffer!");
     }
+
+    _recording = false;
 
     VkSemaphore waitSemaphores[] = {_imageAvailableSemaphores[_currentFrame]};
     VkPipelineStageFlags waitStages[] = {
@@ -627,9 +633,7 @@ void VKApplication::createDepthImages() {
             _device, _depthImage, _depthImageFormat, VK_IMAGE_ASPECT_DEPTH_BIT);
 
     vulkan_util::transitionImageLayout(
-            _device,
-            _commandPool,
-            _graphicsQueue,
+            this,
             _depthImage,
             _depthImageFormat,
             VK_IMAGE_LAYOUT_UNDEFINED,
@@ -879,9 +883,15 @@ VkCommandPool VKApplication::getCommandPool() const {
 }
 
 VkCommandBuffer VKApplication::getCurrentCommandBuffer() const {
-    return _commandBuffers[_currentFrame];
+    return _commandBuffers.empty()
+           ? VK_NULL_HANDLE
+           : _commandBuffers[_currentFrame];
 }
 
 VkRenderPass VKApplication::getRenderPass() const {
     return _renderPass;
+}
+
+bool VKApplication::isRecordingCommandBuffer() const {
+    return _recording;
 }

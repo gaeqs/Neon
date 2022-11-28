@@ -11,6 +11,8 @@
 #include <optional>
 #include <vulkan/vulkan.h>
 
+class VKApplication;
+
 struct InputDescription;
 
 namespace vulkan_util {
@@ -25,10 +27,10 @@ namespace vulkan_util {
             VkDevice device, VkQueue queue,
             VkCommandPool pool, VkCommandBuffer buffer);
 
-    void copyBuffer(VkDevice device, VkCommandPool pool, VkQueue queue,
+    void copyBuffer(VKApplication* application,
                     VkBuffer source, VkBuffer destiny, VkDeviceSize size);
 
-    void copyBuffer(VkDevice device, VkCommandPool pool, VkQueue queue,
+    void copyBuffer(VKApplication* application,
                     VkBuffer source, VkBuffer destiny,
                     VkDeviceSize sourceOffset, VkDeviceSize destinyOffset,
                     VkDeviceSize size);
@@ -42,12 +44,12 @@ namespace vulkan_util {
             VkFormat format);
 
     void transitionImageLayout(
-            VkDevice device, VkCommandPool pool, VkQueue queue,
+            VKApplication* application,
             VkImage image, VkFormat format,
             VkImageLayout oldLayout, VkImageLayout newLayout);
 
     void copyBufferToImage(
-            VkDevice device, VkCommandPool pool, VkQueue queue,
+            VKApplication* application,
             VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
 
     std::optional<VkFormat> findSupportedFormat(
@@ -67,7 +69,7 @@ namespace vulkan_util {
     toVulkanDescription(uint32_t binding, uint32_t startLocation,
                         const InputDescription& description);
 
-};
+}
 
 
 #endif //NEON_VKUTIL_H

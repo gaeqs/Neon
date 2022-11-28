@@ -11,10 +11,7 @@
 
 void VKModel::reinitializeBuffer() {
     _instancingBuffer = StagingBuffer(
-            _vkApplication->getGraphicsQueue(),
-            _vkApplication->getCommandPool(),
-            _vkApplication->getPhysicalDevice(),
-            _vkApplication->getDevice(),
+            _vkApplication,
             VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
             _instancingStructSize * BUFFER_DEFAULT_SIZE
     );
@@ -27,10 +24,7 @@ VKModel::VKModel(Application* application, std::vector<VKMesh*> meshes) :
         _instancingStructSize(sizeof(DefaultInstancingData)),
         _positions(),
         _instancingBuffer(
-                _vkApplication->getGraphicsQueue(),
-                _vkApplication->getCommandPool(),
-                _vkApplication->getPhysicalDevice(),
-                _vkApplication->getDevice(),
+                _vkApplication,
                 VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
                 _instancingStructSize * BUFFER_DEFAULT_SIZE
         ) {
@@ -58,9 +52,7 @@ bool VKModel::freeInstance(uint32_t id) {
 
     if (_instancingStructSize != 0) {
         vulkan_util::copyBuffer(
-                _vkApplication->getDevice(),
-                _vkApplication->getCommandPool(),
-                _vkApplication->getGraphicsQueue(),
+                _vkApplication,
                 _instancingBuffer.getRaw(),
                 _instancingBuffer.getRaw(),
                 *last * _instancingStructSize,
