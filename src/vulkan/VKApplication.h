@@ -136,9 +136,9 @@ public:
 
     bool preUpdate();
 
-    void preDraw();
+    void beginDraw();
 
-    void postDraw();
+    void endDraw();
 
     void internalForceSizeValues(int32_t width, int32_t height);
 

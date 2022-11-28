@@ -88,7 +88,7 @@ std::shared_ptr<Room> getTestRoom(Application* application) {
     }
     auto sansModel = sansResult.model;
 
-    constexpr int AMOUNT = 600;
+    constexpr int AMOUNT = 6000;
     int q = static_cast<int>(std::sqrt(AMOUNT));
     for (int i = 0; i < AMOUNT; i++) {
         auto sans = room->newGameObject();

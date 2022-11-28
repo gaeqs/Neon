@@ -53,7 +53,8 @@ set(
         engine/shader/ShaderUniformBinding.h
         engine/shader/ShaderUniformDescriptor.cpp
         engine/shader/ShaderUniformDescriptor.h
-        engine/model/InputDescription.h)
+        engine/model/InputDescription.h
+        util/Range.h)
 
 
 list(APPEND SOURCES

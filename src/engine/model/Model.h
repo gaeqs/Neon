@@ -71,6 +71,7 @@ public:
 
     void uploadDataRaw(uint32_t id, const void* raw);
 
+    void flush();
 };
 
 

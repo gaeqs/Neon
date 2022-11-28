@@ -15,6 +15,7 @@ void VKModel::reinitializeBuffer() {
             VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
             _instancingStructSize * BUFFER_DEFAULT_SIZE
     );
+    _data.resize(_instancingStructSize * BUFFER_DEFAULT_SIZE, 0);
 }
 
 VKModel::VKModel(Application* application, std::vector<VKMesh*> meshes) :
@@ -27,7 +28,9 @@ VKModel::VKModel(Application* application, std::vector<VKMesh*> meshes) :
                 _vkApplication,
                 VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
                 _instancingStructSize * BUFFER_DEFAULT_SIZE
-        ) {
+        ),
+        _data(_instancingStructSize * BUFFER_DEFAULT_SIZE, 0),
+        _dataChangeRange(0, 0) {
 }
 
 const std::type_index& VKModel::getInstancingStructType() const {
@@ -86,11 +89,19 @@ void VKModel::uploadDataRaw(uint32_t id, const void* raw) {
         return;
     }
 
-    auto map = _instancingBuffer.map<char>();
-    if (map.has_value()) {
-        memcpy(map.value()->raw() + _instancingStructSize * id,
-               raw,
-               _instancingStructSize);
+    memcpy(_data.data() + _instancingStructSize * id,
+           raw, _instancingStructSize);
+    _dataChangeRange += Range<uint32_t>(id, id + 1);
+}
+
+void VKModel::flush() {
+    if (_dataChangeRange.size() != 0) {
+        auto map = _instancingBuffer.map<char>(
+                _dataChangeRange * _instancingStructSize);
+        if (map.has_value()) {
+            memcpy(map.value()->raw(), _data.data(), _data.size());
+        }
+        _dataChangeRange = Range<uint32_t>(0, 0);
     }
 }
 

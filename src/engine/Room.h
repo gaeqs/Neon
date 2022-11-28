@@ -109,6 +109,8 @@ public:
 
     void update(float deltaTime);
 
+    void preDraw();
+
     void draw();
 
 

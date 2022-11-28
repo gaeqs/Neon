@@ -55,3 +55,7 @@ bool Model::freeInstance(uint32_t id) {
 void Model::uploadDataRaw(uint32_t id, const void* raw) {
     _implementation.uploadDataRaw(id, raw);
 }
+
+void Model::flush() {
+    _implementation.flush();
+}

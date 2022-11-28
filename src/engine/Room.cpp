@@ -121,6 +121,12 @@ void Room::update(float deltaTime) {
     _components.updateComponents(deltaTime);
 }
 
+void Room::preDraw() {
+    _models.forEach([](Model* m) {
+        m->flush();
+    });
+}
+
 void Room::draw() {
     _components.drawGraphicComponents(this);
 }

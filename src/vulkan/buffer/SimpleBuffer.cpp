@@ -11,7 +11,14 @@
 
 std::optional<std::shared_ptr<BufferMap<char>>> SimpleBuffer::rawMap() {
     return std::make_shared<SimpleBufferMap<char>>(
-            _application->getDevice(), _vertexBufferMemory, _size);
+            _application->getDevice(), _vertexBufferMemory,
+            Range<uint32_t>(0, _size));
+}
+
+std::optional<std::shared_ptr<BufferMap<char>>>
+SimpleBuffer::rawMap(Range<uint32_t> range) {
+    return std::make_shared<SimpleBufferMap<char>>(
+            _application->getDevice(), _vertexBufferMemory, range);
 }
 
 SimpleBuffer::SimpleBuffer(VKApplication* application,
@@ -85,10 +92,10 @@ bool SimpleBuffer::canBeWrittenOn() const {
     return _modifiable;
 }
 
-VkBuffer SimpleBuffer::getRaw() const {
-    return _vertexBuffer;
-}
-
 VKApplication* SimpleBuffer::getApplication() const {
     return _application;
+}
+
+VkBuffer SimpleBuffer::getRaw() const {
+    return _vertexBuffer;
 }

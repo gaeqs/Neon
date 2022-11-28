@@ -37,6 +37,17 @@ public:
             _map(_stagingBuffer.map<T>().value()) {
     }
 
+    StagingBufferMap(VKApplication* application,
+                     SimpleBuffer& stagingBuffer,
+                     SimpleBuffer& deviceBuffer,
+                     Range<uint32_t> range) :
+            BufferMap<T>(),
+            _application(application),
+            _stagingBuffer(stagingBuffer),
+            _deviceBuffer(deviceBuffer),
+            _map(_stagingBuffer.map<T>(range).value()) {
+    }
+
     ~StagingBufferMap() override {
         dispose();
     };
@@ -74,6 +85,9 @@ class StagingBuffer : public Buffer {
     SimpleBuffer _deviceBuffer;
 
     std::optional<std::shared_ptr<BufferMap<char>>> rawMap() override;
+
+    std::optional<std::shared_ptr<BufferMap<char>>> rawMap(
+            Range<uint32_t> range) override;
 
 public:
 

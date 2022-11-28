@@ -22,12 +22,14 @@ class SimpleBufferMap : public BufferMap<T> {
 
 public:
 
-    SimpleBufferMap(VkDevice device, VkDeviceMemory memory, size_t size) :
+    SimpleBufferMap(VkDevice device, VkDeviceMemory memory,
+                    Range<uint32_t> range) :
             BufferMap<T>(),
             _device(device),
             _memory(memory),
             _pointer(nullptr) {
-        vkMapMemory(device, memory, 0, size, 0, (void**) &_pointer);
+        vkMapMemory(device, memory, range.getFrom(), range.size(), 0,
+                    (void**) &_pointer);
     }
 
     ~SimpleBufferMap() override {
@@ -65,6 +67,9 @@ class SimpleBuffer : public Buffer {
     bool _modifiable;
 
     std::optional<std::shared_ptr<BufferMap<char>>> rawMap() override;
+
+    std::optional<std::shared_ptr<BufferMap<char>>> rawMap(
+            Range<uint32_t> range) override;
 
 public:
 

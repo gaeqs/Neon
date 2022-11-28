@@ -53,10 +53,6 @@ Result<GLFWwindow*, std::string> Application::init(const std::string& name) {
         return {"Failed to open GLFW window"};
     }
 
-    // Enable vertical sync (on cards that support it)
-    glfwMakeContextCurrent(_window);
-    glfwSwapInterval(0);
-
     glfwSetWindowUserPointer(_window, this);
     glfwSetWindowSizeCallback(_window, framebuffer_size_callback);
     glfwSetKeyCallback(_window, key_size_callback);
@@ -90,13 +86,14 @@ Result<uint32_t, std::string> Application::startGameLoop() {
 
                 if (_room != nullptr) {
                     _room->update(seconds);
+                    _room->preDraw();
                 }
 
-                _implementation.preDraw();
+                _implementation.beginDraw();
                 if (_room != nullptr) {
                     _room->draw();
                 }
-                _implementation.postDraw();
+                _implementation.endDraw();
             }
 
             ++frames;

@@ -116,7 +116,7 @@ bool VKApplication::preUpdate() {
     return true;
 }
 
-void VKApplication::preDraw() {
+void VKApplication::beginDraw() {
     auto commandBuffer = _commandBuffers[_currentFrame];
 
     VkRenderPassBeginInfo renderPassInfo{};
@@ -150,7 +150,7 @@ void VKApplication::preDraw() {
     vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 }
 
-void VKApplication::postDraw() {
+void VKApplication::endDraw() {
     auto commandBuffer = _commandBuffers[_currentFrame];
 
     vkCmdEndRenderPass(commandBuffer);

@@ -9,6 +9,7 @@
 #include <memory>
 
 #include <vulkan/vulkan.h>
+#include <util/Range.h>
 
 class VKApplication;
 
@@ -45,6 +46,9 @@ class Buffer {
 
     virtual std::optional<std::shared_ptr<BufferMap<char>>> rawMap() = 0;
 
+    virtual std::optional<std::shared_ptr<BufferMap<char>>> rawMap(
+            Range<uint32_t> range) = 0;
+
 public:
 
     Buffer() = default;
@@ -65,7 +69,18 @@ public:
     std::optional<std::shared_ptr<BufferMap<T>>> map() {
         auto optional = rawMap();
         if (optional.has_value()) {
-            return std::reinterpret_pointer_cast<BufferMap<T>>(optional.value());
+            return std::reinterpret_pointer_cast<BufferMap<T>>(
+                    optional.value());
+        }
+        return {};
+    }
+
+    template<class T>
+    std::optional<std::shared_ptr<BufferMap<T>>> map(Range<uint32_t> range) {
+        auto optional = rawMap(range);
+        if (optional.has_value()) {
+            return std::reinterpret_pointer_cast<BufferMap<T>>(
+                    optional.value());
         }
         return {};
     }

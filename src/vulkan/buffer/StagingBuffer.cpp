@@ -21,6 +21,13 @@ std::optional<std::shared_ptr<BufferMap<char>>> StagingBuffer::rawMap() {
             _application, _stagingBuffer, _deviceBuffer);
 }
 
+std::optional<std::shared_ptr<BufferMap<char>>>
+StagingBuffer::rawMap(Range<uint32_t> range) {
+    return std::make_shared<StagingBufferMap<char>>(
+            _application, _stagingBuffer, _deviceBuffer, range);
+}
+
+
 StagingBuffer::StagingBuffer(VKApplication* application,
                              VkBufferUsageFlags usage, uint32_t sizeInBytes) :
         _application(application),
@@ -31,7 +38,6 @@ StagingBuffer::StagingBuffer(VKApplication* application,
                       VK_BUFFER_USAGE_TRANSFER_DST_BIT | usage,
                       VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, sizeInBytes) {
 }
-
 
 SimpleBuffer& StagingBuffer::getStagingBuffer() {
     return _stagingBuffer;

@@ -10,6 +10,7 @@
 
 #include <vulkan/VKMesh.h>
 #include <vulkan/buffer/StagingBuffer.h>
+#include <util/Range.h>
 #include <util/Result.h>
 
 class Application;
@@ -18,7 +19,7 @@ class VKApplication;
 
 class VKModel {
 
-    static constexpr uint32_t BUFFER_DEFAULT_SIZE = 1024;
+    static constexpr uint32_t BUFFER_DEFAULT_SIZE = 1024 * 8;
 
     VKApplication* _vkApplication;
 
@@ -30,6 +31,8 @@ class VKModel {
     std::vector<uint32_t*> _positions;
 
     StagingBuffer _instancingBuffer;
+    std::vector<char> _data;
+    Range<uint32_t> _dataChangeRange;
 
     void reinitializeBuffer();
 
@@ -59,6 +62,8 @@ public:
     }
 
     void uploadDataRaw(uint32_t id, const void* raw);
+
+    void flush();
 
     void draw(VkCommandBuffer buffer, const ShaderUniformBuffer* global);
 
