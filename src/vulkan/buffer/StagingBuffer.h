@@ -6,12 +6,14 @@
 #define VULKANTEST_STAGINGBUFFER_H
 
 
+#include <utility>
 #include <vector>
 #include "Buffer.h"
 #include "SimpleBuffer.h"
 
 #include <vulkan/util/VKUtil.h>
 #include <vulkan/buffer/SimpleBuffer.h>
+#include <vulkan/VKApplication.h>
 
 class StagingBuffer;
 
@@ -20,7 +22,7 @@ class StagingBufferMap : public BufferMap<T> {
 
     VKApplication* _application;
 
-    SimpleBuffer& _stagingBuffer;
+    std::shared_ptr<SimpleBuffer> _stagingBuffer;
     SimpleBuffer& _deviceBuffer;
 
     std::shared_ptr<BufferMap<T>> _map;
@@ -28,24 +30,24 @@ class StagingBufferMap : public BufferMap<T> {
 public:
 
     StagingBufferMap(VKApplication* application,
-                     SimpleBuffer& stagingBuffer,
+                     std::shared_ptr<SimpleBuffer> stagingBuffer,
                      SimpleBuffer& deviceBuffer) :
             BufferMap<T>(),
             _application(application),
-            _stagingBuffer(stagingBuffer),
+            _stagingBuffer(std::move(stagingBuffer)),
             _deviceBuffer(deviceBuffer),
-            _map(_stagingBuffer.map<T>().value()) {
+            _map(_stagingBuffer->map<T>().value()) {
     }
 
     StagingBufferMap(VKApplication* application,
-                     SimpleBuffer& stagingBuffer,
+                     std::shared_ptr<SimpleBuffer> stagingBuffer,
                      SimpleBuffer& deviceBuffer,
                      Range<uint32_t> range) :
             BufferMap<T>(),
             _application(application),
-            _stagingBuffer(stagingBuffer),
+            _stagingBuffer(std::move(stagingBuffer)),
             _deviceBuffer(deviceBuffer),
-            _map(_stagingBuffer.map<T>(range).value()) {
+            _map(_stagingBuffer->map<T>(range).value()) {
     }
 
     ~StagingBufferMap() override {
@@ -69,7 +71,7 @@ public:
         _map->dispose();
         vulkan_util::copyBuffer(
                 _application,
-                _stagingBuffer.getRaw(),
+                _stagingBuffer->getRaw(),
                 _deviceBuffer.getRaw(),
                 _deviceBuffer.size()
         );
@@ -81,7 +83,7 @@ class StagingBuffer : public Buffer {
 
     VKApplication* _application;
 
-    SimpleBuffer _stagingBuffer;
+    std::vector<std::shared_ptr<SimpleBuffer>> _stagingBuffers;
     SimpleBuffer _deviceBuffer;
 
     std::optional<std::shared_ptr<BufferMap<char>>> rawMap() override;
@@ -95,13 +97,21 @@ public:
     StagingBuffer(VKApplication* application,
                   VkBufferUsageFlags usage, const std::vector<T>& data) :
             _application(application),
-            _stagingBuffer(_application,
-                           VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-                           VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
-                           VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, data),
+            _stagingBuffers(),
             _deviceBuffer(_application,
                           VK_BUFFER_USAGE_TRANSFER_DST_BIT | usage,
                           VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, data) {
+
+        for (int i = 0; i < _application->getMaxFramesInFlight(); ++i) {
+            _stagingBuffers.push_back(std::make_shared<SimpleBuffer>(
+                    _application,
+                    VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+                    VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
+                    VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+                    data
+            ));
+        }
+
         map<T>(); // Transfers all data from the staging buffer to the device buffer.
     }
 
@@ -117,10 +127,6 @@ public:
     VkBuffer getRaw() const override;
 
     VKApplication* getApplication() const override;
-
-    SimpleBuffer& getStagingBuffer();
-
-    const SimpleBuffer& getStagingBuffer() const;
 
     SimpleBuffer& getDeviceBuffer();
 
