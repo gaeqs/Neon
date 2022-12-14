@@ -5,7 +5,7 @@
 #include "VKShaderUniformBuffer.h"
 
 #include <engine/shader/ShaderUniformDescriptor.h>
-#include <vulkan/buffer/SimpleBuffer.h>
+#include <vulkan/buffer/StagingBuffer.h>
 #include <cstring>
 
 VKShaderUniformBuffer::VKShaderUniformBuffer(
@@ -43,10 +43,9 @@ VKShaderUniformBuffer::VKShaderUniformBuffer(
             ++textureAmount;
         } else {
             std::vector<std::shared_ptr<Buffer>> buffers;
-            _buffers.push_back(std::make_shared<SimpleBuffer>(
+            _buffers.push_back(std::make_shared<StagingBuffer>(
                     _vkApplication,
                     VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
-                    VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT,
                     binding.size));
             _data.emplace_back(binding.size, 0);
             ++bufferAmount;
