@@ -14,8 +14,8 @@
 #include "LockMouseComponent.h"
 #include "ConstantRotationComponent.h"
 
-constexpr int32_t WIDTH = 800;
-constexpr int32_t HEIGHT = 600;
+constexpr int32_t WIDTH = 1920;
+constexpr int32_t HEIGHT = 1080;
 
 CMRC_DECLARE(shaders);
 
@@ -88,7 +88,7 @@ std::shared_ptr<Room> getTestRoom(Application* application) {
     }
     auto sansModel = sansResult.model;
 
-    constexpr int AMOUNT = 6000;
+    constexpr int AMOUNT = 1024 * 16;
     int q = static_cast<int>(std::sqrt(AMOUNT));
     for (int i = 0; i < AMOUNT; i++) {
         auto sans = room->newGameObject();

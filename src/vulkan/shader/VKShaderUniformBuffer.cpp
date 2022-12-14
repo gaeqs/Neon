@@ -34,7 +34,7 @@ VKShaderUniformBuffer::VKShaderUniformBuffer(
     uint32_t textureAmount = 0;
 
     for (const auto& binding: bindings) {
-        _updated.emplace_back( _vkApplication->getMaxFramesInFlight(), false);
+        _updated.emplace_back(_vkApplication->getMaxFramesInFlight(), false);
         _types.emplace_back(binding.type);
 
         if (binding.type == UniformBindingType::IMAGE) {
@@ -43,14 +43,11 @@ VKShaderUniformBuffer::VKShaderUniformBuffer(
             ++textureAmount;
         } else {
             std::vector<std::shared_ptr<Buffer>> buffers;
-            for (int i = 0; i < _vkApplication->getMaxFramesInFlight(); ++i) {
-                buffers.push_back(std::make_shared<SimpleBuffer>(
-                        _vkApplication,
-                        VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
-                        VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT,
-                        binding.size));
-            }
-            _buffers.push_back(buffers);
+            _buffers.push_back(std::make_shared<SimpleBuffer>(
+                    _vkApplication,
+                    VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+                    VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT,
+                    binding.size));
             _data.emplace_back(binding.size, 0);
             ++bufferAmount;
         }
@@ -63,7 +60,7 @@ VKShaderUniformBuffer::VKShaderUniformBuffer(
                          bufferAmount *
                          _vkApplication->getMaxFramesInFlight()});
     }
-    if(textureAmount > 0) {
+    if (textureAmount > 0) {
         pools.push_back({VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
                          textureAmount *
                          _vkApplication->getMaxFramesInFlight()});
@@ -108,7 +105,7 @@ VKShaderUniformBuffer::VKShaderUniformBuffer(
 
             if (binding.type == UniformBindingType::BUFFER) {
                 VkDescriptorBufferInfo bufferInfo{};
-                bufferInfo.buffer = _buffers[bindingIndex][frame]->getRaw();
+                bufferInfo.buffer = _buffers[bindingIndex]->getRaw();
                 bufferInfo.offset = 0;
                 bufferInfo.range = binding.size;
 
@@ -167,11 +164,12 @@ void VKShaderUniformBuffer::prepareForFrame() {
 
         switch (_types[index]) {
             case UniformBindingType::BUFFER: {
-                auto optional = _buffers[index][frame]->map<char>();
+                auto optional = _buffers[index]->map<char>();
                 if (optional.has_value()) {
                     auto& data = _data[index];
                     memcpy(optional.value()->raw(), data.data(), data.size());
                 }
+                std::fill(updated.begin(), updated.end(), true);
             }
                 break;
             case UniformBindingType::IMAGE: {

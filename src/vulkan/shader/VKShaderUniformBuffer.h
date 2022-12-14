@@ -27,7 +27,7 @@ class VKShaderUniformBuffer {
     VKApplication* _vkApplication;
     VkDescriptorPool _descriptorPool;
 
-    std::vector<std::vector<std::shared_ptr<Buffer>>> _buffers;
+    std::vector<std::shared_ptr<Buffer>> _buffers;
     std::vector<VkDescriptorSet> _descriptorSets;
     std::vector<UniformBindingType> _types;
     std::vector<std::vector<bool>> _updated;

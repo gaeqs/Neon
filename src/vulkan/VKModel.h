@@ -19,7 +19,7 @@ class VKApplication;
 
 class VKModel {
 
-    static constexpr uint32_t BUFFER_DEFAULT_SIZE = 1024 * 8;
+    static constexpr uint32_t BUFFER_DEFAULT_SIZE = 1024 * 16;
 
     VKApplication* _vkApplication;
 
