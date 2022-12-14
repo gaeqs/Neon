@@ -23,10 +23,12 @@ class Texture : public Identifiable {
     template<class T> friend
     class IdentifiableWrapper;
 
+public:
 #ifdef USE_VULKAN
     using Implementation = VKTexture;
 #endif
 
+private:
     uint64_t _id;
     Implementation _implementation;
 

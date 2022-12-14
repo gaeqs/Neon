@@ -895,3 +895,15 @@ VkRenderPass VKApplication::getRenderPass() const {
 bool VKApplication::isRecordingCommandBuffer() const {
     return _recording;
 }
+
+VkFormat VKApplication::getSwapChainImageFormat() const {
+    return _swapChainImageFormat;
+}
+
+VkFormat VKApplication::getDepthImageFormat() const {
+    return _depthImageFormat;
+}
+
+const VkExtent2D& VKApplication::getSwapChainExtent() const {
+    return _swapChainExtent;
+}

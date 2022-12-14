@@ -164,6 +164,12 @@ public:
 
     [[nodiscard]] VkSwapchainKHR getSwapChain() const;
 
+    [[nodiscard]] VkFormat getSwapChainImageFormat() const;
+
+    [[nodiscard]] VkFormat getDepthImageFormat() const;
+
+    const VkExtent2D& getSwapChainExtent() const;
+
     [[nodiscard]] VkCommandPool getCommandPool() const;
 
     [[nodiscard]] VkRenderPass getRenderPass() const;

@@ -54,7 +54,10 @@ set(
         engine/shader/ShaderUniformDescriptor.cpp
         engine/shader/ShaderUniformDescriptor.h
         engine/model/InputDescription.h
-        util/Range.h)
+        util/Range.h engine/render/FrameBuffer.cpp
+        engine/render/FrameBuffer.h
+        engine/render/SwapChainFrameBuffer.cpp
+        engine/render/SwapChainFrameBuffer.h)
 
 
 list(APPEND SOURCES
@@ -87,7 +90,11 @@ list(APPEND SOURCES
         vulkan/shader/VKShaderUniformDescriptor.cpp
         vulkan/shader/VKShaderUniformDescriptor.h
         vulkan/shader/VKMaterial.cpp
-        vulkan/shader/VKMaterial.h)
+        vulkan/shader/VKMaterial.h
+        vulkan/render/VKFrameBuffer.cpp
+        vulkan/render/VKFrameBuffer.h
+        vulkan/render/VKSwapChainFrameBuffer.cpp
+        vulkan/render/VKSwapChainFrameBuffer.h)
 
 cmrc_add_resource_library(dummy)
 
