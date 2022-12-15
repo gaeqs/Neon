@@ -29,29 +29,12 @@ void VKSwapChainFrameBuffer::fetchSwapChainImages() {
 void VKSwapChainFrameBuffer::createSwapChainImageViews() {
     _swapChainImageViews.resize(_swapChainImages.size());
     for (auto i = 0; i < _swapChainImages.size(); ++i) {
-        VkImageViewCreateInfo createInfo{};
-        createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-        createInfo.image = _swapChainImages[i];
-        createInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-        createInfo.format = _vkApplication->getSwapChainImageFormat();
-        createInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
-        createInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
-        createInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
-        createInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
-        createInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-        createInfo.subresourceRange.baseMipLevel = 0;
-        createInfo.subresourceRange.levelCount = 1;
-        createInfo.subresourceRange.baseArrayLayer = 0;
-        createInfo.subresourceRange.layerCount = 1;
-
-        if (vkCreateImageView(
+        _swapChainImageViews[i] = vulkan_util::createImageView(
                 _vkApplication->getDevice(),
-                &createInfo,
-                nullptr,
-                &_swapChainImageViews[i]
-        ) != VK_SUCCESS) {
-            throw std::runtime_error("Failed to create image views!");
-        }
+                _swapChainImages[i],
+                _vkApplication->getSwapChainImageFormat(),
+                VK_IMAGE_ASPECT_COLOR_BIT
+        );
     }
 }
 
@@ -138,6 +121,7 @@ VKSwapChainFrameBuffer::VKSwapChainFrameBuffer(
         _swapChainImages(),
         _swapChainImageViews(),
         _depthImage(VK_NULL_HANDLE),
+        _depthImageMemory(VK_NULL_HANDLE),
         _depthImageView(VK_NULL_HANDLE),
         _swapChainFrameBuffers(),
         _depth(depth) {
@@ -156,7 +140,11 @@ VKSwapChainFrameBuffer::~VKSwapChainFrameBuffer() {
 }
 
 VkFramebuffer VKSwapChainFrameBuffer::getRaw() const {
-    return nullptr;
+    return _swapChainFrameBuffers[_vkApplication->getCurrentFrame()];
+}
+
+bool VKSwapChainFrameBuffer::hasDepth() {
+    return _depth;
 }
 
 void VKSwapChainFrameBuffer::recreate() {
@@ -170,4 +158,8 @@ void VKSwapChainFrameBuffer::recreate() {
     }
 
     createFrameBuffers();
+}
+
+uint32_t VKSwapChainFrameBuffer::getColorAttachmentAmount() {
+    return 1;
 }

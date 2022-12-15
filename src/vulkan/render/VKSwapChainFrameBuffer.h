@@ -46,6 +46,10 @@ public:
 
     [[nodiscard]] VkFramebuffer getRaw() const override;
 
+    [[nodiscard]] bool hasDepth() override;
+
+    [[nodiscard]] uint32_t getColorAttachmentAmount() override;
+
     void recreate();
 
 };

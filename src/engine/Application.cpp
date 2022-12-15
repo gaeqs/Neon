@@ -48,7 +48,7 @@ Result<GLFWwindow*, std::string> Application::init(const std::string& name) {
 
     _implementation.preWindowCreation();
 
-    _window = glfwCreateWindow(_width, _height, name.c_str(), glfwGetPrimaryMonitor(), nullptr);
+    _window = glfwCreateWindow(_width, _height, name.c_str(), nullptr, nullptr);
     if (!_window) {
         return {"Failed to open GLFW window"};
     }

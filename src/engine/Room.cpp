@@ -125,6 +125,12 @@ void Room::preDraw() {
     _models.forEach([](Model* m) {
         m->flush();
     });
+
+    _globalUniformBuffer.prepareForFrame();
+    _materials.forEach([](Material* material) {
+        material->getUniformBuffer().prepareForFrame();
+    });
+
 }
 
 void Room::draw() {

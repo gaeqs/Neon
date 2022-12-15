@@ -54,13 +54,18 @@ set(
         engine/shader/ShaderUniformDescriptor.cpp
         engine/shader/ShaderUniformDescriptor.h
         engine/model/InputDescription.h
-        util/Range.h engine/render/FrameBuffer.cpp
+        util/Range.h
+        engine/render/FrameBuffer.cpp
         engine/render/FrameBuffer.h
         engine/render/SwapChainFrameBuffer.cpp
-        engine/render/SwapChainFrameBuffer.h)
+        engine/render/SwapChainFrameBuffer.h
+        engine/render/SimpleFrameBuffer.h
+        engine/render/SimpleFrameBuffer.cpp
+        engine/render/RenderPass.h
+        engine/render/RenderPass.cpp)
 
 
-list(APPEND SOURCES
+set( VULKAN_SOURCES
         vulkan/VKApplication.cpp
         vulkan/VKApplication.h
         vulkan/VKSwapChainSupportDetails.h
@@ -94,10 +99,14 @@ list(APPEND SOURCES
         vulkan/render/VKFrameBuffer.cpp
         vulkan/render/VKFrameBuffer.h
         vulkan/render/VKSwapChainFrameBuffer.cpp
-        vulkan/render/VKSwapChainFrameBuffer.h)
+        vulkan/render/VKSwapChainFrameBuffer.h
+        vulkan/render/VKSimpleFrameBuffer.h
+        vulkan/render/VKSimpleFrameBuffer.cpp
+        vulkan/render/VKRenderPass.h
+        vulkan/render/VKRenderPass.cpp)
 
 cmrc_add_resource_library(dummy)
 
-add_library(neon STATIC ${SOURCES})
+add_library(neon STATIC ${SOURCES} ${VULKAN_SOURCES})
 target_link_libraries(neon PUBLIC ${LIBRARIES} ${CMAKE_DL_LIBS} dummy)
 target_compile_definitions(neon PUBLIC USE_VULKAN)
