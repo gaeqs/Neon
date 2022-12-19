@@ -19,11 +19,16 @@ public:
 
     virtual ~VKFrameBuffer() = 0;
 
-    [[nodiscard]] virtual bool hasDepth() = 0;
+    [[nodiscard]] virtual bool hasDepth() const = 0;
 
-    [[nodiscard]] virtual uint32_t getColorAttachmentAmount() = 0;
+    [[nodiscard]] virtual uint32_t getColorAttachmentAmount() const = 0;
 
     [[nodiscard]] virtual VkFramebuffer getRaw() const = 0;
+
+    [[nodiscard]] virtual std::vector<VkFormat> getColorFormats() const = 0;
+
+    [[nodiscard]] virtual VkFormat getDepthFormat() const = 0;
+
 
 };
 

@@ -42,9 +42,13 @@ public:
 
     [[nodiscard]] VkFramebuffer getRaw() const override;
 
-    [[nodiscard]] bool hasDepth() override;
+    [[nodiscard]] bool hasDepth() const override;
 
-    [[nodiscard]] uint32_t getColorAttachmentAmount() override;
+    [[nodiscard]] uint32_t getColorAttachmentAmount() const override;
+
+    [[nodiscard]] std::vector<VkFormat> getColorFormats() const override;
+
+    [[nodiscard]] VkFormat getDepthFormat() const override;
 
     void recreate();
 

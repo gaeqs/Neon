@@ -143,7 +143,7 @@ VkFramebuffer VKSimpleFrameBuffer::getRaw() const {
     return _frameBuffer;
 }
 
-bool VKSimpleFrameBuffer::hasDepth() {
+bool VKSimpleFrameBuffer::hasDepth() const {
     return _depth;
 }
 
@@ -153,6 +153,14 @@ void VKSimpleFrameBuffer::recreate() {
     createFrameBuffer();
 }
 
-uint32_t VKSimpleFrameBuffer::getColorAttachmentAmount() {
+uint32_t VKSimpleFrameBuffer::getColorAttachmentAmount() const {
     return _formats.size();
+}
+
+std::vector<VkFormat> VKSimpleFrameBuffer::getColorFormats() const {
+    return _formats;
+}
+
+VkFormat VKSimpleFrameBuffer::getDepthFormat() const {
+    return _vkApplication->getDepthImageFormat();
 }

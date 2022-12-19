@@ -143,7 +143,7 @@ VkFramebuffer VKSwapChainFrameBuffer::getRaw() const {
     return _swapChainFrameBuffers[_vkApplication->getCurrentFrame()];
 }
 
-bool VKSwapChainFrameBuffer::hasDepth() {
+bool VKSwapChainFrameBuffer::hasDepth() const {
     return _depth;
 }
 
@@ -160,6 +160,14 @@ void VKSwapChainFrameBuffer::recreate() {
     createFrameBuffers();
 }
 
-uint32_t VKSwapChainFrameBuffer::getColorAttachmentAmount() {
+uint32_t VKSwapChainFrameBuffer::getColorAttachmentAmount() const {
     return 1;
+}
+
+std::vector<VkFormat> VKSwapChainFrameBuffer::getColorFormats() const {
+    return {_vkApplication->getSwapChainImageFormat()};
+}
+
+VkFormat VKSwapChainFrameBuffer::getDepthFormat() const {
+    return _vkApplication->getDepthImageFormat();
 }
