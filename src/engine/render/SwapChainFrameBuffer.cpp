@@ -4,6 +4,13 @@
 
 #include "SwapChainFrameBuffer.h"
 
+SwapChainFrameBuffer::SwapChainFrameBuffer(
+        Application* application, bool depth) :
+        FrameBuffer(),
+        _implementation(application, depth) {
+
+}
+
 void SwapChainFrameBuffer::recreate() {
     _implementation.recreate();
 }

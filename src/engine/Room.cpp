@@ -27,7 +27,7 @@ Room::Room(Application* application,
         _materials(this),
         _globalUniformDescriptor(descriptor),
         _globalUniformBuffer(descriptor),
-        _renderer() {
+        _render(application) {
     _globalUniformBuffer.setBindingPoint(0);
 }
 
@@ -134,19 +134,7 @@ void Room::preDraw() {
 }
 
 void Room::draw() {
-    _components.drawGraphicComponents(this);
-}
-
-const std::shared_ptr<Renderer>& Room::getRenderer() const {
-    return _renderer;
-}
-
-std::shared_ptr<Renderer>& Room::getRenderer() {
-    return _renderer;
-}
-
-void Room::setRenderer(const std::shared_ptr<Renderer>& renderer) {
-    _renderer = renderer;
+    _render.render(this);
 }
 
 const IdentifiableCollection<Material>& Room::getMaterials() const {
@@ -155,4 +143,12 @@ const IdentifiableCollection<Material>& Room::getMaterials() const {
 
 IdentifiableCollection<Material>& Room::getMaterials() {
     return _materials;
+}
+
+const Render& Room::getRender() const {
+    return _render;
+}
+
+Render& Room::getRender() {
+    return _render;
 }

@@ -29,6 +29,8 @@ public:
 
     RenderPass(const RenderPass& other) = delete;
 
+    RenderPass(RenderPass&& other) = default;
+
     RenderPass(Application* application, const FrameBuffer& frameBuffer);
 
     [[nodiscard]] const Implementation& getImplementation() const;

@@ -87,12 +87,9 @@ Result<uint32_t, std::string> Application::startGameLoop() {
                 if (_room != nullptr) {
                     _room->update(seconds);
                     _room->preDraw();
-                }
-
-                _implementation.beginDraw();
-                if (_room != nullptr) {
                     _room->draw();
                 }
+
                 _implementation.endDraw();
             }
 

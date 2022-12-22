@@ -6,6 +6,7 @@
 
 
 #include <utility>
+#include <stdexcept>
 
 #include <engine/Application.h>
 #include <vulkan/util/VKUtil.h>

@@ -16,14 +16,13 @@
 #include <engine/shader/ShaderProgram.h>
 #include <engine/shader/Material.h>
 #include <engine/model/Model.h>
+#include <engine/render/Render.h>
 
 #include <util/ClusteredLinkedCollection.h>
 
 class Application;
 
 class GameObject;
-
-class Renderer;
 
 class KeyboardEvent;
 
@@ -44,7 +43,7 @@ class Room {
     std::shared_ptr<ShaderUniformDescriptor> _globalUniformDescriptor;
     ShaderUniformBuffer _globalUniformBuffer;
 
-    std::shared_ptr<Renderer> _renderer;
+    Render _render;
 
 public:
 
@@ -89,11 +88,9 @@ public:
 
     [[nodiscard]] IdentifiableCollection<Material>& getMaterials();
 
-    [[nodiscard]] const std::shared_ptr<Renderer>& getRenderer() const;
+    [[nodiscard]] const Render& getRender() const;
 
-    [[nodiscard]] std::shared_ptr<Renderer>& getRenderer();
-
-    void setRenderer(const std::shared_ptr<Renderer>& renderer);
+    [[nodiscard]] Render& getRender();
 
     [[nodiscard]] IdentifiableWrapper<GameObject> newGameObject();
 

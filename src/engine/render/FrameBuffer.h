@@ -19,6 +19,8 @@ public:
     using Implementation = VKFrameBuffer;
 #endif
 
+    FrameBuffer() = default;
+
     FrameBuffer(const FrameBuffer& other) = delete;
 
     virtual ~FrameBuffer() = default;

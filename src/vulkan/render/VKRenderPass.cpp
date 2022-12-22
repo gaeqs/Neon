@@ -4,8 +4,16 @@
 
 #include "VKRenderPass.h"
 
+#include <stdexcept>
+
 #include <engine/Application.h>
 #include <vulkan/render/VKFrameBuffer.h>
+
+VKRenderPass::VKRenderPass(VKRenderPass&& other) noexcept :
+        _vkApplication(other._vkApplication),
+        _raw(other._raw) {
+    other._raw = VK_NULL_HANDLE;
+}
 
 VKRenderPass::VKRenderPass(Application* application,
                            const FrameBuffer& buffer) :
@@ -100,7 +108,9 @@ VKRenderPass::VKRenderPass(Application* application,
 }
 
 VKRenderPass::~VKRenderPass() {
-    vkDestroyRenderPass(_vkApplication->getDevice(), _raw, nullptr);
+    if (_raw != VK_NULL_HANDLE) {
+        vkDestroyRenderPass(_vkApplication->getDevice(), _raw, nullptr);
+    }
 }
 
 VkRenderPass VKRenderPass::getRaw() const {

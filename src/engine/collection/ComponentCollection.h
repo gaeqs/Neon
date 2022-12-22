@@ -132,14 +132,6 @@ public:
      * @param deltaTime the delay between this frame and the last one, in seconds.
      */
     void updateComponents(float deltaTime);
-
-    /**
-     * THIS METHOD SHOULD ONLY BE USED BY ROOMS!
-     * USERS MUSTN'T USE THIS METHOD.
-     * <p>
-     * Draws all graphic components.
-     */
-    void drawGraphicComponents(Room* room) const;
 };
 
 

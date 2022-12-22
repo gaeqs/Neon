@@ -21,6 +21,10 @@ class VKRenderPass {
 
 public:
 
+    VKRenderPass(const VKRenderPass& other) = delete;
+
+    VKRenderPass(VKRenderPass&& other) noexcept;
+
     VKRenderPass(Application* application, const FrameBuffer& buffer);
 
     ~VKRenderPass();

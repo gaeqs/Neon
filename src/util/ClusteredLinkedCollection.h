@@ -226,7 +226,7 @@ public:
     }
 
     ConstClusteredLinkedCollectorIterator<ClusteredLinkedCollection<T, Size>>
-    cbegin() const {
+    begin() const {
         return ConstClusteredLinkedCollectorIterator<
                 ClusteredLinkedCollection<T, Size>>(this, 0);
     }
@@ -238,7 +238,7 @@ public:
     }
 
     ConstClusteredLinkedCollectorIterator<ClusteredLinkedCollection<T, Size>>
-    cend() const {
+    end() const {
         return ConstClusteredLinkedCollectorIterator<
                 ClusteredLinkedCollection<T, Size>>(nullptr, 0);
     }
@@ -264,8 +264,8 @@ public:
     }
 
     void forEach(std::function<void(const T*)> function) const {
-        auto it = cbegin();
-        auto itEnd = cend();
+        auto it = begin();
+        auto itEnd = end();
 
         while (it != itEnd) {
             function(it.raw());
@@ -290,7 +290,7 @@ public:
         ++_localSize;
 
         auto* ptr = reinterpret_cast<T*>(_data + index * _objectSize);
-        return std::construct_at(ptr, values...);
+        return std::construct_at<T>(ptr, values...);
     }
 
     bool remove(const T* value) {
@@ -319,6 +319,18 @@ public:
         return false;
     }
 
+    void clear () {
+        for (size_t i = 0; i < Size; i += _objectSize) {
+            if (_occupied[i]) {
+                std::destroy_at(_data + i);
+            }
+        }
+
+        _occupied.reset();
+        _localSize = 0;
+
+        delete _next;
+    }
 
 };
 

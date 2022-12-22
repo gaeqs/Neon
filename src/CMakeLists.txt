@@ -103,7 +103,7 @@ set( VULKAN_SOURCES
         vulkan/render/VKSimpleFrameBuffer.h
         vulkan/render/VKSimpleFrameBuffer.cpp
         vulkan/render/VKRenderPass.h
-        vulkan/render/VKRenderPass.cpp)
+        vulkan/render/VKRenderPass.cpp engine/render/Render.cpp engine/render/Render.h vulkan/render/VKRender.cpp vulkan/render/VKRender.h engine/render/RenderPassStrategy.h)
 
 cmrc_add_resource_library(dummy)
 

@@ -4,6 +4,7 @@
 
 #include <engine/Engine.h>
 #include <engine/shader/ShaderProgram.h>
+#include <engine/render/SwapChainFrameBuffer.h>
 #include <vulkan/VKShaderRenderer.h>
 #include <util/component/CameraMovementComponent.h>
 #include <assimp/ModelLoader.h>
@@ -31,8 +32,6 @@ std::shared_ptr<Room> getTestRoom(Application* application) {
 
     auto room = std::make_shared<Room>(application, globalDescriptor);
 
-    auto renderer = std::make_shared<VKShaderRenderer>(application);
-
     auto defaultVert = cmrc::shaders::get_filesystem().open("default.vert");
     auto defaultFrag = cmrc::shaders::get_filesystem().open("default.frag");
 
@@ -42,9 +41,19 @@ std::shared_ptr<Room> getTestRoom(Application* application) {
 
     auto result = shader->compile();
     if (result.has_value()) throw std::runtime_error(result.value());
-    renderer->insertShader("default", shader);
 
-    room->setRenderer(renderer);
+    room->getRender().addRenderPass(
+            std::make_shared<SwapChainFrameBuffer>(application, true),
+            [](Room* r) {
+                auto& app = r->getApplication()->getImplementation();
+                r->getModels().forEach([&](Model* model) {
+                    model->getImplementation().draw(
+                            app.getCurrentCommandBuffer(),
+                            &r->getGlobalUniformBuffer()
+                    );
+                });
+            }
+    );
 
     auto parametersUpdater = room->newGameObject();
     parametersUpdater->newComponent<GlobalParametersUpdaterComponent>();

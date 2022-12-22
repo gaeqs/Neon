@@ -27,6 +27,8 @@ private:
 
 public:
 
+    SwapChainFrameBuffer(Application* application, bool depth);
+
     ~SwapChainFrameBuffer() override = default;
 
     void recreate() override;

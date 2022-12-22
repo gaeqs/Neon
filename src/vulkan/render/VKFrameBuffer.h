@@ -17,7 +17,7 @@ public:
 
     VKFrameBuffer() = default;
 
-    virtual ~VKFrameBuffer() = 0;
+    virtual ~VKFrameBuffer() = default;
 
     [[nodiscard]] virtual bool hasDepth() const = 0;
 

@@ -60,14 +60,6 @@ void ComponentCollection::updateComponents(float deltaTime) {
     }
 }
 
-void ComponentCollection::drawGraphicComponents(Room* room) const {
-    auto elements = getComponentsOfType<GraphicComponent>();
-    auto renderer = room->getRenderer();
-    if (renderer != nullptr) {
-        renderer->render(room, elements);
-    }
-}
-
 void ComponentCollection::callOnConstruction(void* rawComponent) {
     reinterpret_cast<Component*>(rawComponent)->onConstruction();
 }

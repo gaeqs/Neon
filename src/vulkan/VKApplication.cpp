@@ -116,44 +116,8 @@ bool VKApplication::preUpdate() {
     return true;
 }
 
-void VKApplication::beginDraw() {
-    auto commandBuffer = _commandBuffers[_currentFrame];
-
-    VkRenderPassBeginInfo renderPassInfo{};
-    renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-    renderPassInfo.renderPass = _renderPass;
-    renderPassInfo.framebuffer = _swapChainFramebuffers[_imageIndex];
-    renderPassInfo.renderArea.offset = {0, 0};
-    renderPassInfo.renderArea.extent = _swapChainExtent;
-
-    VkClearValue clearColors[2];
-    clearColors[0].color = {0.0f, 0.0f, 0.0f, 1.0f};
-    clearColors[1].depthStencil = {1.0f, 0};
-    renderPassInfo.clearValueCount = 2;
-    renderPassInfo.pClearValues = clearColors;
-
-    vkCmdBeginRenderPass(commandBuffer, &renderPassInfo,
-                         VK_SUBPASS_CONTENTS_INLINE);
-
-    VkViewport viewport{};
-    viewport.x = 0.0f;
-    viewport.y = 0.0f;
-    viewport.width = static_cast<float>(_swapChainExtent.width);
-    viewport.height = static_cast<float>(_swapChainExtent.height);
-    viewport.minDepth = 0.0f;
-    viewport.maxDepth = 1.0f;
-    vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
-
-    VkRect2D scissor{};
-    scissor.offset = {0, 0};
-    scissor.extent = _swapChainExtent;
-    vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
-}
-
 void VKApplication::endDraw() {
     auto commandBuffer = _commandBuffers[_currentFrame];
-
-    vkCmdEndRenderPass(commandBuffer);
 
     if (vkEndCommandBuffer(commandBuffer) != VK_SUCCESS) {
         throw std::runtime_error("Failed to record command buffer!");
