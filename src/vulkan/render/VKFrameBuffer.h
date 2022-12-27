@@ -1,4 +1,5 @@
 //
+//
 // Created by gaelr on 14/12/2022.
 //
 
@@ -8,6 +9,8 @@
 #include <vulkan/vulkan.h>
 
 #include <vector>
+
+class VKRenderPass;
 
 class VKFrameBuffer {
 
@@ -28,6 +31,10 @@ public:
     [[nodiscard]] virtual std::vector<VkFormat> getColorFormats() const = 0;
 
     [[nodiscard]] virtual VkFormat getDepthFormat() const = 0;
+
+    [[nodiscard]] virtual const VKRenderPass& getRenderPass() const = 0;
+
+    [[nodiscard]] virtual VKRenderPass& getRenderPass() = 0;
 
 
 };

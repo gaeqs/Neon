@@ -9,6 +9,7 @@
 #include <cstring>
 #include <algorithm>
 
+#include <engine/Room.h>
 #include <vulkan/util/VKUtil.h>
 
 static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
@@ -66,10 +67,6 @@ void VKApplication::postWindowCreation(GLFWwindow* window) {
     createLogicalDevice();
     createSwapChain();
     createCommandPool();
-    createImageViews();
-    createDepthImages();
-    createRenderPass();
-    createFrameBuffers();
     createCommandBuffers();
     createSyncObjects();
 }
@@ -188,7 +185,7 @@ void VKApplication::createInstance() {
     applicationInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
     applicationInfo.pEngineName = "No Engine";
     applicationInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
-    applicationInfo.apiVersion = VK_API_VERSION_1_0;
+    applicationInfo.apiVersion = VK_API_VERSION_1_3;
 
     createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
     createInfo.pApplicationInfo = &applicationInfo;
@@ -312,6 +309,11 @@ void VKApplication::pickPhysicalDevice() {
 
     if (_physicalDevice == VK_NULL_HANDLE) {
         throw std::runtime_error("Failed to find GPUs with Vulkan support!");
+    } else {
+        std::cout << "Selected physical device: ";
+        VkPhysicalDeviceProperties deviceProperties;
+        vkGetPhysicalDeviceProperties(_physicalDevice, &deviceProperties);
+        std::cout << deviceProperties.deviceName << std::endl;
     }
 }
 
@@ -396,6 +398,12 @@ void VKApplication::createLogicalDevice() {
     VkPhysicalDeviceFeatures deviceFeatures{};
     deviceFeatures.samplerAnisotropy = VK_TRUE;
 
+    VkPhysicalDeviceVulkan12Features vulkan12Features{};
+    vulkan12Features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES;
+    vulkan12Features.separateDepthStencilLayouts = VK_TRUE;
+
+
+
     VkDeviceCreateInfo createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
     createInfo.queueCreateInfoCount = queueCreateInfos.size();
@@ -404,7 +412,7 @@ void VKApplication::createLogicalDevice() {
     createInfo.enabledExtensionCount = DEVICE_EXTENSIONS.size();
     createInfo.ppEnabledExtensionNames = DEVICE_EXTENSIONS.data();
     createInfo.enabledLayerCount = 0;
-
+    createInfo.pNext = &vulkan12Features;
     if (vkCreateDevice(_physicalDevice, &createInfo, nullptr, &_device) !=
         VK_SUCCESS) {
         throw std::runtime_error("Failed to create logical device!");
@@ -461,13 +469,21 @@ void VKApplication::createSwapChain() {
         throw std::runtime_error("Failed to create swap chain!");
     }
 
-    vkGetSwapchainImagesKHR(_device, _swapChain, &imageCount, nullptr);
-    _swapChainImages.resize(imageCount);
-    vkGetSwapchainImagesKHR(_device, _swapChain, &imageCount,
-                            _swapChainImages.data());
-
     _swapChainImageFormat = format.format;
     _swapChainExtent = extent;
+
+    auto depthFormat = vulkan_util::findSupportedFormat(
+            _physicalDevice,
+            {VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT,
+             VK_FORMAT_D24_UNORM_S8_UINT},
+            VK_IMAGE_TILING_OPTIMAL,
+            VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT
+    );
+    if (!depthFormat.has_value()) {
+        throw std::runtime_error("Couldn't find depth format!");
+    }
+
+    _depthImageFormat = depthFormat.value();
 }
 
 VKSwapChainSupportDetails
@@ -543,166 +559,6 @@ VKApplication::chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities) {
     }
 }
 
-void VKApplication::createImageViews() {
-    _swapChainImageViews.resize(_swapChainImages.size());
-    for (auto i = 0; i < _swapChainImages.size(); ++i) {
-        VkImageViewCreateInfo createInfo{};
-        createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-        createInfo.image = _swapChainImages[i];
-        createInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-        createInfo.format = _swapChainImageFormat;
-        createInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
-        createInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
-        createInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
-        createInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
-        createInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-        createInfo.subresourceRange.baseMipLevel = 0;
-        createInfo.subresourceRange.levelCount = 1;
-        createInfo.subresourceRange.baseArrayLayer = 0;
-        createInfo.subresourceRange.layerCount = 1;
-
-        if (vkCreateImageView(_device, &createInfo, nullptr,
-                              &_swapChainImageViews[i]) != VK_SUCCESS) {
-            throw std::runtime_error("Failed to create image views!");
-        }
-    }
-}
-
-void VKApplication::createDepthImages() {
-    auto format = vulkan_util::findSupportedFormat(
-            _physicalDevice,
-            {VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT,
-             VK_FORMAT_D24_UNORM_S8_UINT},
-            VK_IMAGE_TILING_OPTIMAL,
-            VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT
-    );
-    if (!format.has_value()) {
-        throw std::runtime_error("Couldn't find depth format!");
-    }
-
-    _depthImageFormat = format.value();
-
-    auto pair = vulkan_util::createImage(
-            _device,
-            _physicalDevice,
-            _swapChainExtent.width,
-            _swapChainExtent.height,
-            VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
-            _depthImageFormat);
-
-    _depthImage = pair.first;
-    _depthImageMemory = pair.second;
-
-    _depthImageView = vulkan_util::createImageView(
-            _device, _depthImage, _depthImageFormat, VK_IMAGE_ASPECT_DEPTH_BIT);
-
-    vulkan_util::transitionImageLayout(
-            this,
-            _depthImage,
-            _depthImageFormat,
-            VK_IMAGE_LAYOUT_UNDEFINED,
-            VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
-}
-
-void VKApplication::createRenderPass() {
-    VkAttachmentDescription colorAttachment{};
-    colorAttachment.format = _swapChainImageFormat;
-    colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
-    colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-    colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-    colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-    colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-    colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-    colorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-
-    VkAttachmentDescription depthAttachment{};
-    depthAttachment.format = _depthImageFormat;
-    depthAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
-    depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-    depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-    depthAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-    depthAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-    depthAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-    depthAttachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-
-    VkAttachmentReference colorAttachmentRef{};
-    colorAttachmentRef.attachment = 0;
-    colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-
-    VkAttachmentReference depthAttachmentRef{};
-    depthAttachmentRef.attachment = 1;
-    depthAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-
-    VkSubpassDescription subpass{};
-    subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-    subpass.colorAttachmentCount = 1;
-    subpass.pColorAttachments = &colorAttachmentRef;
-    subpass.pDepthStencilAttachment = &depthAttachmentRef;
-
-    VkAttachmentDescription attachments[] = {colorAttachment, depthAttachment};
-
-    VkRenderPassCreateInfo renderPassInfo{};
-    renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-    renderPassInfo.attachmentCount = 2;
-    renderPassInfo.pAttachments = attachments;
-    renderPassInfo.subpassCount = 1;
-    renderPassInfo.pSubpasses = &subpass;
-
-    VkSubpassDependency dependency = {};
-    dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
-    dependency.dstSubpass = 0;
-    dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-    dependency.srcAccessMask = 0;
-    dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-    dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-
-
-    VkSubpassDependency depthDependency{};
-    depthDependency.srcSubpass = VK_SUBPASS_EXTERNAL;
-    depthDependency.dstSubpass = 0;
-    depthDependency.srcStageMask = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT |
-                                   VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
-    depthDependency.srcAccessMask = 0;
-    depthDependency.dstStageMask = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT |
-                                   VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
-    depthDependency.dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
-
-    VkSubpassDependency dependencies[] = {dependency, depthDependency};
-
-    renderPassInfo.dependencyCount = 2;
-    renderPassInfo.pDependencies = dependencies;
-
-    if (vkCreateRenderPass(_device, &renderPassInfo, nullptr, &_renderPass) !=
-        VK_SUCCESS) {
-        throw std::runtime_error("Failed to create render pass!");
-    }
-}
-
-void VKApplication::createFrameBuffers() {
-    _swapChainFramebuffers.resize(_swapChainImageViews.size());
-    for (int i = 0; i < _swapChainImageViews.size(); ++i) {
-
-        VkImageView attachments[] = {
-                _swapChainImageViews[i],
-                _depthImageView
-        };
-
-        VkFramebufferCreateInfo framebufferInfo{};
-        framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-        framebufferInfo.renderPass = _renderPass;
-        framebufferInfo.attachmentCount = 2;
-        framebufferInfo.pAttachments = attachments;
-        framebufferInfo.width = _swapChainExtent.width;
-        framebufferInfo.height = _swapChainExtent.height;
-        framebufferInfo.layers = 1;
-
-        if (vkCreateFramebuffer(_device, &framebufferInfo, nullptr,
-                                &_swapChainFramebuffers[i]) != VK_SUCCESS) {
-            throw std::runtime_error("Failed to create framebuffer!");
-        }
-    }
-}
-
 void VKApplication::createCommandPool() {
     VKQueueFamilyIndices queueFamilyIndices = findQueueFamilies(
             _physicalDevice);
@@ -760,28 +616,12 @@ void VKApplication::createSyncObjects() {
 
 void VKApplication::recreateSwapChain() {
     vkDeviceWaitIdle(_device);
-
     cleanupSwapChain();
-
     createSwapChain();
-    createImageViews();
-    createDepthImages();
-    createFrameBuffers();
+    _room->getRender().recreateFrameBuffers();
 }
 
 void VKApplication::cleanupSwapChain() {
-    vkDestroyImageView(_device, _depthImageView, nullptr);
-    vkDestroyImage(_device, _depthImage, nullptr);
-    vkFreeMemory(_device, _depthImageMemory, nullptr);
-
-    for (auto& _swapChainFramebuffer: _swapChainFramebuffers) {
-        vkDestroyFramebuffer(_device, _swapChainFramebuffer, nullptr);
-    }
-
-    for (auto& _swapChainImageView: _swapChainImageViews) {
-        vkDestroyImageView(_device, _swapChainImageView, nullptr);
-    }
-
     vkDestroySwapchainKHR(_device, _swapChain, nullptr);
 }
 
@@ -794,7 +634,6 @@ VKApplication::~VKApplication() {
 
     vkDestroyCommandPool(_device, _commandPool, nullptr);
 
-    vkDestroyRenderPass(_device, _renderPass, nullptr);
     cleanupSwapChain();
     vkDestroyDevice(_device, nullptr);
     vkDestroySurfaceKHR(_instance, _surface, nullptr);
@@ -808,6 +647,10 @@ VKApplication::~VKApplication() {
 
 uint32_t VKApplication::getCurrentFrame() const {
     return _currentFrame;
+}
+
+uint32_t VKApplication::getCurrentSwapChainImage() const {
+    return _imageIndex;
 }
 
 uint32_t VKApplication::getMaxFramesInFlight() const {
@@ -852,10 +695,6 @@ VkCommandBuffer VKApplication::getCurrentCommandBuffer() const {
            : _commandBuffers[_currentFrame];
 }
 
-VkRenderPass VKApplication::getRenderPass() const {
-    return _renderPass;
-}
-
 bool VKApplication::isRecordingCommandBuffer() const {
     return _recording;
 }
@@ -870,4 +709,8 @@ VkFormat VKApplication::getDepthImageFormat() const {
 
 const VkExtent2D& VKApplication::getSwapChainExtent() const {
     return _swapChainExtent;
+}
+
+void VKApplication::setRoom(const std::shared_ptr<Room>& room) {
+    _room = room;
 }

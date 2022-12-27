@@ -14,6 +14,10 @@ cmrc_add_resource_library(
         WHENCE shader
         shader/default.vert
         shader/default.frag
+        shader/deferred.vert
+        shader/deferred.frag
+        shader/screen.vert
+        shader/screen.frag
 )
 
 cmrc_add_resource_library(

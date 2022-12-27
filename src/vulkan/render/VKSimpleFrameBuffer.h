@@ -7,11 +7,17 @@
 
 #include <vector>
 
-#include <vulkan/render/VKFrameBuffer.h>
+#include <engine/TextureFormat.h>
+#include <engine/IdentifiableWrapper.h>
 
-class Application;
+#include <vulkan/render/VKFrameBuffer.h>
+#include <vulkan/render/VKRenderPass.h>
+
+class Room;
 
 class VKApplication;
+
+class Texture;
 
 class VKSimpleFrameBuffer : public VKFrameBuffer {
 
@@ -22,8 +28,12 @@ class VKSimpleFrameBuffer : public VKFrameBuffer {
     std::vector<VkImage> _images;
     std::vector<VkDeviceMemory> _memories;
     std::vector<VkImageView> _imageViews;
+    std::vector<VkImageLayout> _layouts;
+    std::vector<IdentifiableWrapper<Texture>> _textures;
 
     std::vector<VkFormat> _formats;
+    VKRenderPass _renderPass;
+
     bool _depth;
 
     void createImages();
@@ -35,8 +45,9 @@ class VKSimpleFrameBuffer : public VKFrameBuffer {
 
 public:
 
-    VKSimpleFrameBuffer(Application* application,
-                        std::vector<VkFormat> formats, bool depth);
+    VKSimpleFrameBuffer(Room* room,
+                        const std::vector<TextureFormat>& formats,
+                        bool depth);
 
     ~VKSimpleFrameBuffer() override;
 
@@ -49,6 +60,13 @@ public:
     [[nodiscard]] std::vector<VkFormat> getColorFormats() const override;
 
     [[nodiscard]] VkFormat getDepthFormat() const override;
+
+    [[nodiscard]] VKRenderPass const& getRenderPass() const override;
+
+    [[nodiscard]] VKRenderPass& getRenderPass() override;
+
+    [[nodiscard]] const std::vector<IdentifiableWrapper<Texture>>&
+    getTextures() const;
 
     void recreate();
 

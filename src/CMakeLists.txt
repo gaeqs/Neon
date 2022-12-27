@@ -9,8 +9,6 @@ set(
         engine/Camera.h
         engine/Frustum.cpp
         engine/Frustum.h
-        engine/Renderer.cpp
-        engine/Renderer.h
         engine/GraphicComponent.cpp
         engine/GraphicComponent.h
         engine/shader/Material.cpp
@@ -61,8 +59,12 @@ set(
         engine/render/SwapChainFrameBuffer.h
         engine/render/SimpleFrameBuffer.h
         engine/render/SimpleFrameBuffer.cpp
-        engine/render/RenderPass.h
-        engine/render/RenderPass.cpp)
+        engine/render/Render.cpp
+        engine/render/Render.h
+        engine/render/RenderPassStrategy.h
+        engine/render/RenderPassStrategy.cpp
+        util/DeferredUtils.cpp
+        util/DeferredUtils.h)
 
 
 set( VULKAN_SOURCES
@@ -87,8 +89,6 @@ set( VULKAN_SOURCES
         vulkan/shader/VKShaderProgram.h
         vulkan/VKModel.cpp
         vulkan/VKModel.h
-        vulkan/VKShaderRenderer.cpp
-        vulkan/VKShaderRenderer.h
         vulkan/spirv/SPIRVCompiler.h
         vulkan/spirv/SPIRVCompiler.cpp
         vulkan/VKShaderUniform.h
@@ -103,7 +103,9 @@ set( VULKAN_SOURCES
         vulkan/render/VKSimpleFrameBuffer.h
         vulkan/render/VKSimpleFrameBuffer.cpp
         vulkan/render/VKRenderPass.h
-        vulkan/render/VKRenderPass.cpp engine/render/Render.cpp engine/render/Render.h vulkan/render/VKRender.cpp vulkan/render/VKRender.h engine/render/RenderPassStrategy.h)
+        vulkan/render/VKRenderPass.cpp
+        vulkan/render/VKRender.cpp
+        vulkan/render/VKRender.h)
 
 cmrc_add_resource_library(dummy)
 

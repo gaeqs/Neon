@@ -8,11 +8,14 @@
 #define GLFW_INCLUDE_VULKAN
 
 #include <vector>
+#include <memory>
 
 #include <GLFW/glfw3.h>
 #include <vulkan/vulkan.h>
 #include <vulkan/VKSwapChainSupportDetails.h>
 #include <vulkan/VKQueueFamilyIndices.h>
+
+class Room;
 
 class VKApplication {
 
@@ -30,34 +33,28 @@ class VKApplication {
 
     const std::vector<const char*> DEVICE_EXTENSIONS = {
             VK_KHR_SWAPCHAIN_EXTENSION_NAME,
+            VK_KHR_SEPARATE_DEPTH_STENCIL_LAYOUTS_EXTENSION_NAME
     };
 
-    GLFWwindow* _window{};
+    GLFWwindow* _window;
 
-    VkInstance _instance{};
-    VkDebugUtilsMessengerEXT _debugMessenger{};
-    VkPhysicalDevice _physicalDevice{};
-    VkDevice _device{};
-    VkQueue _graphicsQueue{};
-    VkQueue _presentQueue{};
-    VkSurfaceKHR _surface{};
+    VkInstance _instance;
+    VkDebugUtilsMessengerEXT _debugMessenger;
+    VkPhysicalDevice _physicalDevice;
+    VkDevice _device;
+    VkQueue _graphicsQueue;
+    VkQueue _presentQueue;
+    VkSurfaceKHR _surface;
 
-    VkSwapchainKHR _swapChain{};
-    std::vector<VkImage> _swapChainImages;
+    VkSwapchainKHR _swapChain;
     VkFormat _swapChainImageFormat;
-    VkExtent2D _swapChainExtent{};
-    std::vector<VkImageView> _swapChainImageViews;
-    std::vector<VkFramebuffer> _swapChainFramebuffers;
+    VkExtent2D _swapChainExtent;
 
-    VkImage _depthImage{};
     VkFormat _depthImageFormat;
-    VkDeviceMemory _depthImageMemory{};
-    VkImageView _depthImageView{};
 
-    bool _framebufferResized{};
+    bool _framebufferResized;
 
-    VkRenderPass _renderPass{};
-    VkCommandPool _commandPool{};
+    VkCommandPool _commandPool;
 
     std::vector<VkCommandBuffer> _commandBuffers;
     bool _recording = false;
@@ -67,8 +64,9 @@ class VKApplication {
     std::vector<VkFence> _inFlightFences;
 
     uint32_t _currentFrame = 0;
+    uint32_t _imageIndex;
 
-    uint32_t _imageIndex{};
+    std::shared_ptr<Room> _room;
 
     // region VULKAN INITIALIZATION
 
@@ -101,14 +99,6 @@ class VKApplication {
     chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availableModes);
 
     VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities);
-
-    void createImageViews();
-
-    void createDepthImages();
-
-    void createRenderPass();
-
-    void createFrameBuffers();
 
     void createCommandPool();
 
@@ -146,6 +136,8 @@ public:
 
     [[nodiscard]] uint32_t getCurrentFrame() const;
 
+    [[nodiscard]] uint32_t getCurrentSwapChainImage() const;
+
     [[nodiscard]] uint32_t getMaxFramesInFlight() const;
 
     [[nodiscard]] VkInstance getInstance() const;
@@ -170,11 +162,11 @@ public:
 
     [[nodiscard]] VkCommandPool getCommandPool() const;
 
-    [[nodiscard]] VkRenderPass getRenderPass() const;
-
     [[nodiscard]] VkCommandBuffer getCurrentCommandBuffer() const;
 
     [[nodiscard]] bool isRecordingCommandBuffer() const;
+
+    void setRoom(const std::shared_ptr<Room>& room);
 
 };
 

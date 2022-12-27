@@ -13,6 +13,8 @@
 
 #endif
 
+class Room;
+
 class SwapChainFrameBuffer : public FrameBuffer {
 
 public:
@@ -27,7 +29,7 @@ private:
 
 public:
 
-    SwapChainFrameBuffer(Application* application, bool depth);
+    SwapChainFrameBuffer(Room* room, bool depth);
 
     ~SwapChainFrameBuffer() override = default;
 
@@ -38,6 +40,8 @@ public:
     [[nodiscard]] const FrameBuffer::Implementation&
     getImplementation() const override;
 
+    [[nodiscard]] std::vector<IdentifiableWrapper<Texture>>
+    getTextures() const override;
 };
 
 

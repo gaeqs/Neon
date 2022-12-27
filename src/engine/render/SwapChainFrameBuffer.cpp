@@ -5,9 +5,9 @@
 #include "SwapChainFrameBuffer.h"
 
 SwapChainFrameBuffer::SwapChainFrameBuffer(
-        Application* application, bool depth) :
+        Room* room, bool depth) :
         FrameBuffer(),
-        _implementation(application, depth) {
+        _implementation(room, depth) {
 
 }
 
@@ -22,4 +22,9 @@ FrameBuffer::Implementation& SwapChainFrameBuffer::getImplementation() {
 const FrameBuffer::Implementation&
 SwapChainFrameBuffer::getImplementation() const {
     return _implementation;
+}
+
+std::vector<IdentifiableWrapper<Texture>>
+SwapChainFrameBuffer::getTextures() const {
+    return {};
 }

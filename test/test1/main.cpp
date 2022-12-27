@@ -5,8 +5,9 @@
 #include <engine/Engine.h>
 #include <engine/shader/ShaderProgram.h>
 #include <engine/render/SwapChainFrameBuffer.h>
-#include <vulkan/VKShaderRenderer.h>
+#include <engine/render/SimpleFrameBuffer.h>
 #include <util/component/CameraMovementComponent.h>
+#include <util/DeferredUtils.h>
 #include <assimp/ModelLoader.h>
 
 #include "TestComponent.h"
@@ -15,62 +16,55 @@
 #include "LockMouseComponent.h"
 #include "ConstantRotationComponent.h"
 
-constexpr int32_t WIDTH = 1920;
-constexpr int32_t HEIGHT = 1080;
+constexpr int32_t WIDTH = 800;
+constexpr int32_t HEIGHT = 600;
 
 CMRC_DECLARE(shaders);
 
-std::shared_ptr<Room> getTestRoom(Application* application) {
+std::shared_ptr<FrameBuffer> initRender(Room* room) {
+    std::vector<TextureFormat> frameBufferFormats = {
+            TextureFormat::R8G8B8A8,
+            TextureFormat::R16FG16F // NORMAL
+    };
 
-    std::vector<ShaderUniformBinding> globalBindings = {ShaderUniformBinding{
-            UniformBindingType::BUFFER, sizeof(GlobalParameters)
-    }};
+    auto fpFrameBuffer = std::make_shared<SimpleFrameBuffer>(
+            room, frameBufferFormats, true);
 
-    auto globalDescriptor = std::make_shared<ShaderUniformDescriptor>(
-            application, globalBindings
-    );
+    auto scFrameBuffer = std::make_shared<SwapChainFrameBuffer>(
+            room, false);
 
-    auto room = std::make_shared<Room>(application, globalDescriptor);
+    room->getRender().addRenderPass(
+            {fpFrameBuffer, RenderPassStrategy::defaultStrategy});
 
-    auto defaultVert = cmrc::shaders::get_filesystem().open("default.vert");
-    auto defaultFrag = cmrc::shaders::get_filesystem().open("default.frag");
+    room->getRender().addRenderPass(
+            {scFrameBuffer, RenderPassStrategy::defaultStrategy});
+
+    auto defaultVert = cmrc::shaders::get_filesystem().open("screen.vert");
+    auto defaultFrag = cmrc::shaders::get_filesystem().open("screen.frag");
 
     auto shader = room->getShaders().create();
     shader->addShader(ShaderType::VERTEX, defaultVert);
     shader->addShader(ShaderType::FRAGMENT, defaultFrag);
 
     auto result = shader->compile();
-    if (result.has_value()) throw std::runtime_error(result.value());
+    if (result.has_value()) {
+        std::cerr << result.value() << std::endl;
+        throw std::runtime_error(result.value());
+    }
 
-    room->getRender().addRenderPass(
-            std::make_shared<SwapChainFrameBuffer>(application, true),
-            [](Room* r) {
-                auto& app = r->getApplication()->getImplementation();
-                r->getModels().forEach([&](Model* model) {
-                    model->getImplementation().draw(
-                            app.getCurrentCommandBuffer(),
-                            &r->getGlobalUniformBuffer()
-                    );
-                });
-            }
+
+    deferred_utils::createScreenModel(
+            room,
+            fpFrameBuffer->getTextures(),
+            scFrameBuffer,
+            shader
     );
 
-    auto parametersUpdater = room->newGameObject();
-    parametersUpdater->newComponent<GlobalParametersUpdaterComponent>();
-    parametersUpdater->newComponent<LockMouseComponent>();
+    return fpFrameBuffer;
+}
 
-    auto gameObject = room->newGameObject();
-    gameObject->newComponent<TestComponent>();
-    gameObject->getTransform().setPosition(glm::vec3(0.0f, 0.0f, -1.0f));
-
-    auto gameObject2 = room->newGameObject();
-    gameObject2->newComponent<TestComponent>();
-
-    gameObject2->setParent(gameObject);
-    gameObject2->getTransform().setPosition(glm::vec3(0.0f, -1.0f, 0.0f));
-
-    auto cameraController = room->newGameObject();
-    cameraController->newComponent<CameraMovementComponent>();
+void loadSansModels(Application* application, Room* room,
+                    const std::shared_ptr<FrameBuffer>& target) {
 
     std::vector<ShaderUniformBinding> sansMaterialBindings = {
             ShaderUniformBinding{
@@ -83,8 +77,23 @@ std::shared_ptr<Room> getTestRoom(Application* application) {
             sansMaterialBindings
     );
 
+
+    auto defaultVert = cmrc::shaders::get_filesystem().open("deferred.vert");
+    auto defaultFrag = cmrc::shaders::get_filesystem().open("deferred.frag");
+
+    auto shader = room->getShaders().create();
+    shader->addShader(ShaderType::VERTEX, defaultVert);
+    shader->addShader(ShaderType::FRAGMENT, defaultFrag);
+
+    auto result = shader->compile();
+    if (result.has_value()) {
+        std::cerr << result.value() << std::endl;
+        throw std::runtime_error(result.value());
+    }
+
     auto sansResult = ModelLoader(room).loadModel
             <TestVertex, DefaultInstancingData>(
+            target,
             shader,
             sansMaterialDescriptor,
             R"(resource/Sans)",
@@ -108,6 +117,40 @@ std::shared_ptr<Room> getTestRoom(Application* application) {
         float z = static_cast<float>(i / q) * 3.0f;
         sans->getTransform().setPosition(glm::vec3(x, 0, z));
     }
+}
+
+std::shared_ptr<Room> getTestRoom(Application* application) {
+
+    std::vector<ShaderUniformBinding> globalBindings = {ShaderUniformBinding{
+            UniformBindingType::BUFFER, sizeof(GlobalParameters)
+    }};
+
+    auto globalDescriptor = std::make_shared<ShaderUniformDescriptor>(
+            application, globalBindings
+    );
+
+    auto room = std::make_shared<Room>(application, globalDescriptor);
+
+    auto fpFrameBuffer = initRender(room.get());
+
+    auto parametersUpdater = room->newGameObject();
+    parametersUpdater->newComponent<GlobalParametersUpdaterComponent>();
+    parametersUpdater->newComponent<LockMouseComponent>();
+
+    auto gameObject = room->newGameObject();
+    gameObject->newComponent<TestComponent>();
+    gameObject->getTransform().setPosition(glm::vec3(0.0f, 0.0f, -1.0f));
+
+    auto gameObject2 = room->newGameObject();
+    gameObject2->newComponent<TestComponent>();
+
+    gameObject2->setParent(gameObject);
+    gameObject2->getTransform().setPosition(glm::vec3(0.0f, -1.0f, 0.0f));
+
+    auto cameraController = room->newGameObject();
+    cameraController->newComponent<CameraMovementComponent>();
+
+    loadSansModels(application, room.get(), fpFrameBuffer);
 
     return room;
 }

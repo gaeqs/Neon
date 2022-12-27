@@ -6,12 +6,16 @@
 #define VRTRACKING_TEXTUREFORMAT_H
 
 enum class TextureFormat {
-    RGB,
-    BGR,
-    RGBA,
-    ARGB,
-    BGRA,
-    ABGR
+    R8G8B8,
+    B8G8R8,
+    R8G8B8A8,
+    A8R8G8B8,
+    B8G8R8A8,
+    A8B8G8R8,
+    R32FG32FB32FA32F,
+    R32F,
+    R16FG16F,
+    DEPTH24STENCIL8
 };
 
 

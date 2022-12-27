@@ -5,11 +5,16 @@
 #ifndef NEON_FRAMEBUFFER_H
 #define NEON_FRAMEBUFFER_H
 
+#include <vector>
+#include <engine/IdentifiableWrapper.h>
+
 #ifdef USE_VULKAN
 
-#include "vulkan/render/VKFrameBuffer.h"
+#include <vulkan/render/VKFrameBuffer.h>
 
 #endif
+
+class Texture;
 
 class FrameBuffer {
 
@@ -31,6 +36,8 @@ public:
 
     [[nodiscard]] virtual const Implementation& getImplementation() const = 0;
 
+    [[nodiscard]] virtual std::vector<IdentifiableWrapper<Texture>>
+    getTextures() const = 0;
 };
 
 

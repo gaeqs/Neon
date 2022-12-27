@@ -16,6 +16,10 @@ VKMesh::VKMesh(Application* application,
         _indexAmount(0) {
 }
 
+IdentifiableWrapper<Material> VKMesh::getMaterial() const {
+    return _material;
+}
+
 void VKMesh::draw(
         VkCommandBuffer commandBuffer,
         VkBuffer instancingBuffer,

@@ -7,23 +7,23 @@
 
 #include <functional>
 
-#include <engine/render/RenderPass.h>
-
 class Room;
+
+class FrameBuffer;
 
 struct RenderPassStrategy {
 
     std::shared_ptr<FrameBuffer> frameBuffer;
-    RenderPass renderPass;
-    std::function<void(Room*)> strategy;
+    std::function<void(Room*, std::shared_ptr<FrameBuffer>)> strategy;
 
     RenderPassStrategy(
-            Application* _application,
             const std::shared_ptr<FrameBuffer>& _frameBuffer,
-            const std::function<void(Room*)>& _strategy) :
-            frameBuffer(_frameBuffer),
-            renderPass(_application, *_frameBuffer),
-            strategy(_strategy) {};
+            const std::function<void(Room*, std::shared_ptr<FrameBuffer>)>&
+            _strategy);
+
+    static void defaultStrategy(
+            Room* room,
+            const std::shared_ptr<FrameBuffer>& target);
 };
 
 #endif //NEON_RENDERPASSSTRATEGY_H

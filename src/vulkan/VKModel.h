@@ -7,7 +7,9 @@
 
 #include <cstdint>
 #include <typeindex>
+#include <memory>
 
+#include <engine/render/FrameBuffer.h>
 #include <vulkan/VKMesh.h>
 #include <vulkan/buffer/StagingBuffer.h>
 #include <util/Range.h>
@@ -65,7 +67,9 @@ public:
 
     void flush();
 
-    void draw(VkCommandBuffer buffer, const ShaderUniformBuffer* global);
+    void draw(VkCommandBuffer buffer,
+              VkRenderPass target,
+              const ShaderUniformBuffer* global);
 
 };
 

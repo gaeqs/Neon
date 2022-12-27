@@ -11,33 +11,20 @@
 
 uint32_t VKTexture::getPixelSize(TextureFormat format) {
     switch (format) {
-        case TextureFormat::RGB:
-        case TextureFormat::BGR:
+        case TextureFormat::R32FG32FB32FA32F:
+            return 16;
+        case TextureFormat::R8G8B8:
+        case TextureFormat::B8G8R8:
             return 3;
-        case TextureFormat::ARGB:
-        case TextureFormat::BGRA:
-        case TextureFormat::ABGR:
-        case TextureFormat::RGBA:
+        case TextureFormat::A8R8G8B8:
+        case TextureFormat::B8G8R8A8:
+        case TextureFormat::A8B8G8R8:
+        case TextureFormat::R8G8B8A8:
+        case TextureFormat::R32F:
+        case TextureFormat::R16FG16F:
+        case TextureFormat::DEPTH24STENCIL8:
         default:
             return 4;
-    }
-}
-
-VkFormat VKTexture::getImageFormat(TextureFormat format) {
-    switch (format) {
-        case TextureFormat::RGB:
-            return VK_FORMAT_R8G8B8_SRGB;
-        case TextureFormat::BGR:
-            return VK_FORMAT_B8G8R8_SRGB;
-        case TextureFormat::ARGB:
-            throw std::runtime_error("Vulkan doesn't support ARGB!");
-        case TextureFormat::BGRA:
-            return VK_FORMAT_B8G8R8A8_SRGB;
-        case TextureFormat::ABGR:
-            return VK_FORMAT_A8B8G8R8_SRGB_PACK32;
-        case TextureFormat::RGBA:
-        default:
-            return VK_FORMAT_R8G8B8A8_SRGB;
     }
 }
 
@@ -46,20 +33,23 @@ VKTexture::VKTexture(Application* application, const void* data,
         _vkApplication(&application->getImplementation()),
         _width(width),
         _height(height),
-        _stagingBuffer(
+        _stagingBuffer(std::make_unique<SimpleBuffer>(
                 _vkApplication,
                 VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
                 VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
                 VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
                 data,
                 getPixelSize(format) * width * height
-        ),
+        )),
         _image(VK_NULL_HANDLE),
         _imageMemory(VK_NULL_HANDLE),
         _imageView(VK_NULL_HANDLE),
-        _sampler(VK_NULL_HANDLE) {
+        _sampler(VK_NULL_HANDLE),
+        _layout(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL),
+        _external(false),
+        _externalDirtyFlag(1) {
 
-    VkFormat vkFormat = getImageFormat(format);
+    VkFormat vkFormat = vulkan_util::getImageFormat(format);
 
     auto pair = vulkan_util::createImage(
             _vkApplication->getDevice(),
@@ -82,7 +72,7 @@ VKTexture::VKTexture(Application* application, const void* data,
 
     vulkan_util::copyBufferToImage(
             _vkApplication,
-            _stagingBuffer.getRaw(),
+            _stagingBuffer->getRaw(),
             _image,
             width,
             height
@@ -132,11 +122,58 @@ VKTexture::VKTexture(Application* application, const void* data,
     }
 }
 
+VKTexture::VKTexture(Application* application,
+                     int32_t width, int32_t height,
+                     VkImageView imageView,
+                     VkImageLayout layout) :
+        _vkApplication(&application->getImplementation()),
+        _width(width),
+        _height(height),
+        _stagingBuffer(nullptr),
+        _image(VK_NULL_HANDLE),
+        _imageMemory(VK_NULL_HANDLE),
+        _imageView(imageView),
+        _sampler(VK_NULL_HANDLE),
+        _layout(layout),
+        _external(true),
+        _externalDirtyFlag(1) {
+
+    VkPhysicalDeviceProperties properties{};
+    vkGetPhysicalDeviceProperties(
+            _vkApplication->getPhysicalDevice(),
+            &properties
+    );
+
+    VkSamplerCreateInfo samplerInfo{};
+    samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+    samplerInfo.magFilter = VK_FILTER_LINEAR;
+    samplerInfo.minFilter = VK_FILTER_LINEAR;
+    samplerInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+    samplerInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+    samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+    samplerInfo.anisotropyEnable = VK_TRUE;
+    samplerInfo.maxAnisotropy = properties.limits.maxSamplerAnisotropy;
+    samplerInfo.unnormalizedCoordinates = VK_FALSE;
+    samplerInfo.compareEnable = VK_FALSE;
+    samplerInfo.compareOp = VK_COMPARE_OP_ALWAYS;
+    samplerInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
+    samplerInfo.mipLodBias = 0.0f;
+    samplerInfo.minLod = 0.0f;
+    samplerInfo.maxLod = 0.0f;
+
+    if (vkCreateSampler(_vkApplication->getDevice(), &samplerInfo, nullptr,
+                        &_sampler) != VK_SUCCESS) {
+        throw std::runtime_error("Failed to create texture sampler!");
+    }
+}
+
 VKTexture::~VKTexture() {
     vkDestroySampler(_vkApplication->getDevice(), _sampler, nullptr);
-    vkDestroyImageView(_vkApplication->getDevice(), _imageView, nullptr);
-    vkDestroyImage(_vkApplication->getDevice(), _image, nullptr);
-    vkFreeMemory(_vkApplication->getDevice(), _imageMemory, nullptr);
+    if (!_external) {
+        vkDestroyImageView(_vkApplication->getDevice(), _imageView, nullptr);
+        vkDestroyImage(_vkApplication->getDevice(), _image, nullptr);
+        vkFreeMemory(_vkApplication->getDevice(), _imageMemory, nullptr);
+    }
 }
 
 int32_t VKTexture::getWidth() const {
@@ -147,16 +184,56 @@ int32_t VKTexture::getHeight() const {
     return _height;
 }
 
+VkImageView VKTexture::getImageView() const {
+    return _imageView;
+}
+
+VkSampler VKTexture::getSampler() const {
+    return _sampler;
+}
+
+VkImageLayout VKTexture::getLayout() const {
+    return _layout;
+}
+
+uint32_t VKTexture::getExternalDirtyFlag() const {
+    return _externalDirtyFlag;
+}
+
+void VKTexture::changeExternalImageView(
+        int32_t width, int32_t height, VkImageView imageView) {
+
+    if (!_external) {
+        std::cerr << "The image view of an internal texture cannot"
+                     "be changed!" << std::endl;
+        return;
+    }
+
+    _width = width;
+    _height = height;
+    _imageView = imageView;
+    _externalDirtyFlag++;
+    if (_externalDirtyFlag == 0) {
+        _externalDirtyFlag++;
+    }
+}
+
 void VKTexture::updateData(const void* data, int32_t width, int32_t height,
                            TextureFormat format) {
 
-    auto map = _stagingBuffer.map<char>();
+    if (_external) {
+        std::cerr << "Couldn't update data of a texture"
+                     " with an external handler" << std::endl;
+        return;
+    }
+
+    auto map = _stagingBuffer->map<char>();
     if (map.has_value()) {
         memcpy(map.value()->raw(), data, getPixelSize(format) * width * height);
         map.value()->dispose();
     }
 
-    auto vkFormat = getImageFormat(format);
+    auto vkFormat = vulkan_util::getImageFormat(format);
     vulkan_util::transitionImageLayout(
             _vkApplication,
             _image,
@@ -167,7 +244,7 @@ void VKTexture::updateData(const void* data, int32_t width, int32_t height,
 
     vulkan_util::copyBufferToImage(
             _vkApplication,
-            _stagingBuffer.getRaw(),
+            _stagingBuffer->getRaw(),
             _image,
             width,
             height
@@ -180,12 +257,4 @@ void VKTexture::updateData(const void* data, int32_t width, int32_t height,
             VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
             VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
     );
-}
-
-VkImageView VKTexture::getImageView() const {
-    return _imageView;
-}
-
-VkSampler VKTexture::getSampler() const {
-    return _sampler;
 }

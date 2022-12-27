@@ -4,10 +4,13 @@
 
 #include "Material.h"
 
+#include <utility>
+
 uint64_t MATERIAL_ID_GENERATOR = 1;
 
 Material::Material(
         Room* room,
+        const std::shared_ptr<FrameBuffer>& target,
         IdentifiableWrapper<ShaderProgram> shader,
         const std::shared_ptr<ShaderUniformDescriptor>& descriptor,
         const InputDescription& vertexDescription,
@@ -16,7 +19,8 @@ Material::Material(
         _shader(shader),
         _uniformDescriptor(descriptor),
         _uniformBuffer(descriptor),
-        _implementation(room, this, vertexDescription, instanceDescription) {
+        _implementation(room, this, target, vertexDescription,
+                        instanceDescription) {
     _uniformBuffer.setBindingPoint(1);
 }
 

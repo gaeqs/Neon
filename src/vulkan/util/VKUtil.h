@@ -11,6 +11,8 @@
 #include <optional>
 #include <vulkan/vulkan.h>
 
+#include <engine/TextureFormat.h>
+
 class VKApplication;
 
 struct InputDescription;
@@ -68,6 +70,11 @@ namespace vulkan_util {
             std::vector<VkVertexInputAttributeDescription>>
     toVulkanDescription(uint32_t binding, uint32_t startLocation,
                         const InputDescription& description);
+
+    VkFormat getImageFormat(TextureFormat format);
+
+    std::vector<VkFormat> getImageFormats(
+            const std::vector<TextureFormat>& formats);
 
 }
 

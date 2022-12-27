@@ -23,6 +23,8 @@ class Room;
 
 class Material;
 
+class FrameBuffer;
+
 class VKMaterial {
 
     Material* _material;
@@ -34,11 +36,14 @@ class VKMaterial {
     std::vector<char> _pushConstants;
     VkShaderStageFlags _pushConstantStages;
 
+    VkRenderPass _target;
+
 public:
 
     VKMaterial(const VKMaterial& other) = delete;
 
     VKMaterial(Room* room, Material* material,
+               const std::shared_ptr<FrameBuffer>& target,
                const InputDescription& vertexDescription,
                const InputDescription& instanceDescription);
 
@@ -48,12 +53,14 @@ public:
 
     [[nodiscard]] VkPipeline getPipeline() const;
 
+    [[nodiscard]] VkRenderPass getTarget() const;
+
     void pushConstant(const std::string& name, const void* data, uint32_t size);
 
     void uploadConstants(VkCommandBuffer buffer) const;
 
     void setTexture(const std::string& name,
-                  IdentifiableWrapper<Texture> texture);
+                    IdentifiableWrapper<Texture> texture);
 };
 
 

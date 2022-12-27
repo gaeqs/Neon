@@ -55,6 +55,8 @@ public:
         _indexAmount = indices.size();
     }
 
+    IdentifiableWrapper<Material> getMaterial() const;
+
     void draw(
             VkCommandBuffer commandBuffer,
             VkBuffer instancingBuffer,

@@ -8,6 +8,7 @@
 #include <engine/Engine.h>
 
 struct GlobalParameters {
+    glm::mat4 view;
     glm::mat4 projectionView;
 };
 

@@ -198,10 +198,12 @@ namespace vulkan_util {
             barrier.srcAccessMask = 0;
             barrier.dstAccessMask =
                     VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT |
-                    VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+                    VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT |
+                    VK_ACCESS_SHADER_READ_BIT;
 
             sourceStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
-            destinationStage = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+            destinationStage = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT |
+                               VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
         } else if (oldLayout == VK_IMAGE_LAYOUT_UNDEFINED &&
                    newLayout ==
                    VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL) {
@@ -211,8 +213,12 @@ namespace vulkan_util {
             barrier.srcAccessMask = 0;
             barrier.dstAccessMask =
                     VK_ACCESS_COLOR_ATTACHMENT_READ_BIT |
-                    VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+                    VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT |
+                    VK_ACCESS_SHADER_READ_BIT;
 
+            sourceStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
+            destinationStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT |
+                               VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
         } else {
             throw std::invalid_argument("unsupported layout transition!");
         }
@@ -396,6 +402,43 @@ namespace vulkan_util {
         }
 
         return {bindingDescription, attributes};
+    }
+
+    VkFormat getImageFormat(TextureFormat format) {
+        switch (format) {
+            case TextureFormat::R8G8B8:
+                return VK_FORMAT_R8G8B8_SRGB;
+            case TextureFormat::B8G8R8:
+                return VK_FORMAT_B8G8R8_SRGB;
+            case TextureFormat::A8R8G8B8:
+                throw std::runtime_error("Vulkan doesn't support ARGB!");
+            case TextureFormat::B8G8R8A8:
+                return VK_FORMAT_B8G8R8A8_SRGB;
+            case TextureFormat::A8B8G8R8:
+                return VK_FORMAT_A8B8G8R8_SRGB_PACK32;
+            case TextureFormat::R32FG32FB32FA32F:
+                return VK_FORMAT_R32G32B32A32_SFLOAT;
+            case TextureFormat::R32F:
+                return VK_FORMAT_R32_SFLOAT;
+            case TextureFormat::R16FG16F:
+                return VK_FORMAT_R16G16_SFLOAT;
+            case TextureFormat::DEPTH24STENCIL8:
+                return VK_FORMAT_D24_UNORM_S8_UINT;
+            case TextureFormat::R8G8B8A8:
+            default:
+                return VK_FORMAT_R8G8B8A8_SRGB;
+        }
+    }
+
+    std::vector<VkFormat> getImageFormats(
+            const std::vector<TextureFormat>& formats) {
+        std::vector<VkFormat> map;
+        map.reserve(formats.size());
+        for (const auto& item: formats) {
+            map.push_back(getImageFormat(item));
+        }
+
+        return map;
     }
 
 }

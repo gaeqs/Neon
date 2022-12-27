@@ -8,7 +8,8 @@
 #include <utility>
 #include <stdexcept>
 
-#include <engine/Application.h>
+#include <engine/Room.h>
+#include <engine/Texture.h>
 #include <vulkan/util/VKUtil.h>
 
 void VKSimpleFrameBuffer::createImages() {
@@ -25,7 +26,8 @@ void VKSimpleFrameBuffer::createImages() {
                 _vkApplication->getPhysicalDevice(),
                 extent.width,
                 extent.height,
-                VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
+                VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT |
+                VK_IMAGE_USAGE_SAMPLED_BIT,
                 format
         );
 
@@ -36,17 +38,10 @@ void VKSimpleFrameBuffer::createImages() {
                 VK_IMAGE_ASPECT_COLOR_BIT
         );
 
-        vulkan_util::transitionImageLayout(
-                _vkApplication,
-                image,
-                format,
-                VK_IMAGE_LAYOUT_UNDEFINED,
-                VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
-        );
-
         _images.push_back(image);
         _memories.push_back(memory);
         _imageViews.push_back(view);
+        _layouts.push_back(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
     }
 
     // Add depth texture
@@ -56,7 +51,8 @@ void VKSimpleFrameBuffer::createImages() {
                 _vkApplication->getPhysicalDevice(),
                 extent.width,
                 extent.height,
-                VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
+                VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT
+                | VK_IMAGE_USAGE_SAMPLED_BIT,
                 _vkApplication->getDepthImageFormat()
         );
 
@@ -67,17 +63,10 @@ void VKSimpleFrameBuffer::createImages() {
                 VK_IMAGE_ASPECT_DEPTH_BIT
         );
 
-        vulkan_util::transitionImageLayout(
-                _vkApplication,
-                image,
-                _vkApplication->getDepthImageFormat(),
-                VK_IMAGE_LAYOUT_UNDEFINED,
-                VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL
-        );
-
         _images.push_back(image);
         _memories.push_back(memory);
         _imageViews.push_back(view);
+        _layouts.push_back(VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL);
     }
 
 }
@@ -87,7 +76,7 @@ void VKSimpleFrameBuffer::createFrameBuffer() {
 
     VkFramebufferCreateInfo framebufferInfo{};
     framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-    framebufferInfo.renderPass = _vkApplication->getRenderPass();
+    framebufferInfo.renderPass = _renderPass.getRaw();
     framebufferInfo.attachmentCount = _imageViews.size();
     framebufferInfo.pAttachments = _imageViews.data();
     framebufferInfo.width = extent.width;
@@ -123,17 +112,34 @@ void VKSimpleFrameBuffer::cleanup() {
 }
 
 VKSimpleFrameBuffer::VKSimpleFrameBuffer(
-        Application* application,
-        std::vector<VkFormat> formats, bool depth) :
+        Room* room,
+        const std::vector<TextureFormat>& formats, bool depth) :
         VKFrameBuffer(),
-        _vkApplication(&application->getImplementation()),
+        _vkApplication(&room->getApplication()->getImplementation()),
         _images(),
         _memories(),
         _imageViews(),
-        _formats(std::move(formats)),
+        _layouts(),
+        _textures(),
+        _formats(vulkan_util::getImageFormats(formats)),
+        _renderPass(room->getApplication(), _formats, depth, false,
+                    _vkApplication->getDepthImageFormat()),
         _depth(depth) {
+
     createImages();
     createFrameBuffer();
+
+    // Create the textures
+    auto& extent = _vkApplication->getSwapChainExtent();
+    for (uint32_t i = 0; i < _imageViews.size(); ++i) {
+        auto texture = room->getTextures().create(
+                static_cast<int32_t>(extent.width),
+                static_cast<int32_t>(extent.height),
+                _imageViews[i],
+                _layouts[i]
+        );
+        _textures.push_back(texture);
+    }
 }
 
 VKSimpleFrameBuffer::~VKSimpleFrameBuffer() {
@@ -152,6 +158,16 @@ void VKSimpleFrameBuffer::recreate() {
     cleanup();
     createImages();
     createFrameBuffer();
+
+    // Refresh the textures
+    auto& extent = _vkApplication->getSwapChainExtent();
+    for (uint32_t i = 0; i < _textures.size(); ++i) {
+        _textures[i]->getImplementation().changeExternalImageView(
+                static_cast<int32_t>(extent.width),
+                static_cast<int32_t>(extent.height),
+                _imageViews[i]
+        );
+    }
 }
 
 uint32_t VKSimpleFrameBuffer::getColorAttachmentAmount() const {
@@ -164,4 +180,17 @@ std::vector<VkFormat> VKSimpleFrameBuffer::getColorFormats() const {
 
 VkFormat VKSimpleFrameBuffer::getDepthFormat() const {
     return _vkApplication->getDepthImageFormat();
+}
+
+VKRenderPass const& VKSimpleFrameBuffer::getRenderPass() const {
+    return _renderPass;
+}
+
+VKRenderPass& VKSimpleFrameBuffer::getRenderPass() {
+    return _renderPass;
+}
+
+const std::vector<IdentifiableWrapper<Texture>>&
+VKSimpleFrameBuffer::getTextures() const {
+    return _textures;
 }

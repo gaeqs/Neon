@@ -10,10 +10,13 @@
 #include <engine/Room.h>
 #include <engine/shader/Material.h>
 
+#include <vulkan/render/VKRenderPass.h>
+
 #include <vulkan/util/VKUtil.h>
 
 VKMaterial::VKMaterial(
         Room* room, Material* material,
+        const std::shared_ptr<FrameBuffer>& target,
         const InputDescription& vertexDescription,
         const InputDescription& instanceDescription) :
         _material(material),
@@ -21,7 +24,8 @@ VKMaterial::VKMaterial(
         _pipelineLayout(VK_NULL_HANDLE),
         _pipeline(VK_NULL_HANDLE),
         _pushConstants(),
-        _pushConstantStages(0) {
+        _pushConstantStages(0),
+        _target(target->getImplementation().getRenderPass().getRaw()) {
 
     std::vector<VkDynamicState> dynamicStates = {
             VK_DYNAMIC_STATE_VIEWPORT,
@@ -101,7 +105,7 @@ VKMaterial::VKMaterial(
     colorBlendAttachment.colorWriteMask =
             VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT |
             VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
-    colorBlendAttachment.blendEnable = VK_TRUE;
+    colorBlendAttachment.blendEnable = VK_FALSE;
     colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
     colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
     colorBlendAttachment.colorBlendOp = VK_BLEND_OP_ADD;
@@ -109,12 +113,17 @@ VKMaterial::VKMaterial(
     colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
     colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD;
 
+    std::vector<VkPipelineColorBlendAttachmentState> blendAttachments;
+    blendAttachments.resize(
+            target->getImplementation().getColorAttachmentAmount(),
+            colorBlendAttachment);
+
     VkPipelineColorBlendStateCreateInfo colorBlending{};
     colorBlending.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
     colorBlending.logicOpEnable = VK_FALSE;
     colorBlending.logicOp = VK_LOGIC_OP_COPY; // Optional
-    colorBlending.attachmentCount = 1;
-    colorBlending.pAttachments = &colorBlendAttachment;
+    colorBlending.attachmentCount = blendAttachments.size();
+    colorBlending.pAttachments = blendAttachments.data();
     colorBlending.blendConstants[0] = 0.0f; // Optional
     colorBlending.blendConstants[1] = 0.0f; // Optional
     colorBlending.blendConstants[2] = 0.0f; // Optional
@@ -180,7 +189,7 @@ VKMaterial::VKMaterial(
     pipelineInfo.pColorBlendState = &colorBlending;
     pipelineInfo.pDynamicState = &dynamicState;
     pipelineInfo.layout = _pipelineLayout;
-    pipelineInfo.renderPass = _vkApplication->getRenderPass();
+    pipelineInfo.renderPass = _target;
     pipelineInfo.subpass = 0;
 
     if (vkCreateGraphicsPipelines(
@@ -204,6 +213,10 @@ VkPipelineLayout VKMaterial::getPipelineLayout() const {
 
 VkPipeline VKMaterial::getPipeline() const {
     return _pipeline;
+}
+
+VkRenderPass VKMaterial::getTarget() const {
+    return _target;
 }
 
 void VKMaterial::pushConstant(

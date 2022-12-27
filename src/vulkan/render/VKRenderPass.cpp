@@ -9,25 +9,27 @@
 #include <engine/Application.h>
 #include <vulkan/render/VKFrameBuffer.h>
 
-VKRenderPass::VKRenderPass(VKRenderPass&& other) noexcept :
+VKRenderPass::VKRenderPass(VKRenderPass&& other) noexcept:
         _vkApplication(other._vkApplication),
         _raw(other._raw) {
     other._raw = VK_NULL_HANDLE;
 }
 
 VKRenderPass::VKRenderPass(Application* application,
-                           const FrameBuffer& buffer) :
+                           const std::vector<VkFormat>& colorFormats,
+                           bool depth,
+                           bool present,
+                           VkFormat depthFormat) :
         _vkApplication(&application->getImplementation()),
         _raw(VK_NULL_HANDLE) {
-    auto& impl = buffer.getImplementation();
     std::vector<VkAttachmentDescription> attachments;
-    attachments.reserve(impl.getColorAttachmentAmount()
-                        + (impl.hasDepth() ? 1 : 0));
+    attachments.reserve(colorFormats.size()
+                        + (depth ? 1 : 0));
 
     std::vector<VkAttachmentReference> references;
     references.reserve(attachments.size());
 
-    for (const auto& format: impl.getColorFormats()) {
+    for (const auto& format: colorFormats) {
         VkAttachmentDescription colorAttachment{};
         colorAttachment.format = format;
         colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
@@ -36,7 +38,9 @@ VKRenderPass::VKRenderPass(Application* application,
         colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
         colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
         colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-        colorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+        colorAttachment.finalLayout = present
+                                      ? VK_IMAGE_LAYOUT_PRESENT_SRC_KHR
+                                      : VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
         attachments.push_back(colorAttachment);
 
         VkAttachmentReference colorAttachmentRef{};
@@ -53,16 +57,16 @@ VKRenderPass::VKRenderPass(Application* application,
     VkAttachmentReference depthAttachmentRef{};
     depthAttachmentRef.attachment = references.size();
     depthAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-    if (impl.hasDepth()) {
+    if (depth) {
         VkAttachmentDescription depthAttachment{};
-        depthAttachment.format = impl.getDepthFormat();
+        depthAttachment.format = depthFormat;
         depthAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
         depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-        depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+        depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
         depthAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
         depthAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
         depthAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-        depthAttachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+        depthAttachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL  ;
         attachments.push_back(depthAttachment);
         subpass.pDepthStencilAttachment = &depthAttachmentRef;
     }

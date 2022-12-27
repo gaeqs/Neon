@@ -13,6 +13,8 @@ class Application;
 
 class VKApplication;
 
+class Room;
+
 class VKRender {
 
     VKApplication* _vkApplication;

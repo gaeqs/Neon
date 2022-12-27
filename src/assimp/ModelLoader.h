@@ -28,6 +28,7 @@
 #include <engine/shader/Material.h>
 #include <engine/shader/ShaderProgram.h>
 #include <engine/shader/ShaderUniformDescriptor.h>
+#include <engine/render/FrameBuffer.h>
 
 #include <glm/glm.hpp>
 
@@ -80,6 +81,7 @@ class ModelLoader {
 
     void loadMaterial(
             std::vector<IdentifiableWrapper<Material>>& vector,
+            const std::shared_ptr<FrameBuffer>& target,
             IdentifiableWrapper<ShaderProgram> shader,
             const std::shared_ptr<ShaderUniformDescriptor>& materialDescriptor,
             const std::map<std::string, IdentifiableWrapper<Texture>>& textures,
@@ -100,16 +102,18 @@ public:
 
     template<class Vertex, class Instance>
     [[nodiscard]] ModelLoaderResult loadModel(
+            const std::shared_ptr<FrameBuffer>& target,
             IdentifiableWrapper<ShaderProgram> shader,
             const std::shared_ptr<ShaderUniformDescriptor>& materialDescriptor,
             const cmrc::file& file) const {
         return loadModel<Vertex, Instance>(
-                shader, materialDescriptor, file.begin(), file.size());
+                target, shader, materialDescriptor, file.begin(), file.size());
     }
 
     template<class Vertex, class Instance>
     [[nodiscard]]ModelLoaderResult
     loadModel(
+            const std::shared_ptr<FrameBuffer>& target,
             IdentifiableWrapper<ShaderProgram> shader,
             const std::shared_ptr<ShaderUniformDescriptor>& materialDescriptor,
             const void* buffer,
@@ -127,11 +131,13 @@ public:
                 aiProcess_EmbedTextures |
                 aiProcess_FlipUVs
         );
-        return loadModel<Vertex, Instance>(shader, materialDescriptor, scene);
+        return loadModel<Vertex, Instance>(target, shader,
+                                           materialDescriptor, scene);
     }
 
     template<class Vertex, class Instance>
     [[nodiscard]]ModelLoaderResult loadModel(
+            const std::shared_ptr<FrameBuffer>& target,
             IdentifiableWrapper<ShaderProgram> shader,
             const std::shared_ptr<ShaderUniformDescriptor>& materialDescriptor,
             const std::string& directory,
@@ -150,11 +156,13 @@ public:
                 aiProcess_EmbedTextures |
                 aiProcess_FlipUVs
         );
-        return loadModel<Vertex, Instance>(shader, materialDescriptor, scene);
+        return loadModel<Vertex, Instance>(target, shader,
+                                           materialDescriptor, scene);
     }
 
     template<class Vertex, class Instance>
     [[nodiscard]] ModelLoaderResult loadModel(
+            const std::shared_ptr<FrameBuffer>& target,
             IdentifiableWrapper<ShaderProgram> shader,
             const std::shared_ptr<ShaderUniformDescriptor>& materialDescriptor,
             const aiScene* scene) const {
@@ -182,7 +190,8 @@ public:
 
         for (int i = 0; i < scene->mNumMaterials; ++i) {
             auto* material = scene->mMaterials[i];
-            loadMaterial(materials, shader, materialDescriptor, textures,
+            loadMaterial(materials, target, shader, materialDescriptor,
+                         textures,
                          vertexDescription, instanceDescription, material);
         }
 

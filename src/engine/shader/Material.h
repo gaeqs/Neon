@@ -17,11 +17,13 @@
 #include <engine/Texture.h>
 #include <engine/shader/ShaderUniformBuffer.h>
 #include <engine/model/InputDescription.h>
+#include <engine/render/FrameBuffer.h>
+
+#include <assimp/types.h>
 
 #ifdef USE_VULKAN
 
 #include <vulkan/shader/VKMaterial.h>
-#include <assimp/types.h>
 
 #endif
 
@@ -55,6 +57,7 @@ public:
     Material(const Material& other) = delete;
 
     Material(Room* room,
+             const std::shared_ptr<FrameBuffer>& target,
              IdentifiableWrapper<ShaderProgram> shader,
              const std::shared_ptr<ShaderUniformDescriptor>& descriptor,
              const InputDescription& vertexDescription,

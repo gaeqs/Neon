@@ -13,8 +13,19 @@ Texture::Texture(Room* room, const void* data,
                  TextureFormat format) :
         _id(TEXTURE_ID_GENERATOR++),
         _implementation(room->getApplication(), data, width, height, format) {
-
 }
+
+#ifdef USE_VULKAN
+
+Texture::Texture(Room* room, int32_t width, int32_t height,
+                 VkImageView imageView,
+                 VkImageLayout layout) :
+        _id(TEXTURE_ID_GENERATOR++),
+        _implementation(room->getApplication(), width, height,
+                        imageView, layout) {
+}
+
+#endif
 
 uint64_t Texture::getId() const {
     return _id;

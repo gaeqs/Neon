@@ -30,7 +30,7 @@ class VKShaderUniformBuffer {
     std::vector<std::shared_ptr<Buffer>> _buffers;
     std::vector<VkDescriptorSet> _descriptorSets;
     std::vector<UniformBindingType> _types;
-    std::vector<std::vector<bool>> _updated;
+    std::vector<std::vector<uint32_t>> _updated;
     std::vector<std::vector<char>> _data;
     std::vector<IdentifiableWrapper<Texture>> _textures;
 

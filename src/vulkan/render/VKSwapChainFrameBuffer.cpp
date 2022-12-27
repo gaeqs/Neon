@@ -6,11 +6,12 @@
 
 #include <stdexcept>
 
-#include <engine/Application.h>
+#include <engine/Room.h>
+
 #include <vulkan/util/VKUtil.h>
 
 void VKSwapChainFrameBuffer::fetchSwapChainImages() {
-    uint32_t imageCount;
+    uint32_t imageCount = -1;
     vkGetSwapchainImagesKHR(
             _vkApplication->getDevice(),
             _vkApplication->getSwapChain(),
@@ -81,7 +82,7 @@ void VKSwapChainFrameBuffer::createFrameBuffers() {
 
         VkFramebufferCreateInfo framebufferInfo{};
         framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-        framebufferInfo.renderPass = _vkApplication->getRenderPass();
+        framebufferInfo.renderPass = _renderPass.getRaw();
         framebufferInfo.attachmentCount = _depth ? 2 : 1;
         framebufferInfo.pAttachments = attachments;
         framebufferInfo.width = extent.width;
@@ -115,15 +116,18 @@ void VKSwapChainFrameBuffer::cleanup() {
 }
 
 VKSwapChainFrameBuffer::VKSwapChainFrameBuffer(
-        Application* application, bool depth) :
+        Room* room, bool depth) :
         VKFrameBuffer(),
-        _vkApplication(&application->getImplementation()),
+        _vkApplication(&room->getApplication()->getImplementation()),
         _swapChainImages(),
         _swapChainImageViews(),
         _depthImage(VK_NULL_HANDLE),
         _depthImageMemory(VK_NULL_HANDLE),
         _depthImageView(VK_NULL_HANDLE),
         _swapChainFrameBuffers(),
+        _renderPass(room->getApplication(),
+                    {_vkApplication->getSwapChainImageFormat()},
+                    depth, true, _vkApplication->getDepthImageFormat()),
         _depth(depth) {
     fetchSwapChainImages();
     createSwapChainImageViews();
@@ -140,7 +144,7 @@ VKSwapChainFrameBuffer::~VKSwapChainFrameBuffer() {
 }
 
 VkFramebuffer VKSwapChainFrameBuffer::getRaw() const {
-    return _swapChainFrameBuffers[_vkApplication->getCurrentFrame()];
+    return _swapChainFrameBuffers[_vkApplication->getCurrentSwapChainImage()];
 }
 
 bool VKSwapChainFrameBuffer::hasDepth() const {
@@ -170,4 +174,12 @@ std::vector<VkFormat> VKSwapChainFrameBuffer::getColorFormats() const {
 
 VkFormat VKSwapChainFrameBuffer::getDepthFormat() const {
     return _vkApplication->getDepthImageFormat();
+}
+
+const VKRenderPass& VKSwapChainFrameBuffer::getRenderPass() const {
+    return _renderPass;
+}
+
+VKRenderPass& VKSwapChainFrameBuffer::getRenderPass() {
+    return _renderPass;
 }

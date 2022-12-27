@@ -6,12 +6,15 @@
 #define NEON_SIMPLEFRAMEBUFFER_H
 
 #include <engine/render/FrameBuffer.h>
+#include <engine/TextureFormat.h>
 
 #ifdef USE_VULKAN
 
-#include "vulkan/render/VKSimpleFrameBuffer.h"
+#include <vulkan/render/VKSimpleFrameBuffer.h>
 
 #endif
+
+class Room;
 
 class SimpleFrameBuffer : public FrameBuffer {
 
@@ -27,6 +30,10 @@ private:
 
 public:
 
+    SimpleFrameBuffer(Room* room,
+                      std::vector<TextureFormat> colorFormats,
+                      bool depth);
+
     ~SimpleFrameBuffer() override = default;
 
     void recreate() override;
@@ -36,6 +43,8 @@ public:
     [[nodiscard]] const FrameBuffer::Implementation&
     getImplementation() const override;
 
+    [[nodiscard]] std::vector<IdentifiableWrapper<Texture>>
+    getTextures() const override;
 };
 
 

@@ -6,7 +6,6 @@
 #define NEON_RENDER_H
 
 #include <functional>
-#include <engine/render/RenderPass.h>
 #include <engine/render/RenderPassStrategy.h>
 #include <util/ClusteredLinkedCollection.h>
 
@@ -44,12 +43,13 @@ public:
 
     [[nodiscard]] Implementation& getImplementation();
 
-    void addRenderPass(const std::shared_ptr<FrameBuffer>& _frameBuffer,
-                       const std::function<void(Room*)>& strategy);
+    void addRenderPass(RenderPassStrategy strategy);
 
     void clearRenderPasses();
 
     void render(Room* room) const;
+
+    void recreateFrameBuffers();
 };
 
 

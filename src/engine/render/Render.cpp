@@ -4,6 +4,8 @@
 
 #include "Render.h"
 
+#include <engine/render/FrameBuffer.h>
+
 Render::Render(Application* application) :
         _implementation(application),
         _application(application),
@@ -19,9 +21,8 @@ Render::Implementation& Render::getImplementation() {
     return _implementation;
 }
 
-void Render::addRenderPass(const std::shared_ptr<FrameBuffer>& frameBuffer,
-                           const std::function<void(Room*)>& strategy) {
-    _strategies.emplace(_application, frameBuffer, strategy);
+void Render::addRenderPass(RenderPassStrategy strategy) {
+    _strategies.emplace(strategy);
 }
 
 void Render::clearRenderPasses() {
@@ -30,4 +31,10 @@ void Render::clearRenderPasses() {
 
 void Render::render(Room* room) const {
     _implementation.render(room, _strategies);
+}
+
+void Render::recreateFrameBuffers() {
+    for (const auto& item: _strategies) {
+        item.frameBuffer->recreate();
+    }
 }

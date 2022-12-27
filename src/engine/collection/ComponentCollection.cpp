@@ -5,7 +5,6 @@
 #include "ComponentCollection.h"
 
 #include <engine/Room.h>
-#include <engine/Renderer.h>
 #include <engine/Component.h>
 #include <engine/GraphicComponent.h>
 

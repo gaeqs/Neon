@@ -20,6 +20,7 @@ ModelLoader::ModelLoader(const std::shared_ptr<Room>& room) :
 
 void ModelLoader::loadMaterial(
         std::vector<IdentifiableWrapper<Material>>& vector,
+        const std::shared_ptr<FrameBuffer>& target,
         IdentifiableWrapper<ShaderProgram> shader,
         const std::shared_ptr<ShaderUniformDescriptor>& materialDescriptor,
         const std::map<std::string, IdentifiableWrapper<Texture>>& textures,
@@ -28,6 +29,7 @@ void ModelLoader::loadMaterial(
         const aiMaterial* material) const {
 
     auto m = _room->getMaterials().create(
+            target,
             shader,
             materialDescriptor,
             vertexDescription,
@@ -138,6 +140,6 @@ ModelLoader::loadTexture(
             texture->pcData,
             static_cast<int32_t>(texture->mWidth),
             static_cast<int32_t>(texture->mHeight),
-            TextureFormat::ARGB
+            TextureFormat::A8R8G8B8
     );
 }

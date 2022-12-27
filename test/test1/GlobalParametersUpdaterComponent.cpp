@@ -5,8 +5,7 @@
 #include "GlobalParametersUpdaterComponent.h"
 
 GlobalParametersUpdaterComponent::
-~GlobalParametersUpdaterComponent() noexcept {
-}
+~GlobalParametersUpdaterComponent() noexcept = default;
 
 void GlobalParametersUpdaterComponent::onStart() {
 }
@@ -15,6 +14,7 @@ void GlobalParametersUpdaterComponent::onUpdate(float deltaTime) {
     getRoom()->getGlobalUniformBuffer().uploadData<GlobalParameters>(
             0,
             GlobalParameters{
+                    getRoom()->getCamera().getView(),
                     getRoom()->getCamera().getViewProjection()
             });
 }

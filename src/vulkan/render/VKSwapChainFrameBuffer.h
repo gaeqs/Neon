@@ -8,8 +8,9 @@
 #include <vector>
 
 #include <vulkan/render/VKFrameBuffer.h>
+#include <vulkan/render/VKRenderPass.h>
 
-class Application;
+class Room;
 
 class VKApplication;
 
@@ -26,6 +27,8 @@ class VKSwapChainFrameBuffer : public VKFrameBuffer {
 
     std::vector<VkFramebuffer> _swapChainFrameBuffers;
 
+    VKRenderPass _renderPass;
+
     bool _depth;
 
     void fetchSwapChainImages();
@@ -40,7 +43,7 @@ class VKSwapChainFrameBuffer : public VKFrameBuffer {
 
 public:
 
-    VKSwapChainFrameBuffer(Application* application, bool depth);
+    VKSwapChainFrameBuffer(Room* room, bool depth);
 
     ~VKSwapChainFrameBuffer() override;
 
@@ -53,6 +56,10 @@ public:
     [[nodiscard]] std::vector<VkFormat> getColorFormats() const override;
 
     [[nodiscard]] VkFormat getDepthFormat() const override;
+
+    [[nodiscard]] const VKRenderPass& getRenderPass() const override;
+
+    [[nodiscard]] VKRenderPass& getRenderPass() override;
 
     void recreate();
 

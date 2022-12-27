@@ -128,6 +128,7 @@ void Application::setRoom(const std::shared_ptr<Room>& room) {
     }
     _room = room;
     _room->onResize();
+    _implementation.setRoom(room);
 }
 
 void Application::lockMouse(bool lock) {

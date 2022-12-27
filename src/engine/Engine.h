@@ -15,7 +15,6 @@
 #include <engine/IdentifiableWrapper.h>
 #include <engine/KeyboardEvent.h>
 #include "engine/shader/Material.h"
-#include <engine/Renderer.h>
 #include <engine/Room.h>
 #include <engine/Texture.h>
 #include <engine/TextureFormat.h>

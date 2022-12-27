@@ -39,6 +39,15 @@ public:
     Texture(Room* room, const void* data,
             int32_t width, int32_t height, TextureFormat format);
 
+#ifdef USE_VULKAN
+
+    Texture(Room* room, int32_t width, int32_t height,
+            VkImageView imageView,
+            VkImageLayout layout);
+
+#endif
+
+
     uint64_t getId() const override;
 
     const Implementation& getImplementation() const;

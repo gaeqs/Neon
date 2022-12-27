@@ -105,11 +105,16 @@ void VKModel::flush() {
     }
 }
 
-void VKModel::draw(VkCommandBuffer buffer, const ShaderUniformBuffer* global) {
+void VKModel::draw(VkCommandBuffer buffer,
+                   VkRenderPass target,
+                   const ShaderUniformBuffer* global) {
     if (_positions.empty()) return;
 
     for (const auto& item: _meshes) {
-        item->draw(buffer, _instancingBuffer.getRaw(),
-                   _positions.size(), global);
+        auto meshTarget = item->getMaterial()->getImplementation().getTarget();
+        if (meshTarget == target) {
+            item->draw(buffer, _instancingBuffer.getRaw(),
+                       _positions.size(), global);
+        }
     }
 }

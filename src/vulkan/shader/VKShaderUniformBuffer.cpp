@@ -143,7 +143,7 @@ void VKShaderUniformBuffer::uploadData(uint32_t index,
     auto& vector = _data[index];
     auto finalSize = std::min(size, vector.size());
     memcpy(vector.data(), data, finalSize);
-    std::fill(_updated[index].begin(), _updated[index].end(), false);
+    std::fill(_updated[index].begin(), _updated[index].end(), 0);
 }
 
 void VKShaderUniformBuffer::setTexture(
@@ -151,35 +151,40 @@ void VKShaderUniformBuffer::setTexture(
         IdentifiableWrapper<Texture> texture) {
     if (_types[index] != UniformBindingType::IMAGE) return;
     _textures[index] = texture;
-    std::fill(_updated[index].begin(), _updated[index].end(), false);
+    std::fill(_updated[index].begin(), _updated[index].end(), 0);
 }
 
 void VKShaderUniformBuffer::prepareForFrame() {
     uint32_t frame = _vkApplication->getCurrentFrame();
     for (int index = 0; index < _updated.size(); ++index) {
         auto& updated = _updated[index];
-        if (updated[frame]) continue;
-        updated[frame] = true;
 
         switch (_types[index]) {
             case UniformBindingType::BUFFER: {
+                if (updated[frame] == 1) continue;
+                std::fill(updated.begin(), updated.end(), 1);
+
                 auto optional = _buffers[index]->map<char>();
                 if (optional.has_value()) {
                     auto& data = _data[index];
                     memcpy(optional.value()->raw(), data.data(), data.size());
                 }
-                std::fill(updated.begin(), updated.end(), true);
             }
                 break;
             case UniformBindingType::IMAGE: {
                 auto texture = _textures[index];
+
+                auto flag = texture->getImplementation().getExternalDirtyFlag();
+                if (updated[frame] == flag) continue;
+                updated[frame] = flag;
+
                 if (texture.isValid()) {
                     auto& impl = texture->getImplementation();
 
                     VkDescriptorImageInfo imageInfo{};
                     imageInfo.imageView = impl.getImageView();
                     imageInfo.sampler = impl.getSampler();
-                    imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+                    imageInfo.imageLayout = impl.getLayout();
 
                     VkWriteDescriptorSet descriptorWrite{};
                     descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;

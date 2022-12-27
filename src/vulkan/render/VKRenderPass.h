@@ -25,7 +25,11 @@ public:
 
     VKRenderPass(VKRenderPass&& other) noexcept;
 
-    VKRenderPass(Application* application, const FrameBuffer& buffer);
+    VKRenderPass(Application* application,
+                 const std::vector<VkFormat>& colorFormats,
+                 bool depth,
+                 bool present,
+                 VkFormat depthFormat);
 
     ~VKRenderPass();
 
