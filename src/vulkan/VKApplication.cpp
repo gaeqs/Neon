@@ -3,7 +3,6 @@
 //
 
 #include "VKApplication.h"
-
 #include <stdexcept>
 #include <iostream>
 #include <cstring>
@@ -11,6 +10,10 @@
 
 #include <engine/Room.h>
 #include <vulkan/util/VKUtil.h>
+
+#include <imgui.h>
+#include <imgui_impl_glfw.h>
+#include <imgui_impl_vulkan.h>
 
 static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
         VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
@@ -69,6 +72,7 @@ void VKApplication::postWindowCreation(GLFWwindow* window) {
     createCommandPool();
     createCommandBuffers();
     createSyncObjects();
+    initImGui();
 }
 
 bool VKApplication::preUpdate() {
@@ -403,7 +407,6 @@ void VKApplication::createLogicalDevice() {
     vulkan12Features.separateDepthStencilLayouts = VK_TRUE;
 
 
-
     VkDeviceCreateInfo createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
     createInfo.queueCreateInfoCount = queueCreateInfos.size();
@@ -614,6 +617,37 @@ void VKApplication::createSyncObjects() {
     }
 }
 
+void VKApplication::initImGui() {
+    VkDescriptorPoolSize pool_sizes[] = {
+            {VK_DESCRIPTOR_TYPE_SAMPLER,                1000},
+            {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1000},
+            {VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE,          1000},
+            {VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,          1000},
+            {VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER,   1000},
+            {VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER,   1000},
+            {VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,         1000},
+            {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,         1000},
+            {VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1000},
+            {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, 1000},
+            {VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT,       1000}
+    };
+
+    VkDescriptorPoolCreateInfo pool_info{};
+    pool_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+    pool_info.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
+    pool_info.maxSets = 1000;
+    pool_info.poolSizeCount = std::size(pool_sizes);
+    pool_info.pPoolSizes = pool_sizes;
+
+    if (vkCreateDescriptorPool(_device, &pool_info, nullptr, &_imGuiPool) !=
+        VK_SUCCESS) {
+        throw std::runtime_error("Failed to init ImGui!");
+    }
+
+    ImGui::CreateContext();
+    ImGui_ImplGlfw_InitForVulkan(_window, true);
+}
+
 void VKApplication::recreateSwapChain() {
     vkDeviceWaitIdle(_device);
     cleanupSwapChain();
@@ -626,6 +660,9 @@ void VKApplication::cleanupSwapChain() {
 }
 
 VKApplication::~VKApplication() {
+    vkDestroyDescriptorPool(_device, _imGuiPool, nullptr);
+    ImGui_ImplVulkan_Shutdown();
+
     for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
         vkDestroySemaphore(_device, _imageAvailableSemaphores[i], nullptr);
         vkDestroySemaphore(_device, _renderFinishedSemaphores[i], nullptr);
@@ -693,6 +730,10 @@ VkCommandBuffer VKApplication::getCurrentCommandBuffer() const {
     return _commandBuffers.empty()
            ? VK_NULL_HANDLE
            : _commandBuffers[_currentFrame];
+}
+
+VkDescriptorPool VKApplication::getImGuiPool() const {
+    return _imGuiPool;
 }
 
 bool VKApplication::isRecordingCommandBuffer() const {

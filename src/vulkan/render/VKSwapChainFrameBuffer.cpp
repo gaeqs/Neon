@@ -9,6 +9,7 @@
 #include <engine/Room.h>
 
 #include <vulkan/util/VKUtil.h>
+#include <imgui_impl_vulkan.h>
 
 void VKSwapChainFrameBuffer::fetchSwapChainImages() {
     uint32_t imageCount = -1;
@@ -137,6 +138,27 @@ VKSwapChainFrameBuffer::VKSwapChainFrameBuffer(
     }
 
     createFrameBuffers();
+
+    ImGui_ImplVulkan_InitInfo init_info = {};
+    init_info.Instance = _vkApplication->getInstance();
+    init_info.PhysicalDevice = _vkApplication->getPhysicalDevice();
+    init_info.Device = _vkApplication->getDevice();
+    init_info.Queue = _vkApplication->getGraphicsQueue();
+    init_info.DescriptorPool = _vkApplication->getImGuiPool();
+    init_info.MinImageCount = 3;
+    init_info.ImageCount = 3;
+    init_info.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
+
+    ImGui_ImplVulkan_Init(&init_info, _renderPass.getRaw());
+
+    auto cmd = vulkan_util::beginSingleTimeCommandBuffer(
+            _vkApplication->getDevice(), _vkApplication->getCommandPool());
+    ImGui_ImplVulkan_CreateFontsTexture(cmd);
+    vulkan_util::endSingleTimeCommandBuffer(
+            _vkApplication->getDevice(), _vkApplication->getGraphicsQueue(),
+            _vkApplication->getCommandPool(), cmd);
+
+    ImGui_ImplVulkan_DestroyFontUploadObjects();
 }
 
 VKSwapChainFrameBuffer::~VKSwapChainFrameBuffer() {

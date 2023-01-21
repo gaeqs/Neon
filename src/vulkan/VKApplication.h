@@ -68,6 +68,8 @@ class VKApplication {
 
     std::shared_ptr<Room> _room;
 
+    VkDescriptorPool _imGuiPool;
+
     // region VULKAN INITIALIZATION
 
     void createInstance();
@@ -105,6 +107,8 @@ class VKApplication {
     void createCommandBuffers();
 
     void createSyncObjects();
+
+    void initImGui();
 
     void recreateSwapChain();
 
@@ -163,6 +167,8 @@ public:
     [[nodiscard]] VkCommandPool getCommandPool() const;
 
     [[nodiscard]] VkCommandBuffer getCurrentCommandBuffer() const;
+
+    [[nodiscard]] VkDescriptorPool getImGuiPool() const;
 
     [[nodiscard]] bool isRecordingCommandBuffer() const;
 

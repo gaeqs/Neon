@@ -58,7 +58,9 @@ endif ()
 list(APPEND LIBRARIES glfw ${GLFW_LIBRARIES})
 list(APPEND LIBRARIES ${VULKAN_LIB_LIST})
 list(APPEND LIBRARIES Glslang::SPIRV Glslang::Glslang)
+list(APPEND LIBRARIES IMGUI)
 
+add_subdirectory(lib)
 include_directories(src)
 add_subdirectory(src)
 
