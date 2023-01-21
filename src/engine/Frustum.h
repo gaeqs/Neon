@@ -5,6 +5,8 @@
 #ifndef RVTRACKING_FRUSTUM_H
 #define RVTRACKING_FRUSTUM_H
 
+#include <optional>
+
 #include <glm/glm.hpp>
 
 class Frustum {
@@ -15,6 +17,7 @@ class Frustum {
     float _fovYDegrees;
 
     glm::mat4 _projection;
+    std::optional<glm::mat4> _inverseProjection;
 
 public:
 
@@ -29,6 +32,8 @@ public:
     float getFovYDegrees() const;
 
     const glm::mat4& getProjection() const;
+
+    const glm::mat4& getInverseProjection() const;
 
     Frustum withNear(float near) const;
 

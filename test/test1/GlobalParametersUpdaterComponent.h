@@ -10,6 +10,9 @@
 struct GlobalParameters {
     glm::mat4 view;
     glm::mat4 projectionView;
+    glm::mat4 inverseProjection;
+    float near;
+    float far;
 };
 
 class GlobalParametersUpdaterComponent : public Component {

@@ -52,3 +52,11 @@ Frustum Frustum::withAspectRatio(float aspectRatio) const {
 Frustum Frustum::withFov(float fovYDegrees) const {
     return {_near, _far, _aspectRatio, fovYDegrees};
 }
+
+const glm::mat4& Frustum::getInverseProjection() const {
+    if(!_inverseProjection.has_value()) {
+        auto* f = const_cast<Frustum*>(this);
+        f->_inverseProjection = glm::inverse(_projection);
+    }
+    return _inverseProjection.value();
+}

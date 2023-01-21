@@ -9,6 +9,9 @@ layout (binding = 0) uniform Matrices
 {
     mat4 view;
     mat4 viewProjection;
+    mat4 inverseProjection;
+    float near;
+    float far;
 };
 
 layout(location = 0) out vec3 fragNormal;

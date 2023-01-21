@@ -11,7 +11,7 @@
 #include <engine/GraphicComponent.h>
 
 constexpr float DEFAULT_FRUSTUM_NEAR = 0.1f;
-constexpr float DEFAULT_FRUSTUM_FAR = 1000.0f;
+constexpr float DEFAULT_FRUSTUM_FAR = 100.0f;
 constexpr float DEFAULT_FRUSTUM_FOV = glm::radians(100.0f); // RADIANS
 
 Room::Room(Application* application,
