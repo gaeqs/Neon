@@ -6,7 +6,12 @@ set(
         TestVertex.h
         GlobalParametersUpdaterComponent.cpp
         GlobalParametersUpdaterComponent.h
-        LockMouseComponent.cpp LockMouseComponent.h ConstantRotationComponent.cpp ConstantRotationComponent.h)
+        LockMouseComponent.cpp
+        LockMouseComponent.h
+        ConstantRotationComponent.cpp
+        ConstantRotationComponent.h
+        ImGuiTestComponent.cpp
+        ImGuiTestComponent.h)
 
 cmrc_add_resource_library(
         shaders

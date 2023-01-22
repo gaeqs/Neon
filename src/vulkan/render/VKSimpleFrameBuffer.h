@@ -65,6 +65,8 @@ public:
 
     [[nodiscard]] VKRenderPass& getRenderPass() override;
 
+    bool renderImGui() override;
+
     [[nodiscard]] const std::vector<IdentifiableWrapper<Texture>>&
     getTextures() const;
 

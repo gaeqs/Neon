@@ -45,6 +45,7 @@ class VKApplication {
     VkQueue _graphicsQueue;
     VkQueue _presentQueue;
     VkSurfaceKHR _surface;
+    VkSurfaceFormatKHR _surfaceFormat;
 
     VkSwapchainKHR _swapChain;
     VkFormat _swapChainImageFormat;

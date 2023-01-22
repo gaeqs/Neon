@@ -194,3 +194,7 @@ const std::vector<IdentifiableWrapper<Texture>>&
 VKSimpleFrameBuffer::getTextures() const {
     return _textures;
 }
+
+bool VKSimpleFrameBuffer::renderImGui() {
+    return false;
+}

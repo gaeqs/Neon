@@ -7,6 +7,7 @@
 #include <engine/render/SwapChainFrameBuffer.h>
 #include <engine/render/SimpleFrameBuffer.h>
 #include <util/component/CameraMovementComponent.h>
+#include <util/component/DebugOverlayComponent.h>
 #include <util/DeferredUtils.h>
 #include <assimp/ModelLoader.h>
 
@@ -106,7 +107,7 @@ void loadSansModels(Application* application, Room* room,
     }
     auto sansModel = sansResult.model;
 
-    constexpr int AMOUNT = 1024 * 4;
+    constexpr int AMOUNT = 1024 * 1;
     int q = static_cast<int>(std::sqrt(AMOUNT));
     for (int i = 0; i < AMOUNT; i++) {
         auto sans = room->newGameObject();
@@ -133,10 +134,6 @@ std::shared_ptr<Room> getTestRoom(Application* application) {
 
     auto fpFrameBuffer = initRender(room.get());
 
-    auto parametersUpdater = room->newGameObject();
-    parametersUpdater->newComponent<GlobalParametersUpdaterComponent>();
-    parametersUpdater->newComponent<LockMouseComponent>();
-
     auto gameObject = room->newGameObject();
     gameObject->newComponent<TestComponent>();
     gameObject->getTransform().setPosition(glm::vec3(0.0f, 0.0f, -1.0f));
@@ -148,7 +145,13 @@ std::shared_ptr<Room> getTestRoom(Application* application) {
     gameObject2->getTransform().setPosition(glm::vec3(0.0f, -1.0f, 0.0f));
 
     auto cameraController = room->newGameObject();
-    cameraController->newComponent<CameraMovementComponent>();
+    auto cameraMovement = cameraController->newComponent<CameraMovementComponent>();
+    cameraMovement->setSpeed(10.0f);
+
+    auto parameterUpdater = room->newGameObject();
+    parameterUpdater->newComponent<GlobalParametersUpdaterComponent>();
+    parameterUpdater->newComponent<LockMouseComponent>(cameraMovement);
+    parameterUpdater->newComponent<DebugOverlayComponent>(100);
 
     loadSansModels(application, room.get(), fpFrameBuffer);
 

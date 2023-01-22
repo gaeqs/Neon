@@ -205,3 +205,7 @@ const VKRenderPass& VKSwapChainFrameBuffer::getRenderPass() const {
 VKRenderPass& VKSwapChainFrameBuffer::getRenderPass() {
     return _renderPass;
 }
+
+bool VKSwapChainFrameBuffer::renderImGui() {
+    return true;
+}

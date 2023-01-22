@@ -52,7 +52,6 @@ set(
         engine/shader/ShaderUniformDescriptor.cpp
         engine/shader/ShaderUniformDescriptor.h
         engine/model/InputDescription.h
-        util/Range.h
         engine/render/FrameBuffer.cpp
         engine/render/FrameBuffer.h
         engine/render/SwapChainFrameBuffer.cpp
@@ -63,6 +62,10 @@ set(
         engine/render/Render.h
         engine/render/RenderPassStrategy.h
         engine/render/RenderPassStrategy.cpp
+        engine/FrameInformation.h
+        util/Range.h
+        util/component/DebugOverlayComponent.cpp
+        util/component/DebugOverlayComponent.h
         util/DeferredUtils.cpp
         util/DeferredUtils.h)
 

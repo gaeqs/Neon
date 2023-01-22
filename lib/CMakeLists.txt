@@ -22,3 +22,18 @@ target_include_directories( IMGUI
         )
 
 target_link_libraries(IMGUI PUBLIC ${VULKAN_LIB_LIST} glfw ${GLFW_LIBRARIES})
+
+
+set(IMPLOT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/implot)
+add_library(IMPLOT STATIC)
+
+target_sources( IMPLOT
+        PRIVATE
+        ${IMPLOT_DIR}/implot.cpp
+        ${IMPLOT_DIR}/implot_demo.cpp
+        ${IMPLOT_DIR}/implot_items.cpp
+        )
+
+target_include_directories( IMPLOT PUBLIC ${IMPLOT_DIR})
+
+target_link_libraries(IMPLOT IMGUI)

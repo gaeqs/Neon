@@ -61,6 +61,8 @@ public:
 
     [[nodiscard]] VKRenderPass& getRenderPass() override;
 
+    bool renderImGui() override;
+
     void recreate();
 
 };

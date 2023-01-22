@@ -9,6 +9,9 @@
 #include <vulkan/render/VKFrameBuffer.h>
 #include <vulkan/render/VKRenderPass.h>
 
+#include <imgui.h>
+#include <imgui_impl_vulkan.h>
+
 VKRender::VKRender(Application* application) :
         _vkApplication(&application->getImplementation()) {
 
@@ -16,7 +19,7 @@ VKRender::VKRender(Application* application) :
 
 void VKRender::render(
         Room* room,
-        const ClusteredLinkedCollection<RenderPassStrategy>& strategies) const {
+        const ClusteredLinkedCollection <RenderPassStrategy>& strategies) const {
     for (const auto& strategy: strategies) {
         auto& frameBuffer = strategy.frameBuffer->getImplementation();
         auto& renderPass = frameBuffer.getRenderPass();
@@ -64,6 +67,12 @@ void VKRender::render(
         vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
         strategy.strategy(room, strategy.frameBuffer);
+
+        if (strategy.frameBuffer->getImplementation().renderImGui()) {
+            ImGui::Render();
+            ImGui_ImplVulkan_RenderDrawData(
+                    ImGui::GetDrawData(),commandBuffer);
+        }
 
         vkCmdEndRenderPass(commandBuffer);
     }

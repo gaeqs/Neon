@@ -32,6 +32,7 @@ class Component : public Identifiable {
     class IdentifiableWrapper;
 
     uint64_t _id;
+    bool _enabled;
     IdentifiableWrapper<GameObject> _gameObject;
 
 public:
@@ -68,6 +69,26 @@ public:
      * @return the game object.
      */
     [[nodiscard]] IdentifiableWrapper<GameObject> getGameObject() const;
+
+    /**
+     * Returns whether this component is enabled.
+     *
+     * Components won't be called on any event
+     * when they are disabled.
+     *
+     * @return whether this component is enabled.
+     */
+    [[nodiscard]] bool isEnabled() const;
+
+    /**
+     * Sets whether this component is enabled.
+     *
+     * Components won't be called on any event
+     * when they are disabled.
+     *
+     * @param enabled whether this component is enabled.
+     */
+    void setEnabled(bool enabled);
 
     /**
      * Destroys this component.

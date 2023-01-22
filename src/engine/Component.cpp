@@ -9,7 +9,10 @@
 
 uint64_t COMPONENT_ID_GENERATOR = 1;
 
-Component::Component() : _id(COMPONENT_ID_GENERATOR++), _gameObject(nullptr) {
+Component::Component() :
+        _id(COMPONENT_ID_GENERATOR++),
+        _enabled(true),
+        _gameObject(nullptr) {
 }
 
 uint64_t Component::getId() const {
@@ -18,6 +21,14 @@ uint64_t Component::getId() const {
 
 IdentifiableWrapper<GameObject> Component::getGameObject() const {
     return _gameObject;
+}
+
+bool Component::isEnabled() const {
+    return _enabled;
+}
+
+void Component::setEnabled(bool enabled) {
+    _enabled = enabled;
 }
 
 void Component::destroy() {

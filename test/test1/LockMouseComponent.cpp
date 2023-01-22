@@ -4,9 +4,24 @@
 
 #include "LockMouseComponent.h"
 
+void LockMouseComponent::performLock() {
+    getRoom()->getApplication()->lockMouse(_locked);
+    _cameraMovementComponent->setEnabled(_locked);
+}
+
+LockMouseComponent::LockMouseComponent(
+        IdentifiableWrapper<CameraMovementComponent> cameraMovementComponent) :
+        _cameraMovementComponent(cameraMovementComponent),
+        _locked(false) {
+}
+
+void LockMouseComponent::onStart() {
+    performLock();
+}
+
 void LockMouseComponent::onKey(const KeyboardEvent& event) {
     if (event.key == KeyboardKey::L && event.action == KeyboardAction::PRESS) {
         _locked = !_locked;
-        getRoom()->getApplication()->lockMouse(_locked);
+        performLock();
     }
 }

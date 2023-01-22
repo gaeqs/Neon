@@ -11,7 +11,10 @@
 #include <memory>
 
 #include <glm/glm.hpp>
+
+#include <engine/FrameInformation.h>
 #include <util/Result.h>
+
 
 #ifdef USE_VULKAN
 
@@ -41,7 +44,8 @@ protected:
 
     std::shared_ptr<Room> _room;
 
-    glm::dvec2 _last_cursor_pos;
+    glm::dvec2 _lastCursorPosition;
+    FrameInformation _currentFrameInformation;
 
     Implementation _implementation;
 
@@ -64,6 +68,8 @@ public:
     [[nodiscard]] int32_t getHeight() const;
 
     [[nodiscard]] float getAspectRatio() const;
+
+    [[nodiscard]] FrameInformation getCurrentFrameInformation() const;
 
     void setRoom(const std::shared_ptr<Room>& room);
 

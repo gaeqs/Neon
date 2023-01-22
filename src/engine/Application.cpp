@@ -33,7 +33,8 @@ Application::Application(int32_t width, int32_t height) :
         _height(height),
         _window(nullptr),
         _room(nullptr),
-        _last_cursor_pos(0.0, 0.0),
+        _lastCursorPosition(0.0, 0.0),
+        _currentFrameInformation(),
         _implementation() {
 }
 
@@ -70,14 +71,21 @@ Result<uint32_t, std::string> Application::startGameLoop() {
 
     uint32_t frames = 0;
 
-    auto last_tick = std::chrono::high_resolution_clock::now();
+    auto lastTick = std::chrono::high_resolution_clock::now();
+    float lastFrameProcessTime = 0.0f;
     try {
         while (!glfwWindowShouldClose(_window)) {
             auto now = std::chrono::high_resolution_clock::now();
-            auto duration = now - last_tick;
-            last_tick = now;
+            auto duration = now - lastTick;
+            lastTick = now;
 
-            float seconds = static_cast<float>(duration.count()) * 10.0e-9f;
+            float seconds = static_cast<float>(duration.count()) * 1e-9f;
+
+            _currentFrameInformation = {
+                    frames,
+                    seconds,
+                    lastFrameProcessTime
+            };
 
             //std::cout << (1 / seconds) << std::endl;
 
@@ -92,6 +100,12 @@ Result<uint32_t, std::string> Application::startGameLoop() {
 
                 _implementation.endDraw();
             }
+
+            now = std::chrono::high_resolution_clock::now();
+            auto processTime = now - lastTick;
+
+            lastFrameProcessTime =
+                    static_cast<float>(processTime.count()) * 1e-9;
 
             ++frames;
         }
@@ -122,6 +136,10 @@ float Application::getAspectRatio() const {
     return static_cast<float>(_width) / static_cast<float>(_height);
 }
 
+FrameInformation Application::getCurrentFrameInformation() const {
+    return _currentFrameInformation;
+}
+
 void Application::setRoom(const std::shared_ptr<Room>& room) {
     if (room != nullptr && room->getApplication() != this) {
         throw std::runtime_error("Room's application is not this application!");
@@ -134,7 +152,8 @@ void Application::setRoom(const std::shared_ptr<Room>& room) {
 void Application::lockMouse(bool lock) {
     if (lock) {
         glfwSetInputMode(_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-        glfwGetCursorPos(_window, &_last_cursor_pos.x, &_last_cursor_pos.y);
+        glfwGetCursorPos(_window, &_lastCursorPosition.x,
+                         &_lastCursorPosition.y);
     } else {
         glfwSetInputMode(_window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
     }
@@ -163,8 +182,8 @@ void Application::internalKeyEvent(int key, int scancode,
 
 void Application::internalCursorPosEvent(double x, double y) {
     glm::dvec2 current(x, y);
-    auto delta = current - _last_cursor_pos;
-    _last_cursor_pos = current;
+    auto delta = current - _lastCursorPosition;
+    _lastCursorPosition = current;
 
     CursorMoveEvent event{
             current,

@@ -30,8 +30,10 @@ void ComponentCollection::invokeKeyEvent(const KeyboardEvent& event) {
         auto ptr = std::static_pointer_cast
                 <AbstractClusteredLinkedCollection>(item.second);
         ptr->forEachRaw([&event](void* ptr) {
-            reinterpret_cast<Component*>(ptr)->
-                    onKey(event);
+            auto* component = reinterpret_cast<Component*>(ptr);
+            if (component->isEnabled()) {
+                component->onKey(event);
+            }
         });
     }
 }
@@ -42,8 +44,10 @@ void ComponentCollection::invokeCursorMoveEvent(const CursorMoveEvent& event) {
         auto ptr = std::static_pointer_cast
                 <AbstractClusteredLinkedCollection>(item.second);
         ptr->forEachRaw([&event](void* ptr) {
-            reinterpret_cast<Component*>(ptr)->
-                    onCursorMove(event);
+            auto* component = reinterpret_cast<Component*>(ptr);
+            if (component->isEnabled()) {
+                component->onCursorMove(event);
+            }
         });
     }
 }
@@ -54,7 +58,10 @@ void ComponentCollection::updateComponents(float deltaTime) {
         auto ptr = std::static_pointer_cast
                 <AbstractClusteredLinkedCollection>(item.second);
         ptr->forEachRaw([deltaTime](void* ptr) {
-            reinterpret_cast<Component*>(ptr)->onUpdate(deltaTime);
+            auto* component = reinterpret_cast<Component*>(ptr);
+            if (component->isEnabled()) {
+                component->onUpdate(deltaTime);
+            }
         });
     }
 }

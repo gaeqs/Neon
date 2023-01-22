@@ -34,7 +34,6 @@ class VKShaderUniformBuffer {
     std::vector<std::vector<char>> _data;
     std::vector<IdentifiableWrapper<Texture>> _textures;
 
-    uint32_t _currentImage;
     uint32_t _bindingPoint; // In vulkan this is the "set" parameter.
 
 public:

@@ -36,7 +36,7 @@ public:
 
     [[nodiscard]] virtual VKRenderPass& getRenderPass() = 0;
 
-
+    [[nodiscard]] virtual bool renderImGui() = 0;
 };
 
 

@@ -18,7 +18,6 @@ VKShaderUniformBuffer::VKShaderUniformBuffer(
         _updated(),
         _data(),
         _textures(),
-        _currentImage(0),
         _bindingPoint(0) {
 
     auto& bindings = descriptor->getBindings();
@@ -209,7 +208,9 @@ void VKShaderUniformBuffer::prepareForFrame() {
 
 void VKShaderUniformBuffer::bind(VkCommandBuffer commandBuffer,
                                  VkPipelineLayout layout) const {
-    vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
-                            layout, _bindingPoint, 1,
-                            &_descriptorSets[_currentImage], 0, nullptr);
+    vkCmdBindDescriptorSets(
+            commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
+            layout, _bindingPoint, 1,
+            &_descriptorSets[_vkApplication->getCurrentFrame()],
+            0, nullptr);
 }

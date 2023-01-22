@@ -14,6 +14,7 @@
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_vulkan.h>
+#include <implot.h>
 
 static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
         VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
@@ -111,8 +112,11 @@ bool VKApplication::preUpdate() {
         throw std::runtime_error("Failed to begin recording command buffer!");
     }
 
-    _recording = true;
+    ImGui_ImplVulkan_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
 
+    _recording = true;
 
     return true;
 }
@@ -472,6 +476,7 @@ void VKApplication::createSwapChain() {
         throw std::runtime_error("Failed to create swap chain!");
     }
 
+    _surfaceFormat = format;
     _swapChainImageFormat = format.format;
     _swapChainExtent = extent;
 
@@ -645,6 +650,7 @@ void VKApplication::initImGui() {
     }
 
     ImGui::CreateContext();
+    ImPlot::CreateContext();
     ImGui_ImplGlfw_InitForVulkan(_window, true);
 }
 
@@ -662,6 +668,9 @@ void VKApplication::cleanupSwapChain() {
 VKApplication::~VKApplication() {
     vkDestroyDescriptorPool(_device, _imGuiPool, nullptr);
     ImGui_ImplVulkan_Shutdown();
+
+    ImPlot::DestroyContext();
+    ImGui::DestroyContext();
 
     for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
         vkDestroySemaphore(_device, _imageAvailableSemaphores[i], nullptr);
