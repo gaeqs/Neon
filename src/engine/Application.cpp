@@ -118,6 +118,7 @@ Result<uint32_t, std::string> Application::startGameLoop() {
 
             ++frames;
         }
+        _implementation.finishLoop();
     } catch (const std::exception& exception) {
         return {exception.what()};
     }
@@ -162,7 +163,9 @@ void Application::setRoom(const std::shared_ptr<Room>& room) {
         throw std::runtime_error("Room's application is not this application!");
     }
     _room = room;
-    _room->onResize();
+    if (_room != nullptr) {
+        _room->onResize();
+    }
     _implementation.setRoom(room);
 }
 

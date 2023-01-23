@@ -25,6 +25,9 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
     if (messageSeverity >= VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT) {
         std::cerr << "[VULKAN ERROR]: " << pCallbackData->pMessage << std::endl;
         std::cerr << "------------------------------" << std::endl;
+    } else {
+        std::cout << "[VULKAN DEBUG]: " << pCallbackData->pMessage << std::endl;
+        std::cout << "------------------------------" << std::endl;
     }
 
     return VK_FALSE;
@@ -166,6 +169,11 @@ void VKApplication::endDraw() {
     _currentFrame = (_currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
 }
 
+
+void VKApplication::finishLoop() {
+    vkDeviceWaitIdle(_device);
+}
+
 void VKApplication::internalForceSizeValues(int32_t width, int32_t height) {
 
 }
@@ -264,6 +272,7 @@ void VKApplication::setupDebugMessenger() {
     VkDebugUtilsMessengerCreateInfoEXT createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
     createInfo.messageSeverity =
+            VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT |
             VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT |
             VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
             VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;

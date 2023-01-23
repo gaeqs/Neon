@@ -201,9 +201,10 @@ public:
 
     ~ClusteredLinkedCollection() {
 
-        for (size_t i = 0; i < Size; i += _objectSize) {
+        for (size_t i = 0; i < Size; ++i) {
             if (_occupied[i]) {
-                std::destroy_at(_data + i);
+                T* element = reinterpret_cast<T*>(_data + i * _objectSize);
+                std::destroy_at(element);
             }
         }
 

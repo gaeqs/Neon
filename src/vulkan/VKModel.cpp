@@ -54,19 +54,16 @@ bool VKModel::freeInstance(uint32_t id) {
     auto* last = _positions.back();
 
     if (_instancingStructSize != 0) {
-        vulkan_util::copyBuffer(
-                _vkApplication,
-                _instancingBuffer.getRaw(),
-                _instancingBuffer.getRaw(),
-                *last * _instancingStructSize,
-                id * _instancingStructSize,
-                _instancingStructSize
-        );
+        memcpy(_data.data() + _instancingStructSize * id,
+               _data.data() + _instancingStructSize * *last,
+               _instancingStructSize);
     }
 
     _positions[id] = last;
     _positions.pop_back();
     *last = id;
+
+    _dataChangeRange += Range<uint32_t>(id, id + 1);
 
     delete toRemove;
 

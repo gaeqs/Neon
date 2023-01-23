@@ -180,5 +180,8 @@ int main() {
                   << loopResult.getError()
                   << std::endl;
     }
+
+    application.setRoom(nullptr)
+
     return EXIT_SUCCESS;
 }

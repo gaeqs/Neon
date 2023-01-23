@@ -8,6 +8,7 @@
 
 #include <vulkan/util/VKUtil.h>
 #include <vulkan/VKApplication.h>
+#include <iostream>
 
 std::optional<std::shared_ptr<BufferMap<char>>> SimpleBuffer::rawMap() {
     return std::make_shared<SimpleBufferMap<char>>(

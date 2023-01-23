@@ -133,6 +133,8 @@ public:
 
     void endDraw();
 
+    void finishLoop();
+
     void internalForceSizeValues(int32_t width, int32_t height);
 
     void internalKeyEvent(int key, int scancode, int action, int mods);
