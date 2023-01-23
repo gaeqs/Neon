@@ -6,6 +6,7 @@
 #define NEON_RENDERPASSSTRATEGY_H
 
 #include <functional>
+#include <memory>
 
 class Room;
 

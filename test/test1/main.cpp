@@ -107,7 +107,7 @@ void loadSansModels(Application* application, Room* room,
     }
     auto sansModel = sansResult.model;
 
-    constexpr int AMOUNT = 1024 * 16;
+    constexpr int AMOUNT = 1024 * 1;
     int q = static_cast<int>(std::sqrt(AMOUNT));
     for (int i = 0; i < AMOUNT; i++) {
         auto sans = room->newGameObject();

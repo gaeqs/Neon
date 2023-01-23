@@ -33,7 +33,7 @@ class VKApplication {
 
     const std::vector<const char*> DEVICE_EXTENSIONS = {
             VK_KHR_SWAPCHAIN_EXTENSION_NAME,
-            VK_KHR_SEPARATE_DEPTH_STENCIL_LAYOUTS_EXTENSION_NAME
+            //VK_KHR_SEPARATE_DEPTH_STENCIL_LAYOUTS_EXTENSION_NAME
     };
 
     GLFWwindow* _window;

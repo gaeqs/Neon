@@ -9,6 +9,8 @@
 #include <optional>
 #include <deque>
 #include <unordered_map>
+#include <memory>
+#include <string>
 
 class ProfileStack {
 

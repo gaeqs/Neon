@@ -4,6 +4,8 @@
 
 #include "DebugOverlayComponent.h"
 
+#include <sstream>
+
 #include <imgui.h>
 
 ImPlotPoint DebugOverlayComponent::fetchProcessTime(int id, void* data) {
