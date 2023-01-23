@@ -181,7 +181,7 @@ int main() {
                   << std::endl;
     }
 
-    application.setRoom(nullptr)
+    application.setRoom(nullptr);
 
     return EXIT_SUCCESS;
 }
