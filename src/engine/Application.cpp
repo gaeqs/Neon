@@ -75,6 +75,7 @@ Result<uint32_t, std::string> Application::startGameLoop() {
     float lastFrameProcessTime = 0.0f;
     try {
         while (!glfwWindowShouldClose(_window)) {
+            DEBUG_PROFILE(_profiler, tick);
             auto now = std::chrono::high_resolution_clock::now();
             auto duration = now - lastTick;
             lastTick = now;
@@ -89,7 +90,13 @@ Result<uint32_t, std::string> Application::startGameLoop() {
 
             //std::cout << (1 / seconds) << std::endl;
 
-            if (_implementation.preUpdate()) {
+            bool preUpdate;
+            {
+                DEBUG_PROFILE_ID(_profiler, preUpdate, "preUpdate (GPU Wait)");
+                preUpdate = _implementation.preUpdate();
+            }
+
+            if (preUpdate) {
                 glfwPollEvents();
 
                 if (_room != nullptr) {
@@ -97,8 +104,10 @@ Result<uint32_t, std::string> Application::startGameLoop() {
                     _room->preDraw();
                     _room->draw();
                 }
-
-                _implementation.endDraw();
+                {
+                    DEBUG_PROFILE(_profiler, endDraw);
+                    _implementation.endDraw();
+                }
             }
 
             now = std::chrono::high_resolution_clock::now();
@@ -122,6 +131,14 @@ const Application::Implementation& Application::getImplementation() const {
 
 Application::Implementation& Application::getImplementation() {
     return _implementation;
+}
+
+const Profiler& Application::getProfiler() const {
+    return _profiler;
+}
+
+Profiler& Application::getProfiler() {
+    return _profiler;
 }
 
 int32_t Application::getWidth() const {

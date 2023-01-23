@@ -114,6 +114,17 @@ public:
     virtual void onUpdate(float deltaTime);
 
     /**
+     * Virtual method invoked every game tick.
+     * This method is invoked after all "onUpdate" methods
+     * from all components have been called.
+     *
+     * Drawing parameters shouldn't be inv
+     *
+     * @param deltaTime the time between the last and the current tick, in seconds.
+     */
+    virtual void onLateUpdate(float deltaTime);
+
+    /**
      * Virtual method invoked when a key is pressed.
      * @param event the event.
      */

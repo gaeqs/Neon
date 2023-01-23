@@ -25,7 +25,6 @@ void DebugOverlayComponent::onUpdate(float deltaTime) {
 
     constexpr ImGuiWindowFlags WINDOW_FLAGS =
             ImGuiWindowFlags_NoResize |
-            ImGuiWindowFlags_NoScrollbar |
             ImGuiWindowFlags_NoSavedSettings |
             ImGuiWindowFlags_NoFocusOnAppearing |
             ImGuiWindowFlags_NoNav |
@@ -46,6 +45,9 @@ void DebugOverlayComponent::onUpdate(float deltaTime) {
 
     ImGui::SetNextWindowPos(windowPos, ImGuiCond_Always, windowPosPivot);
     ImGui::SetNextWindowBgAlpha(0.85f);
+    ImGui::SetNextWindowSizeConstraints(
+            ImVec2(-1, 0),
+            ImVec2(-1, viewport->WorkSize.y * 0.5f));
 
     if (ImGui::Begin("Debug information", nullptr, WINDOW_FLAGS)) {
         ImGui::Text("Press \"L\" to enter/exit camera movement mode.");
@@ -58,6 +60,10 @@ void DebugOverlayComponent::onUpdate(float deltaTime) {
         ImGui::Separator();
         if (ImGui::TreeNode("Performance")) {
             drawPerformance();
+            ImGui::TreePop();
+        }
+        if (ImGui::TreeNode("Profiling")) {
+            drawProfiling();
             ImGui::TreePop();
         }
 
@@ -102,5 +108,38 @@ void DebugOverlayComponent::drawPerformance() {
                 2
         );
         ImPlot::EndPlot();
+    }
+}
+
+void DebugOverlayComponent::drawProfiling() {
+    auto& profiler = getRoom()->getApplication()->getProfiler();
+    auto lock = profiler.lockProfiles();
+
+    for (const auto& [id, stack]: profiler.getProfiles()) {
+        std::stringstream ss;
+        ss << id;
+        std::string idString = ss.str();
+
+        if (ImGui::TreeNode(idString.c_str(), "Thread %s", idString.c_str())) {
+            for (const auto& [name, s]: stack->getChildren()) {
+                drawStack(idString, s.get());
+            }
+            ImGui::TreePop();
+        }
+    }
+}
+
+void DebugOverlayComponent::drawStack(const std::string& parentId,
+                                      ProfileStack* stack) {
+    std::string id = parentId + "_" + stack->getName();
+    auto average = stack->getAverageDuration();
+    auto ms = static_cast<double>(average.count()) * 0.000001;
+
+    if (ImGui::TreeNode(id.c_str(), "%s (%.3f ms)",
+                        stack->getName().c_str(), ms)) {
+        for (const auto& [name, s]: stack->getChildren()) {
+            drawStack(id, s.get());
+        }
+        ImGui::TreePop();
     }
 }

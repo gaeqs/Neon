@@ -20,15 +20,18 @@ void ComponentCollection::destroyComponent(
     if (it == _components.end()) return;
 
     auto collection = std::reinterpret_pointer_cast<
-            ClusteredLinkedCollection<Component>>(it->second);
+            ClusteredLinkedCollection<Component>>(it->second.second);
     collection->remove(component.raw());
 }
 
-void ComponentCollection::invokeKeyEvent(const KeyboardEvent& event) {
+void ComponentCollection::invokeKeyEvent(Profiler& profiler,
+                                         const KeyboardEvent& event) {
     flushNotStartedComponents();
-    for (const auto& item: _components) {
+    for (const auto& [type, data]: _components) {
+        if (!data.first.onKey) continue;
+        DEBUG_PROFILE_ID(profiler, type, type.name());
         auto ptr = std::static_pointer_cast
-                <AbstractClusteredLinkedCollection>(item.second);
+                <AbstractClusteredLinkedCollection>(data.second);
         ptr->forEachRaw([&event](void* ptr) {
             auto* component = reinterpret_cast<Component*>(ptr);
             if (component->isEnabled()) {
@@ -38,11 +41,14 @@ void ComponentCollection::invokeKeyEvent(const KeyboardEvent& event) {
     }
 }
 
-void ComponentCollection::invokeCursorMoveEvent(const CursorMoveEvent& event) {
+void ComponentCollection::invokeCursorMoveEvent(Profiler& profiler,
+                                                const CursorMoveEvent& event) {
     flushNotStartedComponents();
-    for (const auto& item: _components) {
+    for (const auto& [type, data]: _components) {
+        if (!data.first.onCursorMove) continue;
+        DEBUG_PROFILE_ID(profiler, type, type.name());
         auto ptr = std::static_pointer_cast
-                <AbstractClusteredLinkedCollection>(item.second);
+                <AbstractClusteredLinkedCollection>(data.second);
         ptr->forEachRaw([&event](void* ptr) {
             auto* component = reinterpret_cast<Component*>(ptr);
             if (component->isEnabled()) {
@@ -52,15 +58,35 @@ void ComponentCollection::invokeCursorMoveEvent(const CursorMoveEvent& event) {
     }
 }
 
-void ComponentCollection::updateComponents(float deltaTime) {
+void ComponentCollection::updateComponents(
+        Profiler& profiler, float deltaTime) {
     flushNotStartedComponents();
-    for (const auto& item: _components) {
+    for (const auto& [type, data]: _components) {
+        if (!data.first.onUpdate) continue;
+        DEBUG_PROFILE_ID(profiler, type, type.name());
         auto ptr = std::static_pointer_cast
-                <AbstractClusteredLinkedCollection>(item.second);
+                <AbstractClusteredLinkedCollection>(data.second);
         ptr->forEachRaw([deltaTime](void* ptr) {
             auto* component = reinterpret_cast<Component*>(ptr);
             if (component->isEnabled()) {
                 component->onUpdate(deltaTime);
+            }
+        });
+    }
+}
+
+void ComponentCollection::lateUpdateComponents(
+        Profiler& profiler, float deltaTime) {
+    flushNotStartedComponents();
+    for (const auto& [type, data]: _components) {
+        if (!data.first.onLateUpdate) continue;
+        DEBUG_PROFILE_ID(profiler, type, type.name());
+        auto ptr = std::static_pointer_cast
+                <AbstractClusteredLinkedCollection>(data.second);
+        ptr->forEachRaw([deltaTime](void* ptr) {
+            auto* component = reinterpret_cast<Component*>(ptr);
+            if (component->isEnabled()) {
+                component->onLateUpdate(deltaTime);
             }
         });
     }
@@ -78,4 +104,8 @@ void ComponentCollection::flushNotStartedComponents() {
             ptr->onStart();
         }
     }
+}
+
+void ComponentCollection::test(std::type_index fun) {
+    std::cout << fun.name() << std::endl;
 }

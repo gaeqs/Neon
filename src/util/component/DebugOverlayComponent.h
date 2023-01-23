@@ -18,6 +18,10 @@ class DebugOverlayComponent : public Component {
 
     void drawPerformance();
 
+    void drawProfiling();
+
+    void drawStack(const std::string& parentId, ProfileStack* stack);
+
 public:
 
     explicit DebugOverlayComponent(uint32_t maxProcessTimes);

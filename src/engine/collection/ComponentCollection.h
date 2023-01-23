@@ -11,7 +11,9 @@
 #include <queue>
 
 #include <engine/IdentifiableWrapper.h>
+#include <engine/ComponentImplementedEvents.h>
 #include <util/ClusteredLinkedCollection.h>
+#include <util/profile/Profiler.h>
 
 class Room;
 
@@ -28,7 +30,8 @@ class CursorMoveEvent;
  */
 class ComponentCollection {
 
-    std::unordered_map<std::type_index, std::shared_ptr<void>> _components;
+    std::unordered_map<std::type_index,
+            std::pair<ComponentImplementedEvents, std::shared_ptr<void>>> _components;
     std::queue<IdentifiableWrapper<Component>> _notStartedComponents;
 
     static void callOnConstruction(void* rawComponent);
@@ -60,24 +63,36 @@ public:
         auto it = _components.find(typeid(T));
 
         if (it == _components.end()) {
+            auto events = ComponentImplementedEvents::fromGeneric<T>();
             auto pointer = std::make_shared<ClusteredLinkedCollection<T>>();
             _components.insert(std::make_pair(
                     std::type_index(typeid(T)),
-                    std::static_pointer_cast<void>(pointer)
+                    std::make_pair(
+                            events,
+                            std::static_pointer_cast<void>(pointer)
+                    )
             ));
 
             T* component = pointer->emplace(values...);
-            _notStartedComponents.push(static_cast<Component*>(component));
-            callOnConstruction(component);
+            if (events.onStart) {
+                _notStartedComponents.push(static_cast<Component*>(component));
+            }
+            if (events.onConstruction) {
+                callOnConstruction(component);
+            }
             return component;
         }
 
         auto components = std::static_pointer_cast
-                <ClusteredLinkedCollection<T>>(it->second);
+                <ClusteredLinkedCollection<T>>(it->second.second);
 
         T* component = components->emplace(values...);
-        _notStartedComponents.push(static_cast<Component*>(component));
-        callOnConstruction(component);
+        if (it->second.first.onStart) {
+            _notStartedComponents.push(static_cast<Component*>(component));
+        }
+        if (it->second.first.onConstruction) {
+            callOnConstruction(component);
+        }
         return component;
     }
 
@@ -114,7 +129,7 @@ public:
      * <p>
      * Calls onKey() on all components.
      */
-    void invokeKeyEvent(const KeyboardEvent& event);
+    void invokeKeyEvent(Profiler& profiler, const KeyboardEvent& event);
 
     /**
      * THIS METHOD SHOULD ONLY BE USED BY ROOMS!
@@ -122,16 +137,29 @@ public:
      * <p>
      * Calls onCursorMove() on all components.
      */
-    void invokeCursorMoveEvent(const CursorMoveEvent& event);
+    void invokeCursorMoveEvent(Profiler& profiler, const CursorMoveEvent& event);
 
     /**
      * THIS METHOD SHOULD ONLY BE USED BY ROOMS!
      * USERS MUSTN'T USE THIS METHOD.
      * <p>
      * Calls onUpdate() on all components.
+     * @param profiler the profiler.
      * @param deltaTime the delay between this frame and the last one, in seconds.
      */
-    void updateComponents(float deltaTime);
+    void updateComponents(Profiler& profiler, float deltaTime);
+
+    /**
+     * THIS METHOD SHOULD ONLY BE USED BY ROOMS!
+     * USERS MUSTN'T USE THIS METHOD.
+     * <p>
+     * Calls onLateUpdate() on all components.
+     * @param profiler the profiler.
+     * @param deltaTime the delay between this frame and the last one, in seconds.
+     */
+    void lateUpdateComponents(Profiler& profiler, float deltaTime);
+
+    void test(std::type_index fun);
 };
 
 

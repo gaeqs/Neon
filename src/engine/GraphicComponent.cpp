@@ -55,7 +55,7 @@ void GraphicComponent::setModel(const IdentifiableWrapper<Model>& model) {
 
 }
 
-void GraphicComponent::onUpdate(float deltaTime) {
+void GraphicComponent::onLateUpdate(float deltaTime) {
     if (!_modelTargetId.has_value()) return;
     if (_model->getInstancingStructType() != typeid(DefaultInstancingData))
         return;

@@ -8,6 +8,7 @@
 #include <engine/Application.h>
 #include <engine/Camera.h>
 #include <engine/Component.h>
+#include <engine/ComponentImplementedEvents.h>
 #include <engine/Frustum.h>
 #include <engine/GameObject.h>
 #include <engine/GraphicComponent.h>

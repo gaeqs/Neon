@@ -36,7 +36,7 @@ public:
         }
     }
 
-    void onUpdate(float deltaTime) override;
+    void onLateUpdate(float deltaTime) override;
 };
 
 

@@ -14,6 +14,7 @@
 
 #include <engine/FrameInformation.h>
 #include <util/Result.h>
+#include <util/profile/Profiler.h>
 
 
 #ifdef USE_VULKAN
@@ -48,6 +49,7 @@ protected:
     FrameInformation _currentFrameInformation;
 
     Implementation _implementation;
+    Profiler _profiler;
 
 public:
 
@@ -62,6 +64,10 @@ public:
     [[nodiscard]] const Implementation& getImplementation() const;
 
     [[nodiscard]] Implementation& getImplementation();
+
+    [[nodiscard]]  const Profiler& getProfiler() const;
+
+    [[nodiscard]] Profiler& getProfiler();
 
     [[nodiscard]] int32_t getWidth() const;
 

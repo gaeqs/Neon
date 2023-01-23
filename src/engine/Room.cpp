@@ -11,7 +11,7 @@
 #include <engine/GraphicComponent.h>
 
 constexpr float DEFAULT_FRUSTUM_NEAR = 0.1f;
-constexpr float DEFAULT_FRUSTUM_FAR = 100.0f;
+constexpr float DEFAULT_FRUSTUM_FAR = 500.0f;
 constexpr float DEFAULT_FRUSTUM_FOV = glm::radians(100.0f); // RADIANS
 
 Room::Room(Application* application,
@@ -103,6 +103,7 @@ void Room::destroyGameObject(IdentifiableWrapper<GameObject> gameObject) {
 }
 
 void Room::onResize() {
+    DEBUG_PROFILE(getApplication()->getProfiler(), onResize);
     if (_application->getWidth() > 0 && _application->getHeight() > 0) {
         _camera.setFrustum(_camera.getFrustum().withAspectRatio(
                 _application->getAspectRatio()));
@@ -110,18 +111,29 @@ void Room::onResize() {
 }
 
 void Room::onKey(const KeyboardEvent& event) {
-    _components.invokeKeyEvent(event);
+    DEBUG_PROFILE(getApplication()->getProfiler(), onKey);
+    _components.invokeKeyEvent(getApplication()->getProfiler(), event);
 }
 
 void Room::onCursorMove(const CursorMoveEvent& event) {
-    _components.invokeCursorMoveEvent(event);
+    DEBUG_PROFILE(getApplication()->getProfiler(), onCursorMove);
+    _components.invokeCursorMoveEvent(getApplication()->getProfiler(), event);
 }
 
 void Room::update(float deltaTime) {
-    _components.updateComponents(deltaTime);
+    auto& p = getApplication()->getProfiler();
+    {
+        DEBUG_PROFILE(getApplication()->getProfiler(), update);
+        _components.updateComponents(p, deltaTime);
+    }
+    {
+        DEBUG_PROFILE(getApplication()->getProfiler(), lateUpdate);
+        _components.lateUpdateComponents(p, deltaTime);
+    }
 }
 
 void Room::preDraw() {
+    DEBUG_PROFILE(getApplication()->getProfiler(), preDraw);
     _models.forEach([](Model* m) {
         m->flush();
     });
@@ -134,6 +146,7 @@ void Room::preDraw() {
 }
 
 void Room::draw() {
+    DEBUG_PROFILE(getApplication()->getProfiler(), draw);
     _render.render(this);
 }
 

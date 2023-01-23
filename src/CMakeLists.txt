@@ -67,7 +67,15 @@ set(
         util/component/DebugOverlayComponent.cpp
         util/component/DebugOverlayComponent.h
         util/DeferredUtils.cpp
-        util/DeferredUtils.h)
+        util/DeferredUtils.h
+        util/profile/Profiler.cpp
+        util/profile/Profiler.h
+        util/profile/ProfileStack.cpp
+        util/profile/ProfileStack.h
+        util/profile/ProfileStackRecorder.cpp
+        util/profile/ProfileStackRecorder.h
+        util/GLMUtils.cpp
+        util/GLMUtils.h engine/ComponentImplementedEvents.cpp engine/ComponentImplementedEvents.h)
 
 
 set( VULKAN_SOURCES

@@ -7,6 +7,7 @@
 #include <glm/gtx/quaternion.hpp>
 
 #include <engine/GameObject.h>
+#include <util/GLMUtils.h>
 
 uint64_t TRANSFORM_ID_GENERATOR = 1;
 
@@ -79,9 +80,7 @@ const glm::quat& Transform::rotate(const glm::vec3& direction, float angle) {
 const glm::mat4& Transform::getModel() {
     if (_dirty) {
         _dirty = false;
-        _localModel =
-                glm::toMat4(_rotation) * glm::scale(glm::mat4(1.0f), _scale);
-        _localModel = glm::translate(glm::mat4(1.0f), _position) * _localModel;
+        glm::trs(_localModel, _position, _rotation, _scale);
 
         // Apply parent transformation
         if (_parent != nullptr) {
