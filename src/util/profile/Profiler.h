@@ -16,7 +16,9 @@
 
 #ifdef NDEBUG
 #define DEBUG_PROFILE(profiler,name)
+#define DEBUG_PROFILE_ID(profiler, id, name)
 #define DEBUG_PROFILE_PTR(profiler,name)
+#define DEBUG_PROFILE_ID_PTR(profiler,name)
 #else
 #define DEBUG_PROFILE(profiler, name) auto name##ProfileStack = (profiler).push(#name)
 #define DEBUG_PROFILE_ID(profiler, id, name) auto id##ProfileStack = (profiler).push(name)
