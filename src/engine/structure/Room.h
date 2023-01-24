@@ -6,7 +6,6 @@
 #define RVTRACKING_ROOM_H
 
 #include <engine/geometry/Camera.h>
-#include "GameObject.h"
 
 #include <engine/collection/ComponentCollection.h>
 #include <engine/collection/IdentifiableCollection.h>
@@ -23,6 +22,8 @@
 class Application;
 
 class GameObject;
+
+class Component;
 
 class KeyboardEvent;
 
