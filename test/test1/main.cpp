@@ -28,11 +28,27 @@ std::shared_ptr<FrameBuffer> initRender(Room* room) {
     auto fpFrameBuffer = std::make_shared<SimpleFrameBuffer>(
             room, frameBufferFormats, true);
 
-    auto scFrameBuffer = std::make_shared<SwapChainFrameBuffer>(
-            room, false);
 
     room->getRender().addRenderPass(
             {fpFrameBuffer, RenderPassStrategy::defaultStrategy});
+
+
+    auto extraTextures = fpFrameBuffer->getTextures();
+    extraTextures = std::vector<IdentifiableWrapper<Texture>>(
+            extraTextures.begin() + 1,
+            extraTextures.end());
+    auto outputColor = deferred_utils::createLightSystem(
+            room,
+            fpFrameBuffer->getTextures().front(),
+            extraTextures,
+            TextureFormat::R8G8B8A8,
+            nullptr,
+            nullptr,
+            nullptr
+    );
+
+    auto scFrameBuffer = std::make_shared<SwapChainFrameBuffer>(
+            room, false);
 
     room->getRender().addRenderPass(
             {scFrameBuffer, RenderPassStrategy::defaultStrategy});
@@ -50,10 +66,12 @@ std::shared_ptr<FrameBuffer> initRender(Room* room) {
         throw std::runtime_error(result.value());
     }
 
+    auto textures = fpFrameBuffer->getTextures();
+    textures[0] = outputColor;
 
     deferred_utils::createScreenModel(
             room,
-            fpFrameBuffer->getTextures(),
+            textures,
             scFrameBuffer,
             shader
     );

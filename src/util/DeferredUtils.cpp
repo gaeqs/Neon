@@ -8,6 +8,8 @@
 
 #include <engine/structure/Room.h>
 #include <engine/render/Texture.h>
+#include <engine/render/SimpleFrameBuffer.h>
+#include <engine/light/DirectionalLight.h>
 
 namespace deferred_utils {
     struct InternalDeferredVertex {
@@ -48,6 +50,7 @@ namespace deferred_utils {
 
         std::vector<uint32_t> indices = {0, 1, 2, 0, 2, 3};
 
+        // Add an image binding for each given texture.
         std::vector<ShaderUniformBinding> materialBindings;
         materialBindings.resize(
                 inputTextures.size(),
@@ -85,5 +88,73 @@ namespace deferred_utils {
         }
 
         return model;
+    }
+
+    IdentifiableWrapper<Texture> createLightSystem(
+            Room* room,
+            IdentifiableWrapper<Texture> colorTexture,
+            const std::vector<IdentifiableWrapper<Texture>>& extraTextures,
+            TextureFormat outputFormat,
+            IdentifiableWrapper<ShaderProgram> directionalShader,
+            IdentifiableWrapper<ShaderProgram> pointShader,
+            IdentifiableWrapper<ShaderProgram> flashShader) {
+        std::vector<TextureFormat> outputFormatVector = {outputFormat};
+
+        std::vector<IdentifiableWrapper<Texture>> textures;
+        textures.resize(extraTextures.size() + 1);
+        textures[0] = colorTexture;
+        for (int i = 0; i < extraTextures.size(); ++i) {
+            textures[i + 1] = extraTextures[i];
+        }
+
+        if (directionalShader != nullptr) {
+            auto frameBuffer = std::make_shared<SimpleFrameBuffer>(
+                    room, outputFormatVector, false);
+
+            auto model = createScreenModel(
+                    room,
+                    textures,
+                    frameBuffer,
+                    directionalShader
+            );
+            model->defineInstanceStruct<DirectionalLight::Data>();
+            room->getRender().addRenderPass(
+                    {frameBuffer, RenderPassStrategy::defaultStrategy});
+            textures[0] = frameBuffer->getTextures().front();
+        }
+
+        if (pointShader != nullptr) {
+            auto frameBuffer = std::make_shared<SimpleFrameBuffer>(
+                    room, outputFormatVector, false);
+
+            auto model = createScreenModel(
+                    room,
+                    textures,
+                    frameBuffer,
+                    directionalShader
+            );
+            //model->defineInstanceStruct<DirectionalLight::Data>();
+            room->getRender().addRenderPass(
+                    {frameBuffer, RenderPassStrategy::defaultStrategy});
+            textures[0] = frameBuffer->getTextures().front();
+        }
+
+        if (flashShader != nullptr) {
+            auto frameBuffer = std::make_shared<SimpleFrameBuffer>(
+                    room, outputFormatVector, false);
+
+            auto model = createScreenModel(
+                    room,
+                    textures,
+                    frameBuffer,
+                    directionalShader
+            );
+            //model->defineInstanceStruct<DirectionalLight::Data>();
+            room->getRender().addRenderPass(
+                    {frameBuffer, RenderPassStrategy::defaultStrategy});
+            textures[0] = frameBuffer->getTextures().front();
+        }
+
+        return textures[0];
     }
 }

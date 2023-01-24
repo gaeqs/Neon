@@ -1,5 +1,4 @@
-set(
-        SOURCES
+set(SOURCES
         engine/Application.cpp
         engine/Application.h
         util/Result.h
@@ -75,10 +74,14 @@ set(
         util/profile/ProfileStackRecorder.cpp
         util/profile/ProfileStackRecorder.h
         util/GLMUtils.cpp
-        util/GLMUtils.h engine/structure/ComponentImplementedEvents.cpp engine/structure/ComponentImplementedEvents.h)
+        util/GLMUtils.h
+        engine/structure/ComponentImplementedEvents.cpp
+        engine/structure/ComponentImplementedEvents.h
+        engine/light/DirectionalLight.cpp
+        engine/light/DirectionalLight.h)
 
 
-set( VULKAN_SOURCES
+set(VULKAN_SOURCES
         vulkan/VKApplication.cpp
         vulkan/VKApplication.h
         vulkan/VKSwapChainSupportDetails.h
