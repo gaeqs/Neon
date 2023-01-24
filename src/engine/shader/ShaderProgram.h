@@ -10,7 +10,7 @@
 
 #include <cmrc/cmrc.hpp>
 
-#include <engine/Identifiable.h>
+#include <engine/structure/Identifiable.h>
 #include <engine/shader/ShaderType.h>
 
 #ifdef USE_VULKAN

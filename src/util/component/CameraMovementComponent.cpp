@@ -4,10 +4,10 @@
 
 #include "CameraMovementComponent.h"
 
-#include "engine/Room.h"
-#include "engine/Camera.h"
-#include "engine/KeyboardEvent.h"
-#include "engine/CursorEvent.h"
+#include <engine/structure/Room.h>
+#include <engine/geometry/Camera.h>
+#include <engine/io/KeyboardEvent.h>
+#include <engine/io/CursorEvent.h>
 
 #include <glm/glm.hpp>
 

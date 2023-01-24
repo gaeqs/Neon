@@ -8,7 +8,7 @@
 #include <type_traits>
 #include <vector>
 
-#include "engine/shader/Material.h"
+#include <engine/shader/Material.h>
 #include <vulkan/vulkan.h>
 #include <engine/collection/IdentifiableCollection.h>
 #include <engine/shader/ShaderUniformBuffer.h>

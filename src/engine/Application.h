@@ -12,7 +12,7 @@
 
 #include <glm/glm.hpp>
 
-#include <engine/FrameInformation.h>
+#include <engine/render/FrameInformation.h>
 #include <util/Result.h>
 #include <util/profile/Profiler.h>
 

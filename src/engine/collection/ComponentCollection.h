@@ -10,8 +10,8 @@
 #include <typeindex>
 #include <queue>
 
-#include <engine/IdentifiableWrapper.h>
-#include <engine/ComponentImplementedEvents.h>
+#include <engine/structure/IdentifiableWrapper.h>
+#include <engine/structure/ComponentImplementedEvents.h>
 #include <util/ClusteredLinkedCollection.h>
 #include <util/profile/Profiler.h>
 

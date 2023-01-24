@@ -6,8 +6,8 @@
 
 #include <glm/gtx/quaternion.hpp>
 
-#include <engine/GameObject.h>
-#include <util/GLMUtils.h>
+#include <engine/structure/GameObject.h>
+#include "util/GLMUtils.h"
 
 uint64_t TRANSFORM_ID_GENERATOR = 1;
 

@@ -11,8 +11,8 @@
 
 #include <vulkan/vulkan.h>
 
-#include <engine/IdentifiableWrapper.h>
-#include <engine/Texture.h>
+#include <engine/structure/IdentifiableWrapper.h>
+#include <engine/render/Texture.h>
 #include <engine/model/InputDescription.h>
 
 class Application;

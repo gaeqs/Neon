@@ -7,9 +7,9 @@
 
 #include <optional>
 
-#include <engine/IdentifiableWrapper.h>
-#include "engine/shader/Material.h"
-#include <engine/Component.h>
+#include <engine/structure/IdentifiableWrapper.h>
+#include <engine/shader/Material.h>
+#include <engine/structure/Component.h>
 #include <engine/model/Model.h>
 
 class GraphicComponent : public Component {

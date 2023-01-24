@@ -8,7 +8,7 @@
 #include <cmrc/cmrc.hpp>
 
 #include <engine/collection/IdentifiableCollection.h>
-#include <engine/Texture.h>
+#include <engine/render/Texture.h>
 
 class Room;
 

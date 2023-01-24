@@ -12,9 +12,9 @@
 
 #include <glm/glm.hpp>
 
-#include <engine/Identifiable.h>
-#include <engine/IdentifiableWrapper.h>
-#include <engine/Texture.h>
+#include <engine/structure/Identifiable.h>
+#include <engine/structure/IdentifiableWrapper.h>
+#include <engine/render/Texture.h>
 #include <engine/shader/ShaderUniformBuffer.h>
 #include <engine/model/InputDescription.h>
 #include <engine/render/FrameBuffer.h>

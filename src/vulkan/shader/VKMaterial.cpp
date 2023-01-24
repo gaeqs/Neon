@@ -7,7 +7,7 @@
 #include <algorithm>
 #include <cstring>
 
-#include <engine/Room.h>
+#include <engine/structure/Room.h>
 #include <engine/shader/Material.h>
 
 #include <vulkan/render/VKRenderPass.h>

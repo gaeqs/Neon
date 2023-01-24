@@ -5,7 +5,7 @@
 #include "VKTexture.h"
 
 #include <engine/Application.h>
-#include <engine/Room.h>
+#include <engine/structure/Room.h>
 
 #include <vulkan/util/VKUtil.h>
 

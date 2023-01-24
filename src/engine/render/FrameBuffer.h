@@ -6,7 +6,7 @@
 #define NEON_FRAMEBUFFER_H
 
 #include <vector>
-#include <engine/IdentifiableWrapper.h>
+#include <engine/structure/IdentifiableWrapper.h>
 
 #ifdef USE_VULKAN
 

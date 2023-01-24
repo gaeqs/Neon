@@ -8,7 +8,7 @@
 
 #include <vulkan/VKApplication.h>
 #include <engine/Application.h>
-#include <engine/Identifiable.h>
+#include <engine/structure/Identifiable.h>
 #include <engine/shader/ShaderUniformBinding.h>
 
 class VKShaderUniformDescriptor {

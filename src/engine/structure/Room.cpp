@@ -6,9 +6,9 @@
 
 #include <glm/glm.hpp>
 
-#include <engine/GameObject.h>
+#include "GameObject.h"
 #include <engine/Application.h>
-#include <engine/GraphicComponent.h>
+#include <engine/render/GraphicComponent.h>
 
 constexpr float DEFAULT_FRUSTUM_NEAR = 0.1f;
 constexpr float DEFAULT_FRUSTUM_FAR = 500.0f;

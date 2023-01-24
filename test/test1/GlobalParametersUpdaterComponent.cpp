@@ -4,8 +4,7 @@
 
 #include "GlobalParametersUpdaterComponent.h"
 
-GlobalParametersUpdaterComponent::
-~GlobalParametersUpdaterComponent() noexcept = default;
+GlobalParametersUpdaterComponent::~GlobalParametersUpdaterComponent() = default;
 
 void GlobalParametersUpdaterComponent::onStart() {
 }

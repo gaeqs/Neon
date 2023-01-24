@@ -7,8 +7,8 @@
 
 #include <vector>
 
-#include <engine/TextureFormat.h>
-#include <engine/IdentifiableWrapper.h>
+#include <engine/render/TextureFormat.h>
+#include <engine/structure/IdentifiableWrapper.h>
 
 #include <vulkan/render/VKFrameBuffer.h>
 #include <vulkan/render/VKRenderPass.h>

@@ -5,7 +5,7 @@
 #include "Component.h"
 
 #include <iostream>
-#include <engine/GameObject.h>
+#include "GameObject.h"
 
 uint64_t COMPONENT_ID_GENERATOR = 1;
 

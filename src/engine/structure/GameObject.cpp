@@ -4,8 +4,8 @@
 
 #include "GameObject.h"
 
-#include <engine/Room.h>
-#include <engine/Component.h>
+#include "Room.h"
+#include "Component.h"
 
 uint64_t GAME_OBJECT_ID_GENERATOR = 1;
 

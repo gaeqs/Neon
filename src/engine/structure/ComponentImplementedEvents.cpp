@@ -4,7 +4,7 @@
 
 #include "ComponentImplementedEvents.h"
 
-#include <engine/Component.h>
+#include <engine/structure/Component.h>
 
 ComponentImplementedEvents::ComponentImplementedEvents(
         std::type_index onConstructionFunction,

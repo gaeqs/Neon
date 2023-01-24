@@ -4,7 +4,7 @@
 
 #include "Texture.h"
 
-#include <engine/Room.h>
+#include <engine/structure/Room.h>
 
 uint64_t TEXTURE_ID_GENERATOR = 1;
 

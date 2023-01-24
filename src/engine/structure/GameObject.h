@@ -9,9 +9,9 @@
 #include <vector>
 
 #include <engine/collection/ComponentCollection.h>
-#include <engine/IdentifiableWrapper.h>
-#include <engine/Transform.h>
-#include <engine/Identifiable.h>
+#include "IdentifiableWrapper.h"
+#include <engine/geometry/Transform.h>
+#include "Identifiable.h"
 
 class Room;
 
@@ -147,7 +147,6 @@ public:
      * @return a reference pointing to the new component.
      */
     template<class T, class... Args>
-    requires std::is_base_of_v<Component, T>
     IdentifiableWrapper<T> newComponent(Args&& ... values) {
         IdentifiableWrapper<T> component =
                 getRoomComponents().newComponent<T>(values...);

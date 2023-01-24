@@ -4,9 +4,9 @@
 
 #include "Application.h"
 
-#include <engine/Room.h>
-#include <engine/KeyboardEvent.h>
-#include <engine/CursorEvent.h>
+#include <engine/structure/Room.h>
+#include <engine/io/KeyboardEvent.h>
+#include <engine/io/CursorEvent.h>
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
     auto* application = static_cast<Application*>(glfwGetWindowUserPointer(

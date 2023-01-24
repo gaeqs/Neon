@@ -4,9 +4,9 @@
 
 #include "ComponentCollection.h"
 
-#include <engine/Room.h>
-#include <engine/Component.h>
-#include <engine/GraphicComponent.h>
+#include <engine/structure/Room.h>
+#include <engine/structure/Component.h>
+#include <engine/render/GraphicComponent.h>
 
 ComponentCollection::ComponentCollection() :
         _components(),

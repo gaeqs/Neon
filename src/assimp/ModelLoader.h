@@ -19,12 +19,12 @@
 
 #include <engine/collection/IdentifiableCollection.h>
 #include <engine/collection/TextureCollection.h>
-#include <engine/Room.h>
-#include <engine/IdentifiableWrapper.h>
+#include <engine/structure/Room.h>
+#include <engine/structure/IdentifiableWrapper.h>
 #include <engine/model/Model.h>
 #include <engine/model/Mesh.h>
 #include <engine/model/InputDescription.h>
-#include <engine/Texture.h>
+#include <engine/render/Texture.h>
 #include <engine/shader/Material.h>
 #include <engine/shader/ShaderProgram.h>
 #include <engine/shader/ShaderUniformDescriptor.h>

@@ -8,8 +8,8 @@
 #include <type_traits>
 #include <unordered_map>
 
-#include <engine/Identifiable.h>
-#include <engine/IdentifiableWrapper.h>
+#include <engine/structure/Identifiable.h>
+#include <engine/structure/IdentifiableWrapper.h>
 #include <util/ClusteredLinkedCollection.h>
 
 class Room;

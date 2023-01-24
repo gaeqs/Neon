@@ -6,8 +6,8 @@
 
 #include <stdexcept>
 
-#include <engine/Room.h>
-#include <engine/Texture.h>
+#include <engine/structure/Room.h>
+#include <engine/render/Texture.h>
 
 namespace deferred_utils {
     struct InternalDeferredVertex {

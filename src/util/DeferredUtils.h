@@ -8,7 +8,7 @@
 #include <memory>
 #include <vector>
 
-#include <engine/IdentifiableWrapper.h>
+#include <engine/structure/IdentifiableWrapper.h>
 
 class Room;
 

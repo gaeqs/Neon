@@ -8,8 +8,8 @@
 #include <utility>
 #include <stdexcept>
 
-#include <engine/Room.h>
-#include <engine/Texture.h>
+#include <engine/structure/Room.h>
+#include <engine/render/Texture.h>
 #include <vulkan/util/VKUtil.h>
 
 void VKSimpleFrameBuffer::createImages() {

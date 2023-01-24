@@ -4,7 +4,7 @@
 
 #include "Model.h"
 
-#include <engine/Room.h>
+#include <engine/structure/Room.h>
 
 uint64_t MODEL_ID_GENERATOR = 1;
 

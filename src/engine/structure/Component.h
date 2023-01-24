@@ -7,13 +7,12 @@
 
 #include <cstdint>
 
-#include <engine/GameObject.h>
-#include <engine/Identifiable.h>
-#include <engine/IdentifiableWrapper.h>
+#include <engine/structure/GameObject.h>
+#include <engine/structure/Identifiable.h>
+#include <engine/structure/IdentifiableWrapper.h>
 
-class KeyboardEvent;
-
-class CursorMoveEvent;
+#include <engine/io/KeyboardEvent.h>
+#include <engine/io/CursorEvent.h>
 
 /**
  * Represents a component inside a game object.

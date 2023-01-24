@@ -5,8 +5,8 @@
 #ifndef RVTRACKING_ROOM_H
 #define RVTRACKING_ROOM_H
 
-#include <engine/Camera.h>
-#include <engine/GameObject.h>
+#include <engine/geometry/Camera.h>
+#include "GameObject.h"
 
 #include <engine/collection/ComponentCollection.h>
 #include <engine/collection/IdentifiableCollection.h>
@@ -18,7 +18,7 @@
 #include <engine/model/Model.h>
 #include <engine/render/Render.h>
 
-#include <util/ClusteredLinkedCollection.h>
+#include "util/ClusteredLinkedCollection.h"
 
 class Application;
 

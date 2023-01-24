@@ -5,7 +5,7 @@
 #ifndef VRTRACKING_CAMERAMOVEMENTCOMPONENT_H
 #define VRTRACKING_CAMERAMOVEMENTCOMPONENT_H
 
-#include "engine/Component.h"
+#include <engine/structure/Component.h>
 
 class CameraMovementComponent : public Component {
 

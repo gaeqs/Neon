@@ -3,9 +3,6 @@
 #include <filesystem>
 
 #include <engine/Engine.h>
-#include <engine/shader/ShaderProgram.h>
-#include <engine/render/SwapChainFrameBuffer.h>
-#include <engine/render/SimpleFrameBuffer.h>
 #include <util/component/CameraMovementComponent.h>
 #include <util/component/DebugOverlayComponent.h>
 #include <util/DeferredUtils.h>

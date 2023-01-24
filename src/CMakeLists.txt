@@ -3,32 +3,32 @@ set(
         engine/Application.cpp
         engine/Application.h
         util/Result.h
-        engine/Room.cpp
-        engine/Room.h
-        engine/Camera.cpp
-        engine/Camera.h
-        engine/Frustum.cpp
-        engine/Frustum.h
-        engine/GraphicComponent.cpp
-        engine/GraphicComponent.h
+        engine/structure/Room.cpp
+        engine/structure/Room.h
+        engine/geometry/Camera.cpp
+        engine/geometry/Camera.h
+        engine/geometry/Frustum.cpp
+        engine/geometry/Frustum.h
+        engine/render/GraphicComponent.cpp
+        engine/render/GraphicComponent.h
         engine/shader/Material.cpp
         engine/shader/Material.h
-        engine/GameObject.cpp
-        engine/GameObject.h
-        engine/Component.cpp
-        engine/Component.h
+        engine/structure/GameObject.cpp
+        engine/structure/GameObject.h
+        engine/structure/Component.cpp
+        engine/structure/Component.h
         util/ClusteredLinkedCollection.h
         engine/Engine.h
         engine/collection/ComponentCollection.cpp
         engine/collection/ComponentCollection.h
         engine/collection/TextureCollection.cpp
         engine/collection/TextureCollection.h
-        engine/IdentifiableWrapper.h
-        engine/Transform.cpp
-        engine/Transform.h
-        engine/Identifiable.h
-        engine/Texture.cpp
-        engine/Texture.h
+        engine/structure/IdentifiableWrapper.h
+        engine/geometry/Transform.cpp
+        engine/geometry/Transform.h
+        engine/structure/Identifiable.h
+        engine/render/Texture.cpp
+        engine/render/Texture.h
         engine/shader/ShaderProgram.cpp
         engine/shader/ShaderProgram.h
         engine/shader/ShaderType.h
@@ -36,12 +36,12 @@ set(
         engine/model/DefaultInstancingData.h
         util/component/CameraMovementComponent.cpp
         util/component/CameraMovementComponent.h
-        engine/TextureFormat.h
+        engine/render/TextureFormat.h
         assimp/ModelLoader.h
         assimp/AssimpMaterialParameters.h
         assimp/ModelLoader.cpp
-        engine/KeyboardEvent.h
-        engine/CursorEvent.h
+        engine/io/KeyboardEvent.h
+        engine/io/CursorEvent.h
         engine/model/Mesh.cpp
         engine/model/Mesh.h
         engine/model/Model.cpp
@@ -62,7 +62,7 @@ set(
         engine/render/Render.h
         engine/render/RenderPassStrategy.h
         engine/render/RenderPassStrategy.cpp
-        engine/FrameInformation.h
+        engine/render/FrameInformation.h
         util/Range.h
         util/component/DebugOverlayComponent.cpp
         util/component/DebugOverlayComponent.h
@@ -75,7 +75,7 @@ set(
         util/profile/ProfileStackRecorder.cpp
         util/profile/ProfileStackRecorder.h
         util/GLMUtils.cpp
-        util/GLMUtils.h engine/ComponentImplementedEvents.cpp engine/ComponentImplementedEvents.h)
+        util/GLMUtils.h engine/structure/ComponentImplementedEvents.cpp engine/structure/ComponentImplementedEvents.h)
 
 
 set( VULKAN_SOURCES

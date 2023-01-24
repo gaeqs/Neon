@@ -8,7 +8,7 @@
 #include <vector>
 #include <memory>
 #include <vulkan/vulkan.h>
-#include <engine/IdentifiableWrapper.h>
+#include <engine/structure/IdentifiableWrapper.h>
 #include <engine/shader/ShaderUniformBinding.h>
 #include <vulkan/shader/VKShaderUniformDescriptor.h>
 

@@ -9,7 +9,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 
-#include <engine/IdentifiableWrapper.h>
+#include <engine/structure/IdentifiableWrapper.h>
 
 class GameObject;
 

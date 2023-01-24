@@ -6,12 +6,12 @@
 #define RVTRACKING_TEXTURE_H
 
 
-#include <engine/Identifiable.h>
-#include <engine/TextureFormat.h>
+#include <engine/structure/Identifiable.h>
+#include "TextureFormat.h"
 
 #ifdef USE_VULKAN
 
-#include <vulkan/VKTexture.h>
+#include "vulkan/VKTexture.h"
 
 #endif
 

@@ -4,7 +4,7 @@
 
 #include "ShaderProgram.h"
 
-#include <engine/Room.h>
+#include <engine/structure/Room.h>
 
 uint64_t SHADER_PROGRAM_ID_GENERATOR = 1;
 

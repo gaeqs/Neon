@@ -8,7 +8,7 @@
 #include <string>
 #include <typeindex>
 
-#include <engine/Identifiable.h>
+#include <engine/structure/Identifiable.h>
 #include <engine/model/Mesh.h>
 
 #ifdef USE_VULKAN

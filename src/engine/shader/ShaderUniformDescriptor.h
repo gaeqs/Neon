@@ -6,7 +6,7 @@
 #define NEON_SHADERUNIFORMDESCRIPTOR_H
 
 #include <vector>
-#include <engine/Identifiable.h>
+#include <engine/structure/Identifiable.h>
 #include <engine/shader/ShaderUniformBinding.h>
 
 #ifdef USE_VULKAN

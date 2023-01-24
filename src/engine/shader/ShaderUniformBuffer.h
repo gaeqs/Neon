@@ -5,7 +5,7 @@
 #ifndef NEON_SHADERUNIFORMBUFFER_H
 #define NEON_SHADERUNIFORMBUFFER_H
 
-#include <engine/Identifiable.h>
+#include <engine/structure/Identifiable.h>
 
 #ifdef USE_VULKAN
 

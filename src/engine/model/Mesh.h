@@ -8,8 +8,8 @@
 
 #include <vector>
 
-#include <engine/Identifiable.h>
-#include "engine/shader/Material.h"
+#include <engine/structure/Identifiable.h>
+#include <engine/shader/Material.h>
 #include <engine/shader/ShaderUniformBuffer.h>
 #include <engine/collection/IdentifiableCollection.h>
 
