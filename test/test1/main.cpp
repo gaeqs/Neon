@@ -20,8 +20,8 @@ constexpr int32_t HEIGHT = 600;
 CMRC_DECLARE(shaders);
 
 IdentifiableWrapper<ShaderProgram> createShader(Room* room,
-                           const std::string& vert,
-                           const std::string& frag) {
+                                                const std::string& vert,
+                                                const std::string& frag) {
     auto defaultVert = cmrc::shaders::get_filesystem().open(vert);
     auto defaultFrag = cmrc::shaders::get_filesystem().open(frag);
 
@@ -41,6 +41,10 @@ IdentifiableWrapper<ShaderProgram> createShader(Room* room,
 std::shared_ptr<FrameBuffer> initRender(Room* room) {
     auto directionalShader = createShader(room, "directional_light.vert",
                                           "directional_light.frag");
+    auto pointShader = createShader(room, "point_light.vert",
+                                    "point_light.frag");
+    auto flashShader = createShader(room, "flash_light.vert",
+                                    "flash_light.frag");
 
     std::vector<TextureFormat> frameBufferFormats = {
             TextureFormat::R8G8B8A8,
@@ -58,8 +62,8 @@ std::shared_ptr<FrameBuffer> initRender(Room* room) {
             fpFrameBuffer->getTextures(),
             TextureFormat::R8G8B8A8,
             directionalShader,
-            nullptr,
-            nullptr
+            pointShader,
+            flashShader
     );
 
     auto scFrameBuffer = std::make_shared<SwapChainFrameBuffer>(
@@ -93,9 +97,9 @@ void loadSansModels(Application* application, Room* room,
                     const std::shared_ptr<FrameBuffer>& target) {
 
     std::vector<ShaderUniformBinding> sansMaterialBindings = {
-            ShaderUniformBinding{
-                    UniformBindingType::IMAGE, 0
-            }};
+            ShaderUniformBinding{UniformBindingType::IMAGE, 0},
+            ShaderUniformBinding{UniformBindingType::IMAGE, 0}
+    };
 
 
     auto sansMaterialDescriptor = std::make_shared<ShaderUniformDescriptor>(
@@ -121,7 +125,7 @@ void loadSansModels(Application* application, Room* room,
     }
     auto sansModel = sansResult.model;
 
-    constexpr int AMOUNT = 1024 * 4;
+    constexpr int AMOUNT = 1024 * 1;
     int q = static_cast<int>(std::sqrt(AMOUNT));
     for (int i = 0; i < AMOUNT; i++) {
         auto sans = room->newGameObject();
@@ -173,6 +177,24 @@ std::shared_ptr<Room> getTestRoom(Application* application) {
     auto directionalLight2 = room->newGameObject();
     directionalLight2->newComponent<DirectionalLight>();
     directionalLight2->getTransform().lookAt(glm::vec3(1.0f, 0.0f, 0.0f));
+
+    auto pointLightGO = room->newGameObject();
+    auto pointLight = pointLightGO->newComponent<PointLight>();
+    pointLightGO->getTransform().setPosition({5.0f, 7.0f, 5.0f});
+    pointLight->setDiffuseColor({1.0f, 0.0f, 0.0f});
+    pointLight->setConstantAttenuation(0.01f);
+    pointLight->setLinearAttenuation(0.2);
+    pointLight->setQuadraticAttenuation(0.1);
+
+    auto flashLightGO = room->newGameObject();
+    auto flashLight = flashLightGO->newComponent<FlashLight>();
+    flashLightGO->getTransform().setPosition({10.0f, 7.0f, 10.0f});
+    flashLightGO->getTransform().rotate(glm::vec3(1.0f, 0.0f, 0.0f), 1.0f);
+    flashLight->setDiffuseColor({0.0f, 1.0f, 0.0f});
+    flashLight->setConstantAttenuation(0.01f);
+    flashLight->setLinearAttenuation(0.2);
+    flashLight->setQuadraticAttenuation(0.1);
+
 
     loadSansModels(application, room.get(), fpFrameBuffer);
 

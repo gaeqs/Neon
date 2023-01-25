@@ -18,6 +18,9 @@
 #include <engine/io/KeyboardEvent.h>
 
 #include <engine/light/DirectionalLight.h>
+#include <engine/light/FlashLight.h>
+#include <engine/light/LightSystem.h>
+#include <engine/light/PointLight.h>
 
 #include <engine/model/DefaultInstancingData.h>
 #include <engine/model/InputDescription.h>

@@ -55,9 +55,14 @@ class ModelLoader {
                       ? mesh->mColors[0][i] : aiColor4D(0.0, 0.0, 0.0, 0.0);
             auto aT = mesh->mTextureCoords[0][i];
 
+            auto aTan = mesh->mTangents[i];
+            auto aBi = mesh->mBitangents[i];
+
             vertices[i] = Vertex::fromAssimp(
                     glm::vec3(aP.x, aP.y, aP.z),
                     glm::vec3(aN.x, aN.y, aN.z),
+                    glm::vec3(aTan.x, aTan.y, aTan.z),
+                    glm::vec3(aBi.x, aBi.y, aBi.z),
                     glm::vec4(aC.r, aC.g, aC.b, aC.a),
                     glm::vec2(aT.x, aT.y)
             );
@@ -125,7 +130,6 @@ public:
                 aiProcess_CalcTangentSpace |
                 aiProcess_Triangulate |
                 aiProcess_JoinIdenticalVertices |
-                aiProcess_GenNormals |
                 aiProcess_SortByPType |
                 aiProcess_RemoveRedundantMaterials |
                 aiProcess_EmbedTextures |

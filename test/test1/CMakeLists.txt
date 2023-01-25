@@ -25,6 +25,10 @@ cmrc_add_resource_library(
         shader/screen.frag
         shader/directional_light.vert
         shader/directional_light.frag
+        shader/point_light.vert
+        shader/point_light.frag
+        shader/flash_light.vert
+        shader/flash_light.frag
 )
 
 cmrc_add_resource_library(

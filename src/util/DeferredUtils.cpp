@@ -10,6 +10,8 @@
 #include <engine/render/Texture.h>
 #include <engine/render/SimpleFrameBuffer.h>
 #include <engine/light/DirectionalLight.h>
+#include <engine/light/FlashLight.h>
+#include <engine/light/PointLight.h>
 #include <engine/light/LightSystem.h>
 
 namespace deferred_utils {
@@ -29,6 +31,8 @@ namespace deferred_utils {
         static InternalDeferredVertex fromAssimp(
                 const glm::vec3& position,
                 [[maybe_unused]] const glm::vec3& normal,
+                [[maybe_unused]] const glm::vec3& tangent,
+                [[maybe_unused]] const glm::vec3& biTangent,
                 [[maybe_unused]] const glm::vec4& color,
                 [[maybe_unused]] const glm::vec2& texCoords) {
             return {position};
@@ -127,11 +131,11 @@ namespace deferred_utils {
                     room,
                     textures,
                     frameBuffer,
-                    DirectionalLight::Data::getDescription(),
-                    directionalShader,
+                    PointLight::Data::getDescription(),
+                    pointShader,
                     configuration
             );
-            //model->defineInstanceStruct<DirectionalLight::Data>();
+            pointModel->defineInstanceStruct<PointLight::Data>();
         }
 
         if (flashShader != nullptr) {
@@ -139,11 +143,11 @@ namespace deferred_utils {
                     room,
                     textures,
                     frameBuffer,
-                    DirectionalLight::Data::getDescription(),
-                    directionalShader,
+                    FlashLight::Data::getDescription(),
+                    flashShader,
                     configuration
             );
-            //model->defineInstanceStruct<DirectionalLight::Data>();
+            flashModel->defineInstanceStruct<FlashLight::Data>();
         }
 
         room->newGameObject()->newComponent<LightSystem>(

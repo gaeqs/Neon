@@ -106,6 +106,13 @@ void ModelLoader::loadMaterial(
             m->setTexture(DISPLACEMENT_TEXTURE, texture->second);
         }
     }
+    if (material->Get(AI_MATKEY_TEXTURE_NORMALS(0), t) ==
+        aiReturn_SUCCESS) {
+        auto texture = textures.find(internalGetTextureId(t));
+        if (texture != textures.end()) {
+            m->setTexture(NORMAL_TEXTURE, texture->second);
+        }
+    }
 }
 
 IdentifiableWrapper<Texture>

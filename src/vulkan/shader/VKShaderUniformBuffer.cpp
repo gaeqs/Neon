@@ -172,7 +172,7 @@ void VKShaderUniformBuffer::prepareForFrame() {
                 break;
             case UniformBindingType::IMAGE: {
                 auto texture = _textures[index];
-
+                if(texture == nullptr) continue;
                 auto flag = texture->getImplementation().getExternalDirtyFlag();
                 if (updated[frame] == flag) continue;
                 updated[frame] = flag;
