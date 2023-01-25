@@ -32,7 +32,6 @@ namespace deferred_utils {
                 const glm::vec3& position,
                 [[maybe_unused]] const glm::vec3& normal,
                 [[maybe_unused]] const glm::vec3& tangent,
-                [[maybe_unused]] const glm::vec3& biTangent,
                 [[maybe_unused]] const glm::vec4& color,
                 [[maybe_unused]] const glm::vec2& texCoords) {
             return {position};

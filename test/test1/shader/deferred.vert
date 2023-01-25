@@ -23,9 +23,8 @@ void main() {
     // Calculate TBN (Tangent-Bitangent-Normal) matrix
     // From view to tangent space!
 
-    vec3 n = normalize((view * normalMatrix * vec4(normal, 0.0f)).xyz);
-    vec3 t = normalize((view * normalMatrix * vec4(tangent, 0.0f)).xyz);
-    t = normalize(t - n * dot(n, t));
+    vec3 n = (view * normalMatrix * vec4(normal, 0.0f)).xyz;
+    vec3 t = (view * normalMatrix * vec4(tangent, 0.0f)).xyz;
     vec3 b = cross(n, t);
 
     TBN = mat3(t, b, n);

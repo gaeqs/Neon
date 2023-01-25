@@ -24,5 +24,5 @@ void main() {
 
     vec4 depthV = inverseProjection * vec4(0, 0, texture(depthTexture, fragTexCoords).r, 1);
     float depth = (-depthV.b / depthV.w - near) / (far - near);
-    color = albedo;
+    color = vec4(normal, 1.0f);
 }

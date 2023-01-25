@@ -150,3 +150,75 @@ ModelLoader::loadTexture(
             TextureFormat::A8R8G8B8
     );
 }
+
+std::vector<glm::vec3> ModelLoader::calculateTangents(aiMesh* mesh) const {
+    std::vector<glm::vec3> tangents;
+    std::vector<glm::vec3> bitangents;
+    std::vector<uint32_t> count;
+    tangents.resize(mesh->mNumVertices);
+    bitangents.resize(mesh->mNumVertices);
+    count.resize(mesh->mNumVertices);
+
+    for (uint32_t faceIndex = 0; faceIndex < mesh->mNumFaces; ++faceIndex) {
+        auto face = mesh->mFaces[faceIndex];
+        for (uint32_t cvIndex = 0; cvIndex < face.mNumIndices; ++cvIndex) {
+            uint32_t currentVertex = face.mIndices[cvIndex];
+            uint32_t other[2];
+            uint32_t oCount = 0;
+
+            for (uint32_t oIndex = 0; oIndex < face.mNumIndices; ++oIndex) {
+                if (oIndex == cvIndex) continue;
+                other[oCount++] = face.mIndices[oIndex];
+            }
+
+            auto posA = mesh->mVertices[currentVertex];
+            auto posB = mesh->mVertices[other[0]];
+            auto posC = mesh->mVertices[other[1]];
+
+            auto uvA = mesh->mTextureCoords[0][currentVertex];
+            auto uvB = mesh->mTextureCoords[0][other[0]];
+            auto uvC = mesh->mTextureCoords[0][other[1]];
+
+            auto edge1 = posB - posA;
+            auto edge2 = posC - posA;
+            auto deltaUV1 = uvB - uvA;
+            auto deltaUV2 = uvC - uvA;
+
+            float f =
+                    1.0f / (deltaUV1.x * deltaUV2.y - deltaUV2.x * deltaUV1.y);
+            tangents[currentVertex] = glm::vec3{
+                    f * (deltaUV2.y * edge1.x - deltaUV1.y * edge2.x),
+                    f * (deltaUV2.y * edge1.y - deltaUV1.y * edge2.y),
+                    f * (deltaUV2.y * edge1.z - deltaUV1.y * edge2.z)
+            };
+
+            bitangents[currentVertex] = glm::vec3{
+                    f * (deltaUV2.x * edge2.x - deltaUV1.x * edge1.x),
+                    f * (deltaUV2.x * edge2.y - deltaUV1.x * edge1.y),
+                    f * (deltaUV2.x * edge2.z - deltaUV1.x * edge1.z)
+            };
+
+            count[currentVertex]++;
+        }
+    }
+
+    // Calculate average.
+    for (uint32_t i = 0; i < mesh->mNumVertices; ++i) {
+        tangents[i] / static_cast<float>(count[i]);
+    }
+
+    // Orthogonalize
+    for (uint32_t i = 0; i < mesh->mNumVertices; ++i) {
+        auto t = tangents[i];
+        auto b = bitangents[i];
+        auto an = mesh->mNormals[i];
+        auto n = glm::vec3(an.x, an.y, an.z);
+        t = glm::normalize(t - n * glm::dot(n, t));
+        if (glm::dot(glm::cross(n, t), b) < 0.0f) {
+            t *= -1.0f;
+        }
+        tangents[i] = t;
+    }
+
+    return tangents;
+}
