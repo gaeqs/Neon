@@ -19,42 +19,11 @@ constexpr int32_t HEIGHT = 600;
 
 CMRC_DECLARE(shaders);
 
-std::shared_ptr<FrameBuffer> initRender(Room* room) {
-    std::vector<TextureFormat> frameBufferFormats = {
-            TextureFormat::R8G8B8A8,
-            TextureFormat::R16FG16F // NORMAL
-    };
-
-    auto fpFrameBuffer = std::make_shared<SimpleFrameBuffer>(
-            room, frameBufferFormats, true);
-
-
-    room->getRender().addRenderPass(
-            {fpFrameBuffer, RenderPassStrategy::defaultStrategy});
-
-
-    auto extraTextures = fpFrameBuffer->getTextures();
-    extraTextures = std::vector<IdentifiableWrapper<Texture>>(
-            extraTextures.begin() + 1,
-            extraTextures.end());
-    auto outputColor = deferred_utils::createLightSystem(
-            room,
-            fpFrameBuffer->getTextures().front(),
-            extraTextures,
-            TextureFormat::R8G8B8A8,
-            nullptr,
-            nullptr,
-            nullptr
-    );
-
-    auto scFrameBuffer = std::make_shared<SwapChainFrameBuffer>(
-            room, false);
-
-    room->getRender().addRenderPass(
-            {scFrameBuffer, RenderPassStrategy::defaultStrategy});
-
-    auto defaultVert = cmrc::shaders::get_filesystem().open("screen.vert");
-    auto defaultFrag = cmrc::shaders::get_filesystem().open("screen.frag");
+IdentifiableWrapper<ShaderProgram> createShader(Room* room,
+                           const std::string& vert,
+                           const std::string& frag) {
+    auto defaultVert = cmrc::shaders::get_filesystem().open(vert);
+    auto defaultFrag = cmrc::shaders::get_filesystem().open(frag);
 
     auto shader = room->getShaders().create();
     shader->addShader(ShaderType::VERTEX, defaultVert);
@@ -66,15 +35,56 @@ std::shared_ptr<FrameBuffer> initRender(Room* room) {
         throw std::runtime_error(result.value());
     }
 
+    return shader;
+}
+
+std::shared_ptr<FrameBuffer> initRender(Room* room) {
+    auto directionalShader = createShader(room, "directional_light.vert",
+                                          "directional_light.frag");
+
+    std::vector<TextureFormat> frameBufferFormats = {
+            TextureFormat::R8G8B8A8,
+            TextureFormat::R16FG16F // NORMAL
+    };
+
+    auto fpFrameBuffer = std::make_shared<SimpleFrameBuffer>(
+            room, frameBufferFormats, true);
+
+    room->getRender().addRenderPass(
+            {fpFrameBuffer, RenderPassStrategy::defaultStrategy});
+
+    auto outputColor = deferred_utils::createLightSystem(
+            room,
+            fpFrameBuffer->getTextures(),
+            TextureFormat::R8G8B8A8,
+            directionalShader,
+            nullptr,
+            nullptr
+    );
+
+    auto scFrameBuffer = std::make_shared<SwapChainFrameBuffer>(
+            room, false);
+
+    room->getRender().addRenderPass(
+            {scFrameBuffer, RenderPassStrategy::defaultStrategy});
+
+    auto screenShader = createShader(room, "screen.vert", "screen.frag");
     auto textures = fpFrameBuffer->getTextures();
     textures[0] = outputColor;
 
-    deferred_utils::createScreenModel(
+    auto screen = deferred_utils::createScreenModel(
             room,
             textures,
             scFrameBuffer,
-            shader
+            InputDescription(0, InputRate::INSTANCE),
+            screenShader
     );
+
+    // Create an empty instance!
+    auto instanceResult = screen->createInstance();
+    if (!instanceResult.isOk()) {
+        throw std::runtime_error(instanceResult.getError());
+    }
 
     return fpFrameBuffer;
 }
@@ -94,18 +104,7 @@ void loadSansModels(Application* application, Room* room,
     );
 
 
-    auto defaultVert = cmrc::shaders::get_filesystem().open("deferred.vert");
-    auto defaultFrag = cmrc::shaders::get_filesystem().open("deferred.frag");
-
-    auto shader = room->getShaders().create();
-    shader->addShader(ShaderType::VERTEX, defaultVert);
-    shader->addShader(ShaderType::FRAGMENT, defaultFrag);
-
-    auto result = shader->compile();
-    if (result.has_value()) {
-        std::cerr << result.value() << std::endl;
-        throw std::runtime_error(result.value());
-    }
+    auto shader = createShader(room, "deferred.vert", "deferred.frag");
 
     auto sansResult = ModelLoader(room).loadModel
             <TestVertex, DefaultInstancingData>(
@@ -122,7 +121,7 @@ void loadSansModels(Application* application, Room* room,
     }
     auto sansModel = sansResult.model;
 
-    constexpr int AMOUNT = 1024 * 1;
+    constexpr int AMOUNT = 1024 * 4;
     int q = static_cast<int>(std::sqrt(AMOUNT));
     for (int i = 0; i < AMOUNT; i++) {
         auto sans = room->newGameObject();
@@ -167,6 +166,13 @@ std::shared_ptr<Room> getTestRoom(Application* application) {
     parameterUpdater->newComponent<GlobalParametersUpdaterComponent>();
     parameterUpdater->newComponent<LockMouseComponent>(cameraMovement);
     parameterUpdater->newComponent<DebugOverlayComponent>(100);
+
+    auto directionalLight = room->newGameObject();
+    directionalLight->newComponent<DirectionalLight>();
+
+    auto directionalLight2 = room->newGameObject();
+    directionalLight2->newComponent<DirectionalLight>();
+    directionalLight2->getTransform().lookAt(glm::vec3(1.0f, 0.0f, 0.0f));
 
     loadSansModels(application, room.get(), fpFrameBuffer);
 

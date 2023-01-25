@@ -15,6 +15,10 @@ namespace glm {
              const glm::quat& r,
              const glm::vec3& s);
 
+    void normal_matrix(glm::mat4& result,
+             const glm::quat& r,
+             const glm::vec3& s);
+
 }
 
 

@@ -31,7 +31,7 @@ private:
 public:
 
     SimpleFrameBuffer(Room* room,
-                      std::vector<TextureFormat> colorFormats,
+                      const std::vector<TextureFormat>& colorFormats,
                       bool depth);
 
     ~SimpleFrameBuffer() override = default;

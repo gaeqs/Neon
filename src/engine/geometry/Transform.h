@@ -26,8 +26,11 @@ class Transform {
 
     bool _dirty;
     glm::mat4 _localModel;
+    glm::mat4 _localNormal;
     glm::mat4 _model;
+    glm::mat4 _normal;
 
+    void recalculateIfRequired();
 
 public:
 
@@ -56,6 +59,8 @@ public:
     const glm::quat& rotate(const glm::vec3& direction, float angle);
 
     const glm::mat4& getModel();
+
+    const glm::mat4& getNormal();
 
 };
 

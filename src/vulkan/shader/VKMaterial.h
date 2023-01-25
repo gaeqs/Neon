@@ -14,6 +14,7 @@
 #include <engine/structure/IdentifiableWrapper.h>
 #include <engine/render/Texture.h>
 #include <engine/model/InputDescription.h>
+#include <engine/shader/MaterialConfiguration.h>
 
 class Application;
 
@@ -45,7 +46,8 @@ public:
     VKMaterial(Room* room, Material* material,
                const std::shared_ptr<FrameBuffer>& target,
                const InputDescription& vertexDescription,
-               const InputDescription& instanceDescription);
+               const InputDescription& instanceDescription,
+               MaterialConfiguration configuration);
 
     ~VKMaterial();
 

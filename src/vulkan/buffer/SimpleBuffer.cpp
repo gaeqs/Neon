@@ -83,6 +83,9 @@ SimpleBuffer::SimpleBuffer(VKApplication* application,
 SimpleBuffer::~SimpleBuffer() {
     vkDestroyBuffer(_application->getDevice(), _vertexBuffer, nullptr);
     vkFreeMemory(_application->getDevice(), _vertexBufferMemory, nullptr);
+
+    _vertexBuffer = VK_NULL_HANDLE;
+    _vertexBufferMemory = VK_NULL_HANDLE;
 }
 
 size_t SimpleBuffer::size() const {

@@ -14,13 +14,14 @@ Material::Material(
         IdentifiableWrapper<ShaderProgram> shader,
         const std::shared_ptr<ShaderUniformDescriptor>& descriptor,
         const InputDescription& vertexDescription,
-        const InputDescription& instanceDescription) :
+        const InputDescription& instanceDescription,
+        MaterialConfiguration configuration) :
         _id(MATERIAL_ID_GENERATOR++),
         _shader(shader),
         _uniformDescriptor(descriptor),
         _uniformBuffer(descriptor),
         _implementation(room, this, target, vertexDescription,
-                        instanceDescription) {
+                        instanceDescription, configuration) {
     _uniformBuffer.setBindingPoint(1);
 }
 

@@ -110,7 +110,7 @@ public:
         auto it = _components.find(typeid(T));
         if (it == _components.end()) return nullptr;
         return std::reinterpret_pointer_cast<ClusteredLinkedCollection<T>>(
-                it->second);
+                it->second.second);
     }
 
     /**

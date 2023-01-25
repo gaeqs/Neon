@@ -78,7 +78,7 @@ set(SOURCES
         engine/structure/ComponentImplementedEvents.cpp
         engine/structure/ComponentImplementedEvents.h
         engine/light/DirectionalLight.cpp
-        engine/light/DirectionalLight.h)
+        engine/light/DirectionalLight.h engine/light/LightSystem.cpp engine/light/LightSystem.h engine/shader/MaterialConfiguration.h)
 
 
 set(VULKAN_SOURCES

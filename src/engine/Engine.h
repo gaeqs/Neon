@@ -17,6 +17,8 @@
 #include <engine/io/KeyboardEvent.h>
 #include <engine/io/KeyboardEvent.h>
 
+#include <engine/light/DirectionalLight.h>
+
 #include <engine/model/DefaultInstancingData.h>
 #include <engine/model/InputDescription.h>
 #include <engine/model/Mesh.h>

@@ -23,6 +23,8 @@ cmrc_add_resource_library(
         shader/deferred.frag
         shader/screen.vert
         shader/screen.frag
+        shader/directional_light.vert
+        shader/directional_light.frag
 )
 
 cmrc_add_resource_library(

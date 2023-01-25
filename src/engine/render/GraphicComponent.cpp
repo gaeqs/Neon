@@ -62,6 +62,7 @@ void GraphicComponent::onLateUpdate(float deltaTime) {
 
     // Update default data!
     uploadData(DefaultInstancingData{
-            getGameObject()->getTransform().getModel()
+            getGameObject()->getTransform().getModel(),
+            getGameObject()->getTransform().getNormal(),
     });
 }

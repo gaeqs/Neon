@@ -10,7 +10,7 @@
 #include <engine/model/DefaultInstancingData.h>
 
 void VKModel::reinitializeBuffer() {
-    _instancingBuffer = StagingBuffer(
+    _instancingBuffer = std::make_unique<StagingBuffer>(
             _vkApplication,
             VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
             _instancingStructSize * BUFFER_DEFAULT_SIZE
@@ -24,11 +24,11 @@ VKModel::VKModel(Application* application, std::vector<VKMesh*> meshes) :
         _instancingStructType(std::type_index(typeid(DefaultInstancingData))),
         _instancingStructSize(sizeof(DefaultInstancingData)),
         _positions(),
-        _instancingBuffer(
+        _instancingBuffer(std::make_unique<StagingBuffer>(
                 _vkApplication,
                 VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
                 _instancingStructSize * BUFFER_DEFAULT_SIZE
-        ),
+        )),
         _data(_instancingStructSize * BUFFER_DEFAULT_SIZE, 0),
         _dataChangeRange(0, 0) {
 }
@@ -73,14 +73,14 @@ bool VKModel::freeInstance(uint32_t id) {
 void VKModel::uploadDataRaw(uint32_t id, const void* raw) {
     if (_instancingStructSize == 0) {
         std::cerr << "[OPENGL MODEL] Cannot upload data to buffer "
-                  << _instancingBuffer.getRaw()
+                  << _instancingBuffer->getRaw()
                   << ": instance struct is not defined!"
                   << std::endl;
         return;
     }
     if (id >= _positions.size()) {
         std::cerr << "[OPENGL MODEL] Cannot upload data to buffer "
-                  << _instancingBuffer.getRaw()
+                  << _instancingBuffer->getRaw()
                   << ": invalid id " << id << "!"
                   << std::endl;
         return;
@@ -93,7 +93,7 @@ void VKModel::uploadDataRaw(uint32_t id, const void* raw) {
 
 void VKModel::flush() {
     if (_dataChangeRange.size() != 0) {
-        auto map = _instancingBuffer.map<char>(
+        auto map = _instancingBuffer->map<char>(
                 _dataChangeRange * _instancingStructSize);
         if (map.has_value()) {
             memcpy(map.value()->raw(), _data.data(), _data.size());
@@ -110,7 +110,7 @@ void VKModel::draw(VkCommandBuffer buffer,
     for (const auto& item: _meshes) {
         auto meshTarget = item->getMaterial()->getImplementation().getTarget();
         if (meshTarget == target) {
-            item->draw(buffer, _instancingBuffer.getRaw(),
+            item->draw(buffer, _instancingBuffer->getRaw(),
                        _positions.size(), global);
         }
     }

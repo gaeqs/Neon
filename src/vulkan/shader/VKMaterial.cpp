@@ -18,7 +18,8 @@ VKMaterial::VKMaterial(
         Room* room, Material* material,
         const std::shared_ptr<FrameBuffer>& target,
         const InputDescription& vertexDescription,
-        const InputDescription& instanceDescription) :
+        const InputDescription& instanceDescription,
+        MaterialConfiguration cfg) :
         _material(material),
         _vkApplication(&room->getApplication()->getImplementation()),
         _pipelineLayout(VK_NULL_HANDLE),
@@ -105,13 +106,13 @@ VKMaterial::VKMaterial(
     colorBlendAttachment.colorWriteMask =
             VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT |
             VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
-    colorBlendAttachment.blendEnable = VK_FALSE;
-    colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
-    colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
-    colorBlendAttachment.colorBlendOp = VK_BLEND_OP_ADD;
-    colorBlendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
-    colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
-    colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD;
+    colorBlendAttachment.blendEnable = cfg.blend;
+    colorBlendAttachment.srcColorBlendFactor = static_cast<VkBlendFactor>(cfg.colorSourceBlendFactor);
+    colorBlendAttachment.dstColorBlendFactor = static_cast<VkBlendFactor>(cfg.colorDestinyBlendFactor);
+    colorBlendAttachment.colorBlendOp = static_cast<VkBlendOp>(cfg.colorBlendOperation);
+    colorBlendAttachment.srcAlphaBlendFactor = static_cast<VkBlendFactor>(cfg.alphaSourceBlendFactor);
+    colorBlendAttachment.dstAlphaBlendFactor = static_cast<VkBlendFactor>(cfg.alphaDestinyBlendFactor);
+    colorBlendAttachment.alphaBlendOp = static_cast<VkBlendOp>(cfg.alphaBlendOperation);
 
     std::vector<VkPipelineColorBlendAttachmentState> blendAttachments;
     blendAttachments.resize(

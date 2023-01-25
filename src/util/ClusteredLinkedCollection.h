@@ -19,6 +19,8 @@ public:
 
     virtual size_t size() const = 0;
 
+    virtual bool empty() const = 0;
+
     virtual size_t capacity() const = 0;
 
     virtual void forEachRaw(std::function<void(void*)> function) = 0;
@@ -150,12 +152,14 @@ public:
     }
 
     bool
-    operator==(const ConstClusteredLinkedCollectorIterator<Collection>& b) const {
+    operator==(
+            const ConstClusteredLinkedCollectorIterator<Collection>& b) const {
         return _collection == b._collection && _index == b._index;
     };
 
     bool
-    operator!=(const ConstClusteredLinkedCollectorIterator<Collection>& b) const {
+    operator!=(
+            const ConstClusteredLinkedCollectorIterator<Collection>& b) const {
         return _collection != b._collection || _index != b._index;
     };
 
@@ -214,6 +218,10 @@ public:
 
     size_t size() const override {
         return _localSize + (_next == nullptr ? 0 : _next->size());
+    }
+
+    bool empty() const override {
+        return size() == 0;
     }
 
     size_t capacity() const override {
@@ -320,7 +328,7 @@ public:
         return false;
     }
 
-    void clear () {
+    void clear() {
         for (size_t i = 0; i < Size; i += _objectSize) {
             if (_occupied[i]) {
                 std::destroy_at(_data + i);

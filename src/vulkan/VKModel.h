@@ -32,7 +32,7 @@ class VKModel {
 
     std::vector<uint32_t*> _positions;
 
-    StagingBuffer _instancingBuffer;
+    std::unique_ptr<StagingBuffer> _instancingBuffer;
     std::vector<char> _data;
     Range<uint32_t> _dataChangeRange;
 

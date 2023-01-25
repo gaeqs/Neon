@@ -10,6 +10,8 @@
 
 #include <engine/structure/IdentifiableWrapper.h>
 #include <engine/render/TextureFormat.h>
+#include <engine/model/InputDescription.h>
+#include <engine/shader/MaterialConfiguration.h>
 
 class Room;
 
@@ -27,12 +29,13 @@ namespace deferred_utils {
             Room* room,
             const std::vector<IdentifiableWrapper<Texture>>& inputTextures,
             const std::shared_ptr<FrameBuffer>& target,
-            IdentifiableWrapper<ShaderProgram> shader);
+            InputDescription instanceDescription,
+            IdentifiableWrapper<ShaderProgram> shader,
+            MaterialConfiguration configuration = MaterialConfiguration());
 
     IdentifiableWrapper<Texture> createLightSystem(
             Room* room,
-            IdentifiableWrapper<Texture> colorTexture,
-            const std::vector<IdentifiableWrapper<Texture>>& extraTextures,
+            const std::vector<IdentifiableWrapper<Texture>>& textures,
             TextureFormat outputFormat,
             IdentifiableWrapper<ShaderProgram> directionalShader,
             IdentifiableWrapper<ShaderProgram> pointShader,

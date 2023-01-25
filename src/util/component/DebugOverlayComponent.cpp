@@ -59,6 +59,12 @@ void DebugOverlayComponent::onUpdate(float deltaTime) {
                     camera.getPosition().y,
                     camera.getPosition().z);
 
+        auto lookAt = camera.getForward();
+        ImGui::Text("LookAt: (%f, %f, %f)",
+                    lookAt.x,
+                    lookAt.y,
+                    lookAt.z);
+
         ImGui::Separator();
         if (ImGui::TreeNode("Performance")) {
             drawPerformance();

@@ -78,17 +78,30 @@ const glm::quat& Transform::rotate(const glm::vec3& direction, float angle) {
 }
 
 const glm::mat4& Transform::getModel() {
+    recalculateIfRequired();
+    return _model;
+}
+
+const glm::mat4& Transform::getNormal() {
+    recalculateIfRequired();
+    return _normal;
+}
+
+void Transform::recalculateIfRequired() {
     if (_dirty) {
         _dirty = false;
         glm::trs(_localModel, _position, _rotation, _scale);
+        glm::normal_matrix(_localNormal, _rotation, _scale);
 
         // Apply parent transformation
         if (_parent != nullptr) {
             auto& t = _parent->getTransform();
             _model = t.getModel() * _localModel;
+            _normal = t.getNormal() * _localNormal;
             _parentIdOnLastRefresh = t._id;
         } else {
             _model = _localModel;
+            _normal = _localNormal;
             _parentIdOnLastRefresh = 0;
         }
         _id = TRANSFORM_ID_GENERATOR++;
@@ -96,17 +109,17 @@ const glm::mat4& Transform::getModel() {
         // Check if parent was modified.
         if (_parent == nullptr && _parentIdOnLastRefresh != 0) {
             _model = _localModel;
+            _normal = _localNormal;
             _parentIdOnLastRefresh = 0;
             _id = TRANSFORM_ID_GENERATOR++;
         } else if (_parent != nullptr) {
             auto& t = _parent->getTransform();
             if (_parentIdOnLastRefresh != t._id || t._dirty) {
                 _model = t.getModel() * _localModel;
+                _normal = t.getNormal() * _localNormal;
                 _parentIdOnLastRefresh = t._id;
                 _id = TRANSFORM_ID_GENERATOR++;
             }
         }
     }
-
-    return _model;
 }

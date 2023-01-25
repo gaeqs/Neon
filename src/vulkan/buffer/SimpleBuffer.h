@@ -22,6 +22,8 @@ class SimpleBufferMap : public BufferMap<T> {
 
 public:
 
+    SimpleBufferMap(const SimpleBufferMap& other) = delete;
+
     SimpleBufferMap(VkDevice device, VkDeviceMemory memory,
                     Range<uint32_t> range) :
             BufferMap<T>(),

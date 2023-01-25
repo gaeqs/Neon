@@ -14,9 +14,10 @@
 
 #include <engine/structure/Identifiable.h>
 #include <engine/structure/IdentifiableWrapper.h>
-#include <engine/render/Texture.h>
 #include <engine/shader/ShaderUniformBuffer.h>
+#include <engine/shader/MaterialConfiguration.h>
 #include <engine/model/InputDescription.h>
+#include <engine/render/Texture.h>
 #include <engine/render/FrameBuffer.h>
 
 #include <assimp/types.h>
@@ -61,7 +62,8 @@ public:
              IdentifiableWrapper<ShaderProgram> shader,
              const std::shared_ptr<ShaderUniformDescriptor>& descriptor,
              const InputDescription& vertexDescription,
-             const InputDescription& instanceDescription);
+             const InputDescription& instanceDescription,
+             MaterialConfiguration configuration = MaterialConfiguration());
 
     [[nodiscard]] uint64_t getId() const override;
 

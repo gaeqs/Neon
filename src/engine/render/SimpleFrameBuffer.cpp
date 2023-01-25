@@ -6,7 +6,7 @@
 
 SimpleFrameBuffer::SimpleFrameBuffer(
         Room* room,
-        std::vector<TextureFormat> colorFormats,
+        const std::vector<TextureFormat>& colorFormats,
         bool depth) :
         _implementation(room, colorFormats, depth) {
 

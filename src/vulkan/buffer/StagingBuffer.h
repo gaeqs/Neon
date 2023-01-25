@@ -29,6 +29,8 @@ class StagingBufferMap : public BufferMap<T> {
 
 public:
 
+    StagingBufferMap(const StagingBufferMap& other) = delete;
+
     StagingBufferMap(VKApplication* application,
                      std::shared_ptr<SimpleBuffer> stagingBuffer,
                      SimpleBuffer& deviceBuffer) :
@@ -92,6 +94,8 @@ class StagingBuffer : public Buffer {
             Range<uint32_t> range) override;
 
 public:
+
+    StagingBuffer(const StagingBuffer& other) = delete;
 
     template<class T>
     StagingBuffer(VKApplication* application,
