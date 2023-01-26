@@ -19,7 +19,7 @@ VKRender::VKRender(Application* application) :
 
 void VKRender::render(
         Room* room,
-        const ClusteredLinkedCollection <RenderPassStrategy>& strategies) const {
+        const std::vector<RenderPassStrategy>& strategies) const {
     for (const auto& strategy: strategies) {
         auto& frameBuffer = strategy.frameBuffer->getImplementation();
         auto& renderPass = frameBuffer.getRenderPass();

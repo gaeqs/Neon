@@ -38,6 +38,10 @@ public:
 
     [[nodiscard]] virtual std::vector<IdentifiableWrapper<Texture>>
     getTextures() const = 0;
+
+    [[nodiscard]] virtual uint32_t getWidth() const = 0;
+
+    [[nodiscard]] virtual uint32_t getHeight() const = 0;
 };
 
 

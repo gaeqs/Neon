@@ -3,4 +3,4 @@
 	url = https://github.com/ocornut/imgui
 [submodule "lib/implot"]
 	path = lib/implot
-	url = https://github.com/epezent/implot
+	url = https://github.com/ocornut/imgui/tree/docking

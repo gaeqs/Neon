@@ -31,7 +31,8 @@ void DebugOverlayComponent::onUpdate(float deltaTime) {
             ImGuiWindowFlags_NoFocusOnAppearing |
             ImGuiWindowFlags_NoNav |
             ImGuiWindowFlags_AlwaysAutoResize |
-            ImGuiWindowFlags_NoMove;
+            ImGuiWindowFlags_NoMove |
+            ImGuiWindowFlags_NoDocking;
 
     auto frameData = getRoom()->getApplication()->getCurrentFrameInformation();
     _processTimes.pop_front();

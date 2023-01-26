@@ -61,6 +61,11 @@ public:
 
     [[nodiscard]] VKRenderPass& getRenderPass() override;
 
+
+    [[nodiscard]] uint32_t getWidth() const override;
+
+    [[nodiscard]] uint32_t getHeight() const override;
+
     bool renderImGui() override;
 
     void recreate();

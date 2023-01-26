@@ -12,6 +12,7 @@
 
 #include <vulkan/render/VKFrameBuffer.h>
 #include <vulkan/render/VKRenderPass.h>
+#include <imgui.h>
 
 class Room;
 
@@ -29,6 +30,7 @@ class VKSimpleFrameBuffer : public VKFrameBuffer {
     std::vector<VkDeviceMemory> _memories;
     std::vector<VkImageView> _imageViews;
     std::vector<VkImageLayout> _layouts;
+    std::vector<VkDescriptorSet> _imGuiDescriptors;
     std::vector<IdentifiableWrapper<Texture>> _textures;
 
     std::vector<VkFormat> _formats;
@@ -64,6 +66,12 @@ public:
     [[nodiscard]] VKRenderPass const& getRenderPass() const override;
 
     [[nodiscard]] VKRenderPass& getRenderPass() override;
+
+    [[nodiscard]] uint32_t getWidth() const override;
+
+    [[nodiscard]] uint32_t getHeight() const override;
+
+    [[nodiscard]] ImTextureID getImGuiDescriptor(uint32_t index);
 
     bool renderImGui() override;
 

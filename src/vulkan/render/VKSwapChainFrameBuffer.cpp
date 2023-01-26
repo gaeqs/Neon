@@ -209,3 +209,11 @@ VKRenderPass& VKSwapChainFrameBuffer::getRenderPass() {
 bool VKSwapChainFrameBuffer::renderImGui() {
     return true;
 }
+
+uint32_t VKSwapChainFrameBuffer::getWidth() const {
+    return _vkApplication->getSwapChainExtent().width;
+}
+
+uint32_t VKSwapChainFrameBuffer::getHeight() const {
+    return _vkApplication->getSwapChainExtent().height;
+}

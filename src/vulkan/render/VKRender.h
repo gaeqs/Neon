@@ -27,7 +27,7 @@ public:
 
     void render(
             Room* room,
-            const ClusteredLinkedCollection<RenderPassStrategy>& strategies)
+            const std::vector<RenderPassStrategy>& strategies)
             const;
 
 };

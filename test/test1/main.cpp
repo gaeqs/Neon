@@ -13,6 +13,7 @@
 #include "GlobalParametersUpdaterComponent.h"
 #include "LockMouseComponent.h"
 #include "ConstantRotationComponent.h"
+#include "ImGuiTestComponent.h"
 
 constexpr int32_t WIDTH = 800;
 constexpr int32_t HEIGHT = 600;
@@ -171,6 +172,7 @@ std::shared_ptr<Room> getTestRoom(Application* application) {
     parameterUpdater->newComponent<GlobalParametersUpdaterComponent>();
     parameterUpdater->newComponent<LockMouseComponent>(cameraMovement);
     parameterUpdater->newComponent<DebugOverlayComponent>(100);
+    parameterUpdater->newComponent<ImGuiTestComponent>();
 
     auto directionalLight = room->newGameObject();
     directionalLight->newComponent<DirectionalLight>();

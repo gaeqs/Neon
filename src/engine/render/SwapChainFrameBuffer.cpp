@@ -28,3 +28,11 @@ std::vector<IdentifiableWrapper<Texture>>
 SwapChainFrameBuffer::getTextures() const {
     return {};
 }
+
+uint32_t SwapChainFrameBuffer::getWidth() const {
+    return _implementation.getWidth();
+}
+
+uint32_t SwapChainFrameBuffer::getHeight() const {
+    return _implementation.getHeight();
+}

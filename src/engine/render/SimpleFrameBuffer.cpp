@@ -29,3 +29,15 @@ std::vector<IdentifiableWrapper<Texture>>
 SimpleFrameBuffer::getTextures() const {
     return _implementation.getTextures();
 }
+
+ImTextureID SimpleFrameBuffer::getImGuiDescriptor(uint32_t index) {
+    return _implementation.getImGuiDescriptor(index);
+}
+
+uint32_t SimpleFrameBuffer::getWidth() const {
+    return _implementation.getWidth();
+}
+
+uint32_t SimpleFrameBuffer::getHeight() const {
+    return _implementation.getHeight();
+}

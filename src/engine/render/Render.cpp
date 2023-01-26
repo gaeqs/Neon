@@ -21,8 +21,8 @@ Render::Implementation& Render::getImplementation() {
     return _implementation;
 }
 
-void Render::addRenderPass(RenderPassStrategy strategy) {
-    _strategies.emplace(strategy);
+void Render::addRenderPass(const RenderPassStrategy& strategy) {
+    _strategies.push_back(strategy);
 }
 
 void Render::clearRenderPasses() {
@@ -37,4 +37,12 @@ void Render::recreateFrameBuffers() {
     for (const auto& item: _strategies) {
         item.frameBuffer->recreate();
     }
+}
+
+size_t Render::getPassesAmount() const {
+    return _strategies.size();
+}
+
+std::shared_ptr<FrameBuffer> Render::getFrameBuffer(size_t index) {
+    return _strategies[index].frameBuffer;
 }

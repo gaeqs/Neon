@@ -5,8 +5,9 @@
 #include "VKSimpleFrameBuffer.h"
 
 
-#include <utility>
 #include <stdexcept>
+
+#include <imgui_impl_vulkan.h>
 
 #include <engine/structure/Room.h>
 #include <engine/render/Texture.h>
@@ -109,6 +110,14 @@ void VKSimpleFrameBuffer::cleanup() {
     for (auto& memory: _memories) {
         vkFreeMemory(d, memory, nullptr);
     }
+
+    for (const auto& item: _imGuiDescriptors) {
+        if (item != VK_NULL_HANDLE) {
+            ImGui_ImplVulkan_RemoveTexture(item);
+        }
+    }
+    std::fill(_imGuiDescriptors.begin(), _imGuiDescriptors.end(),
+              VK_NULL_HANDLE);
 }
 
 VKSimpleFrameBuffer::VKSimpleFrameBuffer(
@@ -121,10 +130,13 @@ VKSimpleFrameBuffer::VKSimpleFrameBuffer(
         _imageViews(),
         _layouts(),
         _textures(),
+        _imGuiDescriptors(),
         _formats(vulkan_util::getImageFormats(formats)),
         _renderPass(room->getApplication(), _formats, depth, false,
                     _vkApplication->getDepthImageFormat()),
         _depth(depth) {
+
+    _imGuiDescriptors.resize(formats.size(), VK_NULL_HANDLE);
 
     createImages();
     createFrameBuffer();
@@ -197,4 +209,25 @@ VKSimpleFrameBuffer::getTextures() const {
 
 bool VKSimpleFrameBuffer::renderImGui() {
     return false;
+}
+
+ImTextureID VKSimpleFrameBuffer::getImGuiDescriptor(uint32_t index) {
+    if (_imGuiDescriptors[index] == VK_NULL_HANDLE) {
+        auto& texture = _textures[index];
+        _imGuiDescriptors[index] = ImGui_ImplVulkan_AddTexture(
+                texture->getImplementation().getSampler(),
+                texture->getImplementation().getImageView(),
+                VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+        );
+    }
+
+    return _imGuiDescriptors[index];
+}
+
+uint32_t VKSimpleFrameBuffer::getWidth() const {
+    return _textures.empty() ? 0 : _textures.front()->getWidth();
+}
+
+uint32_t VKSimpleFrameBuffer::getHeight() const {
+    return _textures.empty() ? 0 : _textures.front()->getHeight();
 }

@@ -661,6 +661,8 @@ void VKApplication::initImGui() {
     ImGui::CreateContext();
     ImPlot::CreateContext();
     ImGui_ImplGlfw_InitForVulkan(_window, true);
+
+    ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 }
 
 void VKApplication::recreateSwapChain() {

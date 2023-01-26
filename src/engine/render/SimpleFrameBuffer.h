@@ -45,6 +45,12 @@ public:
 
     [[nodiscard]] std::vector<IdentifiableWrapper<Texture>>
     getTextures() const override;
+
+    [[nodiscard]] uint32_t getWidth() const override;
+
+    [[nodiscard]] uint32_t getHeight() const override;
+
+    [[nodiscard]] ImTextureID getImGuiDescriptor(uint32_t index);
 };
 
 
