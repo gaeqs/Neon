@@ -4,20 +4,20 @@
 
 #include "GlobalParametersUpdaterComponent.h"
 
-GlobalParametersUpdaterComponent::
-~GlobalParametersUpdaterComponent() noexcept {
-    if (_buffer.isValid()) {
-        getRoom()->getShaderUniformBuffers().destroy(_buffer);
-    }
-}
+GlobalParametersUpdaterComponent::~GlobalParametersUpdaterComponent() = default;
 
 void GlobalParametersUpdaterComponent::onStart() {
-    _buffer = getRoom()->getShaderUniformBuffers().create();
-    _buffer->setBindingPoint(0);
 }
 
 void GlobalParametersUpdaterComponent::onUpdate(float deltaTime) {
-    _buffer->uploadData(GlobalParameters {
-        getRoom()->getCamera().getViewProjection()
-    });
+    auto& camera = getRoom()->getCamera();
+    getRoom()->getGlobalUniformBuffer().uploadData<GlobalParameters>(
+            0,
+            GlobalParameters{
+                    camera.getView(),
+                    camera.getViewProjection(),
+                    camera.getFrustum().getInverseProjection(),
+                    camera.getFrustum().getNear(),
+                    camera.getFrustum().getFar()
+            });
 }

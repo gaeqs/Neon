@@ -4,12 +4,14 @@
 
 #include "Mesh.h"
 
+#include <engine/structure/Room.h>
+
 uint64_t MESH_ID_GENERATOR = 1;
 
-Mesh::Mesh() :
+Mesh::Mesh(Room* room, IdentifiableWrapper<Material> material) :
         _id(MESH_ID_GENERATOR++),
-        _implementation(_material),
-        _material() {
+        _implementation(room->getApplication(), _material),
+        _material(material) {
 
 }
 
@@ -25,14 +27,10 @@ const Mesh::Implementation& Mesh::getImplementation() const {
     return _implementation;
 }
 
-Material& Mesh::getMaterial() {
+IdentifiableWrapper<Material> Mesh::getMaterial() const {
     return _material;
 }
 
-const Material& Mesh::getMaterial() const {
-    return _material;
-}
-
-void Mesh::setMaterial(const Material& material) {
+void Mesh::setMaterial(const IdentifiableWrapper<Material>& material) {
     _material = material;
 }

@@ -1,34 +1,157 @@
 #include <iostream>
 #include <vector>
+#include <filesystem>
 
 #include <engine/Engine.h>
-#include <gl/GLShaderRenderer.h>
-#include "util/component/CameraMovementComponent.h"
+#include <util/component/CameraMovementComponent.h>
+#include <util/component/DebugOverlayComponent.h>
+#include <util/DeferredUtils.h>
 #include <assimp/ModelLoader.h>
+
 #include "TestComponent.h"
 #include "TestVertex.h"
 #include "GlobalParametersUpdaterComponent.h"
+#include "LockMouseComponent.h"
+#include "ConstantRotationComponent.h"
 
 constexpr int32_t WIDTH = 800;
 constexpr int32_t HEIGHT = 600;
 
 CMRC_DECLARE(shaders);
 
-std::shared_ptr<Room> getTestRoom() {
-    auto renderer = std::make_shared<GLShaderRenderer>();
+IdentifiableWrapper<ShaderProgram> createShader(Room* room,
+                                                const std::string& vert,
+                                                const std::string& frag) {
+    auto defaultVert = cmrc::shaders::get_filesystem().open(vert);
+    auto defaultFrag = cmrc::shaders::get_filesystem().open(frag);
 
-    auto defaultVert = cmrc::shaders::get_filesystem().open("default.vert");
-    auto defaultFrag = cmrc::shaders::get_filesystem().open("default.frag");
+    auto shader = room->getShaders().create();
+    shader->addShader(ShaderType::VERTEX, defaultVert);
+    shader->addShader(ShaderType::FRAGMENT, defaultFrag);
 
-    auto shader = Shader::newShader(defaultVert, defaultFrag);
-    if (!shader.isOk()) throw std::runtime_error(shader.getError());
-    renderer->insertShader("default", shader.getResult());
+    auto result = shader->compile();
+    if (result.has_value()) {
+        std::cerr << result.value() << std::endl;
+        throw std::runtime_error(result.value());
+    }
 
-    auto room = std::make_shared<Room>();
-    room->setRenderer(renderer);
+    return shader;
+}
 
-    auto parametersUpdater = room->newGameObject();
-    parametersUpdater->newComponent<GlobalParametersUpdaterComponent>();
+std::shared_ptr<FrameBuffer> initRender(Room* room) {
+    auto directionalShader = createShader(room, "directional_light.vert",
+                                          "directional_light.frag");
+    auto pointShader = createShader(room, "point_light.vert",
+                                    "point_light.frag");
+    auto flashShader = createShader(room, "flash_light.vert",
+                                    "flash_light.frag");
+
+    std::vector<TextureFormat> frameBufferFormats = {
+            TextureFormat::R8G8B8A8,
+            TextureFormat::R16FG16F, // NORMAL XY
+            TextureFormat::R16FG16F // NORMAL Z / SPECULAR
+    };
+
+    auto fpFrameBuffer = std::make_shared<SimpleFrameBuffer>(
+            room, frameBufferFormats, true);
+
+    room->getRender().addRenderPass(
+            {fpFrameBuffer, RenderPassStrategy::defaultStrategy});
+
+    auto outputColor = deferred_utils::createLightSystem(
+            room,
+            fpFrameBuffer->getTextures(),
+            TextureFormat::R8G8B8A8,
+            directionalShader,
+            pointShader,
+            flashShader
+    );
+
+    auto scFrameBuffer = std::make_shared<SwapChainFrameBuffer>(
+            room, false);
+
+    room->getRender().addRenderPass(
+            {scFrameBuffer, RenderPassStrategy::defaultStrategy});
+
+    auto screenShader = createShader(room, "screen.vert", "screen.frag");
+    auto textures = fpFrameBuffer->getTextures();
+    textures[0] = outputColor;
+
+    auto screen = deferred_utils::createScreenModel(
+            room,
+            textures,
+            scFrameBuffer,
+            InputDescription(0, InputRate::INSTANCE),
+            screenShader
+    );
+
+    // Create an empty instance!
+    auto instanceResult = screen->createInstance();
+    if (!instanceResult.isOk()) {
+        throw std::runtime_error(instanceResult.getError());
+    }
+
+    return fpFrameBuffer;
+}
+
+void loadSansModels(Application* application, Room* room,
+                    const std::shared_ptr<FrameBuffer>& target) {
+
+    std::vector<ShaderUniformBinding> sansMaterialBindings = {
+            ShaderUniformBinding{UniformBindingType::IMAGE, 0},
+            ShaderUniformBinding{UniformBindingType::IMAGE, 0}
+    };
+
+
+    auto sansMaterialDescriptor = std::make_shared<ShaderUniformDescriptor>(
+            application,
+            sansMaterialBindings
+    );
+
+
+    auto shader = createShader(room, "deferred.vert", "deferred.frag");
+
+    auto sansResult = ModelLoader(room).loadModel
+            <TestVertex, DefaultInstancingData>(
+            target,
+            shader,
+            sansMaterialDescriptor,
+            R"(resource/Sans)",
+            "Sans.obj");
+
+    if (!sansResult.valid) {
+        std::cout << "Couldn't load Sans model!" << std::endl;
+        std::cout << std::filesystem::current_path() << std::endl;
+        exit(1);
+    }
+    auto sansModel = sansResult.model;
+
+    constexpr int AMOUNT = 1024 * 1;
+    int q = static_cast<int>(std::sqrt(AMOUNT));
+    for (int i = 0; i < AMOUNT; i++) {
+        auto sans = room->newGameObject();
+        sans->newComponent<GraphicComponent>(sansModel);
+        sans->newComponent<ConstantRotationComponent>();
+
+        float x = static_cast<float>(i % q) * 3.0f;
+        float z = static_cast<float>(i / q) * 3.0f; // NOLINT(bugprone-integer-division)
+        sans->getTransform().setPosition(glm::vec3(x, 0, z));
+    }
+}
+
+std::shared_ptr<Room> getTestRoom(Application* application) {
+
+    std::vector<ShaderUniformBinding> globalBindings = {ShaderUniformBinding{
+            UniformBindingType::BUFFER, sizeof(GlobalParameters)
+    }};
+
+    auto globalDescriptor = std::make_shared<ShaderUniformDescriptor>(
+            application, globalBindings
+    );
+
+    auto room = std::make_shared<Room>(application, globalDescriptor);
+
+    auto fpFrameBuffer = initRender(room.get());
 
     auto gameObject = room->newGameObject();
     gameObject->newComponent<TestComponent>();
@@ -41,19 +164,40 @@ std::shared_ptr<Room> getTestRoom() {
     gameObject2->getTransform().setPosition(glm::vec3(0.0f, -1.0f, 0.0f));
 
     auto cameraController = room->newGameObject();
-    cameraController->newComponent<CameraMovementComponent>();
+    auto cameraMovement = cameraController->newComponent<CameraMovementComponent>();
+    cameraMovement->setSpeed(10.0f);
+
+    auto parameterUpdater = room->newGameObject();
+    parameterUpdater->newComponent<GlobalParametersUpdaterComponent>();
+    parameterUpdater->newComponent<LockMouseComponent>(cameraMovement);
+    parameterUpdater->newComponent<DebugOverlayComponent>(100);
+
+    auto directionalLight = room->newGameObject();
+    directionalLight->newComponent<DirectionalLight>();
+
+    auto directionalLight2 = room->newGameObject();
+    directionalLight2->newComponent<DirectionalLight>();
+    directionalLight2->getTransform().lookAt(glm::vec3(1.0f, 0.0f, 0.0f));
+
+    auto pointLightGO = room->newGameObject();
+    auto pointLight = pointLightGO->newComponent<PointLight>();
+    pointLightGO->getTransform().setPosition({5.0f, 7.0f, 5.0f});
+    pointLight->setDiffuseColor({1.0f, 0.0f, 0.0f});
+    pointLight->setConstantAttenuation(0.01f);
+    pointLight->setLinearAttenuation(0.2);
+    pointLight->setQuadraticAttenuation(0.1);
+
+    auto flashLightGO = room->newGameObject();
+    auto flashLight = flashLightGO->newComponent<FlashLight>();
+    flashLightGO->getTransform().setPosition({10.0f, 7.0f, 10.0f});
+    flashLightGO->getTransform().rotate(glm::vec3(1.0f, 0.0f, 0.0f), 1.0f);
+    flashLight->setDiffuseColor({0.0f, 1.0f, 0.0f});
+    flashLight->setConstantAttenuation(0.01f);
+    flashLight->setLinearAttenuation(0.2);
+    flashLight->setQuadraticAttenuation(0.1);
 
 
-    auto sansLoader = ModelLoader(room);
-    auto sansModel = sansLoader.loadModel<TestVertex>(
-            R"(resource/Sans)", "Sans.obj").model;
-    sansModel->setShader("default");
-
-    for (int i = 0; i < 100; i++) {
-        auto sans = room->newGameObject();
-        sans->newComponent<GraphicComponent>(sansModel);
-        sans->getTransform().setPosition(glm::vec3(i, 0, 0));
-    }
+    loadSansModels(application, room.get(), fpFrameBuffer);
 
     return room;
 }
@@ -68,7 +212,7 @@ int main() {
         return EXIT_FAILURE;
     }
 
-    application.setRoom(getTestRoom());
+    application.setRoom(getTestRoom(&application));
 
     auto loopResult = application.startGameLoop();
     if (loopResult.isOk()) {
@@ -80,5 +224,8 @@ int main() {
                   << loopResult.getError()
                   << std::endl;
     }
+
+    application.setRoom(nullptr);
+
     return EXIT_SUCCESS;
 }

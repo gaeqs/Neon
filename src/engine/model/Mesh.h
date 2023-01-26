@@ -5,16 +5,21 @@
 #ifndef NEON_MESH_H
 #define NEON_MESH_H
 
+
 #include <vector>
 
-#include <engine/Identifiable.h>
-#include <engine/Material.h>
+#include <engine/structure/Identifiable.h>
+#include <engine/shader/Material.h>
+#include <engine/shader/ShaderUniformBuffer.h>
+#include <engine/collection/IdentifiableCollection.h>
 
-#ifdef USE_OPENGL
+#ifdef USE_VULKAN
 
-#include <gl/GLMesh.h>
+#include <vulkan/VKMesh.h>
 
 #endif
+
+class Room;
 
 class Mesh : public Identifiable {
 
@@ -22,19 +27,21 @@ class Mesh : public Identifiable {
     class IdentifiableWrapper;
 
 public:
-#ifdef USE_OPENGL
-    using Implementation = GLMesh;
+#ifdef USE_VULKAN
+    using Implementation = VKMesh;
 #endif
 
 private:
 
     uint64_t _id;
     Implementation _implementation;
-    Material _material;
+    IdentifiableWrapper<Material> _material;
 
 public:
 
-    Mesh();
+    Mesh(const Mesh& other) = delete;
+
+    Mesh(Room* room, IdentifiableWrapper<Material> material);
 
     [[nodiscard]] uint64_t getId() const override;
 
@@ -43,16 +50,14 @@ public:
     [[nodiscard]] const Implementation& getImplementation() const;
 
     template<class Vertex>
-    void uploadVertexData(std::vector<Vertex> vertices,
-                          std::vector<uint32_t> indices) {
+    void uploadVertexData(const std::vector<Vertex>& vertices,
+                          const std::vector<uint32_t>& indices) {
         _implementation.uploadData(vertices, indices);
     }
 
-    Material& getMaterial();
+    [[nodiscard]] IdentifiableWrapper<Material> getMaterial() const;
 
-    [[nodiscard]] const Material& getMaterial() const;
-
-    void setMaterial(const Material& material);
+    void setMaterial(const IdentifiableWrapper<Material>& material);
 
 };
 

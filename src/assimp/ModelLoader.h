@@ -19,12 +19,16 @@
 
 #include <engine/collection/IdentifiableCollection.h>
 #include <engine/collection/TextureCollection.h>
-#include <engine/Room.h>
-#include <engine/IdentifiableWrapper.h>
+#include <engine/structure/Room.h>
+#include <engine/structure/IdentifiableWrapper.h>
 #include <engine/model/Model.h>
 #include <engine/model/Mesh.h>
-#include <engine/Texture.h>
-#include <engine/Material.h>
+#include <engine/model/InputDescription.h>
+#include <engine/render/Texture.h>
+#include <engine/shader/Material.h>
+#include <engine/shader/ShaderProgram.h>
+#include <engine/shader/ShaderUniformDescriptor.h>
+#include <engine/render/FrameBuffer.h>
 
 #include <glm/glm.hpp>
 
@@ -35,11 +39,15 @@ struct ModelLoaderResult {
 
 class ModelLoader {
 
-    IdentifiableCollection<Model>& _models;
-    TextureCollection& _textures;
+    Room* _room;
 
-    template<typename Vertex>
-    std::unique_ptr<Mesh> loadMesh(aiMesh* mesh) const {
+    template<class Vertex>
+    std::unique_ptr<Mesh> loadMesh(
+            aiMesh* mesh,
+            IdentifiableWrapper<Material> material) const {
+
+        auto tangents = calculateTangents(mesh);
+
         std::vector<Vertex> vertices;
         vertices.resize(mesh->mNumVertices);
 
@@ -50,9 +58,11 @@ class ModelLoader {
                       ? mesh->mColors[0][i] : aiColor4D(0.0, 0.0, 0.0, 0.0);
             auto aT = mesh->mTextureCoords[0][i];
 
+
             vertices[i] = Vertex::fromAssimp(
                     glm::vec3(aP.x, aP.y, aP.z),
                     glm::vec3(aN.x, aN.y, aN.z),
+                    tangents[i],
                     glm::vec4(aC.r, aC.g, aC.b, aC.a),
                     glm::vec2(aT.x, aT.y)
             );
@@ -69,14 +79,19 @@ class ModelLoader {
         }
 
 
-        auto result = std::make_unique<Mesh>();
+        auto result = std::make_unique<Mesh>(_room, material);
         result->uploadVertexData(vertices, indices);
         return std::move(result);
     }
 
     void loadMaterial(
-            std::vector<Material>& vector,
+            std::vector<IdentifiableWrapper<Material>>& vector,
+            const std::shared_ptr<FrameBuffer>& target,
+            IdentifiableWrapper<ShaderProgram> shader,
+            const std::shared_ptr<ShaderUniformDescriptor>& materialDescriptor,
             const std::map<std::string, IdentifiableWrapper<Texture>>& textures,
+            const InputDescription& vertexDescription,
+            const InputDescription& instanceDescription,
             const aiMaterial* material) const;
 
     IdentifiableWrapper<Texture> loadTexture(
@@ -84,67 +99,87 @@ class ModelLoader {
             const std::map<aiTexture*,
                     IdentifiableWrapper<Texture>>& loadedTextures) const;
 
-public:
+    std::vector<glm::vec3>
+    calculateTangents(aiMesh* mesh) const;
 
-    ModelLoader(IdentifiableCollection<Model>& models,
-                TextureCollection& textures);
+public:
 
     explicit ModelLoader(Room* room);
 
     explicit ModelLoader(const std::shared_ptr<Room>& room);
 
-    template<typename Vertex>
-    [[nodiscard]] ModelLoaderResult loadModel(const cmrc::file& file) const {
-        return loadModel<Vertex>(file.begin(), file.size());
+    template<class Vertex, class Instance>
+    [[nodiscard]] ModelLoaderResult loadModel(
+            const std::shared_ptr<FrameBuffer>& target,
+            IdentifiableWrapper<ShaderProgram> shader,
+            const std::shared_ptr<ShaderUniformDescriptor>& materialDescriptor,
+            const cmrc::file& file) const {
+        return loadModel<Vertex, Instance>(
+                target, shader, materialDescriptor, file.begin(), file.size());
     }
 
-    template<typename Vertex>
-    ModelLoaderResult loadModel(const void* buffer, size_t length) const {
+    template<class Vertex, class Instance>
+    [[nodiscard]]ModelLoaderResult
+    loadModel(
+            const std::shared_ptr<FrameBuffer>& target,
+            IdentifiableWrapper<ShaderProgram> shader,
+            const std::shared_ptr<ShaderUniformDescriptor>& materialDescriptor,
+            const void* buffer,
+            size_t length) const {
         Assimp::Importer importer;
         auto scene = importer.ReadFileFromMemory(
                 buffer,
                 length,
-                aiProcess_CalcTangentSpace |
                 aiProcess_Triangulate |
                 aiProcess_JoinIdenticalVertices |
-                aiProcess_GenNormals |
                 aiProcess_SortByPType |
                 aiProcess_RemoveRedundantMaterials |
                 aiProcess_EmbedTextures |
                 aiProcess_FlipUVs
         );
-        return loadModel<Vertex>(scene);
+        return loadModel<Vertex, Instance>(target, shader,
+                                           materialDescriptor, scene);
     }
 
-    template<typename Vertex>
-    ModelLoaderResult loadModel(const std::string& directory,
-                                const std::string& fileName) const {
+    template<class Vertex, class Instance>
+    [[nodiscard]]ModelLoaderResult loadModel(
+            const std::shared_ptr<FrameBuffer>& target,
+            IdentifiableWrapper<ShaderProgram> shader,
+            const std::shared_ptr<ShaderUniformDescriptor>& materialDescriptor,
+            const std::string& directory,
+            const std::string& fileName) const {
         Assimp::Importer importer;
         importer.GetIOHandler()->ChangeDirectory(directory);
 
         auto scene = importer.ReadFile(
                 fileName,
-                aiProcess_CalcTangentSpace |
                 aiProcess_Triangulate |
                 aiProcess_JoinIdenticalVertices |
-                aiProcess_GenNormals |
                 aiProcess_SortByPType |
                 aiProcess_RemoveRedundantMaterials |
                 aiProcess_EmbedTextures |
                 aiProcess_FlipUVs
         );
-        return loadModel<Vertex>(scene);
+        return loadModel<Vertex, Instance>(target, shader,
+                                           materialDescriptor, scene);
     }
 
-    template<typename Vertex>
-    ModelLoaderResult loadModel(const aiScene* scene) const {
+    template<class Vertex, class Instance>
+    [[nodiscard]] ModelLoaderResult loadModel(
+            const std::shared_ptr<FrameBuffer>& target,
+            IdentifiableWrapper<ShaderProgram> shader,
+            const std::shared_ptr<ShaderUniformDescriptor>& materialDescriptor,
+            const aiScene* scene) const {
         if (!scene) return {false};
 
         ModelLoaderResult result = {true};
 
+        auto vertexDescription = Vertex::getDescription();
+        auto instanceDescription = Instance::getInstancingDescription();
+
         std::map<std::string, IdentifiableWrapper<Texture>> textures;
         std::vector<std::unique_ptr<Mesh>> meshes;
-        std::vector<Material> materials;
+        std::vector<IdentifiableWrapper<Material>> materials;
         meshes.reserve(scene->mNumMeshes);
         materials.reserve(scene->mNumMaterials);
 
@@ -159,17 +194,25 @@ public:
 
         for (int i = 0; i < scene->mNumMaterials; ++i) {
             auto* material = scene->mMaterials[i];
-            loadMaterial(materials, textures, material);
+            loadMaterial(materials, target, shader, materialDescriptor,
+                         textures,
+                         vertexDescription, instanceDescription, material);
         }
 
+        uint32_t vertices = 0;
+        uint32_t faces = 0;
         for (int meshIndex = 0; meshIndex < scene->mNumMeshes; ++meshIndex) {
             auto* mesh = scene->mMeshes[meshIndex];
-            auto meshResult = loadMesh<Vertex>(mesh);
-            meshResult->setMaterial(materials[mesh->mMaterialIndex]);
+            auto meshResult = loadMesh<Vertex>(
+                    mesh,
+                    materials[mesh->mMaterialIndex]);
+            vertices += mesh->mNumVertices;
+            faces += mesh->mNumFaces;
             meshes.emplace_back(std::move(meshResult));
         }
 
-        result.model = _models.create(meshes);
+        result.model = _room->getModels().create(meshes);
+        result.model->defineInstanceStruct<Instance>();
 
         return result;
     }

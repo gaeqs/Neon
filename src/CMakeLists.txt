@@ -1,67 +1,137 @@
-set(
-        SOURCES
+set(SOURCES
         engine/Application.cpp
         engine/Application.h
         util/Result.h
-        gl/Shader.cpp
-        gl/Shader.h
-        engine/Room.cpp
-        engine/Room.h
-        engine/Camera.cpp
-        engine/Camera.h
-        engine/Frustum.cpp
-        engine/Frustum.h
-        engine/Renderer.cpp
-        engine/Renderer.h
-        engine/GraphicComponent.cpp
-        engine/GraphicComponent.h
-        engine/Material.cpp
-        engine/Material.h
-        engine/GameObject.cpp
-        engine/GameObject.h
-        engine/Component.cpp
-        engine/Component.h
+        engine/structure/Room.cpp
+        engine/structure/Room.h
+        engine/geometry/Camera.cpp
+        engine/geometry/Camera.h
+        engine/geometry/Frustum.cpp
+        engine/geometry/Frustum.h
+        engine/render/GraphicComponent.cpp
+        engine/render/GraphicComponent.h
+        engine/shader/Material.cpp
+        engine/shader/Material.h
+        engine/structure/GameObject.cpp
+        engine/structure/GameObject.h
+        engine/structure/Component.cpp
+        engine/structure/Component.h
         util/ClusteredLinkedCollection.h
         engine/Engine.h
         engine/collection/ComponentCollection.cpp
         engine/collection/ComponentCollection.h
-        gl/GLTexture.cpp
-        gl/GLTexture.h
         engine/collection/TextureCollection.cpp
         engine/collection/TextureCollection.h
-        engine/IdentifiableWrapper.h
-        engine/Transform.cpp
-        engine/Transform.h
-        engine/Identifiable.h
-        engine/Texture.cpp
-        engine/Texture.h
-        gl/GLMesh.cpp
-        gl/GLMesh.h
-        gl/GLShaderRenderer.cpp
-        gl/GLShaderRenderer.h
+        engine/structure/IdentifiableWrapper.h
+        engine/geometry/Transform.cpp
+        engine/geometry/Transform.h
+        engine/structure/Identifiable.h
+        engine/render/Texture.cpp
+        engine/render/Texture.h
+        engine/shader/ShaderProgram.cpp
+        engine/shader/ShaderProgram.h
+        engine/shader/ShaderType.h
+        engine/collection/IdentifiableCollection.h
+        engine/model/DefaultInstancingData.h
         util/component/CameraMovementComponent.cpp
         util/component/CameraMovementComponent.h
-        engine/TextureFormat.h
+        engine/render/TextureFormat.h
         assimp/ModelLoader.h
         assimp/AssimpMaterialParameters.h
         assimp/ModelLoader.cpp
-        engine/KeyboardEvent.h
-        engine/CursorEvent.h
+        engine/io/KeyboardEvent.h
+        engine/io/CursorEvent.h
         engine/model/Mesh.cpp
         engine/model/Mesh.h
         engine/model/Model.cpp
         engine/model/Model.h
-        gl/GLModel.cpp
-        gl/GLModel.h
         engine/shader/ShaderUniformBuffer.cpp
         engine/shader/ShaderUniformBuffer.h
-        gl/GLShaderUniformBuffer.cpp
-        gl/GLShaderUniformBuffer.h
-        engine/collection/IdentifiableCollection.h
-        engine/model/DefaultInstancingData.h)
+        engine/shader/ShaderUniformBinding.h
+        engine/shader/ShaderUniformDescriptor.cpp
+        engine/shader/ShaderUniformDescriptor.h
+        engine/model/InputDescription.h
+        engine/render/FrameBuffer.cpp
+        engine/render/FrameBuffer.h
+        engine/render/SwapChainFrameBuffer.cpp
+        engine/render/SwapChainFrameBuffer.h
+        engine/render/SimpleFrameBuffer.h
+        engine/render/SimpleFrameBuffer.cpp
+        engine/render/Render.cpp
+        engine/render/Render.h
+        engine/render/RenderPassStrategy.h
+        engine/render/RenderPassStrategy.cpp
+        engine/render/FrameInformation.h
+        util/Range.h
+        util/component/DebugOverlayComponent.cpp
+        util/component/DebugOverlayComponent.h
+        util/DeferredUtils.cpp
+        util/DeferredUtils.h
+        util/profile/Profiler.cpp
+        util/profile/Profiler.h
+        util/profile/ProfileStack.cpp
+        util/profile/ProfileStack.h
+        util/profile/ProfileStackRecorder.cpp
+        util/profile/ProfileStackRecorder.h
+        util/GLMUtils.cpp
+        util/GLMUtils.h
+        engine/structure/ComponentImplementedEvents.cpp
+        engine/structure/ComponentImplementedEvents.h
+        engine/light/DirectionalLight.cpp
+        engine/light/DirectionalLight.h
+        engine/light/LightSystem.cpp
+        engine/light/LightSystem.h
+        engine/shader/MaterialConfiguration.h
+        engine/light/PointLight.h
+        engine/light/PointLight.cpp
+        engine/light/FlashLight.h
+        engine/light/FlashLight.cpp
+        assimp/AssimpGeometry.cpp
+        assimp/AssimpGeometry.h)
+
+
+set(VULKAN_SOURCES
+        vulkan/VKApplication.cpp
+        vulkan/VKApplication.h
+        vulkan/VKSwapChainSupportDetails.h
+        vulkan/VKQueueFamilyIndices.h
+        vulkan/VKTexture.cpp
+        vulkan/VKTexture.h
+        vulkan/buffer/Buffer.h
+        vulkan/buffer/SimpleBuffer.cpp
+        vulkan/buffer/SimpleBuffer.h
+        vulkan/buffer/StagingBuffer.cpp
+        vulkan/buffer/StagingBuffer.h
+        vulkan/util/VKUtil.cpp
+        vulkan/util/VKUtil.h
+        vulkan/VKMesh.cpp
+        vulkan/VKMesh.h
+        vulkan/shader/VKShaderUniformBuffer.cpp
+        vulkan/shader/VKShaderUniformBuffer.h
+        vulkan/shader/VKShaderProgram.cpp
+        vulkan/shader/VKShaderProgram.h
+        vulkan/VKModel.cpp
+        vulkan/VKModel.h
+        vulkan/spirv/SPIRVCompiler.h
+        vulkan/spirv/SPIRVCompiler.cpp
+        vulkan/VKShaderUniform.h
+        vulkan/shader/VKShaderUniformDescriptor.cpp
+        vulkan/shader/VKShaderUniformDescriptor.h
+        vulkan/shader/VKMaterial.cpp
+        vulkan/shader/VKMaterial.h
+        vulkan/render/VKFrameBuffer.cpp
+        vulkan/render/VKFrameBuffer.h
+        vulkan/render/VKSwapChainFrameBuffer.cpp
+        vulkan/render/VKSwapChainFrameBuffer.h
+        vulkan/render/VKSimpleFrameBuffer.h
+        vulkan/render/VKSimpleFrameBuffer.cpp
+        vulkan/render/VKRenderPass.h
+        vulkan/render/VKRenderPass.cpp
+        vulkan/render/VKRender.cpp
+        vulkan/render/VKRender.h)
 
 cmrc_add_resource_library(dummy)
 
-add_library(neon STATIC ${SOURCES})
+add_library(neon STATIC ${SOURCES} ${VULKAN_SOURCES})
 target_link_libraries(neon PUBLIC ${LIBRARIES} ${CMAKE_DL_LIBS} dummy)
-target_compile_definitions(neon PUBLIC USE_OPENGL)
+target_compile_definitions(neon PUBLIC USE_VULKAN)

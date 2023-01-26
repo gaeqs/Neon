@@ -28,24 +28,22 @@ void TestComponent::onStart() {
     _graphic = getGameObject()->newComponent<GraphicComponent>();
 
     std::vector<TestVertex> vertices = {
-            {{-0.5f, -0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
-            {{0.5f,  -0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
-            {{0.5f,  0.5f,  0.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 0.0f}},
-            {{-0.5f, 0.5f,  0.0f}, {0.0f, 0.0f, 1.0f}, {0.0f, 0.0f}},
+            {{-0.5f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
+            {{0.5f,  -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
+            {{0.5f,  0.5f,  0.0f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 0.0f}},
+            {{-0.5f, 0.5f,  0.0f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 1.0f}, {0.0f, 0.0f}},
     };
 
     std::vector<uint32_t> indices = {0, 1, 2, 0, 2, 3};
 
     std::vector<std::unique_ptr<Mesh>> meshes;
 
-    auto mesh = std::make_unique<Mesh>();
-    mesh->getMaterial().setImage("diffuse", image);
-    mesh->uploadVertexData(vertices, indices);
-    meshes.push_back(std::move(mesh));
+    //auto mesh = std::make_unique<Mesh>(getRoom()->getApplication());
+    //mesh->getMaterial().setImage("diffuse", image);
+    //mesh->uploadVertexData(vertices, indices);
+    //meshes.push_back(std::move(mesh));
 
     auto model = getRoom()->getModels().create(meshes);
-    model->setShader("default");
-
     _graphic->setModel(model);
 }
 

@@ -4,13 +4,11 @@
 
 #include "Application.h"
 
-#include <engine/Room.h>
-#include <engine/KeyboardEvent.h>
-#include <engine/CursorEvent.h>
+#include <engine/structure/Room.h>
+#include <engine/io/KeyboardEvent.h>
+#include <engine/io/CursorEvent.h>
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
-    glViewport(0, 0, width, height);
-
     auto* application = static_cast<Application*>(glfwGetWindowUserPointer(
             window));
     application->internalForceSizeValues(width, height);
@@ -31,8 +29,17 @@ void cursor_pos_callback(GLFWwindow* window, double x, double y) {
 }
 
 Application::Application(int32_t width, int32_t height) :
-        _width(width), _height(height), _window(nullptr),
-        _last_cursor_pos(0.0, 0.0) {
+        _width(width),
+        _height(height),
+        _window(nullptr),
+        _room(nullptr),
+        _lastCursorPosition(0.0, 0.0),
+        _currentFrameInformation(),
+        _implementation() {
+}
+
+Application::~Application() {
+    glfwTerminate();
 }
 
 Result<GLFWwindow*, std::string> Application::init(const std::string& name) {
@@ -40,77 +47,99 @@ Result<GLFWwindow*, std::string> Application::init(const std::string& name) {
         return {"Failed to initialize GLFW"};
     }
 
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    _implementation.preWindowCreation();
 
-    // Open a window and create its OpenGL context
-    _window = glfwCreateWindow(_width, _height, name.c_str(), nullptr,
-                               nullptr);
+    _window = glfwCreateWindow(_width, _height, name.c_str(), nullptr, nullptr);
     if (!_window) {
         return {"Failed to open GLFW window"};
     }
-
-    // Enable vertical sync (on cards that support it)
-    glfwMakeContextCurrent(_window);
-    glfwSwapInterval(0);
-
-    if (!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress)) {
-        return {"Failed to initialize GLAD"};
-    }
-
 
     glfwSetWindowUserPointer(_window, this);
     glfwSetWindowSizeCallback(_window, framebuffer_size_callback);
     glfwSetKeyCallback(_window, key_size_callback);
     glfwSetCursorPosCallback(_window, cursor_pos_callback);
 
-    glfwSetInputMode(_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-    glfwGetCursorPos(_window, &_last_cursor_pos.x, &_last_cursor_pos.y);
+    _implementation.postWindowCreation(_window);
 
     return {_window};
 }
 
-Result<uint32_t, std::string> Application::startGameLoop() const {
+Result<uint32_t, std::string> Application::startGameLoop() {
     if (_window == nullptr) {
         return {"Window is not initialized"};
     }
 
     uint32_t frames = 0;
 
-    auto last_tick = std::chrono::high_resolution_clock::now();
+    auto lastTick = std::chrono::high_resolution_clock::now();
+    float lastFrameProcessTime = 0.0f;
     try {
         while (!glfwWindowShouldClose(_window)) {
+            DEBUG_PROFILE(_profiler, tick);
             auto now = std::chrono::high_resolution_clock::now();
-            auto duration = now - last_tick;
-            last_tick = now;
+            auto duration = now - lastTick;
+            lastTick = now;
 
-            float seconds = static_cast<float>(duration.count())
-                            / 1000000000.0f;
+            float seconds = static_cast<float>(duration.count()) * 1e-9f;
+
+            _currentFrameInformation = {
+                    frames,
+                    seconds,
+                    lastFrameProcessTime
+            };
 
             //std::cout << (1 / seconds) << std::endl;
 
-            if (_room != nullptr) {
-                _room->update(seconds);
+            bool preUpdate;
+            {
+                DEBUG_PROFILE_ID(_profiler, preUpdate, "preUpdate (GPU Wait)");
+                preUpdate = _implementation.preUpdate();
             }
 
-            glfwPollEvents();
+            if (preUpdate) {
+                glfwPollEvents();
 
-            if (_room != nullptr) {
-                _room->draw();
+                if (_room != nullptr) {
+                    _room->update(seconds);
+                    _room->preDraw();
+                    _room->draw();
+                }
+                {
+                    DEBUG_PROFILE(_profiler, endDraw);
+                    _implementation.endDraw();
+                }
             }
 
-            glfwSwapBuffers(_window);
-            frames++;
+            now = std::chrono::high_resolution_clock::now();
+            auto processTime = now - lastTick;
+
+            lastFrameProcessTime =
+                    static_cast<float>(processTime.count()) * 1e-9;
+
+            ++frames;
         }
+        _implementation.finishLoop();
     } catch (const std::exception& exception) {
-        glfwTerminate();
         return {exception.what()};
     }
 
-    glfwTerminate();
-
     return {frames};
+}
+
+const Application::Implementation& Application::getImplementation() const {
+    return _implementation;
+}
+
+Application::Implementation& Application::getImplementation() {
+    return _implementation;
+}
+
+const Profiler& Application::getProfiler() const {
+    return _profiler;
+}
+
+Profiler& Application::getProfiler() {
+    return _profiler;
 }
 
 int32_t Application::getWidth() const {
@@ -125,14 +154,28 @@ float Application::getAspectRatio() const {
     return static_cast<float>(_width) / static_cast<float>(_height);
 }
 
+FrameInformation Application::getCurrentFrameInformation() const {
+    return _currentFrameInformation;
+}
+
 void Application::setRoom(const std::shared_ptr<Room>& room) {
-    if (_room != nullptr) {
-        _room->_application = nullptr;
+    if (room != nullptr && room->getApplication() != this) {
+        throw std::runtime_error("Room's application is not this application!");
     }
     _room = room;
     if (_room != nullptr) {
-        _room->_application = this;
         _room->onResize();
+    }
+    _implementation.setRoom(room);
+}
+
+void Application::lockMouse(bool lock) {
+    if (lock) {
+        glfwSetInputMode(_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        glfwGetCursorPos(_window, &_lastCursorPosition.x,
+                         &_lastCursorPosition.y);
+    } else {
+        glfwSetInputMode(_window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
     }
 }
 
@@ -159,8 +202,8 @@ void Application::internalKeyEvent(int key, int scancode,
 
 void Application::internalCursorPosEvent(double x, double y) {
     glm::dvec2 current(x, y);
-    auto delta = current - _last_cursor_pos;
-    _last_cursor_pos = current;
+    auto delta = current - _lastCursorPosition;
+    _lastCursorPosition = current;
 
     CursorMoveEvent event{
             current,

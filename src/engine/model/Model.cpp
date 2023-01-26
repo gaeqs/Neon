@@ -4,6 +4,8 @@
 
 #include "Model.h"
 
+#include <engine/structure/Room.h>
+
 uint64_t MODEL_ID_GENERATOR = 1;
 
 std::vector<Mesh::Implementation*> Model::getMeshImplementations(
@@ -19,11 +21,11 @@ std::vector<Mesh::Implementation*> Model::getMeshImplementations(
     return vector;
 }
 
-Model::Model(std::vector<std::unique_ptr<Mesh>>& meshes) :
+Model::Model(Room* room,
+             std::vector<std::unique_ptr<Mesh>>& meshes) :
         _id(MODEL_ID_GENERATOR++),
-        _implementation(getMeshImplementations(meshes)),
-        _meshes(std::move(meshes)),
-        _shader() {
+        _implementation(room->getApplication(), getMeshImplementations(meshes)),
+        _meshes(std::move(meshes)) {
 }
 
 uint64_t Model::getId() const {
@@ -38,14 +40,6 @@ const Model::Implementation& Model::getImplementation() const {
     return _implementation;
 }
 
-const std::string& Model::getShader() const {
-    return _shader;
-}
-
-void Model::setShader(const std::string& shader) {
-    _shader = shader;
-}
-
 const std::type_index& Model::getInstancingStructType() const {
     return _implementation.getInstancingStructType();
 }
@@ -58,6 +52,10 @@ bool Model::freeInstance(uint32_t id) {
     return _implementation.freeInstance(id);
 }
 
-void Model::uploadDataRaw(uint32_t id, const void* raw) const {
+void Model::uploadDataRaw(uint32_t id, const void* raw) {
     _implementation.uploadDataRaw(id, raw);
+}
+
+void Model::flush() {
+    _implementation.flush();
 }

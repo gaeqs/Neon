@@ -10,15 +10,34 @@
 #include <string>
 #include <memory>
 
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 
+#include <engine/render/FrameInformation.h>
 #include <util/Result.h>
+#include <util/profile/Profiler.h>
+
+
+#ifdef USE_VULKAN
+
+#define GLFW_INCLUDE_VULKAN
+
+#include <GLFW/glfw3.h>
+#include <vulkan/VKApplication.h>
+
+#endif
+
 
 class Room;
 
 class Application {
+
+public:
+
+#ifdef USE_VULKAN
+    using Implementation = VKApplication;
+#endif
+
+protected:
 
     int32_t _width;
     int32_t _height;
@@ -26,23 +45,41 @@ class Application {
 
     std::shared_ptr<Room> _room;
 
-    glm::dvec2 _last_cursor_pos;
+    glm::dvec2 _lastCursorPosition;
+    FrameInformation _currentFrameInformation;
+
+    Implementation _implementation;
+    Profiler _profiler;
 
 public:
 
     Application(int32_t width, int32_t height);
 
+    ~Application();
+
     Result<GLFWwindow*, std::string> init(const std::string& name);
 
-    Result<uint32_t, std::string> startGameLoop() const;
+    [[nodiscard]] Result<uint32_t, std::string> startGameLoop();
 
-    int32_t getWidth() const;
+    [[nodiscard]] const Implementation& getImplementation() const;
 
-    int32_t getHeight() const;
+    [[nodiscard]] Implementation& getImplementation();
 
-    float getAspectRatio() const;
+    [[nodiscard]]  const Profiler& getProfiler() const;
+
+    [[nodiscard]] Profiler& getProfiler();
+
+    [[nodiscard]] int32_t getWidth() const;
+
+    [[nodiscard]] int32_t getHeight() const;
+
+    [[nodiscard]] float getAspectRatio() const;
+
+    [[nodiscard]] FrameInformation getCurrentFrameInformation() const;
 
     void setRoom(const std::shared_ptr<Room>& room);
+
+    void lockMouse(bool lock);
 
     //region INTERNAL CALLS
 

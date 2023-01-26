@@ -8,15 +8,16 @@
 #include <string>
 #include <typeindex>
 
-#include <engine/Identifiable.h>
+#include <engine/structure/Identifiable.h>
 #include <engine/model/Mesh.h>
 
-#ifdef USE_OPENGL
+#ifdef USE_VULKAN
 
-#include <gl/GLModel.h>
+#include <vulkan/VKModel.h>
 
 #endif
 
+class Room;
 
 class Model : public Identifiable {
 
@@ -24,8 +25,8 @@ class Model : public Identifiable {
     class IdentifiableWrapper;
 
 public:
-#ifdef USE_OPENGL
-    using Implementation = GLModel;
+#ifdef USE_VULKAN
+    using Implementation = VKModel;
 #endif
 
 private:
@@ -35,25 +36,22 @@ private:
 
     std::vector<std::unique_ptr<Mesh>> _meshes;
 
-    std::string _shader;
-
     static std::vector<Mesh::Implementation*> getMeshImplementations(
             const std::vector<std::unique_ptr<Mesh>>& meshes
     );
 
 public:
 
-    explicit Model(std::vector<std::unique_ptr<Mesh>>& meshes);
+    Model(const Model& other) = delete;
+
+    explicit Model(Room* room,
+                   std::vector<std::unique_ptr<Mesh>>& meshes);
 
     [[nodiscard]] uint64_t getId() const override;
 
     [[nodiscard]] Model::Implementation& getImplementation();
 
     [[nodiscard]] const Model::Implementation& getImplementation() const;
-
-    [[nodiscard]] const std::string& getShader() const;
-
-    void setShader(const std::string& shader);
 
     [[nodiscard]] const std::type_index& getInstancingStructType() const;
 
@@ -71,8 +69,9 @@ public:
         _implementation.uploadData(id, data);
     }
 
-    void uploadDataRaw(uint32_t id, const void* raw) const;
+    void uploadDataRaw(uint32_t id, const void* raw);
 
+    void flush();
 };
 
 

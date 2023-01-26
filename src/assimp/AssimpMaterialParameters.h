@@ -22,6 +22,7 @@ const std::string DIFFUSE_TEXTURE = "diffuseTexture";
 const std::string SPECULAR_TEXTURE = "specularTexture";
 const std::string AMBIENT_TEXTURE = "ambientTexture";
 const std::string EMISSIVE_TEXTURE = "emissiveTexture";
-const std::string DISPLACEMENT_TEXTURE = "dislpacementTexture";
+const std::string DISPLACEMENT_TEXTURE = "displacementTexture";
+const std::string NORMAL_TEXTURE = "normalTexture";
 
 #endif //VRTRACKING_ASSIMPMATERIALPARAMETRS_H

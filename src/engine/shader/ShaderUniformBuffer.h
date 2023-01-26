@@ -5,13 +5,17 @@
 #ifndef NEON_SHADERUNIFORMBUFFER_H
 #define NEON_SHADERUNIFORMBUFFER_H
 
-#include <engine/Identifiable.h>
+#include <engine/structure/Identifiable.h>
 
-#ifdef USE_OPENGL
+#ifdef USE_VULKAN
 
-#include <gl/GLShaderUniformBuffer.h>
+#include "vulkan/shader/VKShaderUniformBuffer.h"
 
 #endif
+
+class Application;
+
+class ShaderUniformDescriptor;
 
 class ShaderUniformBuffer : public Identifiable {
 
@@ -19,8 +23,8 @@ class ShaderUniformBuffer : public Identifiable {
     class IdentifiableWrapper;
 
 public:
-#ifdef USE_OPENGL
-    using Implementation = GLShaderUniformBuffer;
+#ifdef USE_VULKAN
+    using Implementation = VKShaderUniformBuffer;
 #endif
 
 private:
@@ -30,18 +34,27 @@ private:
 
 public:
 
-    ShaderUniformBuffer();
+    explicit ShaderUniformBuffer(
+            const std::shared_ptr<ShaderUniformDescriptor>& descriptor);
+
+    [[nodiscard]] const Implementation& getImplementation() const;
+
+    [[nodiscard]] Implementation& getImplementation();
 
     [[nodiscard]] uint64_t getId() const override;
 
-    void setBindingPoint(uint32_t point) const;
+    void setBindingPoint(uint32_t point);
 
-    void uploadData(const void* data, size_t size) const;
+    void uploadData(uint32_t index, const void* data, size_t size);
+
+    void setTexture(uint32_t index, IdentifiableWrapper<Texture> texture);
 
     template<class T>
-    void uploadData(const T& data) const {
-        uploadData(&data, sizeof(T));
+    void uploadData(uint32_t index, const T& data) {
+        uploadData(index, &data, sizeof(T));
     }
+
+    void prepareForFrame();
 
 };
 

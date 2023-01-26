@@ -5,33 +5,34 @@
 #ifndef RVTRACKING_TESTVERTEX_H
 #define RVTRACKING_TESTVERTEX_H
 
-#include <glm/glm.hpp>
-#include <glad/glad.h>
+#include <engine/model/InputDescription.h>
 
 struct TestVertex {
     glm::vec3 position;
     glm::vec3 normal;
+    glm::vec3 tangent;
     glm::vec2 texCoords;
 
-    static uint32_t setupVAO() {
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(TestVertex),
-                              (void*) 0);
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(TestVertex),
-                              (void*) (3 * sizeof(float)));
-        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(TestVertex),
-                              (void*) (6 * sizeof(float)));
-        glEnableVertexAttribArray(0);
-        glEnableVertexAttribArray(1);
-        glEnableVertexAttribArray(2);
-        return 3;
+    static InputDescription getDescription() {
+        InputDescription description(
+                sizeof(TestVertex),
+                InputRate::VERTEX
+        );
+        description.addAttribute(3, 0);
+        description.addAttribute(3, sizeof(float) * 3);
+        description.addAttribute(3, sizeof(float) * 6);
+        description.addAttribute(2, sizeof(float) * 9);
+
+        return description;
     }
 
     static TestVertex fromAssimp(
             const glm::vec3& position,
             const glm::vec3& normal,
+            const glm::vec3& tangent,
             const glm::vec4& color,
             const glm::vec2& texCoords) {
-        return {position, normal, texCoords};
+        return {position, normal, tangent, texCoords};
     }
 };
 

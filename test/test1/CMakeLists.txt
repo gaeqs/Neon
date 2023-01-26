@@ -5,7 +5,13 @@ set(
         TestComponent.h
         TestVertex.h
         GlobalParametersUpdaterComponent.cpp
-        GlobalParametersUpdaterComponent.h)
+        GlobalParametersUpdaterComponent.h
+        LockMouseComponent.cpp
+        LockMouseComponent.h
+        ConstantRotationComponent.cpp
+        ConstantRotationComponent.h
+        ImGuiTestComponent.cpp
+        ImGuiTestComponent.h)
 
 cmrc_add_resource_library(
         shaders
@@ -13,6 +19,16 @@ cmrc_add_resource_library(
         WHENCE shader
         shader/default.vert
         shader/default.frag
+        shader/deferred.vert
+        shader/deferred.frag
+        shader/screen.vert
+        shader/screen.frag
+        shader/directional_light.vert
+        shader/directional_light.frag
+        shader/point_light.vert
+        shader/point_light.frag
+        shader/flash_light.vert
+        shader/flash_light.frag
 )
 
 cmrc_add_resource_library(
