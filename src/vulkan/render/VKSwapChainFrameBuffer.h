@@ -26,8 +26,10 @@ class VKSwapChainFrameBuffer : public VKFrameBuffer {
     VkImageView _depthImageView;
 
     std::vector<VkFramebuffer> _swapChainFrameBuffers;
+    VkExtent2D _extent;
 
     VKRenderPass _renderPass;
+
 
     bool _depth;
 
@@ -61,12 +63,13 @@ public:
 
     [[nodiscard]] VKRenderPass& getRenderPass() override;
 
-
     [[nodiscard]] uint32_t getWidth() const override;
 
     [[nodiscard]] uint32_t getHeight() const override;
 
-    bool renderImGui() override;
+    [[nodiscard]] bool renderImGui() override;
+
+    [[nodiscard]] bool requiresRecreation();
 
     void recreate();
 

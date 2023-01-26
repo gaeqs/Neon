@@ -30,7 +30,10 @@ void VKRender::render(
         renderPassInfo.renderPass = renderPass.getRaw();
         renderPassInfo.framebuffer = frameBuffer.getRaw();
         renderPassInfo.renderArea.offset = {0, 0};
-        renderPassInfo.renderArea.extent = _vkApplication->getSwapChainExtent();
+        renderPassInfo.renderArea.extent = {
+                frameBuffer.getWidth(),
+                frameBuffer.getHeight()
+        };
 
         std::vector<VkClearValue> clearValues;
         clearValues.resize(frameBuffer.getColorAttachmentAmount() +
@@ -76,4 +79,8 @@ void VKRender::render(
 
         vkCmdEndRenderPass(commandBuffer);
     }
+}
+
+void VKRender::setupFrameBufferRecreation() {
+    vkDeviceWaitIdle(_vkApplication->getDevice());
 }

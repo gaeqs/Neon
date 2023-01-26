@@ -9,7 +9,12 @@
 
 class ImGuiTestComponent : public Component {
 
+    std::shared_ptr<SimpleFrameBuffer> _frameBuffer;
+    ImVec2 _windowSize;
+
 public:
+
+    void onStart() override;
 
     void onUpdate(float deltaTime) override;
 

@@ -99,8 +99,6 @@ public:
 
     //region EVENTS
 
-    void onResize();
-
     void onKey(const KeyboardEvent& event);
 
     void onCursorMove(const CursorMoveEvent& event);

@@ -50,7 +50,7 @@ public:
 
     void render(Room* room) const;
 
-    void recreateFrameBuffers();
+    void checkFrameBufferRecreationConditions();
 
     [[nodiscard]] size_t getPassesAmount() const;
 

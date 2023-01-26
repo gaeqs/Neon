@@ -33,9 +33,16 @@ void Render::render(Room* room) const {
     _implementation.render(room, _strategies);
 }
 
-void Render::recreateFrameBuffers() {
+void Render::checkFrameBufferRecreationConditions() {
+    bool first = true;
     for (const auto& item: _strategies) {
-        item.frameBuffer->recreate();
+        if (item.frameBuffer->requiresRecreation()) {
+            if(first) {
+                _implementation.setupFrameBufferRecreation();
+                first = false;
+            }
+            item.frameBuffer->recreate();
+        }
     }
 }
 

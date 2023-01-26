@@ -30,6 +30,8 @@ public:
 
     virtual ~FrameBuffer() = default;
 
+    virtual bool requiresRecreation() = 0;
+
     virtual void recreate() = 0;
 
     [[nodiscard]] virtual Implementation& getImplementation() = 0;

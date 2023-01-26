@@ -30,6 +30,8 @@ public:
             const std::vector<RenderPassStrategy>& strategies)
             const;
 
+    void setupFrameBufferRecreation();
+
 };
 
 

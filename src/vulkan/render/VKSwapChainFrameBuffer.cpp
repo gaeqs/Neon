@@ -99,6 +99,8 @@ void VKSwapChainFrameBuffer::createFrameBuffers() {
             throw std::runtime_error("Failed to create framebuffer!");
         }
     }
+
+    _extent = extent;
 }
 
 void VKSwapChainFrameBuffer::cleanup() {
@@ -126,6 +128,7 @@ VKSwapChainFrameBuffer::VKSwapChainFrameBuffer(
         _depthImageMemory(VK_NULL_HANDLE),
         _depthImageView(VK_NULL_HANDLE),
         _swapChainFrameBuffers(),
+        _extent(),
         _renderPass(room->getApplication(),
                     {_vkApplication->getSwapChainImageFormat()},
                     depth, true, _vkApplication->getDepthImageFormat()),
@@ -211,9 +214,15 @@ bool VKSwapChainFrameBuffer::renderImGui() {
 }
 
 uint32_t VKSwapChainFrameBuffer::getWidth() const {
-    return _vkApplication->getSwapChainExtent().width;
+    return _extent.width;
 }
 
 uint32_t VKSwapChainFrameBuffer::getHeight() const {
-    return _vkApplication->getSwapChainExtent().height;
+    return _extent.height;
+}
+
+bool VKSwapChainFrameBuffer::requiresRecreation() {
+    auto& extent = _vkApplication->getSwapChainExtent();
+    if(extent.width == 0 || extent.height == 0) return false;
+    return extent.width != getWidth() || extent.height != getHeight();
 }

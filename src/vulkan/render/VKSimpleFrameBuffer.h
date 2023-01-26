@@ -12,6 +12,7 @@
 
 #include <vulkan/render/VKFrameBuffer.h>
 #include <vulkan/render/VKRenderPass.h>
+
 #include <imgui.h>
 
 class Room;
@@ -34,6 +35,8 @@ class VKSimpleFrameBuffer : public VKFrameBuffer {
     std::vector<IdentifiableWrapper<Texture>> _textures;
 
     std::vector<VkFormat> _formats;
+    VkExtent2D _extent;
+
     VKRenderPass _renderPass;
 
     bool _depth;
@@ -43,7 +46,6 @@ class VKSimpleFrameBuffer : public VKFrameBuffer {
     void createFrameBuffer();
 
     void cleanup();
-
 
 public:
 
@@ -78,7 +80,12 @@ public:
     [[nodiscard]] const std::vector<IdentifiableWrapper<Texture>>&
     getTextures() const;
 
-    void recreate();
+    void recreate(std::pair<uint32_t, uint32_t> size);
+
+    [[nodiscard]] bool defaultRecreationCondition() const;
+
+    [[nodiscard]] std::pair<uint32_t, uint32_t>
+    defaultRecreationParameters() const;
 
 };
 

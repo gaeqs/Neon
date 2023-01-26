@@ -33,6 +33,8 @@ public:
 
     ~SwapChainFrameBuffer() override = default;
 
+    bool requiresRecreation() override;
+
     void recreate() override;
 
     [[nodiscard]] FrameBuffer::Implementation& getImplementation() override;

@@ -11,6 +11,10 @@ SwapChainFrameBuffer::SwapChainFrameBuffer(
 
 }
 
+bool SwapChainFrameBuffer::requiresRecreation() {
+    return _implementation.requiresRecreation();
+}
+
 void SwapChainFrameBuffer::recreate() {
     _implementation.recreate();
 }

@@ -102,14 +102,6 @@ void Room::destroyGameObject(IdentifiableWrapper<GameObject> gameObject) {
     _gameObjects.remove(gameObject.raw());
 }
 
-void Room::onResize() {
-    DEBUG_PROFILE(getApplication()->getProfiler(), onResize);
-    if (_application->getWidth() > 0 && _application->getHeight() > 0) {
-        _camera.setFrustum(_camera.getFrustum().withAspectRatio(
-                _application->getAspectRatio()));
-    }
-}
-
 void Room::onKey(const KeyboardEvent& event) {
     DEBUG_PROFILE(getApplication()->getProfiler(), onKey);
     _components.invokeKeyEvent(getApplication()->getProfiler(), event);

@@ -19,14 +19,12 @@ void VKSimpleFrameBuffer::createImages() {
     _memories.clear();
     _imageViews.clear();
 
-    auto& extent = _vkApplication->getSwapChainExtent();
-
     for (const auto& format: _formats) {
         auto [image, memory] = vulkan_util::createImage(
                 _vkApplication->getDevice(),
                 _vkApplication->getPhysicalDevice(),
-                extent.width,
-                extent.height,
+                _extent.width,
+                _extent.height,
                 VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT |
                 VK_IMAGE_USAGE_SAMPLED_BIT,
                 format
@@ -50,8 +48,8 @@ void VKSimpleFrameBuffer::createImages() {
         auto [image, memory] = vulkan_util::createImage(
                 _vkApplication->getDevice(),
                 _vkApplication->getPhysicalDevice(),
-                extent.width,
-                extent.height,
+                _extent.width,
+                _extent.height,
                 VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT
                 | VK_IMAGE_USAGE_SAMPLED_BIT,
                 _vkApplication->getDepthImageFormat()
@@ -73,15 +71,13 @@ void VKSimpleFrameBuffer::createImages() {
 }
 
 void VKSimpleFrameBuffer::createFrameBuffer() {
-    auto& extent = _vkApplication->getSwapChainExtent();
-
     VkFramebufferCreateInfo framebufferInfo{};
     framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
     framebufferInfo.renderPass = _renderPass.getRaw();
     framebufferInfo.attachmentCount = _imageViews.size();
     framebufferInfo.pAttachments = _imageViews.data();
-    framebufferInfo.width = extent.width;
-    framebufferInfo.height = extent.height;
+    framebufferInfo.width = _extent.width;
+    framebufferInfo.height = _extent.height;
     framebufferInfo.layers = 1;
 
     if (vkCreateFramebuffer(
@@ -122,7 +118,8 @@ void VKSimpleFrameBuffer::cleanup() {
 
 VKSimpleFrameBuffer::VKSimpleFrameBuffer(
         Room* room,
-        const std::vector<TextureFormat>& formats, bool depth) :
+        const std::vector<TextureFormat>& formats,
+        bool depth) :
         VKFrameBuffer(),
         _vkApplication(&room->getApplication()->getImplementation()),
         _images(),
@@ -132,6 +129,7 @@ VKSimpleFrameBuffer::VKSimpleFrameBuffer(
         _textures(),
         _imGuiDescriptors(),
         _formats(vulkan_util::getImageFormats(formats)),
+        _extent(_vkApplication->getSwapChainExtent()),
         _renderPass(room->getApplication(), _formats, depth, false,
                     _vkApplication->getDepthImageFormat()),
         _depth(depth) {
@@ -142,11 +140,10 @@ VKSimpleFrameBuffer::VKSimpleFrameBuffer(
     createFrameBuffer();
 
     // Create the textures
-    auto& extent = _vkApplication->getSwapChainExtent();
     for (uint32_t i = 0; i < _imageViews.size(); ++i) {
         auto texture = room->getTextures().create(
-                static_cast<int32_t>(extent.width),
-                static_cast<int32_t>(extent.height),
+                static_cast<int32_t>(_extent.width),
+                static_cast<int32_t>(_extent.height),
                 _imageViews[i],
                 _layouts[i]
         );
@@ -166,17 +163,18 @@ bool VKSimpleFrameBuffer::hasDepth() const {
     return _depth;
 }
 
-void VKSimpleFrameBuffer::recreate() {
+void VKSimpleFrameBuffer::recreate(std::pair<uint32_t, uint32_t> size) {
+    _extent = {size.first, size.second};
+
     cleanup();
     createImages();
     createFrameBuffer();
 
     // Refresh the textures
-    auto& extent = _vkApplication->getSwapChainExtent();
     for (uint32_t i = 0; i < _textures.size(); ++i) {
         _textures[i]->getImplementation().changeExternalImageView(
-                static_cast<int32_t>(extent.width),
-                static_cast<int32_t>(extent.height),
+                static_cast<int32_t>(_extent.width),
+                static_cast<int32_t>(_extent.height),
                 _imageViews[i]
         );
     }
@@ -225,9 +223,21 @@ ImTextureID VKSimpleFrameBuffer::getImGuiDescriptor(uint32_t index) {
 }
 
 uint32_t VKSimpleFrameBuffer::getWidth() const {
-    return _textures.empty() ? 0 : _textures.front()->getWidth();
+    return _extent.width;
 }
 
 uint32_t VKSimpleFrameBuffer::getHeight() const {
-    return _textures.empty() ? 0 : _textures.front()->getHeight();
+    return _extent.height;
+}
+
+bool VKSimpleFrameBuffer::defaultRecreationCondition() const {
+    auto& extent = _vkApplication->getSwapChainExtent();
+    if(extent.width == 0 || extent.height == 0) return false;
+    return extent.width != getWidth() || extent.height != getHeight();
+}
+
+std::pair<uint32_t, uint32_t>
+VKSimpleFrameBuffer::defaultRecreationParameters() const {
+    auto& extent = _vkApplication->getSwapChainExtent();
+    return {extent.width, extent.height};
 }

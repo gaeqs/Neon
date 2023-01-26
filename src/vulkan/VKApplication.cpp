@@ -101,6 +101,8 @@ bool VKApplication::preUpdate() {
         throw std::runtime_error("Failed to acquire swap chain image!");
     }
 
+    _room->getRender().checkFrameBufferRecreationConditions();
+
     vkResetFences(_device, 1, &_inFlightFences[_currentFrame]);
 
     vkResetCommandBuffer(_commandBuffers[_currentFrame], 0);
@@ -669,7 +671,6 @@ void VKApplication::recreateSwapChain() {
     vkDeviceWaitIdle(_device);
     cleanupSwapChain();
     createSwapChain();
-    _room->getRender().recreateFrameBuffers();
 }
 
 void VKApplication::cleanupSwapChain() {
