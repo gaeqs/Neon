@@ -8,7 +8,8 @@ layout (location = 4) in vec3 fragDirection;
 
 layout (set = 1, binding = 0) uniform sampler2D diffuseTexture;
 layout (set = 1, binding = 1) uniform sampler2D normalTexture;
-layout (set = 1, binding = 2) uniform sampler2D depthTexture;
+layout (set = 1, binding = 2) uniform sampler2D normalZSpecularTexture;
+layout (set = 1, binding = 3) uniform sampler2D depthTexture;
 
 layout (location = 0) out vec4 color;
 
@@ -22,15 +23,14 @@ layout (set = 0, binding = 0) uniform Matrices
 };
 
 void main() {
-    float specularWeight = 16.0f; // TODO
-
     float depth = texture(depthTexture, fragTexCoords).r;
     if(depth == 1.0f) discard;
 
     // Everything is in camera's coordinates!
     vec4 albedo = texture(diffuseTexture, fragTexCoords);
-    vec2 normalXY = texture(normalTexture, fragTexCoords).rg;
-    vec3 normal = vec3(normalXY, sqrt(1 - dot(normalXY, normalXY)));
+    vec2 normalXY = texture(normalTexture, fragTexCoords).xy;
+    vec2 normalZSpecular = texture(normalZSpecularTexture, fragTexCoords).xy;
+    vec3 normal = vec3(normalXY, normalZSpecular.x);
 
     vec4 projectedPosition = vec4(fragPosition, depth, 1.0f);
     vec4 position4 = inverseProjection * projectedPosition;
@@ -40,8 +40,7 @@ void main() {
 
     float diff = max(dot(normal, -fragDirection), 0.0);
     vec3 reflectDirection = reflect(fragDirection, normal);
-    float spec = pow(max(dot(direction, reflectDirection), 0.0), specularWeight);
-
+    float spec = pow(max(dot(direction, reflectDirection), 0.0), normalZSpecular.y);
 
     color = vec4(fragDiffuseColor * diff * albedo.rgb + fragSpecularColor * spec * albedo.rgb, albedo.a);
 }

@@ -15,6 +15,8 @@ enum class TextureFormat {
     R32FG32FB32FA32F,
     R32F,
     R16FG16F,
+    R16FG16FB16F,
+    R16FG16FB16FA16F,
     DEPTH24STENCIL8
 };
 

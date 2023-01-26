@@ -99,7 +99,8 @@ class ModelLoader {
             const std::map<aiTexture*,
                     IdentifiableWrapper<Texture>>& loadedTextures) const;
 
-    std::vector<glm::vec3> calculateTangents(aiMesh* mesh) const;
+    std::vector<glm::vec3>
+    calculateTangents(aiMesh* mesh) const;
 
 public:
 

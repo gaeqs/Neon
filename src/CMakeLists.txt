@@ -78,7 +78,16 @@ set(SOURCES
         engine/structure/ComponentImplementedEvents.cpp
         engine/structure/ComponentImplementedEvents.h
         engine/light/DirectionalLight.cpp
-        engine/light/DirectionalLight.h engine/light/LightSystem.cpp engine/light/LightSystem.h engine/shader/MaterialConfiguration.h engine/light/PointLight.h engine/light/PointLight.cpp engine/light/FlashLight.h engine/light/FlashLight.cpp)
+        engine/light/DirectionalLight.h
+        engine/light/LightSystem.cpp
+        engine/light/LightSystem.h
+        engine/shader/MaterialConfiguration.h
+        engine/light/PointLight.h
+        engine/light/PointLight.cpp
+        engine/light/FlashLight.h
+        engine/light/FlashLight.cpp
+        assimp/AssimpGeometry.cpp
+        assimp/AssimpGeometry.h)
 
 
 set(VULKAN_SOURCES

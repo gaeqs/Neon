@@ -48,7 +48,8 @@ std::shared_ptr<FrameBuffer> initRender(Room* room) {
 
     std::vector<TextureFormat> frameBufferFormats = {
             TextureFormat::R8G8B8A8,
-            TextureFormat::R16FG16F // NORMAL
+            TextureFormat::R16FG16F, // NORMAL XY
+            TextureFormat::R16FG16F // NORMAL Z / SPECULAR
     };
 
     auto fpFrameBuffer = std::make_shared<SimpleFrameBuffer>(
@@ -133,7 +134,7 @@ void loadSansModels(Application* application, Room* room,
         sans->newComponent<ConstantRotationComponent>();
 
         float x = static_cast<float>(i % q) * 3.0f;
-        float z = static_cast<float>(i / q) * 3.0f;
+        float z = static_cast<float>(i / q) * 3.0f; // NOLINT(bugprone-integer-division)
         sans->getTransform().setPosition(glm::vec3(x, 0, z));
     }
 }
