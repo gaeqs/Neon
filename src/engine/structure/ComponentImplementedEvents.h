@@ -22,6 +22,7 @@ struct ComponentImplementedEvents {
                 typeid(&T::onStart),
                 typeid(&T::onUpdate),
                 typeid(&T::onLateUpdate),
+                typeid(&T::onPreDraw),
                 typeid(&T::onKey),
                 typeid(&T::onCursorMove)
         );
@@ -31,6 +32,7 @@ struct ComponentImplementedEvents {
     bool onStart;
     bool onUpdate;
     bool onLateUpdate;
+    bool onPreDraw;
     bool onKey;
     bool onCursorMove;
 
@@ -39,6 +41,7 @@ struct ComponentImplementedEvents {
             std::type_index onStartFunction,
             std::type_index onUpdateFunction,
             std::type_index onLateUpdateFunction,
+            std::type_index onPreDrawFunction,
             std::type_index onKeyFunction,
             std::type_index onCursorMoveFunction);
 

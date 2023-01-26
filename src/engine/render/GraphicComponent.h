@@ -36,7 +36,7 @@ public:
         }
     }
 
-    void onLateUpdate(float deltaTime) override;
+    void onPreDraw() override;
 };
 
 

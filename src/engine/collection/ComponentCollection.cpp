@@ -92,6 +92,23 @@ void ComponentCollection::lateUpdateComponents(
     }
 }
 
+
+void ComponentCollection::preDrawComponents(Profiler& profiler) {
+    flushNotStartedComponents();
+    for (const auto& [type, data]: _components) {
+        if (!data.first.onPreDraw) continue;
+        DEBUG_PROFILE_ID(profiler, type, type.name());
+        auto ptr = std::static_pointer_cast
+                <AbstractClusteredLinkedCollection>(data.second);
+        ptr->forEachRaw([](void* ptr) {
+            auto* component = reinterpret_cast<Component*>(ptr);
+            if (component->isEnabled()) {
+                component->onPreDraw();
+            }
+        });
+    }
+}
+
 void ComponentCollection::callOnConstruction(void* rawComponent) {
     reinterpret_cast<Component*>(rawComponent)->onConstruction();
 }

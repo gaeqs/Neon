@@ -159,6 +159,15 @@ public:
      */
     void lateUpdateComponents(Profiler& profiler, float deltaTime);
 
+    /**
+     * THIS METHOD SHOULD ONLY BE USED BY ROOMS!
+     * USERS MUSTN'T USE THIS METHOD.
+     * <p>
+     * Calls onPreDraw() on all components.
+     * @param profiler the profiler.
+     */
+    void preDrawComponents(Profiler& profiler);
+
     void test(std::type_index fun);
 };
 

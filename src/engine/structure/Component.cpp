@@ -51,6 +51,9 @@ void Component::onUpdate(float deltaTime) {
 void Component::onLateUpdate(float deltaTime) {
 }
 
+void Component::onPreDraw() {
+}
+
 void Component::onKey(const KeyboardEvent& event) {
 }
 

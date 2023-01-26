@@ -133,15 +133,24 @@ void Room::update(float deltaTime) {
 }
 
 void Room::preDraw() {
-    DEBUG_PROFILE(getApplication()->getProfiler(), preDraw);
-    _models.forEach([](Model* m) {
-        m->flush();
-    });
+    auto& p = getApplication()->getProfiler();
+    DEBUG_PROFILE(p, preDraw);
+    _components.preDrawComponents(p);
 
-    _globalUniformBuffer.prepareForFrame();
-    _materials.forEach([](Material* material) {
-        material->getUniformBuffer().prepareForFrame();
-    });
+    {
+        DEBUG_PROFILE(p, models);
+        _models.forEach([](Model* m) {
+            m->flush();
+        });
+    }
+
+    {
+        DEBUG_PROFILE(p, uniformBUffers);
+        _globalUniformBuffer.prepareForFrame();
+        _materials.forEach([](Material* material) {
+            material->getUniformBuffer().prepareForFrame();
+        });
+    }
 
 }
 
