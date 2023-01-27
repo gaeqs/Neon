@@ -5,6 +5,9 @@
 #include <engine/Engine.h>
 #include <util/component/CameraMovementComponent.h>
 #include <util/component/DebugOverlayComponent.h>
+#include <util/component/DockSpaceComponent.h>
+#include <util/component/ViewportComponent.h>
+#include <util/component/SceneTreeComponent.h>
 #include <util/DeferredUtils.h>
 #include <assimp/ModelLoader.h>
 
@@ -13,7 +16,6 @@
 #include "GlobalParametersUpdaterComponent.h"
 #include "LockMouseComponent.h"
 #include "ConstantRotationComponent.h"
-#include "ImGuiTestComponent.h"
 
 constexpr int32_t WIDTH = 800;
 constexpr int32_t HEIGHT = 600;
@@ -73,24 +75,6 @@ std::shared_ptr<FrameBuffer> initRender(Room* room) {
 
     room->getRender().addRenderPass(
             {scFrameBuffer, RenderPassStrategy::defaultStrategy});
-
-    auto screenShader = createShader(room, "screen.vert", "screen.frag");
-    auto textures = fpFrameBuffer->getTextures();
-    textures[0] = outputColor;
-
-    auto screen = deferred_utils::createScreenModel(
-            room,
-            textures,
-            scFrameBuffer,
-            InputDescription(0, InputRate::INSTANCE),
-            screenShader
-    );
-
-    // Create an empty instance!
-    auto instanceResult = screen->createInstance();
-    if (!instanceResult.isOk()) {
-        throw std::runtime_error(instanceResult.getError());
-    }
 
     return fpFrameBuffer;
 }
@@ -171,8 +155,10 @@ std::shared_ptr<Room> getTestRoom(Application* application) {
     auto parameterUpdater = room->newGameObject();
     parameterUpdater->newComponent<GlobalParametersUpdaterComponent>();
     parameterUpdater->newComponent<LockMouseComponent>(cameraMovement);
-    parameterUpdater->newComponent<DebugOverlayComponent>(100);
-    parameterUpdater->newComponent<ImGuiTestComponent>();
+    parameterUpdater->newComponent<DockSpaceComponent>();
+    parameterUpdater->newComponent<ViewportComponent>();
+    parameterUpdater->newComponent<SceneTreeComponent>();
+    parameterUpdater->newComponent<DebugOverlayComponent>(false, 100);
 
     auto directionalLight = room->newGameObject();
     directionalLight->newComponent<DirectionalLight>();

@@ -5,9 +5,11 @@
 #ifndef NEON_IMGUITEST_H
 #define NEON_IMGUITEST_H
 
-#include <engine/Engine.h>
+#include <engine/structure/Component.h>
+#include <engine/render/SimpleFrameBuffer.h>
+#include <imgui.h>
 
-class ImGuiTestComponent : public Component {
+class ViewportComponent : public Component {
 
     std::shared_ptr<SimpleFrameBuffer> _frameBuffer;
     ImVec2 _windowSize;
@@ -16,7 +18,7 @@ public:
 
     void onStart() override;
 
-    void onUpdate(float deltaTime) override;
+    void onPreDraw() override;
 
 };
 

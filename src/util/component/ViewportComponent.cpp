@@ -2,14 +2,14 @@
 // Created by gaelr on 21/01/2023.
 //
 
-#include "ImGuiTestComponent.h"
+#include "ViewportComponent.h"
 
-#include <imgui.h>
+#include <engine/structure/Room.h>
 
-void ImGuiTestComponent::onStart() {
+void ViewportComponent::onStart() {
     auto& r = getRoom()->getRender();
     auto fb = r.getFrameBuffer(r.getPassesAmount() - 2);
-    _frameBuffer = std::static_pointer_cast<SimpleFrameBuffer>(fb);
+    _frameBuffer = std::dynamic_pointer_cast<SimpleFrameBuffer>(fb);
 
 
     auto condition = [this](const SimpleFrameBuffer* fb) {
@@ -29,7 +29,7 @@ void ImGuiTestComponent::onStart() {
     };
 
     for (uint32_t i = 0; i < r.getPassesAmount(); ++i) {
-        if (auto f = std::static_pointer_cast<SimpleFrameBuffer>(
+        if (auto f = std::dynamic_pointer_cast<SimpleFrameBuffer>(
                 r.getFrameBuffer(i))) {
             f->setRecreationCondition(condition);
             f->setRecreationParameters(parameters);
@@ -37,20 +37,13 @@ void ImGuiTestComponent::onStart() {
     }
 }
 
-void ImGuiTestComponent::onUpdate(float deltaTime) {
-
-    if (ImGui::Begin("Test")) {
-        ImGui::Text("Hello world!");
-    }
-    ImGui::End();
-
-    if (ImGui::Begin("Test2")) {
+void ViewportComponent::onPreDraw() {
+    if (ImGui::Begin("Viewport")) {
         _windowSize = ImGui::GetContentRegionAvail();
         if (_frameBuffer) {
             ImGui::Image(_frameBuffer->getImGuiDescriptor(0), _windowSize);
         }
     }
-
     ImGui::End();
 
     if (_windowSize.x > 0 && _windowSize.y > 0) {

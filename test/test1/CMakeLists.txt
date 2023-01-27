@@ -9,9 +9,7 @@ set(
         LockMouseComponent.cpp
         LockMouseComponent.h
         ConstantRotationComponent.cpp
-        ConstantRotationComponent.h
-        ImGuiTestComponent.cpp
-        ImGuiTestComponent.h)
+        ConstantRotationComponent.h)
 
 cmrc_add_resource_library(
         shaders

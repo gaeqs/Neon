@@ -87,7 +87,11 @@ set(SOURCES
         engine/light/FlashLight.h
         engine/light/FlashLight.cpp
         assimp/AssimpGeometry.cpp
-        assimp/AssimpGeometry.h)
+        assimp/AssimpGeometry.h
+        util/component/DockSpaceComponent.h
+        util/component/DockSpaceComponent.cpp
+        util/component/ViewportComponent.h
+        util/component/ViewportComponent.cpp util/component/SceneTreeComponent.cpp util/component/SceneTreeComponent.h)
 
 
 set(VULKAN_SOURCES
