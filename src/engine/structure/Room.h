@@ -97,6 +97,11 @@ public:
 
     void destroyGameObject(IdentifiableWrapper<GameObject> gameObject);
 
+    void forEachGameObject(std::function<void(GameObject*)> consumer);
+
+    void forEachGameObject(
+            std::function<void(const GameObject*)> consumer) const;
+
     //region EVENTS
 
     void onKey(const KeyboardEvent& event);

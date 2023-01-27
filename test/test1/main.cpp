@@ -8,10 +8,10 @@
 #include <util/component/DockSpaceComponent.h>
 #include <util/component/ViewportComponent.h>
 #include <util/component/SceneTreeComponent.h>
+#include <util/component/GameObjectExplorerComponent.h>
 #include <util/DeferredUtils.h>
 #include <assimp/ModelLoader.h>
 
-#include "TestComponent.h"
 #include "TestVertex.h"
 #include "GlobalParametersUpdaterComponent.h"
 #include "LockMouseComponent.h"
@@ -118,9 +118,19 @@ void loadSansModels(Application* application, Room* room,
         sans->newComponent<GraphicComponent>(sansModel);
         sans->newComponent<ConstantRotationComponent>();
 
+        if(i == 0) {
+            auto sans2 = room->newGameObject();
+            sans2->newComponent<GraphicComponent>(sansModel);
+            sans2->newComponent<ConstantRotationComponent>();
+            sans2->setParent(sans);
+            sans2->getTransform().setPosition(glm::vec3(-5.0f, 5.0f, 0.0f));
+            sans2->setName("Children Sans");
+        }
+
         float x = static_cast<float>(i % q) * 3.0f;
         float z = static_cast<float>(i / q) * 3.0f; // NOLINT(bugprone-integer-division)
         sans->getTransform().setPosition(glm::vec3(x, 0, z));
+        sans->setName("Sans " + std::to_string(i));
     }
 }
 
@@ -138,16 +148,6 @@ std::shared_ptr<Room> getTestRoom(Application* application) {
 
     auto fpFrameBuffer = initRender(room.get());
 
-    auto gameObject = room->newGameObject();
-    gameObject->newComponent<TestComponent>();
-    gameObject->getTransform().setPosition(glm::vec3(0.0f, 0.0f, -1.0f));
-
-    auto gameObject2 = room->newGameObject();
-    gameObject2->newComponent<TestComponent>();
-
-    gameObject2->setParent(gameObject);
-    gameObject2->getTransform().setPosition(glm::vec3(0.0f, -1.0f, 0.0f));
-
     auto cameraController = room->newGameObject();
     auto cameraMovement = cameraController->newComponent<CameraMovementComponent>();
     cameraMovement->setSpeed(10.0f);
@@ -157,7 +157,8 @@ std::shared_ptr<Room> getTestRoom(Application* application) {
     parameterUpdater->newComponent<LockMouseComponent>(cameraMovement);
     parameterUpdater->newComponent<DockSpaceComponent>();
     parameterUpdater->newComponent<ViewportComponent>();
-    parameterUpdater->newComponent<SceneTreeComponent>();
+    auto goExplorer = parameterUpdater->newComponent<GameObjectExplorerComponent>();
+    parameterUpdater->newComponent<SceneTreeComponent>(goExplorer);
     parameterUpdater->newComponent<DebugOverlayComponent>(false, 100);
 
     auto directionalLight = room->newGameObject();
@@ -191,10 +192,11 @@ std::shared_ptr<Room> getTestRoom(Application* application) {
 }
 
 int main() {
+    std::srand(std::time(nullptr));
 
     Application application(WIDTH, HEIGHT);
 
-    auto initResult = application.init("Test");
+    auto initResult = application.init("Neon");
     if (!initResult.isOk()) {
         std::cerr << "[GLFW INIT]\t" << initResult.getError() << std::endl;
         return EXIT_FAILURE;

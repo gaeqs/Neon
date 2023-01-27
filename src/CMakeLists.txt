@@ -91,7 +91,11 @@ set(SOURCES
         util/component/DockSpaceComponent.h
         util/component/DockSpaceComponent.cpp
         util/component/ViewportComponent.h
-        util/component/ViewportComponent.cpp util/component/SceneTreeComponent.cpp util/component/SceneTreeComponent.h)
+        util/component/ViewportComponent.cpp
+        util/component/SceneTreeComponent.cpp
+        util/component/SceneTreeComponent.h
+        util/component/GameObjectExplorerComponent.cpp
+        util/component/GameObjectExplorerComponent.h)
 
 
 set(VULKAN_SOURCES
@@ -132,7 +136,7 @@ set(VULKAN_SOURCES
         vulkan/render/VKRenderPass.h
         vulkan/render/VKRenderPass.cpp
         vulkan/render/VKRender.cpp
-        vulkan/render/VKRender.h)
+        vulkan/render/VKRender.h )
 
 cmrc_add_resource_library(dummy)
 

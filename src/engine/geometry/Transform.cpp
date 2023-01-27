@@ -7,28 +7,24 @@
 #include <glm/gtx/quaternion.hpp>
 
 #include <engine/structure/GameObject.h>
-#include "util/GLMUtils.h"
+#include <util/GLMUtils.h>
 
 uint64_t TRANSFORM_ID_GENERATOR = 1;
 
-Transform::Transform() :
+Transform::Transform(IdentifiableWrapper<GameObject> object) :
         _id(TRANSFORM_ID_GENERATOR++),
         _position(),
         _rotation(glm::vec3(0.0f, 0.0f, 0.0f)),
         _scale(1.0f, 1.0f, 1.0f),
-        _parent(),
+        _gameObject(object),
         _parentIdOnLastRefresh(0),
         _dirty(false),
         _localModel(1.0f),
         _model(1.0f) {
 }
 
-IdentifiableWrapper<GameObject> Transform::getParent() const {
-    return _parent;
-}
-
-void Transform::setParent(const IdentifiableWrapper<GameObject>& parent) {
-    _parent = parent;
+IdentifiableWrapper<GameObject> Transform::getGameObject() const {
+    return _gameObject;
 }
 
 const glm::vec3& Transform::getPosition() const {
@@ -88,14 +84,15 @@ const glm::mat4& Transform::getNormal() {
 }
 
 void Transform::recalculateIfRequired() {
+    auto parent = _gameObject->getParent();
     if (_dirty) {
         _dirty = false;
         glm::trs(_localModel, _position, _rotation, _scale);
         glm::normal_matrix(_localNormal, _rotation, _scale);
 
         // Apply parent transformation
-        if (_parent != nullptr) {
-            auto& t = _parent->getTransform();
+        if (parent != nullptr) {
+            auto& t = parent->getTransform();
             _model = t.getModel() * _localModel;
             _normal = t.getNormal() * _localNormal;
             _parentIdOnLastRefresh = t._id;
@@ -107,13 +104,13 @@ void Transform::recalculateIfRequired() {
         _id = TRANSFORM_ID_GENERATOR++;
     } else {
         // Check if parent was modified.
-        if (_parent == nullptr && _parentIdOnLastRefresh != 0) {
+        if (parent == nullptr && _parentIdOnLastRefresh != 0) {
             _model = _localModel;
             _normal = _localNormal;
             _parentIdOnLastRefresh = 0;
             _id = TRANSFORM_ID_GENERATOR++;
-        } else if (_parent != nullptr) {
-            auto& t = _parent->getTransform();
+        } else if (parent != nullptr) {
+            auto& t = parent->getTransform();
             if (_parentIdOnLastRefresh != t._id || t._dirty) {
                 _model = t.getModel() * _localModel;
                 _normal = t.getNormal() * _localNormal;

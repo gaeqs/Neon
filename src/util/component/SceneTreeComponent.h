@@ -7,10 +7,19 @@
 
 #include <engine/structure/Component.h>
 
+#include <util/component/GameObjectExplorerComponent.h>
+
 class SceneTreeComponent : public Component {
+
+    IdentifiableWrapper<GameObjectExplorerComponent> _explorer;
+
+    bool recursiveTreePopulation(
+            const std::unordered_set<IdentifiableWrapper<GameObject>>& objects);
 
 public:
 
+    SceneTreeComponent(
+            IdentifiableWrapper<GameObjectExplorerComponent> explorer);
 
     void onPreDraw() override;
 

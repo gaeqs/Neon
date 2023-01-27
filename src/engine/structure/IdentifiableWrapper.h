@@ -11,6 +11,8 @@
 template<class T>
 class IdentifiableWrapper {
 
+    friend class std::hash<IdentifiableWrapper<T>>;
+
     T* _pointer;
     uint64_t _componentId;
 
@@ -31,7 +33,7 @@ public:
         }
     }
 
-    inline bool isValid() const {
+    [[nodiscard]] inline bool isValid() const {
         return _pointer != nullptr && _pointer->_id == _componentId;
     }
 
@@ -59,6 +61,17 @@ public:
         return _componentId != other._componentId;
     }
 
+    inline operator bool() const {
+        return isValid();
+    }
+
+};
+
+template<class T>
+struct std::hash<IdentifiableWrapper<T>> {
+    std::size_t operator()(IdentifiableWrapper<T> const& s) const noexcept {
+        return std::hash<uint64_t>{}(s._componentId);
+    }
 };
 
 #endif //RVTRACKING_IDENTIFIABLEWRAPPER_H

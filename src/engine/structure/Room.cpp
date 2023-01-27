@@ -5,6 +5,7 @@
 #include "Room.h"
 
 #include <glm/glm.hpp>
+#include <utility>
 
 #include "GameObject.h"
 #include <engine/Application.h>
@@ -100,6 +101,15 @@ IdentifiableWrapper<GameObject> Room::newGameObject() {
 
 void Room::destroyGameObject(IdentifiableWrapper<GameObject> gameObject) {
     _gameObjects.remove(gameObject.raw());
+}
+
+void Room::forEachGameObject(std::function<void(GameObject*)> consumer) {
+    _gameObjects.forEach(std::move(consumer));
+}
+
+void Room::forEachGameObject(
+        std::function<void(const GameObject*)> consumer) const {
+    _gameObjects.forEach(std::move(consumer));
 }
 
 void Room::onKey(const KeyboardEvent& event) {

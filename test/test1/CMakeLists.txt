@@ -1,8 +1,6 @@
 set(
         TEST_SOURCES
         main.cpp
-        TestComponent.cpp
-        TestComponent.h
         TestVertex.h
         GlobalParametersUpdaterComponent.cpp
         GlobalParametersUpdaterComponent.h
