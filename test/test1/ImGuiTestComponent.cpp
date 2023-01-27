@@ -51,15 +51,12 @@ void ImGuiTestComponent::onUpdate(float deltaTime) {
         }
     }
 
-    std::cout << _windowSize.x << std::endl;
-    std::cout << _windowSize.y << std::endl;
+    ImGui::End();
 
     if (_windowSize.x > 0 && _windowSize.y > 0) {
         auto& c = getRoom()->getCamera();
         c.setFrustum(c.getFrustum().withAspectRatio(
                 _windowSize.x / _windowSize.y));
     }
-
-    ImGui::End();
 
 }

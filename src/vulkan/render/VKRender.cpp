@@ -53,20 +53,18 @@ void VKRender::render(
         vkCmdBeginRenderPass(commandBuffer, &renderPassInfo,
                              VK_SUBPASS_CONTENTS_INLINE);
 
-        auto& extent = _vkApplication->getSwapChainExtent();
-
         VkViewport viewport{};
         viewport.x = 0.0f;
         viewport.y = 0.0f;
-        viewport.width = static_cast<float>(extent.width);
-        viewport.height = static_cast<float>(extent.height);
+        viewport.width = static_cast<float>(frameBuffer.getWidth());
+        viewport.height = static_cast<float>(frameBuffer.getHeight());
         viewport.minDepth = 0.0f;
         viewport.maxDepth = 1.0f;
         vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
 
         VkRect2D scissor{};
         scissor.offset = {0, 0};
-        scissor.extent = extent;
+        scissor.extent = {frameBuffer.getWidth(), frameBuffer.getHeight()};
         vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
         strategy.strategy(room, strategy.frameBuffer);

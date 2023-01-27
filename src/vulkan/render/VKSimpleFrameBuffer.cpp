@@ -93,6 +93,14 @@ void VKSimpleFrameBuffer::createFrameBuffer() {
 void VKSimpleFrameBuffer::cleanup() {
     auto d = _vkApplication->getDevice();
 
+    for (const auto& item: _imGuiDescriptors) {
+        if (item != VK_NULL_HANDLE) {
+            ImGui_ImplVulkan_RemoveTexture(item);
+        }
+    }
+    std::fill(_imGuiDescriptors.begin(), _imGuiDescriptors.end(),
+              VK_NULL_HANDLE);
+
     vkDestroyFramebuffer(d, _frameBuffer, nullptr);
 
     for (auto& view: _imageViews) {
@@ -106,14 +114,6 @@ void VKSimpleFrameBuffer::cleanup() {
     for (auto& memory: _memories) {
         vkFreeMemory(d, memory, nullptr);
     }
-
-    for (const auto& item: _imGuiDescriptors) {
-        if (item != VK_NULL_HANDLE) {
-            ImGui_ImplVulkan_RemoveTexture(item);
-        }
-    }
-    std::fill(_imGuiDescriptors.begin(), _imGuiDescriptors.end(),
-              VK_NULL_HANDLE);
 }
 
 VKSimpleFrameBuffer::VKSimpleFrameBuffer(
