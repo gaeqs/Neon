@@ -103,6 +103,10 @@ void Room::destroyGameObject(IdentifiableWrapper<GameObject> gameObject) {
     _gameObjects.remove(gameObject.raw());
 }
 
+size_t Room::getGameObjectAmount() {
+    return _gameObjects.size();
+}
+
 void Room::forEachGameObject(std::function<void(GameObject*)> consumer) {
     _gameObjects.forEach(std::move(consumer));
 }
