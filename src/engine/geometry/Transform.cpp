@@ -69,7 +69,7 @@ const glm::quat& Transform::lookAt(const glm::vec3& direction) {
 
 const glm::quat& Transform::rotate(const glm::vec3& direction, float angle) {
     _dirty = true;
-    _rotation = glm::angleAxis(angle, direction) * _rotation;
+    _rotation = glm::angleAxis(angle, glm::normalize(direction)) * _rotation;
     return _rotation;
 }
 

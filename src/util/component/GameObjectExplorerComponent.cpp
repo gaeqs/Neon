@@ -16,10 +16,6 @@ void GameObjectExplorerComponent::setTarget(
     _target = target;
 }
 
-namespace {
-
-}
-
 void GameObjectExplorerComponent::onPreDraw() {
     ImGui::ShowDemoWindow();
 
@@ -27,17 +23,27 @@ void GameObjectExplorerComponent::onPreDraw() {
         if (_target) {
             drawGeneralSection();
             drawTransformSection();
-
-            for (const auto& item: _target->getComponents()) {
-                ImGui::Text("%s", typeid(*item.raw()).name());
-            }
+            drawComponentsSection();
         }
     }
     ImGui::End();
 }
 
 void GameObjectExplorerComponent::drawGeneralSection() const {
-    ImGui::Text("%s", _target->getName().c_str());
+    constexpr size_t SIZE = 128;
+    char buffer[SIZE];
+
+    std::string name = _target->getName();
+    strcpy_s(buffer, name.c_str());
+
+    ImGui::PushItemWidth(-1.0f);
+    ImGui::AlignTextToFramePadding();
+    ImGui::Text("Name:");
+    ImGui::SameLine();
+    if (ImGui::InputText("##name", buffer, SIZE)) {
+        _target->setName(std::string(buffer));
+    }
+    ImGui::PopItemWidth();
 }
 
 void GameObjectExplorerComponent::drawTransformSection() const {
@@ -56,12 +62,49 @@ void GameObjectExplorerComponent::drawTransformSection() const {
     ImGui::AlignTextToFramePadding();
     ImGui::Text("Rotation:");
     ImGui::SameLine();
-    auto euler =glm::degrees(glm::eulerAngles(
+    auto euler = glm::degrees(glm::eulerAngles(
             _target->getTransform().getRotation()));
     if (ImGui::DragFloat3("##Rotation", &euler.x, 0.1f)) {
         _target->getTransform().setRotation(glm::quat(glm::radians(euler)));
     }
     ImGui::PopItemWidth();
+}
+
+void GameObjectExplorerComponent::drawComponentsSection() const {
+    static ImGuiTextFilter filter;
+
+    auto& reg = ComponentRegister::instance();
+
+    for (const auto& component: _target->getComponents()) {
+        std::type_index type = typeid(*component.raw());
+        auto entry = reg.getEntry(type);
+        if (!entry.has_value()) continue;
+
+        auto name = entry->name + "##" + std::to_string(component.getId());
+        if (!ImGui::CollapsingHeader(name.c_str())) continue;
+        component->drawEditor();
+    }
+
+    if (ImGui::Button("New component", ImVec2(-1, 0))) {
+        ImGui::OpenPopup("new_component_popup");
+        filter.Clear();
+    }
+
+    if (ImGui::BeginPopup("new_component_popup")) {
+        filter.Draw();
+
+        for (const auto& type: reg.getComponents()) {
+            auto entry = reg.getEntry(type);
+
+            if (!entry->creator.has_value()) continue;
+            if (!filter.PassFilter(entry->name.c_str())) continue;
+            if (ImGui::Selectable(entry->name.c_str())) {
+                entry->creator.value()(*_target.raw());
+            }
+        }
+
+        ImGui::EndPopup();
+    }
 }
 
 

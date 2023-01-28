@@ -26,6 +26,8 @@ public:
     void onUpdate(float deltaTime) override;
 
 };
+REGISTER_COMPONENT(GlobalParametersUpdaterComponent,
+                   "Global Parameters Updater")
 
 
 #endif //NEON_GLOBALPARAMETERSUPDATERCOMPONENT_H

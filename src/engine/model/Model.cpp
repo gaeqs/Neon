@@ -24,6 +24,7 @@ std::vector<Mesh::Implementation*> Model::getMeshImplementations(
 Model::Model(Room* room,
              std::vector<std::unique_ptr<Mesh>>& meshes) :
         _id(MODEL_ID_GENERATOR++),
+        _name("Model " + std::to_string(_id)),
         _implementation(room->getApplication(), getMeshImplementations(meshes)),
         _meshes(std::move(meshes)) {
 }
@@ -58,4 +59,12 @@ void Model::uploadDataRaw(uint32_t id, const void* raw) {
 
 void Model::flush() {
     _implementation.flush();
+}
+
+const std::string& Model::getName() const {
+    return _name;
+}
+
+void Model::setName(const std::string& name) {
+    _name = name;
 }

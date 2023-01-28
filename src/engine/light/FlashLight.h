@@ -87,11 +87,16 @@ public:
 
     void setOuterCutOff(float outerCutOff);
 
+    [[nodiscard]] float attenuationAt(float distance) const;
+
     void onStart() override;
 
     void onLateUpdate(float deltaTime) override;
 
+    void drawEditor() override;
+
 };
+REGISTER_COMPONENT(FlashLight, "Flash Light")
 
 
 #endif //NEON_FLASHLIGHT_H

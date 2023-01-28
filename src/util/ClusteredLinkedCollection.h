@@ -168,7 +168,13 @@ public:
 template<class T, size_t Size = DEFAULT_CLUSTER_SIZE>
 class ClusteredLinkedCollection : public AbstractClusteredLinkedCollection {
 
+public:
+
     using ValueType = T;
+    using Iterator = ClusteredLinkedCollectorIterator<ClusteredLinkedCollection<T, Size>>;
+    using ConstIterator = ConstClusteredLinkedCollectorIterator<ClusteredLinkedCollection<T, Size>>;
+
+private:
 
     friend class ClusteredLinkedCollectorIterator<ClusteredLinkedCollection<T, Size>>;
 
@@ -228,28 +234,20 @@ public:
         return Size;
     }
 
-    ClusteredLinkedCollectorIterator<ClusteredLinkedCollection<T, Size>>
-    begin() {
-        return ClusteredLinkedCollectorIterator<
-                ClusteredLinkedCollection<T, Size>>(this, 0);
+    Iterator begin() {
+        return Iterator(this, 0);
     }
 
-    ConstClusteredLinkedCollectorIterator<ClusteredLinkedCollection<T, Size>>
-    begin() const {
-        return ConstClusteredLinkedCollectorIterator<
-                ClusteredLinkedCollection<T, Size>>(this, 0);
+    ConstIterator begin() const {
+        return ConstIterator(this, 0);
     }
 
-    ClusteredLinkedCollectorIterator<ClusteredLinkedCollection<T, Size>>
-    end() {
-        return ClusteredLinkedCollectorIterator<
-                ClusteredLinkedCollection<T, Size>>(nullptr, 0);
+    Iterator end() {
+        return Iterator(nullptr, 0);
     }
 
-    ConstClusteredLinkedCollectorIterator<ClusteredLinkedCollection<T, Size>>
-    end() const {
-        return ConstClusteredLinkedCollectorIterator<
-                ClusteredLinkedCollection<T, Size>>(nullptr, 0);
+    ConstIterator end() const {
+        return ConstIterator(nullptr, 0);
     }
 
     void forEachRaw(std::function<void(void*)> function) override {

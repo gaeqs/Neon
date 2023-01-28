@@ -24,13 +24,17 @@ public:
                 const IdentifiableWrapper<Model>& pointLightModel,
                 const IdentifiableWrapper<Model>& flashLightModel);
 
-    const IdentifiableWrapper<Model>& getDirectionalLightModel() const;
+    [[nodiscard]] const IdentifiableWrapper<Model>&
+    getDirectionalLightModel() const;
 
-    const IdentifiableWrapper<Model>& getPointLightModel() const;
+    [[nodiscard]] const IdentifiableWrapper<Model>&
+    getPointLightModel() const;
 
-    const IdentifiableWrapper<Model>& getFlashLightModel() const;
+    [[nodiscard]] const IdentifiableWrapper<Model>&
+    getFlashLightModel() const;
 
 };
+REGISTER_COMPONENT(LightSystem, "Light System")
 
 
 #endif //NEON_LIGHTSYSTEM_H

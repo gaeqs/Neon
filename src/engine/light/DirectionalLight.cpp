@@ -6,6 +6,7 @@
 
 #include <engine/structure/Room.h>
 #include <engine/light/LightSystem.h>
+#include <imgui.h>
 
 DirectionalLight::DirectionalLight() :
         _graphicComponent(),
@@ -58,4 +59,16 @@ const glm::vec3& DirectionalLight::getSpecularColor() const {
 
 void DirectionalLight::setSpecularColor(const glm::vec3& specularColor) {
     _specularColor = specularColor;
+}
+
+void DirectionalLight::drawEditor() {
+    float w = (ImGui::GetContentRegionAvail().x -
+               ImGui::GetStyle().ItemSpacing.y) * 0.50f;
+    ImGui::PushItemWidth(w);
+    ImGui::ColorPicker3(imGuiUId("##diffuse").c_str(), &_diffuseColor.x,
+                        ImGuiColorEditFlags_NoSidePreview);
+    ImGui::SameLine();
+    ImGui::ColorPicker3(imGuiUId("##specular").c_str(), &_specularColor.x,
+                        ImGuiColorEditFlags_NoSidePreview);
+    ImGui::PopItemWidth();
 }

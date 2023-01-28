@@ -58,5 +58,7 @@ void Component::onKey(const KeyboardEvent& event) {
 }
 
 void Component::onCursorMove(const CursorMoveEvent& event) {
+}
 
+void Component::drawEditor() {
 }

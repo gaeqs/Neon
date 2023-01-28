@@ -23,7 +23,8 @@ GameObject::GameObject(Room* room) :
 }
 
 GameObject::~GameObject() {
-    for (const auto& item: _components) {
+    auto copy = _components; // Avoid concurrent exceptions!
+    for (const auto& item: copy) {
         if (item.isValid()) {
             item->destroy();
         }

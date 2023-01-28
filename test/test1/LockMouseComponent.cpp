@@ -20,7 +20,9 @@ void LockMouseComponent::onStart() {
 }
 
 void LockMouseComponent::onKey(const KeyboardEvent& event) {
-    if (event.key == KeyboardKey::L && event.action == KeyboardAction::PRESS) {
+    if (event.key == KeyboardKey::L &&
+        event.action == KeyboardAction::PRESS &&
+        event.isModifierActive(KeyboardModifier::CONTROL)) {
         _locked = !_locked;
         performLock();
     }

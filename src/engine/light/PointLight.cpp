@@ -7,6 +7,9 @@
 #include <engine/structure/Room.h>
 #include <engine/light/LightSystem.h>
 
+#include <imgui.h>
+#include <implot.h>
+
 PointLight::PointLight() :
         _graphicComponent(),
         _customModel(),
@@ -90,4 +93,72 @@ float PointLight::getQuadraticAttenuation() const {
 
 void PointLight::setQuadraticAttenuation(float quadraticAttenuation) {
     _quadraticAttenuation = quadraticAttenuation;
+}
+
+float PointLight::attenuationAt(float distance) const {
+    float att = _constantAttenuation
+                + _linearAttenuation * distance
+                + _quadraticAttenuation * distance * distance;
+    return std::min(1.0f, 1.0f / att);
+}
+
+
+void PointLight::drawEditor() {
+    ImGui::Text("Diffuse / Specular");
+
+    float w = (ImGui::GetContentRegionAvail().x -
+               ImGui::GetStyle().ItemSpacing.y) * 0.50f;
+    ImGui::PushItemWidth(w);
+    ImGui::ColorPicker3(imGuiUId("##diffuse").c_str(), &_diffuseColor.x,
+                        ImGuiColorEditFlags_NoSidePreview);
+    ImGui::SameLine();
+    ImGui::ColorPicker3(imGuiUId("##specular").c_str(), &_specularColor.x,
+                        ImGuiColorEditFlags_NoSidePreview);
+    ImGui::PopItemWidth();
+
+    ImGui::Separator();
+
+    ImGui::PushItemWidth(-1.0f);
+
+    ImGui::AlignTextToFramePadding();
+    ImGui::Text("Constant attenuation:");
+    ImGui::SameLine();
+    ImGui::DragFloat(imGuiUId("##constant_attenuation").c_str(),
+                     &_constantAttenuation, 0.05f);
+
+    ImGui::AlignTextToFramePadding();
+    ImGui::Text("Linear attenuation:");
+    ImGui::SameLine();
+    ImGui::DragFloat(imGuiUId("##linear_attenuation").c_str(),
+                     &_linearAttenuation, 0.05f);
+
+    ImGui::AlignTextToFramePadding();
+    ImGui::Text("Quadratic attenuation:");
+    ImGui::SameLine();
+    ImGui::DragFloat(imGuiUId("##quadratic_attenuation").c_str(),
+                     &_quadraticAttenuation, 0.05f);
+
+    if (ImPlot::BeginPlot(imGuiUId("Attenuation / Distance").c_str(),
+                          ImVec2(-1, 200))) {
+        constexpr int MAX_VALUES = 1000;
+        constexpr float STEP = 100.0F / MAX_VALUES;
+        constexpr float MIN_ATTENUATION = 0.05;
+        static float values[MAX_VALUES];
+        int i = 0;
+        for (; i < MAX_VALUES; ++i) {
+            float v = attenuationAt(STEP * static_cast<float>(i));
+            if (v < MIN_ATTENUATION) break;
+            values[i] = v;
+        }
+
+        ImPlot::SetupAxis(ImAxis_X1, "Distance (m)", ImPlotAxisFlags_AutoFit);
+        ImPlot::SetupAxis(ImAxis_Y1, "Attenuation", ImPlotAxisFlags_AutoFit);
+        ImPlot::PlotLine(
+                imGuiUId("##attenuation").c_str(),
+                values,
+                i,
+                100.0 / MAX_VALUES
+        );
+        ImPlot::EndPlot();
+    }
 }

@@ -57,7 +57,7 @@ void DebugOverlayComponent::onPreDraw() {
     }
 
     if (ImGui::Begin("Debug information", nullptr, WINDOW_FLAGS)) {
-        ImGui::Text("Press \"L\" to enter/exit camera movement mode.");
+        ImGui::TextWrapped("Press \"Ctrl+L\" to enter/exit camera movement mode.");
         auto& camera = getRoom()->getCamera();
         ImGui::Text("Camera: (%f, %f, %f)",
                     camera.getPosition().x,

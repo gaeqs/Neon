@@ -30,6 +30,7 @@ public:
     void onPreDraw() override;
 
 };
+REGISTER_COMPONENT(DebugOverlayComponent, "Debug Overlay")
 
 
 #endif //NEON_DEBUGOVERLAYCOMPONENT_H

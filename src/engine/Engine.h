@@ -47,6 +47,7 @@
 
 #include <engine/structure/Component.h>
 #include <engine/structure/ComponentImplementedEvents.h>
+#include <engine/structure/ComponentRegister.h>
 #include <engine/structure/GameObject.h>
 #include <engine/structure/Identifiable.h>
 #include <engine/structure/IdentifiableWrapper.h>

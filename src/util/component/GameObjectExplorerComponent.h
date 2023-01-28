@@ -17,6 +17,8 @@ class GameObjectExplorerComponent : public Component {
 
     void drawTransformSection() const;
 
+    void drawComponentsSection() const;
+
 public:
 
     [[nodiscard]] const IdentifiableWrapper<GameObject>& getTarget() const;
@@ -26,6 +28,7 @@ public:
     void onPreDraw() override;
 
 };
+REGISTER_COMPONENT(GameObjectExplorerComponent, "GameObject Explorer")
 
 
 #endif //NEON_GAMEOBJECTEXPLORERCOMPONENT_H

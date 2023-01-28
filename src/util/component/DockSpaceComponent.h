@@ -14,6 +14,7 @@ public:
     void onUpdate(float deltaTime) override;
 
 };
+REGISTER_COMPONENT(DockSpaceComponent, "Dock Space")
 
 
 #endif //NEON_DOCKSPACECOMPONENT_H

@@ -4,14 +4,44 @@
 
 #include "ConstantRotationComponent.h"
 
-void ConstantRotationComponent::onStart() {
-    _speed = static_cast<float>(std::rand())
-            / static_cast<float>(RAND_MAX) * 5;
+ConstantRotationComponent::ConstantRotationComponent() :
+        _speed(static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX)),
+        _axis(0.0f, 1.0f, 0.0f) {
+}
+
+float ConstantRotationComponent::getSpeed() const {
+    return _speed;
+}
+
+void ConstantRotationComponent::setSpeed(float speed) {
+    _speed = speed;
+}
+
+const glm::vec3& ConstantRotationComponent::getAxis() const {
+    return _axis;
+}
+
+void ConstantRotationComponent::setAxis(const glm::vec3& axis) {
+    _axis = axis;
 }
 
 void ConstantRotationComponent::onUpdate(float deltaTime) {
     getGameObject()->getTransform().rotate(
-            glm::vec3(0, 1, 0),
-            deltaTime * _speed / 10.0f
+            _axis,
+            deltaTime * _speed
     );
+}
+
+void ConstantRotationComponent::drawEditor() {
+    ImGui::AlignTextToFramePadding();
+    ImGui::Text("Speed (rad/s):");
+    ImGui::SameLine();
+    ImGui::DragFloat(imGuiUId("##speed").c_str(), &_speed, 0.05f);
+
+    ImGui::PushItemWidth(-1.0f);
+    ImGui::AlignTextToFramePadding();
+    ImGui::Text("Axis:");
+    ImGui::SameLine();
+    ImGui::DragFloat3(imGuiUId("##axis").c_str(), &_axis.x, 0.1f);
+    ImGui::PopItemWidth();
 }

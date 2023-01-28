@@ -184,8 +184,8 @@ void Application::internalForceSizeValues(int32_t width, int32_t height) {
 void Application::internalKeyEvent(int key, int scancode,
                                    int action, int mods) {
     KeyboardEvent event{
-            mods,
             scancode,
+            mods,
             static_cast<KeyboardKey>(key),
             static_cast<KeyboardAction>(action)
     };

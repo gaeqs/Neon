@@ -6,7 +6,6 @@
 #define VRTRACKING_CAMERAMOVEMENTCOMPONENT_H
 
 #include <engine/structure/Component.h>
-
 class CameraMovementComponent : public Component {
 
     bool _w, _a, _s, _d, _shift, _space;
@@ -24,10 +23,11 @@ public:
 
     void onUpdate(float deltaTime) override;
 
-    float getSpeed() const;
+    [[nodiscard]] float getSpeed() const;
 
     void setSpeed(float speed);
 };
+REGISTER_COMPONENT(CameraMovementComponent, "Camera Move")
 
 
 #endif //VRTRACKING_CAMERAMOVEMENTCOMPONENT_H

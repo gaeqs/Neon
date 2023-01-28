@@ -97,6 +97,8 @@ public:
 
     void destroyGameObject(IdentifiableWrapper<GameObject> gameObject);
 
+    size_t getGameObjectAmount();
+
     void forEachGameObject(std::function<void(GameObject*)> consumer);
 
     void forEachGameObject(

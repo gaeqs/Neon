@@ -21,6 +21,7 @@ public:
     void onPreDraw() override;
 
 };
+REGISTER_COMPONENT(ViewportComponent, "Viewport")
 
 
 #endif //NEON_IMGUITEST_H

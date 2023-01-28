@@ -10,7 +10,9 @@
 
 SceneTreeComponent::SceneTreeComponent(
         IdentifiableWrapper<GameObjectExplorerComponent> explorer) :
-        _explorer(explorer) {
+        _explorer(explorer),
+        _roots(),
+        _timeBeforePopulation(0.0f) {
 
 }
 
@@ -26,8 +28,8 @@ bool SceneTreeComponent::recursiveTreePopulation(
         if (children.empty()) flags |= ImGuiTreeNodeFlags_Leaf;
         if (selected) flags |= ImGuiTreeNodeFlags_Selected;
 
-
-        if (ImGui::TreeNodeEx(obj->getName().c_str(), flags)) {
+        auto id = obj.getId();
+        if (ImGui::TreeNodeEx(obj.raw(), flags, "%s", obj->getName().c_str())) {
             mouseClickConsumed |= recursiveTreePopulation(children);
             ImGui::TreePop();
         }
@@ -45,27 +47,55 @@ bool SceneTreeComponent::recursiveTreePopulation(
 void SceneTreeComponent::onPreDraw() {
     if (ImGui::Begin("Scene tree")) {
 
-        getRoom()->forEachGameObject([this](GameObject* obj) {
-            if (obj->getParent() != nullptr) return;
-            bool mouseClickConsumed = false;
-            auto& children = obj->getChildren();
-            bool selected = _explorer && _explorer->getTarget().raw() == obj;
+        _timeBeforePopulation -= getRoom()->getApplication()->
+                getCurrentFrameInformation().currentDeltaTime;
+        if (_timeBeforePopulation < 0) {
+            _timeBeforePopulation = TIME_BEFORE_POPUPLATION;
+            popuplate();
+        }
 
-            ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_None;
-            if (children.empty()) flags |= ImGuiTreeNodeFlags_Leaf;
-            if (selected) flags |= ImGuiTreeNodeFlags_Selected;
+        ImGuiListClipper clipper;
+        clipper.Begin(_roots.size());
 
-            if (ImGui::TreeNodeEx(obj->getName().c_str(), flags)) {
-                mouseClickConsumed = recursiveTreePopulation(children);
-                ImGui::TreePop();
-            }
-            if (!mouseClickConsumed && ImGui::IsItemClicked()) {
-                if (_explorer) {
-                    _explorer->setTarget(obj);
+        while (clipper.Step()) {
+            for (int row = clipper.DisplayStart;
+                 row < clipper.DisplayEnd; row++) {
+
+                auto obj = _roots[row];
+                if (obj == nullptr) continue;
+
+                bool mouseClickConsumed = false;
+                auto& children = obj->getChildren();
+                bool selected =
+                        _explorer && _explorer->getTarget().raw() == obj;
+
+                ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_None;
+                if (children.empty()) flags |= ImGuiTreeNodeFlags_Leaf;
+                if (selected) flags |= ImGuiTreeNodeFlags_Selected;
+
+                if (ImGui::TreeNodeEx(obj.raw(), flags, "%s",
+                                      obj->getName().c_str())) {
+                    mouseClickConsumed = recursiveTreePopulation(children);
+                    ImGui::TreePop();
+                }
+                if (!mouseClickConsumed && ImGui::IsItemClicked()) {
+                    if (_explorer) {
+                        _explorer->setTarget(obj);
+                    }
                 }
             }
-        });
-
+        }
     }
+
     ImGui::End();
+}
+
+void SceneTreeComponent::popuplate() {
+    _roots.clear();
+    _roots.reserve(getRoom()->getGameObjectAmount());
+    getRoom()->forEachGameObject([this](GameObject* obj) {
+        if (obj->getParent() == nullptr) {
+            _roots.emplace_back(obj);
+        }
+    });
 }

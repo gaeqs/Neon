@@ -71,11 +71,16 @@ public:
 
     void setQuadraticAttenuation(float quadraticAttenuation);
 
+    [[nodiscard]] float attenuationAt(float distance) const;
+
     void onStart() override;
 
     void onLateUpdate(float deltaTime) override;
 
+    void drawEditor() override;
+
 };
+REGISTER_COMPONENT(PointLight, "Point Light")
 
 
 #endif //NEON_POINTLIGHT_H

@@ -54,7 +54,10 @@ public:
 
     void onLateUpdate(float deltaTime) override;
 
+    void drawEditor() override;
+
 };
+REGISTER_COMPONENT(DirectionalLight, "Directional Light")
 
 
 #endif //NEON_DIRECTIONALLIGHT_H
