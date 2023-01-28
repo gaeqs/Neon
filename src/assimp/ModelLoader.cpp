@@ -134,7 +134,7 @@ ModelLoader::loadTexture(
 
         if (texture->achFormatHint == std::string("png")) {
             return _room->getTextures().createTextureFromPNG(
-                    texture->pcData, texture->mWidth);
+                    texture->pcData, texture->mWidth, false);
         }
 
         std::cerr << "Cannot parse format "

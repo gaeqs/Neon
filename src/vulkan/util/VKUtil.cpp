@@ -407,13 +407,13 @@ namespace vulkan_util {
     VkFormat getImageFormat(TextureFormat format) {
         switch (format) {
             case TextureFormat::R8G8B8:
-                return VK_FORMAT_R8G8B8_SRGB;
+                return VK_FORMAT_R8G8B8_UNORM;
             case TextureFormat::B8G8R8:
-                return VK_FORMAT_B8G8R8_SRGB;
+                return VK_FORMAT_B8G8R8_UNORM;
             case TextureFormat::A8R8G8B8:
                 throw std::runtime_error("Vulkan doesn't support ARGB!");
             case TextureFormat::B8G8R8A8:
-                return VK_FORMAT_B8G8R8A8_SRGB;
+                return VK_FORMAT_B8G8R8A8_UNORM;
             case TextureFormat::A8B8G8R8:
                 return VK_FORMAT_A8B8G8R8_SRGB_PACK32;
             case TextureFormat::R32FG32FB32FA32F:
@@ -428,9 +428,11 @@ namespace vulkan_util {
                 return VK_FORMAT_R16G16B16A16_SFLOAT;
             case TextureFormat::DEPTH24STENCIL8:
                 return VK_FORMAT_D24_UNORM_S8_UINT;
+            case TextureFormat::R8G8B8A8_SRGB:
+                return VK_FORMAT_R8G8B8A8_SRGB;
             case TextureFormat::R8G8B8A8:
             default:
-                return VK_FORMAT_R8G8B8A8_SRGB;
+                return VK_FORMAT_R8G8B8A8_UNORM;
         }
     }
 

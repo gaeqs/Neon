@@ -22,9 +22,9 @@ void main() {
     vec4 albedo = texture(diffuseTexture, fragTexCoords);
     vec2 normalXY = texture(normalTexture, fragTexCoords).xy;
     float normalZ = texture(normalZTexture, fragTexCoords).x;
-    vec3 normal = vec3(normalXY, normalZ);
+    vec3 normal = transpose(mat3(view)) * vec3(normalXY, normalZ);
 
     vec4 depthV = inverseProjection * vec4(0, 0, texture(depthTexture, fragTexCoords).r, 1);
     float depth = (-depthV.b / depthV.w - near) / (far - near);
-    color = albedo;
+    color = albedo; //vec4(normal, 1.0f);
 }

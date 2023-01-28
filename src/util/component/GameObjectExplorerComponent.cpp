@@ -55,7 +55,7 @@ void GameObjectExplorerComponent::drawTransformSection() const {
     ImGui::Text("Position:");
     ImGui::SameLine();
     auto pos = _target->getTransform().getPosition();
-    if (ImGui::DragFloat3("##Position", &pos.x, 0.1f)) {
+    if (ImGui::DragFloat3("##position", &pos.x, 0.1f)) {
         _target->getTransform().setPosition(pos);
     }
 
@@ -64,9 +64,18 @@ void GameObjectExplorerComponent::drawTransformSection() const {
     ImGui::SameLine();
     auto euler = glm::degrees(glm::eulerAngles(
             _target->getTransform().getRotation()));
-    if (ImGui::DragFloat3("##Rotation", &euler.x, 0.1f)) {
+    if (ImGui::DragFloat3("##rotation", &euler.x, 0.1f)) {
         _target->getTransform().setRotation(glm::quat(glm::radians(euler)));
     }
+
+    ImGui::AlignTextToFramePadding();
+    ImGui::Text("Scale:");
+    ImGui::SameLine();
+    auto scale = _target->getTransform().getScale();
+    if (ImGui::DragFloat3("##scale", &scale.x, 0.1f)) {
+        _target->getTransform().setScale(scale);
+    }
+
     ImGui::PopItemWidth();
 }
 

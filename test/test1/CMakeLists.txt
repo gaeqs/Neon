@@ -17,6 +17,7 @@ cmrc_add_resource_library(
         shader/default.frag
         shader/deferred.vert
         shader/deferred.frag
+        shader/deferred_parallax.frag
         shader/screen.vert
         shader/screen.frag
         shader/directional_light.vert

@@ -24,6 +24,7 @@ uint32_t VKTexture::getPixelSize(TextureFormat format) {
         case TextureFormat::B8G8R8A8:
         case TextureFormat::A8B8G8R8:
         case TextureFormat::R8G8B8A8:
+        case TextureFormat::R8G8B8A8_SRGB:
         case TextureFormat::R32F:
         case TextureFormat::R16FG16F:
         case TextureFormat::DEPTH24STENCIL8:

@@ -16,18 +16,22 @@ layout (binding = 0) uniform Matrices
     float far;
 };
 
-layout(location = 0) out vec2 fragTexCoords;
-layout(location = 1) out mat3 TBN;
+layout(location = 0) out vec3 fragPosition;
+layout(location = 1) out vec2 fragTexCoords;
+layout(location = 2) out mat3 TBN;
+layout(location = 5) out mat3 inverseTBN;
 
 void main() {
     // Calculate TBN (Tangent-Bitangent-Normal) matrix
-    // From view to tangent space!
-
-    vec3 n = (view * normalMatrix * vec4(normal, 0.0f)).xyz;
-    vec3 t = (view * normalMatrix * vec4(tangent, 0.0f)).xyz;
+    // From tangent space to view!
+    vec3 n = mat3(view) * normalize(vec3(mat3(normalMatrix) * normal));
+    vec3 t = mat3(view) * normalize(vec3(mat3(model) * tangent));
+    t = normalize(t - dot(t, n) * n);
     vec3 b = cross(n, t);
 
     TBN = mat3(t, b, n);
+    inverseTBN = transpose(TBN);
+    fragPosition = (view * model * vec4(vertex, 1.0f)).xyz;
 
     gl_Position = viewProjection * model * vec4(vertex, 1.0f);
     fragTexCoords = texCoords;

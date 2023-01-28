@@ -95,7 +95,7 @@ set(SOURCES
         util/component/SceneTreeComponent.cpp
         util/component/SceneTreeComponent.h
         util/component/GameObjectExplorerComponent.cpp
-        util/component/GameObjectExplorerComponent.h engine/structure/ComponentRegister.cpp engine/structure/ComponentRegister.h)
+        util/component/GameObjectExplorerComponent.h engine/structure/ComponentRegister.cpp engine/structure/ComponentRegister.h util/ModelUtils.cpp util/ModelUtils.h)
 
 
 set(VULKAN_SOURCES

@@ -63,7 +63,7 @@ const glm::vec3& Transform::move(const glm::vec3& offset) {
 
 const glm::quat& Transform::lookAt(const glm::vec3& direction) {
     _dirty = true;
-    _rotation = glm::quatLookAt(direction, glm::vec3(0, 1, 0));
+    _rotation = glm::quatLookAt(glm::normalize(direction), glm::vec3(0, 1, 0));
     return _rotation;
 }
 

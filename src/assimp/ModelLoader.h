@@ -9,6 +9,7 @@
 #include <iostream>
 #include <memory>
 #include <string>
+#include <filesystem>
 
 #include <cmrc/cmrc.hpp>
 
@@ -113,9 +114,11 @@ public:
             const std::shared_ptr<FrameBuffer>& target,
             IdentifiableWrapper<ShaderProgram> shader,
             const std::shared_ptr<ShaderUniformDescriptor>& materialDescriptor,
-            const cmrc::file& file) const {
+            const cmrc::file& file,
+            bool flipWindingOrder = false) const {
         return loadModel<Vertex, Instance>(
-                target, shader, materialDescriptor, file.begin(), file.size());
+                target, shader, materialDescriptor, file.begin(), file.size(),
+                flipWindingOrder);
     }
 
     template<class Vertex, class Instance>
@@ -125,18 +128,20 @@ public:
             IdentifiableWrapper<ShaderProgram> shader,
             const std::shared_ptr<ShaderUniformDescriptor>& materialDescriptor,
             const void* buffer,
-            size_t length) const {
+            size_t length,
+            bool flipWindingOrder = false) const {
         Assimp::Importer importer;
-        auto scene = importer.ReadFileFromMemory(
-                buffer,
-                length,
-                aiProcess_Triangulate |
-                aiProcess_JoinIdenticalVertices |
-                aiProcess_SortByPType |
-                aiProcess_RemoveRedundantMaterials |
-                aiProcess_EmbedTextures |
-                aiProcess_FlipUVs
-        );
+
+        auto flags = aiProcess_Triangulate |
+                     aiProcess_JoinIdenticalVertices |
+                     aiProcess_SortByPType |
+                     aiProcess_RemoveRedundantMaterials |
+                     aiProcess_EmbedTextures |
+                     aiProcess_FlipUVs;
+
+        if (flipWindingOrder) flags |= aiProcess_FlipWindingOrder;
+        auto scene = importer.ReadFileFromMemory(buffer, length, flags);
+
         return loadModel<Vertex, Instance>(target, shader,
                                            materialDescriptor, scene);
     }
@@ -147,21 +152,29 @@ public:
             IdentifiableWrapper<ShaderProgram> shader,
             const std::shared_ptr<ShaderUniformDescriptor>& materialDescriptor,
             const std::string& directory,
-            const std::string& fileName) const {
+            const std::string& fileName,
+            bool flipWindingOrder = false) const {
         Assimp::Importer importer;
+
+        auto previous = std::filesystem::current_path();
+
         importer.GetIOHandler()->ChangeDirectory(directory);
 
-        auto scene = importer.ReadFile(
-                fileName,
-                aiProcess_Triangulate |
-                aiProcess_JoinIdenticalVertices |
-                aiProcess_SortByPType |
-                aiProcess_RemoveRedundantMaterials |
-                aiProcess_EmbedTextures |
-                aiProcess_FlipUVs
-        );
-        return loadModel<Vertex, Instance>(target, shader,
-                                           materialDescriptor, scene);
+
+        auto flags = aiProcess_Triangulate |
+                     aiProcess_JoinIdenticalVertices |
+                     aiProcess_SortByPType |
+                     aiProcess_RemoveRedundantMaterials |
+                     aiProcess_EmbedTextures |
+                     aiProcess_FlipUVs;
+
+        if (flipWindingOrder) flags |= aiProcess_FlipWindingOrder;
+
+        auto scene = importer.ReadFile(fileName, flags);
+        auto result = loadModel<Vertex, Instance>(
+                target, shader, materialDescriptor, scene);
+        std::filesystem::current_path(previous);
+        return result;
     }
 
     template<class Vertex, class Instance>
