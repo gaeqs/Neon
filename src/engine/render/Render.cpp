@@ -21,8 +21,8 @@ Render::Implementation& Render::getImplementation() {
     return _implementation;
 }
 
-void Render::addRenderPass(RenderPassStrategy strategy) {
-    _strategies.emplace(strategy);
+void Render::addRenderPass(const RenderPassStrategy& strategy) {
+    _strategies.push_back(strategy);
 }
 
 void Render::clearRenderPasses() {
@@ -33,8 +33,23 @@ void Render::render(Room* room) const {
     _implementation.render(room, _strategies);
 }
 
-void Render::recreateFrameBuffers() {
+void Render::checkFrameBufferRecreationConditions() {
+    bool first = true;
     for (const auto& item: _strategies) {
-        item.frameBuffer->recreate();
+        if (item.frameBuffer->requiresRecreation()) {
+            if(first) {
+                _implementation.setupFrameBufferRecreation();
+                first = false;
+            }
+            item.frameBuffer->recreate();
+        }
     }
+}
+
+size_t Render::getPassesAmount() const {
+    return _strategies.size();
+}
+
+std::shared_ptr<FrameBuffer> Render::getFrameBuffer(size_t index) {
+    return _strategies[index].frameBuffer;
 }

@@ -13,46 +13,51 @@ ImPlotPoint DebugOverlayComponent::fetchProcessTime(int id, void* data) {
     return {static_cast<double>(id), deque->at(id)};
 }
 
-DebugOverlayComponent::DebugOverlayComponent(uint32_t maxProcessTimes) :
+DebugOverlayComponent::DebugOverlayComponent(
+        bool fixedMode, uint32_t maxProcessTimes) :
         _maxProcessTimes(maxProcessTimes),
-        _processTimes() {
+        _processTimes(),
+        _fixedMode(fixedMode) {
 
     for (uint32_t i = 0; i < maxProcessTimes; ++i) {
         _processTimes.push_back(0.0f);
     }
 }
 
-void DebugOverlayComponent::onUpdate(float deltaTime) {
+void DebugOverlayComponent::onPreDraw() {
     constexpr float PADDING = 10.0f;
 
-    constexpr ImGuiWindowFlags WINDOW_FLAGS =
-            ImGuiWindowFlags_NoResize |
-            ImGuiWindowFlags_NoSavedSettings |
-            ImGuiWindowFlags_NoFocusOnAppearing |
-            ImGuiWindowFlags_NoNav |
-            ImGuiWindowFlags_AlwaysAutoResize |
-            ImGuiWindowFlags_NoMove;
+    const ImGuiWindowFlags WINDOW_FLAGS =
+            _fixedMode ? ImGuiWindowFlags_NoResize |
+                         ImGuiWindowFlags_NoFocusOnAppearing |
+                         ImGuiWindowFlags_NoNav |
+                         ImGuiWindowFlags_AlwaysAutoResize |
+                         ImGuiWindowFlags_NoMove |
+                         ImGuiWindowFlags_NoDocking
+                       : ImGuiWindowFlags_None;
 
     auto frameData = getRoom()->getApplication()->getCurrentFrameInformation();
     _processTimes.pop_front();
     _processTimes.push_back(frameData.lastFrameProcessTime);
 
-    auto* viewport = ImGui::GetMainViewport();
 
-    ImVec2 windowPos(
-            viewport->WorkPos.x + viewport->WorkSize.x - PADDING,
-            viewport->WorkPos.y + PADDING
-    );
-    ImVec2 windowPosPivot(1.0f, 0.0f);
+    if(_fixedMode) {
+        auto* viewport = ImGui::GetMainViewport();
+        ImVec2 windowPos(
+                viewport->WorkPos.x + viewport->WorkSize.x - PADDING,
+                viewport->WorkPos.y + PADDING
+        );
+        ImVec2 windowPosPivot(1.0f, 0.0f);
 
-    ImGui::SetNextWindowPos(windowPos, ImGuiCond_Always, windowPosPivot);
-    ImGui::SetNextWindowBgAlpha(0.85f);
-    ImGui::SetNextWindowSizeConstraints(
-            ImVec2(-1, 0),
-            ImVec2(-1, viewport->WorkSize.y * 0.5f));
+        ImGui::SetNextWindowPos(windowPos, ImGuiCond_Always, windowPosPivot);
+        ImGui::SetNextWindowSizeConstraints(
+                ImVec2(-1, 0),
+                ImVec2(-1, viewport->WorkSize.y * 0.5f));
+        ImGui::SetNextWindowBgAlpha(0.85f);
+    }
 
     if (ImGui::Begin("Debug information", nullptr, WINDOW_FLAGS)) {
-        ImGui::Text("Press \"L\" to enter/exit camera movement mode.");
+        ImGui::TextWrapped("Press \"Ctrl+L\" to enter/exit camera movement mode.");
         auto& camera = getRoom()->getCamera();
         ImGui::Text("Camera: (%f, %f, %f)",
                     camera.getPosition().x,
@@ -73,11 +78,6 @@ void DebugOverlayComponent::onUpdate(float deltaTime) {
         if (ImGui::TreeNode("Profiling")) {
             drawProfiling();
             ImGui::TreePop();
-        }
-
-        if (ImGui::BeginPopupContextWindow()) {
-            //if (ImGui::MenuItem("Custom", NULL, location == -1)) location = -1;
-            ImGui::EndPopup();
         }
     }
     ImGui::End();

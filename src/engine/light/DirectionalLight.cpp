@@ -6,6 +6,7 @@
 
 #include <engine/structure/Room.h>
 #include <engine/light/LightSystem.h>
+#include <imgui.h>
 
 DirectionalLight::DirectionalLight() :
         _graphicComponent(),
@@ -36,7 +37,7 @@ void DirectionalLight::onStart() {
 
 void DirectionalLight::onLateUpdate(float deltaTime) {
     auto direction = getGameObject()->getTransform().getRotation()
-                     * glm::vec3(0.0f, 0.0f, 1.0f);
+                     * glm::vec3(0.0f, 0.0f, -1.0f);
     _graphicComponent->uploadData(Data{
             _diffuseColor,
             _specularColor,
@@ -58,4 +59,22 @@ const glm::vec3& DirectionalLight::getSpecularColor() const {
 
 void DirectionalLight::setSpecularColor(const glm::vec3& specularColor) {
     _specularColor = specularColor;
+}
+
+void DirectionalLight::drawEditor() {
+    float w = (ImGui::GetContentRegionAvail().x -
+               ImGui::GetStyle().ItemSpacing.y) * 0.50f;
+
+    auto lookAt = getGameObject()->getTransform().getRotation() *
+                  glm::vec3(0.0f, 0.0f, -1.0f);
+    ImGui::Text("Looking at: (%0.3f, %0.3f, %0.3f)", lookAt.x, lookAt.y,
+                lookAt.z);
+
+    ImGui::PushItemWidth(w);
+    ImGui::ColorPicker3(imGuiUId("##diffuse").c_str(), &_diffuseColor.x,
+                        ImGuiColorEditFlags_NoSidePreview);
+    ImGui::SameLine();
+    ImGui::ColorPicker3(imGuiUId("##specular").c_str(), &_specularColor.x,
+                        ImGuiColorEditFlags_NoSidePreview);
+    ImGui::PopItemWidth();
 }

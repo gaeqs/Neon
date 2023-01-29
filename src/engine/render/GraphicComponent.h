@@ -37,7 +37,11 @@ public:
     }
 
     void onPreDraw() override;
+
+    void drawEditor() override;
+
 };
+REGISTER_COMPONENT(GraphicComponent, "Graphic Component")
 
 
 #endif //RVTRACKING_GRAPHICCOMPONENT_H

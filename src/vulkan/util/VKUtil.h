@@ -11,7 +11,7 @@
 #include <optional>
 #include <vulkan/vulkan.h>
 
-#include <engine/render/TextureFormat.h>
+#include <engine/render/TextureCreateInfo.h>
 
 class VKApplication;
 
@@ -40,19 +40,29 @@ namespace vulkan_util {
     std::pair<VkImage, VkDeviceMemory> createImage(
             VkDevice device,
             VkPhysicalDevice physicalDevice,
-            uint32_t width,
-            uint32_t height,
             VkImageUsageFlags usage,
-            VkFormat format);
+            const ImageCreateInfo& info,
+            TextureViewType viewType,
+            VkFormat override = VK_FORMAT_UNDEFINED);
 
     void transitionImageLayout(
             VKApplication* application,
             VkImage image, VkFormat format,
-            VkImageLayout oldLayout, VkImageLayout newLayout);
+            VkImageLayout oldLayout, VkImageLayout newLayout,
+            uint32_t mipLevels,
+            uint32_t layers);
 
     void copyBufferToImage(
             VKApplication* application,
-            VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
+            VkBuffer buffer, VkImage image,
+            uint32_t width, uint32_t height, uint32_t depth,
+            uint32_t layers);
+
+    void generateMipmaps(
+            VKApplication* application,
+            VkImage image,
+            uint32_t width, uint32_t height, uint32_t depth,
+            uint32_t levels, int32_t layers);
 
     std::optional<VkFormat> findSupportedFormat(
             VkPhysicalDevice physicalDevice,
@@ -64,17 +74,13 @@ namespace vulkan_util {
             VkDevice device,
             VkImage image,
             VkFormat format,
-            VkImageAspectFlags aspectFlags);
+            VkImageAspectFlags aspectFlags,
+            const ImageViewCreateInfo& info);
 
     std::pair<VkVertexInputBindingDescription,
             std::vector<VkVertexInputAttributeDescription>>
     toVulkanDescription(uint32_t binding, uint32_t startLocation,
                         const InputDescription& description);
-
-    VkFormat getImageFormat(TextureFormat format);
-
-    std::vector<VkFormat> getImageFormats(
-            const std::vector<TextureFormat>& formats);
 
 }
 

@@ -52,6 +52,8 @@ namespace assimp_geometry {
                 auto current = face.mIndices[vertexI];
                 auto other = getOtherVertices(&face, current);
 
+                if(other.size() < 2) break;
+
                 auto a = mesh->mVertices[current];
                 auto b = mesh->mVertices[other[0]];
                 auto c = mesh->mVertices[other[1]];

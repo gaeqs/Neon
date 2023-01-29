@@ -30,6 +30,8 @@ public:
 
     virtual ~FrameBuffer() = default;
 
+    virtual bool requiresRecreation() = 0;
+
     virtual void recreate() = 0;
 
     [[nodiscard]] virtual Implementation& getImplementation() = 0;
@@ -38,6 +40,10 @@ public:
 
     [[nodiscard]] virtual std::vector<IdentifiableWrapper<Texture>>
     getTextures() const = 0;
+
+    [[nodiscard]] virtual uint32_t getWidth() const = 0;
+
+    [[nodiscard]] virtual uint32_t getHeight() const = 0;
 };
 
 

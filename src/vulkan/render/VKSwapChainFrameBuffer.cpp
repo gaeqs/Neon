@@ -35,19 +35,28 @@ void VKSwapChainFrameBuffer::createSwapChainImageViews() {
                 _vkApplication->getDevice(),
                 _swapChainImages[i],
                 _vkApplication->getSwapChainImageFormat(),
-                VK_IMAGE_ASPECT_COLOR_BIT
+                VK_IMAGE_ASPECT_COLOR_BIT,
+                ImageViewCreateInfo()
         );
     }
 }
 
 void VKSwapChainFrameBuffer::createDepthImage() {
     auto& extent = _vkApplication->getSwapChainExtent();
+
+    ImageCreateInfo info;
+    info.width = _extent.width;
+    info.height = _extent.height;
+    info.depth = 1;
+    info.mipmaps = 1;
+    info.layers = 1;
+
     auto pair = vulkan_util::createImage(
             _vkApplication->getDevice(),
             _vkApplication->getPhysicalDevice(),
-            extent.width,
-            extent.height,
             VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
+            info,
+            TextureViewType::NORMAL_2D,
             _vkApplication->getDepthImageFormat()
     );
 
@@ -58,7 +67,8 @@ void VKSwapChainFrameBuffer::createDepthImage() {
             _vkApplication->getDevice(),
             _depthImage,
             _vkApplication->getDepthImageFormat(),
-            VK_IMAGE_ASPECT_DEPTH_BIT
+            VK_IMAGE_ASPECT_DEPTH_BIT,
+            ImageViewCreateInfo()
     );
 
     vulkan_util::transitionImageLayout(
@@ -66,7 +76,8 @@ void VKSwapChainFrameBuffer::createDepthImage() {
             _depthImage,
             _vkApplication->getDepthImageFormat(),
             VK_IMAGE_LAYOUT_UNDEFINED,
-            VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL
+            VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+            1, 1
     );
 }
 
@@ -99,6 +110,8 @@ void VKSwapChainFrameBuffer::createFrameBuffers() {
             throw std::runtime_error("Failed to create framebuffer!");
         }
     }
+
+    _extent = extent;
 }
 
 void VKSwapChainFrameBuffer::cleanup() {
@@ -126,6 +139,7 @@ VKSwapChainFrameBuffer::VKSwapChainFrameBuffer(
         _depthImageMemory(VK_NULL_HANDLE),
         _depthImageView(VK_NULL_HANDLE),
         _swapChainFrameBuffers(),
+        _extent(),
         _renderPass(room->getApplication(),
                     {_vkApplication->getSwapChainImageFormat()},
                     depth, true, _vkApplication->getDepthImageFormat()),
@@ -208,4 +222,18 @@ VKRenderPass& VKSwapChainFrameBuffer::getRenderPass() {
 
 bool VKSwapChainFrameBuffer::renderImGui() {
     return true;
+}
+
+uint32_t VKSwapChainFrameBuffer::getWidth() const {
+    return _extent.width;
+}
+
+uint32_t VKSwapChainFrameBuffer::getHeight() const {
+    return _extent.height;
+}
+
+bool VKSwapChainFrameBuffer::requiresRecreation() {
+    auto& extent = _vkApplication->getSwapChainExtent();
+    if(extent.width == 0 || extent.height == 0) return false;
+    return extent.width != getWidth() || extent.height != getHeight();
 }

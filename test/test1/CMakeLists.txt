@@ -1,17 +1,13 @@
 set(
         TEST_SOURCES
         main.cpp
-        TestComponent.cpp
-        TestComponent.h
         TestVertex.h
         GlobalParametersUpdaterComponent.cpp
         GlobalParametersUpdaterComponent.h
         LockMouseComponent.cpp
         LockMouseComponent.h
         ConstantRotationComponent.cpp
-        ConstantRotationComponent.h
-        ImGuiTestComponent.cpp
-        ImGuiTestComponent.h)
+        ConstantRotationComponent.h)
 
 cmrc_add_resource_library(
         shaders
@@ -21,6 +17,7 @@ cmrc_add_resource_library(
         shader/default.frag
         shader/deferred.vert
         shader/deferred.frag
+        shader/deferred_parallax.frag
         shader/screen.vert
         shader/screen.frag
         shader/directional_light.vert

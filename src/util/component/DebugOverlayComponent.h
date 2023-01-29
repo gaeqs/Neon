@@ -13,6 +13,7 @@ class DebugOverlayComponent : public Component {
 
     uint32_t _maxProcessTimes;
     std::deque<float> _processTimes;
+    bool _fixedMode;
 
     static ImPlotPoint fetchProcessTime(int id, void* data);
 
@@ -24,11 +25,12 @@ class DebugOverlayComponent : public Component {
 
 public:
 
-    explicit DebugOverlayComponent(uint32_t maxProcessTimes);
+    DebugOverlayComponent(bool fixedMode, uint32_t maxProcessTimes);
 
-    void onUpdate(float deltaTime) override;
+    void onPreDraw() override;
 
 };
+REGISTER_COMPONENT(DebugOverlayComponent, "Debug Overlay")
 
 
 #endif //NEON_DEBUGOVERLAYCOMPONENT_H

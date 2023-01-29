@@ -21,7 +21,7 @@ class Transform {
     glm::quat _rotation;
     glm::vec3 _scale;
 
-    IdentifiableWrapper<GameObject> _parent;
+    IdentifiableWrapper<GameObject> _gameObject;
     uint64_t _parentIdOnLastRefresh;
 
     bool _dirty;
@@ -34,17 +34,17 @@ class Transform {
 
 public:
 
-    Transform();
+    Transform(const Transform& other) = delete;
 
-    IdentifiableWrapper<GameObject> getParent() const;
+    explicit Transform(IdentifiableWrapper<GameObject> object);
 
-    void setParent(const IdentifiableWrapper<GameObject>& parent);
+    [[nodiscard]] IdentifiableWrapper<GameObject> getGameObject() const;
 
-    const glm::vec3& getPosition() const;
+    [[nodiscard]] const glm::vec3& getPosition() const;
 
-    const glm::quat& getRotation() const;
+    [[nodiscard]] const glm::quat& getRotation() const;
 
-    const glm::vec3& getScale() const;
+    [[nodiscard]] const glm::vec3& getScale() const;
 
     void setPosition(const glm::vec3& position);
 

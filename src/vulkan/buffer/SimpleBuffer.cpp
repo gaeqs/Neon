@@ -74,8 +74,7 @@ SimpleBuffer::SimpleBuffer(VKApplication* application,
     vkBindBufferMemory(_application->getDevice(),
                        _vertexBuffer, _vertexBufferMemory, 0);
     if (data != nullptr && sizeInBytes != 0 && _modifiable) {
-        std::optional<std::shared_ptr<BufferMap<char>>> ptr = map<char>();
-        memcpy(ptr.value()->raw(), data, _size);
+        memcpy(map<char>().value()->raw(), data, _size);
     }
 
 }

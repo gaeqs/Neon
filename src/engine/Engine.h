@@ -35,8 +35,7 @@
 #include <engine/render/SimpleFrameBuffer.h>
 #include <engine/render/SwapChainFrameBuffer.h>
 #include <engine/render/Texture.h>
-#include <engine/render/TextureFormat.h>
-#include <engine/render/TextureFormat.h>
+#include <engine/render/TextureCreateInfo.h>
 
 #include <engine/shader/Material.h>
 #include <engine/shader/ShaderProgram.h>
@@ -47,6 +46,7 @@
 
 #include <engine/structure/Component.h>
 #include <engine/structure/ComponentImplementedEvents.h>
+#include <engine/structure/ComponentRegister.h>
 #include <engine/structure/GameObject.h>
 #include <engine/structure/Identifiable.h>
 #include <engine/structure/IdentifiableWrapper.h>

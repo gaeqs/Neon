@@ -69,6 +69,22 @@ public:
         _cluster.forEach(function);
     }
 
+    ClusteredLinkedCollection<T>::ConstIterator begin () const {
+        return _cluster.begin();
+    }
+
+    ClusteredLinkedCollection<T>::Iterator begin () {
+        return _cluster.begin();
+    }
+
+    ClusteredLinkedCollection<T>::ConstIterator end () const {
+        return _cluster.end();
+    }
+
+    ClusteredLinkedCollection<T>::Iterator end () {
+        return _cluster.end();
+    }
+
 };
 
 #endif //NEON_IDENTIFIABLECOLLECTION_H

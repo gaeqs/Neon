@@ -163,9 +163,6 @@ void Application::setRoom(const std::shared_ptr<Room>& room) {
         throw std::runtime_error("Room's application is not this application!");
     }
     _room = room;
-    if (_room != nullptr) {
-        _room->onResize();
-    }
     _implementation.setRoom(room);
 }
 
@@ -182,16 +179,13 @@ void Application::lockMouse(bool lock) {
 void Application::internalForceSizeValues(int32_t width, int32_t height) {
     _width = width;
     _height = height;
-    if (_room != nullptr) {
-        _room->onResize();
-    }
 }
 
 void Application::internalKeyEvent(int key, int scancode,
                                    int action, int mods) {
     KeyboardEvent event{
-            mods,
             scancode,
+            mods,
             static_cast<KeyboardKey>(key),
             static_cast<KeyboardAction>(action)
     };

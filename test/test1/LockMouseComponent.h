@@ -27,5 +27,4 @@ public:
 
 };
 
-
 #endif //NEON_LOCKMOUSECOMPONENT_H

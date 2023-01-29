@@ -34,7 +34,7 @@ void main() {
 
     vec4 projectedPosition = vec4(fragPosition, depth, 1.0f);
     vec4 position4 = inverseProjection * projectedPosition;
-    vec3 position = position4.xyz / position4.w;
+    vec3 position = (position4.xyz / position4.w);
 
     vec3 direction = -normalize(position);
 

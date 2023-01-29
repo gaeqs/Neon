@@ -10,14 +10,27 @@
 class ConstantRotationComponent : public Component {
 
     float _speed;
+    glm::vec3 _axis;
 
 public:
 
-    void onStart() override;
+    ConstantRotationComponent();
+
+    [[nodiscard]] float getSpeed() const;
+
+    void setSpeed(float speed);
+
+    [[nodiscard]] const glm::vec3& getAxis() const;
+
+    void setAxis(const glm::vec3& axis);
 
     void onUpdate(float deltaTime) override;
 
+    void drawEditor() override;
+
+
 };
+REGISTER_COMPONENT(ConstantRotationComponent, "Constant Rotation")
 
 
 #endif //NEON_CONSTANTROTATIONCOMPONENT_H

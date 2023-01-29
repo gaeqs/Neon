@@ -122,6 +122,7 @@ namespace deferred_utils {
                     directionalShader,
                     configuration
             );
+            directionalModel->setName("Directional light model");
             directionalModel->defineInstanceStruct<DirectionalLight::Data>();
         }
 
@@ -134,6 +135,7 @@ namespace deferred_utils {
                     pointShader,
                     configuration
             );
+            pointModel->setName("Point light model");
             pointModel->defineInstanceStruct<PointLight::Data>();
         }
 
@@ -146,6 +148,7 @@ namespace deferred_utils {
                     flashShader,
                     configuration
             );
+            flashModel->setName("Flash light model");
             flashModel->defineInstanceStruct<FlashLight::Data>();
         }
 

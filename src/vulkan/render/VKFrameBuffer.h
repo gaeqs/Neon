@@ -36,6 +36,10 @@ public:
 
     [[nodiscard]] virtual VKRenderPass& getRenderPass() = 0;
 
+    [[nodiscard]] virtual uint32_t getWidth() const = 0;
+
+    [[nodiscard]] virtual uint32_t getHeight() const = 0;
+
     [[nodiscard]] virtual bool renderImGui() = 0;
 };
 

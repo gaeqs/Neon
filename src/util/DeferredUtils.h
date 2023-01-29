@@ -9,9 +9,9 @@
 #include <vector>
 
 #include <engine/structure/IdentifiableWrapper.h>
-#include <engine/render/TextureFormat.h>
 #include <engine/model/InputDescription.h>
 #include <engine/shader/MaterialConfiguration.h>
+#include <engine/render/TextureCreateInfo.h>
 
 class Room;
 

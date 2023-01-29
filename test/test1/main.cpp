@@ -5,10 +5,14 @@
 #include <engine/Engine.h>
 #include <util/component/CameraMovementComponent.h>
 #include <util/component/DebugOverlayComponent.h>
+#include <util/component/DockSpaceComponent.h>
+#include <util/component/ViewportComponent.h>
+#include <util/component/SceneTreeComponent.h>
+#include <util/component/GameObjectExplorerComponent.h>
 #include <util/DeferredUtils.h>
+#include <util/ModelUtils.h>
 #include <assimp/ModelLoader.h>
 
-#include "TestComponent.h"
 #include "TestVertex.h"
 #include "GlobalParametersUpdaterComponent.h"
 #include "LockMouseComponent.h"
@@ -45,6 +49,8 @@ std::shared_ptr<FrameBuffer> initRender(Room* room) {
                                     "point_light.frag");
     auto flashShader = createShader(room, "flash_light.vert",
                                     "flash_light.frag");
+    auto screenShader = createShader(room, "screen.vert",
+                                     "screen.frag");
 
     std::vector<TextureFormat> frameBufferFormats = {
             TextureFormat::R8G8B8A8,
@@ -58,7 +64,7 @@ std::shared_ptr<FrameBuffer> initRender(Room* room) {
     room->getRender().addRenderPass(
             {fpFrameBuffer, RenderPassStrategy::defaultStrategy});
 
-    auto outputColor = deferred_utils::createLightSystem(
+    auto albedo = deferred_utils::createLightSystem(
             room,
             fpFrameBuffer->getTextures(),
             TextureFormat::R8G8B8A8,
@@ -67,35 +73,38 @@ std::shared_ptr<FrameBuffer> initRender(Room* room) {
             flashShader
     );
 
-    auto scFrameBuffer = std::make_shared<SwapChainFrameBuffer>(
-            room, false);
-
+    std::vector<TextureFormat> screenFormats = {TextureFormat::R8G8B8A8};
+    auto screenFrameBuffer = std::make_shared<SimpleFrameBuffer>(
+            room, screenFormats, false);
     room->getRender().addRenderPass(
-            {scFrameBuffer, RenderPassStrategy::defaultStrategy});
+            {screenFrameBuffer, RenderPassStrategy::defaultStrategy});
 
-    auto screenShader = createShader(room, "screen.vert", "screen.frag");
     auto textures = fpFrameBuffer->getTextures();
-    textures[0] = outputColor;
-
-    auto screen = deferred_utils::createScreenModel(
+    textures[0] = albedo;
+    auto screenModel = deferred_utils::createScreenModel(
             room,
             textures,
-            scFrameBuffer,
+            screenFrameBuffer,
             InputDescription(0, InputRate::INSTANCE),
             screenShader
     );
 
-    // Create an empty instance!
-    auto instanceResult = screen->createInstance();
-    if (!instanceResult.isOk()) {
-        throw std::runtime_error(instanceResult.getError());
+    auto instance = screenModel->createInstance();
+    if (!instance.isOk()) {
+        throw std::runtime_error(instance.getError());
     }
+
+    auto swapFrameBuffer = std::make_shared<SwapChainFrameBuffer>(
+            room, false);
+
+    room->getRender().addRenderPass(
+            {swapFrameBuffer, RenderPassStrategy::defaultStrategy});
 
     return fpFrameBuffer;
 }
 
-void loadSansModels(Application* application, Room* room,
-                    const std::shared_ptr<FrameBuffer>& target) {
+void loadModels(Application* application, Room* room,
+                const std::shared_ptr<FrameBuffer>& target) {
 
     std::vector<ShaderUniformBinding> sansMaterialBindings = {
             ShaderUniformBinding{UniformBindingType::IMAGE, 0},
@@ -103,19 +112,20 @@ void loadSansModels(Application* application, Room* room,
     };
 
 
-    auto sansMaterialDescriptor = std::make_shared<ShaderUniformDescriptor>(
+    auto materialDescriptor = std::make_shared<ShaderUniformDescriptor>(
             application,
             sansMaterialBindings
     );
 
-
     auto shader = createShader(room, "deferred.vert", "deferred.frag");
+    auto shaderParallax = createShader(room, "deferred.vert",
+                                       "deferred_parallax.frag");
 
     auto sansResult = ModelLoader(room).loadModel
             <TestVertex, DefaultInstancingData>(
             target,
             shader,
-            sansMaterialDescriptor,
+            materialDescriptor,
             R"(resource/Sans)",
             "Sans.obj");
 
@@ -124,7 +134,9 @@ void loadSansModels(Application* application, Room* room,
         std::cout << std::filesystem::current_path() << std::endl;
         exit(1);
     }
+
     auto sansModel = sansResult.model;
+    sansModel->setName("Sans");
 
     constexpr int AMOUNT = 1024 * 1;
     int q = static_cast<int>(std::sqrt(AMOUNT));
@@ -133,17 +145,102 @@ void loadSansModels(Application* application, Room* room,
         sans->newComponent<GraphicComponent>(sansModel);
         sans->newComponent<ConstantRotationComponent>();
 
+        if (i == 0) {
+            auto sans2 = room->newGameObject();
+            sans2->newComponent<GraphicComponent>(sansModel);
+            sans2->newComponent<ConstantRotationComponent>();
+            sans2->setParent(sans);
+            sans2->getTransform().setPosition(glm::vec3(-5.0f, 5.0f, 0.0f));
+            sans2->setName("Children Sans");
+        }
+
         float x = static_cast<float>(i % q) * 3.0f;
-        float z = static_cast<float>(i / q) * 3.0f; // NOLINT(bugprone-integer-division)
+        float z = static_cast<float>(i / q) *
+                  3.0f; // NOLINT(bugprone-integer-division)
         sans->getTransform().setPosition(glm::vec3(x, 0, z));
+        sans->setName("Sans " + std::to_string(i));
     }
+
+    auto zeppeliResult = ModelLoader(room).loadModel
+            <TestVertex, DefaultInstancingData>(
+            target,
+            shader,
+            materialDescriptor,
+            R"(resource/Zeppeli)",
+            "William.obj",
+            true);
+
+    if (!zeppeliResult.valid) {
+        std::cout << "Couldn't load zeppeli model!" << std::endl;
+        std::cout << std::filesystem::current_path() << std::endl;
+        exit(1);
+    }
+
+    auto zeppeliModel = zeppeliResult.model;
+    zeppeliModel->setName("Zeppeli");
+
+    auto zeppeli = room->newGameObject();
+    zeppeli->newComponent<GraphicComponent>(zeppeliModel);
+    zeppeli->newComponent<ConstantRotationComponent>();
+    zeppeli->getTransform().setPosition(glm::vec3(-10.0f, 10.0f, -10.0f));
+    zeppeli->setName("Zeppeli");
+
+    // CUBE
+
+    TextureCreateInfo albedoInfo;
+    albedoInfo.image.format = TextureFormat::R8G8B8A8_SRGB;
+
+    auto cubeAlbedo = room->getTextures()
+            .createTextureFromFile("resource/Cube/bricks.png", albedoInfo);
+    auto cubeNormal = room->getTextures()
+            .createTextureFromFile("resource/Cube/bricks_normal.png");
+    auto cubeParallax = room->getTextures()
+            .createTextureFromFile("resource/Cube/bricks_parallax.png");
+
+    std::vector<IdentifiableWrapper<Texture>> textures = {
+            cubeAlbedo, cubeNormal, cubeParallax
+    };
+
+    auto cubeModel = model_utils::createCubeModel<TestVertex>(
+            room,
+            textures,
+            target,
+            DefaultInstancingData::getInstancingDescription(),
+            shaderParallax
+    );
+    cubeModel->setName("Cube");
+
+    auto cube = room->newGameObject();
+    cube->newComponent<GraphicComponent>(cubeModel);
+    cube->newComponent<ConstantRotationComponent>();
+    cube->getTransform().setPosition(glm::vec3(0.0f, 10.0f, -10.0f));
+    cube->setName("Cube");
+}
+
+IdentifiableWrapper<Texture> loadSkybox(Room* room) {
+    static const std::vector<std::string> PATHS = {
+            "resource/Skybox/right.jpg",
+            "resource/Skybox/left.jpg",
+            "resource/Skybox/top.jpg",
+            "resource/Skybox/bottom.jpg",
+            "resource/Skybox/front.jpg",
+            "resource/Skybox/back.jpg",
+    };
+
+    TextureCreateInfo info;
+    info.imageView.viewType = TextureViewType::CUBE;
+    info.image.layers = 6;
+
+    return room->getTextures().createTextureFromFiles(PATHS, info);
 }
 
 std::shared_ptr<Room> getTestRoom(Application* application) {
 
-    std::vector<ShaderUniformBinding> globalBindings = {ShaderUniformBinding{
-            UniformBindingType::BUFFER, sizeof(GlobalParameters)
-    }};
+    std::vector<ShaderUniformBinding> globalBindings = {
+            ShaderUniformBinding{UniformBindingType::BUFFER,
+                                 sizeof(GlobalParameters)},
+            ShaderUniformBinding{UniformBindingType::IMAGE, 0}
+    };
 
     auto globalDescriptor = std::make_shared<ShaderUniformDescriptor>(
             application, globalBindings
@@ -151,17 +248,10 @@ std::shared_ptr<Room> getTestRoom(Application* application) {
 
     auto room = std::make_shared<Room>(application, globalDescriptor);
 
+    auto skybox = loadSkybox(room.get());
+    room->getGlobalUniformBuffer().setTexture(1, skybox);
+
     auto fpFrameBuffer = initRender(room.get());
-
-    auto gameObject = room->newGameObject();
-    gameObject->newComponent<TestComponent>();
-    gameObject->getTransform().setPosition(glm::vec3(0.0f, 0.0f, -1.0f));
-
-    auto gameObject2 = room->newGameObject();
-    gameObject2->newComponent<TestComponent>();
-
-    gameObject2->setParent(gameObject);
-    gameObject2->getTransform().setPosition(glm::vec3(0.0f, -1.0f, 0.0f));
 
     auto cameraController = room->newGameObject();
     auto cameraMovement = cameraController->newComponent<CameraMovementComponent>();
@@ -170,18 +260,21 @@ std::shared_ptr<Room> getTestRoom(Application* application) {
     auto parameterUpdater = room->newGameObject();
     parameterUpdater->newComponent<GlobalParametersUpdaterComponent>();
     parameterUpdater->newComponent<LockMouseComponent>(cameraMovement);
-    parameterUpdater->newComponent<DebugOverlayComponent>(100);
+    parameterUpdater->newComponent<DockSpaceComponent>();
+    parameterUpdater->newComponent<ViewportComponent>();
+    auto goExplorer = parameterUpdater->newComponent<GameObjectExplorerComponent>();
+    parameterUpdater->newComponent<SceneTreeComponent>(goExplorer);
+    parameterUpdater->newComponent<DebugOverlayComponent>(false, 100);
 
     auto directionalLight = room->newGameObject();
     directionalLight->newComponent<DirectionalLight>();
-
-    auto directionalLight2 = room->newGameObject();
-    directionalLight2->newComponent<DirectionalLight>();
-    directionalLight2->getTransform().lookAt(glm::vec3(1.0f, 0.0f, 0.0f));
+    directionalLight->getTransform().lookAt(glm::vec3(0.45f, -0.6f, 0.65f));
+    directionalLight->setName("Directional light");
 
     auto pointLightGO = room->newGameObject();
     auto pointLight = pointLightGO->newComponent<PointLight>();
     pointLightGO->getTransform().setPosition({5.0f, 7.0f, 5.0f});
+    pointLightGO->setName("Point light");
     pointLight->setDiffuseColor({1.0f, 0.0f, 0.0f});
     pointLight->setConstantAttenuation(0.01f);
     pointLight->setLinearAttenuation(0.2);
@@ -191,22 +284,24 @@ std::shared_ptr<Room> getTestRoom(Application* application) {
     auto flashLight = flashLightGO->newComponent<FlashLight>();
     flashLightGO->getTransform().setPosition({10.0f, 7.0f, 10.0f});
     flashLightGO->getTransform().rotate(glm::vec3(1.0f, 0.0f, 0.0f), 1.0f);
+    flashLightGO->setName("Flash light");
     flashLight->setDiffuseColor({0.0f, 1.0f, 0.0f});
     flashLight->setConstantAttenuation(0.01f);
     flashLight->setLinearAttenuation(0.2);
     flashLight->setQuadraticAttenuation(0.1);
 
 
-    loadSansModels(application, room.get(), fpFrameBuffer);
+    loadModels(application, room.get(), fpFrameBuffer);
 
     return room;
 }
 
 int main() {
+    std::srand(std::time(nullptr));
 
     Application application(WIDTH, HEIGHT);
 
-    auto initResult = application.init("Test");
+    auto initResult = application.init("Neon");
     if (!initResult.isOk()) {
         std::cerr << "[GLFW INIT]\t" << initResult.getError() << std::endl;
         return EXIT_FAILURE;

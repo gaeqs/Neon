@@ -10,9 +10,22 @@
 #include <engine/structure/GameObject.h>
 #include <engine/structure/Identifiable.h>
 #include <engine/structure/IdentifiableWrapper.h>
+#include <engine/structure/ComponentRegister.h>
 
 #include <engine/io/KeyboardEvent.h>
 #include <engine/io/CursorEvent.h>
+
+#define REGISTER_COMPONENT(clazz, name)                         \
+    namespace {                                                 \
+        struct _##clazz##_component_register_ {                 \
+            _##clazz##_component_register_() {                  \
+                ComponentRegister::instance()                   \
+                    .registerComponent< clazz >( name );        \
+            }                                                   \
+        };                                                      \
+        _##clazz##_component_register_ __##clazz##_register;    \
+    }                                                           \
+
 
 /**
  * Represents a component inside a game object.
@@ -140,6 +153,15 @@ public:
      */
     virtual void onCursorMove(const CursorMoveEvent& event);
 
+
+    /**
+     * Draws the editor of this component.
+     *
+     * Components must implement this method
+     * if they want to be edited.
+     */
+    virtual void drawEditor();
+
     // region UTIL
 
     /**
@@ -150,6 +172,10 @@ public:
      */
     [[nodiscard]] inline Room* getRoom() {
         return _gameObject->getRoom();
+    }
+
+    inline std::string imGuiUId(const std::string& id) const {
+        return id + "##" + std::to_string(_id);
     }
 
     // endregion

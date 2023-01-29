@@ -53,13 +53,14 @@ void main() {
     float specularStrenth = pow(max(dot(lightDirection, reflectDirection), 0.0), normalZSpecular.y);
 
     float attenuation = fragConstantAttenuation + fragLinearAttenuation * lightDistance + fragQuadraticAttenuation * (lightDistance * lightDistance);
+    attenuation = min(1.0f, 1.0f / attenuation);
 
     float theta = dot(lightDirection, normalize(-fragLightDirection));
     float epsilon = (fragCutOff - fragOuterCutOff);
     float intensity = clamp((theta - fragOuterCutOff) / epsilon, 0.0, 1.0);
 
-    vec3 diffuse = fragDiffuseColor * diffuseStrength * intensity / attenuation;
-    vec3 specular = fragSpecularColor * specularStrenth * intensity / attenuation;
+    vec3 diffuse = fragDiffuseColor * diffuseStrength * intensity * attenuation;
+    vec3 specular = fragSpecularColor * specularStrenth * intensity * attenuation;
 
     color = vec4(diffuse + specular, 1.0f) * albedo;
 }

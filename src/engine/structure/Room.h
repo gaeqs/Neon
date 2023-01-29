@@ -93,13 +93,18 @@ public:
 
     [[nodiscard]] Render& getRender();
 
-    [[nodiscard]] IdentifiableWrapper<GameObject> newGameObject();
+    IdentifiableWrapper<GameObject> newGameObject();
 
     void destroyGameObject(IdentifiableWrapper<GameObject> gameObject);
 
-    //region EVENTS
+    size_t getGameObjectAmount();
 
-    void onResize();
+    void forEachGameObject(std::function<void(GameObject*)> consumer);
+
+    void forEachGameObject(
+            std::function<void(const GameObject*)> consumer) const;
+
+    //region EVENTS
 
     void onKey(const KeyboardEvent& event);
 

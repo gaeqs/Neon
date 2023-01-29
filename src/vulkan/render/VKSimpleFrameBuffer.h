@@ -7,11 +7,13 @@
 
 #include <vector>
 
-#include <engine/render/TextureFormat.h>
+#include <engine/render/TextureCreateInfo.h>
 #include <engine/structure/IdentifiableWrapper.h>
 
 #include <vulkan/render/VKFrameBuffer.h>
 #include <vulkan/render/VKRenderPass.h>
+
+#include <imgui.h>
 
 class Room;
 
@@ -29,9 +31,12 @@ class VKSimpleFrameBuffer : public VKFrameBuffer {
     std::vector<VkDeviceMemory> _memories;
     std::vector<VkImageView> _imageViews;
     std::vector<VkImageLayout> _layouts;
+    std::vector<VkDescriptorSet> _imGuiDescriptors;
     std::vector<IdentifiableWrapper<Texture>> _textures;
 
-    std::vector<VkFormat> _formats;
+    std::vector<TextureFormat> _formats;
+    VkExtent2D _extent;
+
     VKRenderPass _renderPass;
 
     bool _depth;
@@ -41,7 +46,6 @@ class VKSimpleFrameBuffer : public VKFrameBuffer {
     void createFrameBuffer();
 
     void cleanup();
-
 
 public:
 
@@ -65,12 +69,23 @@ public:
 
     [[nodiscard]] VKRenderPass& getRenderPass() override;
 
+    [[nodiscard]] uint32_t getWidth() const override;
+
+    [[nodiscard]] uint32_t getHeight() const override;
+
+    [[nodiscard]] ImTextureID getImGuiDescriptor(uint32_t index);
+
     bool renderImGui() override;
 
     [[nodiscard]] const std::vector<IdentifiableWrapper<Texture>>&
     getTextures() const;
 
-    void recreate();
+    void recreate(std::pair<uint32_t, uint32_t> size);
+
+    [[nodiscard]] bool defaultRecreationCondition() const;
+
+    [[nodiscard]] std::pair<uint32_t, uint32_t>
+    defaultRecreationParameters() const;
 
 };
 

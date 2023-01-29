@@ -32,6 +32,8 @@ public:
 private:
 
     uint64_t _id;
+    std::string _name;
+
     Implementation _implementation;
 
     std::vector<std::unique_ptr<Mesh>> _meshes;
@@ -44,10 +46,13 @@ public:
 
     Model(const Model& other) = delete;
 
-    explicit Model(Room* room,
-                   std::vector<std::unique_ptr<Mesh>>& meshes);
+    Model(Room* room, std::vector<std::unique_ptr<Mesh>>& meshes);
 
     [[nodiscard]] uint64_t getId() const override;
+
+    [[nodiscard]] const std::string& getName() const;
+
+    void setName(const std::string& name);
 
     [[nodiscard]] Model::Implementation& getImplementation();
 

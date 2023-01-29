@@ -13,7 +13,7 @@ void VKModel::reinitializeBuffer() {
     _instancingBuffer = std::make_unique<StagingBuffer>(
             _vkApplication,
             VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
-            _instancingStructSize * BUFFER_DEFAULT_SIZE
+            static_cast<uint32_t>(_instancingStructSize) * BUFFER_DEFAULT_SIZE
     );
     _data.resize(_instancingStructSize * BUFFER_DEFAULT_SIZE, 0);
 }
@@ -27,7 +27,7 @@ VKModel::VKModel(Application* application, std::vector<VKMesh*> meshes) :
         _instancingBuffer(std::make_unique<StagingBuffer>(
                 _vkApplication,
                 VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
-                _instancingStructSize * BUFFER_DEFAULT_SIZE
+                static_cast<uint32_t>(_instancingStructSize) * BUFFER_DEFAULT_SIZE
         )),
         _data(_instancingStructSize * BUFFER_DEFAULT_SIZE, 0),
         _dataChangeRange(0, 0) {

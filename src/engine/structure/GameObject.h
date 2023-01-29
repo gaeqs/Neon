@@ -7,6 +7,7 @@
 
 #include <any>
 #include <vector>
+#include <unordered_set>
 
 #include <engine/collection/ComponentCollection.h>
 #include <engine/geometry/Transform.h>
@@ -33,10 +34,16 @@ class GameObject : public Identifiable {
     class IdentifiableWrapper;
 
     uint64_t _id;
+    std::string _name;
+
     Transform _transform;
 
     Room* _room;
-    std::vector<IdentifiableWrapper<Component>> _components;
+    std::unordered_set<IdentifiableWrapper<Component>> _components;
+
+    // Hierarchy
+    IdentifiableWrapper<GameObject> _parent;
+    std::unordered_set<IdentifiableWrapper<GameObject>> _children;
 
     /**
      * Helper method that returns the component's collection
@@ -80,6 +87,20 @@ public:
     [[nodiscard]] uint64_t getId() const override;
 
     /**
+     * Returns the name of this game object.
+     *
+     * @return the name.
+     */
+    const std::string& getName() const;
+
+    /**
+     * Sets the name of this game object.
+     *
+     * @param name the name.
+     */
+    void setName(const std::string& name);
+
+    /**
      * Returns the transformation of this game objet.
      * @return the transformation.
      */
@@ -118,9 +139,7 @@ public:
      *
      * @return the parent or null.
      */
-    [[nodiscard]] IdentifiableWrapper<GameObject> getParent() const {
-        return _transform.getParent();
-    }
+    [[nodiscard]] IdentifiableWrapper<GameObject> getParent() const;
 
     /**
      * Sets the parent of this game object. The parent
@@ -135,9 +154,32 @@ public:
      *
      * @param parent the parent or null.
      */
-    void setParent(const IdentifiableWrapper<GameObject>& parent) {
-        _transform.setParent(parent);
-    }
+    void setParent(const IdentifiableWrapper<GameObject>& parent);
+
+    /**
+     * Returns the collection of children of this game object.
+     *
+     * This collection cannot be modified directly:
+     * use setParent on the children to modify this collection.
+     *
+     * @return the collection of children.
+     */
+    [[nodiscard]] const std::unordered_set<IdentifiableWrapper<GameObject>>&
+    getChildren() const;
+
+    /**
+     * Returns a collection with all components inside this
+     * game object.
+     *
+     * This collection is not a copy, and may be modified
+     * internally after this method's call.
+     *
+     * This collection <b>never</b> contains null elements.
+     *
+     * @return the components.
+     */
+    [[nodiscard]] const std::unordered_set<IdentifiableWrapper<Component>>&
+    getComponents() const;
 
     /**
      * Creates a new component, attaching it to this game object.
@@ -153,7 +195,7 @@ public:
                 getRoomComponents().newComponent<T>(values...);
         component->_gameObject = this;
         auto raw = *reinterpret_cast<IdentifiableWrapper<Component>*>(&component);
-        _components.emplace_back(raw);
+        _components.insert(raw);
         return component;
     }
 

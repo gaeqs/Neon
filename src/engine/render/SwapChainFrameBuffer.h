@@ -33,6 +33,8 @@ public:
 
     ~SwapChainFrameBuffer() override = default;
 
+    bool requiresRecreation() override;
+
     void recreate() override;
 
     [[nodiscard]] FrameBuffer::Implementation& getImplementation() override;
@@ -42,6 +44,10 @@ public:
 
     [[nodiscard]] std::vector<IdentifiableWrapper<Texture>>
     getTextures() const override;
+
+    [[nodiscard]] uint32_t getWidth() const override;
+
+    [[nodiscard]] uint32_t getHeight() const override;
 };
 
 

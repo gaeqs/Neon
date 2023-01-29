@@ -150,8 +150,9 @@ struct KeyboardEvent {
     KeyboardKey key;
     KeyboardAction action;
 
-    [[nodiscard]] inline bool isModifierActive(KeyboardModifier modifier) {
-        return (modifiers & static_cast<int>(modifier)) != 0;
+    [[nodiscard]] inline bool
+    isModifierActive(KeyboardModifier modifier) const {
+        return (modifiers & static_cast<int>(modifier)) > 0;
     }
 };
 
