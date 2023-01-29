@@ -4,7 +4,6 @@
 
 #include "VKSimpleFrameBuffer.h"
 
-
 #include <stdexcept>
 
 #include <imgui_impl_vulkan.h>
@@ -12,6 +11,7 @@
 #include <engine/structure/Room.h>
 #include <engine/render/Texture.h>
 #include <vulkan/util/VKUtil.h>
+#include <vulkan/util/VulkanConversions.h>
 
 void VKSimpleFrameBuffer::createImages() {
 
@@ -19,22 +19,30 @@ void VKSimpleFrameBuffer::createImages() {
     _memories.clear();
     _imageViews.clear();
 
+    ImageCreateInfo info;
+    info.width = _extent.width;
+    info.height = _extent.height;
+    info.depth = 1;
+    info.mipmaps = 1;
+    info.layers = 1;
+
     for (const auto& format: _formats) {
+        info.format = format;
         auto [image, memory] = vulkan_util::createImage(
                 _vkApplication->getDevice(),
                 _vkApplication->getPhysicalDevice(),
-                _extent.width,
-                _extent.height,
                 VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT |
                 VK_IMAGE_USAGE_SAMPLED_BIT,
-                format
+                info,
+                TextureViewType::NORMAL_2D
         );
 
         auto view = vulkan_util::createImageView(
                 _vkApplication->getDevice(),
                 image,
-                format,
-                VK_IMAGE_ASPECT_COLOR_BIT
+                vulkan_conversions::vkFormat(format),
+                VK_IMAGE_ASPECT_COLOR_BIT,
+                ImageViewCreateInfo()
         );
 
         _images.push_back(image);
@@ -48,18 +56,19 @@ void VKSimpleFrameBuffer::createImages() {
         auto [image, memory] = vulkan_util::createImage(
                 _vkApplication->getDevice(),
                 _vkApplication->getPhysicalDevice(),
-                _extent.width,
-                _extent.height,
                 VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT
                 | VK_IMAGE_USAGE_SAMPLED_BIT,
-                _vkApplication->getDepthImageFormat()
+                info,
+                TextureViewType::NORMAL_2D,
+                _vkApplication->getDepthImageFormat() // Overrides info's format.
         );
 
         auto view = vulkan_util::createImageView(
                 _vkApplication->getDevice(),
                 image,
                 _vkApplication->getDepthImageFormat(),
-                VK_IMAGE_ASPECT_DEPTH_BIT
+                VK_IMAGE_ASPECT_DEPTH_BIT,
+                ImageViewCreateInfo()
         );
 
         _images.push_back(image);
@@ -128,9 +137,10 @@ VKSimpleFrameBuffer::VKSimpleFrameBuffer(
         _layouts(),
         _textures(),
         _imGuiDescriptors(),
-        _formats(vulkan_util::getImageFormats(formats)),
+        _formats(formats),
         _extent(_vkApplication->getSwapChainExtent()),
-        _renderPass(room->getApplication(), _formats, depth, false,
+        _renderPass(room->getApplication(),
+                    vulkan_conversions::vkFormat(formats), depth, false,
                     _vkApplication->getDepthImageFormat()),
         _depth(depth) {
 
@@ -139,13 +149,20 @@ VKSimpleFrameBuffer::VKSimpleFrameBuffer(
     createImages();
     createFrameBuffer();
 
+    SamplerCreateInfo info;
+    info.anisotropy = false;
+    info.minificationFilter = TextureFilter::NEAREST;
+    info.magnificationFilter = TextureFilter::NEAREST;
+
     // Create the textures
     for (uint32_t i = 0; i < _imageViews.size(); ++i) {
         auto texture = room->getTextures().create(
+                _imageViews[i],
+                _layouts[i],
                 static_cast<int32_t>(_extent.width),
                 static_cast<int32_t>(_extent.height),
-                _imageViews[i],
-                _layouts[i]
+                1,
+                info
         );
         _textures.push_back(texture);
     }
@@ -185,7 +202,7 @@ uint32_t VKSimpleFrameBuffer::getColorAttachmentAmount() const {
 }
 
 std::vector<VkFormat> VKSimpleFrameBuffer::getColorFormats() const {
-    return _formats;
+    return vulkan_conversions::vkFormat(_formats);
 }
 
 VkFormat VKSimpleFrameBuffer::getDepthFormat() const {
@@ -232,7 +249,7 @@ uint32_t VKSimpleFrameBuffer::getHeight() const {
 
 bool VKSimpleFrameBuffer::defaultRecreationCondition() const {
     auto& extent = _vkApplication->getSwapChainExtent();
-    if(extent.width == 0 || extent.height == 0) return false;
+    if (extent.width == 0 || extent.height == 0) return false;
     return extent.width != getWidth() || extent.height != getHeight();
 }
 

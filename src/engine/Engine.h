@@ -35,8 +35,7 @@
 #include <engine/render/SimpleFrameBuffer.h>
 #include <engine/render/SwapChainFrameBuffer.h>
 #include <engine/render/Texture.h>
-#include <engine/render/TextureFormat.h>
-#include <engine/render/TextureFormat.h>
+#include <engine/render/TextureCreateInfo.h>
 
 #include <engine/shader/Material.h>
 #include <engine/shader/ShaderProgram.h>

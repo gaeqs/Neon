@@ -35,7 +35,6 @@ set(SOURCES
         engine/model/DefaultInstancingData.h
         util/component/CameraMovementComponent.cpp
         util/component/CameraMovementComponent.h
-        engine/render/TextureFormat.h
         assimp/ModelLoader.h
         assimp/AssimpMaterialParameters.h
         assimp/ModelLoader.cpp
@@ -95,7 +94,12 @@ set(SOURCES
         util/component/SceneTreeComponent.cpp
         util/component/SceneTreeComponent.h
         util/component/GameObjectExplorerComponent.cpp
-        util/component/GameObjectExplorerComponent.h engine/structure/ComponentRegister.cpp engine/structure/ComponentRegister.h util/ModelUtils.cpp util/ModelUtils.h)
+        util/component/GameObjectExplorerComponent.h
+        engine/structure/ComponentRegister.cpp
+        engine/structure/ComponentRegister.h
+        util/ModelUtils.cpp
+        util/ModelUtils.h
+        engine/render/TextureCreateInfo.h)
 
 
 set(VULKAN_SOURCES
@@ -136,7 +140,9 @@ set(VULKAN_SOURCES
         vulkan/render/VKRenderPass.h
         vulkan/render/VKRenderPass.cpp
         vulkan/render/VKRender.cpp
-        vulkan/render/VKRender.h )
+        vulkan/render/VKRender.h
+        vulkan/util/VulkanConversions.cpp
+        vulkan/util/VulkanConversions.h)
 
 cmrc_add_resource_library(dummy)
 

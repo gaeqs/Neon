@@ -8,6 +8,9 @@
 
 #include <engine/model/InputDescription.h>
 #include <vulkan/VKApplication.h>
+#include <vulkan/util/VulkanConversions.h>
+
+namespace vc = vulkan_conversions;
 
 namespace vulkan_util {
 
@@ -86,30 +89,40 @@ namespace vulkan_util {
     std::pair<VkImage, VkDeviceMemory> createImage(
             VkDevice device,
             VkPhysicalDevice physicalDevice,
-            uint32_t width,
-            uint32_t height,
             VkImageUsageFlags usage,
-            VkFormat format) {
+            const ImageCreateInfo& info,
+            TextureViewType viewType,
+            VkFormat override) {
 
         VkImage image;
         VkDeviceMemory memory;
 
         VkImageCreateInfo imageInfo{};
         imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
-        imageInfo.imageType = VK_IMAGE_TYPE_2D;
-        imageInfo.extent.width = static_cast<uint32_t>(width);
-        imageInfo.extent.height = static_cast<uint32_t>(height);
-        imageInfo.extent.depth = 1;
-        imageInfo.mipLevels = 1;
-        imageInfo.arrayLayers = 1;
+        imageInfo.imageType = vc::vkImageType(info.dimensions);
+        imageInfo.extent.width = info.width;
+        imageInfo.extent.height = info.height;
+        imageInfo.extent.depth = info.depth;
+        imageInfo.mipLevels = info.mipmaps;
+        imageInfo.arrayLayers = info.layers;
 
-        imageInfo.format = format;
-        imageInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
+        if (override == VK_FORMAT_UNDEFINED) {
+            imageInfo.format = vc::vkFormat(info.format);
+        } else {
+            imageInfo.format = override;
+        }
+
+        imageInfo.tiling = vc::vkImageTiling(info.tiling);
         imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
         imageInfo.usage = usage;
         imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-        imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
-        imageInfo.flags = 0;
+        imageInfo.samples = vc::vkSampleCountFlagBits(info.samples);
+
+        if (viewType == TextureViewType::CUBE) {
+            imageInfo.flags = VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT;
+        } else if (viewType == TextureViewType::ARRAY_2D) {
+            imageInfo.flags = VK_IMAGE_CREATE_2D_ARRAY_COMPATIBLE_BIT;
+        }
 
 
         if (vkCreateImage(device, &imageInfo,
@@ -141,7 +154,9 @@ namespace vulkan_util {
     void transitionImageLayout(
             VKApplication* application,
             VkImage image, VkFormat format,
-            VkImageLayout oldLayout, VkImageLayout newLayout) {
+            VkImageLayout oldLayout, VkImageLayout newLayout,
+            uint32_t mipLevels,
+            uint32_t layers) {
 
         VkImageMemoryBarrier barrier{};
         barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
@@ -153,9 +168,9 @@ namespace vulkan_util {
         barrier.image = image;
         barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
         barrier.subresourceRange.baseMipLevel = 0;
-        barrier.subresourceRange.levelCount = 1;
+        barrier.subresourceRange.levelCount = mipLevels;
         barrier.subresourceRange.baseArrayLayer = 0;
-        barrier.subresourceRange.layerCount = 1;
+        barrier.subresourceRange.layerCount = layers;
 
         barrier.srcAccessMask = 0;
         barrier.dstAccessMask = 0;
@@ -253,7 +268,9 @@ namespace vulkan_util {
 
     void copyBufferToImage(
             VKApplication* application,
-            VkBuffer buffer, VkImage image, uint32_t width, uint32_t height) {
+            VkBuffer buffer, VkImage image,
+            uint32_t width, uint32_t height, uint32_t depth,
+            uint32_t layers) {
 
         VkBufferImageCopy region{};
         region.bufferOffset = 0;
@@ -263,13 +280,13 @@ namespace vulkan_util {
         region.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
         region.imageSubresource.mipLevel = 0;
         region.imageSubresource.baseArrayLayer = 0;
-        region.imageSubresource.layerCount = 1;
+        region.imageSubresource.layerCount = layers;
 
         region.imageOffset = {0, 0, 0};
         region.imageExtent = {
                 width,
                 height,
-                1
+                depth,
         };
 
         if (application->isRecordingCommandBuffer()) {
@@ -303,6 +320,113 @@ namespace vulkan_util {
         }
     }
 
+    void generateMipmaps(
+            VKApplication* application,
+            VkImage image,
+            uint32_t width, uint32_t height, uint32_t depth,
+            uint32_t levels, int32_t layers) {
+
+        VkCommandBuffer commandBuffer;
+
+        if (application->isRecordingCommandBuffer()) {
+            commandBuffer = application->getCurrentCommandBuffer();
+        } else {
+            commandBuffer = beginSingleTimeCommandBuffer(
+                    application->getDevice(),
+                    application->getCommandPool()
+            );
+        }
+
+        VkImageMemoryBarrier barrier{};
+        barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+        barrier.image = image;
+        barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        barrier.subresourceRange.baseArrayLayer = 0;
+        barrier.subresourceRange.layerCount = layers;
+        barrier.subresourceRange.levelCount = 1;
+
+        int32_t mipWidth = static_cast<uint32_t>(width);
+        int32_t mipHeight = static_cast<uint32_t>(height);
+        int32_t mipDepth = static_cast<uint32_t>(depth);
+
+        for (uint32_t i = 1; i < levels; i++) {
+            barrier.subresourceRange.baseMipLevel = i - 1;
+            barrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+            barrier.newLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+            barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+            barrier.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+
+            vkCmdPipelineBarrier(commandBuffer,
+                                 VK_PIPELINE_STAGE_TRANSFER_BIT,
+                                 VK_PIPELINE_STAGE_TRANSFER_BIT, 0,
+                                 0, nullptr,
+                                 0, nullptr,
+                                 1, &barrier);
+
+            VkImageBlit blit{};
+            blit.srcOffsets[0] = {0, 0, 0};
+            blit.srcOffsets[1] = {mipWidth, mipHeight, 1};
+            blit.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+            blit.srcSubresource.mipLevel = i - 1;
+            blit.srcSubresource.baseArrayLayer = 0;
+            blit.srcSubresource.layerCount = layers;
+            blit.dstOffsets[0] = {0, 0, 0};
+            blit.dstOffsets[1] = {mipWidth > 1 ? mipWidth / 2 : 1,
+                                  mipHeight > 1 ? mipHeight / 2 : 1,
+                                  mipDepth > 1 ? mipDepth / 2 : 1};
+            blit.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+            blit.dstSubresource.mipLevel = i;
+            blit.dstSubresource.baseArrayLayer = 0;
+            blit.dstSubresource.layerCount = layers;
+
+            vkCmdBlitImage(commandBuffer,
+                           image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+                           image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+                           1, &blit,
+                           VK_FILTER_LINEAR);
+
+            barrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+            barrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+            barrier.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+            barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+
+            vkCmdPipelineBarrier(commandBuffer,
+                                 VK_PIPELINE_STAGE_TRANSFER_BIT,
+                                 VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0,
+                                 0, nullptr,
+                                 0, nullptr,
+                                 1, &barrier);
+
+            if (mipWidth > 1) mipWidth /= 2;
+            if (mipHeight > 1) mipHeight /= 2;
+        }
+
+        barrier.subresourceRange.baseMipLevel = levels - 1;
+        barrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+        barrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+        barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+        barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+
+        vkCmdPipelineBarrier(commandBuffer,
+                             VK_PIPELINE_STAGE_TRANSFER_BIT,
+                             VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0,
+                             0, nullptr,
+                             0, nullptr,
+                             1, &barrier);
+
+        if (!application->isRecordingCommandBuffer()) {
+            endSingleTimeCommandBuffer(
+                    application->getDevice(),
+                    application->getGraphicsQueue(),
+                    application->getCommandPool(),
+                    commandBuffer
+            );
+        }
+
+    }
+
     std::optional<VkFormat> findSupportedFormat(
             VkPhysicalDevice physicalDevice,
             const std::vector<VkFormat>& candidates,
@@ -328,21 +452,26 @@ namespace vulkan_util {
             VkDevice device,
             VkImage image,
             VkFormat format,
-            VkImageAspectFlags aspectFlags) {
+            VkImageAspectFlags aspectFlags,
+            const ImageViewCreateInfo& info) {
         VkImageViewCreateInfo viewInfo{};
         viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
         viewInfo.image = image;
-        viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+        viewInfo.viewType = vc::vkImageViewType(info.viewType);
         viewInfo.format = format;
-        viewInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
-        viewInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
-        viewInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
-        viewInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
+        viewInfo.components.r = vc::vkComponentSwizzle(info.rSwizzle);
+        viewInfo.components.g = vc::vkComponentSwizzle(info.gSwizzle);
+        viewInfo.components.b = vc::vkComponentSwizzle(info.bSwizzle);
+        viewInfo.components.a = vc::vkComponentSwizzle(info.aSwizzle);
         viewInfo.subresourceRange.aspectMask = aspectFlags;
-        viewInfo.subresourceRange.baseMipLevel = 0;
-        viewInfo.subresourceRange.levelCount = 1;
-        viewInfo.subresourceRange.baseArrayLayer = 0;
-        viewInfo.subresourceRange.layerCount = 1;
+        viewInfo.subresourceRange.baseMipLevel = info.baseMipmapLevel;
+        viewInfo.subresourceRange.levelCount = info.mipmapLevelCount == 0
+                                               ? VK_REMAINING_MIP_LEVELS
+                                               : info.mipmapLevelCount;
+        viewInfo.subresourceRange.baseArrayLayer = info.baseArrayLayerLevel;
+        viewInfo.subresourceRange.layerCount = info.arrayLayerCount == 0
+                                               ? VK_REMAINING_ARRAY_LAYERS
+                                               : info.arrayLayerCount;
 
         VkImageView imageView;
         if (vkCreateImageView(device, &viewInfo,
@@ -403,48 +532,4 @@ namespace vulkan_util {
 
         return {bindingDescription, attributes};
     }
-
-    VkFormat getImageFormat(TextureFormat format) {
-        switch (format) {
-            case TextureFormat::R8G8B8:
-                return VK_FORMAT_R8G8B8_UNORM;
-            case TextureFormat::B8G8R8:
-                return VK_FORMAT_B8G8R8_UNORM;
-            case TextureFormat::A8R8G8B8:
-                throw std::runtime_error("Vulkan doesn't support ARGB!");
-            case TextureFormat::B8G8R8A8:
-                return VK_FORMAT_B8G8R8A8_UNORM;
-            case TextureFormat::A8B8G8R8:
-                return VK_FORMAT_A8B8G8R8_SRGB_PACK32;
-            case TextureFormat::R32FG32FB32FA32F:
-                return VK_FORMAT_R32G32B32A32_SFLOAT;
-            case TextureFormat::R32F:
-                return VK_FORMAT_R32_SFLOAT;
-            case TextureFormat::R16FG16F:
-                return VK_FORMAT_R16G16_SFLOAT;
-            case TextureFormat::R16FG16FB16F:
-                return VK_FORMAT_R16G16B16_SFLOAT;
-            case TextureFormat::R16FG16FB16FA16F:
-                return VK_FORMAT_R16G16B16A16_SFLOAT;
-            case TextureFormat::DEPTH24STENCIL8:
-                return VK_FORMAT_D24_UNORM_S8_UINT;
-            case TextureFormat::R8G8B8A8_SRGB:
-                return VK_FORMAT_R8G8B8A8_SRGB;
-            case TextureFormat::R8G8B8A8:
-            default:
-                return VK_FORMAT_R8G8B8A8_UNORM;
-        }
-    }
-
-    std::vector<VkFormat> getImageFormats(
-            const std::vector<TextureFormat>& formats) {
-        std::vector<VkFormat> map;
-        map.reserve(formats.size());
-        for (const auto& item: formats) {
-            map.push_back(getImageFormat(item));
-        }
-
-        return map;
-    }
-
 }

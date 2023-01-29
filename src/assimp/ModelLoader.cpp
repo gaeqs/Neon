@@ -129,12 +129,13 @@ ModelLoader::loadTexture(
         }
     }
 
+
     if (texture->mHeight == 0) {
         // Compressed format!
 
         if (texture->achFormatHint == std::string("png")) {
-            return _room->getTextures().createTextureFromPNG(
-                    texture->pcData, texture->mWidth, false);
+            return _room->getTextures().createTextureFromFile(
+                    texture->pcData, texture->mWidth);
         }
 
         std::cerr << "Cannot parse format "
@@ -142,14 +143,14 @@ ModelLoader::loadTexture(
         throw std::runtime_error("Cannot parse texture format.");
     }
 
+    TextureCreateInfo createInfo;
+    createInfo.image.width = texture->mWidth;
+    createInfo.image.height = texture->mHeight;
+    createInfo.image.depth = 1;
+    createInfo.image.format = TextureFormat::A8R8G8B8;
 
     // Value is always ARGB8888
-    return _room->getTextures().create(
-            texture->pcData,
-            static_cast<int32_t>(texture->mWidth),
-            static_cast<int32_t>(texture->mHeight),
-            TextureFormat::A8R8G8B8
-    );
+    return _room->getTextures().create(texture->pcData, createInfo);
 }
 
 std::vector<glm::vec3>

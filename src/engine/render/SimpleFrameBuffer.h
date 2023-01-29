@@ -8,7 +8,7 @@
 #include <functional>
 
 #include <engine/render/FrameBuffer.h>
-#include <engine/render/TextureFormat.h>
+#include <engine/render/TextureCreateInfo.h>
 
 #ifdef USE_VULKAN
 

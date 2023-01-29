@@ -7,6 +7,7 @@
 
 #include <vector>
 #include <stdexcept>
+#include <string>
 
 #include <vulkan/buffer/Buffer.h>
 
@@ -30,8 +31,12 @@ public:
             _device(device),
             _memory(memory),
             _pointer(nullptr) {
-        vkMapMemory(device, memory, range.getFrom(), range.size(), 0,
-                    (void**) &_pointer);
+        auto result = vkMapMemory(device, memory, range.getFrom(), range.size(),
+                                  0, (void**) &_pointer);
+        if (result != VK_SUCCESS) {
+            throw std::runtime_error("Couldn't map buffer! Result: "
+                                     + std::to_string(result));
+        }
     }
 
     ~SimpleBufferMap() override {

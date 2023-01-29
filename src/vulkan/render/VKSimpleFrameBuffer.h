@@ -7,7 +7,7 @@
 
 #include <vector>
 
-#include <engine/render/TextureFormat.h>
+#include <engine/render/TextureCreateInfo.h>
 #include <engine/structure/IdentifiableWrapper.h>
 
 #include <vulkan/render/VKFrameBuffer.h>
@@ -34,7 +34,7 @@ class VKSimpleFrameBuffer : public VKFrameBuffer {
     std::vector<VkDescriptorSet> _imGuiDescriptors;
     std::vector<IdentifiableWrapper<Texture>> _textures;
 
-    std::vector<VkFormat> _formats;
+    std::vector<TextureFormat> _formats;
     VkExtent2D _extent;
 
     VKRenderPass _renderPass;

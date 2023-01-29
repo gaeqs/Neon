@@ -103,8 +103,8 @@ std::shared_ptr<FrameBuffer> initRender(Room* room) {
     return fpFrameBuffer;
 }
 
-void loadSansModels(Application* application, Room* room,
-                    const std::shared_ptr<FrameBuffer>& target) {
+void loadModels(Application* application, Room* room,
+                const std::shared_ptr<FrameBuffer>& target) {
 
     std::vector<ShaderUniformBinding> sansMaterialBindings = {
             ShaderUniformBinding{UniformBindingType::IMAGE, 0},
@@ -187,12 +187,15 @@ void loadSansModels(Application* application, Room* room,
 
     // CUBE
 
+    TextureCreateInfo albedoInfo;
+    albedoInfo.image.format = TextureFormat::R8G8B8A8_SRGB;
+
     auto cubeAlbedo = room->getTextures()
-            .createTextureFromPNG("resource/Cube/bricks.png", true);
+            .createTextureFromFile("resource/Cube/bricks.png", albedoInfo);
     auto cubeNormal = room->getTextures()
-            .createTextureFromPNG("resource/Cube/bricks_normal.png", false);
+            .createTextureFromFile("resource/Cube/bricks_normal.png");
     auto cubeParallax = room->getTextures()
-            .createTextureFromPNG("resource/Cube/bricks_parallax.png", false);
+            .createTextureFromFile("resource/Cube/bricks_parallax.png");
 
     std::vector<IdentifiableWrapper<Texture>> textures = {
             cubeAlbedo, cubeNormal, cubeParallax
@@ -214,17 +217,39 @@ void loadSansModels(Application* application, Room* room,
     cube->setName("Cube");
 }
 
+IdentifiableWrapper<Texture> loadSkybox(Room* room) {
+    static const std::vector<std::string> PATHS = {
+            "resource/Skybox/right.jpg",
+            "resource/Skybox/left.jpg",
+            "resource/Skybox/top.jpg",
+            "resource/Skybox/bottom.jpg",
+            "resource/Skybox/front.jpg",
+            "resource/Skybox/back.jpg",
+    };
+
+    TextureCreateInfo info;
+    info.imageView.viewType = TextureViewType::CUBE;
+    info.image.layers = 6;
+
+    return room->getTextures().createTextureFromFiles(PATHS, info);
+}
+
 std::shared_ptr<Room> getTestRoom(Application* application) {
 
-    std::vector<ShaderUniformBinding> globalBindings = {ShaderUniformBinding{
-            UniformBindingType::BUFFER, sizeof(GlobalParameters)
-    }};
+    std::vector<ShaderUniformBinding> globalBindings = {
+            ShaderUniformBinding{UniformBindingType::BUFFER,
+                                 sizeof(GlobalParameters)},
+            ShaderUniformBinding{UniformBindingType::IMAGE, 0}
+    };
 
     auto globalDescriptor = std::make_shared<ShaderUniformDescriptor>(
             application, globalBindings
     );
 
     auto room = std::make_shared<Room>(application, globalDescriptor);
+
+    auto skybox = loadSkybox(room.get());
+    room->getGlobalUniformBuffer().setTexture(1, skybox);
 
     auto fpFrameBuffer = initRender(room.get());
 
@@ -243,15 +268,13 @@ std::shared_ptr<Room> getTestRoom(Application* application) {
 
     auto directionalLight = room->newGameObject();
     directionalLight->newComponent<DirectionalLight>();
-    directionalLight->getTransform().lookAt(glm::vec3(1.0f, -1.0f, 0.0f));
-
-    auto directionalLight2 = room->newGameObject();
-    directionalLight2->newComponent<DirectionalLight>();
-    directionalLight2->getTransform().lookAt(glm::vec3(-1.0f, -1.0f, 0.0f));
+    directionalLight->getTransform().lookAt(glm::vec3(0.45f, -0.6f, 0.65f));
+    directionalLight->setName("Directional light");
 
     auto pointLightGO = room->newGameObject();
     auto pointLight = pointLightGO->newComponent<PointLight>();
     pointLightGO->getTransform().setPosition({5.0f, 7.0f, 5.0f});
+    pointLightGO->setName("Point light");
     pointLight->setDiffuseColor({1.0f, 0.0f, 0.0f});
     pointLight->setConstantAttenuation(0.01f);
     pointLight->setLinearAttenuation(0.2);
@@ -261,13 +284,14 @@ std::shared_ptr<Room> getTestRoom(Application* application) {
     auto flashLight = flashLightGO->newComponent<FlashLight>();
     flashLightGO->getTransform().setPosition({10.0f, 7.0f, 10.0f});
     flashLightGO->getTransform().rotate(glm::vec3(1.0f, 0.0f, 0.0f), 1.0f);
+    flashLightGO->setName("Flash light");
     flashLight->setDiffuseColor({0.0f, 1.0f, 0.0f});
     flashLight->setConstantAttenuation(0.01f);
     flashLight->setLinearAttenuation(0.2);
     flashLight->setQuadraticAttenuation(0.1);
 
 
-    loadSansModels(application, room.get(), fpFrameBuffer);
+    loadModels(application, room.get(), fpFrameBuffer);
 
     return room;
 }

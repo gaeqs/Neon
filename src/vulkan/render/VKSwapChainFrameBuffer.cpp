@@ -35,19 +35,28 @@ void VKSwapChainFrameBuffer::createSwapChainImageViews() {
                 _vkApplication->getDevice(),
                 _swapChainImages[i],
                 _vkApplication->getSwapChainImageFormat(),
-                VK_IMAGE_ASPECT_COLOR_BIT
+                VK_IMAGE_ASPECT_COLOR_BIT,
+                ImageViewCreateInfo()
         );
     }
 }
 
 void VKSwapChainFrameBuffer::createDepthImage() {
     auto& extent = _vkApplication->getSwapChainExtent();
+
+    ImageCreateInfo info;
+    info.width = _extent.width;
+    info.height = _extent.height;
+    info.depth = 1;
+    info.mipmaps = 1;
+    info.layers = 1;
+
     auto pair = vulkan_util::createImage(
             _vkApplication->getDevice(),
             _vkApplication->getPhysicalDevice(),
-            extent.width,
-            extent.height,
             VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
+            info,
+            TextureViewType::NORMAL_2D,
             _vkApplication->getDepthImageFormat()
     );
 
@@ -58,7 +67,8 @@ void VKSwapChainFrameBuffer::createDepthImage() {
             _vkApplication->getDevice(),
             _depthImage,
             _vkApplication->getDepthImageFormat(),
-            VK_IMAGE_ASPECT_DEPTH_BIT
+            VK_IMAGE_ASPECT_DEPTH_BIT,
+            ImageViewCreateInfo()
     );
 
     vulkan_util::transitionImageLayout(
@@ -66,7 +76,8 @@ void VKSwapChainFrameBuffer::createDepthImage() {
             _depthImage,
             _vkApplication->getDepthImageFormat(),
             VK_IMAGE_LAYOUT_UNDEFINED,
-            VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL
+            VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+            1, 1
     );
 }
 
