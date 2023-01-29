@@ -17,6 +17,8 @@ void GameObjectExplorerComponent::setTarget(
 }
 
 void GameObjectExplorerComponent::onPreDraw() {
+    ImGui::SetNextWindowSizeConstraints(ImVec2(200, 200),
+                                        ImVec2(100000, 100000));
     if (ImGui::Begin("GameObject explorer")) {
         if (_target) {
             drawGeneralSection();
@@ -105,7 +107,6 @@ void GameObjectExplorerComponent::drawComponentsSection() const {
             bool enabled = component->isEnabled();
             if (ImGui::Checkbox(component->imGuiUId("Enabled").c_str(),
                                 &enabled)) {
-                std::cout << enabled << std::endl;
                 component->setEnabled(enabled);
             }
             component->drawEditor();

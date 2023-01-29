@@ -38,6 +38,8 @@ void ViewportComponent::onStart() {
 }
 
 void ViewportComponent::onPreDraw() {
+    ImGui::SetNextWindowSizeConstraints(ImVec2(200, 200),
+                                        ImVec2(100000, 100000));
     if (ImGui::Begin("Viewport")) {
         _windowSize = ImGui::GetContentRegionAvail();
         if (_frameBuffer) {
