@@ -93,7 +93,7 @@ public:
 
     [[nodiscard]] Render& getRender();
 
-    [[nodiscard]] IdentifiableWrapper<GameObject> newGameObject();
+    IdentifiableWrapper<GameObject> newGameObject();
 
     void destroyGameObject(IdentifiableWrapper<GameObject> gameObject);
 

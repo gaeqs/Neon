@@ -17,8 +17,6 @@ void GameObjectExplorerComponent::setTarget(
 }
 
 void GameObjectExplorerComponent::onPreDraw() {
-    ImGui::ShowDemoWindow();
-
     if (ImGui::Begin("GameObject explorer")) {
         if (_target) {
             drawGeneralSection();
@@ -84,14 +82,34 @@ void GameObjectExplorerComponent::drawComponentsSection() const {
 
     auto& reg = ComponentRegister::instance();
 
-    for (const auto& component: _target->getComponents()) {
+    // Copy the list. The original may be modified.
+    auto list = _target->getComponents();
+    for (const auto& component: list) {
         std::type_index type = typeid(*component.raw());
         auto entry = reg.getEntry(type);
         if (!entry.has_value()) continue;
 
         auto name = entry->name + "##" + std::to_string(component.getId());
-        if (!ImGui::CollapsingHeader(name.c_str())) continue;
-        component->drawEditor();
+
+        bool openComponent = ImGui::CollapsingHeader(name.c_str());
+
+        if (ImGui::BeginPopupContextItem(
+                component->imGuiUId("component_context").c_str())) {
+            if (ImGui::MenuItem("Destroy component")) {
+                component->destroy();
+            }
+            ImGui::EndPopup();
+        }
+
+        if (openComponent && component.isValid()) {
+            bool enabled = component->isEnabled();
+            if (ImGui::Checkbox(component->imGuiUId("Enabled").c_str(),
+                                &enabled)) {
+                std::cout << enabled << std::endl;
+                component->setEnabled(enabled);
+            }
+            component->drawEditor();
+        }
     }
 
     if (ImGui::Button("New component", ImVec2(-1, 0))) {

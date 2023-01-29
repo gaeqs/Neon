@@ -75,7 +75,11 @@ void GraphicComponent::drawEditor() {
 
     auto& models = getRoom()->getModels();
 
-    ImGui::Text("Using model %s", _model->getName().c_str());
+    if (_model) {
+        ImGui::Text("Using model %s", _model->getName().c_str());
+    } else {
+        ImGui::Text("This GraphicComponent is not using any model.");
+    }
 
     if (ImGui::Button("Change model", ImVec2(-1, 0))) {
         ImGui::OpenPopup("model_change_popup");

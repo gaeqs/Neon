@@ -78,6 +78,23 @@ void SceneTreeComponent::onPreDraw() {
                     mouseClickConsumed = recursiveTreePopulation(children);
                     ImGui::TreePop();
                 }
+
+                if (ImGui::BeginPopupContextItem()) {
+                    if (_explorer) {
+                        _explorer->setTarget(obj);
+                    }
+
+                    if (ImGui::MenuItem("New GameObject")) {
+                        getRoom()->newGameObject();
+                        _timeBeforePopulation = 0;
+                    }
+                    ImGui::Separator();
+                    if (ImGui::MenuItem("Destroy GameObject")) {
+                        obj->destroy();
+                    }
+                    ImGui::EndPopup();
+                }
+
                 if (!mouseClickConsumed && ImGui::IsItemClicked()) {
                     if (_explorer) {
                         _explorer->setTarget(obj);
