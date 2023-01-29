@@ -7,11 +7,11 @@
 
 
 #include <engine/structure/Identifiable.h>
-#include "TextureFormat.h"
+#include <engine/render/TextureCreateInfo.h>
 
 #ifdef USE_VULKAN
 
-#include "vulkan/VKTexture.h"
+#include <vulkan/VKTexture.h>
 
 #endif
 
@@ -37,13 +37,13 @@ public:
     Texture(const Texture& other) = delete;
 
     Texture(Room* room, const void* data,
-            int32_t width, int32_t height, TextureFormat format);
+            const TextureCreateInfo& createInfo = TextureCreateInfo());
 
 #ifdef USE_VULKAN
 
-    Texture(Room* room, int32_t width, int32_t height,
-            VkImageView imageView,
-            VkImageLayout layout);
+    Texture(Room* room, VkImageView imageView, VkImageLayout layout,
+            uint32_t width, uint32_t height, uint32_t depth,
+            const SamplerCreateInfo& createInfo = SamplerCreateInfo());
 
 #endif
 
@@ -58,7 +58,10 @@ public:
 
     uint32_t getHeight() const;
 
-    void updateData(const char* data, int32_t width, int32_t height,
+    uint32_t getDepth() const;
+
+    void updateData(const char* data,
+                    int32_t width, int32_t height, int32_t depth,
                     TextureFormat format);
 
 };

@@ -7,8 +7,8 @@
 
 
 #include <cstdint>
-#include <engine/render/TextureFormat.h>
 #include <vulkan/buffer/SimpleBuffer.h>
+#include <engine/render/TextureCreateInfo.h>
 
 class Application;
 
@@ -18,7 +18,8 @@ class VKTexture {
 
     VKApplication* _vkApplication;
 
-    int32_t _width, _height;
+    int32_t _width, _height, _depth;
+    uint32_t _mipmapLevels, _layers;
     std::unique_ptr<SimpleBuffer> _stagingBuffer;
 
     VkImage _image;
@@ -34,27 +35,26 @@ class VKTexture {
     bool _external;
     uint32_t _externalDirtyFlag;
 
-    static uint32_t getPixelSize(TextureFormat format);
-
 public:
 
 
     VKTexture(const VKTexture& other) = delete;
 
     VKTexture(Application* application, const void* data,
-              int32_t width, int32_t height,
-              TextureFormat format);
+              const TextureCreateInfo& createInfo = TextureCreateInfo());
 
-    VKTexture(Application* application,
-              int32_t width, int32_t height,
-              VkImageView imageView,
-              VkImageLayout layout);
+    VKTexture(Application* application, VkImageView imageView,
+              VkImageLayout layout,
+              uint32_t width, uint32_t height, uint32_t depth,
+              const SamplerCreateInfo& sampler = SamplerCreateInfo());
 
     ~VKTexture();
 
     [[nodiscard]] int32_t getWidth() const;
 
     [[nodiscard]] int32_t getHeight() const;
+
+    [[nodiscard]] int32_t getDepth() const;
 
     [[nodiscard]] VkImageView getImageView() const;
 
@@ -76,7 +76,10 @@ public:
     void changeExternalImageView(
             int32_t width, int32_t height, VkImageView imageView);
 
-    void updateData(const void* data, int32_t width, int32_t height,
+    void updateData(const void* data,
+                    int32_t width,
+                    int32_t height,
+                    int32_t depth,
                     TextureFormat format);
 
 };

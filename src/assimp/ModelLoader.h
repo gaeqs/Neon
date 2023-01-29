@@ -45,7 +45,8 @@ class ModelLoader {
     template<class Vertex>
     std::unique_ptr<Mesh> loadMesh(
             aiMesh* mesh,
-            IdentifiableWrapper<Material> material) const {
+            IdentifiableWrapper<Material> material,
+            bool flipWindingOrder) const {
 
         auto tangents = calculateTangents(mesh);
 
@@ -59,6 +60,10 @@ class ModelLoader {
                       ? mesh->mColors[0][i] : aiColor4D(0.0, 0.0, 0.0, 0.0);
             auto aT = mesh->mTextureCoords[0][i];
 
+
+            if (flipWindingOrder) {
+                aN = -aN;
+            }
 
             vertices[i] = Vertex::fromAssimp(
                     glm::vec3(aP.x, aP.y, aP.z),
@@ -142,8 +147,10 @@ public:
         if (flipWindingOrder) flags |= aiProcess_FlipWindingOrder;
         auto scene = importer.ReadFileFromMemory(buffer, length, flags);
 
-        return loadModel<Vertex, Instance>(target, shader,
-                                           materialDescriptor, scene);
+        return loadModel<Vertex, Instance>(
+                target, shader,
+                materialDescriptor, scene,
+                flipWindingOrder);
     }
 
     template<class Vertex, class Instance>
@@ -172,7 +179,7 @@ public:
 
         auto scene = importer.ReadFile(fileName, flags);
         auto result = loadModel<Vertex, Instance>(
-                target, shader, materialDescriptor, scene);
+                target, shader, materialDescriptor, scene, flipWindingOrder);
         std::filesystem::current_path(previous);
         return result;
     }
@@ -182,7 +189,8 @@ public:
             const std::shared_ptr<FrameBuffer>& target,
             IdentifiableWrapper<ShaderProgram> shader,
             const std::shared_ptr<ShaderUniformDescriptor>& materialDescriptor,
-            const aiScene* scene) const {
+            const aiScene* scene,
+            bool flipWindingOrder = false) const {
         if (!scene) return {false};
 
         ModelLoaderResult result = {true};
@@ -218,7 +226,8 @@ public:
             auto* mesh = scene->mMeshes[meshIndex];
             auto meshResult = loadMesh<Vertex>(
                     mesh,
-                    materials[mesh->mMaterialIndex]);
+                    materials[mesh->mMaterialIndex],
+                    flipWindingOrder);
             vertices += mesh->mNumVertices;
             faces += mesh->mNumFaces;
             meshes.emplace_back(std::move(meshResult));
