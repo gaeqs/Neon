@@ -34,7 +34,7 @@ void GameObjectExplorerComponent::drawGeneralSection() const {
     char buffer[SIZE];
 
     std::string name = _target->getName();
-    strcpy_s(buffer, name.c_str());
+    strcpy(buffer, name.c_str());
 
     ImGui::PushItemWidth(-1.0f);
     ImGui::AlignTextToFramePadding();

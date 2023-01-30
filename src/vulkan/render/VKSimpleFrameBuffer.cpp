@@ -108,7 +108,7 @@ void VKSimpleFrameBuffer::cleanup() {
         }
     }
     std::fill(_imGuiDescriptors.begin(), _imGuiDescriptors.end(),
-              VK_NULL_HANDLE);
+              (VkDescriptorSet) VK_NULL_HANDLE);
 
     vkDestroyFramebuffer(d, _frameBuffer, nullptr);
 
