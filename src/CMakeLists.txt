@@ -99,7 +99,7 @@ set(SOURCES
         engine/structure/ComponentRegister.h
         util/ModelUtils.cpp
         util/ModelUtils.h
-        engine/render/TextureCreateInfo.h)
+        engine/render/TextureCreateInfo.h engine/shader/MaterialCreateInfo.h)
 
 
 set(VULKAN_SOURCES
