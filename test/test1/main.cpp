@@ -17,6 +17,7 @@
 #include "GlobalParametersUpdaterComponent.h"
 #include "LockMouseComponent.h"
 #include "ConstantRotationComponent.h"
+#include "engine/shader/MaterialCreateInfo.h"
 
 constexpr int32_t WIDTH = 800;
 constexpr int32_t HEIGHT = 600;
@@ -85,7 +86,6 @@ std::shared_ptr<FrameBuffer> initRender(Room* room) {
             room,
             textures,
             screenFrameBuffer,
-            InputDescription(0, InputRate::INSTANCE),
             screenShader
     );
 
@@ -205,8 +205,11 @@ void loadModels(Application* application, Room* room,
             room,
             textures,
             target,
-            DefaultInstancingData::getInstancingDescription(),
-            shaderParallax
+            shaderParallax,
+            [](MaterialCreateInfo& info) {
+                info.descriptions.instance =
+                        DefaultInstancingData::getInstancingDescription();
+            }
     );
     cubeModel->setName("Cube");
 

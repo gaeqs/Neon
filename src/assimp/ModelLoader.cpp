@@ -7,8 +7,10 @@
 #include <assimp/AssimpMaterialParameters.h>
 #include <assimp/AssimpGeometry.h>
 
+#include <engine/shader/MaterialCreateInfo.h>
+
 inline std::string internalGetTextureId(const aiString& string) {
-    return std::string(string.data, std::min(string.length, 2u));
+    return {string.data, std::min(string.length, 2u)};
 }
 
 ModelLoader::ModelLoader(Room* room) :
@@ -29,12 +31,14 @@ void ModelLoader::loadMaterial(
         const InputDescription& instanceDescription,
         const aiMaterial* material) const {
 
-    auto m = _room->getMaterials().create(
-            target,
-            shader,
-            materialDescriptor,
-            vertexDescription,
-            instanceDescription);
+    MaterialCreateInfo info;
+    info.target = target;
+    info.shader = shader;
+    info.descriptions.uniform = materialDescriptor;
+    info.descriptions.instance = instanceDescription;
+    info.descriptions.vertex = vertexDescription;
+
+    auto m = _room->getMaterials().create(info);
     vector.push_back(m);
 
     aiColor3D color;

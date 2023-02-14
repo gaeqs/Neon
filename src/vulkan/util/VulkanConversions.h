@@ -5,9 +5,11 @@
 #ifndef NEON_VULKANCONVERSIONS_H
 #define NEON_VULKANCONVERSIONS_H
 
+#include "engine/shader/MaterialCreateInfo.h"
 #include <vector>
 
 #include <vulkan/vulkan.h>
+#include <vulkan/vulkan_core.h>
 
 enum class TextureFormat;
 enum class Tiling;
@@ -18,6 +20,10 @@ enum class TextureComponentSwizzle;
 enum class TextureFilter;
 enum class AddressMode;
 enum class MipmapMode;
+enum class DepthCompareOperation;
+enum class BlendOperation;
+enum class BlendFactor;
+enum class BlendingLogicOperation;
 struct SamplerCreateInfo;
 
 namespace vulkan_conversions {
@@ -46,6 +52,14 @@ namespace vulkan_conversions {
 
     VkSamplerCreateInfo vkSamplerCreateInfo(const SamplerCreateInfo& sampler,
                                             float deviceMaxAnisotropic);
+
+    VkCompareOp vkCompareOp(const DepthCompareOperation& op);
+
+    VkBlendOp vkBlendOp(const BlendOperation& op);
+
+    VkLogicOp vkLogicOp (const BlendingLogicOperation& op);
+
+    VkBlendFactor vkBlendFactor(const BlendFactor& factor);
 }
 
 #endif //NEON_VULKANCONVERSIONS_H

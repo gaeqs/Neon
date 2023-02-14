@@ -3,25 +3,18 @@
 //
 
 #include "Material.h"
+#include "MaterialCreateInfo.h"
 
 #include <utility>
 
 uint64_t MATERIAL_ID_GENERATOR = 1;
 
-Material::Material(
-        Room* room,
-        const std::shared_ptr<FrameBuffer>& target,
-        IdentifiableWrapper<ShaderProgram> shader,
-        const std::shared_ptr<ShaderUniformDescriptor>& descriptor,
-        const InputDescription& vertexDescription,
-        const InputDescription& instanceDescription,
-        MaterialConfiguration configuration) :
+Material::Material(Room* room, const MaterialCreateInfo& createInfo) :
         _id(MATERIAL_ID_GENERATOR++),
-        _shader(shader),
-        _uniformDescriptor(descriptor),
-        _uniformBuffer(descriptor),
-        _implementation(room, this, target, vertexDescription,
-                        instanceDescription, configuration) {
+        _shader(createInfo.shader),
+        _uniformDescriptor(createInfo.descriptions.uniform),
+        _uniformBuffer(_uniformDescriptor),
+        _implementation(room, this, createInfo) {
     _uniformBuffer.setBindingPoint(1);
 }
 

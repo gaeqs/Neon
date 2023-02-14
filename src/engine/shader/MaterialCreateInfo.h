@@ -79,7 +79,7 @@ enum class DepthCompareOperation {
     GREATER,
     NOT_EQUAL,
     GREATER_OR_EQUAL,
-    ALWAY,
+    ALWAYS,
 };
 
 struct MaterialDescriptions {
@@ -229,6 +229,11 @@ struct MaterialCreateInfo {
      * material.
      */
     MaterialBlending blending = MaterialBlending();
+
+    /**
+     * The depth and stencil settings for the material.
+     */
+    MaterialDepthStencil depthStencil = MaterialDepthStencil();
 
 };
 

@@ -80,7 +80,6 @@ set(SOURCES
         engine/light/DirectionalLight.h
         engine/light/LightSystem.cpp
         engine/light/LightSystem.h
-        engine/shader/MaterialConfiguration.h
         engine/light/PointLight.h
         engine/light/PointLight.cpp
         engine/light/FlashLight.h

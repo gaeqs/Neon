@@ -5,6 +5,8 @@
 #ifndef NEON_MODELUTILS_H
 #define NEON_MODELUTILS_H
 
+#include <functional>
+
 #include <glm/glm.hpp>
 
 #include <engine/Engine.h>
@@ -16,9 +18,8 @@ namespace model_utils {
             Room* room,
             const std::vector<IdentifiableWrapper<Texture>>& inputTextures,
             const std::shared_ptr<FrameBuffer>& target,
-            InputDescription instanceDescription,
             IdentifiableWrapper<ShaderProgram> shader,
-            MaterialConfiguration configuration = MaterialConfiguration()) {
+            const std::function<void(MaterialCreateInfo&)>& populateFunction) {
 
         static const std::vector<uint32_t> CUBE_TRIANGLE_INDEX = {
                 0, 1, 2, 1, 3, 2,
@@ -180,14 +181,16 @@ namespace model_utils {
                 materialBindings
         );
 
-        auto material = room->getMaterials().create(
-                target,
-                shader,
-                materialDescriptor,
-                Vertex::getDescription(),
-                instanceDescription,
-                configuration
-        );
+        MaterialCreateInfo info;
+        info.shader = shader;
+        info.target = target;
+        info.descriptions.uniform = materialDescriptor;
+        info.descriptions.vertex = Vertex::getDescription();
+
+        if (populateFunction != nullptr)
+            populateFunction(info);
+
+        auto material = room->getMaterials().create(info);
 
         for (uint32_t i = 0; i < inputTextures.size(); ++i) {
             material->getUniformBuffer().setTexture(i, inputTextures[i]);

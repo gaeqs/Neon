@@ -7,6 +7,7 @@
 #include <stdexcept>
 
 #include <engine/render/TextureCreateInfo.h>
+#include <vulkan/vulkan_core.h>
 
 namespace vc = vulkan_conversions;
 
@@ -232,4 +233,128 @@ VkSamplerCreateInfo vc::vkSamplerCreateInfo(const SamplerCreateInfo& sampler,
                                 : sampler.maxAnisotropy;
 
     return samplerInfo;
+}
+
+VkCompareOp vulkan_conversions::vkCompareOp(const DepthCompareOperation& op) {
+    switch (op) {
+        case DepthCompareOperation::LESS:
+            return VK_COMPARE_OP_LESS;
+        case DepthCompareOperation::EQUAL:
+            return VK_COMPARE_OP_EQUAL;
+        case DepthCompareOperation::LESS_OR_EQUAL:
+            return VK_COMPARE_OP_LESS_OR_EQUAL;
+        case DepthCompareOperation::GREATER:
+            return VK_COMPARE_OP_GREATER;
+        case DepthCompareOperation::NOT_EQUAL:
+            return VK_COMPARE_OP_NOT_EQUAL;
+        case DepthCompareOperation::GREATER_OR_EQUAL:
+            return VK_COMPARE_OP_LESS_OR_EQUAL;
+        case DepthCompareOperation::ALWAYS:
+            return VK_COMPARE_OP_ALWAYS;
+        case DepthCompareOperation::NEVER:
+            return VK_COMPARE_OP_NEVER;
+        default:
+            throw std::runtime_error("Conversion not found!");
+    }
+}
+
+VkBlendOp vulkan_conversions::vkBlendOp(const BlendOperation& op) {
+    switch (op) {
+        case BlendOperation::ADD:
+            return VK_BLEND_OP_ADD;
+        case BlendOperation::SUBTRACT:
+            return VK_BLEND_OP_SUBTRACT;
+        case BlendOperation::REVERSE_SUBTRACT:
+            return VK_BLEND_OP_REVERSE_SUBTRACT;
+        case BlendOperation::MIN:
+            return VK_BLEND_OP_MIN;
+        case BlendOperation::MAX:
+            return VK_BLEND_OP_MAX;
+        default:
+            throw std::runtime_error("Conversion not found!");
+    }
+}
+
+VkLogicOp vulkan_conversions::vkLogicOp(const BlendingLogicOperation& op) {
+    switch (op) {
+        case BlendingLogicOperation::CLEAR:
+            return VK_LOGIC_OP_CLEAR;
+        case BlendingLogicOperation::AND:
+            return VK_LOGIC_OP_AND;
+        case BlendingLogicOperation::AND_REVERSE:
+            return VK_LOGIC_OP_AND_REVERSE;
+        case BlendingLogicOperation::COPY:
+            return VK_LOGIC_OP_COPY;
+        case BlendingLogicOperation::AND_INVERTED:
+            return VK_LOGIC_OP_AND_REVERSE;
+        case BlendingLogicOperation::NO_OP:
+            return VK_LOGIC_OP_NO_OP;
+        case BlendingLogicOperation::XOR:
+            return VK_LOGIC_OP_XOR;
+        case BlendingLogicOperation::OR:
+            return VK_LOGIC_OP_OR;
+        case BlendingLogicOperation::NOR:
+            return VK_LOGIC_OP_NOR;
+        case BlendingLogicOperation::EQUIVALENT:
+            return VK_LOGIC_OP_EQUIVALENT;
+        case BlendingLogicOperation::INVERT:
+            return VK_LOGIC_OP_INVERT;
+        case BlendingLogicOperation::OR_REVERSE:
+            return VK_LOGIC_OP_OR_REVERSE;
+        case BlendingLogicOperation::COPY_INVERTED:
+            return VK_LOGIC_OP_COPY_INVERTED;
+        case BlendingLogicOperation::OR_INVERTED:
+            return VK_LOGIC_OP_OR_INVERTED;
+        case BlendingLogicOperation::NAND:
+            return VK_LOGIC_OP_NAND;
+        case BlendingLogicOperation::SET:
+            return VK_LOGIC_OP_SET;
+        default:
+            throw std::runtime_error("Conversion not found!");
+    }
+}
+
+VkBlendFactor vulkan_conversions::vkBlendFactor(const BlendFactor& factor) {
+    switch (factor) {
+        case BlendFactor::ZERO:
+            return VK_BLEND_FACTOR_ZERO;
+        case BlendFactor::ONE:
+            return VK_BLEND_FACTOR_ONE;
+        case BlendFactor::SRC_COLOR:
+            return VK_BLEND_FACTOR_SRC_COLOR;
+        case BlendFactor::ONE_MINUS_SRC_COLOR:
+            return VK_BLEND_FACTOR_ONE_MINUS_SRC_COLOR;
+        case BlendFactor::DST_COLOR:
+            return VK_BLEND_FACTOR_DST_COLOR;
+        case BlendFactor::ONE_MINUS_DST_COLOR:
+            return VK_BLEND_FACTOR_ONE_MINUS_DST_COLOR;
+        case BlendFactor::SRC_ALPHA:
+            return VK_BLEND_FACTOR_SRC_ALPHA;
+        case BlendFactor::ONE_MINUS_SRC_ALPHA:
+            return VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
+        case BlendFactor::DST_ALPHA:
+            return VK_BLEND_FACTOR_DST_ALPHA;
+        case BlendFactor::ONE_MINUS_DST_ALPHA:
+            return VK_BLEND_FACTOR_ONE_MINUS_DST_ALPHA;
+        case BlendFactor::CONSTANT_COLOR:
+            return VK_BLEND_FACTOR_CONSTANT_COLOR;
+        case BlendFactor::ONE_MINUS_CONSTANT_COLOR:
+            return VK_BLEND_FACTOR_ONE_MINUS_CONSTANT_COLOR;
+        case BlendFactor::CONSTANT_ALPHA:
+            return VK_BLEND_FACTOR_CONSTANT_ALPHA;
+        case BlendFactor::ONE_MINUS_CONSTANT_ALPHA:
+            return VK_BLEND_FACTOR_ONE_MINUS_CONSTANT_ALPHA;
+        case BlendFactor::SRC_ALPHA_SATURATE:
+            return VK_BLEND_FACTOR_SRC_ALPHA_SATURATE;
+        case BlendFactor::SRC1_COLOR:
+            return VK_BLEND_FACTOR_SRC1_COLOR;
+        case BlendFactor::ONE_MINUS_SRC1_COLOR:
+            return VK_BLEND_FACTOR_ONE_MINUS_SRC1_COLOR;
+        case BlendFactor::SRC1_ALPHA:
+            return VK_BLEND_FACTOR_SRC1_ALPHA;
+        case BlendFactor::ONE_MINUS_SRC1_ALPHA:
+            return VK_BLEND_FACTOR_ONE_MINUS_SRC1_ALPHA;
+        default:
+            throw std::runtime_error("Conversion not found!");
+    }
 }

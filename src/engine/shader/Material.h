@@ -15,7 +15,7 @@
 #include <engine/structure/Identifiable.h>
 #include <engine/structure/IdentifiableWrapper.h>
 #include <engine/shader/ShaderUniformBuffer.h>
-#include <engine/shader/MaterialConfiguration.h>
+#include <engine/shader/MaterialCreateInfo.h>
 #include <engine/model/InputDescription.h>
 #include <engine/render/Texture.h>
 #include <engine/render/FrameBuffer.h>
@@ -57,13 +57,7 @@ public:
 
     Material(const Material& other) = delete;
 
-    Material(Room* room,
-             const std::shared_ptr<FrameBuffer>& target,
-             IdentifiableWrapper<ShaderProgram> shader,
-             const std::shared_ptr<ShaderUniformDescriptor>& descriptor,
-             const InputDescription& vertexDescription,
-             const InputDescription& instanceDescription,
-             MaterialConfiguration configuration = MaterialConfiguration());
+    Material(Room* room, const MaterialCreateInfo& createInfo);
 
     [[nodiscard]] uint64_t getId() const override;
 

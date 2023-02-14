@@ -5,6 +5,7 @@
 #ifndef NEON_VKMATERIAL_H
 #define NEON_VKMATERIAL_H
 
+#include "engine/shader/MaterialCreateInfo.h"
 #include <vector>
 #include <unordered_map>
 #include <string>
@@ -14,7 +15,7 @@
 #include <engine/structure/IdentifiableWrapper.h>
 #include <engine/render/Texture.h>
 #include <engine/model/InputDescription.h>
-#include <engine/shader/MaterialConfiguration.h>
+#include <engine/shader/MaterialCreateInfo.h>
 
 class Application;
 
@@ -44,10 +45,7 @@ public:
     VKMaterial(const VKMaterial& other) = delete;
 
     VKMaterial(Room* room, Material* material,
-               const std::shared_ptr<FrameBuffer>& target,
-               const InputDescription& vertexDescription,
-               const InputDescription& instanceDescription,
-               MaterialConfiguration configuration);
+               const MaterialCreateInfo& createInfo);
 
     ~VKMaterial();
 
