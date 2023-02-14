@@ -10,7 +10,7 @@
 #include <engine/shader/MaterialCreateInfo.h>
 
 inline std::string internalGetTextureId(const aiString& string) {
-    return {string.data, std::min(string.length, 2u)};
+    return std::string(string.data, std::min(string.length, 2u));
 }
 
 ModelLoader::ModelLoader(Room* room) :

@@ -138,6 +138,7 @@ void VKShaderUniformBuffer::setBindingPoint(uint32_t point) {
 void VKShaderUniformBuffer::uploadData(uint32_t index,
                                        const void* data,
                                        size_t size) {
+    if (index >= _types.size()) return;
     if (_types[index] != UniformBindingType::BUFFER) return;
     auto& vector = _data[index];
     auto finalSize = std::min(size, vector.size());
@@ -148,6 +149,7 @@ void VKShaderUniformBuffer::uploadData(uint32_t index,
 void VKShaderUniformBuffer::setTexture(
         uint32_t index,
         IdentifiableWrapper<Texture> texture) {
+    if (index >= _types.size()) return;
     if (_types[index] != UniformBindingType::IMAGE) return;
     _textures[index] = texture;
     std::fill(_updated[index].begin(), _updated[index].end(), 0);
@@ -172,7 +174,7 @@ void VKShaderUniformBuffer::prepareForFrame() {
                 break;
             case UniformBindingType::IMAGE: {
                 auto texture = _textures[index];
-                if(texture == nullptr) continue;
+                if (texture == nullptr) continue;
                 auto flag = texture->getImplementation().getExternalDirtyFlag();
                 if (updated[frame] == flag) continue;
                 updated[frame] = flag;
