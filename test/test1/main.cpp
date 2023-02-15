@@ -12,6 +12,7 @@
 #include <util/DeferredUtils.h>
 #include <util/ModelUtils.h>
 #include <assimp/ModelLoader.h>
+#include <assimp/AssimpLoader.h>
 
 #include "TestVertex.h"
 #include "GlobalParametersUpdaterComponent.h"
@@ -121,13 +122,14 @@ void loadModels(Application* application, Room* room,
     auto shaderParallax = createShader(room, "deferred.vert",
                                        "deferred_parallax.frag");
 
-    auto sansResult = ModelLoader(room).loadModel
-            <TestVertex, DefaultInstancingData>(
-            target,
-            shader,
-            materialDescriptor,
-            R"(resource/Sans)",
-            "Sans.obj");
+    MaterialCreateInfo sansMaterialInfo(target, shader);
+    sansMaterialInfo.descriptions.uniform = materialDescriptor;
+
+    auto sansLoaderInfo = assimp_loader::LoaderInfo::create<TestVertex>(
+            room, sansMaterialInfo);
+
+    auto sansResult = assimp_loader::load(R"(resource/Sans)", "Sans.obj",
+                                          sansLoaderInfo);
 
     if (!sansResult.valid) {
         std::cout << "Couldn't load Sans model!" << std::endl;

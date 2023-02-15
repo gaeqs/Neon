@@ -211,12 +211,12 @@ struct MaterialCreateInfo {
      * This is the framebuffer where models using
      * the material will be drawn.
      */
-    std::shared_ptr<FrameBuffer> target = nullptr;
+    std::shared_ptr<FrameBuffer> target;
 
     /**
      * The shader the material will use.
      */
-    IdentifiableWrapper<ShaderProgram> shader = nullptr;
+    IdentifiableWrapper<ShaderProgram> shader;
 
     /**
      * The buffer descriptions for vertex,
@@ -235,6 +235,12 @@ struct MaterialCreateInfo {
      */
     MaterialDepthStencil depthStencil = MaterialDepthStencil();
 
+    MaterialCreateInfo(
+            std::shared_ptr<FrameBuffer> target_,
+            IdentifiableWrapper<ShaderProgram> shader_) :
+            target(target_),
+            shader(shader_) {
+    }
 };
 
 #endif //NEON_MATERIALCREATEINFO_H

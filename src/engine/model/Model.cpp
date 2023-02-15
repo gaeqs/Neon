@@ -68,3 +68,7 @@ const std::string& Model::getName() const {
 void Model::setName(const std::string& name) {
     _name = name;
 }
+
+void Model::defineInstanceStruct(std::type_index type, size_t size) {
+    _implementation.defineInstanceStruct(type, size);
+}

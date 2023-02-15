@@ -31,9 +31,7 @@ void ModelLoader::loadMaterial(
         const InputDescription& instanceDescription,
         const aiMaterial* material) const {
 
-    MaterialCreateInfo info;
-    info.target = target;
-    info.shader = shader;
+    MaterialCreateInfo info(target, shader);
     info.descriptions.uniform = materialDescriptor;
     info.descriptions.instance = instanceDescription;
     info.descriptions.vertex = vertexDescription;
@@ -130,6 +128,7 @@ ModelLoader::loadTexture(
     for (const auto& [aiTexture, actualTexture]: loadedTextures) {
         if (aiTexture->mWidth == texture->mWidth
             && aiTexture->mHeight == texture->mHeight) {
+            return actualTexture;
         }
     }
 

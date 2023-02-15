@@ -67,9 +67,7 @@ namespace deferred_utils {
                 materialBindings
         );
 
-        MaterialCreateInfo info;
-        info.shader = shader;
-        info.target = target;
+        MaterialCreateInfo info(target, shader);
         info.descriptions.uniform = materialDescriptor;
         info.descriptions.vertex = InternalDeferredVertex::getDescription();
 
