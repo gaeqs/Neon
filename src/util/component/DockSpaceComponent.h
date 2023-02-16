@@ -7,14 +7,15 @@
 
 #include <engine/structure/Component.h>
 
-class DockSpaceComponent : public Component {
+namespace neon {
+    class DockSpaceComponent : public Component {
 
-public:
+    public:
 
-    void onUpdate(float deltaTime) override;
+        void onUpdate(float deltaTime) override;
 
-};
-REGISTER_COMPONENT(DockSpaceComponent, "Dock Space")
-
+    };
+    REGISTER_COMPONENT(DockSpaceComponent, "Dock Space")
+}
 
 #endif //NEON_DOCKSPACECOMPONENT_H

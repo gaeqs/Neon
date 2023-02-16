@@ -15,62 +15,65 @@
 #include <util/Range.h>
 #include <util/Result.h>
 
-class Application;
+namespace neon {
+    class Application;
+}
 
-class VKApplication;
+namespace neon::vulkan {
+    class VKApplication;
 
-class VKModel {
+    class VKModel {
 
-    static constexpr uint32_t BUFFER_DEFAULT_SIZE = 1024 * 16;
+        static constexpr uint32_t BUFFER_DEFAULT_SIZE = 1024 * 16;
 
-    VKApplication* _vkApplication;
+        VKApplication* _vkApplication;
 
-    std::vector<VKMesh*> _meshes;
+        std::vector<VKMesh*> _meshes;
 
-    std::type_index _instancingStructType;
-    size_t _instancingStructSize;
+        std::type_index _instancingStructType;
+        size_t _instancingStructSize;
 
-    std::vector<uint32_t*> _positions;
+        std::vector<uint32_t*> _positions;
 
-    std::unique_ptr<StagingBuffer> _instancingBuffer;
-    std::vector<char> _data;
-    Range<uint32_t> _dataChangeRange;
+        std::unique_ptr<StagingBuffer> _instancingBuffer;
+        std::vector<char> _data;
+        Range<uint32_t> _dataChangeRange;
 
-    void reinitializeBuffer();
+        void reinitializeBuffer();
 
-public:
+    public:
 
-    VKModel(const VKModel& other) = delete;
+        VKModel(const VKModel& other) = delete;
 
-    VKModel(Application* application, std::vector<VKMesh*> meshes);
+        VKModel(Application* application, std::vector<VKMesh*> meshes);
 
-    [[nodiscard]] const std::type_index& getInstancingStructType() const;
+        [[nodiscard]] const std::type_index& getInstancingStructType() const;
 
-    template<class InstanceData>
-    void defineInstanceStruct() {
-        defineInstanceStruct(typeid(InstanceData), sizeof(InstanceData));
-    }
+        template<class InstanceData>
+        void defineInstanceStruct() {
+            defineInstanceStruct(typeid(InstanceData), sizeof(InstanceData));
+        }
 
-    void defineInstanceStruct(std::type_index type, size_t size);
+        void defineInstanceStruct(std::type_index type, size_t size);
 
-    [[nodiscard]] Result<uint32_t*, std::string> createInstance();
+        [[nodiscard]] Result<uint32_t*, std::string> createInstance();
 
-    bool freeInstance(uint32_t id);
+        bool freeInstance(uint32_t id);
 
-    template<class InstanceData>
-    void uploadData(uint32_t id, const InstanceData& data) {
-        uploadDataRaw(id, &data);
-    }
+        template<class InstanceData>
+        void uploadData(uint32_t id, const InstanceData& data) {
+            uploadDataRaw(id, &data);
+        }
 
-    void uploadDataRaw(uint32_t id, const void* raw);
+        void uploadDataRaw(uint32_t id, const void* raw);
 
-    void flush();
+        void flush();
 
-    void draw(VkCommandBuffer buffer,
-              VkRenderPass target,
-              const ShaderUniformBuffer* global);
+        void draw(VkCommandBuffer buffer,
+                  VkRenderPass target,
+                  const ShaderUniformBuffer* global);
 
-};
-
+    };
+}
 
 #endif //NEON_VKMODEL_H

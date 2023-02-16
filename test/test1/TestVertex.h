@@ -13,10 +13,10 @@ struct TestVertex {
     glm::vec3 tangent;
     glm::vec2 texCoords;
 
-    static InputDescription getDescription() {
-        InputDescription description(
+    static neon::InputDescription getDescription() {
+        neon::InputDescription description(
                 sizeof(TestVertex),
-                InputRate::VERTEX
+                neon::InputRate::VERTEX
         );
         description.addAttribute(3, 0);
         description.addAttribute(3, sizeof(float) * 3);

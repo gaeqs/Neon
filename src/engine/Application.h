@@ -26,71 +26,73 @@
 
 #endif
 
+namespace neon {
 
-class Room;
+    class Room;
 
-class Application {
+    class Application {
 
-public:
+    public:
 
 #ifdef USE_VULKAN
-    using Implementation = VKApplication;
+    using Implementation = vulkan::VKApplication;
 #endif
 
-protected:
+    protected:
 
-    int32_t _width;
-    int32_t _height;
-    GLFWwindow* _window;
+        int32_t _width;
+        int32_t _height;
+        GLFWwindow *_window;
 
-    std::shared_ptr<Room> _room;
+        std::shared_ptr<Room> _room;
 
-    glm::dvec2 _lastCursorPosition;
-    FrameInformation _currentFrameInformation;
+        glm::dvec2 _lastCursorPosition;
+        FrameInformation _currentFrameInformation;
 
-    Implementation _implementation;
-    Profiler _profiler;
+        Implementation _implementation;
+        Profiler _profiler;
 
-public:
+    public:
 
-    Application(int32_t width, int32_t height);
+        Application(int32_t width, int32_t height);
 
-    ~Application();
+        ~Application();
 
-    Result<GLFWwindow*, std::string> init(const std::string& name);
+        Result<GLFWwindow *, std::string> init(const std::string &name);
 
-    [[nodiscard]] Result<uint32_t, std::string> startGameLoop();
+        [[nodiscard]] Result<uint32_t, std::string> startGameLoop();
 
-    [[nodiscard]] const Implementation& getImplementation() const;
+        [[nodiscard]] const Implementation &getImplementation() const;
 
-    [[nodiscard]] Implementation& getImplementation();
+        [[nodiscard]] Implementation &getImplementation();
 
-    [[nodiscard]]  const Profiler& getProfiler() const;
+        [[nodiscard]]  const Profiler &getProfiler() const;
 
-    [[nodiscard]] Profiler& getProfiler();
+        [[nodiscard]] Profiler &getProfiler();
 
-    [[nodiscard]] int32_t getWidth() const;
+        [[nodiscard]] int32_t getWidth() const;
 
-    [[nodiscard]] int32_t getHeight() const;
+        [[nodiscard]] int32_t getHeight() const;
 
-    [[nodiscard]] float getAspectRatio() const;
+        [[nodiscard]] float getAspectRatio() const;
 
-    [[nodiscard]] FrameInformation getCurrentFrameInformation() const;
+        [[nodiscard]] FrameInformation getCurrentFrameInformation() const;
 
-    void setRoom(const std::shared_ptr<Room>& room);
+        void setRoom(const std::shared_ptr<Room> &room);
 
-    void lockMouse(bool lock);
+        void lockMouse(bool lock);
 
-    //region INTERNAL CALLS
+        //region INTERNAL CALLS
 
-    void internalForceSizeValues(int32_t width, int32_t height);
+        void internalForceSizeValues(int32_t width, int32_t height);
 
-    void internalKeyEvent(int key, int scancode, int action, int mods);
+        void internalKeyEvent(int key, int scancode, int action, int mods);
 
-    void internalCursorPosEvent(double x, double y);
+        void internalCursorPosEvent(double x, double y);
 
-    //endregion
-};
+        //endregion
+    };
+}
 
 
 #endif //RVTRACKING_APPLICATION_H

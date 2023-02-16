@@ -15,79 +15,83 @@
 
 #include <imgui.h>
 
-class Room;
+namespace neon {
+    class Room;
 
-class VKApplication;
+    class Texture;
+}
 
-class Texture;
+namespace neon::vulkan {
+    class VKApplication;
 
-class VKSimpleFrameBuffer : public VKFrameBuffer {
+    class VKSimpleFrameBuffer : public VKFrameBuffer {
 
-    VKApplication* _vkApplication;
+        VKApplication* _vkApplication;
 
-    VkFramebuffer _frameBuffer;
+        VkFramebuffer _frameBuffer;
 
-    std::vector<VkImage> _images;
-    std::vector<VkDeviceMemory> _memories;
-    std::vector<VkImageView> _imageViews;
-    std::vector<VkImageLayout> _layouts;
-    std::vector<VkDescriptorSet> _imGuiDescriptors;
-    std::vector<IdentifiableWrapper<Texture>> _textures;
+        std::vector<VkImage> _images;
+        std::vector<VkDeviceMemory> _memories;
+        std::vector<VkImageView> _imageViews;
+        std::vector<VkImageLayout> _layouts;
+        std::vector<VkDescriptorSet> _imGuiDescriptors;
+        std::vector<IdentifiableWrapper<Texture>> _textures;
 
-    std::vector<TextureFormat> _formats;
-    VkExtent2D _extent;
+        std::vector<TextureFormat> _formats;
+        VkExtent2D _extent;
 
-    VKRenderPass _renderPass;
+        VKRenderPass _renderPass;
 
-    bool _depth;
+        bool _depth;
 
-    void createImages();
+        void createImages();
 
-    void createFrameBuffer();
+        void createFrameBuffer();
 
-    void cleanup();
+        void cleanup();
 
-public:
+    public:
 
-    VKSimpleFrameBuffer(Room* room,
-                        const std::vector<TextureFormat>& formats,
-                        bool depth);
+        VKSimpleFrameBuffer(Room* room,
+                            const std::vector<TextureFormat>& formats,
+                            bool depth);
 
-    ~VKSimpleFrameBuffer() override;
+        ~VKSimpleFrameBuffer() override;
 
-    [[nodiscard]] VkFramebuffer getRaw() const override;
+        [[nodiscard]] VkFramebuffer getRaw() const override;
 
-    [[nodiscard]] bool hasDepth() const override;
+        [[nodiscard]] bool hasDepth() const override;
 
-    [[nodiscard]] uint32_t getColorAttachmentAmount() const override;
+        [[nodiscard]] uint32_t getColorAttachmentAmount() const override;
 
-    [[nodiscard]] std::vector<VkFormat> getColorFormats() const override;
+        [[nodiscard]] std::vector<VkFormat> getColorFormats() const override;
 
-    [[nodiscard]] VkFormat getDepthFormat() const override;
+        [[nodiscard]] VkFormat getDepthFormat() const override;
 
-    [[nodiscard]] VKRenderPass const& getRenderPass() const override;
+        [[nodiscard]] VKRenderPass const& getRenderPass() const override;
 
-    [[nodiscard]] VKRenderPass& getRenderPass() override;
+        [[nodiscard]] VKRenderPass& getRenderPass() override;
 
-    [[nodiscard]] uint32_t getWidth() const override;
+        [[nodiscard]] uint32_t getWidth() const override;
 
-    [[nodiscard]] uint32_t getHeight() const override;
+        [[nodiscard]] uint32_t getHeight() const override;
 
-    [[nodiscard]] ImTextureID getImGuiDescriptor(uint32_t index);
+        [[nodiscard]] ImTextureID getImGuiDescriptor(uint32_t index);
 
-    bool renderImGui() override;
+        bool renderImGui() override;
 
-    [[nodiscard]] const std::vector<IdentifiableWrapper<Texture>>&
-    getTextures() const;
+        [[nodiscard]] const std::vector<IdentifiableWrapper<Texture>>&
+        getTextures() const;
 
-    void recreate(std::pair<uint32_t, uint32_t> size);
+        void recreate(std::pair<uint32_t, uint32_t> size);
 
-    [[nodiscard]] bool defaultRecreationCondition() const;
+        [[nodiscard]] bool defaultRecreationCondition() const;
 
-    [[nodiscard]] std::pair<uint32_t, uint32_t>
-    defaultRecreationParameters() const;
+        [[nodiscard]] std::pair<uint32_t, uint32_t>
+        defaultRecreationParameters() const;
 
-};
+    };
+}
 
 
 #endif //NEON_VKSIMPLEFRAMEBUFFER_H

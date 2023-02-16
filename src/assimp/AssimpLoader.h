@@ -19,13 +19,16 @@
 #include <engine/structure/IdentifiableWrapper.h>
 #include <engine/shader/MaterialCreateInfo.h>
 
-class Model;
 
-class Room;
+namespace neon {
+    class Model;
+
+    class Room;
+}
 
 struct aiScene;
 
-namespace assimp_loader {
+namespace neon::assimp_loader {
 
     struct Result {
 

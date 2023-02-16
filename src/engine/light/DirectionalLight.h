@@ -9,55 +9,56 @@
 #include <engine/render/GraphicComponent.h>
 #include <engine/model/Model.h>
 
-class DirectionalLight : public Component {
+namespace neon {
+    class DirectionalLight : public Component {
 
-    IdentifiableWrapper<GraphicComponent> _graphicComponent;
-    IdentifiableWrapper<Model> _customModel;
+        IdentifiableWrapper<GraphicComponent> _graphicComponent;
+        IdentifiableWrapper<Model> _customModel;
 
-    glm::vec3 _diffuseColor;
-    glm::vec3 _specularColor;
+        glm::vec3 _diffuseColor;
+        glm::vec3 _specularColor;
 
-public:
+    public:
 
-    struct Data {
-        glm::vec3 diffuseColor;
-        glm::vec3 specularColor;
-        glm::vec3 direction;
+        struct Data {
+            glm::vec3 diffuseColor;
+            glm::vec3 specularColor;
+            glm::vec3 direction;
 
-        static InputDescription getDescription() {
-            InputDescription description(
-                    sizeof(Data),
-                    InputRate::INSTANCE
-            );
+            static InputDescription getDescription() {
+                InputDescription description(
+                        sizeof(Data),
+                        InputRate::INSTANCE
+                );
 
-            description.addAttribute(3, 0);
-            description.addAttribute(3, 12);
-            description.addAttribute(3, 24);
+                description.addAttribute(3, 0);
+                description.addAttribute(3, 12);
+                description.addAttribute(3, 24);
 
-            return description;
-        }
+                return description;
+            }
+        };
+
+        DirectionalLight();
+
+        explicit DirectionalLight(const IdentifiableWrapper<Model>& model);
+
+        [[nodiscard]] const glm::vec3& getDiffuseColor() const;
+
+        void setDiffuseColor(const glm::vec3& diffuseColor);
+
+        [[nodiscard]] const glm::vec3& getSpecularColor() const;
+
+        void setSpecularColor(const glm::vec3& specularColor);
+
+        void onStart() override;
+
+        void onLateUpdate(float deltaTime) override;
+
+        void drawEditor() override;
+
     };
-
-    DirectionalLight();
-
-    explicit DirectionalLight(const IdentifiableWrapper<Model>& model);
-
-    [[nodiscard]] const glm::vec3& getDiffuseColor() const;
-
-    void setDiffuseColor(const glm::vec3& diffuseColor);
-
-    [[nodiscard]] const glm::vec3& getSpecularColor() const;
-
-    void setSpecularColor(const glm::vec3& specularColor);
-
-    void onStart() override;
-
-    void onLateUpdate(float deltaTime) override;
-
-    void drawEditor() override;
-
-};
-REGISTER_COMPONENT(DirectionalLight, "Directional Light")
-
+    REGISTER_COMPONENT(DirectionalLight, "Directional Light")
+}
 
 #endif //NEON_DIRECTIONALLIGHT_H

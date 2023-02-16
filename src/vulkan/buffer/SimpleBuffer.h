@@ -11,103 +11,105 @@
 
 #include <vulkan/buffer/Buffer.h>
 
-class VKApplication;
-
-template<class T>
-class SimpleBufferMap : public BufferMap<T> {
-
-    VkDevice _device;
-    VkDeviceMemory _memory;
-
-    T* _pointer;
-
-public:
-
-    SimpleBufferMap(const SimpleBufferMap& other) = delete;
-
-    SimpleBufferMap(VkDevice device, VkDeviceMemory memory,
-                    Range<uint32_t> range) :
-            BufferMap<T>(),
-            _device(device),
-            _memory(memory),
-            _pointer(nullptr) {
-        auto result = vkMapMemory(device, memory, range.getFrom(), range.size(),
-                                  0, (void**) &_pointer);
-        if (result != VK_SUCCESS) {
-            throw std::runtime_error("Couldn't map buffer! Result: "
-                                     + std::to_string(result));
-        }
-    }
-
-    ~SimpleBufferMap() override {
-        dispose();
-    };
-
-    T& operator[](size_t index) override {
-        return _pointer[index];
-    }
-
-    T operator[](size_t index) const override {
-        return _pointer[index];
-    }
-
-    T* raw() override {
-        return _pointer;
-    }
-
-    void dispose() override {
-        if (_pointer == nullptr) return;
-        vkUnmapMemory(_device, _memory);
-        _pointer = nullptr;
-    }
-
-};
-
-class SimpleBuffer : public Buffer {
-
-    size_t _size;
-
-    VKApplication* _application;
-    VkBuffer _vertexBuffer;
-    VkDeviceMemory _vertexBufferMemory;
-
-    bool _modifiable;
-
-    std::optional<std::shared_ptr<BufferMap<char>>> rawMap() override;
-
-    std::optional<std::shared_ptr<BufferMap<char>>> rawMap(
-            Range<uint32_t> range) override;
-
-public:
-
-    SimpleBuffer(const SimpleBuffer& other) = delete;
+namespace neon::vulkan {
+    class VKApplication;
 
     template<class T>
-    SimpleBuffer(VKApplication* application,
-                 VkBufferUsageFlags usage, VkMemoryPropertyFlags properties,
-                 const std::vector<T>& data):
-            SimpleBuffer(application, usage, properties, data.data(),
-                         data.size() * sizeof(T)) {
-    }
+    class SimpleBufferMap : public BufferMap<T> {
 
-    SimpleBuffer(VKApplication* application,
-                 VkBufferUsageFlags usage, VkMemoryPropertyFlags properties,
-                 uint32_t sizeInBytes);
+        VkDevice _device;
+        VkDeviceMemory _memory;
 
-    SimpleBuffer(VKApplication* application,
-                 VkBufferUsageFlags usage, VkMemoryPropertyFlags properties,
-                 const void* data, uint32_t sizeInBytes);
+        T* _pointer;
 
-    ~SimpleBuffer() override;
+    public:
 
-    [[nodiscard]] size_t size() const override;
+        SimpleBufferMap(const SimpleBufferMap& other) = delete;
 
-    [[nodiscard]] bool canBeWrittenOn() const override;
+        SimpleBufferMap(VkDevice device, VkDeviceMemory memory,
+                        Range<uint32_t> range) :
+                BufferMap<T>(),
+                _device(device),
+                _memory(memory),
+                _pointer(nullptr) {
+            auto result = vkMapMemory(device, memory, range.getFrom(),
+                                      range.size(),
+                                      0, (void**) &_pointer);
+            if (result != VK_SUCCESS) {
+                throw std::runtime_error("Couldn't map buffer! Result: "
+                                         + std::to_string(result));
+            }
+        }
 
-    [[nodiscard]] VkBuffer getRaw() const override;
+        ~SimpleBufferMap() override {
+            dispose();
+        };
 
-    [[nodiscard]] VKApplication* getApplication() const override;
-};
+        T& operator[](size_t index) override {
+            return _pointer[index];
+        }
 
+        T operator[](size_t index) const override {
+            return _pointer[index];
+        }
+
+        T* raw() override {
+            return _pointer;
+        }
+
+        void dispose() override {
+            if (_pointer == nullptr) return;
+            vkUnmapMemory(_device, _memory);
+            _pointer = nullptr;
+        }
+
+    };
+
+    class SimpleBuffer : public Buffer {
+
+        size_t _size;
+
+        VKApplication* _application;
+        VkBuffer _vertexBuffer;
+        VkDeviceMemory _vertexBufferMemory;
+
+        bool _modifiable;
+
+        std::optional<std::shared_ptr<BufferMap<char>>> rawMap() override;
+
+        std::optional<std::shared_ptr<BufferMap<char>>> rawMap(
+                Range<uint32_t> range) override;
+
+    public:
+
+        SimpleBuffer(const SimpleBuffer& other) = delete;
+
+        template<class T>
+        SimpleBuffer(VKApplication* application,
+                     VkBufferUsageFlags usage, VkMemoryPropertyFlags properties,
+                     const std::vector<T>& data):
+                SimpleBuffer(application, usage, properties, data.data(),
+                             data.size() * sizeof(T)) {
+        }
+
+        SimpleBuffer(VKApplication* application,
+                     VkBufferUsageFlags usage, VkMemoryPropertyFlags properties,
+                     uint32_t sizeInBytes);
+
+        SimpleBuffer(VKApplication* application,
+                     VkBufferUsageFlags usage, VkMemoryPropertyFlags properties,
+                     const void* data, uint32_t sizeInBytes);
+
+        ~SimpleBuffer() override;
+
+        [[nodiscard]] size_t size() const override;
+
+        [[nodiscard]] bool canBeWrittenOn() const override;
+
+        [[nodiscard]] VkBuffer getRaw() const override;
+
+        [[nodiscard]] VKApplication* getApplication() const override;
+    };
+}
 
 #endif //VULKANTEST_SIMPLEBUFFER_H

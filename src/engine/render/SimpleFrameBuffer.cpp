@@ -4,78 +4,81 @@
 
 #include "SimpleFrameBuffer.h"
 
+namespace neon {
+    bool SimpleFrameBuffer::defaultRecreationCondition(
+            const SimpleFrameBuffer* fb) {
+        return fb->_implementation.defaultRecreationCondition();
+    }
 
-bool SimpleFrameBuffer::defaultRecreationCondition(
-        const SimpleFrameBuffer* fb) {
-    return fb->_implementation.defaultRecreationCondition();
-}
+    std::pair<uint32_t, uint32_t>
+    SimpleFrameBuffer::defaultRecreationParameters(
+            const SimpleFrameBuffer* fb) {
+        return fb->_implementation.defaultRecreationParameters();
+    }
 
-std::pair<uint32_t, uint32_t>
-SimpleFrameBuffer::defaultRecreationParameters(const SimpleFrameBuffer* fb) {
-    return fb->_implementation.defaultRecreationParameters();
-}
+    SimpleFrameBuffer::SimpleFrameBuffer(
+            Room* room,
+            const std::vector<TextureFormat>& colorFormats,
+            bool depth) :
+            _implementation(room, colorFormats, depth),
+            _recreationCondition(defaultRecreationCondition),
+            _recreationParameters(defaultRecreationParameters) {
 
-SimpleFrameBuffer::SimpleFrameBuffer(
-        Room* room,
-        const std::vector<TextureFormat>& colorFormats,
-        bool depth) :
-        _implementation(room, colorFormats, depth),
-        _recreationCondition(defaultRecreationCondition),
-        _recreationParameters(defaultRecreationParameters) {
+    }
 
-}
+    bool SimpleFrameBuffer::requiresRecreation() {
+        return _recreationCondition(this);
+    }
 
-bool SimpleFrameBuffer::requiresRecreation() {
-    return _recreationCondition(this);
-}
+    void SimpleFrameBuffer::recreate() {
+        _implementation.recreate(_recreationParameters(this));
+    }
 
-void SimpleFrameBuffer::recreate() {
-    _implementation.recreate(_recreationParameters(this));
-}
+    FrameBuffer::Implementation& SimpleFrameBuffer::getImplementation() {
+        return _implementation;
+    }
 
-FrameBuffer::Implementation& SimpleFrameBuffer::getImplementation() {
-    return _implementation;
-}
+    const FrameBuffer::Implementation&
+    SimpleFrameBuffer::getImplementation() const {
+        return _implementation;
+    }
 
-const FrameBuffer::Implementation&
-SimpleFrameBuffer::getImplementation() const {
-    return _implementation;
-}
+    std::vector<IdentifiableWrapper<Texture>>
+    SimpleFrameBuffer::getTextures() const {
+        return _implementation.getTextures();
+    }
 
-std::vector<IdentifiableWrapper<Texture>>
-SimpleFrameBuffer::getTextures() const {
-    return _implementation.getTextures();
-}
+    ImTextureID SimpleFrameBuffer::getImGuiDescriptor(uint32_t index) {
+        return _implementation.getImGuiDescriptor(index);
+    }
 
-ImTextureID SimpleFrameBuffer::getImGuiDescriptor(uint32_t index) {
-    return _implementation.getImGuiDescriptor(index);
-}
+    uint32_t SimpleFrameBuffer::getWidth() const {
+        return _implementation.getWidth();
+    }
 
-uint32_t SimpleFrameBuffer::getWidth() const {
-    return _implementation.getWidth();
-}
+    uint32_t SimpleFrameBuffer::getHeight() const {
+        return _implementation.getHeight();
+    }
 
-uint32_t SimpleFrameBuffer::getHeight() const {
-    return _implementation.getHeight();
-}
+    const std::function<bool(const SimpleFrameBuffer*)>&
+    SimpleFrameBuffer::getRecreationCondition() const {
+        return _recreationCondition;
+    }
 
-const std::function<bool(const SimpleFrameBuffer*)>&
-SimpleFrameBuffer::getRecreationCondition() const {
-    return _recreationCondition;
-}
+    void SimpleFrameBuffer::setRecreationCondition(const std::function<bool(
+            const SimpleFrameBuffer*)>& recreationCondition) {
+        _recreationCondition = recreationCondition;
+    }
 
-void SimpleFrameBuffer::setRecreationCondition(const std::function<bool(
-        const SimpleFrameBuffer*)>& recreationCondition) {
-    _recreationCondition = recreationCondition;
-}
+    const std::function<std::pair<uint32_t, uint32_t>(
+            const SimpleFrameBuffer*)>&
+    SimpleFrameBuffer::getRecreationParameters() const {
+        return _recreationParameters;
+    }
 
-const std::function<std::pair<uint32_t, uint32_t>(const SimpleFrameBuffer*)>&
-SimpleFrameBuffer::getRecreationParameters() const {
-    return _recreationParameters;
-}
-
-void SimpleFrameBuffer::setRecreationParameters(
-        const std::function<std::pair<uint32_t, uint32_t>(
-                const SimpleFrameBuffer*)>& recreationParameters) {
-    _recreationParameters = recreationParameters;
+    void SimpleFrameBuffer::setRecreationParameters(
+            const std::function<std::pair<uint32_t, uint32_t>(
+                    const SimpleFrameBuffer*)>& recreationParameters) {
+        _recreationParameters = recreationParameters;
+    }
 }

@@ -14,37 +14,40 @@
 
 #endif
 
-class Texture;
+namespace neon {
 
-class FrameBuffer {
+    class Texture;
 
-public:
+    class FrameBuffer {
+
+    public:
 
 #ifdef USE_VULKAN
-    using Implementation = VKFrameBuffer;
+    using Implementation = vulkan::VKFrameBuffer;
 #endif
 
-    FrameBuffer() = default;
+        FrameBuffer() = default;
 
-    FrameBuffer(const FrameBuffer& other) = delete;
+        FrameBuffer(const FrameBuffer& other) = delete;
 
-    virtual ~FrameBuffer() = default;
+        virtual ~FrameBuffer() = default;
 
-    virtual bool requiresRecreation() = 0;
+        virtual bool requiresRecreation() = 0;
 
-    virtual void recreate() = 0;
+        virtual void recreate() = 0;
 
-    [[nodiscard]] virtual Implementation& getImplementation() = 0;
+        [[nodiscard]] virtual Implementation& getImplementation() = 0;
 
-    [[nodiscard]] virtual const Implementation& getImplementation() const = 0;
+        [[nodiscard]] virtual const Implementation&
+        getImplementation() const = 0;
 
-    [[nodiscard]] virtual std::vector<IdentifiableWrapper<Texture>>
-    getTextures() const = 0;
+        [[nodiscard]] virtual std::vector<IdentifiableWrapper<Texture>>
+        getTextures() const = 0;
 
-    [[nodiscard]] virtual uint32_t getWidth() const = 0;
+        [[nodiscard]] virtual uint32_t getWidth() const = 0;
 
-    [[nodiscard]] virtual uint32_t getHeight() const = 0;
-};
-
+        [[nodiscard]] virtual uint32_t getHeight() const = 0;
+    };
+}
 
 #endif //NEON_FRAMEBUFFER_H

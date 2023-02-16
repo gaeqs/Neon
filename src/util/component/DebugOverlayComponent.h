@@ -9,28 +9,29 @@
 
 #include <implot.h>
 
-class DebugOverlayComponent : public Component {
+namespace neon {
+    class DebugOverlayComponent : public Component {
 
-    uint32_t _maxProcessTimes;
-    std::deque<float> _processTimes;
-    bool _fixedMode;
+        uint32_t _maxProcessTimes;
+        std::deque<float> _processTimes;
+        bool _fixedMode;
 
-    static ImPlotPoint fetchProcessTime(int id, void* data);
+        static ImPlotPoint fetchProcessTime(int id, void* data);
 
-    void drawPerformance();
+        void drawPerformance();
 
-    void drawProfiling();
+        void drawProfiling();
 
-    void drawStack(const std::string& parentId, ProfileStack* stack);
+        void drawStack(const std::string& parentId, ProfileStack* stack);
 
-public:
+    public:
 
-    DebugOverlayComponent(bool fixedMode, uint32_t maxProcessTimes);
+        DebugOverlayComponent(bool fixedMode, uint32_t maxProcessTimes);
 
-    void onPreDraw() override;
+        void onPreDraw() override;
 
-};
-REGISTER_COMPONENT(DebugOverlayComponent, "Debug Overlay")
-
+    };
+    REGISTER_COMPONENT(DebugOverlayComponent, "Debug Overlay")
+}
 
 #endif //NEON_DEBUGOVERLAYCOMPONENT_H

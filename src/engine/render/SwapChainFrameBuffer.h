@@ -13,42 +13,45 @@
 
 #endif
 
-class Room;
+namespace neon {
 
-class SwapChainFrameBuffer : public FrameBuffer {
+    class Room;
 
-public:
+    class SwapChainFrameBuffer : public FrameBuffer {
+
+    public:
 
 #ifdef USE_VULKAN
-    using Implementation = VKSwapChainFrameBuffer;
+    using Implementation = vulkan::VKSwapChainFrameBuffer;
 #endif
 
-private:
+    private:
 
-    Implementation _implementation;
+        Implementation _implementation;
 
-public:
+    public:
 
-    SwapChainFrameBuffer(Room* room, bool depth);
+        SwapChainFrameBuffer(Room* room, bool depth);
 
-    ~SwapChainFrameBuffer() override = default;
+        ~SwapChainFrameBuffer() override = default;
 
-    bool requiresRecreation() override;
+        bool requiresRecreation() override;
 
-    void recreate() override;
+        void recreate() override;
 
-    [[nodiscard]] FrameBuffer::Implementation& getImplementation() override;
+        [[nodiscard]] FrameBuffer::Implementation& getImplementation() override;
 
-    [[nodiscard]] const FrameBuffer::Implementation&
-    getImplementation() const override;
+        [[nodiscard]] const FrameBuffer::Implementation&
+        getImplementation() const override;
 
-    [[nodiscard]] std::vector<IdentifiableWrapper<Texture>>
-    getTextures() const override;
+        [[nodiscard]] std::vector<IdentifiableWrapper<Texture>>
+        getTextures() const override;
 
-    [[nodiscard]] uint32_t getWidth() const override;
+        [[nodiscard]] uint32_t getWidth() const override;
 
-    [[nodiscard]] uint32_t getHeight() const override;
-};
+        [[nodiscard]] uint32_t getHeight() const override;
+    };
+}
 
 
 #endif //NEON_SWAPCHAINFRAMEBUFFER_H

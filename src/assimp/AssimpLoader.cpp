@@ -24,7 +24,7 @@
 #include <engine/structure/Room.h>
 #include <engine/model/Mesh.h>
 
-namespace assimp_loader {
+namespace neon::assimp_loader {
 
     using Tex = IdentifiableWrapper<Texture>;
     using Mat = IdentifiableWrapper<Material>;

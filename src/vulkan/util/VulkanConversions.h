@@ -11,22 +11,24 @@
 #include <vulkan/vulkan.h>
 #include <vulkan/vulkan_core.h>
 
-enum class TextureFormat;
-enum class Tiling;
-enum class TextureDimensions;
-enum class SamplesPerTexel;
-enum class TextureViewType;
-enum class TextureComponentSwizzle;
-enum class TextureFilter;
-enum class AddressMode;
-enum class MipmapMode;
-enum class DepthCompareOperation;
-enum class BlendOperation;
-enum class BlendFactor;
-enum class BlendingLogicOperation;
-struct SamplerCreateInfo;
+namespace neon {
+    enum class TextureFormat;
+    enum class Tiling;
+    enum class TextureDimensions;
+    enum class SamplesPerTexel;
+    enum class TextureViewType;
+    enum class TextureComponentSwizzle;
+    enum class TextureFilter;
+    enum class AddressMode;
+    enum class MipmapMode;
+    enum class DepthCompareOperation;
+    enum class BlendOperation;
+    enum class BlendFactor;
+    enum class BlendingLogicOperation;
+    struct SamplerCreateInfo;
+}
 
-namespace vulkan_conversions {
+namespace neon::vulkan::conversions {
 
     uint32_t pixelSize(const TextureFormat& format);
 

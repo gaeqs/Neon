@@ -14,17 +14,20 @@
 #include <engine/render/TextureCreateInfo.h>
 #include <engine/shader/MaterialCreateInfo.h>
 
-class Room;
 
-class FrameBuffer;
+namespace neon {
+    class Room;
 
-class ShaderProgram;
+    class FrameBuffer;
 
-class Texture;
+    class ShaderProgram;
 
-class Model;
+    class Texture;
 
-namespace deferred_utils {
+    class Model;
+}
+
+namespace neon::deferred_utils {
 
     IdentifiableWrapper<Model> createScreenModel(
             Room* room,

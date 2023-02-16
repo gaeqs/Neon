@@ -15,55 +15,60 @@
 #include <vulkan/VKApplication.h>
 #include <vulkan/buffer/SimpleBuffer.h>
 
-class Application;
+namespace neon {
+    class Application;
+}
 
-class VKApplication;
+namespace neon::vulkan {
 
-class VKShaderProgram;
+    class VKApplication;
 
-class VKMesh {
+    class VKShaderProgram;
 
-    VKApplication* _vkApplication;
-    IdentifiableWrapper<Material>& _material;
+    class VKMesh {
 
-    std::optional<std::unique_ptr<SimpleBuffer>> _vertexBuffer;
-    std::optional<std::unique_ptr<SimpleBuffer>> _indexBuffer;
-    uint32_t _indexAmount;
+        VKApplication* _vkApplication;
+        IdentifiableWrapper<Material>& _material;
 
-public:
+        std::optional<std::unique_ptr<SimpleBuffer>> _vertexBuffer;
+        std::optional<std::unique_ptr<SimpleBuffer>> _indexBuffer;
+        uint32_t _indexAmount;
 
-    VKMesh(const VKMesh& other) = delete;
+    public:
 
-    VKMesh(Application* application, IdentifiableWrapper<Material>& material);
+        VKMesh(const VKMesh& other) = delete;
 
-    template<class Vertex>
-    void uploadData(const std::vector<Vertex>& vertices,
-                    const std::vector<uint32_t>& indices) {
+        VKMesh(Application* application,
+               IdentifiableWrapper<Material>& material);
 
-        _vertexBuffer = std::make_unique<SimpleBuffer>(
-                _vkApplication,
-                VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
-                VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT,
-                vertices);
+        template<class Vertex>
+        void uploadData(const std::vector<Vertex>& vertices,
+                        const std::vector<uint32_t>& indices) {
 
-        _indexBuffer = std::make_unique<SimpleBuffer>(
-                _vkApplication,
-                VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
-                VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT,
-                indices);
+            _vertexBuffer = std::make_unique<SimpleBuffer>(
+                    _vkApplication,
+                    VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
+                    VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT,
+                    vertices);
 
-        _indexAmount = indices.size();
-    }
+            _indexBuffer = std::make_unique<SimpleBuffer>(
+                    _vkApplication,
+                    VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
+                    VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT,
+                    indices);
 
-    [[nodiscard]] IdentifiableWrapper<Material> getMaterial() const;
+            _indexAmount = indices.size();
+        }
 
-    void draw(
-            VkCommandBuffer commandBuffer,
-            VkBuffer instancingBuffer,
-            uint32_t instancingElements,
-            const ShaderUniformBuffer* global);
+        [[nodiscard]] IdentifiableWrapper<Material> getMaterial() const;
 
-};
+        void draw(
+                VkCommandBuffer commandBuffer,
+                VkBuffer instancingBuffer,
+                uint32_t instancingElements,
+                const ShaderUniformBuffer* global);
 
+    };
+}
 
 #endif //NEON_VKMESH_H

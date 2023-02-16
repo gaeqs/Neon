@@ -11,7 +11,7 @@
 
 #include <engine/Engine.h>
 
-namespace model_utils {
+namespace neon::model_utils {
 
     template<class Vertex>
     IdentifiableWrapper<Model> createCubeModel(

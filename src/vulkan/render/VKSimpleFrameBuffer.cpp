@@ -13,248 +13,250 @@
 #include <vulkan/util/VKUtil.h>
 #include <vulkan/util/VulkanConversions.h>
 
-void VKSimpleFrameBuffer::createImages() {
+namespace neon::vulkan {
+    void VKSimpleFrameBuffer::createImages() {
 
-    _images.clear();
-    _memories.clear();
-    _imageViews.clear();
+        _images.clear();
+        _memories.clear();
+        _imageViews.clear();
 
-    ImageCreateInfo info;
-    info.width = _extent.width;
-    info.height = _extent.height;
-    info.depth = 1;
-    info.mipmaps = 1;
-    info.layers = 1;
+        ImageCreateInfo info;
+        info.width = _extent.width;
+        info.height = _extent.height;
+        info.depth = 1;
+        info.mipmaps = 1;
+        info.layers = 1;
 
-    for (const auto& format: _formats) {
-        info.format = format;
-        auto [image, memory] = vulkan_util::createImage(
-                _vkApplication->getDevice(),
-                _vkApplication->getPhysicalDevice(),
-                VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT |
-                VK_IMAGE_USAGE_SAMPLED_BIT,
-                info,
-                TextureViewType::NORMAL_2D
-        );
+        for (const auto& format: _formats) {
+            info.format = format;
+            auto [image, memory] = vulkan_util::createImage(
+                    _vkApplication->getDevice(),
+                    _vkApplication->getPhysicalDevice(),
+                    VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT |
+                    VK_IMAGE_USAGE_SAMPLED_BIT,
+                    info,
+                    TextureViewType::NORMAL_2D
+            );
 
-        auto view = vulkan_util::createImageView(
-                _vkApplication->getDevice(),
-                image,
-                vulkan_conversions::vkFormat(format),
-                VK_IMAGE_ASPECT_COLOR_BIT,
-                ImageViewCreateInfo()
-        );
+            auto view = vulkan_util::createImageView(
+                    _vkApplication->getDevice(),
+                    image,
+                    conversions::vkFormat(format),
+                    VK_IMAGE_ASPECT_COLOR_BIT,
+                    ImageViewCreateInfo()
+            );
 
-        _images.push_back(image);
-        _memories.push_back(memory);
-        _imageViews.push_back(view);
-        _layouts.push_back(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+            _images.push_back(image);
+            _memories.push_back(memory);
+            _imageViews.push_back(view);
+            _layouts.push_back(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+        }
+
+        // Add depth texture
+        if (_depth) {
+            auto [image, memory] = vulkan_util::createImage(
+                    _vkApplication->getDevice(),
+                    _vkApplication->getPhysicalDevice(),
+                    VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT
+                    | VK_IMAGE_USAGE_SAMPLED_BIT,
+                    info,
+                    TextureViewType::NORMAL_2D,
+                    _vkApplication->getDepthImageFormat() // Overrides info's format.
+            );
+
+            auto view = vulkan_util::createImageView(
+                    _vkApplication->getDevice(),
+                    image,
+                    _vkApplication->getDepthImageFormat(),
+                    VK_IMAGE_ASPECT_DEPTH_BIT,
+                    ImageViewCreateInfo()
+            );
+
+            _images.push_back(image);
+            _memories.push_back(memory);
+            _imageViews.push_back(view);
+            _layouts.push_back(VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL);
+        }
+
     }
 
-    // Add depth texture
-    if (_depth) {
-        auto [image, memory] = vulkan_util::createImage(
+    void VKSimpleFrameBuffer::createFrameBuffer() {
+        VkFramebufferCreateInfo framebufferInfo{};
+        framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+        framebufferInfo.renderPass = _renderPass.getRaw();
+        framebufferInfo.attachmentCount = _imageViews.size();
+        framebufferInfo.pAttachments = _imageViews.data();
+        framebufferInfo.width = _extent.width;
+        framebufferInfo.height = _extent.height;
+        framebufferInfo.layers = 1;
+
+        if (vkCreateFramebuffer(
                 _vkApplication->getDevice(),
-                _vkApplication->getPhysicalDevice(),
-                VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT
-                | VK_IMAGE_USAGE_SAMPLED_BIT,
-                info,
-                TextureViewType::NORMAL_2D,
-                _vkApplication->getDepthImageFormat() // Overrides info's format.
-        );
-
-        auto view = vulkan_util::createImageView(
-                _vkApplication->getDevice(),
-                image,
-                _vkApplication->getDepthImageFormat(),
-                VK_IMAGE_ASPECT_DEPTH_BIT,
-                ImageViewCreateInfo()
-        );
-
-        _images.push_back(image);
-        _memories.push_back(memory);
-        _imageViews.push_back(view);
-        _layouts.push_back(VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL);
-    }
-
-}
-
-void VKSimpleFrameBuffer::createFrameBuffer() {
-    VkFramebufferCreateInfo framebufferInfo{};
-    framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-    framebufferInfo.renderPass = _renderPass.getRaw();
-    framebufferInfo.attachmentCount = _imageViews.size();
-    framebufferInfo.pAttachments = _imageViews.data();
-    framebufferInfo.width = _extent.width;
-    framebufferInfo.height = _extent.height;
-    framebufferInfo.layers = 1;
-
-    if (vkCreateFramebuffer(
-            _vkApplication->getDevice(),
-            &framebufferInfo,
-            nullptr,
-            &_frameBuffer
-    ) != VK_SUCCESS) {
-        throw std::runtime_error("Failed to create framebuffer!");
-    }
-}
-
-void VKSimpleFrameBuffer::cleanup() {
-    auto d = _vkApplication->getDevice();
-
-    for (const auto& item: _imGuiDescriptors) {
-        if (item != VK_NULL_HANDLE) {
-            ImGui_ImplVulkan_RemoveTexture(item);
+                &framebufferInfo,
+                nullptr,
+                &_frameBuffer
+        ) != VK_SUCCESS) {
+            throw std::runtime_error("Failed to create framebuffer!");
         }
     }
-    std::fill(_imGuiDescriptors.begin(), _imGuiDescriptors.end(),
-              (VkDescriptorSet) VK_NULL_HANDLE);
 
-    vkDestroyFramebuffer(d, _frameBuffer, nullptr);
+    void VKSimpleFrameBuffer::cleanup() {
+        auto d = _vkApplication->getDevice();
 
-    for (auto& view: _imageViews) {
-        vkDestroyImageView(d, view, nullptr);
+        for (const auto& item: _imGuiDescriptors) {
+            if (item != VK_NULL_HANDLE) {
+                ImGui_ImplVulkan_RemoveTexture(item);
+            }
+        }
+        std::fill(_imGuiDescriptors.begin(), _imGuiDescriptors.end(),
+                  (VkDescriptorSet) VK_NULL_HANDLE);
+
+        vkDestroyFramebuffer(d, _frameBuffer, nullptr);
+
+        for (auto& view: _imageViews) {
+            vkDestroyImageView(d, view, nullptr);
+        }
+
+        for (auto& image: _images) {
+            vkDestroyImage(d, image, nullptr);
+        }
+
+        for (auto& memory: _memories) {
+            vkFreeMemory(d, memory, nullptr);
+        }
     }
 
-    for (auto& image: _images) {
-        vkDestroyImage(d, image, nullptr);
+    VKSimpleFrameBuffer::VKSimpleFrameBuffer(
+            Room* room,
+            const std::vector<TextureFormat>& formats,
+            bool depth) :
+            VKFrameBuffer(),
+            _vkApplication(&room->getApplication()->getImplementation()),
+            _images(),
+            _memories(),
+            _imageViews(),
+            _layouts(),
+            _textures(),
+            _imGuiDescriptors(),
+            _formats(formats),
+            _extent(_vkApplication->getSwapChainExtent()),
+            _renderPass(room->getApplication(),
+                        conversions::vkFormat(formats), depth, false,
+                        _vkApplication->getDepthImageFormat()),
+            _depth(depth) {
+
+        _imGuiDescriptors.resize(formats.size(), VK_NULL_HANDLE);
+
+        createImages();
+        createFrameBuffer();
+
+        SamplerCreateInfo info;
+        info.anisotropy = false;
+        info.minificationFilter = TextureFilter::NEAREST;
+        info.magnificationFilter = TextureFilter::NEAREST;
+
+        // Create the textures
+        for (uint32_t i = 0; i < _imageViews.size(); ++i) {
+            auto texture = room->getTextures().create(
+                    _imageViews[i],
+                    _layouts[i],
+                    static_cast<int32_t>(_extent.width),
+                    static_cast<int32_t>(_extent.height),
+                    1,
+                    info
+            );
+            _textures.push_back(texture);
+        }
     }
 
-    for (auto& memory: _memories) {
-        vkFreeMemory(d, memory, nullptr);
-    }
-}
-
-VKSimpleFrameBuffer::VKSimpleFrameBuffer(
-        Room* room,
-        const std::vector<TextureFormat>& formats,
-        bool depth) :
-        VKFrameBuffer(),
-        _vkApplication(&room->getApplication()->getImplementation()),
-        _images(),
-        _memories(),
-        _imageViews(),
-        _layouts(),
-        _textures(),
-        _imGuiDescriptors(),
-        _formats(formats),
-        _extent(_vkApplication->getSwapChainExtent()),
-        _renderPass(room->getApplication(),
-                    vulkan_conversions::vkFormat(formats), depth, false,
-                    _vkApplication->getDepthImageFormat()),
-        _depth(depth) {
-
-    _imGuiDescriptors.resize(formats.size(), VK_NULL_HANDLE);
-
-    createImages();
-    createFrameBuffer();
-
-    SamplerCreateInfo info;
-    info.anisotropy = false;
-    info.minificationFilter = TextureFilter::NEAREST;
-    info.magnificationFilter = TextureFilter::NEAREST;
-
-    // Create the textures
-    for (uint32_t i = 0; i < _imageViews.size(); ++i) {
-        auto texture = room->getTextures().create(
-                _imageViews[i],
-                _layouts[i],
-                static_cast<int32_t>(_extent.width),
-                static_cast<int32_t>(_extent.height),
-                1,
-                info
-        );
-        _textures.push_back(texture);
-    }
-}
-
-VKSimpleFrameBuffer::~VKSimpleFrameBuffer() {
-    cleanup();
-}
-
-VkFramebuffer VKSimpleFrameBuffer::getRaw() const {
-    return _frameBuffer;
-}
-
-bool VKSimpleFrameBuffer::hasDepth() const {
-    return _depth;
-}
-
-void VKSimpleFrameBuffer::recreate(std::pair<uint32_t, uint32_t> size) {
-    _extent = {size.first, size.second};
-
-    cleanup();
-    createImages();
-    createFrameBuffer();
-
-    // Refresh the textures
-    for (uint32_t i = 0; i < _textures.size(); ++i) {
-        _textures[i]->getImplementation().changeExternalImageView(
-                static_cast<int32_t>(_extent.width),
-                static_cast<int32_t>(_extent.height),
-                _imageViews[i]
-        );
-    }
-}
-
-uint32_t VKSimpleFrameBuffer::getColorAttachmentAmount() const {
-    return _formats.size();
-}
-
-std::vector<VkFormat> VKSimpleFrameBuffer::getColorFormats() const {
-    return vulkan_conversions::vkFormat(_formats);
-}
-
-VkFormat VKSimpleFrameBuffer::getDepthFormat() const {
-    return _vkApplication->getDepthImageFormat();
-}
-
-VKRenderPass const& VKSimpleFrameBuffer::getRenderPass() const {
-    return _renderPass;
-}
-
-VKRenderPass& VKSimpleFrameBuffer::getRenderPass() {
-    return _renderPass;
-}
-
-const std::vector<IdentifiableWrapper<Texture>>&
-VKSimpleFrameBuffer::getTextures() const {
-    return _textures;
-}
-
-bool VKSimpleFrameBuffer::renderImGui() {
-    return false;
-}
-
-ImTextureID VKSimpleFrameBuffer::getImGuiDescriptor(uint32_t index) {
-    if (_imGuiDescriptors[index] == VK_NULL_HANDLE) {
-        auto& texture = _textures[index];
-        _imGuiDescriptors[index] = ImGui_ImplVulkan_AddTexture(
-                texture->getImplementation().getSampler(),
-                texture->getImplementation().getImageView(),
-                VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
-        );
+    VKSimpleFrameBuffer::~VKSimpleFrameBuffer() {
+        cleanup();
     }
 
-    return _imGuiDescriptors[index];
-}
+    VkFramebuffer VKSimpleFrameBuffer::getRaw() const {
+        return _frameBuffer;
+    }
 
-uint32_t VKSimpleFrameBuffer::getWidth() const {
-    return _extent.width;
-}
+    bool VKSimpleFrameBuffer::hasDepth() const {
+        return _depth;
+    }
 
-uint32_t VKSimpleFrameBuffer::getHeight() const {
-    return _extent.height;
-}
+    void VKSimpleFrameBuffer::recreate(std::pair<uint32_t, uint32_t> size) {
+        _extent = {size.first, size.second};
 
-bool VKSimpleFrameBuffer::defaultRecreationCondition() const {
-    auto& extent = _vkApplication->getSwapChainExtent();
-    if (extent.width == 0 || extent.height == 0) return false;
-    return extent.width != getWidth() || extent.height != getHeight();
-}
+        cleanup();
+        createImages();
+        createFrameBuffer();
 
-std::pair<uint32_t, uint32_t>
-VKSimpleFrameBuffer::defaultRecreationParameters() const {
-    auto& extent = _vkApplication->getSwapChainExtent();
-    return {extent.width, extent.height};
+        // Refresh the textures
+        for (uint32_t i = 0; i < _textures.size(); ++i) {
+            _textures[i]->getImplementation().changeExternalImageView(
+                    static_cast<int32_t>(_extent.width),
+                    static_cast<int32_t>(_extent.height),
+                    _imageViews[i]
+            );
+        }
+    }
+
+    uint32_t VKSimpleFrameBuffer::getColorAttachmentAmount() const {
+        return _formats.size();
+    }
+
+    std::vector<VkFormat> VKSimpleFrameBuffer::getColorFormats() const {
+        return conversions::vkFormat(_formats);
+    }
+
+    VkFormat VKSimpleFrameBuffer::getDepthFormat() const {
+        return _vkApplication->getDepthImageFormat();
+    }
+
+    VKRenderPass const& VKSimpleFrameBuffer::getRenderPass() const {
+        return _renderPass;
+    }
+
+    VKRenderPass& VKSimpleFrameBuffer::getRenderPass() {
+        return _renderPass;
+    }
+
+    const std::vector<IdentifiableWrapper<Texture>>&
+    VKSimpleFrameBuffer::getTextures() const {
+        return _textures;
+    }
+
+    bool VKSimpleFrameBuffer::renderImGui() {
+        return false;
+    }
+
+    ImTextureID VKSimpleFrameBuffer::getImGuiDescriptor(uint32_t index) {
+        if (_imGuiDescriptors[index] == VK_NULL_HANDLE) {
+            auto& texture = _textures[index];
+            _imGuiDescriptors[index] = ImGui_ImplVulkan_AddTexture(
+                    texture->getImplementation().getSampler(),
+                    texture->getImplementation().getImageView(),
+                    VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+            );
+        }
+
+        return _imGuiDescriptors[index];
+    }
+
+    uint32_t VKSimpleFrameBuffer::getWidth() const {
+        return _extent.width;
+    }
+
+    uint32_t VKSimpleFrameBuffer::getHeight() const {
+        return _extent.height;
+    }
+
+    bool VKSimpleFrameBuffer::defaultRecreationCondition() const {
+        auto& extent = _vkApplication->getSwapChainExtent();
+        if (extent.width == 0 || extent.height == 0) return false;
+        return extent.width != getWidth() || extent.height != getHeight();
+    }
+
+    std::pair<uint32_t, uint32_t>
+    VKSimpleFrameBuffer::defaultRecreationParameters() const {
+        auto& extent = _vkApplication->getSwapChainExtent();
+        return {extent.width, extent.height};
+    }
 }

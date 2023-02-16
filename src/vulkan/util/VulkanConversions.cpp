@@ -9,7 +9,7 @@
 #include <engine/render/TextureCreateInfo.h>
 #include <vulkan/vulkan_core.h>
 
-namespace vc = vulkan_conversions;
+namespace vc = neon::vulkan::conversions;
 
 uint32_t vc::pixelSize(const TextureFormat& format) {
     switch (format) {
@@ -235,7 +235,7 @@ VkSamplerCreateInfo vc::vkSamplerCreateInfo(const SamplerCreateInfo& sampler,
     return samplerInfo;
 }
 
-VkCompareOp vulkan_conversions::vkCompareOp(const DepthCompareOperation& op) {
+VkCompareOp vc::vkCompareOp(const DepthCompareOperation& op) {
     switch (op) {
         case DepthCompareOperation::LESS:
             return VK_COMPARE_OP_LESS;
@@ -258,7 +258,7 @@ VkCompareOp vulkan_conversions::vkCompareOp(const DepthCompareOperation& op) {
     }
 }
 
-VkBlendOp vulkan_conversions::vkBlendOp(const BlendOperation& op) {
+VkBlendOp vc::vkBlendOp(const BlendOperation& op) {
     switch (op) {
         case BlendOperation::ADD:
             return VK_BLEND_OP_ADD;
@@ -275,7 +275,7 @@ VkBlendOp vulkan_conversions::vkBlendOp(const BlendOperation& op) {
     }
 }
 
-VkLogicOp vulkan_conversions::vkLogicOp(const BlendingLogicOperation& op) {
+VkLogicOp vc::vkLogicOp(const BlendingLogicOperation& op) {
     switch (op) {
         case BlendingLogicOperation::CLEAR:
             return VK_LOGIC_OP_CLEAR;
@@ -314,7 +314,7 @@ VkLogicOp vulkan_conversions::vkLogicOp(const BlendingLogicOperation& op) {
     }
 }
 
-VkBlendFactor vulkan_conversions::vkBlendFactor(const BlendFactor& factor) {
+VkBlendFactor vc::vkBlendFactor(const BlendFactor& factor) {
     switch (factor) {
         case BlendFactor::ZERO:
             return VK_BLEND_FACTOR_ZERO;

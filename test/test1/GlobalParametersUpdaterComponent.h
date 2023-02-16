@@ -15,7 +15,7 @@ struct GlobalParameters {
     float far;
 };
 
-class GlobalParametersUpdaterComponent : public Component {
+class GlobalParametersUpdaterComponent : public neon::Component {
 
 public:
 

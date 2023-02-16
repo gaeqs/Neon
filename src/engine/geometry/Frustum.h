@@ -9,40 +9,42 @@
 
 #include <glm/glm.hpp>
 
-class Frustum {
+namespace neon {
 
-    float _near;
-    float _far;
-    float _aspectRatio;
-    float _fovYDegrees;
+    class Frustum {
 
-    glm::mat4 _projection;
-    std::optional<glm::mat4> _inverseProjection;
+        float _near;
+        float _far;
+        float _aspectRatio;
+        float _fovYDegrees;
 
-public:
+        glm::mat4 _projection;
+        std::optional<glm::mat4> _inverseProjection;
 
-    Frustum(float near, float far, float aspectRatio, float fovYDegrees);
+    public:
 
-    float getNear() const;
+        Frustum(float near, float far, float aspectRatio, float fovYDegrees);
 
-    float getFar() const;
+        float getNear() const;
 
-    float getAspectRatio() const;
+        float getFar() const;
 
-    float getFovYDegrees() const;
+        float getAspectRatio() const;
 
-    const glm::mat4& getProjection() const;
+        float getFovYDegrees() const;
 
-    const glm::mat4& getInverseProjection() const;
+        const glm::mat4& getProjection() const;
 
-    Frustum withNear(float near) const;
+        const glm::mat4& getInverseProjection() const;
 
-    Frustum withFar(float far) const;
+        Frustum withNear(float near) const;
 
-    Frustum withAspectRatio(float aspectRatio) const;
+        Frustum withFar(float far) const;
 
-    Frustum withFov(float fovYDegrees) const;
-};
+        Frustum withAspectRatio(float aspectRatio) const;
 
+        Frustum withFov(float fovYDegrees) const;
+    };
+}
 
 #endif //RVTRACKING_FRUSTUM_H

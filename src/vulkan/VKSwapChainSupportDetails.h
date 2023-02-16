@@ -8,10 +8,12 @@
 #include <vector>
 #include <vulkan/vulkan.h>
 
-struct VKSwapChainSupportDetails {
-    VkSurfaceCapabilitiesKHR capabilities;
-    std::vector<VkSurfaceFormatKHR> formats;
-    std::vector<VkPresentModeKHR> presentModes;
-};
+namespace neon::vulkan {
+    struct VKSwapChainSupportDetails {
+        VkSurfaceCapabilitiesKHR capabilities;
+        std::vector<VkSurfaceFormatKHR> formats;
+        std::vector<VkPresentModeKHR> presentModes;
+    };
+}
 
 #endif //NEON_VKSWAPCHAINSUPPORTDETAILS_H

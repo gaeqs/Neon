@@ -16,46 +16,48 @@
 
 #endif
 
-class Room;
+namespace neon {
 
-class Application;
+    class Room;
 
-class Render {
+    class Application;
 
-public:
+    class Render {
+
+    public:
 
 #ifdef USE_VULKAN
-    using Implementation = VKRender;
+    using Implementation = vulkan::VKRender;
 #endif
 
-private:
+    private:
 
-    Implementation _implementation;
-    Application* _application;
-    std::vector<RenderPassStrategy> _strategies;
+        Implementation _implementation;
+        Application* _application;
+        std::vector<RenderPassStrategy> _strategies;
 
-public:
+    public:
 
-    Render(const Render& other) = delete;
+        Render(const Render& other) = delete;
 
-    explicit Render(Application* application);
+        explicit Render(Application* application);
 
-    [[nodiscard]] const Implementation& getImplementation() const;
+        [[nodiscard]] const Implementation& getImplementation() const;
 
-    [[nodiscard]] Implementation& getImplementation();
+        [[nodiscard]] Implementation& getImplementation();
 
-    void addRenderPass(const RenderPassStrategy& strategy);
+        void addRenderPass(const RenderPassStrategy& strategy);
 
-    void clearRenderPasses();
+        void clearRenderPasses();
 
-    void render(Room* room) const;
+        void render(Room* room) const;
 
-    void checkFrameBufferRecreationConditions();
+        void checkFrameBufferRecreationConditions();
 
-    [[nodiscard]] size_t getPassesAmount() const;
+        [[nodiscard]] size_t getPassesAmount() const;
 
-    [[nodiscard]] std::shared_ptr<FrameBuffer> getFrameBuffer (size_t index);
-};
-
+        [[nodiscard]] std::shared_ptr<FrameBuffer> getFrameBuffer(size_t index);
+    };
+}
 
 #endif //NEON_RENDER_H

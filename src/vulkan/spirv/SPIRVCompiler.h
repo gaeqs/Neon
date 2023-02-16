@@ -16,42 +16,43 @@
 #include <util/Result.h>
 #include <vulkan/VKShaderUniform.h>
 
-class SPIRVCompiler {
+namespace neon::vulkan {
+    class SPIRVCompiler {
 
-    static TBuiltInResource generateDefaultResources();
+        static TBuiltInResource generateDefaultResources();
 
-    static EShLanguage getLanguage(const VkShaderStageFlagBits& shaderType);
+        static EShLanguage getLanguage(const VkShaderStageFlagBits& shaderType);
 
-    bool _compiled;
-    std::vector<glslang::TShader*> _shaders;
-    glslang::TProgram _program;
-    TBuiltInResource _resources;
+        bool _compiled;
+        std::vector<glslang::TShader*> _shaders;
+        glslang::TProgram _program;
+        TBuiltInResource _resources;
 
-public:
+    public:
 
-    SPIRVCompiler();
+        SPIRVCompiler();
 
-    ~SPIRVCompiler();
+        ~SPIRVCompiler();
 
-    std::optional<std::string>
-    addShader(const VkShaderStageFlagBits& shaderType,
-              const std::string& source);
+        std::optional<std::string>
+        addShader(const VkShaderStageFlagBits& shaderType,
+                  const std::string& source);
 
-    std::optional<std::string> compile();
+        std::optional<std::string> compile();
 
-    Result<std::vector<uint32_t>, std::string>
-    getStage(const VkShaderStageFlagBits& shaderType);
+        Result<std::vector<uint32_t>, std::string>
+        getStage(const VkShaderStageFlagBits& shaderType);
 
-    [[nodiscard]] std::unordered_map<std::string, VKShaderUniformBlock>
-    getUniformBlocks() const;
+        [[nodiscard]] std::unordered_map<std::string, VKShaderUniformBlock>
+        getUniformBlocks() const;
 
-    [[nodiscard]] std::unordered_map<std::string, VKShaderUniform>
-    getUniforms() const;
+        [[nodiscard]] std::unordered_map<std::string, VKShaderUniform>
+        getUniforms() const;
 
-    [[nodiscard]] std::unordered_map<std::string, VKShaderSampler>
-    getSamplers() const;
+        [[nodiscard]] std::unordered_map<std::string, VKShaderSampler>
+        getSamplers() const;
 
-};
-
+    };
+}
 
 #endif //NEON_SPIRVCOMPILER_H

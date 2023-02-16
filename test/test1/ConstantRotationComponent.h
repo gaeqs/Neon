@@ -7,7 +7,7 @@
 
 #include <engine/Engine.h>
 
-class ConstantRotationComponent : public Component {
+class ConstantRotationComponent : public neon::Component {
 
     float _speed;
     glm::vec3 _axis;

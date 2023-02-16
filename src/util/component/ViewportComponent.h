@@ -9,19 +9,20 @@
 #include <engine/render/SimpleFrameBuffer.h>
 #include <imgui.h>
 
-class ViewportComponent : public Component {
+namespace neon {
+    class ViewportComponent : public Component {
 
-    std::shared_ptr<SimpleFrameBuffer> _frameBuffer;
-    ImVec2 _windowSize;
+        std::shared_ptr<SimpleFrameBuffer> _frameBuffer;
+        ImVec2 _windowSize;
 
-public:
+    public:
 
-    void onStart() override;
+        void onStart() override;
 
-    void onPreDraw() override;
+        void onPreDraw() override;
 
-};
-REGISTER_COMPONENT(ViewportComponent, "Viewport")
-
+    };
+    REGISTER_COMPONENT(ViewportComponent, "Viewport")
+}
 
 #endif //NEON_IMGUITEST_H

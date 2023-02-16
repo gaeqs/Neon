@@ -16,68 +16,71 @@
 
 #endif
 
-class Room;
+namespace neon {
 
-class SimpleFrameBuffer : public FrameBuffer {
+    class Room;
 
-public:
+    class SimpleFrameBuffer : public FrameBuffer {
+
+    public:
 
 #ifdef USE_VULKAN
-    using Implementation = VKSimpleFrameBuffer;
+    using Implementation = vulkan::VKSimpleFrameBuffer;
 #endif
 
-private:
+    private:
 
-    Implementation _implementation;
+        Implementation _implementation;
 
-    std::function<bool(const SimpleFrameBuffer*)> _recreationCondition;
-    std::function<std::pair<uint32_t, uint32_t>(const SimpleFrameBuffer*)>
-            _recreationParameters;
+        std::function<bool(const SimpleFrameBuffer*)> _recreationCondition;
+        std::function<std::pair<uint32_t, uint32_t>(const SimpleFrameBuffer*)>
+                _recreationParameters;
 
-    static bool defaultRecreationCondition(const SimpleFrameBuffer*);
+        static bool defaultRecreationCondition(const SimpleFrameBuffer*);
 
-    static std::pair<uint32_t, uint32_t>
-    defaultRecreationParameters(const SimpleFrameBuffer*);
+        static std::pair<uint32_t, uint32_t>
+        defaultRecreationParameters(const SimpleFrameBuffer*);
 
-public:
+    public:
 
-    SimpleFrameBuffer(Room* room,
-                      const std::vector<TextureFormat>& colorFormats,
-                      bool depth);
+        SimpleFrameBuffer(Room* room,
+                          const std::vector<TextureFormat>& colorFormats,
+                          bool depth);
 
-    ~SimpleFrameBuffer() override = default;
+        ~SimpleFrameBuffer() override = default;
 
-    bool requiresRecreation() override;
+        bool requiresRecreation() override;
 
-    void recreate() override;
+        void recreate() override;
 
-    [[nodiscard]] FrameBuffer::Implementation& getImplementation() override;
+        [[nodiscard]] FrameBuffer::Implementation& getImplementation() override;
 
-    [[nodiscard]] const FrameBuffer::Implementation&
-    getImplementation() const override;
+        [[nodiscard]] const FrameBuffer::Implementation&
+        getImplementation() const override;
 
-    [[nodiscard]] std::vector<IdentifiableWrapper<Texture>>
-    getTextures() const override;
+        [[nodiscard]] std::vector<IdentifiableWrapper<Texture>>
+        getTextures() const override;
 
-    [[nodiscard]] uint32_t getWidth() const override;
+        [[nodiscard]] uint32_t getWidth() const override;
 
-    [[nodiscard]] uint32_t getHeight() const override;
+        [[nodiscard]] uint32_t getHeight() const override;
 
-    [[nodiscard]] const std::function<bool(const SimpleFrameBuffer*)>&
-    getRecreationCondition() const;
+        [[nodiscard]] const std::function<bool(const SimpleFrameBuffer*)>&
+        getRecreationCondition() const;
 
-    void setRecreationCondition(const std::function<bool(
-            const SimpleFrameBuffer*)>& recreationCondition);
+        void setRecreationCondition(const std::function<bool(
+                const SimpleFrameBuffer*)>& recreationCondition);
 
-    [[nodiscard]] const std::function<std::pair<uint32_t, uint32_t>(
-            const SimpleFrameBuffer*)>& getRecreationParameters() const;
+        [[nodiscard]] const std::function<std::pair<uint32_t, uint32_t>(
+                const SimpleFrameBuffer*)>& getRecreationParameters() const;
 
-    void setRecreationParameters(
-            const std::function<std::pair<uint32_t, uint32_t>(
-                    const SimpleFrameBuffer*)>& recreationParameters);
+        void setRecreationParameters(
+                const std::function<std::pair<uint32_t, uint32_t>(
+                        const SimpleFrameBuffer*)>& recreationParameters);
 
-    [[nodiscard]] ImTextureID getImGuiDescriptor(uint32_t index);
-};
+        [[nodiscard]] ImTextureID getImGuiDescriptor(uint32_t index);
+    };
+}
 
 
 #endif //NEON_SIMPLEFRAMEBUFFER_H

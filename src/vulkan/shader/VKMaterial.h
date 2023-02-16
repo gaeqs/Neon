@@ -17,51 +17,57 @@
 #include <engine/model/InputDescription.h>
 #include <engine/shader/MaterialCreateInfo.h>
 
-class Application;
+namespace neon {
+    class Application;
 
-class VKApplication;
+    class Room;
 
-class Room;
+    class Material;
 
-class Material;
+    class FrameBuffer;
+}
 
-class FrameBuffer;
+namespace neon::vulkan {
+    class VKApplication;
 
-class VKMaterial {
+    class VKMaterial {
 
-    Material* _material;
+        Material* _material;
 
-    VKApplication* _vkApplication;
-    VkPipelineLayout _pipelineLayout;
-    VkPipeline _pipeline;
+        VKApplication* _vkApplication;
+        VkPipelineLayout _pipelineLayout;
+        VkPipeline _pipeline;
 
-    std::vector<char> _pushConstants;
-    VkShaderStageFlags _pushConstantStages;
+        std::vector<char> _pushConstants;
+        VkShaderStageFlags _pushConstantStages;
 
-    VkRenderPass _target;
+        VkRenderPass _target;
 
-public:
+    public:
 
-    VKMaterial(const VKMaterial& other) = delete;
+        VKMaterial(const VKMaterial& other) = delete;
 
-    VKMaterial(Room* room, Material* material,
-               const MaterialCreateInfo& createInfo);
+        VKMaterial(Room* room,
+                   Material* material,
+                   const MaterialCreateInfo& createInfo);
 
-    ~VKMaterial();
+        ~VKMaterial();
 
-    [[nodiscard]] VkPipelineLayout getPipelineLayout() const;
+        [[nodiscard]] VkPipelineLayout getPipelineLayout() const;
 
-    [[nodiscard]] VkPipeline getPipeline() const;
+        [[nodiscard]] VkPipeline getPipeline() const;
 
-    [[nodiscard]] VkRenderPass getTarget() const;
+        [[nodiscard]] VkRenderPass getTarget() const;
 
-    void pushConstant(const std::string& name, const void* data, uint32_t size);
+        void pushConstant(const std::string& name,
+                          const void* data,
+                          uint32_t size);
 
-    void uploadConstants(VkCommandBuffer buffer) const;
+        void uploadConstants(VkCommandBuffer buffer) const;
 
-    void setTexture(const std::string& name,
-                    IdentifiableWrapper<Texture> texture);
-};
-
+        void setTexture(const std::string& name,
+                        IdentifiableWrapper<Texture> texture);
+    };
+}
 
 #endif //NEON_VKMATERIAL_H

@@ -9,18 +9,20 @@
 #include <engine/render/Texture.h>
 #include <cstdint>
 
-enum class UniformBindingType {
-    BUFFER,
-    IMAGE
-};
+namespace neon {
+    enum class UniformBindingType {
+        BUFFER,
+        IMAGE
+    };
 
-struct ShaderUniformBinding {
-    UniformBindingType type;
-    uint32_t size;
+    struct ShaderUniformBinding {
+        UniformBindingType type;
+        uint32_t size;
 
-    ShaderUniformBinding(UniformBindingType type, uint32_t size)
-            : type(type), size(size) {}
-};
+        ShaderUniformBinding(UniformBindingType type, uint32_t size)
+                : type(type), size(size) {}
+    };
+}
 
 
 #endif //NEON_SHADERUNIFORMBINDING_H

@@ -12,36 +12,37 @@
 #include <engine/structure/Component.h>
 #include <engine/model/Model.h>
 
-class GraphicComponent : public Component {
+namespace neon {
+    class GraphicComponent : public Component {
 
-    IdentifiableWrapper<Model> _model;
-    std::optional<uint32_t*> _modelTargetId;
+        IdentifiableWrapper<Model> _model;
+        std::optional<uint32_t*> _modelTargetId;
 
-public:
+    public:
 
-    GraphicComponent();
+        GraphicComponent();
 
-    explicit GraphicComponent(IdentifiableWrapper<Model> model);
+        explicit GraphicComponent(IdentifiableWrapper<Model> model);
 
-    ~GraphicComponent() override;
+        ~GraphicComponent() override;
 
-    [[nodiscard]] const IdentifiableWrapper<Model>& getModel() const;
+        [[nodiscard]] const IdentifiableWrapper<Model>& getModel() const;
 
-    void setModel(const IdentifiableWrapper<Model>& model);
+        void setModel(const IdentifiableWrapper<Model>& model);
 
-    template<class InstanceData>
-    void uploadData(const InstanceData& data) {
-        if (_modelTargetId.has_value()) {
-            _model->uploadData(*_modelTargetId.value(), data);
+        template<class InstanceData>
+        void uploadData(const InstanceData& data) {
+            if (_modelTargetId.has_value()) {
+                _model->uploadData(*_modelTargetId.value(), data);
+            }
         }
-    }
 
-    void onPreDraw() override;
+        void onPreDraw() override;
 
-    void drawEditor() override;
+        void drawEditor() override;
 
-};
-REGISTER_COMPONENT(GraphicComponent, "Graphic Component")
-
+    };
+    REGISTER_COMPONENT(GraphicComponent, "Graphic Component")
+}
 
 #endif //RVTRACKING_GRAPHICCOMPONENT_H
