@@ -43,7 +43,9 @@ namespace neon {
 
         Mesh(const Mesh& other) = delete;
 
-        Mesh(Room* room, IdentifiableWrapper<Material> material);
+        Mesh(Room* room, IdentifiableWrapper<Material> material,
+             bool modifiableVertices = false,
+             bool modifiableIndices = false);
 
         [[nodiscard]] uint64_t getId() const override;
 

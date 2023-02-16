@@ -30,8 +30,8 @@ namespace neon::vulkan {
         VKApplication* _vkApplication;
         IdentifiableWrapper<Material>& _material;
 
-        std::optional<std::unique_ptr<SimpleBuffer>> _vertexBuffer;
-        std::optional<std::unique_ptr<SimpleBuffer>> _indexBuffer;
+        std::optional<std::unique_ptr<Buffer>> _vertexBuffer;
+        std::optional<std::unique_ptr<Buffer>> _indexBuffer;
         uint32_t _indexAmount;
 
     public:

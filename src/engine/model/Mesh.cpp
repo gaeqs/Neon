@@ -9,7 +9,9 @@
 namespace neon {
     uint64_t MESH_ID_GENERATOR = 1;
 
-    Mesh::Mesh(Room* room, IdentifiableWrapper<Material> material) :
+    Mesh::Mesh(Room* room, IdentifiableWrapper<Material> material,
+               bool modifiableVertices,
+               bool modifiableIndices) :
             _id(MESH_ID_GENERATOR++),
             _implementation(room->getApplication(), _material),
             _material(material) {

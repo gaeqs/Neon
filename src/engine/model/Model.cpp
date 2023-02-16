@@ -75,4 +75,12 @@ namespace neon {
     void Model::defineInstanceStruct(std::type_index type, size_t size) {
         _implementation.defineInstanceStruct(type, size);
     }
+
+    size_t Model::getMeshesAmount() const {
+        return _meshes.size();
+    }
+
+    Mesh* Model::getMesh(uint32_t index) {
+        return _meshes.at(index).get();
+    }
 }
