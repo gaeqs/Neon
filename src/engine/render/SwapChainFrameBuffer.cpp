@@ -4,39 +4,41 @@
 
 #include "SwapChainFrameBuffer.h"
 
-SwapChainFrameBuffer::SwapChainFrameBuffer(
-        Room* room, bool depth) :
-        FrameBuffer(),
-        _implementation(room, depth) {
+namespace neon {
+    SwapChainFrameBuffer::SwapChainFrameBuffer(
+            Room* room, bool depth) :
+            FrameBuffer(),
+            _implementation(room, depth) {
 
-}
+    }
 
-bool SwapChainFrameBuffer::requiresRecreation() {
-    return _implementation.requiresRecreation();
-}
+    bool SwapChainFrameBuffer::requiresRecreation() {
+        return _implementation.requiresRecreation();
+    }
 
-void SwapChainFrameBuffer::recreate() {
-    _implementation.recreate();
-}
+    void SwapChainFrameBuffer::recreate() {
+        _implementation.recreate();
+    }
 
-FrameBuffer::Implementation& SwapChainFrameBuffer::getImplementation() {
-    return _implementation;
-}
+    FrameBuffer::Implementation& SwapChainFrameBuffer::getImplementation() {
+        return _implementation;
+    }
 
-const FrameBuffer::Implementation&
-SwapChainFrameBuffer::getImplementation() const {
-    return _implementation;
-}
+    const FrameBuffer::Implementation&
+    SwapChainFrameBuffer::getImplementation() const {
+        return _implementation;
+    }
 
-std::vector<IdentifiableWrapper<Texture>>
-SwapChainFrameBuffer::getTextures() const {
-    return {};
-}
+    std::vector<IdentifiableWrapper<Texture>>
+    SwapChainFrameBuffer::getTextures() const {
+        return {};
+    }
 
-uint32_t SwapChainFrameBuffer::getWidth() const {
-    return _implementation.getWidth();
-}
+    uint32_t SwapChainFrameBuffer::getWidth() const {
+        return _implementation.getWidth();
+    }
 
-uint32_t SwapChainFrameBuffer::getHeight() const {
-    return _implementation.getHeight();
+    uint32_t SwapChainFrameBuffer::getHeight() const {
+        return _implementation.getHeight();
+    }
 }

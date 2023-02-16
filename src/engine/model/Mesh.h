@@ -19,47 +19,50 @@
 
 #endif
 
-class Room;
+namespace neon {
 
-class Mesh : public Identifiable {
+    class Room;
 
-    template<class T> friend
-    class IdentifiableWrapper;
+    class Mesh : public Identifiable {
 
-public:
+        template<class T> friend
+        class IdentifiableWrapper;
+
+    public:
 #ifdef USE_VULKAN
-    using Implementation = VKMesh;
+    using Implementation = vulkan::VKMesh;
 #endif
 
-private:
+    private:
 
-    uint64_t _id;
-    Implementation _implementation;
-    IdentifiableWrapper<Material> _material;
+        uint64_t _id;
+        Implementation _implementation;
+        IdentifiableWrapper<Material> _material;
 
-public:
+    public:
 
-    Mesh(const Mesh& other) = delete;
+        Mesh(const Mesh& other) = delete;
 
-    Mesh(Room* room, IdentifiableWrapper<Material> material);
+        Mesh(Room* room, IdentifiableWrapper<Material> material);
 
-    [[nodiscard]] uint64_t getId() const override;
+        [[nodiscard]] uint64_t getId() const override;
 
-    [[nodiscard]] Implementation& getImplementation();
+        [[nodiscard]] Implementation& getImplementation();
 
-    [[nodiscard]] const Implementation& getImplementation() const;
+        [[nodiscard]] const Implementation& getImplementation() const;
 
-    template<class Vertex>
-    void uploadVertexData(const std::vector<Vertex>& vertices,
-                          const std::vector<uint32_t>& indices) {
-        _implementation.uploadData(vertices, indices);
-    }
+        template<class Vertex>
+        void uploadVertexData(const std::vector<Vertex>& vertices,
+                              const std::vector<uint32_t>& indices) {
+            _implementation.uploadData(vertices, indices);
+        }
 
-    [[nodiscard]] IdentifiableWrapper<Material> getMaterial() const;
+        [[nodiscard]] IdentifiableWrapper<Material> getMaterial() const;
 
-    void setMaterial(const IdentifiableWrapper<Material>& material);
+        void setMaterial(const IdentifiableWrapper<Material>& material);
 
-};
+    };
+}
 
 
 #endif //NEON_MESH_H

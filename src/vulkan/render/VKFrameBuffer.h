@@ -10,38 +10,39 @@
 
 #include <vector>
 
-class VKRenderPass;
+namespace neon::vulkan {
+    class VKRenderPass;
 
-class VKFrameBuffer {
+    class VKFrameBuffer {
 
-public:
+    public:
 
-    VKFrameBuffer(const VKFrameBuffer& other) = delete;
+        VKFrameBuffer(const VKFrameBuffer& other) = delete;
 
-    VKFrameBuffer() = default;
+        VKFrameBuffer() = default;
 
-    virtual ~VKFrameBuffer() = default;
+        virtual ~VKFrameBuffer() = default;
 
-    [[nodiscard]] virtual bool hasDepth() const = 0;
+        [[nodiscard]] virtual bool hasDepth() const = 0;
 
-    [[nodiscard]] virtual uint32_t getColorAttachmentAmount() const = 0;
+        [[nodiscard]] virtual uint32_t getColorAttachmentAmount() const = 0;
 
-    [[nodiscard]] virtual VkFramebuffer getRaw() const = 0;
+        [[nodiscard]] virtual VkFramebuffer getRaw() const = 0;
 
-    [[nodiscard]] virtual std::vector<VkFormat> getColorFormats() const = 0;
+        [[nodiscard]] virtual std::vector<VkFormat> getColorFormats() const = 0;
 
-    [[nodiscard]] virtual VkFormat getDepthFormat() const = 0;
+        [[nodiscard]] virtual VkFormat getDepthFormat() const = 0;
 
-    [[nodiscard]] virtual const VKRenderPass& getRenderPass() const = 0;
+        [[nodiscard]] virtual const VKRenderPass& getRenderPass() const = 0;
 
-    [[nodiscard]] virtual VKRenderPass& getRenderPass() = 0;
+        [[nodiscard]] virtual VKRenderPass& getRenderPass() = 0;
 
-    [[nodiscard]] virtual uint32_t getWidth() const = 0;
+        [[nodiscard]] virtual uint32_t getWidth() const = 0;
 
-    [[nodiscard]] virtual uint32_t getHeight() const = 0;
+        [[nodiscard]] virtual uint32_t getHeight() const = 0;
 
-    [[nodiscard]] virtual bool renderImGui() = 0;
-};
-
+        [[nodiscard]] virtual bool renderImGui() = 0;
+    };
+}
 
 #endif //NEON_VKFRAMEBUFFER_H

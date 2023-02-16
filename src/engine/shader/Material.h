@@ -28,62 +28,66 @@
 
 #endif
 
-class ShaderProgram;
+namespace neon {
+    class ShaderProgram;
 
-class ShaderUniformDescriptor;
+    class ShaderUniformDescriptor;
 
-class Room;
+    class Room;
 
-class Material : public Identifiable {
+    class Material : public Identifiable {
 
-    template<class T> friend
-    class IdentifiableWrapper;
+        template<class T> friend
+        class IdentifiableWrapper;
 
-public:
+    public:
 #ifdef USE_VULKAN
-    using Implementation = VKMaterial;
+    using Implementation = vulkan::VKMaterial;
 #endif
-private:
+    private:
 
-    uint64_t _id;
-    IdentifiableWrapper<ShaderProgram> _shader;
+        uint64_t _id;
+        IdentifiableWrapper<ShaderProgram> _shader;
 
-    std::shared_ptr<ShaderUniformDescriptor> _uniformDescriptor;
-    ShaderUniformBuffer _uniformBuffer;
+        std::shared_ptr<ShaderUniformDescriptor> _uniformDescriptor;
+        ShaderUniformBuffer _uniformBuffer;
 
-    Implementation _implementation;
+        Implementation _implementation;
 
-public:
+    public:
 
-    Material(const Material& other) = delete;
+        Material(const Material& other) = delete;
 
-    Material(Room* room, const MaterialCreateInfo& createInfo);
+        Material(Room* room, const MaterialCreateInfo& createInfo);
 
-    [[nodiscard]] uint64_t getId() const override;
+        [[nodiscard]] uint64_t getId() const override;
 
-    [[nodiscard]] const IdentifiableWrapper<ShaderProgram>& getShader() const;
+        [[nodiscard]] const IdentifiableWrapper<ShaderProgram>&
+        getShader() const;
 
-    [[nodiscard]] const ShaderUniformBuffer& getUniformBuffer() const;
+        [[nodiscard]] const ShaderUniformBuffer& getUniformBuffer() const;
 
-    [[nodiscard]] ShaderUniformBuffer& getUniformBuffer();
+        [[nodiscard]] ShaderUniformBuffer& getUniformBuffer();
 
-    [[nodiscard]] const std::shared_ptr<ShaderUniformDescriptor>&
-    getUniformDescriptor() const;
+        [[nodiscard]] const std::shared_ptr<ShaderUniformDescriptor>&
+        getUniformDescriptor() const;
 
-    [[nodiscard]] const Implementation& getImplementation() const;
+        [[nodiscard]] const Implementation& getImplementation() const;
 
-    Implementation& getImplementation();
+        Implementation& getImplementation();
 
-    void pushConstant(const std::string& name, const void* data, uint32_t size);
+        void
+        pushConstant(const std::string& name, const void* data, uint32_t size);
 
-    template<class T>
-    void pushConstant(const std::string key, const T& value) {
-        pushConstant(key, &value, sizeof(T));
-    }
+        template<class T>
+        void pushConstant(const std::string key, const T& value) {
+            pushConstant(key, &value, sizeof(T));
+        }
 
-    void setTexture(const std::string& name,
-                    IdentifiableWrapper<Texture> texture);
-};
+        void setTexture(const std::string& name,
+                        IdentifiableWrapper<Texture> texture);
+    };
+}
 
 
 #endif //RVTRACKING_MATERIAL_H

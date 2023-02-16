@@ -8,34 +8,36 @@
 #include <cstdint>
 #include <vector>
 
-enum class InputRate {
-    VERTEX,
-    INSTANCE
-};
+namespace neon {
+    enum class InputRate {
+        VERTEX,
+        INSTANCE
+    };
 
-struct InputAttribute {
-    uint32_t sizeInFloats;
-    uint32_t offsetInBytes;
+    struct InputAttribute {
+        uint32_t sizeInFloats;
+        uint32_t offsetInBytes;
 
-    InputAttribute(uint32_t sizeInFloats, uint32_t offsetInBytes)
-            : sizeInFloats(sizeInFloats), offsetInBytes(offsetInBytes) {}
-};
+        InputAttribute(uint32_t sizeInFloats, uint32_t offsetInBytes)
+                : sizeInFloats(sizeInFloats), offsetInBytes(offsetInBytes) {}
+    };
 
-struct InputDescription {
-    uint32_t stride;
-    InputRate rate;
-    std::vector<InputAttribute> attributes;
+    struct InputDescription {
+        uint32_t stride;
+        InputRate rate;
+        std::vector<InputAttribute> attributes;
 
-    InputDescription(uint32_t stride, InputRate rate)
-            : stride(stride),
-              rate(rate),
-              attributes() {
-    }
+        InputDescription(uint32_t stride, InputRate rate)
+                : stride(stride),
+                  rate(rate),
+                  attributes() {
+        }
 
-    void addAttribute(uint32_t sizeInFloats, uint32_t offsetInBytes) {
-        attributes.emplace_back(sizeInFloats, offsetInBytes);
-    }
-};
+        void addAttribute(uint32_t sizeInFloats, uint32_t offsetInBytes) {
+            attributes.emplace_back(sizeInFloats, offsetInBytes);
+        }
+    };
+}
 
 
 #endif //NEON_INPUTDESCRIPTION_H

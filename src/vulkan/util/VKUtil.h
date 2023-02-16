@@ -13,12 +13,15 @@
 
 #include <engine/render/TextureCreateInfo.h>
 
-class VKApplication;
+namespace neon {
+    struct InputDescription;
+}
 
-struct InputDescription;
+namespace neon::vulkan {
+    class VKApplication;
+}
 
-namespace vulkan_util {
-
+namespace neon::vulkan::vulkan_util {
     uint32_t findMemoryType(VkPhysicalDevice device, uint32_t typeFilter,
                             VkMemoryPropertyFlags flags);
 

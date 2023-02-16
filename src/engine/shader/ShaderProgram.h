@@ -19,50 +19,44 @@
 
 #endif
 
-class Room;
+namespace neon {
+    class Room;
 
-class ShaderProgram : public Identifiable {
+    class ShaderProgram : public Identifiable {
 
-    template<class T> friend
-    class IdentifiableWrapper;
+        template<class T> friend
+        class IdentifiableWrapper;
 
-public:
+    public:
 #ifdef USE_VULKAN
-    using Implementation = VKShaderProgram;
+    using Implementation = vulkan::VKShaderProgram;
 #endif
 
-private:
-    uint64_t _id;
-    bool _compiled;
-    std::unordered_map<ShaderType, cmrc::file> _rawShaders;
-    Implementation _implementation;
+    private:
+        uint64_t _id;
+        bool _compiled;
+        std::unordered_map<ShaderType, cmrc::file> _rawShaders;
+        Implementation _implementation;
 
-public:
+    public:
 
 
-    ShaderProgram(const ShaderProgram& other) = delete;
+        ShaderProgram(const ShaderProgram& other) = delete;
 
-    explicit ShaderProgram(Room* room);
+        explicit ShaderProgram(Room* room);
 
-    [[nodiscard]] uint64_t getId() const override;
+        [[nodiscard]] uint64_t getId() const override;
 
-    [[nodiscard]] const Implementation& getImplementation() const;
+        [[nodiscard]] const Implementation& getImplementation() const;
 
-    Implementation& getImplementation();
+        Implementation& getImplementation();
 
-    bool addShader(ShaderType type, cmrc::file resource);
+        bool addShader(ShaderType type, cmrc::file resource);
 
-    /*bool defineBinding(uint32_t binding, uint32_t size, bool instanceMode);
+        std::optional<std::string> compile();
 
-    bool defineAttribute(
-            uint32_t location,
-            uint32_t binding,
-            uint32_t sizeInFloats,
-            uint32_t bindingOffset);*/
-
-    std::optional<std::string> compile();
-
-};
+    };
+}
 
 
 #endif //NEON_SHADERPROGRAM_H

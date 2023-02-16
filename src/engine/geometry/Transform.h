@@ -11,58 +11,61 @@
 
 #include <engine/structure/IdentifiableWrapper.h>
 
-class GameObject;
+namespace neon {
 
-class Transform {
+    class GameObject;
 
-    uint64_t _id;
+    class Transform {
 
-    glm::vec3 _position;
-    glm::quat _rotation;
-    glm::vec3 _scale;
+        uint64_t _id;
 
-    IdentifiableWrapper<GameObject> _gameObject;
-    uint64_t _parentIdOnLastRefresh;
+        glm::vec3 _position;
+        glm::quat _rotation;
+        glm::vec3 _scale;
 
-    bool _dirty;
-    glm::mat4 _localModel;
-    glm::mat4 _localNormal;
-    glm::mat4 _model;
-    glm::mat4 _normal;
+        IdentifiableWrapper<GameObject> _gameObject;
+        uint64_t _parentIdOnLastRefresh;
 
-    void recalculateIfRequired();
+        bool _dirty;
+        glm::mat4 _localModel;
+        glm::mat4 _localNormal;
+        glm::mat4 _model;
+        glm::mat4 _normal;
 
-public:
+        void recalculateIfRequired();
 
-    Transform(const Transform& other) = delete;
+    public:
 
-    explicit Transform(IdentifiableWrapper<GameObject> object);
+        Transform(const Transform& other) = delete;
 
-    [[nodiscard]] IdentifiableWrapper<GameObject> getGameObject() const;
+        explicit Transform(IdentifiableWrapper<GameObject> object);
 
-    [[nodiscard]] const glm::vec3& getPosition() const;
+        [[nodiscard]] IdentifiableWrapper<GameObject> getGameObject() const;
 
-    [[nodiscard]] const glm::quat& getRotation() const;
+        [[nodiscard]] const glm::vec3& getPosition() const;
 
-    [[nodiscard]] const glm::vec3& getScale() const;
+        [[nodiscard]] const glm::quat& getRotation() const;
 
-    void setPosition(const glm::vec3& position);
+        [[nodiscard]] const glm::vec3& getScale() const;
 
-    void setRotation(const glm::quat& rotation);
+        void setPosition(const glm::vec3& position);
 
-    void setScale(const glm::vec3& scale);
+        void setRotation(const glm::quat& rotation);
 
-    const glm::vec3& move(const glm::vec3& offset);
+        void setScale(const glm::vec3& scale);
 
-    const glm::quat& lookAt(const glm::vec3& direction);
+        const glm::vec3& move(const glm::vec3& offset);
 
-    const glm::quat& rotate(const glm::vec3& direction, float angle);
+        const glm::quat& lookAt(const glm::vec3& direction);
 
-    const glm::mat4& getModel();
+        const glm::quat& rotate(const glm::vec3& direction, float angle);
 
-    const glm::mat4& getNormal();
+        const glm::mat4& getModel();
 
-};
+        const glm::mat4& getNormal();
+
+    };
+}
 
 
 #endif //RVTRACKING_TRANSFORM_H

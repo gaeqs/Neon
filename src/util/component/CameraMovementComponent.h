@@ -6,28 +6,30 @@
 #define VRTRACKING_CAMERAMOVEMENTCOMPONENT_H
 
 #include <engine/structure/Component.h>
-class CameraMovementComponent : public Component {
 
-    bool _w, _a, _s, _d, _shift, _space;
-    float _speed;
+namespace neon {
+    class CameraMovementComponent : public Component {
 
-    glm::vec2 _eulerAngles;
+        bool _w, _a, _s, _d, _shift, _space;
+        float _speed;
 
-public:
+        glm::vec2 _eulerAngles;
 
-    CameraMovementComponent();
+    public:
 
-    void onKey(const KeyboardEvent& event) override;
+        CameraMovementComponent();
 
-    void onCursorMove(const CursorMoveEvent& event) override;
+        void onKey(const KeyboardEvent &event) override;
 
-    void onUpdate(float deltaTime) override;
+        void onCursorMove(const CursorMoveEvent &event) override;
 
-    [[nodiscard]] float getSpeed() const;
+        void onUpdate(float deltaTime) override;
 
-    void setSpeed(float speed);
-};
-REGISTER_COMPONENT(CameraMovementComponent, "Camera Move")
+        [[nodiscard]] float getSpeed() const;
 
+        void setSpeed(float speed);
+    };
+    REGISTER_COMPONENT(CameraMovementComponent, "Camera Move")
+}
 
 #endif //VRTRACKING_CAMERAMOVEMENTCOMPONENT_H

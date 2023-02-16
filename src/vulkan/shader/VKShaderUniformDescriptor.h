@@ -5,38 +5,40 @@
 #ifndef NEON_VKSHADERUNIFORMDESCRIPTOR_H
 #define NEON_VKSHADERUNIFORMDESCRIPTOR_H
 
-
 #include <vulkan/VKApplication.h>
 #include <engine/Application.h>
 #include <engine/structure/Identifiable.h>
 #include <engine/shader/ShaderUniformBinding.h>
 
-class VKShaderUniformDescriptor {
+namespace neon::vulkan {
+    class VKShaderUniformDescriptor {
 
-    static VkDescriptorType getType(UniformBindingType type);
+        static VkDescriptorType getType(UniformBindingType type);
 
-    VKApplication* _vkApplication;
-    std::vector<ShaderUniformBinding> _bindings;
-    VkDescriptorSetLayout _descriptorSetLayout;
+        VKApplication* _vkApplication;
+        std::vector<ShaderUniformBinding> _bindings;
+        VkDescriptorSetLayout _descriptorSetLayout;
 
 
-public:
+    public:
 
-    VKShaderUniformDescriptor(const VKShaderUniformDescriptor& other) = delete;
+        VKShaderUniformDescriptor(
+                const VKShaderUniformDescriptor& other) = delete;
 
-    VKShaderUniformDescriptor(
-            Application* application,
-            const std::vector<ShaderUniformBinding>& bindings);
+        VKShaderUniformDescriptor(
+                Application* application,
+                const std::vector<ShaderUniformBinding>& bindings);
 
-    ~VKShaderUniformDescriptor();
+        ~VKShaderUniformDescriptor();
 
-    [[nodiscard]] VKApplication* getVkApplication() const;
+        [[nodiscard]] VKApplication* getVkApplication() const;
 
-    [[nodiscard]] const std::vector<ShaderUniformBinding>& getBindings() const;
+        [[nodiscard]] const std::vector<ShaderUniformBinding>&
+        getBindings() const;
 
-    [[nodiscard]] VkDescriptorSetLayout getDescriptorSetLayout() const;
+        [[nodiscard]] VkDescriptorSetLayout getDescriptorSetLayout() const;
 
-};
-
+    };
+}
 
 #endif //NEON_VKSHADERUNIFORMDESCRIPTOR_H

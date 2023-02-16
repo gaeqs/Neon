@@ -17,69 +17,71 @@
 
 #endif
 
-class Room;
+namespace neon {
 
-class Model : public Identifiable {
+    class Room;
 
-    template<class T> friend
-    class IdentifiableWrapper;
+    class Model : public Identifiable {
 
-public:
+        template<class T> friend
+        class IdentifiableWrapper;
+
+    public:
 #ifdef USE_VULKAN
-    using Implementation = VKModel;
+    using Implementation = vulkan::VKModel;
 #endif
 
-private:
+    private:
 
-    uint64_t _id;
-    std::string _name;
+        uint64_t _id;
+        std::string _name;
 
-    Implementation _implementation;
+        Implementation _implementation;
 
-    std::vector<std::unique_ptr<Mesh>> _meshes;
+        std::vector<std::unique_ptr<Mesh>> _meshes;
 
-    static std::vector<Mesh::Implementation*> getMeshImplementations(
-            const std::vector<std::unique_ptr<Mesh>>& meshes
-    );
+        static std::vector<Mesh::Implementation*> getMeshImplementations(
+                const std::vector<std::unique_ptr<Mesh>>& meshes
+        );
 
-public:
+    public:
 
-    Model(const Model& other) = delete;
+        Model(const Model& other) = delete;
 
-    Model(Room* room, std::vector<std::unique_ptr<Mesh>>& meshes);
+        Model(Room* room, std::vector<std::unique_ptr<Mesh>>& meshes);
 
-    [[nodiscard]] uint64_t getId() const override;
+        [[nodiscard]] uint64_t getId() const override;
 
-    [[nodiscard]] const std::string& getName() const;
+        [[nodiscard]] const std::string& getName() const;
 
-    void setName(const std::string& name);
+        void setName(const std::string& name);
 
-    [[nodiscard]] Model::Implementation& getImplementation();
+        [[nodiscard]] Model::Implementation& getImplementation();
 
-    [[nodiscard]] const Model::Implementation& getImplementation() const;
+        [[nodiscard]] const Model::Implementation& getImplementation() const;
 
-    [[nodiscard]] const std::type_index& getInstancingStructType() const;
+        [[nodiscard]] const std::type_index& getInstancingStructType() const;
 
-    template<class InstanceData>
-    void defineInstanceStruct() {
-        _implementation.defineInstanceStruct<InstanceData>();
-    }
+        template<class InstanceData>
+        void defineInstanceStruct() {
+            _implementation.defineInstanceStruct<InstanceData>();
+        }
 
-    void defineInstanceStruct(std::type_index type, size_t size);
+        void defineInstanceStruct(std::type_index type, size_t size);
 
-    [[nodiscard]] Result<uint32_t*, std::string> createInstance();
+        [[nodiscard]] Result<uint32_t*, std::string> createInstance();
 
-    bool freeInstance(uint32_t id);
+        bool freeInstance(uint32_t id);
 
-    template<class InstanceData>
-    void uploadData(uint32_t id, const InstanceData& data) {
-        _implementation.uploadData(id, data);
-    }
+        template<class InstanceData>
+        void uploadData(uint32_t id, const InstanceData& data) {
+            _implementation.uploadData(id, data);
+        }
 
-    void uploadDataRaw(uint32_t id, const void* raw);
+        void uploadDataRaw(uint32_t id, const void* raw);
 
-    void flush();
-};
-
+        void flush();
+    };
+}
 
 #endif //NEON_MODEL_H

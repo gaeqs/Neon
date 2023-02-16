@@ -9,26 +9,27 @@
 #include <engine/structure/GameObject.h>
 #include <engine/structure/IdentifiableWrapper.h>
 
-class GameObjectExplorerComponent : public Component {
+namespace neon {
+    class GameObjectExplorerComponent : public Component {
 
-    IdentifiableWrapper<GameObject> _target;
+        IdentifiableWrapper<GameObject> _target;
 
-    void drawGeneralSection() const;
+        void drawGeneralSection() const;
 
-    void drawTransformSection() const;
+        void drawTransformSection() const;
 
-    void drawComponentsSection() const;
+        void drawComponentsSection() const;
 
-public:
+    public:
 
-    [[nodiscard]] const IdentifiableWrapper<GameObject>& getTarget() const;
+        [[nodiscard]] const IdentifiableWrapper<GameObject>& getTarget() const;
 
-    void setTarget(const IdentifiableWrapper<GameObject>& target);
+        void setTarget(const IdentifiableWrapper<GameObject>& target);
 
-    void onPreDraw() override;
+        void onPreDraw() override;
 
-};
-REGISTER_COMPONENT(GameObjectExplorerComponent, "GameObject Explorer")
-
+    };
+    REGISTER_COMPONENT(GameObjectExplorerComponent, "GameObject Explorer")
+}
 
 #endif //NEON_GAMEOBJECTEXPLORERCOMPONENT_H

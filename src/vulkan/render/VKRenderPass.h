@@ -10,32 +10,36 @@
 
 #include <engine/render/FrameBuffer.h>
 
-class Application;
+namespace neon {
+    class Application;
+}
 
-class VKApplication;
+namespace neon::vulkan {
 
-class VKRenderPass {
+    class VKApplication;
 
-    VKApplication* _vkApplication;
-    VkRenderPass _raw;
+    class VKRenderPass {
 
-public:
+        VKApplication* _vkApplication;
+        VkRenderPass _raw;
 
-    VKRenderPass(const VKRenderPass& other) = delete;
+    public:
 
-    VKRenderPass(VKRenderPass&& other) noexcept;
+        VKRenderPass(const VKRenderPass& other) = delete;
 
-    VKRenderPass(Application* application,
-                 const std::vector<VkFormat>& colorFormats,
-                 bool depth,
-                 bool present,
-                 VkFormat depthFormat);
+        VKRenderPass(VKRenderPass&& other) noexcept;
 
-    ~VKRenderPass();
+        VKRenderPass(Application* application,
+                     const std::vector<VkFormat>& colorFormats,
+                     bool depth,
+                     bool present,
+                     VkFormat depthFormat);
 
-    [[nodiscard]] VkRenderPass getRaw() const;
+        ~VKRenderPass();
 
-};
+        [[nodiscard]] VkRenderPass getRaw() const;
 
+    };
+}
 
 #endif //NEON_VKRENDERPASS_H

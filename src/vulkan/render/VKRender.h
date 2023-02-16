@@ -9,30 +9,35 @@
 
 #include <util/ClusteredLinkedCollection.h>
 
-class Application;
+namespace neon {
+    class Application;
 
-class VKApplication;
+    class Room;
+}
 
-class Room;
+namespace neon::vulkan {
 
-class VKRender {
+    class VKApplication;
 
-    VKApplication* _vkApplication;
+    class VKRender {
 
-public:
+        VKApplication* _vkApplication;
 
-    VKRender(const VKRender& other) = delete;
+    public:
 
-    explicit VKRender(Application* application);
+        VKRender(const VKRender& other) = delete;
 
-    void render(
-            Room* room,
-            const std::vector<RenderPassStrategy>& strategies)
-            const;
+        explicit VKRender(Application* application);
 
-    void setupFrameBufferRecreation();
+        void render(
+                Room* room,
+                const std::vector<RenderPassStrategy>& strategies)
+        const;
 
-};
+        void setupFrameBufferRecreation();
+
+    };
+}
 
 
 #endif //NEON_VKRENDER_H

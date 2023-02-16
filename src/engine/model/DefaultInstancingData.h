@@ -8,21 +8,23 @@
 #include <glm/glm.hpp>
 #include <engine/model/InputDescription.h>
 
-struct DefaultInstancingData {
-    glm::mat4 model;
-    glm::mat4 normal;
+namespace neon {
+    struct DefaultInstancingData {
+        glm::mat4 model;
+        glm::mat4 normal;
 
-    static InputDescription getInstancingDescription() {
-        InputDescription description(
-                sizeof(DefaultInstancingData),
-                InputRate::INSTANCE
-        );
-        description.addAttribute(16, 0);
-        description.addAttribute(16, 64);
+        static InputDescription getInstancingDescription() {
+            InputDescription description(
+                    sizeof(DefaultInstancingData),
+                    InputRate::INSTANCE
+            );
+            description.addAttribute(16, 0);
+            description.addAttribute(16, 64);
 
-        return description;
-    }
+            return description;
+        }
 
-};
+    };
+}
 
 #endif //NEON_DEFAULTINSTANCINGDATA_H

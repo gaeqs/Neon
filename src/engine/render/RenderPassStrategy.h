@@ -8,23 +8,25 @@
 #include <functional>
 #include <memory>
 
-class Room;
+namespace neon {
+    class Room;
 
-class FrameBuffer;
+    class FrameBuffer;
 
-struct RenderPassStrategy {
+    struct RenderPassStrategy {
 
-    std::shared_ptr<FrameBuffer> frameBuffer;
-    std::function<void(Room*, std::shared_ptr<FrameBuffer>)> strategy;
+        std::shared_ptr<FrameBuffer> frameBuffer;
+        std::function<void(Room*, std::shared_ptr<FrameBuffer>)> strategy;
 
-    RenderPassStrategy(
-            const std::shared_ptr<FrameBuffer>& _frameBuffer,
-            const std::function<void(Room*, std::shared_ptr<FrameBuffer>)>&
-            _strategy);
+        RenderPassStrategy(
+                const std::shared_ptr<FrameBuffer>& _frameBuffer,
+                const std::function<void(Room*, std::shared_ptr<FrameBuffer>)>&
+                _strategy);
 
-    static void defaultStrategy(
-            Room* room,
-            const std::shared_ptr<FrameBuffer>& target);
-};
+        static void defaultStrategy(
+                Room* room,
+                const std::shared_ptr<FrameBuffer>& target);
+    };
+}
 
 #endif //NEON_RENDERPASSSTRATEGY_H

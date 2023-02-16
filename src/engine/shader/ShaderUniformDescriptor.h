@@ -17,53 +17,57 @@
 
 #endif
 
-class Application;
+namespace neon {
+    class Application;
 
-class ShaderUniformDescriptor : public Identifiable {
+    class ShaderUniformDescriptor : public Identifiable {
 
-    template<class T> friend
-    class IdentifiableWrapper;
+        template<class T> friend
+        class IdentifiableWrapper;
 
-public:
+    public:
 #ifdef USE_VULKAN
-    using Implementation = VKShaderUniformDescriptor;
+    using Implementation = vulkan::VKShaderUniformDescriptor;
 #endif
 
-private:
+    private:
 
-    uint64_t _id;
-    Implementation _implementation;
+        uint64_t _id;
+        Implementation _implementation;
 
-public:
+    public:
 
-    ShaderUniformDescriptor(const ShaderUniformDescriptor& other) = delete;
+        ShaderUniformDescriptor(const ShaderUniformDescriptor& other) = delete;
 
-    ShaderUniformDescriptor(Application* application,
-                            const std::vector<ShaderUniformBinding>& bindings);
+        ShaderUniformDescriptor(
+                Application* application,
+                const std::vector<ShaderUniformBinding>& bindings);
 
-    [[nodiscard]] uint64_t getId() const override;
+        [[nodiscard]] uint64_t getId() const override;
 
-    [[nodiscard]] const Implementation& getImplementation() const;
+        [[nodiscard]] const Implementation& getImplementation() const;
 
-    [[nodiscard]] Implementation& getImplementation();
+        [[nodiscard]] Implementation& getImplementation();
 
-    [[nodiscard]] const std::vector<ShaderUniformBinding>& getBindings() const;
+        [[nodiscard]] const std::vector<ShaderUniformBinding>&
+        getBindings() const;
 
 
-    // region Static helper constructors
+        // region Static helper constructors
 
-    /**
-     * Creates a new ShaderUniformDescriptor
-     * that contains the given amount of images.
-     * @param application the application.
-     * @param amount the amount of images.
-     * @return the new ShaderUniformDescriptor.
-     */
-    static std::unique_ptr<ShaderUniformDescriptor>
-    ofImages(Application* application, uint32_t amount);
+        /**
+         * Creates a new ShaderUniformDescriptor
+         * that contains the given amount of images.
+         * @param application the application.
+         * @param amount the amount of images.
+         * @return the new ShaderUniformDescriptor.
+         */
+        static std::unique_ptr<ShaderUniformDescriptor>
+        ofImages(Application* application, uint32_t amount);
 
-    // endregion
+        // endregion
 
-};
+    };
+}
 
 #endif //NEON_SHADERUNIFORMDESCRIPTOR_H

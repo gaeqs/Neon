@@ -13,50 +13,52 @@
 
 #endif
 
-class Application;
+namespace neon {
+    class Application;
 
-class ShaderUniformDescriptor;
+    class ShaderUniformDescriptor;
 
-class ShaderUniformBuffer : public Identifiable {
+    class ShaderUniformBuffer : public Identifiable {
 
-    template<class T> friend
-    class IdentifiableWrapper;
+        template<class T> friend
+        class IdentifiableWrapper;
 
-public:
+    public:
 #ifdef USE_VULKAN
-    using Implementation = VKShaderUniformBuffer;
+    using Implementation = vulkan::VKShaderUniformBuffer;
 #endif
 
-private:
+    private:
 
-    uint64_t _id;
-    Implementation _implementation;
+        uint64_t _id;
+        Implementation _implementation;
 
-public:
+    public:
 
-    explicit ShaderUniformBuffer(
-            const std::shared_ptr<ShaderUniformDescriptor>& descriptor);
+        explicit ShaderUniformBuffer(
+                const std::shared_ptr<ShaderUniformDescriptor>& descriptor);
 
-    [[nodiscard]] const Implementation& getImplementation() const;
+        [[nodiscard]] const Implementation& getImplementation() const;
 
-    [[nodiscard]] Implementation& getImplementation();
+        [[nodiscard]] Implementation& getImplementation();
 
-    [[nodiscard]] uint64_t getId() const override;
+        [[nodiscard]] uint64_t getId() const override;
 
-    void setBindingPoint(uint32_t point);
+        void setBindingPoint(uint32_t point);
 
-    void uploadData(uint32_t index, const void* data, size_t size);
+        void uploadData(uint32_t index, const void* data, size_t size);
 
-    void setTexture(uint32_t index, IdentifiableWrapper<Texture> texture);
+        void setTexture(uint32_t index, IdentifiableWrapper<Texture> texture);
 
-    template<class T>
-    void uploadData(uint32_t index, const T& data) {
-        uploadData(index, &data, sizeof(T));
-    }
+        template<class T>
+        void uploadData(uint32_t index, const T& data) {
+            uploadData(index, &data, sizeof(T));
+        }
 
-    void prepareForFrame();
+        void prepareForFrame();
 
-};
+    };
+}
 
 
 #endif //NEON_SHADERUNIFORMBUFFER_H

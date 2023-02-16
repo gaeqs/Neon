@@ -7,9 +7,11 @@
 
 #include <cstdint>
 
-class Identifiable {
-public:
-    [[nodiscard]] virtual uint64_t getId() const = 0;
-};
+namespace neon {
+    class Identifiable {
+    public:
+        [[nodiscard]] virtual uint64_t getId() const = 0;
+    };
+}
 
 #endif //RVTRACKING_IDENTIFIABLE_H

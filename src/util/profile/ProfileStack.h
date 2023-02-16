@@ -12,42 +12,43 @@
 #include <memory>
 #include <string>
 
-class ProfileStack {
+namespace neon {
+    class ProfileStack {
 
-    using ProfileDuration = std::chrono::duration<uint64_t, std::nano>;
+        using ProfileDuration = std::chrono::duration<uint64_t, std::nano>;
 
-    std::string _name;
-    ProfileStack* _parent;
-    std::deque<ProfileDuration> _durations;
-    std::unordered_map<std::string, std::shared_ptr<ProfileStack>> _children;
+        std::string _name;
+        ProfileStack* _parent;
+        std::deque<ProfileDuration> _durations;
+        std::unordered_map<std::string, std::shared_ptr<ProfileStack>> _children;
 
-public:
+    public:
 
-    constexpr static int MAX_DURATIONS = 10;
+        constexpr static int MAX_DURATIONS = 10;
 
-    ProfileStack(std::string name, ProfileStack* parent);
+        ProfileStack(std::string name, ProfileStack* parent);
 
-    void registerDuration(ProfileDuration duration);
+        void registerDuration(ProfileDuration duration);
 
-    [[nodiscard]] const std::string& getName() const;
+        [[nodiscard]] const std::string& getName() const;
 
-    [[nodiscard]] ProfileStack* getParent() const;
+        [[nodiscard]] ProfileStack* getParent() const;
 
-    [[nodiscard]]
-    const std::unordered_map<std::string, std::shared_ptr<ProfileStack>>&
-    getChildren() const;
+        [[nodiscard]]
+        const std::unordered_map<std::string, std::shared_ptr<ProfileStack>>&
+        getChildren() const;
 
-    [[nodiscard]] std::optional<std::shared_ptr<ProfileStack>>
-    getChild(const std::string& name) const;
+        [[nodiscard]] std::optional<std::shared_ptr<ProfileStack>>
+        getChild(const std::string& name) const;
 
-    [[nodiscard]] std::shared_ptr<ProfileStack>
-    getOrCreateChild(const std::string& name);
+        [[nodiscard]] std::shared_ptr<ProfileStack>
+        getOrCreateChild(const std::string& name);
 
-    [[nodiscard]] const std::deque<ProfileDuration>& getDurations() const;
+        [[nodiscard]] const std::deque<ProfileDuration>& getDurations() const;
 
-    [[nodiscard]] ProfileDuration getAverageDuration() const;
+        [[nodiscard]] ProfileDuration getAverageDuration() const;
 
-};
-
+    };
+}
 
 #endif //NEON_PROFILESTACK_H

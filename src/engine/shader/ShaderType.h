@@ -5,9 +5,11 @@
 #ifndef NEON_SHADERTYPE_H
 #define NEON_SHADERTYPE_H
 
-enum class ShaderType {
-    VERTEX,
-    FRAGMENT
-};
+namespace neon {
+    enum class ShaderType {
+        VERTEX,
+        FRAGMENT
+    };
+}
 
 #endif //NEON_SHADERTYPE_H

@@ -12,79 +12,82 @@
 #include <engine/structure/IdentifiableWrapper.h>
 #include <util/ClusteredLinkedCollection.h>
 
-class Room;
+namespace neon {
 
-template<class T> requires std::is_base_of_v<Identifiable, T>
-class IdentifiableCollection {
+    class Room;
 
-    Room* _room;
-    ClusteredLinkedCollection<T> _cluster;
-    std::unordered_map<uint64_t, IdentifiableWrapper<T>> _idMap;
-    uint64_t _modificationId;
+    template<class T> requires std::is_base_of_v<Identifiable, T>
+    class IdentifiableCollection {
 
-public:
+        Room* _room;
+        ClusteredLinkedCollection<T> _cluster;
+        std::unordered_map<uint64_t, IdentifiableWrapper<T>> _idMap;
+        uint64_t _modificationId;
 
-    IdentifiableCollection(const IdentifiableCollection& other) = delete;
+    public:
 
-    explicit IdentifiableCollection(Room* room) :
-            _room(room),
-            _modificationId(0) {
-    }
+        IdentifiableCollection(const IdentifiableCollection& other) = delete;
 
-    [[nodiscard]] uint64_t getModificationId() const {
-        return _modificationId;
-    }
-
-    [[nodiscard]] size_t getSize() const {
-        return _idMap.size();
-    }
-
-    template<class... Args>
-    IdentifiableWrapper<T> create(Args&& ... values) {
-        IdentifiableWrapper<T> ptr = _cluster.emplace(_room, values...);
-        _idMap[ptr->getId()] = ptr;
-        ++_modificationId;
-        return ptr;
-    }
-
-    [[nodiscard]] IdentifiableWrapper<T> get(uint64_t id) const {
-        auto it = _idMap.find(id);
-        if (it != _idMap.end()) {
-            return it->second;
+        explicit IdentifiableCollection(Room* room) :
+                _room(room),
+                _modificationId(0) {
         }
-        return nullptr;
-    }
 
-    bool destroy(IdentifiableWrapper<T>& value) {
-        ++_modificationId;
-        _idMap.erase(value->getId());
-        return _cluster.remove(value.raw());
-    }
+        [[nodiscard]] uint64_t getModificationId() const {
+            return _modificationId;
+        }
 
-    void forEach(std::function<void(T*)> function) {
-        _cluster.forEach(function);
-    }
+        [[nodiscard]] size_t getSize() const {
+            return _idMap.size();
+        }
 
-    void forEach(std::function<void(const T*)> function) const {
-        _cluster.forEach(function);
-    }
+        template<class... Args>
+        IdentifiableWrapper<T> create(Args&& ... values) {
+            IdentifiableWrapper<T> ptr = _cluster.emplace(_room, values...);
+            _idMap[ptr->getId()] = ptr;
+            ++_modificationId;
+            return ptr;
+        }
 
-    ClusteredLinkedCollection<T>::ConstIterator begin () const {
-        return _cluster.begin();
-    }
+        [[nodiscard]] IdentifiableWrapper<T> get(uint64_t id) const {
+            auto it = _idMap.find(id);
+            if (it != _idMap.end()) {
+                return it->second;
+            }
+            return nullptr;
+        }
 
-    ClusteredLinkedCollection<T>::Iterator begin () {
-        return _cluster.begin();
-    }
+        bool destroy(IdentifiableWrapper<T>& value) {
+            ++_modificationId;
+            _idMap.erase(value->getId());
+            return _cluster.remove(value.raw());
+        }
 
-    ClusteredLinkedCollection<T>::ConstIterator end () const {
-        return _cluster.end();
-    }
+        void forEach(std::function<void(T*)> function) {
+            _cluster.forEach(function);
+        }
 
-    ClusteredLinkedCollection<T>::Iterator end () {
-        return _cluster.end();
-    }
+        void forEach(std::function<void(const T*)> function) const {
+            _cluster.forEach(function);
+        }
 
-};
+        ClusteredLinkedCollection<T>::ConstIterator begin() const {
+            return _cluster.begin();
+        }
+
+        ClusteredLinkedCollection<T>::Iterator begin() {
+            return _cluster.begin();
+        }
+
+        ClusteredLinkedCollection<T>::ConstIterator end() const {
+            return _cluster.end();
+        }
+
+        ClusteredLinkedCollection<T>::Iterator end() {
+            return _cluster.end();
+        }
+
+    };
+}
 
 #endif //NEON_IDENTIFIABLECOLLECTION_H

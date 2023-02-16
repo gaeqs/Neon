@@ -15,7 +15,7 @@
 #include <engine/light/PointLight.h>
 #include <engine/light/LightSystem.h>
 
-namespace deferred_utils {
+namespace neon::deferred_utils {
     struct InternalDeferredVertex {
         glm::vec2 position;
 
@@ -45,7 +45,8 @@ namespace deferred_utils {
             const std::vector<IdentifiableWrapper<Texture>>& inputTextures,
             const std::shared_ptr<FrameBuffer>& target,
             IdentifiableWrapper<ShaderProgram> shader,
-            const std::function<void(MaterialCreateInfo&)>& populateFunction) {
+            const std::function<void(
+                    MaterialCreateInfo & )>& populateFunction) {
         std::vector<InternalDeferredVertex> vertices = {
                 {{-1.0f, 1.0f}},
                 {{1.0f,  1.0f}},

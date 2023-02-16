@@ -26,25 +26,27 @@
 #define DEBUG_PROFILE_ID_PTR(profiler, id, name) auto id##ProfileStack = (profiler)->push(name)
 #endif
 
-class Profiler {
+namespace neon {
 
-    std::unordered_map<std::thread::id, std::unique_ptr<ProfileStack>> _roots;
-    std::unordered_map<std::thread::id, ProfileStack*> _current;
-    std::mutex _mutex;
+    class Profiler {
 
-public:
+        std::unordered_map<std::thread::id, std::unique_ptr<ProfileStack>> _roots;
+        std::unordered_map<std::thread::id, ProfileStack*> _current;
+        std::mutex _mutex;
 
-    Profiler();
+    public:
 
-    std::unordered_map<std::thread::id, ProfileStack*>  getProfiles();
+        Profiler();
 
-    std::lock_guard<std::mutex> lockProfiles();
+        std::unordered_map<std::thread::id, ProfileStack*> getProfiles();
 
-    ProfileStackRecorder push(const std::string& name);
+        std::lock_guard<std::mutex> lockProfiles();
 
-    void pop();
+        ProfileStackRecorder push(const std::string& name);
 
-};
+        void pop();
 
+    };
+}
 
 #endif //NEON_PROFILER_H

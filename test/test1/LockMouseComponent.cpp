@@ -10,7 +10,8 @@ void LockMouseComponent::performLock() {
 }
 
 LockMouseComponent::LockMouseComponent(
-        IdentifiableWrapper<CameraMovementComponent> cameraMovementComponent) :
+        neon::IdentifiableWrapper<neon::CameraMovementComponent>
+        cameraMovementComponent) :
         _cameraMovementComponent(cameraMovementComponent),
         _locked(false) {
 }
@@ -19,10 +20,10 @@ void LockMouseComponent::onStart() {
     performLock();
 }
 
-void LockMouseComponent::onKey(const KeyboardEvent& event) {
-    if (event.key == KeyboardKey::L &&
-        event.action == KeyboardAction::PRESS &&
-        event.isModifierActive(KeyboardModifier::CONTROL)) {
+void LockMouseComponent::onKey(const neon::KeyboardEvent& event) {
+    if (event.key == neon::KeyboardKey::L &&
+        event.action == neon::KeyboardAction::PRESS &&
+        event.isModifierActive(neon::KeyboardModifier::CONTROL)) {
         _locked = !_locked;
         performLock();
     }

@@ -19,107 +19,110 @@
 
 #include "util/ClusteredLinkedCollection.h"
 
-class Application;
+namespace neon {
 
-class GameObject;
+    class Application;
 
-class Component;
+    class GameObject;
 
-class KeyboardEvent;
+    class Component;
 
-class CursorMoveEvent;
+    class KeyboardEvent;
 
-class Room {
+    class CursorMoveEvent;
 
-    Application* _application;
+    class Room {
 
-    Camera _camera;
-    ClusteredLinkedCollection<GameObject> _gameObjects;
-    ComponentCollection _components;
-    TextureCollection _textures;
-    IdentifiableCollection<Model> _models;
-    IdentifiableCollection<ShaderProgram> _shaders;
-    IdentifiableCollection<Material> _materials;
+        Application *_application;
 
-    std::shared_ptr<ShaderUniformDescriptor> _globalUniformDescriptor;
-    ShaderUniformBuffer _globalUniformBuffer;
+        Camera _camera;
+        ClusteredLinkedCollection<GameObject> _gameObjects;
+        ComponentCollection _components;
+        TextureCollection _textures;
+        IdentifiableCollection<Model> _models;
+        IdentifiableCollection<ShaderProgram> _shaders;
+        IdentifiableCollection<Material> _materials;
 
-    Render _render;
+        std::shared_ptr<ShaderUniformDescriptor> _globalUniformDescriptor;
+        ShaderUniformBuffer _globalUniformBuffer;
 
-public:
+        Render _render;
 
-    Room(const Room& other) = delete;
+    public:
 
-    Room(Application* application,
-         const std::shared_ptr<ShaderUniformDescriptor>& descriptor);
+        Room(const Room &other) = delete;
 
-    ~Room();
+        Room(Application *application,
+             const std::shared_ptr<ShaderUniformDescriptor> &descriptor);
 
-    [[nodiscard]] Application* getApplication() const;
+        ~Room();
 
-    [[nodiscard]] const Camera& getCamera() const;
+        [[nodiscard]] Application *getApplication() const;
 
-    [[nodiscard]] Camera& getCamera();
+        [[nodiscard]] const Camera &getCamera() const;
 
-    [[nodiscard]] const ComponentCollection& getComponents() const;
+        [[nodiscard]] Camera &getCamera();
 
-    [[nodiscard]] ComponentCollection& getComponents();
+        [[nodiscard]] const ComponentCollection &getComponents() const;
 
-    [[nodiscard]] const TextureCollection& getTextures() const;
+        [[nodiscard]] ComponentCollection &getComponents();
 
-    [[nodiscard]] TextureCollection& getTextures();
+        [[nodiscard]] const TextureCollection &getTextures() const;
 
-    [[nodiscard]] const IdentifiableCollection<Model>& getModels() const;
+        [[nodiscard]] TextureCollection &getTextures();
 
-    [[nodiscard]] IdentifiableCollection<Model>& getModels();
+        [[nodiscard]] const IdentifiableCollection<Model> &getModels() const;
 
-    [[nodiscard]] const std::shared_ptr<ShaderUniformDescriptor>&
-    getGlobalUniformDescriptor() const;
+        [[nodiscard]] IdentifiableCollection<Model> &getModels();
 
-    [[nodiscard]] const ShaderUniformBuffer& getGlobalUniformBuffer() const;
+        [[nodiscard]] const std::shared_ptr<ShaderUniformDescriptor> &
+        getGlobalUniformDescriptor() const;
 
-    [[nodiscard]] ShaderUniformBuffer& getGlobalUniformBuffer();
+        [[nodiscard]] const ShaderUniformBuffer &getGlobalUniformBuffer() const;
 
-    [[nodiscard]] const IdentifiableCollection<ShaderProgram>&
-    getShaders() const;
+        [[nodiscard]] ShaderUniformBuffer &getGlobalUniformBuffer();
 
-    [[nodiscard]] IdentifiableCollection<ShaderProgram>& getShaders();
+        [[nodiscard]] const IdentifiableCollection<ShaderProgram> &
+        getShaders() const;
 
-    [[nodiscard]] const IdentifiableCollection<Material>& getMaterials() const;
+        [[nodiscard]] IdentifiableCollection<ShaderProgram> &getShaders();
 
-    [[nodiscard]] IdentifiableCollection<Material>& getMaterials();
+        [[nodiscard]] const IdentifiableCollection<Material> &getMaterials() const;
 
-    [[nodiscard]] const Render& getRender() const;
+        [[nodiscard]] IdentifiableCollection<Material> &getMaterials();
 
-    [[nodiscard]] Render& getRender();
+        [[nodiscard]] const Render &getRender() const;
 
-    IdentifiableWrapper<GameObject> newGameObject();
+        [[nodiscard]] Render &getRender();
 
-    void destroyGameObject(IdentifiableWrapper<GameObject> gameObject);
+        IdentifiableWrapper<GameObject> newGameObject();
 
-    size_t getGameObjectAmount();
+        void destroyGameObject(IdentifiableWrapper<GameObject> gameObject);
 
-    void forEachGameObject(std::function<void(GameObject*)> consumer);
+        size_t getGameObjectAmount();
 
-    void forEachGameObject(
-            std::function<void(const GameObject*)> consumer) const;
+        void forEachGameObject(std::function<void(GameObject *)> consumer);
 
-    //region EVENTS
+        void forEachGameObject(
+                std::function<void(const GameObject *)> consumer) const;
 
-    void onKey(const KeyboardEvent& event);
+        //region EVENTS
 
-    void onCursorMove(const CursorMoveEvent& event);
+        void onKey(const KeyboardEvent &event);
 
-    void update(float deltaTime);
+        void onCursorMove(const CursorMoveEvent &event);
 
-    void preDraw();
+        void update(float deltaTime);
 
-    void draw();
+        void preDraw();
+
+        void draw();
 
 
-    //endregion
+        //endregion
 
-};
+    };
+}
 
 
 #endif //RVTRACKING_ROOM_H

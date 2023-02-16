@@ -7,59 +7,62 @@
 
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
-#include "Frustum.h"
+#include <engine/geometry/Frustum.h>
 
-class Camera {
+namespace neon {
 
-    glm::vec3 _position;
-    glm::quat _rotation;
-    glm::quat _rotationInverse;
-    Frustum _frustum;
+    class Camera {
 
-    bool _dirtyView;
-    bool _dirtyProjection;
+        glm::vec3 _position;
+        glm::quat _rotation;
+        glm::quat _rotationInverse;
+        Frustum _frustum;
 
-    glm::mat4 _view;
-    glm::mat4 _viewProjection;
+        bool _dirtyView;
+        bool _dirtyProjection;
 
-    void recalculateViewMatrix();
+        glm::mat4 _view;
+        glm::mat4 _viewProjection;
 
-public:
+        void recalculateViewMatrix();
 
-    Camera(const Camera& other) = delete;
+    public:
 
-    Camera(const Frustum& frustum);
+        Camera(const Camera& other) = delete;
 
-    const glm::vec3& getPosition() const;
+        Camera(const Frustum& frustum);
 
-    const glm::quat& getRotation() const;
+        const glm::vec3& getPosition() const;
 
-    const Frustum& getFrustum() const;
+        const glm::quat& getRotation() const;
 
-    glm::vec3 getForward() const;
+        const Frustum& getFrustum() const;
 
-    glm::vec3 getUp() const;
+        glm::vec3 getForward() const;
 
-    glm::vec3 getRight() const;
+        glm::vec3 getUp() const;
 
-    void setPosition(const glm::vec3& position);
+        glm::vec3 getRight() const;
 
-    void setRotation(const glm::quat& rotation);
+        void setPosition(const glm::vec3& position);
 
-    void setFrustum(const Frustum& frustum);
+        void setRotation(const glm::quat& rotation);
 
-    const glm::vec3& move(const glm::vec3& offset);
+        void setFrustum(const Frustum& frustum);
 
-    const glm::quat& lookAt(const glm::vec3& direction);
+        const glm::vec3& move(const glm::vec3& offset);
 
-    const glm::quat& rotate(const glm::vec3& direction, float angle);
+        const glm::quat& lookAt(const glm::vec3& direction);
 
-    const glm::quat& rotate(const glm::quat& quaternion);
+        const glm::quat& rotate(const glm::vec3& direction, float angle);
 
-    const glm::mat4& getView();
+        const glm::quat& rotate(const glm::quat& quaternion);
 
-    const glm::mat4& getViewProjection();
-};
+        const glm::mat4& getView();
+
+        const glm::mat4& getViewProjection();
+    };
+}
 
 
 #endif //RVTRACKING_CAMERA_H
