@@ -10,6 +10,7 @@
 #include <unordered_map>
 
 #include <assimp/scene.h>
+#include <glm/glm.hpp>
 
 namespace assimp_geometry {
 
@@ -30,12 +31,14 @@ namespace assimp_geometry {
 
     float cotan(const aiVector3D& a, const aiVector3D& b, const aiVector3D& c);
 
-    bool isObtuse(aiMesh* mesh, uint32_t face);
+    bool isObtuse(const aiMesh* mesh, uint32_t face);
 
-    std::vector<uint32_t> getOtherVertices(aiFace* face, uint32_t vertex);
+    std::vector<uint32_t> getOtherVertices(const aiFace* face, uint32_t vertex);
 
     std::unordered_map<VertexFace, float, VertexFaceHash>
-    getInfluenceAreas(aiMesh* mesh);
+    getInfluenceAreas(const aiMesh* mesh);
+
+    std::vector<glm::vec3> calculateTangents(const aiMesh* mesh);
 
 }
 

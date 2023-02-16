@@ -48,11 +48,10 @@ public:
 
     template<class InstanceData>
     void defineInstanceStruct() {
-        if (_instancingStructType == typeid(InstanceData)) return;
-        _instancingStructType = typeid(InstanceData);
-        _instancingStructSize = sizeof(InstanceData);
-        reinitializeBuffer();
+        defineInstanceStruct(typeid(InstanceData), sizeof(InstanceData));
     }
+
+    void defineInstanceStruct(std::type_index type, size_t size);
 
     [[nodiscard]] Result<uint32_t*, std::string> createInstance();
 

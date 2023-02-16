@@ -3,6 +3,7 @@
 //
 
 #include "DeferredUtils.h"
+#include "engine/shader/MaterialCreateInfo.h"
 
 #include <stdexcept>
 
@@ -43,10 +44,8 @@ namespace deferred_utils {
             Room* room,
             const std::vector<IdentifiableWrapper<Texture>>& inputTextures,
             const std::shared_ptr<FrameBuffer>& target,
-            InputDescription instanceDescription,
             IdentifiableWrapper<ShaderProgram> shader,
-            MaterialConfiguration configuration) {
-
+            const std::function<void(MaterialCreateInfo&)>& populateFunction) {
         std::vector<InternalDeferredVertex> vertices = {
                 {{-1.0f, 1.0f}},
                 {{1.0f,  1.0f}},
@@ -68,14 +67,14 @@ namespace deferred_utils {
                 materialBindings
         );
 
-        auto material = room->getMaterials().create(
-                target,
-                shader,
-                materialDescriptor,
-                InternalDeferredVertex::getDescription(),
-                instanceDescription,
-                configuration
-        );
+        MaterialCreateInfo info(target, shader);
+        info.descriptions.uniform = materialDescriptor;
+        info.descriptions.vertex = InternalDeferredVertex::getDescription();
+
+        if (populateFunction != nullptr)
+            populateFunction(info);
+
+        auto material = room->getMaterials().create(info);
 
         for (uint32_t i = 0; i < inputTextures.size(); ++i) {
             material->getUniformBuffer().setTexture(i, inputTextures[i]);
@@ -108,19 +107,22 @@ namespace deferred_utils {
         room->getRender().addRenderPass(
                 {frameBuffer, RenderPassStrategy::defaultStrategy});
 
-        MaterialConfiguration configuration{};
-        configuration.blend = true;
-        configuration.colorSourceBlendFactor = BlendFactor::ONE;
-        configuration.colorDestinyBlendFactor = BlendFactor::ONE;
+        MaterialAttachmentBlending blend;
+        blend.blend = true;
+        blend.colorSourceBlendFactor = BlendFactor::ONE;
+        blend.colorDestinyBlendFactor = BlendFactor::ONE;
 
         if (directionalShader != nullptr) {
             directionalModel = createScreenModel(
                     room,
                     textures,
                     frameBuffer,
-                    DirectionalLight::Data::getDescription(),
                     directionalShader,
-                    configuration
+                    [&blend](MaterialCreateInfo& info) {
+                        info.descriptions.instance =
+                                DirectionalLight::Data::getDescription();
+                        info.blending.attachmentsBlending.push_back(blend);
+                    }
             );
             directionalModel->setName("Directional light model");
             directionalModel->defineInstanceStruct<DirectionalLight::Data>();
@@ -131,9 +133,12 @@ namespace deferred_utils {
                     room,
                     textures,
                     frameBuffer,
-                    PointLight::Data::getDescription(),
                     pointShader,
-                    configuration
+                    [&blend](MaterialCreateInfo& info) {
+                        info.descriptions.instance =
+                                PointLight::Data::getDescription();
+                        info.blending.attachmentsBlending.push_back(blend);
+                    }
             );
             pointModel->setName("Point light model");
             pointModel->defineInstanceStruct<PointLight::Data>();
@@ -144,9 +149,12 @@ namespace deferred_utils {
                     room,
                     textures,
                     frameBuffer,
-                    FlashLight::Data::getDescription(),
                     flashShader,
-                    configuration
+                    [&blend](MaterialCreateInfo& info) {
+                        info.descriptions.instance =
+                                FlashLight::Data::getDescription();
+                        info.blending.attachmentsBlending.push_back(blend);
+                    }
             );
             flashModel->setName("Flash light model");
             flashModel->defineInstanceStruct<FlashLight::Data>();

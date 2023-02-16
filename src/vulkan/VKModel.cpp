@@ -27,7 +27,8 @@ VKModel::VKModel(Application* application, std::vector<VKMesh*> meshes) :
         _instancingBuffer(std::make_unique<StagingBuffer>(
                 _vkApplication,
                 VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
-                static_cast<uint32_t>(_instancingStructSize) * BUFFER_DEFAULT_SIZE
+                static_cast<uint32_t>(_instancingStructSize) *
+                BUFFER_DEFAULT_SIZE
         )),
         _data(_instancingStructSize * BUFFER_DEFAULT_SIZE, 0),
         _dataChangeRange(0, 0) {
@@ -114,4 +115,11 @@ void VKModel::draw(VkCommandBuffer buffer,
                        _positions.size(), global);
         }
     }
+}
+
+void VKModel::defineInstanceStruct(std::type_index type, size_t size) {
+    if (_instancingStructType == type) return;
+    _instancingStructType = type;
+    _instancingStructSize = size;
+    reinitializeBuffer();
 }

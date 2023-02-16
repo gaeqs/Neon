@@ -10,23 +10,24 @@
 #include <engine/structure/Room.h>
 #include <engine/shader/Material.h>
 
+#include <iterator>
 #include <vulkan/render/VKRenderPass.h>
 
 #include <vulkan/util/VKUtil.h>
+#include <vulkan/util/VulkanConversions.h>
+
+namespace vc = vulkan_conversions;
 
 VKMaterial::VKMaterial(
         Room* room, Material* material,
-        const std::shared_ptr<FrameBuffer>& target,
-        const InputDescription& vertexDescription,
-        const InputDescription& instanceDescription,
-        MaterialConfiguration cfg) :
+        const MaterialCreateInfo& createInfo) :
         _material(material),
         _vkApplication(&room->getApplication()->getImplementation()),
         _pipelineLayout(VK_NULL_HANDLE),
         _pipeline(VK_NULL_HANDLE),
         _pushConstants(),
         _pushConstantStages(0),
-        _target(target->getImplementation().getRenderPass().getRaw()) {
+        _target(createInfo.target->getImplementation().getRenderPass().getRaw()) {
 
     std::vector<VkDynamicState> dynamicStates = {
             VK_DYNAMIC_STATE_VIEWPORT,
@@ -34,10 +35,11 @@ VKMaterial::VKMaterial(
     };
 
     auto [vBinding, vAttributes] = vulkan_util::toVulkanDescription(
-            0, 0, vertexDescription);
+            0, 0, createInfo.descriptions.vertex);
 
     auto [iBinding, iAttributes] = vulkan_util::toVulkanDescription(
-            1, vertexDescription.attributes.size(), instanceDescription);
+            1, createInfo.descriptions.vertex.attributes.size(),
+            createInfo.descriptions.instance);
 
     VkVertexInputBindingDescription bindings[] = {vBinding, iBinding};
 
@@ -90,46 +92,61 @@ VKMaterial::VKMaterial(
     multisampling.alphaToCoverageEnable = VK_FALSE; // Optional
     multisampling.alphaToOneEnable = VK_FALSE; // Optional
 
+    auto& di = createInfo.depthStencil;
     VkPipelineDepthStencilStateCreateInfo depthStencil{};
     depthStencil.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
-    depthStencil.depthTestEnable = VK_TRUE;
-    depthStencil.depthWriteEnable = VK_TRUE;
-    depthStencil.depthCompareOp = VK_COMPARE_OP_LESS;
-    depthStencil.depthBoundsTestEnable = VK_FALSE;
-    depthStencil.minDepthBounds = 0.0f; // Optional
-    depthStencil.maxDepthBounds = 1.0f; // Optional
+    depthStencil.depthTestEnable = di.depthTest;
+    depthStencil.depthWriteEnable = di.depthWrite;
+    depthStencil.depthCompareOp = vc::vkCompareOp(di.depthCompareOperation);
+    depthStencil.depthBoundsTestEnable = di.useDepthBounds;
+    depthStencil.minDepthBounds = di.minDepthBounds;
+    depthStencil.maxDepthBounds = di.maxDepthBounds;
     depthStencil.stencilTestEnable = VK_FALSE;
     depthStencil.front = {}; // Optional
     depthStencil.back = {}; // Optional
 
-    VkPipelineColorBlendAttachmentState colorBlendAttachment{};
-    colorBlendAttachment.colorWriteMask =
+    VkPipelineColorBlendAttachmentState defaultColorBlendAttachment{};
+    defaultColorBlendAttachment.colorWriteMask =
             VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT |
             VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
-    colorBlendAttachment.blendEnable = cfg.blend;
-    colorBlendAttachment.srcColorBlendFactor = static_cast<VkBlendFactor>(cfg.colorSourceBlendFactor);
-    colorBlendAttachment.dstColorBlendFactor = static_cast<VkBlendFactor>(cfg.colorDestinyBlendFactor);
-    colorBlendAttachment.colorBlendOp = static_cast<VkBlendOp>(cfg.colorBlendOperation);
-    colorBlendAttachment.srcAlphaBlendFactor = static_cast<VkBlendFactor>(cfg.alphaSourceBlendFactor);
-    colorBlendAttachment.dstAlphaBlendFactor = static_cast<VkBlendFactor>(cfg.alphaDestinyBlendFactor);
-    colorBlendAttachment.alphaBlendOp = static_cast<VkBlendOp>(cfg.alphaBlendOperation);
+    defaultColorBlendAttachment.blendEnable = false;
 
     std::vector<VkPipelineColorBlendAttachmentState> blendAttachments;
     blendAttachments.resize(
-            target->getImplementation().getColorAttachmentAmount(),
-            colorBlendAttachment);
+            createInfo.target->getImplementation().getColorAttachmentAmount(),
+            defaultColorBlendAttachment
+    );
+
+    for (int i = 0; i < createInfo.blending.attachmentsBlending.size(); ++i) {
+        auto& att = createInfo.blending.attachmentsBlending[i];
+        VkPipelineColorBlendAttachmentState cba{};
+
+        cba.colorWriteMask = att.writeMask;
+        cba.blendEnable = att.blend;
+
+        cba.colorBlendOp = vc::vkBlendOp(att.colorBlendOperation);
+        cba.srcColorBlendFactor = vc::vkBlendFactor(att.colorSourceBlendFactor);
+        cba.dstColorBlendFactor = vc::vkBlendFactor(
+                att.colorDestinyBlendFactor);
+
+        cba.alphaBlendOp = vc::vkBlendOp(att.alphaBlendOperation);
+        cba.srcAlphaBlendFactor = vc::vkBlendFactor(att.alphaSourceBlendFactor);
+        cba.dstAlphaBlendFactor = vc::vkBlendFactor(
+                att.alphaDestinyBlendFactor);
+
+        blendAttachments[i] = cba;
+    }
 
     VkPipelineColorBlendStateCreateInfo colorBlending{};
     colorBlending.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
-    colorBlending.logicOpEnable = VK_FALSE;
-    colorBlending.logicOp = VK_LOGIC_OP_COPY; // Optional
+    colorBlending.logicOpEnable = createInfo.blending.logicBlending;
+    colorBlending.logicOp = vc::vkLogicOp(createInfo.blending.logicOperation);
     colorBlending.attachmentCount = blendAttachments.size();
     colorBlending.pAttachments = blendAttachments.data();
-    colorBlending.blendConstants[0] = 0.0f; // Optional
-    colorBlending.blendConstants[1] = 0.0f; // Optional
-    colorBlending.blendConstants[2] = 0.0f; // Optional
-    colorBlending.blendConstants[3] = 0.0f; // Optional
-
+    colorBlending.blendConstants[0] = createInfo.blending.blendingConstants[0];
+    colorBlending.blendConstants[1] = createInfo.blending.blendingConstants[1];
+    colorBlending.blendConstants[2] = createInfo.blending.blendingConstants[2];
+    colorBlending.blendConstants[3] = createInfo.blending.blendingConstants[3];
 
     VkDescriptorSetLayout uniformInfos[] = {
             room->getGlobalUniformDescriptor()

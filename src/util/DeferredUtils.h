@@ -7,11 +7,12 @@
 
 #include <memory>
 #include <vector>
+#include <functional>
 
 #include <engine/structure/IdentifiableWrapper.h>
 #include <engine/model/InputDescription.h>
-#include <engine/shader/MaterialConfiguration.h>
 #include <engine/render/TextureCreateInfo.h>
+#include <engine/shader/MaterialCreateInfo.h>
 
 class Room;
 
@@ -29,9 +30,9 @@ namespace deferred_utils {
             Room* room,
             const std::vector<IdentifiableWrapper<Texture>>& inputTextures,
             const std::shared_ptr<FrameBuffer>& target,
-            InputDescription instanceDescription,
             IdentifiableWrapper<ShaderProgram> shader,
-            MaterialConfiguration configuration = MaterialConfiguration());
+            const std::function<void(MaterialCreateInfo&)>& populateFunction
+            = nullptr);
 
     IdentifiableWrapper<Texture> createLightSystem(
             Room* room,

@@ -65,6 +65,8 @@ public:
         _implementation.defineInstanceStruct<InstanceData>();
     }
 
+    void defineInstanceStruct(std::type_index type, size_t size);
+
     [[nodiscard]] Result<uint32_t*, std::string> createInstance();
 
     bool freeInstance(uint32_t id);

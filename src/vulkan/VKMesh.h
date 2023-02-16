@@ -55,7 +55,7 @@ public:
         _indexAmount = indices.size();
     }
 
-    IdentifiableWrapper<Material> getMaterial() const;
+    [[nodiscard]] IdentifiableWrapper<Material> getMaterial() const;
 
     void draw(
             VkCommandBuffer commandBuffer,

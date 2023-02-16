@@ -289,7 +289,8 @@ SPIRVCompiler::getSamplers() const {
     for (int i = 0; i < _program.getNumUniformVariables(); ++i) {
         auto& reflection = _program.getUniform(i);
 
-        if (!reflection.getType()->isTexture()) continue;
+        if (reflection.getType()->getBasicType() != glslang::TBasicType::EbtSampler)
+            continue;
 
         auto current = VKShaderSampler{
                 reflection.name,

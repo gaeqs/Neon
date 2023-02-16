@@ -38,6 +38,7 @@
 #include <engine/render/TextureCreateInfo.h>
 
 #include <engine/shader/Material.h>
+#include <engine/shader/MaterialCreateInfo.h>
 #include <engine/shader/ShaderProgram.h>
 #include <engine/shader/ShaderType.h>
 #include <engine/shader/ShaderUniformBinding.h>
