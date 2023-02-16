@@ -4,19 +4,25 @@
 
 #include "AssimpLoader.h"
 
-#include <assimp/types.h>
 #include <memory>
 #include <string>
+#include <vector>
+#include <filesystem>
 
 #include <assimp/material.h>
 #include <assimp/scene.h>
 #include <assimp/texture.h>
 #include <assimp/AssimpMaterialParameters.h>
 #include <assimp/AssimpGeometry.h>
+#include <assimp/postprocess.h>
+#include <assimp/types.h>
+#include <assimp/Importer.hpp>
+#include <assimp/IOSystem.hpp>
 
 #include <engine/shader/Material.h>
 #include <engine/render/Texture.h>
-#include <vector>
+#include <engine/structure/Room.h>
+#include <engine/model/Mesh.h>
 
 namespace assimp_loader {
 

@@ -3,6 +3,9 @@
 //
 
 #include "ShaderUniformDescriptor.h"
+#include "ShaderUniformBinding.h"
+#include "vulkan/VKTexture.h"
+#include <vector>
 
 uint64_t SHADER_UNIFORM_DESCRIPTOR_ID_GENERATOR = 1;
 
@@ -31,4 +34,12 @@ ShaderUniformDescriptor::getBindings() const {
 
 uint64_t ShaderUniformDescriptor::getId() const {
     return _id;
+}
+
+std::unique_ptr<ShaderUniformDescriptor>
+ShaderUniformDescriptor::ofImages(Application* application, uint32_t amount) {
+    ShaderUniformBinding binding(UniformBindingType::IMAGE, 0);
+    std::vector<ShaderUniformBinding> vector;
+    vector.resize(amount, binding);
+    return std::make_unique<ShaderUniformDescriptor>(application, vector);
 }

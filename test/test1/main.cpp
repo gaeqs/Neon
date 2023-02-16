@@ -1,4 +1,5 @@
 #include <iostream>
+#include <memory>
 #include <vector>
 #include <filesystem>
 
@@ -11,7 +12,6 @@
 #include <util/component/GameObjectExplorerComponent.h>
 #include <util/DeferredUtils.h>
 #include <util/ModelUtils.h>
-#include <assimp/ModelLoader.h>
 #include <assimp/AssimpLoader.h>
 
 #include "TestVertex.h"
@@ -19,6 +19,7 @@
 #include "LockMouseComponent.h"
 #include "ConstantRotationComponent.h"
 #include "engine/shader/MaterialCreateInfo.h"
+#include "engine/shader/ShaderUniformBinding.h"
 
 constexpr int32_t WIDTH = 800;
 constexpr int32_t HEIGHT = 600;
@@ -107,16 +108,8 @@ std::shared_ptr<FrameBuffer> initRender(Room* room) {
 void loadModels(Application* application, Room* room,
                 const std::shared_ptr<FrameBuffer>& target) {
 
-    std::vector<ShaderUniformBinding> sansMaterialBindings = {
-            ShaderUniformBinding{UniformBindingType::IMAGE, 0},
-            ShaderUniformBinding{UniformBindingType::IMAGE, 0}
-    };
-
-
-    auto materialDescriptor = std::make_shared<ShaderUniformDescriptor>(
-            application,
-            sansMaterialBindings
-    );
+    std::shared_ptr<ShaderUniformDescriptor> materialDescriptor =
+            ShaderUniformDescriptor::ofImages(application, 2);
 
     auto shader = createShader(room, "deferred.vert", "deferred.frag");
     auto shaderParallax = createShader(room, "deferred.vert",
@@ -163,14 +156,13 @@ void loadModels(Application* application, Room* room,
         sans->setName("Sans " + std::to_string(i));
     }
 
-    auto zeppeliResult = ModelLoader(room).loadModel
-            <TestVertex, DefaultInstancingData>(
-            target,
-            shader,
-            materialDescriptor,
-            R"(resource/Zeppeli)",
-            "William.obj",
-            true);
+    auto zeppeliLoaderInfo = assimp_loader::LoaderInfo::create<TestVertex>(
+            room, sansMaterialInfo);
+    zeppeliLoaderInfo.flipWindingOrder = true;
+    zeppeliLoaderInfo.flipNormals = true;
+
+    auto zeppeliResult = assimp_loader::load(R"(resource/Zeppeli)",
+                                             "William.obj", zeppeliLoaderInfo);
 
     if (!zeppeliResult.valid) {
         std::cout << "Couldn't load zeppeli model!" << std::endl;

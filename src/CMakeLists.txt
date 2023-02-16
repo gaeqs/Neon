@@ -35,9 +35,7 @@ set(SOURCES
         engine/model/DefaultInstancingData.h
         util/component/CameraMovementComponent.cpp
         util/component/CameraMovementComponent.h
-        assimp/ModelLoader.h
         assimp/AssimpMaterialParameters.h
-        assimp/ModelLoader.cpp
         engine/io/KeyboardEvent.h
         engine/io/CursorEvent.h
         engine/model/Mesh.cpp
@@ -98,7 +96,9 @@ set(SOURCES
         engine/structure/ComponentRegister.h
         util/ModelUtils.cpp
         util/ModelUtils.h
-        engine/render/TextureCreateInfo.h engine/shader/MaterialCreateInfo.h assimp/AssimpLoader.cpp assimp/AssimpLoader.h)
+        engine/render/TextureCreateInfo.h
+        engine/shader/MaterialCreateInfo.h
+        assimp/AssimpLoader.cpp assimp/AssimpLoader.h)
 
 
 set(VULKAN_SOURCES

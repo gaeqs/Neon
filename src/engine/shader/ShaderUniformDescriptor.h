@@ -5,7 +5,9 @@
 #ifndef NEON_SHADERUNIFORMDESCRIPTOR_H
 #define NEON_SHADERUNIFORMDESCRIPTOR_H
 
+#include <cstdint>
 #include <vector>
+#include <memory>
 #include <engine/structure/Identifiable.h>
 #include <engine/shader/ShaderUniformBinding.h>
 
@@ -46,6 +48,21 @@ public:
     [[nodiscard]] Implementation& getImplementation();
 
     [[nodiscard]] const std::vector<ShaderUniformBinding>& getBindings() const;
+
+
+    // region Static helper constructors
+
+    /**
+     * Creates a new ShaderUniformDescriptor
+     * that contains the given amount of images.
+     * @param application the application.
+     * @param amount the amount of images.
+     * @return the new ShaderUniformDescriptor.
+     */
+    static std::unique_ptr<ShaderUniformDescriptor>
+    ofImages(Application* application, uint32_t amount);
+
+    // endregion
 
 };
 

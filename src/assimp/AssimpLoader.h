@@ -5,8 +5,6 @@
 #ifndef NEON_ASSIMPLOADER_H
 #define NEON_ASSIMPLOADER_H
 
-#include "ModelLoader.h"
-
 #include <functional>
 #include <typeindex>
 #include <utility>
@@ -19,12 +17,11 @@
 #include <engine/model/InputDescription.h>
 #include <engine/model/DefaultInstancingData.h>
 #include <engine/structure/IdentifiableWrapper.h>
+#include <engine/shader/MaterialCreateInfo.h>
 
 class Model;
 
 class Room;
-
-class MaterialCreateInfo;
 
 struct aiScene;
 
