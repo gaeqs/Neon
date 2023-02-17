@@ -30,7 +30,7 @@ namespace neon {
 
     public:
 #ifdef USE_VULKAN
-    using Implementation = vulkan::VKMesh;
+        using Implementation = vulkan::VKMesh;
 #endif
 
     private:
@@ -54,9 +54,14 @@ namespace neon {
         [[nodiscard]] const Implementation& getImplementation() const;
 
         template<class Vertex>
-        void uploadVertexData(const std::vector<Vertex>& vertices,
-                              const std::vector<uint32_t>& indices) {
+        void reinitializeVertexData(const std::vector<Vertex>& vertices,
+                                    const std::vector<uint32_t>& indices) {
             _implementation.uploadData(vertices, indices);
+        }
+
+        template<class Vertex>
+        std::vector<Vertex> getVertices() {
+            return _implementation.getVertices<Vertex>();
         }
 
         [[nodiscard]] IdentifiableWrapper<Material> getMaterial() const;

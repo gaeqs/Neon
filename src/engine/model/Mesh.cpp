@@ -13,7 +13,8 @@ namespace neon {
                bool modifiableVertices,
                bool modifiableIndices) :
             _id(MESH_ID_GENERATOR++),
-            _implementation(room->getApplication(), _material),
+            _implementation(room->getApplication(), _material,
+                            modifiableVertices, modifiableIndices),
             _material(material) {
 
     }

@@ -246,7 +246,7 @@ namespace neon::assimp_loader {
             }
 
             auto result = std::make_unique<Mesh>(info.room, material);
-            result->uploadVertexData(dataArray, indices);
+            result->reinitializeVertexData(dataArray, indices);
 
             return result;
         }

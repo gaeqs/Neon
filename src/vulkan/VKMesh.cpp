@@ -4,17 +4,22 @@
 
 #include "VKMesh.h"
 
+#include <cstring>
 #include <engine/Application.h>
 #include <vulkan/VKApplication.h>
 
 namespace neon::vulkan {
     VKMesh::VKMesh(Application* application,
-                   IdentifiableWrapper<Material>& material) :
+                   IdentifiableWrapper<Material>& material,
+                   bool modifiableVertices,
+                   bool modifiableIndices) :
             _vkApplication(&application->getImplementation()),
             _material(material),
             _vertexBuffer(),
             _indexBuffer(),
-            _indexAmount(0) {
+            _indexAmount(0),
+            _modifiableVertices(modifiableVertices),
+            _modifiableIndices(modifiableIndices) {
     }
 
     IdentifiableWrapper<Material> VKMesh::getMaterial() const {
@@ -53,5 +58,13 @@ namespace neon::vulkan {
 
         vkCmdDrawIndexed(commandBuffer, _indexAmount, instancingElements,
                          0, 0, 0);
+    }
+
+    bool VKMesh::setVertices(const void* data, size_t length) const {
+        if (!_modifiableVertices) return false;
+        auto map = _vertexBuffer.value()->map<char>();
+        if (!map.has_value()) return false;
+        memcpy(map.value()->raw(), data, std::min(length, _verticesSize));
+        return true;
     }
 }

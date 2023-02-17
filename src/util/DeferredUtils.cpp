@@ -82,7 +82,7 @@ namespace neon::deferred_utils {
         }
 
         auto mesh = std::make_unique<Mesh>(room, material);
-        mesh->uploadVertexData(vertices, indices);
+        mesh->reinitializeVertexData(vertices, indices);
         std::vector<std::unique_ptr<Mesh>> meshes;
         meshes.push_back(std::move(mesh));
 
