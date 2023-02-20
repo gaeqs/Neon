@@ -7,7 +7,12 @@ set(
         LockMouseComponent.cpp
         LockMouseComponent.h
         Cloth.cpp
-        Cloth.h)
+        Cloth.h
+        cloth/ISimulable.h
+        cloth/Node.h
+        cloth/Node.cpp
+        cloth/Spring.cpp
+        cloth/Spring.h cloth/MassSpring.cpp cloth/MassSpring.h cloth/PhysicsManager.cpp cloth/PhysicsManager.h)
 
 cmrc_add_resource_library(
         shaders_cloth
@@ -28,7 +33,9 @@ cmrc_add_resource_library(
         shader/flash_light.frag
 )
 
+find_package(Eigen3 CONFIG REQUIRED)
+
 add_executable(testCloth ${TEST_SOURCES})
 set_target_properties(testCloth PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${TEST_DIRECTORY})
-target_link_libraries(testCloth neon shaders_cloth)
+target_link_libraries(testCloth neon shaders_cloth Eigen3::Eigen)
 add_dependencies(testCloth tests)
