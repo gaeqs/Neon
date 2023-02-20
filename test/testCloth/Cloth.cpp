@@ -13,15 +13,14 @@
 #include "TestVertex.h"
 
 void Cloth::generateModel() {
-    std::vector<TestVertex> vertices;
-    vertices.reserve(_width * _height);
+    _vertices.reserve(_width * _height);
 
     auto w = static_cast<float>(_width);
     auto h = static_cast<float>(_height);
 
     for (float x = 0; x < w; x += 1.0f) {
         for (float z = 0; z < h; z += 1.0f) {
-            vertices.push_back(TestVertex{
+            _vertices.push_back(TestVertex{
                     glm::vec3(x, 0.0f, z),
                     glm::vec3(0.0f, 1.0f, 0.0f),
                     glm::vec3(1.0f, 0.0f, 0.0f),
@@ -41,11 +40,11 @@ void Cloth::generateModel() {
             uint32_t v3 = x + 1 + (z + 1) * _width;
 
             indices.push_back(v0);
+            indices.push_back(v3);
             indices.push_back(v2);
-            indices.push_back(v3);
             indices.push_back(v0);
-            indices.push_back(v3);
             indices.push_back(v1);
+            indices.push_back(v3);
         }
     }
 
@@ -56,15 +55,11 @@ void Cloth::generateModel() {
             true,
             false
     ));
+    meshes[0]->reinitializeVertexData(_vertices, indices);
 
     _model = getRoom()->getModels().create(meshes);
 
     getGameObject()->newComponent<neon::GraphicComponent>(_model);
-}
-
-void Cloth::onStart() {
-
-
 }
 
 Cloth::Cloth(neon::IdentifiableWrapper<neon::Material> material,
@@ -74,4 +69,27 @@ Cloth::Cloth(neon::IdentifiableWrapper<neon::Material> material,
         _height(height),
         _model() {
 
+}
+
+void Cloth::onStart() {
+    generateModel();
+}
+
+void Cloth::onUpdate(float deltaTime) {
+    static float time = 0;
+
+    time += deltaTime;
+
+    _modifiedVertices.resize(_vertices.size());
+
+    for (int i = 0; i < _vertices.size(); ++i) {
+        TestVertex vertex = _vertices[i];
+        float s = std::sin(time +
+                           vertex.position.x + vertex.position.z);
+        vertex.position.y += s;
+
+        _modifiedVertices[i] = vertex;
+    }
+
+    _model->getMesh(0)->setVertices(_modifiedVertices);
 }

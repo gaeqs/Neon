@@ -5,6 +5,7 @@
 #ifndef NEON_CLOTH_H
 #define NEON_CLOTH_H
 
+#include "TestVertex.h"
 #include <cstdint>
 #include <engine/Engine.h>
 
@@ -16,6 +17,9 @@ class Cloth : public neon::Component {
 
     neon::IdentifiableWrapper<neon::Model> _model;
 
+    std::vector<TestVertex> _vertices;
+    std::vector<TestVertex> _modifiedVertices;
+
     void generateModel();
 
 public:
@@ -25,6 +29,7 @@ public:
 
     void onStart() override;
 
+    void onUpdate(float deltaTime) override;
 
 };
 

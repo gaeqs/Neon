@@ -64,6 +64,13 @@ namespace neon {
             return _implementation.getVertices<Vertex>();
         }
 
+        template<class Vertex>
+        bool setVertices(std::vector<Vertex> vertices) const {
+            return _implementation.setVertices(vertices);
+        }
+
+        bool setVertices(const void* data, size_t length) const;
+
         [[nodiscard]] IdentifiableWrapper<Material> getMaterial() const;
 
         void setMaterial(const IdentifiableWrapper<Material>& material);

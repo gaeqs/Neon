@@ -38,4 +38,8 @@ namespace neon {
     void Mesh::setMaterial(const IdentifiableWrapper<Material>& material) {
         _material = material;
     }
+
+    bool Mesh::setVertices(const void* data, size_t length) const {
+        return _implementation.setVertices(data, length);
+    }
 }

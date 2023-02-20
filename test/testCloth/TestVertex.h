@@ -7,6 +7,8 @@
 
 #include <engine/model/InputDescription.h>
 
+#include <glm/glm.hpp>
+
 struct TestVertex {
     glm::vec3 position;
     glm::vec3 normal;
