@@ -6,14 +6,20 @@
 
 #include <cstdint>
 #include <memory>
+#include <stdint.h>
 #include <vector>
 
 #include <glm/glm.hpp>
 
 #include "TestVertex.h"
+#include "engine/structure/IdentifiableWrapper.h"
+
 
 void Cloth::generateModel() {
     _vertices.reserve(_width * _height);
+
+    std::vector<glm::vec3> positions;
+    positions.reserve(_width * _height);
 
     auto w = static_cast<float>(_width);
     auto h = static_cast<float>(_height);
@@ -26,6 +32,7 @@ void Cloth::generateModel() {
                     glm::vec3(1.0f, 0.0f, 0.0f),
                     glm::vec2(x / w, z / h)
             });
+            positions.emplace_back(x, 0.0f, z);
         }
     }
 
@@ -59,15 +66,31 @@ void Cloth::generateModel() {
 
     _model = getRoom()->getModels().create(meshes);
 
+    _massSpring = _physicsManager->createSimulableObject<MassSpring>(
+            getGameObject(),
+            positions,
+            indices,
+            500.0f,
+            1000.0f,
+            10.0f,
+            0.5f,
+            0.5f
+    );
+
     getGameObject()->newComponent<neon::GraphicComponent>(_model);
 }
 
 Cloth::Cloth(neon::IdentifiableWrapper<neon::Material> material,
+             neon::IdentifiableWrapper<PhysicsManager> physicsManager,
              uint32_t width, uint32_t height) :
         _material(material),
+        _physicsManager(physicsManager),
         _width(width),
         _height(height),
-        _model() {
+        _model(),
+        _vertices(),
+        _modifiedVertices(),
+        _massSpring() {
 
 }
 
@@ -75,20 +98,18 @@ void Cloth::onStart() {
     generateModel();
 }
 
-void Cloth::onUpdate(float deltaTime) {
-    static float time = 0;
-
-    time += deltaTime;
-
+void Cloth::onPreDraw() {
     _modifiedVertices.resize(_vertices.size());
 
-    for (int i = 0; i < _vertices.size(); ++i) {
+    uint32_t i = 0;
+    for (const auto& node: _massSpring->getNodes()) {
         TestVertex vertex = _vertices[i];
-        float s = std::sin(time +
-                           vertex.position.x + vertex.position.z);
-        vertex.position.y += s;
+
+        auto& pos = node.getPositionVector();
+        vertex.position = {pos.x(), pos.y(), pos.z()};
 
         _modifiedVertices[i] = vertex;
+        ++i;
     }
 
     _model->getMesh(0)->setVertices(_modifiedVertices);

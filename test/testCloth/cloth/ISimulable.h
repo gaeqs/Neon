@@ -15,17 +15,15 @@ class ISimulable {
 
 public:
 
-    virtual void initialize(int startIndex);
-
-    virtual uint32_t getNumberOfDegreesOfFreedom() const = 0;
+    [[nodiscard]] virtual uint32_t getNumberOfDegreesOfFreedom() const = 0;
 
     virtual void getPosition(Eigen::VectorXf& vector) const = 0;
 
-    virtual void setPosition(Eigen::VectorXf& vector);
+    virtual void setPosition(const Eigen::VectorXf& vector) = 0;
 
     virtual void getVelocity(Eigen::VectorXf& vector) const = 0;
 
-    virtual void setVelocity(Eigen::VectorXf& vector);
+    virtual void setVelocity(const Eigen::VectorXf& vector) = 0;
 
     virtual void getForce(Eigen::VectorXf& vector) const = 0;
 

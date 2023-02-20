@@ -18,10 +18,9 @@
 #include "TestVertex.h"
 #include "GlobalParametersUpdaterComponent.h"
 #include "LockMouseComponent.h"
+#include "cloth/PhysicsManager.h"
 #include "engine/shader/MaterialCreateInfo.h"
 #include "engine/shader/ShaderUniformBinding.h"
-#include "glm/ext/quaternion_geometric.hpp"
-#include "glm/fwd.hpp"
 
 constexpr int32_t WIDTH = 800;
 constexpr int32_t HEIGHT = 600;
@@ -152,9 +151,14 @@ std::shared_ptr<Room> getTestRoom(Application* application) {
     clothMaterialInfo.descriptions.vertex = TestVertex::getDescription();
 
     auto material = room->getMaterials().create(clothMaterialInfo);
+
+    auto physicManagerGO = room->newGameObject();
+    auto physicsManager = physicManagerGO->newComponent<PhysicsManager>(
+            IntegrationMode::IMPLICIT);
+
     auto cloth = room->newGameObject();
     cloth->setName("Cloth");
-    cloth->newComponent<Cloth>(material, 20, 20);
+    cloth->newComponent<Cloth>(material, physicsManager, 4, 4);
 
     room->getCamera().lookAt(glm::normalize(glm::vec3(0, 1.0f, -1.0f)));
     room->getCamera().setPosition(glm::vec3(0.0f, 3.0f, 3.0f));

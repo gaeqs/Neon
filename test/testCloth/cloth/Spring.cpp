@@ -39,14 +39,16 @@ void Spring::getForce(Eigen::VectorXf& vector) const {
     auto dampingA = -_damping * _stiffness
                     * _velocityBA.dot(_direction) * _direction;
     auto springA = -_stiffness * (_length - _length0) * _direction;
-    auto forceA = springA + dampingA;
+    Eigen::Vector3f forceA = springA + dampingA;
     vector(_nodeADoFIndex) += forceA(0);
     vector(_nodeADoFIndex + 1) += forceA(1);
-    vector(_nodeADoFIndex + 1) += forceA(2);
+    vector(_nodeADoFIndex + 2) += forceA(2);
     vector(_nodeBDoFIndex) -= forceA(0);
     vector(_nodeBDoFIndex + 1) -= forceA(1);
-    vector(_nodeBDoFIndex + 1) -= forceA(2);
+    vector(_nodeBDoFIndex + 2) -= forceA(2);
 }
+
+#include <iostream>
 
 void Spring::getForceJacobian(
         std::vector<Eigen::Triplet<float>>& dFdx,
@@ -56,8 +58,8 @@ void Spring::getForceJacobian(
 
     auto first = -_stiffness * (_length - _length0) / _length * identity;
     auto second = -_stiffness * _length0 / _length * uM;
-    auto ka = first + second;
-    auto da = _damping * _stiffness * uM;
+    Eigen::Matrix3f ka = first + second;
+    Eigen::Matrix3f da = _damping * _stiffness * uM;
 
     const auto a = _nodeADoFIndex;
     const auto b = _nodeBDoFIndex;

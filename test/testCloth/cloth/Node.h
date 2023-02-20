@@ -15,7 +15,7 @@
 
 class Node : public ISimulable {
 
-    uint32_t _doFIndex;
+    uint32_t _dofIndex;
     float _mass;
     float _damping;
     bool _fixed;
@@ -24,6 +24,9 @@ class Node : public ISimulable {
     Eigen::Vector3f _velocity;
 
 public:
+
+    Node(uint32_t doFIndex, float mass, float damping, bool fixed,
+         Eigen::Vector3f  position);
 
     [[nodiscard]] uint32_t getDoFIndex() const;
 
@@ -35,17 +38,15 @@ public:
 
     [[nodiscard]] const Eigen::Vector3f& getVelocityVector() const;
 
-    void initialize(int startIndex) override;
-
     [[nodiscard]] uint32_t getNumberOfDegreesOfFreedom() const override;
 
     void getPosition(Eigen::VectorXf& vector) const override;
 
-    void setPosition(Eigen::VectorXf& vector) override;
+    void setPosition(const Eigen::VectorXf& vector) override;
 
     void getVelocity(Eigen::VectorXf& vector) const override;
 
-    void setVelocity(Eigen::VectorXf& vector) override;
+    void setVelocity(const Eigen::VectorXf& vector) override;
 
     void getForce(Eigen::VectorXf& vector) const override;
 

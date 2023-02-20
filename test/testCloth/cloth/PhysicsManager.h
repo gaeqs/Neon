@@ -8,12 +8,13 @@
 #include <cstdint>
 
 #include <engine/Engine.h>
+#include <memory>
 #include <vector>
 
 #include "ISimulable.h"
 
 enum class IntegrationMode {
-    SYMPLETIC,
+    SYMPLECTIC,
     IMPLICIT
 };
 
@@ -25,7 +26,11 @@ class PhysicsManager : public neon::Component {
 
     std::vector<std::unique_ptr<ISimulable>> _objects;
 
-    void stepSympletic(float deltaTime);
+    bool _paused;
+
+    void stepSymplectic(float deltaTime);
+
+    void stepImplicit(float deltaTime);
 
 public:
 
@@ -33,7 +38,20 @@ public:
 
     void onUpdate(float deltaTime) override;
 
+    void drawEditor() override;
+
+    template<class Object, class... Params>
+    Object* createSimulableObject(Params&& ... values) {
+        auto ptr = std::make_unique<Object>(_degreesOfFreedom, this, values...);
+
+        _degreesOfFreedom += ptr->getNumberOfDegreesOfFreedom();
+        auto raw = ptr.get();
+        _objects.emplace_back(std::move(ptr));
+        return raw;
+    }
+
 };
+REGISTER_COMPONENT(PhysicsManager, "Physics Manager")
 
 
 #endif //NEON_PHYSICSMANAGER_H
