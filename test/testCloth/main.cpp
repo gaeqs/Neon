@@ -158,7 +158,7 @@ std::shared_ptr<Room> getTestRoom(Application* application) {
 
     auto cloth = room->newGameObject();
     cloth->setName("Cloth");
-    cloth->newComponent<Cloth>(material, physicsManager, 4, 4);
+    cloth->newComponent<Cloth>(material, physicsManager, 20, 20);
 
     room->getCamera().lookAt(glm::normalize(glm::vec3(0, 1.0f, -1.0f)));
     room->getCamera().setPosition(glm::vec3(0.0f, 3.0f, 3.0f));

@@ -60,6 +60,10 @@ list(APPEND LIBRARIES ${VULKAN_LIB_LIST})
 list(APPEND LIBRARIES Glslang::SPIRV Glslang::Glslang)
 list(APPEND LIBRARIES IMGUI IMPLOT)
 
+if (RELEASE_DEBUG)
+    add_compile_definitions(RELEASE_DEBUG)
+endif ()
+
 add_subdirectory(lib)
 include_directories(src)
 add_subdirectory(src)

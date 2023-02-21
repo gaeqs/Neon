@@ -3,8 +3,11 @@
 //
 
 #include "Node.h"
+#include <Eigen/src/Core/Matrix.h>
 #include <Eigen/src/Core/util/Meta.h>
 #include <Eigen/src/SparseCore/SparseUtil.h>
+
+#include <iostream>
 
 #include <utility>
 
@@ -38,8 +41,9 @@ void Node::setVelocity(const Eigen::VectorXf& vector) {
 }
 
 void Node::getForce(Eigen::VectorXf& vector) const {
-    auto damping = -_damping * _mass * _velocity;
-    auto force = Eigen::Vector3f(0.0f, -9.81f, 0.0f) * _mass + damping;
+    Eigen::Vector3f damping = -_damping * _mass * _velocity;
+    Eigen::Vector3f force = Eigen::Vector3f(0.0f, -9.81f, 0.0f) * _mass
+                            + damping;
 
     vector(_dofIndex) += force(0);
     vector(_dofIndex + 1) += force(1);

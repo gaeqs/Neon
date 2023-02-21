@@ -74,7 +74,7 @@ void Cloth::generateModel() {
             1000.0f,
             10.0f,
             0.5f,
-            0.5f
+            0.005f
     );
 
     getGameObject()->newComponent<neon::GraphicComponent>(_model);

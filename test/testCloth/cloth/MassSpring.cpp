@@ -47,7 +47,7 @@ void MassSpring::generateNodes(std::vector<glm::vec3>& positions,
                 i,
                 massPerNode,
                 dampingAlpha,
-                _index == i,
+                _index == i || _index + 57 == i,
                 Eigen::Vector3f(pos.x, pos.y, pos.z)
         );
 

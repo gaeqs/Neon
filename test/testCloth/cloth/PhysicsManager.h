@@ -34,7 +34,7 @@ class PhysicsManager : public neon::Component {
 
 public:
 
-    PhysicsManager(IntegrationMode mode);
+    explicit PhysicsManager(IntegrationMode mode);
 
     void onUpdate(float deltaTime) override;
 
