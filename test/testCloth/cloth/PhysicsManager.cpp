@@ -10,7 +10,7 @@
 #include <Eigen/Core>
 #include <Eigen/Dense>
 #include <Eigen/Sparse>
-#include <Eigen/SparseLU>
+#include <Eigen/SparseCholesky>
 #include <vector>
 
 PhysicsManager::PhysicsManager(IntegrationMode mode) :
@@ -180,11 +180,9 @@ void PhysicsManager::stepImplicit(float deltaTime) {
                          implicit_solve,
                          "Implicit solve");
 
-        Eigen::SparseLU<Eigen::SparseMatrix<float>> solver;
-        solver.analyzePattern(a);
-        solver.factorize(a);
+        Eigen::SimplicialLLT<Eigen::SparseMatrix<float>> solver;
 
-        v = solver.solve(b);
+        v = solver.compute(a).solve(b);
         x += deltaTime * v;
     }
 
