@@ -35,6 +35,8 @@ cmrc_add_resource_library(
 
 find_package(Eigen3 CONFIG REQUIRED)
 
+add_compile_definitions(EIGEN_INITIALIZE_MATRICES_BY_ZERO)
+
 add_executable(testCloth ${TEST_SOURCES})
 set_target_properties(testCloth PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${TEST_DIRECTORY})
 target_link_libraries(testCloth neon shaders_cloth Eigen3::Eigen)
