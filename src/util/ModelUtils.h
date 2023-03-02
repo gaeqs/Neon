@@ -195,7 +195,7 @@ namespace neon::model_utils {
         }
 
         auto mesh = std::make_unique<Mesh>(room, material);
-        mesh->uploadVertexData(vertices, CUBE_TRIANGLE_INDEX);
+        mesh->setMeshData(vertices, CUBE_TRIANGLE_INDEX);
         std::vector<std::unique_ptr<Mesh>> meshes;
         meshes.push_back(std::move(mesh));
 

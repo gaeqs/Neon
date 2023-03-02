@@ -14,7 +14,7 @@
 #include <util/profile/ProfileStack.h>
 #include <util/profile/ProfileStackRecorder.h>
 
-#ifdef NDEBUG
+#if defined NDEBUG && !defined RELEASE_DEBUG
 #define DEBUG_PROFILE(profiler,name)
 #define DEBUG_PROFILE_ID(profiler, id, name)
 #define DEBUG_PROFILE_PTR(profiler,name)
