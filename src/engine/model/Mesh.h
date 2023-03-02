@@ -12,7 +12,7 @@
 #include <engine/structure/Identifiable.h>
 #include <engine/shader/Material.h>
 #include <engine/shader/ShaderUniformBuffer.h>
-#include <engine/collection/IdentifiableCollection.h>
+#include <engine/structure/collection/IdentifiableCollection.h>
 
 #ifdef USE_VULKAN
 

@@ -9,7 +9,7 @@
 
 #include <cmrc/cmrc.hpp>
 
-#include <engine/collection/IdentifiableCollection.h>
+#include <engine/structure/collection/IdentifiableCollection.h>
 #include <engine/render/Texture.h>
 
 namespace neon {

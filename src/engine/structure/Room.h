@@ -7,9 +7,9 @@
 
 #include <engine/geometry/Camera.h>
 
-#include <engine/collection/ComponentCollection.h>
-#include <engine/collection/IdentifiableCollection.h>
-#include <engine/collection/TextureCollection.h>
+#include <engine/structure/collection/ComponentCollection.h>
+#include <engine/structure/collection/IdentifiableCollection.h>
+#include <engine/structure/collection/TextureCollection.h>
 #include <engine/shader/ShaderUniformBuffer.h>
 #include <engine/shader/ShaderUniformDescriptor.h>
 #include <engine/shader/ShaderProgram.h>

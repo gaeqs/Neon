@@ -13,7 +13,7 @@
 
 #include <engine/shader/Material.h>
 #include <vulkan/vulkan.h>
-#include <engine/collection/IdentifiableCollection.h>
+#include <engine/structure/collection/IdentifiableCollection.h>
 #include <engine/shader/ShaderUniformBuffer.h>
 #include <vulkan/VKApplication.h>
 #include <vulkan/buffer/SimpleBuffer.h>

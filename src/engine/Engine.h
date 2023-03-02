@@ -5,10 +5,6 @@
 #ifndef RVTRACKING_ENGINE_H
 #define RVTRACKING_ENGINE_H
 
-#include <engine/collection/ComponentCollection.h>
-#include <engine/collection/IdentifiableCollection.h>
-#include <engine/collection/TextureCollection.h>
-
 #include <engine/geometry/Camera.h>
 #include <engine/geometry/Frustum.h>
 #include <engine/geometry/Transform.h>
@@ -45,6 +41,7 @@
 #include <engine/shader/ShaderUniformBuffer.h>
 #include <engine/shader/ShaderUniformDescriptor.h>
 
+#include <engine/structure/Asset.h>
 #include <engine/structure/Component.h>
 #include <engine/structure/ComponentImplementedEvents.h>
 #include <engine/structure/ComponentRegister.h>
@@ -52,6 +49,12 @@
 #include <engine/structure/Identifiable.h>
 #include <engine/structure/IdentifiableWrapper.h>
 #include <engine/structure/Room.h>
+
+#include <engine/structure/collection/ComponentCollection.h>
+#include <engine/structure/collection/IdentifiableCollection.h>
+#include <engine/structure/collection/TextureCollection.h>
+
+
 #include <engine/Application.h>
 
 #endif //RVTRACKING_ENGINE_H

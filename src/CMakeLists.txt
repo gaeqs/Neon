@@ -16,12 +16,12 @@ set(SOURCES
         engine/structure/GameObject.h
         engine/structure/Component.cpp
         engine/structure/Component.h
-        util/ClusteredLinkedCollection.h
         engine/Engine.h
-        engine/collection/ComponentCollection.cpp
-        engine/collection/ComponentCollection.h
-        engine/collection/TextureCollection.cpp
-        engine/collection/TextureCollection.h
+        util/ClusteredLinkedCollection.h
+        engine/structure/collection/ComponentCollection.cpp
+        engine/structure/collection/ComponentCollection.h
+        engine/structure/collection/TextureCollection.cpp
+        engine/structure/collection/TextureCollection.h
         engine/structure/IdentifiableWrapper.h
         engine/geometry/Transform.cpp
         engine/geometry/Transform.h
@@ -31,7 +31,7 @@ set(SOURCES
         engine/shader/ShaderProgram.cpp
         engine/shader/ShaderProgram.h
         engine/shader/ShaderType.h
-        engine/collection/IdentifiableCollection.h
+        engine/structure/collection/IdentifiableCollection.h
         engine/model/DefaultInstancingData.h
         util/component/CameraMovementComponent.cpp
         util/component/CameraMovementComponent.h
@@ -98,7 +98,12 @@ set(SOURCES
         util/ModelUtils.h
         engine/render/TextureCreateInfo.h
         engine/shader/MaterialCreateInfo.h
-        assimp/AssimpLoader.cpp assimp/AssimpLoader.h)
+        assimp/AssimpLoader.cpp
+        assimp/AssimpLoader.h
+        engine/structure/Asset.cpp
+        engine/structure/Asset.h
+        engine/structure/collection/AssetCollection.cpp
+        engine/structure/collection/AssetCollection.h)
 
 
 set(VULKAN_SOURCES
