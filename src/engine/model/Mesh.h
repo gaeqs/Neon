@@ -24,6 +24,10 @@ namespace neon {
 
     class Room;
 
+    /**
+     * Represents a set of vertices and indices
+     * used by models to render an object.
+     */
     class Mesh : public Identifiable {
 
         template<class T> friend
