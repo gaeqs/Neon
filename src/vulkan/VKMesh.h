@@ -5,6 +5,7 @@
 #ifndef NEON_VKMESH_H
 #define NEON_VKMESH_H
 
+#include <stdint.h>
 #include <type_traits>
 #include <vector>
 #include <optional>
@@ -108,12 +109,16 @@ namespace neon::vulkan {
         }
 
         template<class Vertex>
-        bool setVertices(std::vector<Vertex> vertices) const {
+        bool setVertices(const std::vector<Vertex>& vertices) const {
             return setVertices(vertices.data(),
                                vertices.size() * sizeof(Vertex));
         }
 
         bool setVertices(const void* data, size_t length) const;
+
+        [[nodiscard]] std::vector<uint32_t> getIndices() const;
+
+        bool setIndices(const std::vector<uint32_t>& indices) const;
 
         [[nodiscard]] IdentifiableWrapper<Material> getMaterial() const;
 

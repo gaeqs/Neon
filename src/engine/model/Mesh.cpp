@@ -42,4 +42,12 @@ namespace neon {
     bool Mesh::setVertices(const void* data, size_t length) const {
         return _implementation.setVertices(data, length);
     }
+
+    std::vector<uint32_t> Mesh::getIndices() const {
+        return _implementation.getIndices();
+    }
+
+    bool Mesh::setIndices(const std::vector<uint32_t>& indices) const {
+        return _implementation.setIndices(indices);
+    }
 }

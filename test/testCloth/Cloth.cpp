@@ -62,7 +62,7 @@ void Cloth::generateModel() {
             true,
             false
     ));
-    meshes[0]->reinitializeVertexData(_vertices, indices);
+    meshes[0]->setMeshData(_vertices, indices);
 
     _model = getRoom()->getModels().create(meshes);
 

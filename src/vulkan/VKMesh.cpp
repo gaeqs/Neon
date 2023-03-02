@@ -6,6 +6,7 @@
 
 #include <cstring>
 #include <engine/Application.h>
+#include <stdint.h>
 #include <vulkan/VKApplication.h>
 
 namespace neon::vulkan {
@@ -65,6 +66,33 @@ namespace neon::vulkan {
         auto map = _vertexBuffer.value()->map<char>();
         if (!map.has_value()) return false;
         memcpy(map.value()->raw(), data, std::min(length, _verticesSize));
+        return true;
+    }
+
+    std::vector<uint32_t> VKMesh::getIndices() const {
+        if (!_indexBuffer.has_value() || _indexAmount == 0)
+            return {};
+
+        auto map = _vertexBuffer.value()->map<uint32_t>();
+        if (!map.has_value()) return {};
+
+        std::vector<uint32_t> vertices;
+        vertices.resize(_indexAmount);
+
+        for (int i = 0; i < _indexAmount; ++i) {
+            vertices.push_back(map->get()->get(i));
+        }
+
+        return vertices;
+    }
+
+    bool VKMesh::setIndices(const std::vector<uint32_t>& indices) const {
+        if (!_modifiableIndices) return false;
+        auto map = _indexBuffer.value()->map<char>();
+        if (!map.has_value()) return false;
+        memcpy(map.value()->raw(), indices.data(),
+               std::min(indices.size(), static_cast<size_t>(_indexAmount))
+               * sizeof(uint32_t));
         return true;
     }
 }
