@@ -4,9 +4,13 @@
 
 #include "ComponentCollection.h"
 
+#include <memory>
+#include <unordered_set>
+
 #include <engine/structure/Room.h>
 #include <engine/structure/Component.h>
 #include <engine/render/GraphicComponent.h>
+#include <engine/model/Model.h>
 
 namespace neon {
 
@@ -115,6 +119,20 @@ namespace neon {
         reinterpret_cast<Component*>(rawComponent)->onConstruction();
     }
 
+    void ComponentCollection::flushModels() const {
+        std::unordered_set<std::shared_ptr<Model>> updated;
+        auto ptr = getComponentsOfType<GraphicComponent>();
+        if (ptr == nullptr) return;
+        auto it = ptr->begin();
+        auto end = ptr->end();
+        while (it != end) {
+            if (updated.insert(it->getModel()).second) {
+                it->getModel()->flush();
+            }
+            ++it;
+        }
+    }
+
     void ComponentCollection::flushNotStartedComponents() {
         for (; !_notStartedComponents.empty(); _notStartedComponents.pop()) {
             auto ptr = _notStartedComponents.front();
@@ -123,9 +141,5 @@ namespace neon {
                 ptr->onStart();
             }
         }
-    }
-
-    void ComponentCollection::test(std::type_index fun) {
-        std::cout << fun.name() << std::endl;
     }
 }

@@ -39,7 +39,6 @@ namespace neon {
         ClusteredLinkedCollection<GameObject> _gameObjects;
         ComponentCollection _components;
         TextureCollection _textures;
-        IdentifiableCollection<Model> _models;
         IdentifiableCollection<ShaderProgram> _shaders;
         IdentifiableCollection<Material> _materials;
 
@@ -70,10 +69,6 @@ namespace neon {
         [[nodiscard]] const TextureCollection &getTextures() const;
 
         [[nodiscard]] TextureCollection &getTextures();
-
-        [[nodiscard]] const IdentifiableCollection<Model> &getModels() const;
-
-        [[nodiscard]] IdentifiableCollection<Model> &getModels();
 
         [[nodiscard]] const std::shared_ptr<ShaderUniformDescriptor> &
         getGlobalUniformDescriptor() const;

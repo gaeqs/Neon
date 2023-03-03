@@ -45,6 +45,8 @@ namespace neon {
          */
         Asset(std::type_index type, std::string name);
 
+        virtual ~Asset() = default;
+
         /**
          * Returns the type of the asset.
          * @return the type.
@@ -83,7 +85,7 @@ namespace neon {
 namespace std {
 
     template<>
-    class hash<neon::AssetIdentifier> {
+    struct hash<neon::AssetIdentifier> {
 
         std::size_t operator()(neon::AssetIdentifier const& s) const noexcept {
             std::size_t h1 = std::hash<std::type_index>{}(s.type);

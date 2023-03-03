@@ -5,11 +5,11 @@
 #ifndef NEON_MODEL_H
 #define NEON_MODEL_H
 
-#include <stdint.h>
+#include "engine/Application.h"
 #include <string>
 #include <typeindex>
 
-#include <engine/structure/Identifiable.h>
+#include <engine/structure/Asset.h>
 #include <engine/model/Mesh.h>
 
 #ifdef USE_VULKAN
@@ -29,10 +29,7 @@ namespace neon {
      * A model can be represented as a collection
      * of meshes that share the same position.
      */
-    class Model : public Identifiable {
-
-        template<class T> friend
-        class IdentifiableWrapper;
+    class Model : public Asset {
 
     public:
 #ifdef USE_VULKAN
@@ -41,11 +38,7 @@ namespace neon {
 
     private:
 
-        uint64_t _id;
-        std::string _name;
-
         Implementation _implementation;
-
         std::vector<std::unique_ptr<Mesh>> _meshes;
 
         /**
@@ -65,28 +58,9 @@ namespace neon {
          * @param room the room where the model is located at.
          * @param meshes the meshes used by the model.
          */
-        Model(Room* room, std::vector<std::unique_ptr<Mesh>>& meshes);
-
-        /**
-         * Returns the identifier of the model.
-         * This identifier is unique and immutable.
-         * @return the identifier.
-         */
-        [[nodiscard]] uint64_t getId() const override;
-
-        /**
-         * Returns the name of the model.
-         * This name may be changed and may not be unique.
-         * @return the name.
-         */
-        [[nodiscard]] const std::string& getName() const;
-
-        /**
-         * Sets the name of the model.
-         * This name may not be unique.
-         * @param name the name.
-         */
-        void setName(const std::string& name);
+        Model(Application* application,
+              const std::string& name,
+              std::vector<std::unique_ptr<Mesh>>& meshes);
 
         /**
          * Returns the implementation of the model.
@@ -128,7 +102,8 @@ namespace neon {
 
         /**
          * Creates an instance of this model.
-         * @return the identifier of the instance or the error if something went wrong.
+         * @return the identifier of the instance or the
+         * error if something went wrong.
          */
         [[nodiscard]] Result<uint32_t*, std::string> createInstance();
 

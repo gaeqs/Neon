@@ -6,8 +6,12 @@
 
 #include <engine/model/DefaultInstancingData.h>
 #include <engine/structure/Room.h>
+#include <engine/model/Model.h>
+#include <engine/structure/collection/AssetCollection.h>
 
 #include <imgui.h>
+
+#include <utility>
 
 namespace neon {
     GraphicComponent::GraphicComponent() :
@@ -16,8 +20,8 @@ namespace neon {
 
     }
 
-    GraphicComponent::GraphicComponent(IdentifiableWrapper<Model> model) :
-            _model(model),
+    GraphicComponent::GraphicComponent(std::shared_ptr<Model> model) :
+            _model(std::move(model)),
             _modelTargetId() {
 
         if (_model != nullptr) {
@@ -36,11 +40,11 @@ namespace neon {
         }
     }
 
-    const IdentifiableWrapper<Model>& GraphicComponent::getModel() const {
+    const std::shared_ptr<Model>& GraphicComponent::getModel() const {
         return _model;
     }
 
-    void GraphicComponent::setModel(const IdentifiableWrapper<Model>& model) {
+    void GraphicComponent::setModel(const std::shared_ptr<Model>& model) {
         if (_model != nullptr && _modelTargetId.has_value()) {
             _model->freeInstance(*_modelTargetId.value());
         }
@@ -74,7 +78,7 @@ namespace neon {
     void GraphicComponent::drawEditor() {
         static ImGuiTextFilter filter;
 
-        auto& models = getRoom()->getModels();
+        auto& models = getAssets().getAll<Model>();
 
         if (_model) {
             ImGui::Text("Using model %s", _model->getName().c_str());
@@ -90,11 +94,12 @@ namespace neon {
         if (ImGui::BeginPopup("model_change_popup")) {
             filter.Draw();
 
-            for (auto& model: models) {
-                if (!filter.PassFilter(model.getName().c_str())) continue;
-                if (ImGui::Selectable(model.getName().c_str(),
-                                      _model.getId() == model.getId())) {
-                    setModel(&model);
+            for (auto& [name, model]: models) {
+                if (model.expired()) continue;
+                if (!filter.PassFilter(name.c_str())) continue;
+                if (ImGui::Selectable(name.c_str(),
+                                      _model->getName() == name)) {
+                    setModel(std::dynamic_pointer_cast<Model>(model.lock()));
                 }
             }
 

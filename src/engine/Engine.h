@@ -50,6 +50,7 @@
 #include <engine/structure/IdentifiableWrapper.h>
 #include <engine/structure/Room.h>
 
+#include <engine/structure/collection/AssetCollection.h>
 #include <engine/structure/collection/ComponentCollection.h>
 #include <engine/structure/collection/IdentifiableCollection.h>
 #include <engine/structure/collection/TextureCollection.h>

@@ -25,7 +25,6 @@ namespace neon {
             _gameObjects(),
             _components(),
             _textures(this),
-            _models(this),
             _shaders(this),
             _materials(this),
             _globalUniformDescriptor(descriptor),
@@ -66,14 +65,6 @@ namespace neon {
 
     TextureCollection &Room::getTextures() {
         return _textures;
-    }
-
-    const IdentifiableCollection<Model> &Room::getModels() const {
-        return _models;
-    }
-
-    IdentifiableCollection<Model> &Room::getModels() {
-        return _models;
     }
 
     const std::shared_ptr<ShaderUniformDescriptor> &
@@ -147,9 +138,7 @@ namespace neon {
 
         {
             DEBUG_PROFILE(p, models);
-            _models.forEach([](Model *m) {
-                m->flush();
-            });
+            _components.flushModels();
         }
 
         {

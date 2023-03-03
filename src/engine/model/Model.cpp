@@ -3,12 +3,11 @@
 //
 
 #include "Model.h"
+#include "engine/structure/Asset.h"
 
 #include <engine/structure/Room.h>
 
 namespace neon {
-
-    uint64_t MODEL_ID_GENERATOR = 1;
 
     std::vector<Mesh::Implementation*> Model::getMeshImplementations(
             const std::vector<std::unique_ptr<Mesh>>& meshes) {
@@ -23,17 +22,12 @@ namespace neon {
         return vector;
     }
 
-    Model::Model(Room* room,
+    Model::Model(Application* application,
+                 const std::string& name,
                  std::vector<std::unique_ptr<Mesh>>& meshes) :
-            _id(MODEL_ID_GENERATOR++),
-            _name("Model " + std::to_string(_id)),
-            _implementation(room->getApplication(),
-                            getMeshImplementations(meshes)),
+            Asset(typeid(Model), name),
+            _implementation(application, getMeshImplementations(meshes)),
             _meshes(std::move(meshes)) {
-    }
-
-    uint64_t Model::getId() const {
-        return _id;
     }
 
     Model::Implementation& Model::getImplementation() {
@@ -62,14 +56,6 @@ namespace neon {
 
     void Model::flush() {
         _implementation.flush();
-    }
-
-    const std::string& Model::getName() const {
-        return _name;
-    }
-
-    void Model::setName(const std::string& name) {
-        _name = name;
     }
 
     void Model::defineInstanceStruct(std::type_index type, size_t size) {

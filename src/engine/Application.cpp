@@ -9,24 +9,24 @@
 #include <engine/io/CursorEvent.h>
 
 namespace neon {
-    void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
-        auto *application = static_cast<Application *>(
+    void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
+        auto* application = static_cast<Application*>(
                 glfwGetWindowUserPointer(
-                window));
+                        window));
         application->internalForceSizeValues(width, height);
     }
 
-    void key_size_callback(GLFWwindow *window, int key, int scancode,
+    void key_size_callback(GLFWwindow* window, int key, int scancode,
                            int action, int mods) {
-        auto *application = static_cast<Application *>(
+        auto* application = static_cast<Application*>(
                 glfwGetWindowUserPointer(
-                window));
+                        window));
 
         application->internalKeyEvent(key, scancode, action, mods);
     }
 
-    void cursor_pos_callback(GLFWwindow *window, double x, double y) {
-        auto *application = static_cast<Application *>(
+    void cursor_pos_callback(GLFWwindow* window, double x, double y) {
+        auto* application = static_cast<Application*>(
                 glfwGetWindowUserPointer(window));
         application->internalCursorPosEvent(x, y);
     }
@@ -38,15 +38,16 @@ namespace neon {
             _room(nullptr),
             _lastCursorPosition(0.0, 0.0),
             _currentFrameInformation(),
-            _implementation() {
+            _implementation(),
+            _assets() {
     }
 
     Application::~Application() {
         glfwTerminate();
     }
 
-    Result<GLFWwindow *, std::string> Application::init(
-            const std::string &name) {
+    Result<GLFWwindow*, std::string> Application::init(
+            const std::string& name) {
         if (!glfwInit()) {
             return {"Failed to initialize GLFW"};
         }
@@ -125,27 +126,35 @@ namespace neon {
                 ++frames;
             }
             _implementation.finishLoop();
-        } catch (const std::exception &exception) {
+        } catch (const std::exception& exception) {
             return {exception.what()};
         }
 
         return {frames};
     }
 
-    const Application::Implementation &Application::getImplementation() const {
+    const Application::Implementation& Application::getImplementation() const {
         return _implementation;
     }
 
-    Application::Implementation &Application::getImplementation() {
+    Application::Implementation& Application::getImplementation() {
         return _implementation;
     }
 
-    const Profiler &Application::getProfiler() const {
+    const Profiler& Application::getProfiler() const {
         return _profiler;
     }
 
-    Profiler &Application::getProfiler() {
+    Profiler& Application::getProfiler() {
         return _profiler;
+    }
+
+    const AssetCollection& Application::getAssets() const {
+        return _assets;
+    }
+
+    AssetCollection& Application::getAssets() {
+        return _assets;
     }
 
     int32_t Application::getWidth() const {
@@ -164,7 +173,7 @@ namespace neon {
         return _currentFrameInformation;
     }
 
-    void Application::setRoom(const std::shared_ptr<Room> &room) {
+    void Application::setRoom(const std::shared_ptr<Room>& room) {
         if (room != nullptr && room->getApplication() != this) {
             throw std::runtime_error(
                     "Room's application is not this application!");

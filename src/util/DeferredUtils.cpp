@@ -3,10 +3,10 @@
 //
 
 #include "DeferredUtils.h"
-#include "engine/shader/MaterialCreateInfo.h"
 
 #include <stdexcept>
 
+#include <engine/shader/MaterialCreateInfo.h>
 #include <engine/structure/Room.h>
 #include <engine/render/Texture.h>
 #include <engine/render/SimpleFrameBuffer.h>
@@ -46,7 +46,7 @@ namespace neon::deferred_utils {
             const std::shared_ptr<FrameBuffer>& target,
             IdentifiableWrapper<ShaderProgram> shader,
             const std::function<void(
-                    MaterialCreateInfo & )>& populateFunction) {
+                    MaterialCreateInfo&)>& populateFunction) {
         std::vector<InternalDeferredVertex> vertices = {
                 {{-1.0f, 1.0f}},
                 {{1.0f,  1.0f}},
