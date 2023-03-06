@@ -13,7 +13,7 @@ namespace neon {
     class FlashLight : public Component {
 
         IdentifiableWrapper<GraphicComponent> _graphicComponent;
-        IdentifiableWrapper<Model> _customModel;
+        std::shared_ptr<Model> _customModel;
 
         glm::vec3 _diffuseColor;
         glm::vec3 _specularColor;
@@ -58,7 +58,7 @@ namespace neon {
 
         FlashLight();
 
-        explicit FlashLight(const IdentifiableWrapper<Model>& model);
+        explicit FlashLight(const std::shared_ptr<Model>& model);
 
         [[nodiscard]] const glm::vec3& getDiffuseColor() const;
 

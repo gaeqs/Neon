@@ -22,7 +22,7 @@ namespace neon {
             _quadraticAttenuation(1.0f) {
     }
 
-    PointLight::PointLight(const IdentifiableWrapper<Model>& model) :
+    PointLight::PointLight(const std::shared_ptr<Model>& model) :
             _graphicComponent(),
             _customModel(model),
             _diffuseColor(1.0f, 1.0f, 1.0f),

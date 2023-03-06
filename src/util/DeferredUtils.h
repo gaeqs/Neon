@@ -29,8 +29,9 @@ namespace neon {
 
 namespace neon::deferred_utils {
 
-    IdentifiableWrapper<Model> createScreenModel(
+    std::shared_ptr<Model> createScreenModel(
             Room* room,
+            const std::string& name,
             const std::vector<IdentifiableWrapper<Texture>>& inputTextures,
             const std::shared_ptr<FrameBuffer>& target,
             IdentifiableWrapper<ShaderProgram> shader,

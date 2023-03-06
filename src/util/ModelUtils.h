@@ -5,6 +5,7 @@
 #ifndef NEON_MODELUTILS_H
 #define NEON_MODELUTILS_H
 
+#include "engine/structure/collection/AssetCollection.h"
 #include <functional>
 
 #include <glm/glm.hpp>
@@ -14,7 +15,7 @@
 namespace neon::model_utils {
 
     template<class Vertex>
-    IdentifiableWrapper<Model> createCubeModel(
+    std::shared_ptr<Model> createCubeModel(
             Room* room,
             const std::vector<IdentifiableWrapper<Texture>>& inputTextures,
             const std::shared_ptr<FrameBuffer>& target,
@@ -199,7 +200,13 @@ namespace neon::model_utils {
         std::vector<std::unique_ptr<Mesh>> meshes;
         meshes.push_back(std::move(mesh));
 
-        auto model = room->getModels().create(meshes);
+        auto model = std::make_shared<Model>(
+                room->getApplication(),
+                "box",
+                meshes
+        );
+
+        room->getApplication()->getAssets().storage(model, StorageMode::WEAK);
         return model;
     }
 

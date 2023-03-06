@@ -3,7 +3,9 @@
 //
 
 #include "DeferredUtils.h"
+#include "engine/structure/collection/AssetCollection.h"
 
+#include <memory>
 #include <stdexcept>
 
 #include <engine/shader/MaterialCreateInfo.h>
@@ -40,13 +42,15 @@ namespace neon::deferred_utils {
     };
 
 
-    IdentifiableWrapper<Model> createScreenModel(
+    std::shared_ptr<Model> createScreenModel(
             Room* room,
+            const std::string& name,
             const std::vector<IdentifiableWrapper<Texture>>& inputTextures,
             const std::shared_ptr<FrameBuffer>& target,
             IdentifiableWrapper<ShaderProgram> shader,
             const std::function<void(
                     MaterialCreateInfo&)>& populateFunction) {
+
         std::vector<InternalDeferredVertex> vertices = {
                 {{-1.0f, 1.0f}},
                 {{1.0f,  1.0f}},
@@ -86,7 +90,12 @@ namespace neon::deferred_utils {
         std::vector<std::unique_ptr<Mesh>> meshes;
         meshes.push_back(std::move(mesh));
 
-        auto model = room->getModels().create(meshes);
+
+        auto& assets = room->getApplication()->getAssets();
+        auto model = std::make_shared<Model>(room->getApplication(),
+                                             name, meshes);
+        assets.storage(model, StorageMode::WEAK);
+
         return model;
     }
 
@@ -99,9 +108,9 @@ namespace neon::deferred_utils {
             IdentifiableWrapper<ShaderProgram> flashShader) {
         std::vector<TextureFormat> outputFormatVector = {outputFormat};
 
-        IdentifiableWrapper<Model> directionalModel = nullptr;
-        IdentifiableWrapper<Model> pointModel = nullptr;
-        IdentifiableWrapper<Model> flashModel = nullptr;
+        std::shared_ptr<Model> directionalModel = nullptr;
+        std::shared_ptr<Model> pointModel = nullptr;
+        std::shared_ptr<Model> flashModel = nullptr;
 
         auto frameBuffer = std::make_shared<SimpleFrameBuffer>(
                 room, outputFormatVector, false);
@@ -116,6 +125,7 @@ namespace neon::deferred_utils {
         if (directionalShader != nullptr) {
             directionalModel = createScreenModel(
                     room,
+                    "Directional light model",
                     textures,
                     frameBuffer,
                     directionalShader,
@@ -125,13 +135,13 @@ namespace neon::deferred_utils {
                         info.blending.attachmentsBlending.push_back(blend);
                     }
             );
-            directionalModel->setName("Directional light model");
             directionalModel->defineInstanceStruct<DirectionalLight::Data>();
         }
 
         if (pointShader != nullptr) {
             pointModel = createScreenModel(
                     room,
+                    "Point light model",
                     textures,
                     frameBuffer,
                     pointShader,
@@ -141,13 +151,13 @@ namespace neon::deferred_utils {
                         info.blending.attachmentsBlending.push_back(blend);
                     }
             );
-            pointModel->setName("Point light model");
             pointModel->defineInstanceStruct<PointLight::Data>();
         }
 
         if (flashShader != nullptr) {
             flashModel = createScreenModel(
                     room,
+                    "Flash light model",
                     textures,
                     frameBuffer,
                     flashShader,
@@ -157,7 +167,6 @@ namespace neon::deferred_utils {
                         info.blending.attachmentsBlending.push_back(blend);
                     }
             );
-            flashModel->setName("Flash light model");
             flashModel->defineInstanceStruct<FlashLight::Data>();
         }
 

@@ -5,6 +5,8 @@
 #ifndef NEON_LIGHTSYSTEM_H
 #define NEON_LIGHTSYSTEM_H
 
+#include <memory>
+
 #include <engine/structure/Component.h>
 #include <engine/model/Model.h>
 
@@ -16,23 +18,23 @@ namespace neon {
  */
     class LightSystem : public Component {
 
-        IdentifiableWrapper<Model> _directionalLightModel;
-        IdentifiableWrapper<Model> _pointLightModel;
-        IdentifiableWrapper<Model> _flashLightModel;
+        std::shared_ptr<Model> _directionalLightModel;
+        std::shared_ptr<Model> _pointLightModel;
+        std::shared_ptr<Model> _flashLightModel;
 
     public:
 
-        LightSystem(const IdentifiableWrapper<Model>& directionalLightModel,
-                    const IdentifiableWrapper<Model>& pointLightModel,
-                    const IdentifiableWrapper<Model>& flashLightModel);
+        LightSystem(const std::shared_ptr<Model>& directionalLightModel,
+                    const std::shared_ptr<Model>& pointLightModel,
+                    const std::shared_ptr<Model>& flashLightModel);
 
-        [[nodiscard]] const IdentifiableWrapper<Model>&
+        [[nodiscard]] const std::shared_ptr<Model>&
         getDirectionalLightModel() const;
 
-        [[nodiscard]] const IdentifiableWrapper<Model>&
+        [[nodiscard]] const std::shared_ptr<Model>&
         getPointLightModel() const;
 
-        [[nodiscard]] const IdentifiableWrapper<Model>&
+        [[nodiscard]] const std::shared_ptr<Model>&
         getFlashLightModel() const;
 
     };
