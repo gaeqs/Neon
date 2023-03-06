@@ -3,6 +3,7 @@
 //
 
 #include "AssimpLoader.h"
+#include "engine/structure/collection/AssetCollection.h"
 
 #include <memory>
 #include <string>
@@ -315,11 +316,19 @@ namespace neon::assimp_loader {
         loadMaterials(scene, materials, textures, info);
         loadMeshes(scene, meshes, materials, info);
 
-        auto model = info.room->getModels().create(meshes);
+        auto model = std::make_shared<Model>(
+                info.room->getApplication(),
+                info.name,
+                meshes
+        );
+
         model->defineInstanceStruct(
                 info.instanceData.type,
                 info.instanceData.size
         );
+
+        info.room->getApplication()->getAssets()
+                .store(model, StorageMode::WEAK);
 
         return {true, model};
     }

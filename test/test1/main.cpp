@@ -86,6 +86,7 @@ std::shared_ptr<FrameBuffer> initRender(Room* room) {
     textures[0] = albedo;
     auto screenModel = deferred_utils::createScreenModel(
             room,
+            "screen_model",
             textures,
             screenFrameBuffer,
             screenShader
@@ -119,7 +120,7 @@ void loadModels(Application* application, Room* room,
     sansMaterialInfo.descriptions.uniform = materialDescriptor;
 
     auto sansLoaderInfo = assimp_loader::LoaderInfo::create<TestVertex>(
-            room, sansMaterialInfo);
+            room, "Sans", sansMaterialInfo);
 
     auto sansResult = assimp_loader::load(R"(resource/Sans)", "Sans.obj",
                                           sansLoaderInfo);
@@ -131,7 +132,6 @@ void loadModels(Application* application, Room* room,
     }
 
     auto sansModel = sansResult.model;
-    sansModel->setName("Sans");
 
     constexpr int AMOUNT = 1024 * 1;
     int q = static_cast<int>(std::sqrt(AMOUNT));
@@ -157,7 +157,7 @@ void loadModels(Application* application, Room* room,
     }
 
     auto zeppeliLoaderInfo = assimp_loader::LoaderInfo::create<TestVertex>(
-            room, sansMaterialInfo);
+            room, "Zeppeli", sansMaterialInfo);
     zeppeliLoaderInfo.flipWindingOrder = true;
     zeppeliLoaderInfo.flipNormals = true;
 
@@ -171,7 +171,6 @@ void loadModels(Application* application, Room* room,
     }
 
     auto zeppeliModel = zeppeliResult.model;
-    zeppeliModel->setName("Zeppeli");
 
     auto zeppeli = room->newGameObject();
     zeppeli->newComponent<GraphicComponent>(zeppeliModel);
@@ -205,7 +204,6 @@ void loadModels(Application* application, Room* room,
                         DefaultInstancingData::getInstancingDescription();
             }
     );
-    cubeModel->setName("Cube");
 
     auto cube = room->newGameObject();
     cube->newComponent<GraphicComponent>(cubeModel);

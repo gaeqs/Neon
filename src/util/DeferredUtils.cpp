@@ -94,7 +94,7 @@ namespace neon::deferred_utils {
         auto& assets = room->getApplication()->getAssets();
         auto model = std::make_shared<Model>(room->getApplication(),
                                              name, meshes);
-        assets.storage(model, StorageMode::WEAK);
+        assets.store(model, StorageMode::PERMANENT);
 
         return model;
     }

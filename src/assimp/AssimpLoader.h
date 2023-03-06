@@ -41,7 +41,7 @@ namespace neon::assimp_loader {
          * The loaded model.
          * This value is nullptr if the result is not valid.
          */
-        IdentifiableWrapper<Model> model = nullptr;
+        std::shared_ptr<Model> model = nullptr;
     };
 
     struct VertexParserData {
@@ -61,8 +61,8 @@ namespace neon::assimp_loader {
         InputDescription description;
         size_t structSize;
 
-        VertexParser(ParseFunction  parseFunction_,
-                     InputDescription  description_,
+        VertexParser(ParseFunction parseFunction_,
+                     InputDescription description_,
                      size_t structSize_) :
                 parseFunction(std::move(parseFunction_)),
                 description(std::move(description_)),
@@ -97,9 +97,10 @@ namespace neon::assimp_loader {
         std::type_index type;
         size_t size;
 
-        InstanceData(InputDescription  description_,
+        InstanceData(InputDescription description_,
                      const std::type_index& type_, size_t size_) :
-                description(std::move(description_)), type(type_), size(size_) {}
+                description(std::move(description_)), type(type_),
+                size(size_) {}
 
         template<typename Instance>
         static InstanceData fromTemplate() {
@@ -118,6 +119,11 @@ namespace neon::assimp_loader {
          * The room where the model is loaded.
          */
         Room* room;
+
+        /**
+         * The name of the model.
+         */
+        std::string name;
 
         /**
          * The structure used to create materials.
@@ -163,10 +169,12 @@ namespace neon::assimp_loader {
     private:
 
         LoaderInfo(Room* room_,
-                   MaterialCreateInfo  materialCreateInfo_,
-                   VertexParser  vertexParser_,
-                   InstanceData  instanceData_) :
+                   std::string name_,
+                   MaterialCreateInfo materialCreateInfo_,
+                   VertexParser vertexParser_,
+                   InstanceData instanceData_) :
                 room(room_),
+                name(std::move(name_)),
                 materialCreateInfo(std::move(materialCreateInfo_)),
                 vertexParser(std::move(vertexParser_)),
                 instanceData(std::move(instanceData_)) {}
@@ -175,9 +183,11 @@ namespace neon::assimp_loader {
 
         template<class Vertex, class Instance = DefaultInstancingData>
         static LoaderInfo create(Room* room,
+                                 std::string name,
                                  MaterialCreateInfo materialCreateInfo) {
             return {
                     room,
+                    std::move(name),
                     materialCreateInfo,
                     VertexParser::fromTemplate<Vertex>(),
                     InstanceData::fromTemplate<Instance>()
@@ -195,6 +205,7 @@ namespace neon::assimp_loader {
      */
     Result load(const cmrc::file& file,
                 const LoaderInfo& info);
+
     /**
      * Loads the model located at the given file.
      *

@@ -206,7 +206,7 @@ namespace neon::model_utils {
                 meshes
         );
 
-        room->getApplication()->getAssets().storage(model, StorageMode::WEAK);
+        room->getApplication()->getAssets().store(model, StorageMode::WEAK);
         return model;
     }
 

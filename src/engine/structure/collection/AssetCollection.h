@@ -139,7 +139,7 @@ namespace neon {
          * @param asset the asset to store.
          * @param mode the storage mode.
          */
-        void storage(const std::shared_ptr<Asset>& asset, StorageMode mode);
+        void store(const std::shared_ptr<Asset>& asset, StorageMode mode);
 
         /**
          * Removes the asset that matches the given
