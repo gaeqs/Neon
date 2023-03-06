@@ -85,7 +85,7 @@ namespace neon::deferred_utils {
             material->getUniformBuffer().setTexture(i, inputTextures[i]);
         }
 
-        auto mesh = std::make_unique<Mesh>(room, material);
+        auto mesh = std::make_shared<Mesh>(room, material);
         mesh->setMeshData(vertices, indices);
         std::vector<std::unique_ptr<Mesh>> meshes;
         meshes.push_back(std::move(mesh));
@@ -94,7 +94,7 @@ namespace neon::deferred_utils {
         auto& assets = room->getApplication()->getAssets();
         auto model = std::make_shared<Model>(room->getApplication(),
                                              name, meshes);
-        assets.store(model, StorageMode::PERMANENT);
+        assets.store(model, AssetStorageMode::PERMANENT);
 
         return model;
     }

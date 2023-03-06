@@ -18,9 +18,9 @@ namespace neon {
     }
 
     void AssetCollection::store(const std::shared_ptr<Asset>& asset,
-                                StorageMode mode) {
+                                AssetStorageMode mode) {
         if (asset == nullptr) return;
-        if (mode == StorageMode::PERMANENT)
+        if (mode == AssetStorageMode::PERMANENT)
             _permanentAssets[asset->getIdentifier()] = asset;
         _assets[asset->getType()][asset->getName()] = asset;
     }

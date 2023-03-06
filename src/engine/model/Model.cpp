@@ -3,14 +3,13 @@
 //
 
 #include "Model.h"
-#include "engine/structure/Asset.h"
 
 #include <engine/structure/Room.h>
 
 namespace neon {
 
     std::vector<Mesh::Implementation*> Model::getMeshImplementations(
-            const std::vector<std::unique_ptr<Mesh>>& meshes) {
+            const std::vector<std::shared_ptr<Mesh>>& meshes) {
 
         std::vector<Mesh::Implementation*> vector;
         vector.reserve(meshes.size());
@@ -24,7 +23,7 @@ namespace neon {
 
     Model::Model(Application* application,
                  const std::string& name,
-                 std::vector<std::unique_ptr<Mesh>>& meshes) :
+                 std::vector<std::shared_ptr<Mesh>>& meshes) :
             Asset(typeid(Model), name),
             _implementation(application, getMeshImplementations(meshes)),
             _meshes(std::move(meshes)) {

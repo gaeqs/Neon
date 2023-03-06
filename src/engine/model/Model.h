@@ -5,7 +5,6 @@
 #ifndef NEON_MODEL_H
 #define NEON_MODEL_H
 
-#include "engine/Application.h"
 #include <string>
 #include <typeindex>
 
@@ -20,7 +19,7 @@
 
 namespace neon {
 
-    class Room;
+    class Application;
 
     /**
      * Represents a model that can be rendered
@@ -39,7 +38,7 @@ namespace neon {
     private:
 
         Implementation _implementation;
-        std::vector<std::unique_ptr<Mesh>> _meshes;
+        std::vector<std::shared_ptr<Mesh>> _meshes;
 
         /**
          * Gets all implementations of the given meshes.
@@ -47,7 +46,7 @@ namespace neon {
          * @return the implementations.
          */
         static std::vector<Mesh::Implementation*> getMeshImplementations(
-                const std::vector<std::unique_ptr<Mesh>>& meshes);
+                const std::vector<std::shared_ptr<Mesh>>& meshes);
 
     public:
 
@@ -60,7 +59,7 @@ namespace neon {
          */
         Model(Application* application,
               const std::string& name,
-              std::vector<std::unique_ptr<Mesh>>& meshes);
+              std::vector<std::shared_ptr<Mesh>>& meshes);
 
         /**
          * Returns the implementation of the model.

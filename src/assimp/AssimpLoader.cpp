@@ -203,7 +203,7 @@ namespace neon::assimp_loader {
             }
         }
 
-        std::unique_ptr<Mesh> loadMesh(const aiMesh* mesh,
+        std::shared_ptr<Mesh> loadMesh(const aiMesh* mesh,
                                        Mat material,
                                        const LoaderInfo& info) {
             std::vector<char> dataArray;
@@ -246,14 +246,23 @@ namespace neon::assimp_loader {
                 indices.push_back(face.mIndices[2]);
             }
 
-            auto result = std::make_unique<Mesh>(info.room, material);
+            auto result = std::make_shared<Mesh>(
+                    info.room->getApplication(),
+                    info.name + "_" + mesh->mName.C_Str(),
+                    material
+            );
+
+            if (info.storeAssets) {
+                info.room->getApplication()->getAssets()
+                        .store(result, info.assetStorageMode);
+            }
             result->setMeshData(dataArray, indices);
 
             return result;
         }
 
         void loadMeshes(const aiScene* scene,
-                        std::vector<std::unique_ptr<Mesh>>& meshes,
+                        std::vector<std::shared_ptr<Mesh>>& meshes,
                         const std::vector<Mat>& materials,
                         const LoaderInfo& info) {
             for (int i = 0; i < scene->mNumMeshes; ++i) {
@@ -307,7 +316,7 @@ namespace neon::assimp_loader {
         std::map<std::string, Tex> textures;
         std::map<aiTexture*, Tex> loadedTextures;
 
-        std::vector<std::unique_ptr<Mesh>> meshes;
+        std::vector<std::shared_ptr<Mesh>> meshes;
         std::vector<Mat> materials;
         meshes.reserve(scene->mNumMeshes);
         materials.reserve(scene->mNumMaterials);
@@ -328,7 +337,7 @@ namespace neon::assimp_loader {
         );
 
         info.room->getApplication()->getAssets()
-                .store(model, StorageMode::WEAK);
+                .store(model, AssetStorageMode::WEAK);
 
         return {true, model};
     }

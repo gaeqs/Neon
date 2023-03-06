@@ -14,6 +14,7 @@
 
 #include <cmrc/cmrc.hpp>
 
+#include <engine/structure/collection/AssetCollection.h>
 #include <engine/model/InputDescription.h>
 #include <engine/model/DefaultInstancingData.h>
 #include <engine/structure/IdentifiableWrapper.h>
@@ -165,6 +166,20 @@ namespace neon::assimp_loader {
          * Whether normals should be flipped.
          */
         bool flipNormals = false;
+
+        /**
+         * Whether the loaded models and meshes will be stored on the asset
+         * collection of the application.
+         *
+         * If true, the assets can be retrieved from the asset collection
+         * after the model and meshes have been loaded.
+         */
+        bool storeAssets = true;
+
+        /**
+         * The mode the meshes and models will be stored in the asset collection.
+         */
+        AssetStorageMode assetStorageMode = AssetStorageMode::WEAK;
 
     private:
 

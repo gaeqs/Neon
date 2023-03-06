@@ -7,20 +7,16 @@
 #include <engine/structure/Room.h>
 
 namespace neon {
-    uint64_t MESH_ID_GENERATOR = 1;
-
-    Mesh::Mesh(Room* room, IdentifiableWrapper<Material> material,
+    Mesh::Mesh(Application* application,
+               const std::string& name,
+               IdentifiableWrapper<Material> material,
                bool modifiableVertices,
                bool modifiableIndices) :
-            _id(MESH_ID_GENERATOR++),
-            _implementation(room->getApplication(), _material,
+            Asset(typeid(Mesh), name),
+            _implementation(application, _material,
                             modifiableVertices, modifiableIndices),
             _material(material) {
 
-    }
-
-    uint64_t Mesh::getId() const {
-        return _id;
     }
 
     Mesh::Implementation& Mesh::getImplementation() {
