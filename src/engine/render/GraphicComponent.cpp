@@ -16,13 +16,15 @@
 namespace neon {
     GraphicComponent::GraphicComponent() :
             _model(),
-            _modelTargetId() {
+            _modelTargetId(),
+            _firstPreDrawExecuted(false) {
 
     }
 
     GraphicComponent::GraphicComponent(std::shared_ptr<Model> model) :
             _model(std::move(model)),
-            _modelTargetId() {
+            _modelTargetId(),
+            _firstPreDrawExecuted(false) {
 
         if (_model != nullptr) {
             auto result = _model->createInstance();
@@ -35,9 +37,7 @@ namespace neon {
     }
 
     GraphicComponent::~GraphicComponent() {
-        if (_model != nullptr && _modelTargetId.has_value()) {
-            _model->freeInstance(*_modelTargetId.value());
-        }
+        setModel(nullptr);
     }
 
     const std::shared_ptr<Model>& GraphicComponent::getModel() const {
@@ -45,13 +45,22 @@ namespace neon {
     }
 
     void GraphicComponent::setModel(const std::shared_ptr<Model>& model) {
-        if (_model != nullptr && _modelTargetId.has_value()) {
-            _model->freeInstance(*_modelTargetId.value());
+        if (_model != nullptr) {
+            if (_modelTargetId.has_value()) {
+                _model->freeInstance(*_modelTargetId.value());
+            }
+            if (_firstPreDrawExecuted) {
+                getRoom()->unmarkUsingModel(model.get());
+            }
         }
 
         _model = model;
 
         if (_model != nullptr) {
+            if (_firstPreDrawExecuted) {
+                getRoom()->markUsingModel(model.get());
+            }
+
             auto result = _model->createInstance();
             if (result.isOk()) {
                 _modelTargetId = result.getResult();
@@ -64,6 +73,13 @@ namespace neon {
     }
 
     void GraphicComponent::onPreDraw() {
+        if (!_firstPreDrawExecuted) {
+            if (_model != nullptr) {
+                getRoom()->markUsingModel(_model.get());
+            }
+            _firstPreDrawExecuted = true;
+        }
+
         if (!_modelTargetId.has_value()) return;
         if (_model->getInstancingStructType() != typeid(DefaultInstancingData))
             return;

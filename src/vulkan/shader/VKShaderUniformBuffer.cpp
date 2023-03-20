@@ -7,6 +7,7 @@
 #include <engine/shader/ShaderUniformDescriptor.h>
 #include <vulkan/buffer/StagingBuffer.h>
 #include <cstring>
+#include <utility>
 
 namespace neon::vulkan {
     VKShaderUniformBuffer::VKShaderUniformBuffer(
@@ -150,10 +151,10 @@ namespace neon::vulkan {
 
     void VKShaderUniformBuffer::setTexture(
             uint32_t index,
-            IdentifiableWrapper<Texture> texture) {
+            std::shared_ptr<Texture> texture) {
         if (index >= _types.size()) return;
         if (_types[index] != UniformBindingType::IMAGE) return;
-        _textures[index] = texture;
+        _textures[index] = std::move(texture);
         std::fill(_updated[index].begin(), _updated[index].end(), 0);
     }
 
@@ -182,7 +183,7 @@ namespace neon::vulkan {
                     if (updated[frame] == flag) continue;
                     updated[frame] = flag;
 
-                    if (texture.isValid()) {
+                    if (texture != nullptr) {
                         auto& impl = texture->getImplementation();
 
                         VkDescriptorImageInfo imageInfo{};

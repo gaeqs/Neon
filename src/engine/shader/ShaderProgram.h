@@ -10,7 +10,7 @@
 
 #include <cmrc/cmrc.hpp>
 
-#include <engine/structure/Identifiable.h>
+#include <engine/structure/Asset.h>
 #include <engine/shader/ShaderType.h>
 
 #ifdef USE_VULKAN
@@ -22,7 +22,7 @@
 namespace neon {
     class Room;
 
-    class ShaderProgram : public Identifiable {
+    class ShaderProgram : public Asset {
 
         template<class T> friend
         class IdentifiableWrapper;
@@ -33,19 +33,16 @@ namespace neon {
 #endif
 
     private:
-        uint64_t _id;
+
         bool _compiled;
         std::unordered_map<ShaderType, cmrc::file> _rawShaders;
         Implementation _implementation;
 
     public:
 
-
         ShaderProgram(const ShaderProgram& other) = delete;
 
-        explicit ShaderProgram(Room* room);
-
-        [[nodiscard]] uint64_t getId() const override;
+        explicit ShaderProgram(Application* application, std::string name);
 
         [[nodiscard]] const Implementation& getImplementation() const;
 

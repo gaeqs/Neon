@@ -13,10 +13,12 @@
 #include <engine/model/Model.h>
 
 namespace neon {
-    class GraphicComponent : public Component {
+    class GraphicComponent final : public Component {
 
         std::shared_ptr<Model> _model;
         std::optional<uint32_t*> _modelTargetId;
+
+        bool _firstPreDrawExecuted;
 
     public:
 
@@ -24,7 +26,7 @@ namespace neon {
 
         explicit GraphicComponent(std::shared_ptr<Model> model);
 
-        ~GraphicComponent() override;
+        ~GraphicComponent() final;
 
         [[nodiscard]] const std::shared_ptr<Model>& getModel() const;
 
@@ -37,9 +39,9 @@ namespace neon {
             }
         }
 
-        void onPreDraw() override;
+        void onPreDraw() final;
 
-        void drawEditor() override;
+        void drawEditor() final;
 
     };
     REGISTER_COMPONENT(GraphicComponent, "Graphic Component")

@@ -195,9 +195,10 @@ namespace neon::model_utils {
             material->getUniformBuffer().setTexture(i, inputTextures[i]);
         }
 
-        auto mesh = std::make_unique<Mesh>(room, material);
+        auto mesh = std::make_shared<Mesh>(room->getApplication(),
+                                           "box", material);
         mesh->setMeshData(vertices, CUBE_TRIANGLE_INDEX);
-        std::vector<std::unique_ptr<Mesh>> meshes;
+        std::vector<std::shared_ptr<Mesh>> meshes;
         meshes.push_back(std::move(mesh));
 
         auto model = std::make_shared<Model>(
@@ -206,7 +207,8 @@ namespace neon::model_utils {
                 meshes
         );
 
-        room->getApplication()->getAssets().store(model, AssetStorageMode::WEAK);
+        room->getApplication()->getAssets().store(model,
+                                                  AssetStorageMode::WEAK);
         return model;
     }
 

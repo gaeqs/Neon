@@ -12,7 +12,7 @@
 
 #include <glm/glm.hpp>
 
-#include <engine/structure/Identifiable.h>
+#include <engine/structure/Asset.h>
 #include <engine/structure/IdentifiableWrapper.h>
 #include <engine/shader/ShaderUniformBuffer.h>
 #include <engine/shader/MaterialCreateInfo.h>
@@ -33,21 +33,17 @@ namespace neon {
 
     class ShaderUniformDescriptor;
 
-    class Room;
+    class Application;
 
-    class Material : public Identifiable {
-
-        template<class T> friend
-        class IdentifiableWrapper;
+    class Material : public Asset {
 
     public:
 #ifdef USE_VULKAN
-    using Implementation = vulkan::VKMaterial;
+        using Implementation = vulkan::VKMaterial;
 #endif
     private:
 
-        uint64_t _id;
-        IdentifiableWrapper<ShaderProgram> _shader;
+        std::shared_ptr<ShaderProgram> _shader;
 
         std::shared_ptr<ShaderUniformDescriptor> _uniformDescriptor;
         ShaderUniformBuffer _uniformBuffer;
@@ -58,11 +54,11 @@ namespace neon {
 
         Material(const Material& other) = delete;
 
-        Material(Room* room, const MaterialCreateInfo& createInfo);
+        Material(Application* application,
+                 const std::string& name,
+                 const MaterialCreateInfo& createInfo);
 
-        [[nodiscard]] uint64_t getId() const override;
-
-        [[nodiscard]] const IdentifiableWrapper<ShaderProgram>&
+        [[nodiscard]] const std::shared_ptr<ShaderProgram>&
         getShader() const;
 
         [[nodiscard]] const ShaderUniformBuffer& getUniformBuffer() const;

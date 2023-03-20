@@ -8,6 +8,7 @@
 
 #include <cstdint>
 #include <unordered_map>
+#include <vector>
 
 #include <assimp/scene.h>
 #include <glm/glm.hpp>

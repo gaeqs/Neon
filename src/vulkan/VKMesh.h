@@ -5,16 +5,17 @@
 #ifndef NEON_VKMESH_H
 #define NEON_VKMESH_H
 
-#include <stdint.h>
+#include <cstdint>
 #include <type_traits>
 #include <vector>
 #include <optional>
 #include <memory>
 
-#include <engine/shader/Material.h>
 #include <vulkan/vulkan.h>
-#include <engine/structure/collection/IdentifiableCollection.h>
+
+#include <engine/shader/Material.h>
 #include <engine/shader/ShaderUniformBuffer.h>
+
 #include <vulkan/VKApplication.h>
 #include <vulkan/buffer/SimpleBuffer.h>
 #include <vulkan/buffer/StagingBuffer.h>
@@ -32,7 +33,7 @@ namespace neon::vulkan {
     class VKMesh {
 
         VKApplication* _vkApplication;
-        IdentifiableWrapper<Material>& _material;
+        std::shared_ptr<Material>& _material;
 
         std::optional<std::unique_ptr<Buffer>> _vertexBuffer;
         std::optional<std::unique_ptr<Buffer>> _indexBuffer;
@@ -48,7 +49,7 @@ namespace neon::vulkan {
         VKMesh(const VKMesh& other) = delete;
 
         VKMesh(Application* application,
-               IdentifiableWrapper<Material>& material,
+               std::shared_ptr<Material>& material,
                bool modifiableVertices,
                bool modifiableIndices);
 
@@ -120,7 +121,7 @@ namespace neon::vulkan {
 
         bool setIndices(const std::vector<uint32_t>& indices) const;
 
-        [[nodiscard]] IdentifiableWrapper<Material> getMaterial() const;
+        [[nodiscard]] std::shared_ptr<Material> getMaterial() const;
 
         void draw(
                 VkCommandBuffer commandBuffer,

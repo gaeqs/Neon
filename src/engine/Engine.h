@@ -53,7 +53,6 @@
 #include <engine/structure/collection/AssetCollection.h>
 #include <engine/structure/collection/ComponentCollection.h>
 #include <engine/structure/collection/IdentifiableCollection.h>
-#include <engine/structure/collection/TextureCollection.h>
 
 
 #include <engine/Application.h>

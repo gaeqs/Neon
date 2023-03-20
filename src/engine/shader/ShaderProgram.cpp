@@ -7,18 +7,13 @@
 #include <engine/structure/Room.h>
 
 namespace neon {
-    uint64_t SHADER_PROGRAM_ID_GENERATOR = 1;
 
-    ShaderProgram::ShaderProgram(Room* room) :
-            _id(SHADER_PROGRAM_ID_GENERATOR++),
+    ShaderProgram::ShaderProgram(Application* application, std::string name) :
+            Asset(typeid(ShaderProgram), std::move(name)),
             _compiled(false),
             _rawShaders(),
-            _implementation(room->getApplication()) {
+            _implementation(application) {
 
-    }
-
-    uint64_t ShaderProgram::getId() const {
-        return _id;
     }
 
     const ShaderProgram::Implementation&

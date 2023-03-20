@@ -20,8 +20,6 @@ set(SOURCES
         util/ClusteredLinkedCollection.h
         engine/structure/collection/ComponentCollection.cpp
         engine/structure/collection/ComponentCollection.h
-        engine/structure/collection/TextureCollection.cpp
-        engine/structure/collection/TextureCollection.h
         engine/structure/IdentifiableWrapper.h
         engine/geometry/Transform.cpp
         engine/geometry/Transform.h

@@ -29,7 +29,7 @@ namespace neon {
         return _implementation;
     }
 
-    std::vector<IdentifiableWrapper<Texture>>
+    std::vector<std::shared_ptr<Texture>>
     SwapChainFrameBuffer::getTextures() const {
         return {};
     }

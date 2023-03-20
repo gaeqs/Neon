@@ -4,10 +4,14 @@
 
 #include "Render.h"
 
+#include <utility>
+
 #include <engine/render/FrameBuffer.h>
 
+
 namespace neon {
-    Render::Render(Application* application) :
+    Render::Render(Application* application, std::string name) :
+            Asset(typeid(Render), std::move(name)),
             _implementation(application),
             _application(application),
             _strategies() {

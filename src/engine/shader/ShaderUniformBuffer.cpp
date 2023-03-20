@@ -4,17 +4,15 @@
 
 #include "ShaderUniformBuffer.h"
 
+#include <utility>
+
 namespace neon {
-    uint64_t SHADER_UNIFORM_BUFFER_ID_GENERATOR = 1;
 
     ShaderUniformBuffer::ShaderUniformBuffer(
+            std::string name,
             const std::shared_ptr<ShaderUniformDescriptor>& descriptor) :
-            _id(SHADER_UNIFORM_BUFFER_ID_GENERATOR++),
+            Asset(typeid(ShaderUniformBuffer), std::move(name)),
             _implementation(descriptor) {
-    }
-
-    uint64_t ShaderUniformBuffer::getId() const {
-        return _id;
     }
 
     void ShaderUniformBuffer::setBindingPoint(uint32_t point) {
@@ -28,8 +26,8 @@ namespace neon {
 
     void ShaderUniformBuffer::setTexture(
             uint32_t index,
-            IdentifiableWrapper<Texture> texture) {
-        _implementation.setTexture(index, texture);
+            std::shared_ptr<Texture> texture) {
+        _implementation.setTexture(index, std::move(texture));
     }
 
     void ShaderUniformBuffer::prepareForFrame() {

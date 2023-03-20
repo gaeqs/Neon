@@ -6,16 +6,18 @@
 
 #include <engine/structure/Room.h>
 
+#include <utility>
+
 namespace neon {
     Mesh::Mesh(Application* application,
                const std::string& name,
-               IdentifiableWrapper<Material> material,
+               std::shared_ptr<Material> material,
                bool modifiableVertices,
                bool modifiableIndices) :
             Asset(typeid(Mesh), name),
             _implementation(application, _material,
                             modifiableVertices, modifiableIndices),
-            _material(material) {
+            _material(std::move(material)) {
 
     }
 
@@ -27,11 +29,11 @@ namespace neon {
         return _implementation;
     }
 
-    IdentifiableWrapper<Material> Mesh::getMaterial() const {
+    const std::shared_ptr<Material>& Mesh::getMaterial() const {
         return _material;
     }
 
-    void Mesh::setMaterial(const IdentifiableWrapper<Material>& material) {
+    void Mesh::setMaterial(const std::shared_ptr<Material>& material) {
         _material = material;
     }
 

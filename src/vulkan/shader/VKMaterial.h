@@ -20,8 +20,6 @@
 namespace neon {
     class Application;
 
-    class Room;
-
     class Material;
 
     class FrameBuffer;
@@ -47,7 +45,7 @@ namespace neon::vulkan {
 
         VKMaterial(const VKMaterial& other) = delete;
 
-        VKMaterial(Room* room,
+        VKMaterial(Application* application,
                    Material* material,
                    const MaterialCreateInfo& createInfo);
 

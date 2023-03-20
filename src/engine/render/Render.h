@@ -7,7 +7,9 @@
 
 #include <functional>
 #include <vector>
+
 #include <engine/render/RenderPassStrategy.h>
+#include <engine/structure/Asset.h>
 #include <util/ClusteredLinkedCollection.h>
 
 #ifdef USE_VULKAN
@@ -22,12 +24,12 @@ namespace neon {
 
     class Application;
 
-    class Render {
+    class Render : public Asset {
 
     public:
 
 #ifdef USE_VULKAN
-    using Implementation = vulkan::VKRender;
+        using Implementation = vulkan::VKRender;
 #endif
 
     private:
@@ -40,7 +42,7 @@ namespace neon {
 
         Render(const Render& other) = delete;
 
-        explicit Render(Application* application);
+        explicit Render(Application* application, std::string name);
 
         [[nodiscard]] const Implementation& getImplementation() const;
 

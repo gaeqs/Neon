@@ -9,11 +9,9 @@
 #include <vector>
 #include <string>
 
-#include <engine/structure/Identifiable.h>
 #include <engine/shader/Material.h>
-#include <engine/structure/Asset.h>
 #include <engine/shader/ShaderUniformBuffer.h>
-#include <engine/structure/collection/IdentifiableCollection.h>
+#include <engine/structure/Asset.h>
 
 #ifdef USE_VULKAN
 
@@ -39,7 +37,7 @@ namespace neon {
     private:
 
         Implementation _implementation;
-        IdentifiableWrapper<Material> _material;
+        std::shared_ptr<Material> _material;
 
     public:
 
@@ -54,7 +52,7 @@ namespace neon {
          */
         Mesh(Application* application,
              const std::string& name,
-             IdentifiableWrapper<Material> material,
+             std::shared_ptr<Material> material,
              bool modifiableVertices = false,
              bool modifiableIndices = false);
 
@@ -171,13 +169,13 @@ namespace neon {
          * Returns the material of the mesh.
          * @return the material.
          */
-        [[nodiscard]] IdentifiableWrapper<Material> getMaterial() const;
+        [[nodiscard]] const std::shared_ptr<Material>& getMaterial() const;
 
         /**
          * Sets the material of the mesh.
          * @param material the material.
          */
-        void setMaterial(const IdentifiableWrapper<Material>& material);
+        void setMaterial(const std::shared_ptr<Material>& material);
 
     };
 }

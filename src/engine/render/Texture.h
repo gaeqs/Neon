@@ -6,8 +6,12 @@
 #define RVTRACKING_TEXTURE_H
 
 
-#include <engine/structure/Identifiable.h>
+#include <memory>
+
+#include <engine/structure/Asset.h>
 #include <engine/render/TextureCreateInfo.h>
+
+#include <cmrc/cmrc.hpp>
 
 #ifdef USE_VULKAN
 
@@ -16,12 +20,9 @@
 #endif
 
 namespace neon {
-    class Room;
+    class Application;
 
-    class Texture : public Identifiable {
-
-        template<class T> friend
-        class IdentifiableWrapper;
+    class Texture : public Asset {
 
     public:
 #ifdef USE_VULKAN
@@ -29,40 +30,142 @@ namespace neon {
 #endif
 
     private:
-        uint64_t _id;
+
         Implementation _implementation;
 
     public:
 
         Texture(const Texture& other) = delete;
 
-        Texture(Room* room, const void* data,
+        Texture(Application* application,
+                std::string name,
+                const void* data,
                 const TextureCreateInfo& createInfo = TextureCreateInfo());
 
 #ifdef USE_VULKAN
 
-        Texture(Room* room, VkImageView imageView, VkImageLayout layout,
+        Texture(Application* application,
+                std::string name,
+                VkImageView imageView, VkImageLayout layout,
                 uint32_t width, uint32_t height, uint32_t depth,
                 const SamplerCreateInfo& createInfo = SamplerCreateInfo());
 
 #endif
 
 
-        uint64_t getId() const override;
-
-        const Implementation& getImplementation() const;
+        [[nodiscard]] const Implementation& getImplementation() const;
 
         Implementation& getImplementation();
 
-        uint32_t getWidth() const;
+        [[nodiscard]] uint32_t getWidth() const;
 
-        uint32_t getHeight() const;
+        [[nodiscard]] uint32_t getHeight() const;
 
-        uint32_t getDepth() const;
+        [[nodiscard]] uint32_t getDepth() const;
 
         void updateData(const char* data,
                         int32_t width, int32_t height, int32_t depth,
                         TextureFormat format);
+
+        // region Static methods
+
+        /**
+         * Creates a new texture from a resource.
+         * @param resource the resource.
+         * @param createInfo the texture creation info.
+         * @return a pointer to the new texture.
+         */
+        static std::unique_ptr<Texture> createTextureFromFile(
+                Application* application,
+                std::string name,
+                const cmrc::file& resource,
+                const TextureCreateInfo& createInfo = TextureCreateInfo());
+
+        /**
+         * Creates a new texture from a set of resources.
+         *
+         * This method is useful if you want to create cube boxes
+         * or layered textures.
+         *
+         * All images must have the same size!
+         *
+         * @param resource the resources.
+         * Their raw data will be concatenated.
+         * @param createInfo the texture creation info.
+         * @return a pointer to the new texture.
+         */
+        static std::unique_ptr<Texture> createTextureFromFiles(
+                Application* application,
+                std::string name,
+                const std::vector<cmrc::file>& resources,
+                const TextureCreateInfo& createInfo = TextureCreateInfo());
+
+        /**
+         * Creates a new texture from a file.
+         * @param path the path of the file.
+         * @param createInfo the texture creation info.
+         * @return a pointer to the new texture.
+         */
+        static std::unique_ptr<Texture> createTextureFromFile(
+                Application* application,
+                std::string name,
+                const std::string& path,
+                const TextureCreateInfo& createInfo = TextureCreateInfo());
+
+        /**
+         * Creates a new texture from a set of files.
+         *
+         * This method is useful if you want to create cube boxes
+         * or layered textures.
+         *
+         * All images must have the same size!
+         *
+         * @param paths the paths of the files.
+         * Their raw data will be concatenated.
+         * @param createInfo the texture creation info.
+         * @return a pointer to the new texture.
+         */
+        static std::unique_ptr<Texture> createTextureFromFiles(
+                Application* application,
+                std::string name,
+                const std::vector<std::string>& paths,
+                const TextureCreateInfo& createInfo = TextureCreateInfo());
+
+        /**
+         * Creates a new texture from raw data.
+         * @param data the data.
+         * @param size the length of the data in bytes.
+         * @param createInfo the texture creation info.
+         * @return a pointer to the new texture.
+         */
+        static std::unique_ptr<Texture> createTextureFromFile(
+                Application* application,
+                std::string name,
+                const void* data, uint32_t size,
+                const TextureCreateInfo& createInfo = TextureCreateInfo());
+
+        /**
+         * Creates a new texture from a set of raw data pointers.
+         *
+         * This method is useful if you want to create cube boxes
+         * or layered textures.
+         *
+         * All images must have the same size!
+         *
+         * @param data the data array.
+         * Their raw data will be concatenated.
+         * @param sizes the lengths of the data in bytes.
+         * @param createInfo the texture creation info.
+         * @return a pointer to the new texture.
+         */
+        static std::unique_ptr<Texture> createTextureFromFile(
+                Application* application,
+                std::string name,
+                const std::vector<const void*>& data,
+                const std::vector<uint32_t>& sizes,
+                const TextureCreateInfo& createInfo = TextureCreateInfo());
+
+        // endregion
 
     };
 }

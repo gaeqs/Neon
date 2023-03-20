@@ -61,6 +61,10 @@ namespace neon {
 
     public:
 
+        AssetCollection(const AssetCollection& other) = delete;
+
+        AssetCollection() = default;
+
         /**
          * Returns a dictionary containing all assets of the given type.
          * <p>
@@ -73,7 +77,8 @@ namespace neon {
          */
         template<class Type>
         [[nodiscard]]
-        const std::unordered_map<std::string, std::weak_ptr<Asset>>& getAll() const {
+        const std::unordered_map<std::string, std::weak_ptr<Asset>>&
+        getAll() const {
             auto it = _assets.find(typeid(Type));
             if (it == _assets.end()) {
                 static std::unordered_map<std::string, std::weak_ptr<Asset>> empty;

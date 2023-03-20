@@ -5,11 +5,11 @@
 #ifndef NEON_SHADERUNIFORMBUFFER_H
 #define NEON_SHADERUNIFORMBUFFER_H
 
-#include <engine/structure/Identifiable.h>
+#include <engine/structure/Asset.h>
 
 #ifdef USE_VULKAN
 
-#include "vulkan/shader/VKShaderUniformBuffer.h"
+#include <vulkan/shader/VKShaderUniformBuffer.h>
 
 #endif
 
@@ -18,37 +18,33 @@ namespace neon {
 
     class ShaderUniformDescriptor;
 
-    class ShaderUniformBuffer : public Identifiable {
-
-        template<class T> friend
-        class IdentifiableWrapper;
+    class ShaderUniformBuffer : public Asset {
 
     public:
+
 #ifdef USE_VULKAN
-    using Implementation = vulkan::VKShaderUniformBuffer;
+        using Implementation = vulkan::VKShaderUniformBuffer;
 #endif
 
     private:
 
-        uint64_t _id;
         Implementation _implementation;
 
     public:
 
-        explicit ShaderUniformBuffer(
+        ShaderUniformBuffer(
+                std::string name,
                 const std::shared_ptr<ShaderUniformDescriptor>& descriptor);
 
         [[nodiscard]] const Implementation& getImplementation() const;
 
         [[nodiscard]] Implementation& getImplementation();
 
-        [[nodiscard]] uint64_t getId() const override;
-
         void setBindingPoint(uint32_t point);
 
         void uploadData(uint32_t index, const void* data, size_t size);
 
-        void setTexture(uint32_t index, IdentifiableWrapper<Texture> texture);
+        void setTexture(uint32_t index, std::shared_ptr<Texture> texture);
 
         template<class T>
         void uploadData(uint32_t index, const T& data) {

@@ -10,13 +10,14 @@
 #include <functional>
 
 #include <engine/structure/IdentifiableWrapper.h>
+#include <engine/structure/collection/AssetCollection.h>
 #include <engine/model/InputDescription.h>
 #include <engine/render/TextureCreateInfo.h>
 #include <engine/shader/MaterialCreateInfo.h>
 
 
 namespace neon {
-    class Room;
+    class Application;
 
     class FrameBuffer;
 
@@ -29,17 +30,55 @@ namespace neon {
 
 namespace neon::deferred_utils {
 
-    std::shared_ptr<Model> createScreenModel(
-            Room* room,
-            const std::string& name,
-            const std::vector<IdentifiableWrapper<Texture>>& inputTextures,
-            const std::shared_ptr<FrameBuffer>& target,
-            IdentifiableWrapper<ShaderProgram> shader,
-            const std::function<void(MaterialCreateInfo&)>& populateFunction
-            = nullptr);
+    struct ScreenModelCreationInfo {
+
+        Application* application;
+        std::string materialName;
+        std::string meshName;
+        std::string modelName;
+
+        std::vector<std::shared_ptr<Texture>> inputTextures;
+        std::shared_ptr<FrameBuffer> target;
+        std::shared_ptr<ShaderProgram> shader;
+
+        bool searchInAssets;
+        bool saveInAssets;
+        AssetStorageMode storageMode;
+
+        std::function<void(MaterialCreateInfo&)> populateFunction;
+
+        ScreenModelCreationInfo(
+                Application* app,
+                const std::string& name,
+                std::vector<std::shared_ptr<Texture>> inputTextures,
+                std::shared_ptr<FrameBuffer> target,
+                std::shared_ptr<ShaderProgram> shader,
+                bool searchInAssets = true,
+                bool saveInAssets = true,
+                AssetStorageMode storageMode = AssetStorageMode::WEAK,
+                std::function<void(MaterialCreateInfo&)> populateFunction = {});
+
+        ScreenModelCreationInfo(
+                Application* app,
+                std::string meshName,
+                std::string modelName,
+                std::string materialName,
+                std::vector<std::shared_ptr<Texture>> inputTextures,
+                std::shared_ptr<FrameBuffer> target,
+                std::shared_ptr<ShaderProgram> shader,
+                bool searchInAssets = true,
+                bool saveInAssets = true,
+                AssetStorageMode storageMode = AssetStorageMode::WEAK,
+                std::function<void(MaterialCreateInfo&)> populateFunction = {});
+
+
+    };
+
+    std::shared_ptr<Model>
+    createScreenModel(const ScreenModelCreationInfo& info);
 
     IdentifiableWrapper<Texture> createLightSystem(
-            Room* room,
+            Application* application,
             const std::vector<IdentifiableWrapper<Texture>>& textures,
             TextureFormat outputFormat,
             IdentifiableWrapper<ShaderProgram> directionalShader,

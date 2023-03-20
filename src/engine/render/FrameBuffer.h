@@ -6,6 +6,7 @@
 #define NEON_FRAMEBUFFER_H
 
 #include <vector>
+#include <memory>
 #include <engine/structure/IdentifiableWrapper.h>
 
 #ifdef USE_VULKAN
@@ -41,7 +42,7 @@ namespace neon {
         [[nodiscard]] virtual const Implementation&
         getImplementation() const = 0;
 
-        [[nodiscard]] virtual std::vector<IdentifiableWrapper<Texture>>
+        [[nodiscard]] virtual std::vector<std::shared_ptr<Texture>>
         getTextures() const = 0;
 
         [[nodiscard]] virtual uint32_t getWidth() const = 0;

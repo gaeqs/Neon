@@ -127,11 +127,12 @@ namespace neon::vulkan {
     }
 
     VKSimpleFrameBuffer::VKSimpleFrameBuffer(
-            Room* room,
+            Application* application,
             const std::vector<TextureFormat>& formats,
             bool depth) :
             VKFrameBuffer(),
-            _vkApplication(&room->getApplication()->getImplementation()),
+            _vkApplication(&application->getImplementation()),
+            _frameBuffer(VK_NULL_HANDLE),
             _images(),
             _memories(),
             _imageViews(),
@@ -140,7 +141,7 @@ namespace neon::vulkan {
             _imGuiDescriptors(),
             _formats(formats),
             _extent(_vkApplication->getSwapChainExtent()),
-            _renderPass(room->getApplication(),
+            _renderPass(application,
                         conversions::vkFormat(formats), depth, false,
                         _vkApplication->getDepthImageFormat()),
             _depth(depth) {
@@ -157,7 +158,10 @@ namespace neon::vulkan {
 
         // Create the textures
         for (uint32_t i = 0; i < _imageViews.size(); ++i) {
-            auto texture = room->getTextures().create(
+
+            auto texture = std::make_shared<Texture>(
+                    application,
+                    std::to_string(i),
                     _imageViews[i],
                     _layouts[i],
                     static_cast<int32_t>(_extent.width),
@@ -165,6 +169,7 @@ namespace neon::vulkan {
                     1,
                     info
             );
+
             _textures.push_back(texture);
         }
     }
@@ -218,7 +223,7 @@ namespace neon::vulkan {
         return _renderPass;
     }
 
-    const std::vector<IdentifiableWrapper<Texture>>&
+    const std::vector<std::shared_ptr<Texture>>&
     VKSimpleFrameBuffer::getTextures() const {
         return _textures;
     }

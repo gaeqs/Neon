@@ -17,10 +17,10 @@ namespace neon {
     }
 
     SimpleFrameBuffer::SimpleFrameBuffer(
-            Room* room,
+            Application* application,
             const std::vector<TextureFormat>& colorFormats,
             bool depth) :
-            _implementation(room, colorFormats, depth),
+            _implementation(application, colorFormats, depth),
             _recreationCondition(defaultRecreationCondition),
             _recreationParameters(defaultRecreationParameters) {
 
@@ -43,7 +43,7 @@ namespace neon {
         return _implementation;
     }
 
-    std::vector<IdentifiableWrapper<Texture>>
+    std::vector<std::shared_ptr<Texture>>
     SimpleFrameBuffer::getTextures() const {
         return _implementation.getTextures();
     }

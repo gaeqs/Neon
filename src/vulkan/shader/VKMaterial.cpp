@@ -20,10 +20,11 @@ namespace vc = neon::vulkan::conversions;
 
 namespace neon::vulkan {
     VKMaterial::VKMaterial(
-            Room* room, Material* material,
+            Application* application,
+            Material* material,
             const MaterialCreateInfo& createInfo) :
             _material(material),
-            _vkApplication(&room->getApplication()->getImplementation()),
+            _vkApplication(&application->getImplementation()),
             _pipelineLayout(VK_NULL_HANDLE),
             _pipeline(VK_NULL_HANDLE),
             _pushConstants(),

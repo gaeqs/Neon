@@ -3,11 +3,12 @@
 //
 
 #include "DeferredUtils.h"
-#include "engine/structure/collection/AssetCollection.h"
 
 #include <memory>
 #include <stdexcept>
+#include <utility>
 
+#include <engine/structure/collection/AssetCollection.h>
 #include <engine/shader/MaterialCreateInfo.h>
 #include <engine/structure/Room.h>
 #include <engine/render/Texture.h>
@@ -42,65 +43,87 @@ namespace neon::deferred_utils {
     };
 
 
-    std::shared_ptr<Model> createScreenModel(
-            Room* room,
-            const std::string& name,
-            const std::vector<IdentifiableWrapper<Texture>>& inputTextures,
-            const std::shared_ptr<FrameBuffer>& target,
-            IdentifiableWrapper<ShaderProgram> shader,
-            const std::function<void(
-                    MaterialCreateInfo&)>& populateFunction) {
-
-        std::vector<InternalDeferredVertex> vertices = {
+    std::shared_ptr<Model>
+    createScreenModel(const ScreenModelCreationInfo& info) {
+        static std::vector<InternalDeferredVertex> vertices = {
                 {{-1.0f, 1.0f}},
                 {{1.0f,  1.0f}},
                 {{1.0f,  -1.0f}},
                 {{-1.0f, -1.0f}},
         };
+        static std::vector<uint32_t> indices = {0, 1, 2, 0, 2, 3};
 
-        std::vector<uint32_t> indices = {0, 1, 2, 0, 2, 3};
-
-        // Add an image binding for each given texture.
-        std::vector<ShaderUniformBinding> materialBindings;
-        materialBindings.resize(
-                inputTextures.size(),
-                ShaderUniformBinding{UniformBindingType::IMAGE, 0}
-        );
-
-        auto materialDescriptor = std::make_shared<ShaderUniformDescriptor>(
-                room->getApplication(),
-                materialBindings
-        );
-
-        MaterialCreateInfo info(target, shader);
-        info.descriptions.uniform = materialDescriptor;
-        info.descriptions.vertex = InternalDeferredVertex::getDescription();
-
-        if (populateFunction != nullptr)
-            populateFunction(info);
-
-        auto material = room->getMaterials().create(info);
-
-        for (uint32_t i = 0; i < inputTextures.size(); ++i) {
-            material->getUniformBuffer().setTexture(i, inputTextures[i]);
+        if (info.application == nullptr) {
+            throw std::runtime_error("Application is null!");
         }
 
-        auto mesh = std::make_shared<Mesh>(room, material);
+        std::shared_ptr<Material> material = nullptr;
+        std::shared_ptr<Model> model = nullptr;
+        std::shared_ptr<Mesh> mesh = nullptr;
+
+        // Search in assets.
+        if (info.searchInAssets) {
+            auto& assets = info.application->getAssets();
+            material = assets.get<Material>(info.materialName)
+                    .value_or(nullptr);
+            model = assets.get<Model>(info.modelName).value_or(nullptr);
+            mesh = assets.get<Mesh>(info.modelName).value_or(nullptr);
+        }
+
+
+        if (material == nullptr) {
+            // Add an image binding for each given texture.
+            std::vector<ShaderUniformBinding> materialBindings;
+            materialBindings.resize(
+                    info.inputTextures.size(),
+                    ShaderUniformBinding{UniformBindingType::IMAGE, 0}
+            );
+
+            auto materialDescriptor = std::make_shared<ShaderUniformDescriptor>(
+                    info.application,
+                    materialBindings
+            );
+
+            MaterialCreateInfo materialInfo(info.target, info.shader);
+            materialInfo.descriptions.uniform = materialDescriptor;
+            materialInfo.descriptions.vertex =
+                    InternalDeferredVertex::getDescription();
+
+            if (info.populateFunction != nullptr)
+                info.populateFunction(materialInfo);
+
+            material = std::make_shared<Material>(
+                    info.application,
+                    info.materialName,
+                    materialInfo
+            );
+
+            if (info.saveInAssets) {
+                info.application->getAssets().store(material, info.storageMode);
+            }
+        }
+
+
+        for (uint32_t i = 0; i < info.inputTextures.size(); ++i) {
+            material->getUniformBuffer().setTexture(i, info.inputTextures[i]);
+        }
+
+        auto mesh = std::make_shared<Mesh>(application,
+                                           name, material);
         mesh->setMeshData(vertices, indices);
-        std::vector<std::unique_ptr<Mesh>> meshes;
+        std::vector<std::shared_ptr<Mesh>> meshes;
         meshes.push_back(std::move(mesh));
 
 
-        auto& assets = room->getApplication()->getAssets();
-        auto model = std::make_shared<Model>(room->getApplication(),
-                                             name, meshes);
+        auto& assets = application->getAssets();
+        auto model = std::make_shared<Model>(application, name, meshes);
         assets.store(model, AssetStorageMode::PERMANENT);
 
         return model;
     }
 
     IdentifiableWrapper<Texture> createLightSystem(
-            Room* room,
+            Application* application,
             const std::vector<IdentifiableWrapper<Texture>>& textures,
             TextureFormat outputFormat,
             IdentifiableWrapper<ShaderProgram> directionalShader,
@@ -124,7 +147,7 @@ namespace neon::deferred_utils {
 
         if (directionalShader != nullptr) {
             directionalModel = createScreenModel(
-                    room,
+                    application,
                     "Directional light model",
                     textures,
                     frameBuffer,
@@ -178,4 +201,53 @@ namespace neon::deferred_utils {
 
         return frameBuffer->getTextures().front();
     }
+
+
+    ScreenModelCreationInfo::ScreenModelCreationInfo(
+            neon::Application* app_,
+            const std::string& name_,
+            std::vector<std::shared_ptr<Texture>> inputTextures_,
+            std::shared_ptr<FrameBuffer> target_,
+            std::shared_ptr<neon::ShaderProgram> shader_,
+            bool searchInAssets_,
+            bool saveInAssets_,
+            AssetStorageMode storageMode_,
+            std::function<void(MaterialCreateInfo&)> populateFunction_) :
+            ScreenModelCreationInfo(
+                    app_,
+                    name_,
+                    name_,
+                    name_,
+                    std::move(inputTextures_),
+                    std::move(target_),
+                    std::move(shader_),
+                    searchInAssets_,
+                    saveInAssets_,
+                    storageMode_,
+                    std::move(populateFunction_)) {
+    }
+
+    ScreenModelCreationInfo::ScreenModelCreationInfo(
+            neon::Application* app_,
+            std::string materialName_,
+            std::string meshName_,
+            std::string modelName_,
+            std::vector<std::shared_ptr<Texture>> inputTextures_,
+            std::shared_ptr<FrameBuffer> target_,
+            std::shared_ptr<neon::ShaderProgram> shader_,
+            bool searchInAssets_,
+            bool saveInAssets_,
+            AssetStorageMode storageMode_,
+            std::function<void(MaterialCreateInfo&)> populateFunction_) :
+            application(app_),
+            materialName(std::move(materialName_)),
+            meshName(std::move(meshName_)),
+            modelName(std::move(modelName_)),
+            inputTextures(std::move(inputTextures_)),
+            target(std::move(target_)),
+            shader(std::move(shader_)),
+            searchInAssets(searchInAssets_),
+            saveInAssets(saveInAssets_),
+            storageMode(storageMode_),
+            populateFunction(std::move(populateFunction_)) {}
 }

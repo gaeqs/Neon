@@ -6,6 +6,7 @@
 #define NEON_MATERIALCREATEINFO_H
 
 #include <memory>
+#include <utility>
 #include <vector>
 
 #include <engine/render/FrameBuffer.h>
@@ -217,7 +218,7 @@ namespace neon {
         /**
          * The shader the material will use.
          */
-        IdentifiableWrapper<ShaderProgram> shader;
+        std::shared_ptr<ShaderProgram> shader;
 
         /**
          * The buffer descriptions for vertex,
@@ -238,9 +239,9 @@ namespace neon {
 
         MaterialCreateInfo(
                 std::shared_ptr<FrameBuffer> target_,
-                IdentifiableWrapper<ShaderProgram> shader_) :
-                target(target_),
-                shader(shader_) {
+                std::shared_ptr<ShaderProgram> shader_) :
+                target(std::move(target_)),
+                shader(std::move(shader_)) {
         }
     };
 }
