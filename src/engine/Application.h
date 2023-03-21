@@ -17,7 +17,6 @@
 #include <util/Result.h>
 #include <util/profile/Profiler.h>
 
-
 #ifdef USE_VULKAN
 
 #define GLFW_INCLUDE_VULKAN
@@ -30,6 +29,8 @@
 namespace neon {
 
     class Room;
+
+    class Render;
 
     class Application {
 
@@ -54,6 +55,8 @@ namespace neon {
         Profiler _profiler;
 
         AssetCollection _assets;
+
+        std::shared_ptr<Render> _render;
 
     public:
 
@@ -82,6 +85,10 @@ namespace neon {
         [[nodiscard]] int32_t getHeight() const;
 
         [[nodiscard]] float getAspectRatio() const;
+
+        [[nodiscard]] const std::shared_ptr<Render>& getRender() const;
+
+        void setRender(const std::shared_ptr<Render>& render);
 
         [[nodiscard]] FrameInformation getCurrentFrameInformation() const;
 

@@ -93,7 +93,8 @@ namespace neon::vulkan {
             return false;
         }
 
-        _room->getRender().checkFrameBufferRecreationConditions();
+        auto& render = _room->getApplication()->getRender();
+        render->checkFrameBufferRecreationConditions();
 
         VkResult result = vkAcquireNextImageKHR(
                 _device, _swapChain, UINT64_MAX,
@@ -102,7 +103,7 @@ namespace neon::vulkan {
 
         if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR) {
             recreateSwapChain();
-            _room->getRender().checkFrameBufferRecreationConditions();
+            render->checkFrameBufferRecreationConditions();
             return false;
         } else if (result != VK_SUCCESS) {
             throw std::runtime_error("Failed to acquire swap chain image!");

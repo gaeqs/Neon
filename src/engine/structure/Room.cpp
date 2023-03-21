@@ -18,18 +18,15 @@ namespace neon {
     constexpr float DEFAULT_FRUSTUM_FAR = 500.0f;
     constexpr float DEFAULT_FRUSTUM_FOV = glm::radians(100.0f); // RADIANS
 
-    Room::Room(Application* application,
-               const std::shared_ptr<ShaderUniformDescriptor>& descriptor) :
+    Room::Room(Application* application) :
             _application(application),
             _camera(Frustum(DEFAULT_FRUSTUM_NEAR, DEFAULT_FRUSTUM_FAR, 1.0f,
                             DEFAULT_FRUSTUM_FOV)),
             _gameObjects(),
             _components(),
-            _globalUniformDescriptor(descriptor),
-            _globalUniformBuffer("global", descriptor),
-            _usedModels(),
-            _render(application, "render") {
-        _globalUniformBuffer.setBindingPoint(0);
+
+            _usedModels() {
+
     }
 
     Room::~Room() {
@@ -56,19 +53,6 @@ namespace neon {
 
     ComponentCollection& Room::getComponents() {
         return _components;
-    }
-
-    const std::shared_ptr<ShaderUniformDescriptor>&
-    Room::getGlobalUniformDescriptor() const {
-        return _globalUniformDescriptor;
-    }
-
-    const ShaderUniformBuffer& Room::getGlobalUniformBuffer() const {
-        return _globalUniformBuffer;
-    }
-
-    ShaderUniformBuffer& Room::getGlobalUniformBuffer() {
-        return _globalUniformBuffer;
     }
 
     IdentifiableWrapper<GameObject> Room::newGameObject() {
@@ -127,7 +111,8 @@ namespace neon {
 
         {
             DEBUG_PROFILE(p, uniformBuffers);
-            _globalUniformBuffer.prepareForFrame();
+            _application->getRender()->getGlobalUniformBuffer()
+                    .prepareForFrame();
 
             std::unordered_set<Material*> materials;
 
@@ -147,15 +132,7 @@ namespace neon {
 
     void Room::draw() {
         DEBUG_PROFILE(getApplication()->getProfiler(), draw);
-        _render.render(this);
-    }
-
-    const Render& Room::getRender() const {
-        return _render;
-    }
-
-    Render& Room::getRender() {
-        return _render;
+        _application->getRender()->render(this);
     }
 
     void Room::markUsingModel(neon::Model* model) {

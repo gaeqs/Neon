@@ -169,6 +169,14 @@ namespace neon {
         return static_cast<float>(_width) / static_cast<float>(_height);
     }
 
+    const std::shared_ptr<Render>& Application::getRender() const {
+        return _render;
+    }
+
+    void Application::setRender(const std::shared_ptr<Render>& render) {
+        _render = render;
+    }
+
     FrameInformation Application::getCurrentFrameInformation() const {
         return _currentFrameInformation;
     }

@@ -26,7 +26,6 @@ namespace neon {
             const std::shared_ptr<FrameBuffer>& target) {
         auto& app = room->getApplication()->getImplementation();
         auto renderPass = target->getImplementation().getRenderPass().getRaw();
-
         for (const auto& [name, model]: room->getApplication()
                 ->getAssets().getAll<Model>()) {
             if (model.expired()) continue;

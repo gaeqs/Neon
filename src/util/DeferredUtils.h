@@ -26,6 +26,10 @@ namespace neon {
     class Texture;
 
     class Model;
+
+    class Render;
+
+    class Room;
 }
 
 namespace neon::deferred_utils {
@@ -77,13 +81,14 @@ namespace neon::deferred_utils {
     std::shared_ptr<Model>
     createScreenModel(const ScreenModelCreationInfo& info);
 
-    IdentifiableWrapper<Texture> createLightSystem(
-            Application* application,
+    std::shared_ptr<Texture> createLightSystem(
+            Room* room,
+            Render* render,
             const std::vector<IdentifiableWrapper<Texture>>& textures,
             TextureFormat outputFormat,
-            IdentifiableWrapper<ShaderProgram> directionalShader,
-            IdentifiableWrapper<ShaderProgram> pointShader,
-            IdentifiableWrapper<ShaderProgram> flashShader);
+            const std::shared_ptr<ShaderProgram>& directionalShader,
+            const std::shared_ptr<ShaderProgram>& pointShader,
+            const std::shared_ptr<ShaderProgram>& flashShader);
 
 };
 

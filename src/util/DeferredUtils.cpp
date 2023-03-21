@@ -13,6 +13,7 @@
 #include <engine/structure/Room.h>
 #include <engine/render/Texture.h>
 #include <engine/render/SimpleFrameBuffer.h>
+#include <engine/render/Render.h>
 #include <engine/light/DirectionalLight.h>
 #include <engine/light/FlashLight.h>
 #include <engine/light/PointLight.h>
@@ -81,6 +82,7 @@ namespace neon::deferred_utils {
 
             auto materialDescriptor = std::make_shared<ShaderUniformDescriptor>(
                     info.application,
+                    info.materialName,
                     materialBindings
             );
 
@@ -98,37 +100,55 @@ namespace neon::deferred_utils {
                     materialInfo
             );
 
+            for (uint32_t i = 0; i < info.inputTextures.size(); ++i) {
+                material->getUniformBuffer().setTexture(
+                        i,
+                        info.inputTextures[i]
+                );
+            }
+
             if (info.saveInAssets) {
                 info.application->getAssets().store(material, info.storageMode);
             }
         }
 
+        if (mesh == nullptr && model == nullptr) {
+            mesh = std::make_shared<Mesh>(
+                    info.application,
+                    info.meshName,
+                    material
+            );
+            mesh->setMeshData(vertices, indices);
 
-        for (uint32_t i = 0; i < info.inputTextures.size(); ++i) {
-            material->getUniformBuffer().setTexture(i, info.inputTextures[i]);
+            if (info.saveInAssets) {
+                info.application->getAssets().store(mesh, info.storageMode);
+            }
         }
 
-        auto mesh = std::make_shared<Mesh>(application,
-                                           name, material);
-        mesh->setMeshData(vertices, indices);
-        std::vector<std::shared_ptr<Mesh>> meshes;
-        meshes.push_back(std::move(mesh));
+        if (model == nullptr) {
+            std::vector<std::shared_ptr<Mesh>> meshes{std::move(mesh)};
+            model = std::make_shared<Model>(
+                    info.application,
+                    info.modelName,
+                    meshes
+            );
 
-
-        auto& assets = application->getAssets();
-        auto model = std::make_shared<Model>(application, name, meshes);
-        assets.store(model, AssetStorageMode::PERMANENT);
+            if (info.saveInAssets) {
+                info.application->getAssets().store(model, info.storageMode);
+            }
+        }
 
         return model;
     }
 
-    IdentifiableWrapper<Texture> createLightSystem(
-            Application* application,
-            const std::vector<IdentifiableWrapper<Texture>>& textures,
+    std::shared_ptr<Texture> createLightSystem(
+            Room* room,
+            Render* render,
+            const std::vector<std::shared_ptr<Texture>>& textures,
             TextureFormat outputFormat,
-            IdentifiableWrapper<ShaderProgram> directionalShader,
-            IdentifiableWrapper<ShaderProgram> pointShader,
-            IdentifiableWrapper<ShaderProgram> flashShader) {
+            const std::shared_ptr<ShaderProgram>& directionalShader,
+            const std::shared_ptr<ShaderProgram>& pointShader,
+            const std::shared_ptr<ShaderProgram>& flashShader) {
         std::vector<TextureFormat> outputFormatVector = {outputFormat};
 
         std::shared_ptr<Model> directionalModel = nullptr;
@@ -136,8 +156,8 @@ namespace neon::deferred_utils {
         std::shared_ptr<Model> flashModel = nullptr;
 
         auto frameBuffer = std::make_shared<SimpleFrameBuffer>(
-                room, outputFormatVector, false);
-        room->getRender().addRenderPass(
+                room->getApplication(), outputFormatVector, false);
+        render->addRenderPass(
                 {frameBuffer, RenderPassStrategy::defaultStrategy});
 
         MaterialAttachmentBlending blend;
@@ -145,51 +165,46 @@ namespace neon::deferred_utils {
         blend.colorSourceBlendFactor = BlendFactor::ONE;
         blend.colorDestinyBlendFactor = BlendFactor::ONE;
 
+        ScreenModelCreationInfo info(
+                room->getApplication(),
+                "",
+                textures,
+                frameBuffer,
+                nullptr,
+                false,
+                false,
+                AssetStorageMode::WEAK,
+                [&blend](MaterialCreateInfo& info) {
+                    info.descriptions.instance =
+                            DirectionalLight::Data::getDescription();
+                    info.blending.attachmentsBlending.push_back(blend);
+                }
+        );
+
         if (directionalShader != nullptr) {
-            directionalModel = createScreenModel(
-                    application,
-                    "Directional light model",
-                    textures,
-                    frameBuffer,
-                    directionalShader,
-                    [&blend](MaterialCreateInfo& info) {
-                        info.descriptions.instance =
-                                DirectionalLight::Data::getDescription();
-                        info.blending.attachmentsBlending.push_back(blend);
-                    }
-            );
+            info.materialName = "Directional Light";
+            info.meshName = "Directional Light";
+            info.modelName = "Directional Light";
+            info.shader = directionalShader;
+            directionalModel = createScreenModel(info);
             directionalModel->defineInstanceStruct<DirectionalLight::Data>();
         }
 
         if (pointShader != nullptr) {
-            pointModel = createScreenModel(
-                    room,
-                    "Point light model",
-                    textures,
-                    frameBuffer,
-                    pointShader,
-                    [&blend](MaterialCreateInfo& info) {
-                        info.descriptions.instance =
-                                PointLight::Data::getDescription();
-                        info.blending.attachmentsBlending.push_back(blend);
-                    }
-            );
+            info.materialName = "Point Light";
+            info.meshName = "Point Light";
+            info.modelName = "Point Light";
+            info.shader = pointShader;
+            pointModel = createScreenModel(info);
             pointModel->defineInstanceStruct<PointLight::Data>();
         }
 
         if (flashShader != nullptr) {
-            flashModel = createScreenModel(
-                    room,
-                    "Flash light model",
-                    textures,
-                    frameBuffer,
-                    flashShader,
-                    [&blend](MaterialCreateInfo& info) {
-                        info.descriptions.instance =
-                                FlashLight::Data::getDescription();
-                        info.blending.attachmentsBlending.push_back(blend);
-                    }
-            );
+            info.materialName = "Flash Light";
+            info.meshName = "Flash Light";
+            info.modelName = "Flash Light";
+            info.shader = pointShader;
+            flashModel = createScreenModel(info);
             flashModel->defineInstanceStruct<FlashLight::Data>();
         }
 

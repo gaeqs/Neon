@@ -11,8 +11,6 @@
 
 #include <engine/structure/collection/ComponentCollection.h>
 #include <engine/structure/collection/IdentifiableCollection.h>
-#include <engine/shader/ShaderUniformBuffer.h>
-#include <engine/shader/ShaderUniformDescriptor.h>
 #include <engine/render/Render.h>
 
 #include "util/ClusteredLinkedCollection.h"
@@ -39,19 +37,15 @@ namespace neon {
         ClusteredLinkedCollection<GameObject> _gameObjects;
         ComponentCollection _components;
 
-        std::shared_ptr<ShaderUniformDescriptor> _globalUniformDescriptor;
-        ShaderUniformBuffer _globalUniformBuffer;
+
 
         std::unordered_map<Model*, uint32_t> _usedModels;
-
-        Render _render;
 
     public:
 
         Room(const Room& other) = delete;
 
-        Room(Application* application,
-             const std::shared_ptr<ShaderUniformDescriptor>& descriptor);
+        Room(Application* application);
 
         ~Room();
 
@@ -64,17 +58,6 @@ namespace neon {
         [[nodiscard]] const ComponentCollection& getComponents() const;
 
         [[nodiscard]] ComponentCollection& getComponents();
-
-        [[nodiscard]] const std::shared_ptr<ShaderUniformDescriptor>&
-        getGlobalUniformDescriptor() const;
-
-        [[nodiscard]] const ShaderUniformBuffer& getGlobalUniformBuffer() const;
-
-        [[nodiscard]] ShaderUniformBuffer& getGlobalUniformBuffer();
-
-        [[nodiscard]] const Render& getRender() const;
-
-        [[nodiscard]] Render& getRender();
 
         IdentifiableWrapper<GameObject> newGameObject();
 

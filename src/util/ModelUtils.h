@@ -5,8 +5,8 @@
 #ifndef NEON_MODELUTILS_H
 #define NEON_MODELUTILS_H
 
-#include "engine/structure/collection/AssetCollection.h"
 #include <functional>
+#include <memory>
 
 #include <glm/glm.hpp>
 
@@ -17,10 +17,7 @@ namespace neon::model_utils {
     template<class Vertex>
     std::shared_ptr<Model> createCubeModel(
             Room* room,
-            const std::vector<IdentifiableWrapper<Texture>>& inputTextures,
-            const std::shared_ptr<FrameBuffer>& target,
-            IdentifiableWrapper<ShaderProgram> shader,
-            const std::function<void(MaterialCreateInfo&)>& populateFunction) {
+            std::shared_ptr<Material> material) {
 
         static const std::vector<uint32_t> CUBE_TRIANGLE_INDEX = {
                 0, 1, 2, 1, 3, 2,
@@ -167,32 +164,6 @@ namespace neon::model_utils {
                     glm::vec4(0.0f, 0.0f, 0.0f, 0.0f),
                     CUBE_VERTEX_TEX_COORDS[i]
             ));
-        }
-
-        // Add an image binding for each given texture.
-        std::vector<ShaderUniformBinding> materialBindings;
-        materialBindings.resize(
-                inputTextures.size(),
-                ShaderUniformBinding{UniformBindingType::IMAGE, 0}
-        );
-
-        std::shared_ptr<ShaderUniformDescriptor> materialDescriptor;
-        materialDescriptor = std::make_shared<ShaderUniformDescriptor>(
-                room->getApplication(),
-                materialBindings
-        );
-
-        MaterialCreateInfo info(target, shader);
-        info.descriptions.uniform = materialDescriptor;
-        info.descriptions.vertex = Vertex::getDescription();
-
-        if (populateFunction != nullptr)
-            populateFunction(info);
-
-        auto material = room->getMaterials().create(info);
-
-        for (uint32_t i = 0; i < inputTextures.size(); ++i) {
-            material->getUniformBuffer().setTexture(i, inputTextures[i]);
         }
 
         auto mesh = std::make_shared<Mesh>(room->getApplication(),
