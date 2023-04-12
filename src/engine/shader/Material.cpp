@@ -51,7 +51,7 @@ namespace neon {
     }
 
     void Material::setTexture(const std::string& name,
-                              IdentifiableWrapper<Texture> texture) {
+                              std::shared_ptr<Texture> texture) {
         _implementation.setTexture(name, texture);
     }
 }

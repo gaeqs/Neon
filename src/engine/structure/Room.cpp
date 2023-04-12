@@ -135,6 +135,10 @@ namespace neon {
         _application->getRender()->render(this);
     }
 
+    const std::unordered_map<Model*, uint32_t>& Room::usedModels() const {
+        return _usedModels;
+    }
+
     void Room::markUsingModel(neon::Model* model) {
         ++_usedModels[model];
     }

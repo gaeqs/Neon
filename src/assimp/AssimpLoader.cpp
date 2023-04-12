@@ -6,6 +6,7 @@
 #include "engine/structure/collection/AssetCollection.h"
 
 #include <memory>
+#include <stdint.h>
 #include <string>
 #include <vector>
 #include <filesystem>
@@ -24,11 +25,12 @@
 #include <engine/render/Texture.h>
 #include <engine/structure/Room.h>
 #include <engine/model/Mesh.h>
+#include <engine/model/Model.h>
 
 namespace neon::assimp_loader {
 
-    using Tex = IdentifiableWrapper<Texture>;
-    using Mat = IdentifiableWrapper<Material>;
+    using Tex = std::shared_ptr<Texture>;
+    using Mat = std::shared_ptr<Material>;
 
     // Private methods
     namespace {
@@ -44,6 +46,7 @@ namespace neon::assimp_loader {
         }
 
         Tex loadTexture(const aiTexture* texture,
+                        const std::string& name,
                         const std::map<aiTexture*, Tex>& loadedTextures,
                         const LoaderInfo& info) {
 
@@ -57,7 +60,9 @@ namespace neon::assimp_loader {
 
             if (texture->mHeight == 0) {
                 // Compressed format! Let's stbi decide.
-                return info.room->getTextures().createTextureFromFile(
+                return Texture::createTextureFromFile(
+                        info.application,
+                        texture->mFilename.C_Str(),
                         texture->pcData,
                         texture->mWidth
                 );
@@ -70,7 +75,12 @@ namespace neon::assimp_loader {
             createInfo.image.format = TextureFormat::A8R8G8B8;
 
             // Value is always ARGB8888
-            return info.room->getTextures().create(texture->pcData, createInfo);
+            return std::make_shared<Texture>(
+                    info.application,
+                    name,
+                    texture->pcData,
+                    createInfo
+            );
         }
 
         void loadTextures(
@@ -82,15 +92,18 @@ namespace neon::assimp_loader {
             for (int i = 0; i < scene->mNumTextures; ++i) {
                 auto* aiTexture = scene->mTextures[i];
                 auto name = "*" + std::to_string(i);
-                auto texture = loadTexture(aiTexture, loadedTextures, info);
+                auto texture = loadTexture(aiTexture, name,
+                                           loadedTextures, info);
                 textures.emplace(name, texture);
                 loadedTextures.emplace(aiTexture, texture);
             }
         }
 
-        Mat loadMaterial(const aiMaterial* material,
-                         const std::map<std::string, Tex>& textures,
-                         const LoaderInfo& info) {
+        Mat loadMaterial(
+                uint32_t index,
+                const aiMaterial* material,
+                const std::map<std::string, Tex>& textures,
+                const LoaderInfo& info) {
             static const auto getTextureId = [](const aiString& string) {
                 return std::string(string.data, std::min(string.length, 2u));
             };
@@ -99,7 +112,11 @@ namespace neon::assimp_loader {
             mInfo.descriptions.vertex = info.vertexParser.description;
             mInfo.descriptions.instance = info.instanceData.description;
 
-            auto m = info.room->getMaterials().create(mInfo);
+            auto m = std::make_shared<Material>(
+                    info.application,
+                    info.name + "_material_" + std::to_string(index),
+                    mInfo
+            );
 
             aiColor3D color;
             int b;
@@ -197,9 +214,9 @@ namespace neon::assimp_loader {
                            std::vector<Mat>& materials,
                            const std::map<std::string, Tex>& textures,
                            const LoaderInfo& info) {
-            for (int i = 0; i < scene->mNumMaterials; ++i) {
+            for (uint32_t i = 0; i < scene->mNumMaterials; ++i) {
                 auto* material = scene->mMaterials[i];
-                materials.push_back(loadMaterial(material, textures, info));
+                materials.push_back(loadMaterial(i, material, textures, info));
             }
         }
 
@@ -247,13 +264,13 @@ namespace neon::assimp_loader {
             }
 
             auto result = std::make_shared<Mesh>(
-                    info.room->getApplication(),
+                    info.application,
                     info.name + "_" + mesh->mName.C_Str(),
                     material
             );
 
             if (info.storeAssets) {
-                info.room->getApplication()->getAssets()
+                info.application->getAssets()
                         .store(result, info.assetStorageMode);
             }
             result->setMeshData(dataArray, indices);
@@ -326,7 +343,7 @@ namespace neon::assimp_loader {
         loadMeshes(scene, meshes, materials, info);
 
         auto model = std::make_shared<Model>(
-                info.room->getApplication(),
+                info.application,
                 info.name,
                 meshes
         );
@@ -336,8 +353,7 @@ namespace neon::assimp_loader {
                 info.instanceData.size
         );
 
-        info.room->getApplication()->getAssets()
-                .store(model, AssetStorageMode::WEAK);
+        info.application->getAssets().store(model, AssetStorageMode::WEAK);
 
         return {true, model};
     }

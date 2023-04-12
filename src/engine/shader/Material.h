@@ -13,7 +13,6 @@
 #include <glm/glm.hpp>
 
 #include <engine/structure/Asset.h>
-#include <engine/structure/IdentifiableWrapper.h>
 #include <engine/shader/ShaderUniformBuffer.h>
 #include <engine/shader/MaterialCreateInfo.h>
 #include <engine/model/InputDescription.h>
@@ -81,7 +80,7 @@ namespace neon {
         }
 
         void setTexture(const std::string& name,
-                        IdentifiableWrapper<Texture> texture);
+                        std::shared_ptr<Texture> texture);
     };
 }
 

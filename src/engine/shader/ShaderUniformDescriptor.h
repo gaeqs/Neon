@@ -13,7 +13,7 @@
 
 #ifdef USE_VULKAN
 
-#include "vulkan/shader/VKShaderUniformDescriptor.h"
+#include <vulkan/shader/VKShaderUniformDescriptor.h>
 
 #endif
 

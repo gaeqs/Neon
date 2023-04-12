@@ -32,6 +32,8 @@ namespace neon {
 
     public:
 
+        ShaderUniformBuffer(const ShaderUniformBuffer& other) = delete;
+
         ShaderUniformBuffer(
                 std::string name,
                 const std::shared_ptr<ShaderUniformDescriptor>& descriptor);

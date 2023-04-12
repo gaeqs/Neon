@@ -38,7 +38,6 @@ namespace neon {
         ComponentCollection _components;
 
 
-
         std::unordered_map<Model*, uint32_t> _usedModels;
 
     public:
@@ -72,6 +71,8 @@ namespace neon {
 
         // region INTERNAL
 
+        const std::unordered_map<Model*, uint32_t>& usedModels() const;
+
         /**
          * THIS METHOD SHOULD ONLY BE USED BY GRAPHIC COMPONENTS!
          * USERS MUSTN'T USE THIS METHOD.
@@ -86,7 +87,7 @@ namespace neon {
          * <p>
          * Unmarks the given model as being used to render the scene.
          */
-        void unmarkUsingModel (Model* model);
+        void unmarkUsingModel(Model* model);
 
         // endregion
 

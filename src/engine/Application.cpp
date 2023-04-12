@@ -39,7 +39,8 @@ namespace neon {
             _lastCursorPosition(0.0, 0.0),
             _currentFrameInformation(),
             _implementation(),
-            _assets() {
+            _assets(),
+            _render() {
     }
 
     Application::~Application() {

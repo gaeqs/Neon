@@ -26,14 +26,13 @@ namespace neon {
             const std::shared_ptr<FrameBuffer>& target) {
         auto& app = room->getApplication()->getImplementation();
         auto renderPass = target->getImplementation().getRenderPass().getRaw();
-        for (const auto& [name, model]: room->getApplication()
-                ->getAssets().getAll<Model>()) {
-            if (model.expired()) continue;
-            auto ptr = std::reinterpret_pointer_cast<Model>(model.lock());
-            ptr->getImplementation().draw(
+        auto globalUniformBuffer = &room->getApplication()->getRender()
+                ->getGlobalUniformBuffer();
+        for (const auto& [model, amount]: room->usedModels()) {
+            model->getImplementation().draw(
                     app.getCurrentCommandBuffer(),
                     renderPass,
-                    &room->getGlobalUniformBuffer()
+                    globalUniformBuffer
             );
         }
     }

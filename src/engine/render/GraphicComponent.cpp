@@ -45,6 +45,7 @@ namespace neon {
     }
 
     void GraphicComponent::setModel(const std::shared_ptr<Model>& model) {
+        if (model == _model) return;
         if (_model != nullptr) {
             if (_modelTargetId.has_value()) {
                 _model->freeInstance(*_modelTargetId.value());

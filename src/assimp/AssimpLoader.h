@@ -117,9 +117,9 @@ namespace neon::assimp_loader {
     struct LoaderInfo {
 
         /**
-         * The room where the model is loaded.
+         * The application where the model is loaded.
          */
-        Room* room;
+        Application* application;
 
         /**
          * The name of the model.
@@ -183,12 +183,12 @@ namespace neon::assimp_loader {
 
     private:
 
-        LoaderInfo(Room* room_,
+        LoaderInfo(Application* application_,
                    std::string name_,
                    MaterialCreateInfo materialCreateInfo_,
                    VertexParser vertexParser_,
                    InstanceData instanceData_) :
-                room(room_),
+                application(application_),
                 name(std::move(name_)),
                 materialCreateInfo(std::move(materialCreateInfo_)),
                 vertexParser(std::move(vertexParser_)),
@@ -197,11 +197,11 @@ namespace neon::assimp_loader {
     public:
 
         template<class Vertex, class Instance = DefaultInstancingData>
-        static LoaderInfo create(Room* room,
+        static LoaderInfo create(Application* application,
                                  std::string name,
                                  MaterialCreateInfo materialCreateInfo) {
             return {
-                    room,
+                    application,
                     std::move(name),
                     materialCreateInfo,
                     VertexParser::fromTemplate<Vertex>(),
