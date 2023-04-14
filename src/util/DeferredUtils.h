@@ -84,7 +84,7 @@ namespace neon::deferred_utils {
     std::shared_ptr<Texture> createLightSystem(
             Room* room,
             Render* render,
-            const std::vector<IdentifiableWrapper<Texture>>& textures,
+            const std::vector<std::shared_ptr<Texture>>& textures,
             TextureFormat outputFormat,
             const std::shared_ptr<ShaderProgram>& directionalShader,
             const std::shared_ptr<ShaderProgram>& pointShader,

@@ -11,13 +11,14 @@ void GlobalParametersUpdaterComponent::onStart() {
 
 void GlobalParametersUpdaterComponent::onUpdate(float deltaTime) {
     auto& camera = getRoom()->getCamera();
-    getRoom()->getGlobalUniformBuffer().uploadData<GlobalParameters>(
-            0,
-            GlobalParameters{
-                    camera.getView(),
-                    camera.getViewProjection(),
-                    camera.getFrustum().getInverseProjection(),
-                    camera.getFrustum().getNear(),
-                    camera.getFrustum().getFar()
-            });
+    getApplication()->getRender()
+            ->getGlobalUniformBuffer().uploadData<GlobalParameters>(
+                    0,
+                    GlobalParameters{
+                            camera.getView(),
+                            camera.getViewProjection(),
+                            camera.getFrustum().getInverseProjection(),
+                            camera.getFrustum().getNear(),
+                            camera.getFrustum().getFar()
+                    });
 }
