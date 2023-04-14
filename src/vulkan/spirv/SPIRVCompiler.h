@@ -11,7 +11,7 @@
 #include <unordered_map>
 
 #include <vulkan/vulkan.h>
-#include <glslang/SPIRV/GlslangToSpv.h>
+#include <SPIRV/GlslangToSpv.h>
 
 #include <util/Result.h>
 #include <vulkan/VKShaderUniform.h>

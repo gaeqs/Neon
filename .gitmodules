@@ -5,3 +5,12 @@
 [submodule "lib/implot"]
 	path = lib/implot
 	url = https://github.com/epezent/implot.git
+[submodule "lib/glslang"]
+	path = lib/glslang
+	url = https://github.com/KhronosGroup/glslang
+[submodule "lib/spirv-tools"]
+	path = lib/spirv-tools
+	url = https://github.com/KhronosGroup/SPIRV-Tools
+[submodule "lib/spirv-headers"]
+	path = lib/spirv-headers
+	url = https://github.com/KhronosGroup/SPIRV-Headers

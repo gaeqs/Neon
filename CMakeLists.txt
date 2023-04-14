@@ -32,7 +32,6 @@ find_package(glfw3 CONFIG REQUIRED)
 find_package(glm CONFIG REQUIRED)
 find_package(assimp CONFIG REQUIRED)
 find_package(Vulkan REQUIRED)
-find_package(Glslang REQUIRED)
 
 # Try extracting VulkanSDK path from ${Vulkan_INCLUDE_DIRS}
 if (NOT ${Vulkan_INCLUDE_DIRS} STREQUAL "")
@@ -41,8 +40,17 @@ if (NOT ${Vulkan_INCLUDE_DIRS} STREQUAL "")
 endif ()
 
 # STB
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/lib/stb/)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/lib/stb)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/lib/stb/src)
+
+# GLSLANG
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/lib/glslang)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/lib/glslang)
+
+
+# SPIRV-TOOLS
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/lib/spirv-headers)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/lib/spirv-tools)
 
 if (WIN32)
     list(APPEND LIBRARIES assimp::assimp)
@@ -57,7 +65,7 @@ endif ()
 
 list(APPEND LIBRARIES glfw ${GLFW_LIBRARIES})
 list(APPEND LIBRARIES ${VULKAN_LIB_LIST})
-list(APPEND LIBRARIES Glslang::SPIRV Glslang::Glslang)
+list(APPEND LIBRARIES SPIRV glslang)
 list(APPEND LIBRARIES IMGUI IMPLOT)
 
 if (RELEASE_DEBUG)
