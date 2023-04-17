@@ -42,17 +42,14 @@ std::shared_ptr<ShaderProgram> createShader(Application* application,
     auto defaultVert = cmrc::shaders::get_filesystem().open(vert);
     auto defaultFrag = cmrc::shaders::get_filesystem().open(frag);
 
-    auto shader = std::make_shared<ShaderProgram>(application, name);
-    shader->addShader(ShaderType::VERTEX, defaultVert);
-    shader->addShader(ShaderType::FRAGMENT, defaultFrag);
-
-    auto result = shader->compile();
-    if (result.has_value()) {
-        std::cerr << result.value() << std::endl;
-        throw std::runtime_error(result.value());
+    auto result = ShaderProgram::createShader(
+            application, name, defaultVert, defaultFrag);
+    if (!result.isOk()) {
+        std::cerr << result.getError() << std::endl;
+        throw std::runtime_error(result.getError());
     }
 
-    return shader;
+    return result.getResult();
 }
 
 

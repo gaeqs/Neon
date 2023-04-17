@@ -7,11 +7,15 @@
 
 #include <unordered_map>
 #include <optional>
+#include <memory>
+#include <string>
 
 #include <cmrc/cmrc.hpp>
 
 #include <engine/structure/Asset.h>
 #include <engine/shader/ShaderType.h>
+
+#include <util/Result.h>
 
 #ifdef USE_VULKAN
 
@@ -22,6 +26,20 @@
 namespace neon {
     class Room;
 
+    /**
+     * Represents a set of shaders that can be used in a material.
+     * <p>
+     * Shader programs contains all shaders used by a pipeline
+     * to render an object.
+     * To create a shader program, you must provide a set of shaders
+     * in GLSL format.
+     * When all shaders are added to the program, you must compile
+     * it using the method <i>compile</i>.
+     * You cannot use a shader program that is not compiled.
+     * <p>
+     * You may use the util static method <i>createShader</i> to
+     * create an compile a shader program in one line.
+     */
     class ShaderProgram : public Asset {
 
         template<class T> friend
@@ -29,28 +47,107 @@ namespace neon {
 
     public:
 #ifdef USE_VULKAN
-    using Implementation = vulkan::VKShaderProgram;
+        using Implementation = vulkan::VKShaderProgram;
 #endif
 
     private:
 
         bool _compiled;
-        std::unordered_map<ShaderType, cmrc::file> _rawShaders;
+        std::unordered_map<ShaderType, std::string> _rawShaders;
         Implementation _implementation;
 
     public:
 
         ShaderProgram(const ShaderProgram& other) = delete;
 
-        explicit ShaderProgram(Application* application, std::string name);
+        /**
+         * Creates a new shader program.
+         * <p>
+         * You may add shaders to this program using the method
+         * <i>addShader</i>.
+         * @param application the application holding this asset.
+         * @param name the name of this shader program.
+         */
+        ShaderProgram(Application* application, std::string name);
 
+        /**
+         * Returns the implementation of this shader program.
+         * @return the implementation.
+         */
         [[nodiscard]] const Implementation& getImplementation() const;
 
+        /**
+         * Returns the implementation of this shader program.
+         * @return the implementation.
+         */
         Implementation& getImplementation();
 
+        /**
+         * Adds a shader to this program.
+         * You can only add new shaders when the program is not
+         * compiled.
+         * Once this shader program is compiled, no new shaders
+         * can be added, and this method will always return false.
+         * @param type the type of the shader.
+         * @param resource the shader data.
+         * @return whether the shader was added.
+         */
         bool addShader(ShaderType type, cmrc::file resource);
 
+        /**
+         * Adds a shader to this program.
+         * You can only add new shaders when the program is not
+         * compiled.
+         * Once this shader program is compiled, no new shaders
+         * can be added, and this method will always return false.
+         * @param type the type of the shader.
+         * @param resource the shader data.
+         * @return whether the shader was added.
+         */
+        bool addShader(ShaderType type, std::string resource);
+
+        /**
+         * Compiles this shader program.
+         * You cannot add new shaders after a shader program is
+         * compiled.
+         * @return a compilation error if present.
+         */
         std::optional<std::string> compile();
+
+        // region Util static methods
+
+        /**
+         * Util static method that creates a new shader program
+         * that only has a vertex and fragment shader.
+         * The returned program is already compiled;
+         * you cannot add new shaders to the returned program.
+         * @param app the application holding the program.
+         * @param name the name of the program.
+         * @param vert the vertex shader on GLSL source format.
+         * @param frag the fragment shader on GLSL source format.
+         * @return the program or a compilation error.
+         */
+        static neon::Result<std::shared_ptr<ShaderProgram>, std::string>
+        createShader(Application* app, std::string name,
+                     std::string vert, std::string frag);
+
+        /**
+         * Util static method that creates a new shader program
+         * that only has a vertex and fragment shader.
+         * The returned program is already compiled;
+         * you cannot add new shaders to the returned program.
+         * @param app the application holding the program.
+         * @param name the name of the program.
+         * @param vert the vertex shader on GLSL source format.
+         * @param frag the fragment shader on GLSL source format.
+         * @return the program or a compilation error.
+         */
+        static neon::Result<std::shared_ptr<ShaderProgram>, std::string>
+        createShader(Application* app, std::string name,
+                     cmrc::file vert, cmrc::file frag);
+
+        // endregion
+
 
     };
 }
