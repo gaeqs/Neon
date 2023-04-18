@@ -12,6 +12,7 @@ namespace neon {
             std::string name,
             const std::shared_ptr<ShaderUniformDescriptor>& descriptor) :
             Asset(typeid(ShaderUniformBuffer), std::move(name)),
+            _descriptor(descriptor),
             _implementation(descriptor) {
     }
 
@@ -42,6 +43,11 @@ namespace neon {
     ShaderUniformBuffer::Implementation&
     ShaderUniformBuffer::getImplementation() {
         return _implementation;
+    }
+
+    const std::shared_ptr<ShaderUniformDescriptor>&
+    ShaderUniformBuffer::getDescriptor() const {
+        return _descriptor;
     }
 }
 

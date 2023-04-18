@@ -28,6 +28,7 @@ namespace neon {
 
     private:
 
+        std::shared_ptr<ShaderUniformDescriptor> _descriptor;
         Implementation _implementation;
 
     public:
@@ -41,6 +42,9 @@ namespace neon {
         [[nodiscard]] const Implementation& getImplementation() const;
 
         [[nodiscard]] Implementation& getImplementation();
+
+        [[nodiscard]] const std::shared_ptr<ShaderUniformDescriptor>&
+        getDescriptor() const;
 
         void setBindingPoint(uint32_t point);
 

@@ -34,6 +34,20 @@ namespace neon {
 
     class Application;
 
+    /**
+     * Represents a render material.
+     * A material tells the engine how to render
+     * a model.
+     * Materials are primarily defined by a shader
+     * program and a target frame buffer.
+     * The model will be render at the defined framed buffer,
+     * using the defined shader.
+     * <p>
+     * Materials can also contains images and uniform buffers that
+     * the shader can use.
+     * Unlike the shader and the target, the uniform buffers and
+     * images are mutable and can be changed anytime.
+     */
     class Material : public Asset {
 
     public:
@@ -44,7 +58,6 @@ namespace neon {
 
         std::shared_ptr<ShaderProgram> _shader;
 
-        std::shared_ptr<ShaderUniformDescriptor> _uniformDescriptor;
         ShaderUniformBuffer _uniformBuffer;
 
         Implementation _implementation;
@@ -53,32 +66,75 @@ namespace neon {
 
         Material(const Material& other) = delete;
 
+        /**
+         * Creates a new material.
+         * @param application the application holding this asset.
+         * @param name the name of this material.
+         * @param createInfo the creation information of this material.
+         */
         Material(Application* application,
                  const std::string& name,
                  const MaterialCreateInfo& createInfo);
 
+        /**
+         * Returns the shader program this material uses.
+         * This value cannot be modified.
+         * @return the shader program.
+         */
         [[nodiscard]] const std::shared_ptr<ShaderProgram>&
         getShader() const;
 
+        /**
+         * Returns the uniform buffer that contains the mutable information
+         * of this material.
+         * @return the uniform buffer.
+         */
         [[nodiscard]] const ShaderUniformBuffer& getUniformBuffer() const;
 
+        /**
+         * Returns the uniform buffer that contains the mutable information
+         * of this material.
+         * @return the uniform buffer.
+         */
         [[nodiscard]] ShaderUniformBuffer& getUniformBuffer();
 
-        [[nodiscard]] const std::shared_ptr<ShaderUniformDescriptor>&
-        getUniformDescriptor() const;
-
+        /**
+         * Returns the implementation of this material.
+         * @return the implementation.
+         */
         [[nodiscard]] const Implementation& getImplementation() const;
 
+        /**
+         * Returns the implementation of this material.
+         * @return the implementation.
+         */
         Implementation& getImplementation();
 
-        void
-        pushConstant(const std::string& name, const void* data, uint32_t size);
+        /**
+         * Sets the value of a shader constant.
+         * @param name the name of the constant.
+         * @param data the data to set.
+         * @param size the size of the data array.
+         */
+        void pushConstant(const std::string& name,
+                          const void* data, uint32_t size);
 
+        /**
+         * Sets the value of a shader constant.
+         * @tparam T the type of the value.
+         * @param key the name of the constant.
+         * @param value the data to set.
+         */
         template<class T>
         void pushConstant(const std::string key, const T& value) {
             pushConstant(key, &value, sizeof(T));
         }
 
+        /**
+         * Sets the texture of a shader sampler.
+         * @param name the name of the sampler.
+         * @param texture the texture.
+         */
         void setTexture(const std::string& name,
                         std::shared_ptr<Texture> texture);
     };

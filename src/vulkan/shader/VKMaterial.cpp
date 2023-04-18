@@ -160,7 +160,7 @@ namespace neon::vulkan {
         VkDescriptorSetLayout uniformInfos[] = {
                 application->getRender()->getGlobalUniformDescriptor()
                         ->getImplementation().getDescriptorSetLayout(),
-                material->getUniformDescriptor()
+                material->getUniformBuffer().getDescriptor()
                         ->getImplementation().getDescriptorSetLayout()
         };
 

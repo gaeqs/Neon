@@ -14,8 +14,7 @@ namespace neon {
                        const MaterialCreateInfo& createInfo) :
             Asset(typeid(Material), name),
             _shader(createInfo.shader),
-            _uniformDescriptor(createInfo.descriptions.uniform),
-            _uniformBuffer(name, _uniformDescriptor),
+            _uniformBuffer(name, createInfo.descriptions.uniform),
             _implementation(application, this, createInfo) {
         _uniformBuffer.setBindingPoint(1);
     }
@@ -30,11 +29,6 @@ namespace neon {
 
     ShaderUniformBuffer& Material::getUniformBuffer() {
         return _uniformBuffer;
-    }
-
-    const std::shared_ptr<ShaderUniformDescriptor>&
-    Material::getUniformDescriptor() const {
-        return _uniformDescriptor;
     }
 
     const Material::Implementation& Material::getImplementation() const {

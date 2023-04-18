@@ -33,6 +33,7 @@ namespace neon {
 
     bool ShaderProgram::addShader(ShaderType type, std::string resource) {
         _rawShaders[type] = std::move(resource);
+        return true;
     }
 
     std::optional<std::string> ShaderProgram::compile() {
