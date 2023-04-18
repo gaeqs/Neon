@@ -21,14 +21,6 @@
     "name" : "vulkan",
     "version>=" : "1.1.82.1#3"
   }, {
-    "name" : "glslang",
-    "version>=" : "11.13.0",
-    "$comment" : "    find_package(glslang CONFIG REQUIRED)\n\n    target_link_libraries(main PRIVATE glslang::OSDependent glslang::glslang glslang::MachineIndependent glslang::GenericCodeGen glslang::OGLCompiler glslang::glslangValidator glslang::spirv-remap glslang::glslang-default-resource-limits glslang::SPVRemapper glslang::SPIRV glslang::HLSL)\n"
-  }, {
-    "name" : "spirv-tools",
-    "version>=" : "2022.4",
-    "$comment" : "    # this is heuristically generated, and may not be correct\n\n    find_package(SPIRV-Tools CONFIG REQUIRED)\n\n    target_link_libraries(main PRIVATE SPIRV-Tools-shared SPIRV-Tools-static)\n"
-  }, {
     "name" : "eigen3",
     "version>=" : "3.4.0#2",
     "$comment" : "    # this is heuristically generated, and may not be correct\n\n    find_package(Eigen3 CONFIG REQUIRED)\n\n    target_link_libraries(main PRIVATE Eigen3::Eigen)\n"
