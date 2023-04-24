@@ -7,6 +7,7 @@
 #include <stdexcept>
 
 #include <engine/render/TextureCreateInfo.h>
+#include <engine/shader/MaterialCreateInfo.h>
 #include <vulkan/vulkan_core.h>
 
 namespace vc = neon::vulkan::conversions;
@@ -354,6 +355,36 @@ VkBlendFactor vc::vkBlendFactor(const BlendFactor& factor) {
             return VK_BLEND_FACTOR_SRC1_ALPHA;
         case BlendFactor::ONE_MINUS_SRC1_ALPHA:
             return VK_BLEND_FACTOR_ONE_MINUS_SRC1_ALPHA;
+        default:
+            throw std::runtime_error("Conversion not found!");
+    }
+}
+
+VkPolygonMode vc::vkPolygonMode(const PolygonMode& polygonMode) {
+    switch (polygonMode) {
+        case PolygonMode::FILL:
+            return VK_POLYGON_MODE_FILL;
+        case PolygonMode::LINE:
+            return VK_POLYGON_MODE_LINE;
+        case PolygonMode::POINT:
+            return VK_POLYGON_MODE_POINT;
+        case PolygonMode::FILL_RECTANGLE_NVIDIA:
+            return VK_POLYGON_MODE_FILL_RECTANGLE_NV;
+        default:
+            throw std::runtime_error("Conversion not found!");
+    }
+}
+
+VkCullModeFlagBits vc::vkCullModeFlagBits(const CullMode& cullMode) {
+    switch (cullMode) {
+        case CullMode::NONE:
+            return VK_CULL_MODE_NONE;
+        case CullMode::FRONT:
+            return VK_CULL_MODE_FRONT_BIT;
+        case CullMode::BACK:
+            return VK_CULL_MODE_BACK_BIT;
+        case CullMode::BOTH:
+            return VK_CULL_MODE_FRONT_AND_BACK;
         default:
             throw std::runtime_error("Conversion not found!");
     }

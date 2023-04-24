@@ -84,6 +84,20 @@ namespace neon {
         ALWAYS,
     };
 
+    enum class PolygonMode {
+        FILL = 0,
+        LINE = 1,
+        POINT = 2,
+        FILL_RECTANGLE_NVIDIA = 1000153000
+    };
+
+    enum class CullMode {
+        NONE = 0,
+        FRONT = 1,
+        BACK = 2,
+        BOTH = 3
+    };
+
     struct MaterialDescriptions {
 
         /**
@@ -206,6 +220,26 @@ namespace neon {
 
     };
 
+    struct MaterialRasterizer {
+
+        /**
+         * The polygon mode the rasterizer should use.
+         */
+        PolygonMode polygonMode = PolygonMode::FILL;
+
+        /**
+         * The line width of the lines when the polygon mode is in line mode.
+         */
+        float lineWidth = 1.0f;
+
+        /**
+         * The cull mode tells the rasterizer the face
+         * that should be discarded in a model.
+         */
+        CullMode cullMode = CullMode::BACK;
+
+    };
+
     struct MaterialCreateInfo {
 
         /**
@@ -236,6 +270,11 @@ namespace neon {
          * The depth and stencil settings for the material.
          */
         MaterialDepthStencil depthStencil = MaterialDepthStencil();
+
+        /**
+         * The rasterizer settings of the material.
+         */
+        MaterialRasterizer rasterizer = MaterialRasterizer();
 
         MaterialCreateInfo(
                 std::shared_ptr<FrameBuffer> target_,

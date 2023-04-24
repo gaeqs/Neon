@@ -5,7 +5,6 @@
 #ifndef NEON_VULKANCONVERSIONS_H
 #define NEON_VULKANCONVERSIONS_H
 
-#include "engine/shader/MaterialCreateInfo.h"
 #include <vector>
 
 #include <vulkan/vulkan.h>
@@ -25,6 +24,8 @@ namespace neon {
     enum class BlendOperation;
     enum class BlendFactor;
     enum class BlendingLogicOperation;
+    enum class PolygonMode;
+    enum class CullMode;
     struct SamplerCreateInfo;
 }
 
@@ -59,9 +60,13 @@ namespace neon::vulkan::conversions {
 
     VkBlendOp vkBlendOp(const BlendOperation& op);
 
-    VkLogicOp vkLogicOp (const BlendingLogicOperation& op);
+    VkLogicOp vkLogicOp(const BlendingLogicOperation& op);
 
     VkBlendFactor vkBlendFactor(const BlendFactor& factor);
+
+    VkPolygonMode vkPolygonMode(const PolygonMode& polygonMode);
+
+    VkCullModeFlagBits vkCullModeFlagBits(const CullMode& cullMode);
 }
 
 #endif //NEON_VULKANCONVERSIONS_H
