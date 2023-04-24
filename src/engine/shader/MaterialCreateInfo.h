@@ -98,6 +98,11 @@ namespace neon {
         BOTH = 3
     };
 
+    enum class FrontFace {
+        COUNTER_CLOCKWISE = 0,
+        CLOCKWISE = 1
+    };
+
     struct MaterialDescriptions {
 
         /**
@@ -233,10 +238,16 @@ namespace neon {
         float lineWidth = 1.0f;
 
         /**
-         * The cull mode tells the rasterizer the face
+         * Tells the rasterizer the face
          * that should be discarded in a model.
          */
         CullMode cullMode = CullMode::BACK;
+
+        /**
+         * Defines how the rasterizer chooses which
+         * face is the front face.
+         */
+        FrontFace frontFace = FrontFace::COUNTER_CLOCKWISE;
 
     };
 

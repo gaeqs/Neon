@@ -203,7 +203,7 @@ std::shared_ptr<Room> getTestRoom(Application* application) {
     clothMaterialInfo.descriptions.uniform = materialDescriptor;
     clothMaterialInfo.descriptions.instance = DefaultInstancingData::getInstancingDescription();
     clothMaterialInfo.descriptions.vertex = TestVertex::getDescription();
-    clothMaterialInfo.rasterizer.polygonMode = neon::PolygonMode::FILL_RECTANGLE_NVIDIA;
+    clothMaterialInfo.rasterizer.polygonMode = neon::PolygonMode::LINE;
     clothMaterialInfo.rasterizer.cullMode = neon::CullMode::NONE;
 
     auto material = std::make_shared<Material>(application, "cloth",

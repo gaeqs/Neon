@@ -83,7 +83,9 @@ namespace neon::vulkan {
         rasterizer.polygonMode = vc::vkPolygonMode(ra.polygonMode);
         rasterizer.lineWidth = ra.lineWidth;
         rasterizer.cullMode = vc::vkCullModeFlagBits(ra.cullMode);
-        rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
+        rasterizer.frontFace = ra.frontFace == FrontFace::COUNTER_CLOCKWISE
+                               ? VK_FRONT_FACE_COUNTER_CLOCKWISE
+                               : VK_FRONT_FACE_CLOCKWISE;
         rasterizer.depthBiasEnable = VK_FALSE;
         rasterizer.depthBiasConstantFactor = 0.0f; // Optional
         rasterizer.depthBiasClamp = 0.0f; // Optional
