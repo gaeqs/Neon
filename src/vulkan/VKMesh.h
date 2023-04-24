@@ -33,7 +33,7 @@ namespace neon::vulkan {
     class VKMesh {
 
         VKApplication* _vkApplication;
-        std::shared_ptr<Material>& _material;
+        std::vector<std::shared_ptr<Material>>& _materials;
 
         std::optional<std::unique_ptr<Buffer>> _vertexBuffer;
         std::optional<std::unique_ptr<Buffer>> _indexBuffer;
@@ -49,9 +49,10 @@ namespace neon::vulkan {
         VKMesh(const VKMesh& other) = delete;
 
         VKMesh(Application* application,
-               std::shared_ptr<Material>& material,
+               std::vector<std::shared_ptr<Material>>& materials,
                bool modifiableVertices,
-               bool modifiableIndices);
+               bool modifiableIndices
+        );
 
         template<class Vertex>
         void uploadData(const std::vector<Vertex>& vertices,
@@ -121,13 +122,15 @@ namespace neon::vulkan {
 
         bool setIndices(const std::vector<uint32_t>& indices) const;
 
-        [[nodiscard]] std::shared_ptr<Material> getMaterial() const;
+        [[nodiscard]] const std::vector<std::shared_ptr<Material>>&
+        getMaterials() const;
 
         void draw(
                 VkCommandBuffer commandBuffer,
                 VkBuffer instancingBuffer,
                 uint32_t instancingElements,
-                const ShaderUniformBuffer* global);
+                const ShaderUniformBuffer* global,
+                VkRenderPass target);
 
     };
 }

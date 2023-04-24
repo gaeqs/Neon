@@ -118,8 +118,9 @@ namespace neon {
 
             for (const auto& [model, amount]: _usedModels) {
                 for (int i = 0; i < model->getMeshesAmount(); ++i) {
-                    auto& material = model->getMesh(i)->getMaterial();
-                    materials.insert(material.get());
+                    for (const auto& mat: model->getMesh(i)->getMaterials()) {
+                        materials.insert(mat.get());
+                    }
                 }
             }
 

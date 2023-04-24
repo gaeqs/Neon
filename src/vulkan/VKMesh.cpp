@@ -10,12 +10,13 @@
 #include <vulkan/VKApplication.h>
 
 namespace neon::vulkan {
+
     VKMesh::VKMesh(Application* application,
-                   std::shared_ptr<Material>& material,
+                   std::vector<std::shared_ptr<Material>>& materials,
                    bool modifiableVertices,
                    bool modifiableIndices) :
             _vkApplication(&application->getImplementation()),
-            _material(material),
+            _materials(materials),
             _vertexBuffer(),
             _indexBuffer(),
             _indexAmount(0),
@@ -23,42 +24,55 @@ namespace neon::vulkan {
             _modifiableIndices(modifiableIndices) {
     }
 
-    std::shared_ptr<Material> VKMesh::getMaterial() const {
-        return _material;
+    const std::vector<std::shared_ptr<Material>>& VKMesh::getMaterials() const {
+        return _materials;
     }
 
     void VKMesh::draw(
             VkCommandBuffer commandBuffer,
             VkBuffer instancingBuffer,
             uint32_t instancingElements,
-            const ShaderUniformBuffer* global) {
+            const ShaderUniformBuffer* global,
+            VkRenderPass target) {
 
         if (!_vertexBuffer.has_value()) return;
 
-        VkBuffer buffers[] = {_vertexBuffer.value()->getRaw(),
-                              instancingBuffer};
-        VkDeviceSize offsets[] = {0, 0};
+        bool init = false;
 
-        auto& mat = _material->getImplementation();
+        for (const auto& material: _materials) {
+            if (target != material->getImplementation().getTarget())
+                continue;
 
-        vkCmdBindPipeline(commandBuffer,
-                          VK_PIPELINE_BIND_POINT_GRAPHICS,
-                          mat.getPipeline());
+            if (!init) {
+                VkBuffer buffers[] = {_vertexBuffer.value()->getRaw(),
+                                      instancingBuffer};
+                VkDeviceSize offsets[] = {0, 0};
 
-        mat.uploadConstants(commandBuffer);
+                vkCmdBindVertexBuffers(commandBuffer, 0, 2, buffers, offsets);
+                vkCmdBindIndexBuffer(
+                        commandBuffer,
+                        _indexBuffer.value()->getRaw(),
+                        0, VK_INDEX_TYPE_UINT32
+                );
+                init = true;
+            }
 
-        vkCmdBindVertexBuffers(commandBuffer, 0, 2, buffers, offsets);
-        vkCmdBindIndexBuffer(commandBuffer,
-                             _indexBuffer.value()->getRaw(),
-                             0, VK_INDEX_TYPE_UINT32);
+            auto& mat = material->getImplementation();
 
-        auto layout = mat.getPipelineLayout();
-        global->getImplementation().bind(commandBuffer, layout);
-        _material->getUniformBuffer().getImplementation()
-                .bind(commandBuffer, layout);
+            vkCmdBindPipeline(commandBuffer,
+                              VK_PIPELINE_BIND_POINT_GRAPHICS,
+                              mat.getPipeline());
 
-        vkCmdDrawIndexed(commandBuffer, _indexAmount, instancingElements,
-                         0, 0, 0);
+            mat.uploadConstants(commandBuffer);
+
+            auto layout = mat.getPipelineLayout();
+
+            global->getImplementation().bind(commandBuffer, layout);
+            material->getUniformBuffer()
+                    .getImplementation().bind(commandBuffer, layout);
+            vkCmdDrawIndexed(commandBuffer, _indexAmount, instancingElements,
+                             0, 0, 0);
+        }
     }
 
     bool VKMesh::setVertices(const void* data, size_t length) const {

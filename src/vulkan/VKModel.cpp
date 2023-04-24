@@ -112,11 +112,13 @@ namespace neon::vulkan {
         if (_positions.empty()) return;
 
         for (const auto& item: _meshes) {
-            auto meshTarget = item->getMaterial()->getImplementation().getTarget();
-            if (meshTarget == target) {
-                item->draw(buffer, _instancingBuffer->getRaw(),
-                           _positions.size(), global);
-            }
+            item->draw(
+                    buffer,
+                    _instancingBuffer->getRaw(),
+                    _positions.size(),
+                    global,
+                    target
+            );
         }
     }
 

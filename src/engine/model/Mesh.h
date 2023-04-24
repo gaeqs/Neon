@@ -37,7 +37,7 @@ namespace neon {
     private:
 
         Implementation _implementation;
-        std::shared_ptr<Material> _material;
+        std::vector<std::shared_ptr<Material>> _materials;
 
     public:
 
@@ -56,6 +56,18 @@ namespace neon {
              bool modifiableVertices = false,
              bool modifiableIndices = false);
 
+        /**
+         * Creates a new mesh.
+         * @param application the application where the mesh belongs to.
+         * @param materials the materials of the mesh.
+         * @param modifiableVertices whether this mesh's vertices can be modified.
+         * @param modifiableIndices whether this mesh's indices can be modified.
+         */
+        Mesh(Application* application,
+             const std::string& name,
+             std::vector<std::shared_ptr<Material>> materials,
+             bool modifiableVertices = false,
+             bool modifiableIndices = false);
 
         /**
          * Returns the implementation of the mesh.
@@ -166,13 +178,23 @@ namespace neon {
         bool setIndices(const std::vector<uint32_t>& indices) const;
 
         /**
-         * Returns the material of the mesh.
-         * @return the material.
+         * Returns the materials of the mesh.
+         * @return the materials.
          */
-        [[nodiscard]] const std::shared_ptr<Material>& getMaterial() const;
+        [[nodiscard]] const std::vector<std::shared_ptr<Material>>&
+        getMaterials() const;
+
+        /**
+         * Returns the materials of the mesh.
+         * You can modify this vector to add new materials.
+         * @return the materials.
+         */
+        [[nodiscard]] std::vector<std::shared_ptr<Material>>& getMaterials();
 
         /**
          * Sets the material of the mesh.
+         * This method overrides all materials inside
+         * this mesh.
          * @param material the material.
          */
         void setMaterial(const std::shared_ptr<Material>& material);
