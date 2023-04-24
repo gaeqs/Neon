@@ -11,6 +11,7 @@
 #include <engine/shader/Material.h>
 
 #include <iterator>
+#include <utility>
 #include <vulkan/render/VKRenderPass.h>
 
 #include <vulkan/util/VKUtil.h>
@@ -20,10 +21,11 @@ namespace vc = neon::vulkan::conversions;
 
 namespace neon::vulkan {
     VKMaterial::VKMaterial(
-            Room* room, Material* material,
+            Application* application,
+            Material* material,
             const MaterialCreateInfo& createInfo) :
             _material(material),
-            _vkApplication(&room->getApplication()->getImplementation()),
+            _vkApplication(&application->getImplementation()),
             _pipelineLayout(VK_NULL_HANDLE),
             _pipeline(VK_NULL_HANDLE),
             _pushConstants(),
@@ -156,9 +158,9 @@ namespace neon::vulkan {
         colorBlending.blendConstants[3] = createInfo.blending.blendingConstants[3];
 
         VkDescriptorSetLayout uniformInfos[] = {
-                room->getGlobalUniformDescriptor()
+                application->getRender()->getGlobalUniformDescriptor()
                         ->getImplementation().getDescriptorSetLayout(),
-                material->getUniformDescriptor()
+                material->getUniformBuffer().getDescriptor()
                         ->getImplementation().getDescriptorSetLayout()
         };
 
@@ -274,7 +276,7 @@ namespace neon::vulkan {
     }
 
     void VKMaterial::setTexture(const std::string& name,
-                                IdentifiableWrapper<Texture> texture) {
+                                std::shared_ptr<Texture> texture) {
         auto& samplers = _material->getShader()->getImplementation()
                 .getSamplers();
         auto samplerIt = samplers.find(name);
@@ -282,6 +284,6 @@ namespace neon::vulkan {
 
         _material->getUniformBuffer().setTexture(
                 samplerIt->second.binding,
-                texture);
+                std::move(texture));
     }
 }

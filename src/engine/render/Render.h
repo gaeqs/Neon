@@ -7,8 +7,13 @@
 
 #include <functional>
 #include <vector>
+
 #include <engine/render/RenderPassStrategy.h>
+#include <engine/structure/Asset.h>
 #include <util/ClusteredLinkedCollection.h>
+
+#include <engine/shader/ShaderUniformBuffer.h>
+#include <engine/shader/ShaderUniformDescriptor.h>
 
 #ifdef USE_VULKAN
 
@@ -22,12 +27,12 @@ namespace neon {
 
     class Application;
 
-    class Render {
+    class Render : public Asset {
 
     public:
 
 #ifdef USE_VULKAN
-    using Implementation = vulkan::VKRender;
+        using Implementation = vulkan::VKRender;
 #endif
 
     private:
@@ -36,11 +41,16 @@ namespace neon {
         Application* _application;
         std::vector<RenderPassStrategy> _strategies;
 
+        std::shared_ptr<ShaderUniformDescriptor> _globalUniformDescriptor;
+        ShaderUniformBuffer _globalUniformBuffer;
+
     public:
 
         Render(const Render& other) = delete;
 
-        explicit Render(Application* application);
+        Render(Application* application,
+               std::string name,
+               const std::shared_ptr<ShaderUniformDescriptor>& descriptor);
 
         [[nodiscard]] const Implementation& getImplementation() const;
 
@@ -57,6 +67,13 @@ namespace neon {
         [[nodiscard]] size_t getPassesAmount() const;
 
         [[nodiscard]] std::shared_ptr<FrameBuffer> getFrameBuffer(size_t index);
+
+        [[nodiscard]] const std::shared_ptr<ShaderUniformDescriptor>&
+        getGlobalUniformDescriptor() const;
+
+        [[nodiscard]] const ShaderUniformBuffer& getGlobalUniformBuffer() const;
+
+        [[nodiscard]] ShaderUniformBuffer& getGlobalUniformBuffer();
     };
 }
 

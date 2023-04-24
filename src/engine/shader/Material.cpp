@@ -8,22 +8,18 @@
 #include <utility>
 
 namespace neon {
-    uint64_t MATERIAL_ID_GENERATOR = 1;
 
-    Material::Material(Room* room, const MaterialCreateInfo& createInfo) :
-            _id(MATERIAL_ID_GENERATOR++),
+    Material::Material(Application* application,
+                       const std::string& name,
+                       const MaterialCreateInfo& createInfo) :
+            Asset(typeid(Material), name),
             _shader(createInfo.shader),
-            _uniformDescriptor(createInfo.descriptions.uniform),
-            _uniformBuffer(_uniformDescriptor),
-            _implementation(room, this, createInfo) {
+            _uniformBuffer(name, createInfo.descriptions.uniform),
+            _implementation(application, this, createInfo) {
         _uniformBuffer.setBindingPoint(1);
     }
 
-    uint64_t Material::getId() const {
-        return _id;
-    }
-
-    const IdentifiableWrapper<ShaderProgram>& Material::getShader() const {
+    const std::shared_ptr<ShaderProgram>& Material::getShader() const {
         return _shader;
     }
 
@@ -33,11 +29,6 @@ namespace neon {
 
     ShaderUniformBuffer& Material::getUniformBuffer() {
         return _uniformBuffer;
-    }
-
-    const std::shared_ptr<ShaderUniformDescriptor>&
-    Material::getUniformDescriptor() const {
-        return _uniformDescriptor;
     }
 
     const Material::Implementation& Material::getImplementation() const {
@@ -54,7 +45,7 @@ namespace neon {
     }
 
     void Material::setTexture(const std::string& name,
-                              IdentifiableWrapper<Texture> texture) {
+                              std::shared_ptr<Texture> texture) {
         _implementation.setTexture(name, texture);
     }
 }

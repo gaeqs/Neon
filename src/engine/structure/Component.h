@@ -5,6 +5,8 @@
 #ifndef RVTRACKING_COMPONENT_H
 #define RVTRACKING_COMPONENT_H
 
+#include "Asset.h"
+
 #include <cstdint>
 
 #include <engine/structure/GameObject.h>
@@ -30,15 +32,19 @@
 
 namespace neon {
 
-/**
- * Represents a component inside a game object.
- * <p>
- * Components are represented by an identifier.
- * <p>
- * Components define behaviours to the attached game object.
- * You can add or remove components from a game object
- * using the appropriated methods.
- */
+    class Application;
+
+    class AssetCollection;
+
+    /**
+     * Represents a component inside a game object.
+     * <p>
+     * Components are represented by an identifier.
+     * <p>
+     * Components define behaviours to the attached game object.
+     * You can add or remove components from a game object
+     * using the appropriated methods.
+     */
     class Component : public Identifiable {
 
         friend class GameObject;
@@ -173,9 +179,13 @@ namespace neon {
          * This method is an alias of getGameObject()->getRoom().
          * @return the room.
          */
-        [[nodiscard]] inline Room* getRoom() {
+        [[nodiscard]] inline Room* getRoom() const {
             return _gameObject->getRoom();
         }
+
+        [[nodiscard]] Application* getApplication() const;
+
+        [[nodiscard]] AssetCollection& getAssets() const;
 
         inline std::string imGuiUId(const std::string& id) const {
             return id + "##" + std::to_string(_id);

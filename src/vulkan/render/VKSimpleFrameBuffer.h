@@ -6,6 +6,7 @@
 #define NEON_VKSIMPLEFRAMEBUFFER_H
 
 #include <vector>
+#include <memory>
 
 #include <engine/render/TextureCreateInfo.h>
 #include <engine/structure/IdentifiableWrapper.h>
@@ -16,7 +17,7 @@
 #include <imgui.h>
 
 namespace neon {
-    class Room;
+    class Application;
 
     class Texture;
 }
@@ -35,7 +36,7 @@ namespace neon::vulkan {
         std::vector<VkImageView> _imageViews;
         std::vector<VkImageLayout> _layouts;
         std::vector<VkDescriptorSet> _imGuiDescriptors;
-        std::vector<IdentifiableWrapper<Texture>> _textures;
+        std::vector<std::shared_ptr<Texture>> _textures;
 
         std::vector<TextureFormat> _formats;
         VkExtent2D _extent;
@@ -52,7 +53,7 @@ namespace neon::vulkan {
 
     public:
 
-        VKSimpleFrameBuffer(Room* room,
+        VKSimpleFrameBuffer(Application* application,
                             const std::vector<TextureFormat>& formats,
                             bool depth);
 
@@ -80,7 +81,7 @@ namespace neon::vulkan {
 
         bool renderImGui() override;
 
-        [[nodiscard]] const std::vector<IdentifiableWrapper<Texture>>&
+        [[nodiscard]] const std::vector<std::shared_ptr<Texture>>&
         getTextures() const;
 
         void recreate(std::pair<uint32_t, uint32_t> size);

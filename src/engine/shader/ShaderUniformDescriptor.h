@@ -13,26 +13,23 @@
 
 #ifdef USE_VULKAN
 
-#include "vulkan/shader/VKShaderUniformDescriptor.h"
+#include <vulkan/shader/VKShaderUniformDescriptor.h>
 
 #endif
 
 namespace neon {
     class Application;
 
-    class ShaderUniformDescriptor : public Identifiable {
-
-        template<class T> friend
-        class IdentifiableWrapper;
+    class ShaderUniformDescriptor : public Asset {
 
     public:
+
 #ifdef USE_VULKAN
     using Implementation = vulkan::VKShaderUniformDescriptor;
 #endif
 
     private:
 
-        uint64_t _id;
         Implementation _implementation;
 
     public:
@@ -41,9 +38,8 @@ namespace neon {
 
         ShaderUniformDescriptor(
                 Application* application,
+                std::string name,
                 const std::vector<ShaderUniformBinding>& bindings);
-
-        [[nodiscard]] uint64_t getId() const override;
 
         [[nodiscard]] const Implementation& getImplementation() const;
 
@@ -63,7 +59,7 @@ namespace neon {
          * @return the new ShaderUniformDescriptor.
          */
         static std::unique_ptr<ShaderUniformDescriptor>
-        ofImages(Application* application, uint32_t amount);
+        ofImages(Application* application, std::string name, uint32_t amount);
 
         // endregion
 

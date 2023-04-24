@@ -8,7 +8,6 @@
 #include <vector>
 #include <memory>
 #include <vulkan/vulkan.h>
-#include <engine/structure/IdentifiableWrapper.h>
 #include <engine/shader/ShaderUniformBinding.h>
 #include <vulkan/shader/VKShaderUniformDescriptor.h>
 
@@ -35,7 +34,7 @@ namespace neon::vulkan {
         std::vector<UniformBindingType> _types;
         std::vector<std::vector<uint32_t>> _updated;
         std::vector<std::vector<char>> _data;
-        std::vector<IdentifiableWrapper<Texture>> _textures;
+        std::vector<std::shared_ptr<Texture>> _textures;
 
         uint32_t _bindingPoint; // In vulkan this is the "set" parameter.
 
@@ -50,7 +49,7 @@ namespace neon::vulkan {
 
         void uploadData(uint32_t index, const void* data, size_t size);
 
-        void setTexture(uint32_t index, IdentifiableWrapper<Texture> texture);
+        void setTexture(uint32_t index, std::shared_ptr<Texture> texture);
 
         void prepareForFrame();
 

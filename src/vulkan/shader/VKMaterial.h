@@ -5,22 +5,18 @@
 #ifndef NEON_VKMATERIAL_H
 #define NEON_VKMATERIAL_H
 
-#include "engine/shader/MaterialCreateInfo.h"
 #include <vector>
 #include <unordered_map>
 #include <string>
 
 #include <vulkan/vulkan.h>
 
-#include <engine/structure/IdentifiableWrapper.h>
 #include <engine/render/Texture.h>
 #include <engine/model/InputDescription.h>
 #include <engine/shader/MaterialCreateInfo.h>
 
 namespace neon {
     class Application;
-
-    class Room;
 
     class Material;
 
@@ -47,7 +43,7 @@ namespace neon::vulkan {
 
         VKMaterial(const VKMaterial& other) = delete;
 
-        VKMaterial(Room* room,
+        VKMaterial(Application* application,
                    Material* material,
                    const MaterialCreateInfo& createInfo);
 
@@ -66,7 +62,7 @@ namespace neon::vulkan {
         void uploadConstants(VkCommandBuffer buffer) const;
 
         void setTexture(const std::string& name,
-                        IdentifiableWrapper<Texture> texture);
+                        std::shared_ptr<Texture> texture);
     };
 }
 

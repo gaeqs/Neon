@@ -1,9 +1,9 @@
 #include <iostream>
 #include <memory>
 #include <vector>
-#include <filesystem>
 
 #include <engine/Engine.h>
+
 #include <util/component/CameraMovementComponent.h>
 #include <util/component/DebugOverlayComponent.h>
 #include <util/component/DockSpaceComponent.h>
@@ -11,7 +11,7 @@
 #include <util/component/SceneTreeComponent.h>
 #include <util/component/GameObjectExplorerComponent.h>
 #include <util/DeferredUtils.h>
-#include <util/ModelUtils.h>
+
 #include <assimp/AssimpLoader.h>
 
 #include "Cloth.h"
@@ -19,21 +19,28 @@
 #include "GlobalParametersUpdaterComponent.h"
 #include "LockMouseComponent.h"
 #include "cloth/PhysicsManager.h"
-#include "engine/shader/MaterialCreateInfo.h"
-#include "engine/shader/ShaderUniformBinding.h"
 
 constexpr int32_t WIDTH = 800;
 constexpr int32_t HEIGHT = 600;
 
 CMRC_DECLARE(shaders);
 
-IdentifiableWrapper<ShaderProgram> createShader(Room* room,
-                                                const std::string& vert,
-                                                const std::string& frag) {
+/**
+ * Creates a shader program.
+ * @param room the application.
+ * @param name the name of the shader.
+ * @param vert the vertex shader.
+ * @param frag the fragment shader.
+ * @return the shader program.
+ */
+std::shared_ptr<ShaderProgram> createShader(Application* application,
+                                            const std::string& name,
+                                            const std::string& vert,
+                                            const std::string& frag) {
     auto defaultVert = cmrc::shaders::get_filesystem().open(vert);
     auto defaultFrag = cmrc::shaders::get_filesystem().open(frag);
 
-    auto shader = room->getShaders().create();
+    auto shader = std::make_shared<ShaderProgram>(application, name);
     shader->addShader(ShaderType::VERTEX, defaultVert);
     shader->addShader(ShaderType::FRAGMENT, defaultFrag);
 
@@ -47,50 +54,100 @@ IdentifiableWrapper<ShaderProgram> createShader(Room* room,
 }
 
 std::shared_ptr<FrameBuffer> initRender(Room* room) {
-    auto screenShader = createShader(room, "screen.vert",
-                                     "screen.frag");
+    auto* app = room->getApplication();
 
+    // Bindings for the global uniforms.
+    // In this application, we have a buffer of global parameters
+    // and a skybox.
+    std::vector<ShaderUniformBinding> globalBindings = {
+            {UniformBindingType::BUFFER, sizeof(GlobalParameters)},
+            {UniformBindingType::IMAGE,  0}
+    };
+
+    // The description of the global uniforms.
+    auto globalDescriptor = std::make_shared<ShaderUniformDescriptor>(
+            app, "default", globalBindings);
+
+    // The render of the application.
+    // We should set the render to the application before
+    // we do anything else, as some components depend on
+    // the application's render.
+    auto render = std::make_shared<Render>(app, "default", globalDescriptor);
+    app->setRender(render);
+
+    // The format of the first frame buffer.
     std::vector<TextureFormat> frameBufferFormats = {
             TextureFormat::R8G8B8A8,
             TextureFormat::R16FG16F, // NORMAL XY
             TextureFormat::R16FG16F // NORMAL Z / SPECULAR
     };
 
+    // Here we create the first frame buffer.
+    // Just after creation, the frame buffer should be added
+    // to the render as a render pass.
+    // We'll use the default strategy for the rendering.
     auto fpFrameBuffer = std::make_shared<SimpleFrameBuffer>(
-            room, frameBufferFormats, true);
+            room->getApplication(), frameBufferFormats, true);
 
-    room->getRender().addRenderPass(
-            {fpFrameBuffer, RenderPassStrategy::defaultStrategy});
+    render->addRenderPass({fpFrameBuffer, RenderPassStrategy::defaultStrategy});
 
+    // Here we create the second frame buffer.
+    // Just like the first frame buffer, we define the output,
+    // create the frame buffer and add a render pass.
     std::vector<TextureFormat> screenFormats = {TextureFormat::R8G8B8A8};
     auto screenFrameBuffer = std::make_shared<SimpleFrameBuffer>(
-            room, screenFormats, false);
-    room->getRender().addRenderPass(
+            room->getApplication(), screenFormats, false);
+    render->addRenderPass(
             {screenFrameBuffer, RenderPassStrategy::defaultStrategy});
 
+
+    // Here we create a model that renders the screen on
+    // the second render pass.
+    // This model is a screen plane that uses the
+    // output textures of the first render pass.
+
+    auto screenShader = createShader(
+            app, "screen", "screen.vert", "screen.frag");
+
     auto textures = fpFrameBuffer->getTextures();
-    auto screenModel = deferred_utils::createScreenModel(
-            room,
+    deferred_utils::ScreenModelCreationInfo info(
+            room->getApplication(),
+            "screen model",
             textures,
             screenFrameBuffer,
-            screenShader
+            screenShader,
+            true,
+            true,
+            neon::AssetStorageMode::PERMANENT
     );
+
+    // We can also create a GraphicComponent that handles
+    // an instance of the model.
+    // This option is more direct.
+    auto screenModel = deferred_utils::createScreenModel(info);
+    room->markUsingModel(screenModel.get());
 
     auto instance = screenModel->createInstance();
     if (!instance.isOk()) {
         throw std::runtime_error(instance.getError());
     }
 
-    auto swapFrameBuffer = std::make_shared<SwapChainFrameBuffer>(
-            room, false);
-
-    room->getRender().addRenderPass(
+    // Finally, we create the swap chain buffer.
+    // We split the screen render in two frame buffers
+    // because of ImGUI.
+    // ImGUI will use the result of screenFrameBuffer
+    // to render a viewport.
+    // Then, it will render its UI.
+    // If you don't use ImGUI, you don't have to
+    // split the screen render in two frame buffers.
+    auto swapFrameBuffer = std::make_shared<SwapChainFrameBuffer>(room, false);
+    render->addRenderPass(
             {swapFrameBuffer, RenderPassStrategy::defaultStrategy});
 
     return fpFrameBuffer;
 }
 
-IdentifiableWrapper<Texture> loadSkybox(Room* room) {
+std::shared_ptr<Texture> loadSkybox(Room* room) {
     static const std::vector<std::string> PATHS = {
             "resource/Skybox/right.jpg",
             "resource/Skybox/left.jpg",
@@ -104,27 +161,23 @@ IdentifiableWrapper<Texture> loadSkybox(Room* room) {
     info.imageView.viewType = TextureViewType::CUBE;
     info.image.layers = 6;
 
-    return room->getTextures().createTextureFromFiles(PATHS, info);
+    return Texture::createTextureFromFiles(
+            room->getApplication(),
+            "skybox",
+            PATHS,
+            info
+    );
 }
 
 std::shared_ptr<Room> getTestRoom(Application* application) {
 
-    std::vector<ShaderUniformBinding> globalBindings = {
-            ShaderUniformBinding{UniformBindingType::BUFFER,
-                                 sizeof(GlobalParameters)},
-            ShaderUniformBinding{UniformBindingType::IMAGE, 0}
-    };
-
-    auto globalDescriptor = std::make_shared<ShaderUniformDescriptor>(
-            application, globalBindings
-    );
-
-    auto room = std::make_shared<Room>(application, globalDescriptor);
+    auto room = std::make_shared<Room>(application);
+    auto fpFrameBuffer = initRender(room.get());
 
     auto skybox = loadSkybox(room.get());
-    room->getGlobalUniformBuffer().setTexture(1, skybox);
+    room->getApplication()->getRender()->
+            getGlobalUniformBuffer().setTexture(1, skybox);
 
-    auto fpFrameBuffer = initRender(room.get());
 
     auto cameraController = room->newGameObject();
     cameraController->newComponent<GlobalParametersUpdaterComponent>();
@@ -141,16 +194,18 @@ std::shared_ptr<Room> getTestRoom(Application* application) {
 
 
     std::shared_ptr<ShaderUniformDescriptor> materialDescriptor =
-            ShaderUniformDescriptor::ofImages(application, 1);
+            ShaderUniformDescriptor::ofImages(application, "descriptor", 1);
 
-    auto shader = createShader(room.get(), "deferred.vert", "deferred.frag");
+    auto shader = createShader(application,
+                               "deferred", "deferred.vert", "deferred.frag");
 
     MaterialCreateInfo clothMaterialInfo(fpFrameBuffer, shader);
     clothMaterialInfo.descriptions.uniform = materialDescriptor;
     clothMaterialInfo.descriptions.instance = DefaultInstancingData::getInstancingDescription();
     clothMaterialInfo.descriptions.vertex = TestVertex::getDescription();
 
-    auto material = room->getMaterials().create(clothMaterialInfo);
+    auto material = std::make_shared<Material>(application, "cloth",
+                                               clothMaterialInfo);
 
     auto physicManagerGO = room->newGameObject();
     auto physicsManager = physicManagerGO->newComponent<PhysicsManager>(

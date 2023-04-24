@@ -8,10 +8,8 @@
 
 namespace neon {
 
-    uint64_t MODEL_ID_GENERATOR = 1;
-
     std::vector<Mesh::Implementation*> Model::getMeshImplementations(
-            const std::vector<std::unique_ptr<Mesh>>& meshes) {
+            const std::vector<std::shared_ptr<Mesh>>& meshes) {
 
         std::vector<Mesh::Implementation*> vector;
         vector.reserve(meshes.size());
@@ -23,17 +21,12 @@ namespace neon {
         return vector;
     }
 
-    Model::Model(Room* room,
-                 std::vector<std::unique_ptr<Mesh>>& meshes) :
-            _id(MODEL_ID_GENERATOR++),
-            _name("Model " + std::to_string(_id)),
-            _implementation(room->getApplication(),
-                            getMeshImplementations(meshes)),
+    Model::Model(Application* application,
+                 const std::string& name,
+                 std::vector<std::shared_ptr<Mesh>>& meshes) :
+            Asset(typeid(Model), name),
+            _implementation(application, getMeshImplementations(meshes)),
             _meshes(std::move(meshes)) {
-    }
-
-    uint64_t Model::getId() const {
-        return _id;
     }
 
     Model::Implementation& Model::getImplementation() {
@@ -62,14 +55,6 @@ namespace neon {
 
     void Model::flush() {
         _implementation.flush();
-    }
-
-    const std::string& Model::getName() const {
-        return _name;
-    }
-
-    void Model::setName(const std::string& name) {
-        _name = name;
     }
 
     void Model::defineInstanceStruct(std::type_index type, size_t size) {

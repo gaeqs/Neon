@@ -11,7 +11,7 @@
 
 namespace neon::vulkan {
     VKMesh::VKMesh(Application* application,
-                   IdentifiableWrapper<Material>& material,
+                   std::shared_ptr<Material>& material,
                    bool modifiableVertices,
                    bool modifiableIndices) :
             _vkApplication(&application->getImplementation()),
@@ -23,7 +23,7 @@ namespace neon::vulkan {
             _modifiableIndices(modifiableIndices) {
     }
 
-    IdentifiableWrapper<Material> VKMesh::getMaterial() const {
+    std::shared_ptr<Material> VKMesh::getMaterial() const {
         return _material;
     }
 

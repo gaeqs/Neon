@@ -9,8 +9,8 @@
 #include <vector>
 #include <unordered_set>
 
-#include <engine/collection/ComponentCollection.h>
 #include <engine/geometry/Transform.h>
+#include <engine/structure/collection/ComponentCollection.h>
 #include <engine/structure/IdentifiableWrapper.h>
 #include <engine/structure/Identifiable.h>
 

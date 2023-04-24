@@ -8,8 +8,8 @@
 
 namespace neon {
     void ViewportComponent::onStart() {
-        auto& r = getRoom()->getRender();
-        auto fb = r.getFrameBuffer(r.getPassesAmount() - 2);
+        auto& r = getRoom()->getApplication()->getRender();
+        auto fb = r->getFrameBuffer(r->getPassesAmount() - 2);
         _frameBuffer = std::dynamic_pointer_cast<SimpleFrameBuffer>(fb);
 
 
@@ -29,9 +29,9 @@ namespace neon {
                     static_cast<uint32_t>(this->_windowSize.y));
         };
 
-        for (uint32_t i = 0; i < r.getPassesAmount(); ++i) {
+        for (uint32_t i = 0; i < r->getPassesAmount(); ++i) {
             if (auto f = std::dynamic_pointer_cast<SimpleFrameBuffer>(
-                    r.getFrameBuffer(i))) {
+                    r->getFrameBuffer(i))) {
                 f->setRecreationCondition(condition);
                 f->setRecreationParameters(parameters);
             }

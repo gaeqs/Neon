@@ -17,7 +17,7 @@ namespace neon {
             _specularColor(1.0f, 1.0f, 1.0f) {
     }
 
-    DirectionalLight::DirectionalLight(const IdentifiableWrapper<Model>& model)
+    DirectionalLight::DirectionalLight(const std::shared_ptr<Model>& model)
             :
             _graphicComponent(),
             _customModel(model),

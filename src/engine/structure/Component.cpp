@@ -5,7 +5,10 @@
 #include "Component.h"
 
 #include <iostream>
-#include "GameObject.h"
+
+#include <engine/structure/GameObject.h>
+#include <engine/structure/Room.h>
+#include <engine/structure/collection/AssetCollection.h>
 
 namespace neon {
     uint64_t COMPONENT_ID_GENERATOR = 1;
@@ -62,5 +65,13 @@ namespace neon {
     }
 
     void Component::drawEditor() {
+    }
+
+    Application* Component::getApplication() const {
+        return getRoom()->getApplication();
+    }
+
+    AssetCollection& Component::getAssets() const {
+        return getRoom()->getApplication()->getAssets();
     }
 }

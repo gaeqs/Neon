@@ -18,6 +18,7 @@
 #include "GlobalParametersUpdaterComponent.h"
 #include "LockMouseComponent.h"
 #include "ConstantRotationComponent.h"
+#include "engine/shader/Material.h"
 #include "engine/shader/MaterialCreateInfo.h"
 #include "engine/shader/ShaderUniformBinding.h"
 
@@ -26,33 +27,69 @@ constexpr int32_t HEIGHT = 600;
 
 CMRC_DECLARE(shaders);
 
-IdentifiableWrapper<ShaderProgram> createShader(Room* room,
-                                                const std::string& vert,
-                                                const std::string& frag) {
+/**
+ * Creates a shader program.
+ * @param room the application.
+ * @param name the name of the shader.
+ * @param vert the vertex shader.
+ * @param frag the fragment shader.
+ * @return the shader program.
+ */
+std::shared_ptr<ShaderProgram> createShader(Application* application,
+                                            const std::string& name,
+                                            const std::string& vert,
+                                            const std::string& frag) {
     auto defaultVert = cmrc::shaders::get_filesystem().open(vert);
     auto defaultFrag = cmrc::shaders::get_filesystem().open(frag);
 
-    auto shader = room->getShaders().create();
-    shader->addShader(ShaderType::VERTEX, defaultVert);
-    shader->addShader(ShaderType::FRAGMENT, defaultFrag);
-
-    auto result = shader->compile();
-    if (result.has_value()) {
-        std::cerr << result.value() << std::endl;
-        throw std::runtime_error(result.value());
+    auto result = ShaderProgram::createShader(
+            application, name, defaultVert, defaultFrag);
+    if (!result.isOk()) {
+        std::cerr << result.getError() << std::endl;
+        throw std::runtime_error(result.getError());
     }
 
-    return shader;
+    return result.getResult();
 }
 
+
 std::shared_ptr<FrameBuffer> initRender(Room* room) {
-    auto directionalShader = createShader(room, "directional_light.vert",
+    auto* app = room->getApplication();
+
+    // Bindings for the global uniforms.
+    // In this application, we have a buffer of global parameters
+    // and a skybox.
+    std::vector<ShaderUniformBinding> globalBindings = {
+            {UniformBindingType::BUFFER, sizeof(GlobalParameters)},
+            {UniformBindingType::IMAGE,  0}
+    };
+
+    // The description of the global uniforms.
+    auto globalDescriptor = std::make_shared<ShaderUniformDescriptor>(
+            app, "default", globalBindings);
+
+    // The render of the application.
+    // We should set the render to the application before
+    // we do anything else, as some components depend on
+    // the application's render.
+    auto render = std::make_shared<Render>(app, "default", globalDescriptor);
+    app->setRender(render);
+
+    auto directionalShader = createShader(app,
+                                          "directional_light",
+                                          "directional_light.vert",
                                           "directional_light.frag");
-    auto pointShader = createShader(room, "point_light.vert",
+    auto pointShader = createShader(app,
+                                    "point_light",
+                                    "point_light.vert",
                                     "point_light.frag");
-    auto flashShader = createShader(room, "flash_light.vert",
+    auto flashShader = createShader(app,
+                                    "flash_light",
+                                    "flash_light.vert",
                                     "flash_light.frag");
-    auto screenShader = createShader(room, "screen.vert",
+    auto screenShader = createShader(app,
+                                     "screen",
+                                     "screen.vert",
                                      "screen.frag");
 
     std::vector<TextureFormat> frameBufferFormats = {
@@ -62,13 +99,13 @@ std::shared_ptr<FrameBuffer> initRender(Room* room) {
     };
 
     auto fpFrameBuffer = std::make_shared<SimpleFrameBuffer>(
-            room, frameBufferFormats, true);
+            app, frameBufferFormats, true);
 
-    room->getRender().addRenderPass(
-            {fpFrameBuffer, RenderPassStrategy::defaultStrategy});
+    render->addRenderPass({fpFrameBuffer, RenderPassStrategy::defaultStrategy});
 
     auto albedo = deferred_utils::createLightSystem(
             room,
+            render.get(),
             fpFrameBuffer->getTextures(),
             TextureFormat::R8G8B8A8,
             directionalShader,
@@ -78,28 +115,36 @@ std::shared_ptr<FrameBuffer> initRender(Room* room) {
 
     std::vector<TextureFormat> screenFormats = {TextureFormat::R8G8B8A8};
     auto screenFrameBuffer = std::make_shared<SimpleFrameBuffer>(
-            room, screenFormats, false);
-    room->getRender().addRenderPass(
+            app, screenFormats, false);
+    render->addRenderPass(
             {screenFrameBuffer, RenderPassStrategy::defaultStrategy});
 
     auto textures = fpFrameBuffer->getTextures();
     textures[0] = albedo;
-    auto screenModel = deferred_utils::createScreenModel(
-            room,
+
+    deferred_utils::ScreenModelCreationInfo info(
+            room->getApplication(),
+            "screen model",
             textures,
             screenFrameBuffer,
-            screenShader
+            screenShader,
+            true,
+            true,
+            neon::AssetStorageMode::PERMANENT
     );
+
+    auto screenModel = deferred_utils::createScreenModel(info);
 
     auto instance = screenModel->createInstance();
     if (!instance.isOk()) {
         throw std::runtime_error(instance.getError());
     }
+    room->markUsingModel(screenModel.get());
 
     auto swapFrameBuffer = std::make_shared<SwapChainFrameBuffer>(
             room, false);
 
-    room->getRender().addRenderPass(
+    render->addRenderPass(
             {swapFrameBuffer, RenderPassStrategy::defaultStrategy});
 
     return fpFrameBuffer;
@@ -109,17 +154,19 @@ void loadModels(Application* application, Room* room,
                 const std::shared_ptr<FrameBuffer>& target) {
 
     std::shared_ptr<ShaderUniformDescriptor> materialDescriptor =
-            ShaderUniformDescriptor::ofImages(application, 2);
+            ShaderUniformDescriptor::ofImages(application, "default", 2);
 
-    auto shader = createShader(room, "deferred.vert", "deferred.frag");
-    auto shaderParallax = createShader(room, "deferred.vert",
+    auto shader = createShader(application,
+                               "deferred", "deferred.vert", "deferred.frag");
+    auto shaderParallax = createShader(application,
+                                       "parallax", "deferred.vert",
                                        "deferred_parallax.frag");
 
     MaterialCreateInfo sansMaterialInfo(target, shader);
     sansMaterialInfo.descriptions.uniform = materialDescriptor;
 
     auto sansLoaderInfo = assimp_loader::LoaderInfo::create<TestVertex>(
-            room, sansMaterialInfo);
+            application, "Sans", sansMaterialInfo);
 
     auto sansResult = assimp_loader::load(R"(resource/Sans)", "Sans.obj",
                                           sansLoaderInfo);
@@ -131,7 +178,6 @@ void loadModels(Application* application, Room* room,
     }
 
     auto sansModel = sansResult.model;
-    sansModel->setName("Sans");
 
     constexpr int AMOUNT = 1024 * 1;
     int q = static_cast<int>(std::sqrt(AMOUNT));
@@ -157,7 +203,7 @@ void loadModels(Application* application, Room* room,
     }
 
     auto zeppeliLoaderInfo = assimp_loader::LoaderInfo::create<TestVertex>(
-            room, sansMaterialInfo);
+            application, "Zeppeli", sansMaterialInfo);
     zeppeliLoaderInfo.flipWindingOrder = true;
     zeppeliLoaderInfo.flipNormals = true;
 
@@ -171,7 +217,6 @@ void loadModels(Application* application, Room* room,
     }
 
     auto zeppeliModel = zeppeliResult.model;
-    zeppeliModel->setName("Zeppeli");
 
     auto zeppeli = room->newGameObject();
     zeppeli->newComponent<GraphicComponent>(zeppeliModel);
@@ -184,28 +229,42 @@ void loadModels(Application* application, Room* room,
     TextureCreateInfo albedoInfo;
     albedoInfo.image.format = TextureFormat::R8G8B8A8_SRGB;
 
-    auto cubeAlbedo = room->getTextures()
-            .createTextureFromFile("resource/Cube/bricks.png", albedoInfo);
-    auto cubeNormal = room->getTextures()
-            .createTextureFromFile("resource/Cube/bricks_normal.png");
-    auto cubeParallax = room->getTextures()
-            .createTextureFromFile("resource/Cube/bricks_parallax.png");
+    std::shared_ptr<Texture> cubeAlbedo = Texture::createTextureFromFile(
+            application, "cube_albedo", "resource/Cube/bricks.png",
+            albedoInfo);
 
-    std::vector<IdentifiableWrapper<Texture>> textures = {
-            cubeAlbedo, cubeNormal, cubeParallax
-    };
+    std::shared_ptr<Texture> cubeNormal = Texture::createTextureFromFile(
+            application, "cube_normal",
+            "resource/Cube/bricks_normal.png");
+    std::shared_ptr<Texture> cubeParallax = Texture::createTextureFromFile(
+            application, "cube_parallax",
+            "resource/Cube/bricks_parallax.png");
+
+    std::vector<ShaderUniformBinding> cubeMaterialBindings;
+    cubeMaterialBindings.resize(3, {UniformBindingType::IMAGE, 0});
+
+    std::shared_ptr<ShaderUniformDescriptor> cubeMaterialDescriptor;
+    materialDescriptor = std::make_shared<ShaderUniformDescriptor>(
+            room->getApplication(),
+            "cubeMaterialDescriptor",
+            cubeMaterialBindings
+    );
+
+    MaterialCreateInfo cubeMaterialInfo(target, shaderParallax);
+    cubeMaterialInfo.descriptions.uniform = materialDescriptor;
+    cubeMaterialInfo.descriptions.vertex = TestVertex::getDescription();
+    cubeMaterialInfo.descriptions.instance =
+            DefaultInstancingData::getInstancingDescription();
+
+    auto material = std::make_shared<Material>(
+            application, "cubeMaterial", cubeMaterialInfo);
+
+    material->getUniformBuffer().setTexture(0, cubeAlbedo);
+    material->getUniformBuffer().setTexture(1, cubeNormal);
+    material->getUniformBuffer().setTexture(2, cubeParallax);
 
     auto cubeModel = model_utils::createCubeModel<TestVertex>(
-            room,
-            textures,
-            target,
-            shaderParallax,
-            [](MaterialCreateInfo& info) {
-                info.descriptions.instance =
-                        DefaultInstancingData::getInstancingDescription();
-            }
-    );
-    cubeModel->setName("Cube");
+            room, material);
 
     auto cube = room->newGameObject();
     cube->newComponent<GraphicComponent>(cubeModel);
@@ -214,7 +273,7 @@ void loadModels(Application* application, Room* room,
     cube->setName("Cube");
 }
 
-IdentifiableWrapper<Texture> loadSkybox(Room* room) {
+std::shared_ptr<Texture> loadSkybox(Room* room) {
     static const std::vector<std::string> PATHS = {
             "resource/Skybox/right.jpg",
             "resource/Skybox/left.jpg",
@@ -228,27 +287,19 @@ IdentifiableWrapper<Texture> loadSkybox(Room* room) {
     info.imageView.viewType = TextureViewType::CUBE;
     info.image.layers = 6;
 
-    return room->getTextures().createTextureFromFiles(PATHS, info);
+    return Texture::createTextureFromFiles(room->getApplication(),
+                                           "skybox", PATHS, info);
 }
 
 std::shared_ptr<Room> getTestRoom(Application* application) {
 
-    std::vector<ShaderUniformBinding> globalBindings = {
-            ShaderUniformBinding{UniformBindingType::BUFFER,
-                                 sizeof(GlobalParameters)},
-            ShaderUniformBinding{UniformBindingType::IMAGE, 0}
-    };
-
-    auto globalDescriptor = std::make_shared<ShaderUniformDescriptor>(
-            application, globalBindings
-    );
-
-    auto room = std::make_shared<Room>(application, globalDescriptor);
-
-    auto skybox = loadSkybox(room.get());
-    room->getGlobalUniformBuffer().setTexture(1, skybox);
+    auto room = std::make_shared<Room>(application);
 
     auto fpFrameBuffer = initRender(room.get());
+
+    auto skybox = loadSkybox(room.get());
+    application->getRender()->getGlobalUniformBuffer().setTexture(1, skybox);
+
 
     auto cameraController = room->newGameObject();
     auto cameraMovement = cameraController->newComponent<CameraMovementComponent>();

@@ -10,8 +10,6 @@
 #include <string>
 #include <unordered_map>
 
-#include "cmrc/cmrc.hpp"
-
 #include <vulkan/vulkan.h>
 
 #include <engine/shader/ShaderType.h>
@@ -46,7 +44,7 @@ namespace neon::vulkan {
         ~VKShaderProgram();
 
         std::optional<std::string>
-        compile(const std::unordered_map<ShaderType, cmrc::file>& raw);
+        compile(const std::unordered_map<ShaderType, std::string>& raw);
 
         [[nodiscard]] const std::vector<VkPipelineShaderStageCreateInfo>&
         getShaders() const;

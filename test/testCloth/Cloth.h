@@ -14,12 +14,12 @@
 
 class Cloth : public neon::Component {
 
-    neon::IdentifiableWrapper<neon::Material> _material;
+    std::shared_ptr<neon::Material> _material;
     neon::IdentifiableWrapper<PhysicsManager> _physicsManager;
     uint32_t _width;
     uint32_t _height;
 
-    neon::IdentifiableWrapper<neon::Model> _model;
+    std::shared_ptr<neon::Model> _model;
 
     std::vector<TestVertex> _vertices;
     std::vector<TestVertex> _modifiedVertices;
@@ -30,7 +30,7 @@ class Cloth : public neon::Component {
 
 public:
 
-    Cloth(neon::IdentifiableWrapper<neon::Material> material,
+    Cloth(std::shared_ptr<neon::Material> material,
           neon::IdentifiableWrapper<PhysicsManager> physicsManager,
           uint32_t width, uint32_t height);
 

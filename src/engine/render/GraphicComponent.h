@@ -6,29 +6,31 @@
 #define RVTRACKING_GRAPHICCOMPONENT_H
 
 #include <optional>
+#include <memory>
 
-#include <engine/structure/IdentifiableWrapper.h>
 #include <engine/shader/Material.h>
 #include <engine/structure/Component.h>
 #include <engine/model/Model.h>
 
 namespace neon {
-    class GraphicComponent : public Component {
+    class GraphicComponent final : public Component {
 
-        IdentifiableWrapper<Model> _model;
+        std::shared_ptr<Model> _model;
         std::optional<uint32_t*> _modelTargetId;
+
+        bool _firstPreDrawExecuted;
 
     public:
 
         GraphicComponent();
 
-        explicit GraphicComponent(IdentifiableWrapper<Model> model);
+        explicit GraphicComponent(std::shared_ptr<Model> model);
 
-        ~GraphicComponent() override;
+        ~GraphicComponent() final;
 
-        [[nodiscard]] const IdentifiableWrapper<Model>& getModel() const;
+        [[nodiscard]] const std::shared_ptr<Model>& getModel() const;
 
-        void setModel(const IdentifiableWrapper<Model>& model);
+        void setModel(const std::shared_ptr<Model>& model);
 
         template<class InstanceData>
         void uploadData(const InstanceData& data) {
@@ -37,9 +39,9 @@ namespace neon {
             }
         }
 
-        void onPreDraw() override;
+        void onPreDraw() final;
 
-        void drawEditor() override;
+        void drawEditor() final;
 
     };
     REGISTER_COMPONENT(GraphicComponent, "Graphic Component")

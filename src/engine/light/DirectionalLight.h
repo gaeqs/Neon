@@ -13,7 +13,7 @@ namespace neon {
     class DirectionalLight : public Component {
 
         IdentifiableWrapper<GraphicComponent> _graphicComponent;
-        IdentifiableWrapper<Model> _customModel;
+        std::shared_ptr<Model> _customModel;
 
         glm::vec3 _diffuseColor;
         glm::vec3 _specularColor;
@@ -41,7 +41,7 @@ namespace neon {
 
         DirectionalLight();
 
-        explicit DirectionalLight(const IdentifiableWrapper<Model>& model);
+        explicit DirectionalLight(const std::shared_ptr<Model>& model);
 
         [[nodiscard]] const glm::vec3& getDiffuseColor() const;
 

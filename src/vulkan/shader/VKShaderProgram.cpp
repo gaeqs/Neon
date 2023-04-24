@@ -42,13 +42,12 @@ namespace neon::vulkan {
 
     std::optional<std::string>
     VKShaderProgram::compile(
-            const std::unordered_map<ShaderType, cmrc::file>& raw) {
+            const std::unordered_map<ShaderType, std::string>& raw) {
         deleteShaders();
 
         SPIRVCompiler compiler;
 
-        for (const auto& [type, resource]: raw) {
-            auto code = std::string(resource.begin(), resource.end());
+        for (const auto& [type, code]: raw) {
             auto error = compiler.addShader(getStage(type), code);
             if (error.has_value()) {
                 return "Error compiling shader:\n"

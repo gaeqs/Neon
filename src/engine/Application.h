@@ -12,10 +12,10 @@
 
 #include <glm/glm.hpp>
 
+#include <engine/structure/collection/AssetCollection.h>
 #include <engine/render/FrameInformation.h>
 #include <util/Result.h>
 #include <util/profile/Profiler.h>
-
 
 #ifdef USE_VULKAN
 
@@ -30,19 +30,21 @@ namespace neon {
 
     class Room;
 
+    class Render;
+
     class Application {
 
     public:
 
 #ifdef USE_VULKAN
-    using Implementation = vulkan::VKApplication;
+        using Implementation = vulkan::VKApplication;
 #endif
 
     protected:
 
         int32_t _width;
         int32_t _height;
-        GLFWwindow *_window;
+        GLFWwindow* _window;
 
         std::shared_ptr<Room> _room;
 
@@ -52,23 +54,31 @@ namespace neon {
         Implementation _implementation;
         Profiler _profiler;
 
+        AssetCollection _assets;
+
+        std::shared_ptr<Render> _render;
+
     public:
 
         Application(int32_t width, int32_t height);
 
         ~Application();
 
-        Result<GLFWwindow *, std::string> init(const std::string &name);
+        Result<GLFWwindow*, std::string> init(const std::string& name);
 
         [[nodiscard]] Result<uint32_t, std::string> startGameLoop();
 
-        [[nodiscard]] const Implementation &getImplementation() const;
+        [[nodiscard]] const Implementation& getImplementation() const;
 
-        [[nodiscard]] Implementation &getImplementation();
+        [[nodiscard]] Implementation& getImplementation();
 
-        [[nodiscard]]  const Profiler &getProfiler() const;
+        [[nodiscard]]  const Profiler& getProfiler() const;
 
-        [[nodiscard]] Profiler &getProfiler();
+        [[nodiscard]] Profiler& getProfiler();
+
+        [[nodiscard]] const AssetCollection& getAssets() const;
+
+        [[nodiscard]] AssetCollection& getAssets();
 
         [[nodiscard]] int32_t getWidth() const;
 
@@ -76,9 +86,13 @@ namespace neon {
 
         [[nodiscard]] float getAspectRatio() const;
 
+        [[nodiscard]] const std::shared_ptr<Render>& getRender() const;
+
+        void setRender(const std::shared_ptr<Render>& render);
+
         [[nodiscard]] FrameInformation getCurrentFrameInformation() const;
 
-        void setRoom(const std::shared_ptr<Room> &room);
+        void setRoom(const std::shared_ptr<Room>& room);
 
         void lockMouse(bool lock);
 

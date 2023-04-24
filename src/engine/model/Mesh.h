@@ -6,13 +6,12 @@
 #define NEON_MESH_H
 
 
-#include <stdint.h>
 #include <vector>
+#include <string>
 
-#include <engine/structure/Identifiable.h>
 #include <engine/shader/Material.h>
 #include <engine/shader/ShaderUniformBuffer.h>
-#include <engine/collection/IdentifiableCollection.h>
+#include <engine/structure/Asset.h>
 
 #ifdef USE_VULKAN
 
@@ -22,16 +21,13 @@
 
 namespace neon {
 
-    class Room;
+    class Application;
 
     /**
      * Represents a set of vertices and indices
      * used by models to render an object.
      */
-    class Mesh : public Identifiable {
-
-        template<class T> friend
-        class IdentifiableWrapper;
+    class Mesh : public Asset {
 
     public:
 #ifdef USE_VULKAN
@@ -40,9 +36,8 @@ namespace neon {
 
     private:
 
-        uint64_t _id;
         Implementation _implementation;
-        IdentifiableWrapper<Material> _material;
+        std::shared_ptr<Material> _material;
 
     public:
 
@@ -50,21 +45,17 @@ namespace neon {
 
         /**
          * Creates a new mesh.
-         * @param room the room where the mesh belongs to.
+         * @param application the application where the mesh belongs to.
          * @param material the material of the mesh.
          * @param modifiableVertices whether this mesh's vertices can be modified.
          * @param modifiableIndices whether this mesh's indices can be modified.
          */
-        Mesh(Room* room, IdentifiableWrapper<Material> material,
+        Mesh(Application* application,
+             const std::string& name,
+             std::shared_ptr<Material> material,
              bool modifiableVertices = false,
              bool modifiableIndices = false);
 
-        /**
-         * Returns the id of the mesh.
-         * This value is unique.
-         * @return the id.
-         */
-        [[nodiscard]] uint64_t getId() const override;
 
         /**
          * Returns the implementation of the mesh.
@@ -178,13 +169,13 @@ namespace neon {
          * Returns the material of the mesh.
          * @return the material.
          */
-        [[nodiscard]] IdentifiableWrapper<Material> getMaterial() const;
+        [[nodiscard]] const std::shared_ptr<Material>& getMaterial() const;
 
         /**
          * Sets the material of the mesh.
          * @param material the material.
          */
-        void setMaterial(const IdentifiableWrapper<Material>& material);
+        void setMaterial(const std::shared_ptr<Material>& material);
 
     };
 }

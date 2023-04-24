@@ -4,14 +4,22 @@
 
 #include "Render.h"
 
+#include <utility>
+
 #include <engine/render/FrameBuffer.h>
 
+
 namespace neon {
-    Render::Render(Application* application) :
+    Render::Render(Application* application,
+                   std::string name,
+                   const std::shared_ptr<ShaderUniformDescriptor>& descriptor) :
+            Asset(typeid(Render), std::move(name)),
             _implementation(application),
             _application(application),
-            _strategies() {
-
+            _strategies(),
+            _globalUniformDescriptor(descriptor),
+            _globalUniformBuffer(name, descriptor) {
+        _globalUniformBuffer.setBindingPoint(0);
     }
 
     const Render::Implementation& Render::getImplementation() const {
@@ -53,5 +61,18 @@ namespace neon {
 
     std::shared_ptr<FrameBuffer> Render::getFrameBuffer(size_t index) {
         return _strategies[index].frameBuffer;
+    }
+
+    const std::shared_ptr<ShaderUniformDescriptor>&
+    Render::getGlobalUniformDescriptor() const {
+        return _globalUniformDescriptor;
+    }
+
+    const ShaderUniformBuffer& Render::getGlobalUniformBuffer() const {
+        return _globalUniformBuffer;
+    }
+
+    ShaderUniformBuffer& Render::getGlobalUniformBuffer() {
+        return _globalUniformBuffer;
     }
 }

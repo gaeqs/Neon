@@ -6,6 +6,7 @@
 #define NEON_MODELUTILS_H
 
 #include <functional>
+#include <memory>
 
 #include <glm/glm.hpp>
 
@@ -14,12 +15,9 @@
 namespace neon::model_utils {
 
     template<class Vertex>
-    IdentifiableWrapper<Model> createCubeModel(
+    std::shared_ptr<Model> createCubeModel(
             Room* room,
-            const std::vector<IdentifiableWrapper<Texture>>& inputTextures,
-            const std::shared_ptr<FrameBuffer>& target,
-            IdentifiableWrapper<ShaderProgram> shader,
-            const std::function<void(MaterialCreateInfo&)>& populateFunction) {
+            std::shared_ptr<Material> material) {
 
         static const std::vector<uint32_t> CUBE_TRIANGLE_INDEX = {
                 0, 1, 2, 1, 3, 2,
@@ -168,38 +166,20 @@ namespace neon::model_utils {
             ));
         }
 
-        // Add an image binding for each given texture.
-        std::vector<ShaderUniformBinding> materialBindings;
-        materialBindings.resize(
-                inputTextures.size(),
-                ShaderUniformBinding{UniformBindingType::IMAGE, 0}
-        );
-
-        std::shared_ptr<ShaderUniformDescriptor> materialDescriptor;
-        materialDescriptor = std::make_shared<ShaderUniformDescriptor>(
-                room->getApplication(),
-                materialBindings
-        );
-
-        MaterialCreateInfo info(target, shader);
-        info.descriptions.uniform = materialDescriptor;
-        info.descriptions.vertex = Vertex::getDescription();
-
-        if (populateFunction != nullptr)
-            populateFunction(info);
-
-        auto material = room->getMaterials().create(info);
-
-        for (uint32_t i = 0; i < inputTextures.size(); ++i) {
-            material->getUniformBuffer().setTexture(i, inputTextures[i]);
-        }
-
-        auto mesh = std::make_unique<Mesh>(room, material);
+        auto mesh = std::make_shared<Mesh>(room->getApplication(),
+                                           "box", material);
         mesh->setMeshData(vertices, CUBE_TRIANGLE_INDEX);
-        std::vector<std::unique_ptr<Mesh>> meshes;
+        std::vector<std::shared_ptr<Mesh>> meshes;
         meshes.push_back(std::move(mesh));
 
-        auto model = room->getModels().create(meshes);
+        auto model = std::make_shared<Model>(
+                room->getApplication(),
+                "box",
+                meshes
+        );
+
+        room->getApplication()->getAssets().store(model,
+                                                  AssetStorageMode::WEAK);
         return model;
     }
 

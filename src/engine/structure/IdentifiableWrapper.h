@@ -9,13 +9,15 @@
 #include <cstdint>
 #include <iostream>
 
+#include <engine/structure/Identifiable.h>
+
 namespace neon {
     template<class T>
     class IdentifiableWrapper {
 
         friend class std::hash<IdentifiableWrapper<T>>;
 
-        T *_pointer;
+        T* _pointer;
         uint64_t _id;
 
     public:
@@ -25,19 +27,20 @@ namespace neon {
                 _id(0) {
         }
 
-        IdentifiableWrapper(T *pointer) :
+        IdentifiableWrapper(T* pointer) :
                 _pointer(pointer),
                 _id(_pointer == nullptr ? 0 : _pointer->_id) {
             if (_id == 0 && _pointer != nullptr) {
-                std::cerr << "Invalid identifiable found on wrapper constructor! "
-                             "Setting pointer to null" << std::endl;
+                std::cerr
+                        << "Invalid identifiable found on wrapper constructor! "
+                           "Setting pointer to null" << std::endl;
                 _pointer = nullptr;
             }
         }
 
         template<class O>
         requires std::is_base_of_v<T, O>
-        IdentifiableWrapper(const IdentifiableWrapper<O> &other) :
+        IdentifiableWrapper(const IdentifiableWrapper<O>& other) :
                 _pointer(other.raw()),
                 _id(other.getId()) {
         }
@@ -47,15 +50,15 @@ namespace neon {
         }
 
         [[nodiscard]] inline bool isValid() const {
-            return _pointer != nullptr && _pointer != (void *) 0xFFFFFFFFFFFFFFFF
+            return _pointer != nullptr && _pointer != (void*) 0xFFFFFFFFFFFFFFFF
                    && _pointer->_id == _id;
         }
 
-        inline T *raw() const {
+        inline T* raw() const {
             return isValid() ? _pointer : nullptr;
         }
 
-        inline T *operator->() const {
+        inline T* operator->() const {
             return isValid() ? _pointer : nullptr;
         }
 
@@ -67,11 +70,11 @@ namespace neon {
             return isValid();
         }
 
-        inline bool operator==(const IdentifiableWrapper<T> &other) const {
+        inline bool operator==(const IdentifiableWrapper<T>& other) const {
             return _id == other._id;
         }
 
-        inline bool operator!=(const IdentifiableWrapper<T> &other) const {
+        inline bool operator!=(const IdentifiableWrapper<T>& other) const {
             return _id != other._id;
         }
 
@@ -81,7 +84,7 @@ namespace neon {
 
         template<class O>
         requires std::is_base_of_v<T, O>
-        IdentifiableWrapper<T> &operator=(const IdentifiableWrapper<O> &other) {
+        IdentifiableWrapper<T>& operator=(const IdentifiableWrapper<O>& other) {
             _pointer = other.raw();
             _id = other.getId();
             return *this;
@@ -91,7 +94,7 @@ namespace neon {
 
 template<class T>
 struct std::hash<neon::IdentifiableWrapper<T>> {
-    std::size_t operator()(neon::IdentifiableWrapper<T> const &s)
+    std::size_t operator()(neon::IdentifiableWrapper<T> const& s)
     const noexcept {
         return std::hash<uint64_t>{}(s._id);
     }

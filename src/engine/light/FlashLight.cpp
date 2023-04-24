@@ -22,7 +22,7 @@ namespace neon {
             _outerCutOff(0.82f) {
     }
 
-    FlashLight::FlashLight(const IdentifiableWrapper<Model>& model) :
+    FlashLight::FlashLight(const std::shared_ptr<Model>& model) :
             _graphicComponent(),
             _customModel(model),
             _diffuseColor(1.0f, 1.0f, 1.0f),

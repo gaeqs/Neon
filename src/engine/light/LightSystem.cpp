@@ -6,23 +6,23 @@
 
 namespace neon {
     LightSystem::LightSystem(
-            const IdentifiableWrapper<Model>& directionalLightModel,
-            const IdentifiableWrapper<Model>& pointLightModel,
-            const IdentifiableWrapper<Model>& flashLightModel)
+            const std::shared_ptr<Model>& directionalLightModel,
+            const std::shared_ptr<Model>& pointLightModel,
+            const std::shared_ptr<Model>& flashLightModel)
             : _directionalLightModel(directionalLightModel),
               _pointLightModel(pointLightModel),
               _flashLightModel(flashLightModel) {}
 
-    const IdentifiableWrapper<Model>&
+    const std::shared_ptr<Model>&
     LightSystem::getDirectionalLightModel() const {
         return _directionalLightModel;
     }
 
-    const IdentifiableWrapper<Model>& LightSystem::getPointLightModel() const {
+    const std::shared_ptr<Model>& LightSystem::getPointLightModel() const {
         return _pointLightModel;
     }
 
-    const IdentifiableWrapper<Model>& LightSystem::getFlashLightModel() const {
+    const std::shared_ptr<Model>& LightSystem::getFlashLightModel() const {
         return _flashLightModel;
     }
 }
