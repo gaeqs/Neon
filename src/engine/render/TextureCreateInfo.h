@@ -16,6 +16,7 @@ namespace neon {
         A8R8G8B8,
         B8G8R8A8,
         A8B8G8R8,
+        R32FG32FB32F,
         R32FG32FB32FA32F,
         R32F,
         R16FG16F,

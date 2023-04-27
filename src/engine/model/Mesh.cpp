@@ -17,8 +17,10 @@ namespace neon {
             Asset(typeid(Mesh), name),
             _implementation(application, _materials,
                             modifiableVertices, modifiableIndices),
-            _materials({material}) {
-
+            _materials() {
+        if (material != nullptr) {
+            _materials.push_back(std::move(material));
+        }
     }
 
     Mesh::Mesh(Application* application,

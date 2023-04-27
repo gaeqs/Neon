@@ -14,6 +14,8 @@ namespace vc = neon::vulkan::conversions;
 
 uint32_t vc::pixelSize(const TextureFormat& format) {
     switch (format) {
+        case TextureFormat::R32FG32FB32F:
+            return 12;
         case TextureFormat::R32FG32FB32FA32F:
             return 16;
         case TextureFormat::R8G8B8:
@@ -53,6 +55,8 @@ VkFormat vc::vkFormat(const TextureFormat& format) {
         case TextureFormat::R8G8B8A8:
             return VK_FORMAT_R8G8B8A8_UNORM;
 
+        case TextureFormat::R32FG32FB32F:
+            return VK_FORMAT_R32G32B32_SFLOAT;
         case TextureFormat::R32FG32FB32FA32F:
             return VK_FORMAT_R32G32B32A32_SFLOAT;
         case TextureFormat::R32F:
