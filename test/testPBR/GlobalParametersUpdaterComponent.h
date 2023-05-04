@@ -13,9 +13,14 @@ struct GlobalParameters {
     glm::mat4 inverseProjection;
     float near;
     float far;
+    float metallic;
+    float roughness;
 };
 
 class GlobalParametersUpdaterComponent : public neon::Component {
+
+    float metallic = 0.0f;
+    float roughness = 0.0f;
 
 public:
 
@@ -24,6 +29,8 @@ public:
     void onStart() override;
 
     void onUpdate(float deltaTime) override;
+
+    void drawEditor() override;
 
 };
 REGISTER_COMPONENT(GlobalParametersUpdaterComponent,

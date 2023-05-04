@@ -8,13 +8,15 @@ layout (location = 4) in float constantAttenuation;
 layout (location = 5) in float linearAttenuation;
 layout (location = 6) in float quadraticAttenuation;
 
-layout (binding = 0) uniform Matrices
+layout (set = 0, binding = 0) uniform Matrices
 {
     mat4 view;
     mat4 viewProjection;
     mat4 inverseProjection;
     float near;
     float far;
+    float metallic;
+    float roughness;
 };
 
 layout (location = 0) out vec2 fragPosition;

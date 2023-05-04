@@ -11,7 +11,18 @@ layout(set = 1, binding = 2) uniform sampler2D parallaxTexture;
 
 layout(location = 0) out vec4 color;
 layout(location = 1) out vec2 normalXY;
-layout(location = 2) out vec2 normalZSpecular;
+layout(location = 2) out vec2 metallicRoughness;
+
+layout (set = 0, binding = 0) uniform Matrices
+{
+    mat4 view;
+    mat4 viewProjection;
+    mat4 inverseProjection;
+    float near;
+    float far;
+    float metallic;
+    float roughness;
+};
 
 vec2 parallaxMapping(in vec2 texCoords, in vec3 viewDir) {
     const float height_scale = 0.05f;
@@ -54,6 +65,6 @@ void main() {
     tn = normalize(tn * 2.0f - 1.0f);
     vec3 normal = TBN * tn;
     normalXY = normal.xy;
-    normalZSpecular = vec2(normal.z, 16.0f);
+    metallicRoughness = vec2(metallic, roughness);
     color = texture(diffuseTexture, parallaxTexCoord);
 }

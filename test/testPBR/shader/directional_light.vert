@@ -12,6 +12,8 @@ layout (binding = 0) uniform Matrices
     mat4 inverseProjection;
     float near;
     float far;
+    float metallic;
+    float roughness;
 };
 
 layout (location = 0) out vec2 fragPosition;

@@ -195,6 +195,11 @@ namespace neon::deferred_utils {
             info.meshName = "Point Light";
             info.modelName = "Point Light";
             info.shader = pointShader;
+            info.populateFunction = [&blend](MaterialCreateInfo& info) {
+                info.descriptions.instance =
+                        PointLight::Data::getDescription();
+                info.blending.attachmentsBlending.push_back(blend);
+            };
             pointModel = createScreenModel(info);
             pointModel->defineInstanceStruct<PointLight::Data>();
         }
@@ -204,6 +209,11 @@ namespace neon::deferred_utils {
             info.meshName = "Flash Light";
             info.modelName = "Flash Light";
             info.shader = pointShader;
+            info.populateFunction = [&blend](MaterialCreateInfo& info) {
+                info.descriptions.instance =
+                        FlashLight::Data::getDescription();
+                info.blending.attachmentsBlending.push_back(blend);
+            };
             flashModel = createScreenModel(info);
             flashModel->defineInstanceStruct<FlashLight::Data>();
         }

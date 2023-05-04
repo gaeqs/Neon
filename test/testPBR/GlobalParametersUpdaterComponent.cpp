@@ -19,6 +19,20 @@ void GlobalParametersUpdaterComponent::onUpdate(float deltaTime) {
                             camera.getViewProjection(),
                             camera.getFrustum().getInverseProjection(),
                             camera.getFrustum().getNear(),
-                            camera.getFrustum().getFar()
+                            camera.getFrustum().getFar(),
+                            metallic,
+                            roughness
                     });
+}
+
+void GlobalParametersUpdaterComponent::drawEditor() {
+    ImGui::AlignTextToFramePadding();
+    ImGui::Text("Metallic:");
+    ImGui::SameLine();
+    ImGui::DragFloat(imGuiUId("##metallic").c_str(), &metallic, 0.005f, 0.0f, 1.0f);
+
+    ImGui::AlignTextToFramePadding();
+    ImGui::Text("Roughness:");
+    ImGui::SameLine();
+    ImGui::DragFloat(imGuiUId("##roughness").c_str(), &roughness, 0.005f, 0.0f, 1.0f);
 }

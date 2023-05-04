@@ -21,13 +21,15 @@ layout (set = 1, binding = 3) uniform sampler2D depthTexture;
 
 layout (location = 0) out vec3 color;
 
-layout (set = 0, binding = 0) uniform Matrices
+layout (binding = 0) uniform Matrices
 {
     mat4 view;
     mat4 viewProjection;
     mat4 inverseProjection;
     float near;
     float far;
+    float metallic;
+    float roughness;
 };
 
 float distributionGGX(vec3 n, vec3 h, float roughness) {
@@ -97,7 +99,7 @@ void main() {
 
     vec3 top = d * g * f;
     float bottom = 4.0f * max(dot(n, v), 0.0f) * max(dot(n, l), 0.0f);
-    vec3 specular = top / bottom;
+    vec3 specular = top / (bottom + 0.0001f);
 
     vec3 kS = f;
     vec3 kD = (1.0f - kS) * (1.0f - metallicRoughness.x);

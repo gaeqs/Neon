@@ -107,7 +107,7 @@ std::shared_ptr<FrameBuffer> initRender(Room* room) {
             room,
             render.get(),
             fpFrameBuffer->getTextures(),
-            TextureFormat::R32FG32FB32F,
+            TextureFormat::R32FG32FB32FA32F,
             directionalShader,
             pointShader,
             flashShader
