@@ -26,6 +26,16 @@ namespace neon {
 
     }
 
+    SimpleFrameBuffer::SimpleFrameBuffer(
+            Application* application,
+            const std::vector<TextureFormat>& colorFormats,
+            std::shared_ptr<Texture> depthTexture) :
+            _implementation(application, colorFormats, depthTexture),
+            _recreationCondition(defaultRecreationCondition),
+            _recreationParameters(defaultRecreationParameters) {
+
+    }
+
     bool SimpleFrameBuffer::requiresRecreation() {
         return _recreationCondition(this);
     }

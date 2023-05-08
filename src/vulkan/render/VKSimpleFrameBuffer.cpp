@@ -14,7 +14,8 @@
 #include <vulkan/util/VulkanConversions.h>
 
 namespace neon::vulkan {
-    void VKSimpleFrameBuffer::createImages() {
+    void VKSimpleFrameBuffer::createImages(
+            std::shared_ptr<Texture> overrideDepth) {
 
         _images.clear();
         _memories.clear();
@@ -53,7 +54,8 @@ namespace neon::vulkan {
         }
 
         // Add depth texture
-        if (_depth) {
+        if (!_depth) return;
+        if (overrideDepth == nullptr) {
             auto [image, memory] = vulkan_util::createImage(
                     _vkApplication->getDevice(),
                     _vkApplication->getPhysicalDevice(),
@@ -75,6 +77,12 @@ namespace neon::vulkan {
             _images.push_back(image);
             _memories.push_back(memory);
             _imageViews.push_back(view);
+            _layouts.push_back(VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL);
+        } else {
+            auto& impl = overrideDepth->getImplementation();
+            _images.push_back(impl.getImage());
+            _memories.push_back(impl.getMemory());
+            _imageViews.push_back(impl.getImageView());
             _layouts.push_back(VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL);
         }
 
@@ -148,7 +156,7 @@ namespace neon::vulkan {
 
         _imGuiDescriptors.resize(formats.size(), VK_NULL_HANDLE);
 
-        createImages();
+        createImages(nullptr);
         createFrameBuffer();
 
         SamplerCreateInfo info;
@@ -162,6 +170,8 @@ namespace neon::vulkan {
             auto texture = std::make_shared<Texture>(
                     application,
                     std::to_string(i),
+                    _images[i],
+                    _memories[i],
                     _imageViews[i],
                     _layouts[i],
                     static_cast<int32_t>(_extent.width),
@@ -171,6 +181,63 @@ namespace neon::vulkan {
             );
 
             _textures.push_back(texture);
+        }
+    }
+
+    VKSimpleFrameBuffer::VKSimpleFrameBuffer(
+            Application* application,
+            const std::vector<TextureFormat>& formats,
+            std::shared_ptr<Texture> depthTexture) :
+            VKFrameBuffer(),
+            _vkApplication(&application->getImplementation()),
+            _frameBuffer(VK_NULL_HANDLE),
+            _images(),
+            _memories(),
+            _imageViews(),
+            _layouts(),
+            _textures(),
+            _imGuiDescriptors(),
+            _formats(formats),
+            _extent(_vkApplication->getSwapChainExtent()),
+            _renderPass(application,
+                        conversions::vkFormat(formats),
+                        depthTexture != nullptr, false,
+                        _vkApplication->getDepthImageFormat()),
+            _depth(depthTexture != nullptr) {
+
+        _imGuiDescriptors.resize(formats.size(), VK_NULL_HANDLE);
+
+        createImages(depthTexture);
+        createFrameBuffer();
+
+        SamplerCreateInfo info;
+        info.anisotropy = false;
+        info.minificationFilter = TextureFilter::NEAREST;
+        info.magnificationFilter = TextureFilter::NEAREST;
+
+        int skip = depthTexture == nullptr ? 0 : 1;
+
+        // Create the textures
+        for (uint32_t i = 0; i < _imageViews.size() - skip; ++i) {
+
+            auto texture = std::make_shared<Texture>(
+                    application,
+                    std::to_string(i),
+                    _images[i],
+                    _memories[i],
+                    _imageViews[i],
+                    _layouts[i],
+                    static_cast<int32_t>(_extent.width),
+                    static_cast<int32_t>(_extent.height),
+                    1,
+                    info
+            );
+
+            _textures.push_back(texture);
+        }
+
+        if (depthTexture != nullptr) {
+            _textures.push_back(depthTexture);
         }
     }
 
@@ -190,7 +257,7 @@ namespace neon::vulkan {
         _extent = {size.first, size.second};
 
         cleanup();
-        createImages();
+        createImages(nullptr);
         createFrameBuffer();
 
         // Refresh the textures

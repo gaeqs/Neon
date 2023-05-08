@@ -26,11 +26,14 @@ namespace neon {
 
     Texture::Texture(Application* application,
                      std::string name,
-                     VkImageView imageView, VkImageLayout layout,
+                     VkImage image,
+                     VkDeviceMemory memory,
+                     VkImageView imageView,
+                     VkImageLayout layout,
                      uint32_t width, uint32_t height, uint32_t depth,
                      const SamplerCreateInfo& createInfo) :
             Asset(typeid(Texture), std::move(name)),
-            _implementation(application, imageView, layout,
+            _implementation(application, image, memory, imageView, layout,
                             width, height, depth, createInfo) {
     }
 

@@ -45,7 +45,7 @@ namespace neon::vulkan {
 
         bool _depth;
 
-        void createImages();
+        void createImages(std::shared_ptr<Texture> overrideDepth);
 
         void createFrameBuffer();
 
@@ -56,6 +56,10 @@ namespace neon::vulkan {
         VKSimpleFrameBuffer(Application* application,
                             const std::vector<TextureFormat>& formats,
                             bool depth);
+
+        VKSimpleFrameBuffer(Application* application,
+                            const std::vector<TextureFormat>& formats,
+                            std::shared_ptr<Texture> depthTexture);
 
         ~VKSimpleFrameBuffer() override;
 

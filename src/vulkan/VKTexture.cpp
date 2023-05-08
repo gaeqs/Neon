@@ -116,6 +116,8 @@ namespace neon::vulkan {
     }
 
     VKTexture::VKTexture(Application* application,
+                         VkImage image,
+                         VkDeviceMemory memory,
                          VkImageView imageView,
                          VkImageLayout layout,
                          uint32_t width, uint32_t height, uint32_t depth,
@@ -124,9 +126,11 @@ namespace neon::vulkan {
             _width(static_cast<int>(width)),
             _height(static_cast<int>(height)),
             _depth(static_cast<int>(depth)),
+            _mipmapLevels(1),
+            _layers(1),
             _stagingBuffer(nullptr),
-            _image(VK_NULL_HANDLE),
-            _imageMemory(VK_NULL_HANDLE),
+            _image(image),
+            _imageMemory(memory),
             _imageView(imageView),
             _sampler(VK_NULL_HANDLE),
             _layout(layout),
@@ -168,6 +172,14 @@ namespace neon::vulkan {
 
     int32_t VKTexture::getDepth() const {
         return _depth;
+    }
+
+    VkImage VKTexture::getImage() const {
+        return _image;
+    }
+
+    VkDeviceMemory VKTexture::getMemory() const {
+        return _imageMemory;
     }
 
     VkImageView VKTexture::getImageView() const {

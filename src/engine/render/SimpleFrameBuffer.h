@@ -47,6 +47,10 @@ namespace neon {
                           const std::vector<TextureFormat>& colorFormats,
                           bool depth);
 
+        SimpleFrameBuffer(Application* application,
+                          const std::vector<TextureFormat>& colorFormats,
+                          std::shared_ptr<Texture> depthTexture);
+
         ~SimpleFrameBuffer() override = default;
 
         bool requiresRecreation() override;

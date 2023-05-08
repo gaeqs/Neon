@@ -46,7 +46,10 @@ namespace neon {
 
         Texture(Application* application,
                 std::string name,
-                VkImageView imageView, VkImageLayout layout,
+                VkImage image,
+                VkDeviceMemory memory,
+                VkImageView imageView,
+                VkImageLayout layout,
                 uint32_t width, uint32_t height, uint32_t depth,
                 const SamplerCreateInfo& createInfo = SamplerCreateInfo());
 

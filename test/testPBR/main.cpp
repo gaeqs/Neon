@@ -161,6 +161,14 @@ void loadModels(Application* application, Room* room,
     auto shaderParallax = createShader(application,
                                        "parallax", "deferred.vert",
                                        "deferred_parallax.frag");
+    auto shaderDepth = createShader(application,
+                                    "depth", "deferred_depth.vert",
+                                    "deferred_depth.frag");
+
+    MaterialCreateInfo depthMaterialInfo(target, shaderDepth);
+    auto depthMaterial = std::make_shared<Material>(
+            application, "depth", depthMaterialInfo);
+
 
     MaterialCreateInfo sansMaterialInfo(target, shader);
     sansMaterialInfo.descriptions.uniform = materialDescriptor;
@@ -178,6 +186,10 @@ void loadModels(Application* application, Room* room,
     }
 
     auto sansModel = sansResult.model;
+
+    for (int i = 0; i < sansModel->getMeshesAmount(); ++i) {
+        sansModel->getMesh(i)->getMaterials().push_back(depthMaterial);
+    }
 
     constexpr int AMOUNT = 1024 * 1;
     int q = static_cast<int>(std::sqrt(AMOUNT));
@@ -217,6 +229,10 @@ void loadModels(Application* application, Room* room,
     }
 
     auto zeppeliModel = zeppeliResult.model;
+
+    for (int i = 0; i < zeppeliModel->getMeshesAmount(); ++i) {
+        zeppeliModel->getMesh(i)->getMaterials().push_back(depthMaterial);
+    }
 
     auto zeppeli = room->newGameObject();
     zeppeli->newComponent<GraphicComponent>(zeppeliModel);
