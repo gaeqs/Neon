@@ -125,7 +125,9 @@ namespace neon {
             }
 
             for (const auto& material: materials) {
-                material->getUniformBuffer().prepareForFrame();
+                if (material->getUniformBuffer() != nullptr) {
+                    material->getUniformBuffer()->prepareForFrame();
+                }
             }
         }
 

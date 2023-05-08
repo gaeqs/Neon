@@ -68,8 +68,11 @@ namespace neon::vulkan {
             auto layout = mat.getPipelineLayout();
 
             global->getImplementation().bind(commandBuffer, layout);
-            material->getUniformBuffer()
-                    .getImplementation().bind(commandBuffer, layout);
+
+            if (material->getUniformBuffer() != nullptr) {
+                material->getUniformBuffer()
+                        ->getImplementation().bind(commandBuffer, layout);
+            }
             vkCmdDrawIndexed(commandBuffer, _indexAmount, instancingElements,
                              0, 0, 0);
         }

@@ -4,13 +4,11 @@
 
 #include "VKMaterial.h"
 
-#include <algorithm>
 #include <cstring>
 
 #include <engine/structure/Room.h>
 #include <engine/shader/Material.h>
 
-#include <iterator>
 #include <utility>
 #include <vulkan/render/VKRenderPass.h>
 
@@ -160,18 +158,24 @@ namespace neon::vulkan {
         colorBlending.blendConstants[2] = createInfo.blending.blendingConstants[2];
         colorBlending.blendConstants[3] = createInfo.blending.blendingConstants[3];
 
-        VkDescriptorSetLayout uniformInfos[] = {
-                application->getRender()->getGlobalUniformDescriptor()
-                        ->getImplementation().getDescriptorSetLayout(),
-                material->getUniformBuffer().getDescriptor()
-                        ->getImplementation().getDescriptorSetLayout()
-        };
+        std::vector<VkDescriptorSetLayout> uniformInfos;
+        uniformInfos.reserve(2);
+        uniformInfos.push_back(
+                application->getRender()
+                        ->getGlobalUniformDescriptor()
+                        ->getImplementation().getDescriptorSetLayout());
+        if (material->getUniformBuffer() != nullptr) {
+            uniformInfos.push_back(material->getUniformBuffer()
+                                           ->getDescriptor()
+                                           ->getImplementation()
+                                           .getDescriptorSetLayout());
+        }
 
 
         VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
         pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-        pipelineLayoutInfo.setLayoutCount = 2;
-        pipelineLayoutInfo.pSetLayouts = uniformInfos;
+        pipelineLayoutInfo.setLayoutCount = uniformInfos.size();
+        pipelineLayoutInfo.pSetLayouts = uniformInfos.data();
 
         auto& blocks = _material->getShader()
                 ->getImplementation().getUniformBlocks();
@@ -280,12 +284,13 @@ namespace neon::vulkan {
 
     void VKMaterial::setTexture(const std::string& name,
                                 std::shared_ptr<Texture> texture) {
+        if(_material->getUniformBuffer() == nullptr) return;
         auto& samplers = _material->getShader()->getImplementation()
                 .getSamplers();
         auto samplerIt = samplers.find(name);
         if (samplerIt == samplers.end()) return;
 
-        _material->getUniformBuffer().setTexture(
+        _material->getUniformBuffer()->setTexture(
                 samplerIt->second.binding,
                 std::move(texture));
     }

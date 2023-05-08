@@ -57,8 +57,7 @@ namespace neon {
     private:
 
         std::shared_ptr<ShaderProgram> _shader;
-
-        ShaderUniformBuffer _uniformBuffer;
+        std::unique_ptr<ShaderUniformBuffer> _uniformBuffer;
 
         Implementation _implementation;
 
@@ -87,16 +86,22 @@ namespace neon {
         /**
          * Returns the uniform buffer that contains the mutable information
          * of this material.
+         * The uniform buffer may not be present if
+         * no description has been provided.
          * @return the uniform buffer.
          */
-        [[nodiscard]] const ShaderUniformBuffer& getUniformBuffer() const;
+        [[nodiscard]] const std::unique_ptr<ShaderUniformBuffer>&
+        getUniformBuffer() const;
 
         /**
          * Returns the uniform buffer that contains the mutable information
          * of this material.
+         * The uniform buffer may not be present if
+         * no description has been provided.
          * @return the uniform buffer.
          */
-        [[nodiscard]] ShaderUniformBuffer& getUniformBuffer();
+        [[nodiscard]] std::unique_ptr<ShaderUniformBuffer>&
+        getUniformBuffer();
 
         /**
          * Returns the implementation of this material.

@@ -101,7 +101,7 @@ namespace neon::deferred_utils {
             );
 
             for (uint32_t i = 0; i < info.inputTextures.size(); ++i) {
-                material->getUniformBuffer().setTexture(
+                material->getUniformBuffer()->setTexture(
                         i,
                         info.inputTextures[i]
                 );
