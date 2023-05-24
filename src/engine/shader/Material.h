@@ -57,7 +57,10 @@ namespace neon {
     private:
 
         std::shared_ptr<ShaderProgram> _shader;
+        std::shared_ptr<FrameBuffer> _target;
         std::unique_ptr<ShaderUniformBuffer> _uniformBuffer;
+
+        int32_t _priority;
 
         Implementation _implementation;
 
@@ -84,6 +87,14 @@ namespace neon {
         getShader() const;
 
         /**
+         * Returns the target frame buffer this material
+         * will draw the meshes using it.
+         * @return the target.
+         */
+        [[nodiscard]] const std::shared_ptr<FrameBuffer>&
+        getTarget() const;
+
+        /**
          * Returns the uniform buffer that contains the mutable information
          * of this material.
          * The uniform buffer may not be present if
@@ -102,6 +113,30 @@ namespace neon {
          */
         [[nodiscard]] std::unique_ptr<ShaderUniformBuffer>&
         getUniformBuffer();
+
+        /**
+         * Returns the priority of the material.
+         * The bigger this number, the earlier this
+         * material will be rendered inside its
+         * target.
+         * <p>
+         * The default priority is 0. The priority
+         * can be negative.
+         * @return the priority.
+         */
+        [[nodiscard]] int32_t getPriority() const;
+
+        /**
+         * Sets the priority of the material.
+         * The bigger this number, the earlier this
+         * material will be rendered inside its
+         * target.
+         * <p>
+         * The default priority is 0. The priority
+         * can be negative.
+         * @param priority the priority.
+         */
+        [[nodiscard]] void setPriority(int32_t priority);
 
         /**
          * Returns the implementation of this material.
@@ -142,6 +177,20 @@ namespace neon {
          */
         void setTexture(const std::string& name,
                         std::shared_ptr<Texture> texture);
+
+        // region Util static methods
+
+        static std::unique_ptr<Material> create(
+                Application* application,
+                const std::string& name,
+                const std::shared_ptr<FrameBuffer>& target,
+                const std::shared_ptr<ShaderProgram>& shader,
+                const InputDescription& vertex,
+                const InputDescription& instance,
+                const std::vector<std::pair<void*, size_t>>& buffers,
+                const std::vector<std::shared_ptr<Texture>>& textures);
+
+        // endregion
     };
 }
 

@@ -21,6 +21,8 @@ namespace neon {
 
     class Application;
 
+    class Material;
+
     /**
      * Represents a model that can be rendered
      * inside a scene.
@@ -151,6 +153,20 @@ namespace neon {
          * @return the mesh.
          */
         [[nodiscard]] Mesh* getMesh(uint32_t index);
+
+        /**
+         * Adds the given material to all meshes inside this model.
+         * @param material the material.
+         */
+        void addMaterial(const std::shared_ptr<Material>& material);
+
+        /**
+         * Calls the draw calls for the meshes that
+         * contains the given material.
+         * @param material the material.
+         */
+        void draw(const std::shared_ptr<Material>& material) const;
+
     };
 }
 

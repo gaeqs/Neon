@@ -14,6 +14,7 @@
 #include <engine/model/InputDescription.h>
 #include <engine/render/TextureCreateInfo.h>
 #include <engine/shader/MaterialCreateInfo.h>
+#include <engine/shader/ShaderUniformBinding.h>
 
 
 namespace neon {
@@ -34,52 +35,31 @@ namespace neon {
 
 namespace neon::deferred_utils {
 
-    struct ScreenModelCreationInfo {
+    struct DeferredVertex {
+        glm::vec2 position;
 
-        Application* application;
-        std::string materialName;
-        std::string meshName;
-        std::string modelName;
+        static InputDescription getDescription() {
+            InputDescription description(
+                    sizeof(DeferredVertex),
+                    InputRate::VERTEX
+            );
+            description.addAttribute(2, 0);
 
-        std::vector<std::shared_ptr<Texture>> inputTextures;
-        std::shared_ptr<FrameBuffer> target;
-        std::shared_ptr<ShaderProgram> shader;
+            return description;
+        }
 
-        bool searchInAssets;
-        bool saveInAssets;
-        AssetStorageMode storageMode;
-
-        std::function<void(MaterialCreateInfo&)> populateFunction;
-
-        ScreenModelCreationInfo(
-                Application* app,
-                const std::string& name,
-                std::vector<std::shared_ptr<Texture>> inputTextures,
-                std::shared_ptr<FrameBuffer> target,
-                std::shared_ptr<ShaderProgram> shader,
-                bool searchInAssets = true,
-                bool saveInAssets = true,
-                AssetStorageMode storageMode = AssetStorageMode::WEAK,
-                std::function<void(MaterialCreateInfo&)> populateFunction = {});
-
-        ScreenModelCreationInfo(
-                Application* app,
-                std::string meshName,
-                std::string modelName,
-                std::string materialName,
-                std::vector<std::shared_ptr<Texture>> inputTextures,
-                std::shared_ptr<FrameBuffer> target,
-                std::shared_ptr<ShaderProgram> shader,
-                bool searchInAssets = true,
-                bool saveInAssets = true,
-                AssetStorageMode storageMode = AssetStorageMode::WEAK,
-                std::function<void(MaterialCreateInfo&)> populateFunction = {});
-
-
+        static DeferredVertex fromAssimp(
+                const glm::vec3& position,
+                [[maybe_unused]] const glm::vec3& normal,
+                [[maybe_unused]] const glm::vec3& tangent,
+                [[maybe_unused]] const glm::vec4& color,
+                [[maybe_unused]] const glm::vec2& texCoords) {
+            return {position};
+        }
     };
 
-    std::shared_ptr<Model>
-    createScreenModel(const ScreenModelCreationInfo& info);
+    std::shared_ptr<Model> createScreenModel(Application* application,
+                                             const std::string& name);
 
     std::shared_ptr<Texture> createLightSystem(
             Room* room,

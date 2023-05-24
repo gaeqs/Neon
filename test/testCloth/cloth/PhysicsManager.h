@@ -53,5 +53,4 @@ public:
 };
 REGISTER_COMPONENT(PhysicsManager, "Physics Manager")
 
-
 #endif //NEON_PHYSICSMANAGER_H

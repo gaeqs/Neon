@@ -7,12 +7,14 @@
 #include <utility>
 
 #include <engine/Application.h>
+#include <engine/render/Render.h>
 #include <engine/model/DefaultInstancingData.h>
+#include <engine/shader/Material.h>
 
 namespace neon::vulkan {
     void VKModel::reinitializeBuffer() {
         _instancingBuffer = std::make_unique<StagingBuffer>(
-                _vkApplication,
+                &_application->getImplementation(),
                 VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
                 static_cast<uint32_t>(_instancingStructSize) *
                 BUFFER_DEFAULT_SIZE
@@ -21,14 +23,14 @@ namespace neon::vulkan {
     }
 
     VKModel::VKModel(Application* application, std::vector<VKMesh*> meshes) :
-            _vkApplication(&application->getImplementation()),
+            _application(application),
             _meshes(std::move(meshes)),
             _instancingStructType(
                     std::type_index(typeid(DefaultInstancingData))),
             _instancingStructSize(sizeof(DefaultInstancingData)),
             _positions(),
             _instancingBuffer(std::make_unique<StagingBuffer>(
-                    _vkApplication,
+                    &_application->getImplementation(),
                     VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
                     static_cast<uint32_t>(_instancingStructSize) *
                     BUFFER_DEFAULT_SIZE
@@ -106,19 +108,17 @@ namespace neon::vulkan {
         }
     }
 
-    void VKModel::draw(VkCommandBuffer buffer,
-                       VkRenderPass target,
-                       const ShaderUniformBuffer* global) {
+    void VKModel::draw(const std::shared_ptr<Material>& material) const {
         if (_positions.empty()) return;
-
-        for (const auto& item: _meshes) {
-            item->draw(
-                    buffer,
+        for (const auto& mesh: _meshes) {
+            if (!mesh->getMaterials().contains(material)) continue;
+            auto& vk = _application->getImplementation();
+            mesh->draw(
+                    material,
+                    vk.getCurrentCommandBuffer(),
                     _instancingBuffer->getRaw(),
                     _positions.size(),
-                    global,
-                    target
-            );
+                    &_application->getRender()->getGlobalUniformBuffer());
         }
     }
 

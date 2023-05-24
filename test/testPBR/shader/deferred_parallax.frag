@@ -13,11 +13,12 @@ layout(location = 0) out vec4 color;
 layout(location = 1) out vec2 normalXY;
 layout(location = 2) out vec2 metallicRoughness;
 
-layout (set = 0, binding = 0) uniform Matrices
-{
+layout (set = 0, binding = 0) uniform Matrices {
     mat4 view;
+    mat4 projection;
     mat4 viewProjection;
     mat4 inverseProjection;
+    vec2 screenSize;
     float near;
     float far;
     float metallic;

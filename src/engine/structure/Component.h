@@ -19,10 +19,9 @@
 
 #define REGISTER_COMPONENT(clazz, name)                         \
     namespace {                                                 \
-        using namespace neon;                                   \
         struct _##clazz##_component_register_ {                 \
             _##clazz##_component_register_() {                  \
-                ComponentRegister::instance()                   \
+                neon::ComponentRegister::instance()             \
                     .registerComponent< clazz >( name );        \
             }                                                   \
         };                                                      \

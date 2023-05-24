@@ -9,6 +9,8 @@
 
 namespace neon {
     enum class TextureFormat {
+        R8,
+        R8G8,
         R8G8B8,
         B8G8R8,
         R8G8B8A8,

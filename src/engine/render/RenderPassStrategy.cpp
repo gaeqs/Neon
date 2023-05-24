@@ -7,14 +7,14 @@
 #include <engine/model/Model.h>
 #include <engine/structure/Room.h>
 #include <engine/render/FrameBuffer.h>
-
-#include <vulkan/render/VKRenderPass.h>
+#include <engine/shader/Material.h>
 
 namespace neon {
     RenderPassStrategy::RenderPassStrategy(
             const std::shared_ptr<FrameBuffer>& _frameBuffer,
             const std::function<void(
                     Room*,
+                    const std::vector<std::shared_ptr<Material>>&,
                     std::shared_ptr<FrameBuffer>)>& _strategy) :
             frameBuffer(_frameBuffer),
             strategy(_strategy) {
@@ -23,17 +23,13 @@ namespace neon {
 
     void RenderPassStrategy::defaultStrategy(
             Room* room,
+            const std::vector<std::shared_ptr<Material>>& sortedMaterials,
             const std::shared_ptr<FrameBuffer>& target) {
-        auto& app = room->getApplication()->getImplementation();
-        auto renderPass = target->getImplementation().getRenderPass().getRaw();
-        auto globalUniformBuffer = &room->getApplication()->getRender()
-                ->getGlobalUniformBuffer();
-        for (const auto& [model, amount]: room->usedModels()) {
-            model->getImplementation().draw(
-                    app.getCurrentCommandBuffer(),
-                    renderPass,
-                    globalUniformBuffer
-            );
+        for (const auto& material: sortedMaterials) {
+            if (material->getTarget() != target) continue;
+            for (const auto& [model, amount]: room->usedModels()) {
+                model->draw(material);
+            }
         }
     }
 }

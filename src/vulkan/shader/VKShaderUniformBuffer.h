@@ -14,15 +14,16 @@
 namespace neon {
     class Application;
 
-    class Buffer;
-
     class Texture;
 
     class ShaderUniformDescriptor;
 }
 
 namespace neon::vulkan {
+
     class VKApplication;
+
+    class Buffer;
 
     class VKShaderUniformBuffer {
 

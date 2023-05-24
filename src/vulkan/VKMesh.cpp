@@ -6,76 +6,67 @@
 
 #include <cstring>
 #include <engine/Application.h>
-#include <stdint.h>
 #include <vulkan/VKApplication.h>
 
 namespace neon::vulkan {
 
     VKMesh::VKMesh(Application* application,
-                   std::vector<std::shared_ptr<Material>>& materials,
+                   std::unordered_set<std::shared_ptr<Material>>& materials,
                    bool modifiableVertices,
                    bool modifiableIndices) :
             _vkApplication(&application->getImplementation()),
             _materials(materials),
             _vertexBuffer(),
             _indexBuffer(),
+            _verticesSize(0),
             _indexAmount(0),
             _modifiableVertices(modifiableVertices),
             _modifiableIndices(modifiableIndices) {
     }
 
-    const std::vector<std::shared_ptr<Material>>& VKMesh::getMaterials() const {
+    const std::unordered_set<std::shared_ptr<Material>>&
+    VKMesh::getMaterials() const {
         return _materials;
     }
 
     void VKMesh::draw(
+            const std::shared_ptr<Material>& material,
             VkCommandBuffer commandBuffer,
             VkBuffer instancingBuffer,
             uint32_t instancingElements,
-            const ShaderUniformBuffer* global,
-            VkRenderPass target) {
+            const ShaderUniformBuffer* global) {
 
         if (!_vertexBuffer.has_value()) return;
 
-        bool init = false;
+        VkBuffer buffers[] = {_vertexBuffer.value()->getRaw(),
+                              instancingBuffer};
+        VkDeviceSize offsets[] = {0, 0};
 
-        for (const auto& material: _materials) {
-            if (target != material->getImplementation().getTarget())
-                continue;
+        vkCmdBindVertexBuffers(commandBuffer, 0, 2, buffers, offsets);
+        vkCmdBindIndexBuffer(
+                commandBuffer,
+                _indexBuffer.value()->getRaw(),
+                0, VK_INDEX_TYPE_UINT32
+        );
 
-            if (!init) {
-                VkBuffer buffers[] = {_vertexBuffer.value()->getRaw(),
-                                      instancingBuffer};
-                VkDeviceSize offsets[] = {0, 0};
+        auto& mat = material->getImplementation();
 
-                vkCmdBindVertexBuffers(commandBuffer, 0, 2, buffers, offsets);
-                vkCmdBindIndexBuffer(
-                        commandBuffer,
-                        _indexBuffer.value()->getRaw(),
-                        0, VK_INDEX_TYPE_UINT32
-                );
-                init = true;
-            }
+        vkCmdBindPipeline(commandBuffer,
+                          VK_PIPELINE_BIND_POINT_GRAPHICS,
+                          mat.getPipeline());
 
-            auto& mat = material->getImplementation();
+        mat.uploadConstants(commandBuffer);
 
-            vkCmdBindPipeline(commandBuffer,
-                              VK_PIPELINE_BIND_POINT_GRAPHICS,
-                              mat.getPipeline());
+        auto layout = mat.getPipelineLayout();
 
-            mat.uploadConstants(commandBuffer);
+        global->getImplementation().bind(commandBuffer, layout);
 
-            auto layout = mat.getPipelineLayout();
-
-            global->getImplementation().bind(commandBuffer, layout);
-
-            if (material->getUniformBuffer() != nullptr) {
-                material->getUniformBuffer()
-                        ->getImplementation().bind(commandBuffer, layout);
-            }
-            vkCmdDrawIndexed(commandBuffer, _indexAmount, instancingElements,
-                             0, 0, 0);
+        if (material->getUniformBuffer() != nullptr) {
+            material->getUniformBuffer()
+                    ->getImplementation().bind(commandBuffer, layout);
         }
+        vkCmdDrawIndexed(commandBuffer, _indexAmount, instancingElements,
+                         0, 0, 0);
     }
 
     bool VKMesh::setVertices(const void* data, size_t length) const {

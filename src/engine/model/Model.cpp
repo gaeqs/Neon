@@ -68,4 +68,14 @@ namespace neon {
     Mesh* Model::getMesh(uint32_t index) {
         return _meshes.at(index).get();
     }
+
+    void Model::addMaterial(const std::shared_ptr<Material>& material) {
+        for (const auto& mesh: _meshes) {
+            mesh->getMaterials().insert(material);
+        }
+    }
+
+    void Model::draw(const std::shared_ptr<Material>& material) const {
+        _implementation.draw(material);
+    }
 }

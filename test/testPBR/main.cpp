@@ -2,6 +2,7 @@
 #include <memory>
 #include <vector>
 #include <filesystem>
+#include <random>
 
 #include <engine/Engine.h>
 #include <util/component/CameraMovementComponent.h>
@@ -18,12 +19,11 @@
 #include "GlobalParametersUpdaterComponent.h"
 #include "LockMouseComponent.h"
 #include "ConstantRotationComponent.h"
-#include "engine/shader/Material.h"
-#include "engine/shader/MaterialCreateInfo.h"
-#include "engine/shader/ShaderUniformBinding.h"
 
 constexpr int32_t WIDTH = 800;
 constexpr int32_t HEIGHT = 600;
+
+using namespace neon;
 
 CMRC_DECLARE(shaders);
 
@@ -52,6 +52,105 @@ std::shared_ptr<ShaderProgram> createShader(Application* application,
     return result.getResult();
 }
 
+std::shared_ptr<Material> createSSAOMaterial(
+        Room* room,
+        const std::shared_ptr<FrameBuffer>& ssaoFrameBuffer,
+        std::vector<std::shared_ptr<Texture>> textures) {
+    constexpr uint32_t SAMPLES = 64;
+    constexpr uint32_t NOISE_WIDTH = 4;
+
+    std::random_device randomDevice;
+    std::uniform_real_distribution<float> randomFloats(0.0f, 1.0f);
+    std::default_random_engine randomGenerator(randomDevice());
+
+    // GENERATE SAMPLES
+    // We use vec4 because GLSL's vec3 has an aligment of 16 bytes.
+    std::vector<glm::vec4> samples;
+    samples.reserve(SAMPLES);
+    for (uint32_t i = 0; i < SAMPLES; ++i) {
+        float scale = static_cast<float>(i) / 64.0f;
+        samples.push_back(
+                glm::normalize(glm::vec4(
+                        randomFloats(randomGenerator) * 2.0f - 1.0f,
+                        randomFloats(randomGenerator) * 2.0f - 1.0f,
+                        randomFloats(randomGenerator),
+                        0.0f
+                )) * std::lerp(0.1f, 1.0f, scale)
+        );
+    }
+
+    // GENERATE NOISE
+    std::vector<glm::vec3> noise;
+    noise.reserve(NOISE_WIDTH * NOISE_WIDTH);
+    for (uint32_t i = 0; i < NOISE_WIDTH * NOISE_WIDTH; ++i) {
+        noise.emplace_back(
+                randomFloats(randomGenerator) * 2.0f - 1.0f,
+                randomFloats(randomGenerator) * 2.0f - 1.0f,
+                0.0f
+        );
+    }
+
+    TextureCreateInfo noiseTextureCreateInfo;
+    noiseTextureCreateInfo.image.format = TextureFormat::R32FG32FB32F;
+    noiseTextureCreateInfo.image.width = NOISE_WIDTH;
+    noiseTextureCreateInfo.image.height = NOISE_WIDTH;
+    noiseTextureCreateInfo.image.depth = 1;
+    noiseTextureCreateInfo.image.mipmaps = 1;
+    // RTX 2070 doesn't have support for R32FG32FB32F when using optimal tiling,
+    // but it does when using linear tiling.
+    noiseTextureCreateInfo.image.tiling = Tiling::LINEAR;
+    noiseTextureCreateInfo.sampler.anisotropy = false;
+    noiseTextureCreateInfo.sampler.minificationFilter = TextureFilter::NEAREST;
+    noiseTextureCreateInfo.sampler.magnificationFilter = TextureFilter::NEAREST;
+    noiseTextureCreateInfo.sampler.mipmapMode = MipmapMode::NEAREST;
+    noiseTextureCreateInfo.sampler.uAddressMode = AddressMode::REPEAT;
+    noiseTextureCreateInfo.sampler.vAddressMode = AddressMode::REPEAT;
+
+    auto noiseTexture = std::make_shared<Texture>(
+            room->getApplication(),
+            "SSAO_noise",
+            noise.data(),
+            noiseTextureCreateInfo
+    );
+    textures.push_back(noiseTexture);
+
+    auto ssaoShader = createShader(room->getApplication(),
+                                   "SSAO",
+                                   "ssao.vert",
+                                   "ssao.frag");
+
+    std::shared_ptr<Material> material = Material::create(
+            room->getApplication(), "SSAO",
+            ssaoFrameBuffer, ssaoShader,
+            deferred_utils::DeferredVertex::getDescription(),
+            InputDescription(0, InputRate::INSTANCE),
+            {{samples.data(), SAMPLES * sizeof(glm::vec4)}},
+            textures);
+
+    return material;
+}
+
+
+std::shared_ptr<Material> createSSAOBlurMaterial(
+        Room* room,
+        const std::shared_ptr<FrameBuffer>& ssaoFrameBuffer,
+        const std::vector<std::shared_ptr<Texture>>& textures) {
+
+    auto ssaoShader = createShader(room->getApplication(),
+                                   "SSAO",
+                                   "ssao_blur.vert",
+                                   "ssao_blur.frag");
+
+    std::shared_ptr<Material> material = Material::create(
+            room->getApplication(), "SSAO Blur",
+            ssaoFrameBuffer, ssaoShader,
+            deferred_utils::DeferredVertex::getDescription(),
+            InputDescription(0, InputRate::INSTANCE),
+            {},
+            textures);
+
+    return material;
+}
 
 std::shared_ptr<FrameBuffer> initRender(Room* room) {
     auto* app = room->getApplication();
@@ -61,6 +160,7 @@ std::shared_ptr<FrameBuffer> initRender(Room* room) {
     // and a skybox.
     std::vector<ShaderUniformBinding> globalBindings = {
             {UniformBindingType::BUFFER, sizeof(GlobalParameters)},
+            {UniformBindingType::BUFFER, sizeof(int32_t)},
             {UniformBindingType::IMAGE,  0}
     };
 
@@ -98,15 +198,49 @@ std::shared_ptr<FrameBuffer> initRender(Room* room) {
             TextureFormat::R16FG16F // METALLIC / ROUGHNESS
     };
 
+    // G BUFFER
+
     auto fpFrameBuffer = std::make_shared<SimpleFrameBuffer>(
             app, frameBufferFormats, true);
+    auto fpTextures = fpFrameBuffer->getTextures();
 
     render->addRenderPass({fpFrameBuffer, RenderPassStrategy::defaultStrategy});
+
+    // SSAO
+
+    auto ssaoFrameBuffer = std::make_shared<SimpleFrameBuffer>(
+            app, std::vector<TextureFormat>{TextureFormat::R32F}, false
+    );
+
+    app->getRender()->addRenderPass(
+            {ssaoFrameBuffer, RenderPassStrategy::defaultStrategy});
+
+    auto ssaoBlurFrameBuffer = std::make_shared<SimpleFrameBuffer>(
+            app, std::vector<TextureFormat>{TextureFormat::R32F}, false
+    );
+
+    app->getRender()->addRenderPass(
+            {ssaoBlurFrameBuffer, RenderPassStrategy::defaultStrategy});
+
+
+    auto ssaoMaterial = createSSAOMaterial(
+            room, ssaoFrameBuffer,
+            {
+                    fpTextures.at(0), // ALBEDO
+                    fpTextures.at(1), // NORMAL XY
+                    fpTextures.at(3)  // DEPTH
+            }
+    );
+
+    auto ssaoBlurMaterial = createSSAOBlurMaterial(
+            room, ssaoBlurFrameBuffer, ssaoFrameBuffer->getTextures());
+
+    // LIGHT SYSTEM
 
     auto albedo = deferred_utils::createLightSystem(
             room,
             render.get(),
-            fpFrameBuffer->getTextures(),
+            fpTextures,
             TextureFormat::R32FG32FB32FA32F,
             directionalShader,
             pointShader,
@@ -121,25 +255,27 @@ std::shared_ptr<FrameBuffer> initRender(Room* room) {
 
     auto textures = fpFrameBuffer->getTextures();
     textures.push_back(albedo);
+    textures.push_back(ssaoBlurFrameBuffer->getTextures().at(0)); // SSAO
 
-    deferred_utils::ScreenModelCreationInfo info(
-            room->getApplication(),
-            "screen model",
-            textures,
-            screenFrameBuffer,
-            screenShader,
-            true,
-            true,
-            neon::AssetStorageMode::PERMANENT
-    );
+    std::shared_ptr<Material> screenMaterial = Material::create(
+            room->getApplication(), "Screen Model",
+            screenFrameBuffer, screenShader,
+            deferred_utils::DeferredVertex::getDescription(),
+            InputDescription(0, InputRate::INSTANCE),
+            {}, textures);
 
-    auto screenModel = deferred_utils::createScreenModel(info);
+    auto screenModel = deferred_utils::createScreenModel(app, "Screen Model");
+    screenModel->addMaterial(screenMaterial);
+    screenModel->addMaterial(ssaoMaterial);
+    screenModel->addMaterial(ssaoBlurMaterial);
 
     auto instance = screenModel->createInstance();
     if (!instance.isOk()) {
         throw std::runtime_error(instance.getError());
     }
     room->markUsingModel(screenModel.get());
+
+    app->getAssets().store(screenModel, neon::AssetStorageMode::PERMANENT);
 
     auto swapFrameBuffer = std::make_shared<SwapChainFrameBuffer>(
             room, false);
@@ -166,12 +302,21 @@ void loadModels(Application* application, Room* room,
                                     "deferred_depth.frag");
 
     MaterialCreateInfo depthMaterialInfo(target, shaderDepth);
+    depthMaterialInfo.descriptions.vertex = TestVertex::getDescription();
+    depthMaterialInfo.descriptions.instance =
+            DefaultInstancingData::getInstancingDescription();
+    depthMaterialInfo.depthStencil.depthCompareOperation =
+            DepthCompareOperation::LESS;
+
     auto depthMaterial = std::make_shared<Material>(
             application, "depth", depthMaterialInfo);
+    depthMaterial->setPriority(1);
 
 
     MaterialCreateInfo sansMaterialInfo(target, shader);
     sansMaterialInfo.descriptions.uniform = materialDescriptor;
+    sansMaterialInfo.depthStencil.depthCompareOperation =
+            DepthCompareOperation::LESS_OR_EQUAL;
 
     auto sansLoaderInfo = assimp_loader::LoaderInfo::create<TestVertex>(
             application, "Sans", sansMaterialInfo);
@@ -188,7 +333,7 @@ void loadModels(Application* application, Room* room,
     auto sansModel = sansResult.model;
 
     for (int i = 0; i < sansModel->getMeshesAmount(); ++i) {
-        sansModel->getMesh(i)->getMaterials().push_back(depthMaterial);
+        sansModel->getMesh(i)->getMaterials().insert(depthMaterial);
     }
 
     constexpr int AMOUNT = 1024 * 1;
@@ -231,7 +376,7 @@ void loadModels(Application* application, Room* room,
     auto zeppeliModel = zeppeliResult.model;
 
     for (int i = 0; i < zeppeliModel->getMeshesAmount(); ++i) {
-        zeppeliModel->getMesh(i)->getMaterials().push_back(depthMaterial);
+        zeppeliModel->getMesh(i)->getMaterials().insert(depthMaterial);
     }
 
     auto zeppeli = room->newGameObject();
@@ -314,7 +459,7 @@ std::shared_ptr<Room> getTestRoom(Application* application) {
     auto fpFrameBuffer = initRender(room.get());
 
     auto skybox = loadSkybox(room.get());
-    application->getRender()->getGlobalUniformBuffer().setTexture(1, skybox);
+    application->getRender()->getGlobalUniformBuffer().setTexture(2, skybox);
 
 
     auto cameraController = room->newGameObject();

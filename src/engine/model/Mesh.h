@@ -6,7 +6,7 @@
 #define NEON_MESH_H
 
 
-#include <vector>
+#include <unordered_set>
 #include <string>
 
 #include <engine/shader/Material.h>
@@ -37,7 +37,7 @@ namespace neon {
     private:
 
         Implementation _implementation;
-        std::vector<std::shared_ptr<Material>> _materials;
+        std::unordered_set<std::shared_ptr<Material>> _materials;
 
     public:
 
@@ -65,7 +65,7 @@ namespace neon {
          */
         Mesh(Application* application,
              const std::string& name,
-             std::vector<std::shared_ptr<Material>> materials,
+             std::unordered_set<std::shared_ptr<Material>> materials,
              bool modifiableVertices = false,
              bool modifiableIndices = false);
 
@@ -175,13 +175,14 @@ namespace neon {
          * @param indices the indices.
          * @return whether the operation was successful.
          */
-        bool setIndices(const std::vector<uint32_t>& indices) const;
+        [[nodiscard]] bool
+        setIndices(const std::vector<uint32_t>& indices) const;
 
         /**
          * Returns the materials of the mesh.
          * @return the materials.
          */
-        [[nodiscard]] const std::vector<std::shared_ptr<Material>>&
+        [[nodiscard]] const std::unordered_set<std::shared_ptr<Material>>&
         getMaterials() const;
 
         /**
@@ -189,7 +190,8 @@ namespace neon {
          * You can modify this vector to add new materials.
          * @return the materials.
          */
-        [[nodiscard]] std::vector<std::shared_ptr<Material>>& getMaterials();
+        [[nodiscard]] std::unordered_set<std::shared_ptr<Material>>&
+        getMaterials();
 
         /**
          * Sets the material of the mesh.

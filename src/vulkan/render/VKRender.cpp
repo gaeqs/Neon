@@ -5,6 +5,7 @@
 #include "VKRender.h"
 
 #include <engine/Application.h>
+#include <engine/shader/Material.h>
 
 #include <vulkan/render/VKFrameBuffer.h>
 #include <vulkan/render/VKRenderPass.h>
@@ -20,6 +21,7 @@ namespace neon::vulkan {
 
     void VKRender::render(
             Room* room,
+            const std::vector<std::shared_ptr<Material>>& sortedMaterials,
             const std::vector<RenderPassStrategy>& strategies) const {
         for (const auto& strategy: strategies) {
             auto& frameBuffer = strategy.frameBuffer->getImplementation();
@@ -69,7 +71,7 @@ namespace neon::vulkan {
             scissor.extent = {frameBuffer.getWidth(), frameBuffer.getHeight()};
             vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
-            strategy.strategy(room, strategy.frameBuffer);
+            strategy.strategy(room, sortedMaterials, strategy.frameBuffer);
 
             if (strategy.frameBuffer->getImplementation().renderImGui()) {
                 ImGui::Render();

@@ -27,6 +27,8 @@ constexpr int32_t HEIGHT = 600;
 
 CMRC_DECLARE(shaders);
 
+using namespace neon;
+
 /**
  * Creates a shader program.
  * @param room the application.
@@ -259,9 +261,9 @@ void loadModels(Application* application, Room* room,
     auto material = std::make_shared<Material>(
             application, "cubeMaterial", cubeMaterialInfo);
 
-    material->getUniformBuffer().setTexture(0, cubeAlbedo);
-    material->getUniformBuffer().setTexture(1, cubeNormal);
-    material->getUniformBuffer().setTexture(2, cubeParallax);
+    material->getUniformBuffer()->setTexture(0, cubeAlbedo);
+    material->getUniformBuffer()->setTexture(1, cubeNormal);
+    material->getUniformBuffer()->setTexture(2, cubeParallax);
 
     auto cubeModel = model_utils::createCubeModel<TestVertex>(
             room, material);

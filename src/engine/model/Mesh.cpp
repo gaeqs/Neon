@@ -19,13 +19,13 @@ namespace neon {
                             modifiableVertices, modifiableIndices),
             _materials() {
         if (material != nullptr) {
-            _materials.push_back(std::move(material));
+            _materials.insert(std::move(material));
         }
     }
 
     Mesh::Mesh(Application* application,
                const std::string& name,
-               std::vector<std::shared_ptr<Material>> materials,
+               std::unordered_set<std::shared_ptr<Material>> materials,
                bool modifiableVertices,
                bool modifiableIndices) :
             Asset(typeid(Mesh), name),
@@ -44,18 +44,18 @@ namespace neon {
         return _implementation;
     }
 
-    [[nodiscard]] const std::vector<std::shared_ptr<Material>>&
+    [[nodiscard]] const std::unordered_set<std::shared_ptr<Material>>&
     Mesh::getMaterials() const {
         return _materials;
     }
 
-    std::vector<std::shared_ptr<Material>>& Mesh::getMaterials() {
+    std::unordered_set<std::shared_ptr<Material>>& Mesh::getMaterials() {
         return _materials;
     }
 
     void Mesh::setMaterial(const std::shared_ptr<Material>& material) {
         _materials.clear();
-        _materials.push_back(material);
+        _materials.insert(material);
     }
 
     bool Mesh::setVertices(const void* data, size_t length) const {

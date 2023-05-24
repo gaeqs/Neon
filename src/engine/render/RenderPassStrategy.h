@@ -13,18 +13,24 @@ namespace neon {
 
     class FrameBuffer;
 
+    class Material;
+
     struct RenderPassStrategy {
 
         std::shared_ptr<FrameBuffer> frameBuffer;
-        std::function<void(Room*, std::shared_ptr<FrameBuffer>)> strategy;
+        std::function<void(Room*, const std::vector<std::shared_ptr<Material>>&,
+                           std::shared_ptr<FrameBuffer>)> strategy;
 
         RenderPassStrategy(
                 const std::shared_ptr<FrameBuffer>& _frameBuffer,
-                const std::function<void(Room*, std::shared_ptr<FrameBuffer>)>&
-                _strategy);
+                const std::function<void(
+                        Room*,
+                        const std::vector<std::shared_ptr<Material>>&,
+                        std::shared_ptr<FrameBuffer>)>& _strategy);
 
         static void defaultStrategy(
                 Room* room,
+                const std::vector<std::shared_ptr<Material>>& sortedMaterials,
                 const std::shared_ptr<FrameBuffer>& target);
     };
 }

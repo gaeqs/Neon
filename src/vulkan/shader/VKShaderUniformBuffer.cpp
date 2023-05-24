@@ -6,6 +6,7 @@
 
 #include <engine/shader/ShaderUniformDescriptor.h>
 #include <vulkan/buffer/StagingBuffer.h>
+#include <engine/render/Texture.h>
 #include <cstring>
 #include <utility>
 

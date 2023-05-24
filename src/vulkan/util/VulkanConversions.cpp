@@ -18,6 +18,10 @@ uint32_t vc::pixelSize(const TextureFormat& format) {
             return 12;
         case TextureFormat::R32FG32FB32FA32F:
             return 16;
+        case TextureFormat::R8:
+            return 1;
+        case TextureFormat::R8G8:
+            return 2;
         case TextureFormat::R8G8B8:
         case TextureFormat::B8G8R8:
             return 3;
@@ -40,6 +44,10 @@ uint32_t vc::pixelSize(const TextureFormat& format) {
 
 VkFormat vc::vkFormat(const TextureFormat& format) {
     switch (format) {
+        case TextureFormat::R8:
+            return VK_FORMAT_R8_UNORM;
+        case TextureFormat::R8G8:
+            return VK_FORMAT_R8G8_UNORM;
         case TextureFormat::R8G8B8:
             return VK_FORMAT_R8G8B8_UNORM;
         case TextureFormat::B8G8R8:

@@ -28,6 +28,10 @@ cmrc_add_resource_library(
         shader/point_light.frag
         shader/flash_light.vert
         shader/flash_light.frag
+        shader/ssao.vert
+        shader/ssao.frag
+        shader/ssao_blur.vert
+        shader/ssao_blur.frag
 )
 
 cmrc_add_resource_library(

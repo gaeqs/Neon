@@ -9,8 +9,10 @@
 
 struct GlobalParameters {
     glm::mat4 view;
+    glm::mat4 projection;
     glm::mat4 projectionView;
     glm::mat4 inverseProjection;
+    glm::vec2 screenSize;
     float near;
     float far;
     float metallic;
@@ -22,6 +24,8 @@ class GlobalParametersUpdaterComponent : public neon::Component {
     float metallic = 0.0f;
     float roughness = 0.0f;
 
+    bool useSSAO = true;
+
 public:
 
     ~GlobalParametersUpdaterComponent() override;
@@ -31,6 +35,8 @@ public:
     void onUpdate(float deltaTime) override;
 
     void drawEditor() override;
+
+    void onKey(const neon::KeyboardEvent &event) override;
 
 };
 REGISTER_COMPONENT(GlobalParametersUpdaterComponent,
