@@ -35,8 +35,13 @@ namespace neon::vulkan {
 
         void render(
                 Room* room,
+                const Render* render,
                 const std::vector<std::shared_ptr<Material>>& sortedMaterials,
-                const std::vector<RenderPassStrategy>& strategies) const;
+                const std::vector<std::shared_ptr<RenderPassStrategy>>& strategies) const;
+
+        void beginRenderPass(const std::shared_ptr<FrameBuffer>& fb) const;
+
+        void endRenderPass() const;
 
         void setupFrameBufferRecreation();
 

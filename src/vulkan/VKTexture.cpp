@@ -53,9 +53,6 @@ namespace neon::vulkan {
         auto pair = vulkan_util::createImage(
                 _vkApplication->getDevice(),
                 _vkApplication->getPhysicalDevice(),
-                VK_IMAGE_USAGE_TRANSFER_SRC_BIT |
-                VK_IMAGE_USAGE_TRANSFER_DST_BIT |
-                VK_IMAGE_USAGE_SAMPLED_BIT,
                 createInfo.image,
                 createInfo.imageView.viewType);
 

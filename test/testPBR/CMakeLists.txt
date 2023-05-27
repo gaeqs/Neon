@@ -7,7 +7,7 @@ set(
         LockMouseComponent.cpp
         LockMouseComponent.h
         ConstantRotationComponent.cpp
-        ConstantRotationComponent.h)
+        ConstantRotationComponent.h BloomRender.cpp BloomRender.h)
 
 cmrc_add_resource_library(
         shaders_pbr
@@ -32,6 +32,10 @@ cmrc_add_resource_library(
         shader/ssao.frag
         shader/ssao_blur.vert
         shader/ssao_blur.frag
+        shader/downsampling.vert
+        shader/downsampling.frag
+        shader/upsampling.vert
+        shader/upsampling.frag
 )
 
 cmrc_add_resource_library(

@@ -19,6 +19,7 @@
 #include "GlobalParametersUpdaterComponent.h"
 #include "LockMouseComponent.h"
 #include "ConstantRotationComponent.h"
+#include "BloomRender.h"
 
 constexpr int32_t WIDTH = 800;
 constexpr int32_t HEIGHT = 600;
@@ -191,6 +192,14 @@ std::shared_ptr<FrameBuffer> initRender(Room* room) {
                                      "screen",
                                      "screen.vert",
                                      "screen.frag");
+    auto downsampling = createShader(app,
+                                     "downsampling",
+                                     "downsampling.vert",
+                                     "downsampling.frag");
+    auto upsampling = createShader(app,
+                                   "upsampling",
+                                   "upsampling.vert",
+                                   "upsampling.frag");
 
     std::vector<TextureFormat> frameBufferFormats = {
             TextureFormat::R8G8B8A8, // ALBEDO
@@ -204,23 +213,35 @@ std::shared_ptr<FrameBuffer> initRender(Room* room) {
             app, frameBufferFormats, true);
     auto fpTextures = fpFrameBuffer->getTextures();
 
-    render->addRenderPass({fpFrameBuffer, RenderPassStrategy::defaultStrategy});
+    render->addRenderPass(
+            std::make_shared<DefaultRenderPassStrategy>(fpFrameBuffer));
 
     // SSAO
 
+    SamplerCreateInfo ssaoSamplerInfo;
+    ssaoSamplerInfo.anisotropy = false;
+    ssaoSamplerInfo.magnificationFilter = neon::TextureFilter::LINEAR;
+    ssaoSamplerInfo.minificationFilter = neon::TextureFilter::LINEAR;
+
     auto ssaoFrameBuffer = std::make_shared<SimpleFrameBuffer>(
-            app, std::vector<TextureFormat>{TextureFormat::R32F}, false
+            app, std::vector<TextureFormat>{TextureFormat::R32F}, false,
+            neon::SimpleFrameBuffer::defaultRecreationCondition,
+            neon::SimpleFrameBuffer::defaultRecreationParameters,
+            std::vector<SamplerCreateInfo>{ssaoSamplerInfo}
     );
 
     app->getRender()->addRenderPass(
-            {ssaoFrameBuffer, RenderPassStrategy::defaultStrategy});
+            std::make_shared<DefaultRenderPassStrategy>(ssaoFrameBuffer));
 
     auto ssaoBlurFrameBuffer = std::make_shared<SimpleFrameBuffer>(
-            app, std::vector<TextureFormat>{TextureFormat::R32F}, false
+            app, std::vector<TextureFormat>{TextureFormat::R32F}, false,
+            neon::SimpleFrameBuffer::defaultRecreationCondition,
+            neon::SimpleFrameBuffer::defaultRecreationParameters,
+            std::vector<SamplerCreateInfo>{ssaoSamplerInfo}
     );
 
     app->getRender()->addRenderPass(
-            {ssaoBlurFrameBuffer, RenderPassStrategy::defaultStrategy});
+            std::make_shared<DefaultRenderPassStrategy>(ssaoBlurFrameBuffer));
 
 
     auto ssaoMaterial = createSSAOMaterial(
@@ -247,15 +268,26 @@ std::shared_ptr<FrameBuffer> initRender(Room* room) {
             flashShader
     );
 
+    // BLOOM
+    auto screenModel = deferred_utils::createScreenModel(app, "Screen Model");
+
+    auto bloomRender = std::make_shared<BloomRender>(
+            app, downsampling, upsampling, albedo, screenModel, 3, 0.005f);
+
+    render->addRenderPass(bloomRender);
+
+    // SCREEN
+
     std::vector<TextureFormat> screenFormats = {TextureFormat::R8G8B8A8};
     auto screenFrameBuffer = std::make_shared<SimpleFrameBuffer>(
             app, screenFormats, false);
     render->addRenderPass(
-            {screenFrameBuffer, RenderPassStrategy::defaultStrategy});
+            std::make_shared<DefaultRenderPassStrategy>(screenFrameBuffer));
 
     auto textures = fpFrameBuffer->getTextures();
     textures.push_back(albedo);
     textures.push_back(ssaoBlurFrameBuffer->getTextures().at(0)); // SSAO
+    textures.push_back(bloomRender->getBloomTexture()); // BLOOM
 
     std::shared_ptr<Material> screenMaterial = Material::create(
             room->getApplication(), "Screen Model",
@@ -264,7 +296,6 @@ std::shared_ptr<FrameBuffer> initRender(Room* room) {
             InputDescription(0, InputRate::INSTANCE),
             {}, textures);
 
-    auto screenModel = deferred_utils::createScreenModel(app, "Screen Model");
     screenModel->addMaterial(screenMaterial);
     screenModel->addMaterial(ssaoMaterial);
     screenModel->addMaterial(ssaoBlurMaterial);
@@ -281,7 +312,7 @@ std::shared_ptr<FrameBuffer> initRender(Room* room) {
             room, false);
 
     render->addRenderPass(
-            {swapFrameBuffer, RenderPassStrategy::defaultStrategy});
+            std::make_shared<DefaultRenderPassStrategy>(swapFrameBuffer));
 
     return fpFrameBuffer;
 }

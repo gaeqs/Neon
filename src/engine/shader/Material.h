@@ -136,7 +136,7 @@ namespace neon {
          * can be negative.
          * @param priority the priority.
          */
-        [[nodiscard]] void setPriority(int32_t priority);
+        void setPriority(int32_t priority);
 
         /**
          * Returns the implementation of this material.

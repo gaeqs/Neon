@@ -51,11 +51,11 @@ namespace neon::vulkan {
         info.depth = 1;
         info.mipmaps = 1;
         info.layers = 1;
+        info.usages = {TextureUsage::DEPTH_STENCIL_ATTACHMENT};
 
         auto pair = vulkan_util::createImage(
                 _vkApplication->getDevice(),
                 _vkApplication->getPhysicalDevice(),
-                VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
                 info,
                 TextureViewType::NORMAL_2D,
                 _vkApplication->getDepthImageFormat()

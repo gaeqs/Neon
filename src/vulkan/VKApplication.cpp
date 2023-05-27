@@ -570,7 +570,7 @@ namespace neon::vulkan {
             }
         }
 
-        return VK_PRESENT_MODE_IMMEDIATE_KHR;
+        return VK_PRESENT_MODE_MAILBOX_KHR;
     }
 
     VkExtent2D

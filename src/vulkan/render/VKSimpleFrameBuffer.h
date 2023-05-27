@@ -55,11 +55,15 @@ namespace neon::vulkan {
 
         VKSimpleFrameBuffer(Application* application,
                             const std::vector<TextureFormat>& formats,
-                            bool depth);
+                            std::pair<uint32_t, uint32_t> extent,
+                            bool depth,
+                            const std::vector<SamplerCreateInfo>& sampleInfos);
 
         VKSimpleFrameBuffer(Application* application,
                             const std::vector<TextureFormat>& formats,
-                            std::shared_ptr<Texture> depthTexture);
+                            std::pair<uint32_t, uint32_t> extent,
+                            std::shared_ptr<Texture> depthTexture,
+                            const std::vector<SamplerCreateInfo>& sampleInfos);
 
         ~VKSimpleFrameBuffer() override;
 

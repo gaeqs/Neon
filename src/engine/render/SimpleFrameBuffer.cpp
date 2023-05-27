@@ -4,36 +4,51 @@
 
 #include "SimpleFrameBuffer.h"
 
+#include <engine/Application.h>
+
+#include <utility>
+
 namespace neon {
     bool SimpleFrameBuffer::defaultRecreationCondition(
             const SimpleFrameBuffer* fb) {
-        return fb->_implementation.defaultRecreationCondition();
+        auto vp = fb->_application->getViewport();
+        if (vp.x == 0 || vp.y == 0) return false;
+        return vp.x != fb->getWidth() || vp.y != fb->getHeight();
     }
 
     std::pair<uint32_t, uint32_t>
-    SimpleFrameBuffer::defaultRecreationParameters(
-            const SimpleFrameBuffer* fb) {
-        return fb->_implementation.defaultRecreationParameters();
+    SimpleFrameBuffer::defaultRecreationParameters(Application* app) {
+        return {app->getWidth(), app->getHeight()};
     }
 
     SimpleFrameBuffer::SimpleFrameBuffer(
             Application* application,
             const std::vector<TextureFormat>& colorFormats,
-            bool depth) :
-            _implementation(application, colorFormats, depth),
-            _recreationCondition(defaultRecreationCondition),
-            _recreationParameters(defaultRecreationParameters) {
+            bool depth,
+            Condition condition,
+            const Parameters& parameters,
+            const std::vector<SamplerCreateInfo>& sampleInfos) :
+            _application(application),
+            _implementation(application, colorFormats,
+                            parameters(application), depth, sampleInfos),
+            _recreationCondition(std::move(condition)),
+            _recreationParameters(parameters) {
 
     }
 
     SimpleFrameBuffer::SimpleFrameBuffer(
             Application* application,
             const std::vector<TextureFormat>& colorFormats,
-            std::shared_ptr<Texture> depthTexture) :
-            _implementation(application, colorFormats, depthTexture),
-            _recreationCondition(defaultRecreationCondition),
-            _recreationParameters(defaultRecreationParameters) {
-
+            std::shared_ptr<Texture> depthTexture,
+            Condition condition,
+            const Parameters& parameters,
+            const std::vector<SamplerCreateInfo>& sampleInfos) :
+            _application(application),
+            _implementation(application, colorFormats,
+                            parameters(application),
+                            std::move(depthTexture), sampleInfos),
+            _recreationCondition(std::move(condition)),
+            _recreationParameters(parameters) {
     }
 
     bool SimpleFrameBuffer::requiresRecreation() {
@@ -41,7 +56,7 @@ namespace neon {
     }
 
     void SimpleFrameBuffer::recreate() {
-        _implementation.recreate(_recreationParameters(this));
+        _implementation.recreate(_recreationParameters(_application));
     }
 
     FrameBuffer::Implementation& SimpleFrameBuffer::getImplementation() {
@@ -70,25 +85,23 @@ namespace neon {
         return _implementation.getHeight();
     }
 
-    const std::function<bool(const SimpleFrameBuffer*)>&
+    const SimpleFrameBuffer::Condition&
     SimpleFrameBuffer::getRecreationCondition() const {
         return _recreationCondition;
     }
 
-    void SimpleFrameBuffer::setRecreationCondition(const std::function<bool(
-            const SimpleFrameBuffer*)>& recreationCondition) {
+    void SimpleFrameBuffer::setRecreationCondition(
+            const Condition& recreationCondition) {
         _recreationCondition = recreationCondition;
     }
 
-    const std::function<std::pair<uint32_t, uint32_t>(
-            const SimpleFrameBuffer*)>&
+    const SimpleFrameBuffer::Parameters&
     SimpleFrameBuffer::getRecreationParameters() const {
         return _recreationParameters;
     }
 
     void SimpleFrameBuffer::setRecreationParameters(
-            const std::function<std::pair<uint32_t, uint32_t>(
-                    const SimpleFrameBuffer*)>& recreationParameters) {
+            const Parameters& recreationParameters) {
         _recreationParameters = recreationParameters;
     }
 }

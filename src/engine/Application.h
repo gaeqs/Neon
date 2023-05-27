@@ -9,6 +9,7 @@
 #include <cstdint>
 #include <string>
 #include <memory>
+#include <optional>
 
 #include <glm/glm.hpp>
 
@@ -58,6 +59,8 @@ namespace neon {
 
         std::shared_ptr<Render> _render;
 
+        std::optional<glm::ivec2> _forcedViewport;
+
     public:
 
         Application(int32_t width, int32_t height);
@@ -85,6 +88,12 @@ namespace neon {
         [[nodiscard]] int32_t getHeight() const;
 
         [[nodiscard]] float getAspectRatio() const;
+
+        [[nodiscard]] glm::ivec2 getViewport() const;
+
+        void forceViewport(glm::ivec2 viewport);
+
+        void removeForcedViewport();
 
         [[nodiscard]] const std::shared_ptr<Render>& getRender() const;
 

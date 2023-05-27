@@ -35,7 +35,8 @@ namespace neon {
         return _implementation;
     }
 
-    void Render::addRenderPass(const RenderPassStrategy& strategy) {
+    void Render::addRenderPass(
+            const std::shared_ptr<RenderPassStrategy>& strategy) {
         _strategies.push_back(strategy);
     }
 
@@ -76,28 +77,29 @@ namespace neon {
             queue.pop();
         }
 
-        _implementation.render(room, vector, _strategies);
+        _implementation.render(room, this, vector, _strategies);
     }
 
     void Render::checkFrameBufferRecreationConditions() {
         bool first = true;
         for (const auto& item: _strategies) {
-            if (item.frameBuffer->requiresRecreation()) {
+            if (item->requiresRecreation()) {
                 if (first) {
                     _implementation.setupFrameBufferRecreation();
                     first = false;
                 }
-                item.frameBuffer->recreate();
+                item->recreate();
             }
         }
     }
 
-    size_t Render::getPassesAmount() const {
+    size_t Render::getStrategyAmount() const {
         return _strategies.size();
     }
 
-    std::shared_ptr<FrameBuffer> Render::getFrameBuffer(size_t index) {
-        return _strategies[index].frameBuffer;
+    const std::vector<std::shared_ptr<RenderPassStrategy>>&
+    Render::getStrategies() const {
+        return _strategies;
     }
 
     const std::shared_ptr<ShaderUniformDescriptor>&
@@ -111,5 +113,13 @@ namespace neon {
 
     ShaderUniformBuffer& Render::getGlobalUniformBuffer() {
         return _globalUniformBuffer;
+    }
+
+    void Render::beginRenderPass(const std::shared_ptr<FrameBuffer>& fb) const {
+        _implementation.beginRenderPass(fb);
+    }
+
+    void Render::endRenderPass() const {
+        _implementation.endRenderPass();
     }
 }

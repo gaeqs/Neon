@@ -27,14 +27,13 @@ namespace neon::vulkan {
         info.depth = 1;
         info.mipmaps = 1;
         info.layers = 1;
+        info.usages = {TextureUsage::COLOR_ATTACHMENT, TextureUsage::SAMPLING};
 
         for (const auto& format: _formats) {
             info.format = format;
             auto [image, memory] = vulkan_util::createImage(
                     _vkApplication->getDevice(),
                     _vkApplication->getPhysicalDevice(),
-                    VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT |
-                    VK_IMAGE_USAGE_SAMPLED_BIT,
                     info,
                     TextureViewType::NORMAL_2D
             );
@@ -56,11 +55,11 @@ namespace neon::vulkan {
         // Add depth texture
         if (!_depth) return;
         if (overrideDepth == nullptr) {
+            info.usages = {TextureUsage::DEPTH_STENCIL_ATTACHMENT,
+                           TextureUsage::SAMPLING};
             auto [image, memory] = vulkan_util::createImage(
                     _vkApplication->getDevice(),
                     _vkApplication->getPhysicalDevice(),
-                    VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT
-                    | VK_IMAGE_USAGE_SAMPLED_BIT,
                     info,
                     TextureViewType::NORMAL_2D,
                     _vkApplication->getDepthImageFormat() // Overrides info's format.
@@ -137,7 +136,9 @@ namespace neon::vulkan {
     VKSimpleFrameBuffer::VKSimpleFrameBuffer(
             Application* application,
             const std::vector<TextureFormat>& formats,
-            bool depth) :
+            std::pair<uint32_t, uint32_t> extent,
+            bool depth,
+            const std::vector<SamplerCreateInfo>& sampleInfos) :
             VKFrameBuffer(),
             _vkApplication(&application->getImplementation()),
             _frameBuffer(VK_NULL_HANDLE),
@@ -148,7 +149,7 @@ namespace neon::vulkan {
             _textures(),
             _imGuiDescriptors(),
             _formats(formats),
-            _extent(_vkApplication->getSwapChainExtent()),
+            _extent({extent.first, extent.second}),
             _renderPass(application,
                         conversions::vkFormat(formats), depth, false,
                         _vkApplication->getDepthImageFormat()),
@@ -177,7 +178,9 @@ namespace neon::vulkan {
                     static_cast<int32_t>(_extent.width),
                     static_cast<int32_t>(_extent.height),
                     1,
-                    info
+                    i >= _formats.size() ? TextureFormat::DEPTH24STENCIL8
+                                         : _formats[i],
+                    i >= sampleInfos.size() ? info : sampleInfos[i]
             );
 
             _textures.push_back(texture);
@@ -187,7 +190,9 @@ namespace neon::vulkan {
     VKSimpleFrameBuffer::VKSimpleFrameBuffer(
             Application* application,
             const std::vector<TextureFormat>& formats,
-            std::shared_ptr<Texture> depthTexture) :
+            std::pair<uint32_t, uint32_t> extent,
+            std::shared_ptr<Texture> depthTexture,
+            const std::vector<SamplerCreateInfo>& sampleInfos) :
             VKFrameBuffer(),
             _vkApplication(&application->getImplementation()),
             _frameBuffer(VK_NULL_HANDLE),
@@ -198,7 +203,7 @@ namespace neon::vulkan {
             _textures(),
             _imGuiDescriptors(),
             _formats(formats),
-            _extent(_vkApplication->getSwapChainExtent()),
+            _extent({extent.first, extent.second}),
             _renderPass(application,
                         conversions::vkFormat(formats),
                         depthTexture != nullptr, false,
@@ -230,7 +235,8 @@ namespace neon::vulkan {
                     static_cast<int32_t>(_extent.width),
                     static_cast<int32_t>(_extent.height),
                     1,
-                    info
+                    _formats[i],
+                    i >= sampleInfos.size() ? info : sampleInfos[i]
             );
 
             _textures.push_back(texture);

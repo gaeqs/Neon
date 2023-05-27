@@ -19,7 +19,8 @@ namespace neon {
                      const void* data,
                      const TextureCreateInfo& createInfo) :
             Asset(typeid(Texture), std::move(name)),
-            _implementation(application, data, createInfo) {
+            _implementation(application, data, createInfo),
+            _format(createInfo.image.format) {
     }
 
 #ifdef USE_VULKAN
@@ -31,10 +32,12 @@ namespace neon {
                      VkImageView imageView,
                      VkImageLayout layout,
                      uint32_t width, uint32_t height, uint32_t depth,
+                     TextureFormat format,
                      const SamplerCreateInfo& createInfo) :
             Asset(typeid(Texture), std::move(name)),
             _implementation(application, image, memory, imageView, layout,
-                            width, height, depth, createInfo) {
+                            width, height, depth, createInfo),
+            _format(format) {
     }
 
 #endif
@@ -57,6 +60,10 @@ namespace neon {
 
     uint32_t Texture::getDepth() const {
         return _implementation.getDepth();
+    }
+
+    TextureFormat Texture::getFormat() const {
+        return _format;
     }
 
     void Texture::updateData(const char* data,
@@ -176,6 +183,7 @@ namespace neon {
         return image;
     }
 
+
     std::unique_ptr<Texture> Texture::createTextureFromFile(
             Application* application,
             std::string name,
@@ -203,7 +211,6 @@ namespace neon {
         stbi_image_free(ptr);
         return image;
     }
-
 
     std::unique_ptr<Texture> Texture::createTextureFromFile(
             Application* application,

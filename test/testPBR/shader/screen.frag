@@ -28,6 +28,7 @@ layout (set = 1, binding = 2) uniform sampler2D normalZTexture;
 layout (set = 1, binding = 3) uniform sampler2D depthTexture;
 layout (set = 1, binding = 4) uniform sampler2D lightColorTexture;
 layout (set = 1, binding = 5) uniform sampler2D ssaoTexture;
+layout (set = 1, binding = 6) uniform sampler2D bloomTexture;
 
 layout (location = 0) out vec4 outColor;
 
@@ -46,7 +47,10 @@ void main() {
         // Finish PBR process
         vec3 albedo = texture(diffuseTexture, fragTexCoords).rgb;
         vec3 color = texture(lightColorTexture, fragTexCoords).rgb;
+        vec3 bloom = texture(bloomTexture, fragTexCoords).rgb;
         float ssao = texture(ssaoTexture, fragTexCoords).r;
+
+        color = mix(color, bloom, 0.04f);
 
         vec3 ambient = 0.03f * albedo;
         color += ambient;

@@ -43,7 +43,6 @@ namespace neon::vulkan::vulkan_util {
     std::pair<VkImage, VkDeviceMemory> createImage(
             VkDevice device,
             VkPhysicalDevice physicalDevice,
-            VkImageUsageFlags usage,
             const ImageCreateInfo& info,
             TextureViewType viewType,
             VkFormat override = VK_FORMAT_UNDEFINED);

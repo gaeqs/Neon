@@ -7,29 +7,39 @@
 #include <engine/model/Model.h>
 #include <engine/structure/Room.h>
 #include <engine/render/FrameBuffer.h>
+#include <engine/render/Render.h>
 #include <engine/shader/Material.h>
 
 namespace neon {
-    RenderPassStrategy::RenderPassStrategy(
-            const std::shared_ptr<FrameBuffer>& _frameBuffer,
-            const std::function<void(
-                    Room*,
-                    const std::vector<std::shared_ptr<Material>>&,
-                    std::shared_ptr<FrameBuffer>)>& _strategy) :
-            frameBuffer(_frameBuffer),
-            strategy(_strategy) {
 
+    DefaultRenderPassStrategy::DefaultRenderPassStrategy(
+            const std::shared_ptr<FrameBuffer>& frameBuffer)
+            : _frameBuffer(frameBuffer) {}
+
+    const std::shared_ptr<FrameBuffer>&
+    DefaultRenderPassStrategy::getFrameBuffer() const {
+        return _frameBuffer;
     }
 
-    void RenderPassStrategy::defaultStrategy(
+    void DefaultRenderPassStrategy::render(
             Room* room,
-            const std::vector<std::shared_ptr<Material>>& sortedMaterials,
-            const std::shared_ptr<FrameBuffer>& target) {
-        for (const auto& material: sortedMaterials) {
-            if (material->getTarget() != target) continue;
+            const Render* render,
+            const std::vector<std::shared_ptr<Material>>& materials) const {
+        render->beginRenderPass(_frameBuffer);
+        for (const auto& material: materials) {
+            if (material->getTarget() != _frameBuffer) continue;
             for (const auto& [model, amount]: room->usedModels()) {
                 model->draw(material);
             }
         }
+        render->endRenderPass();
+    }
+
+    bool DefaultRenderPassStrategy::requiresRecreation() {
+        return _frameBuffer->requiresRecreation();
+    }
+
+    void DefaultRenderPassStrategy::recreate() {
+        _frameBuffer->recreate();
     }
 }

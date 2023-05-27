@@ -89,7 +89,6 @@ namespace neon::vulkan::vulkan_util {
     std::pair<VkImage, VkDeviceMemory> createImage(
             VkDevice device,
             VkPhysicalDevice physicalDevice,
-            VkImageUsageFlags usage,
             const ImageCreateInfo& info,
             TextureViewType viewType,
             VkFormat override) {
@@ -112,9 +111,14 @@ namespace neon::vulkan::vulkan_util {
             imageInfo.format = override;
         }
 
+        VkImageUsageFlags usages = 0;
+        for (const auto& usage: info.usages) {
+            usages |= static_cast<VkImageUsageFlagBits>(usage);
+        }
+
         imageInfo.tiling = vc::vkImageTiling(info.tiling);
         imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-        imageInfo.usage = usage;
+        imageInfo.usage = usages;
         imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
         imageInfo.samples = vc::vkSampleCountFlagBits(info.samples);
 

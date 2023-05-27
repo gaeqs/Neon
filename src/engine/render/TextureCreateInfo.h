@@ -48,6 +48,26 @@ namespace neon {
         THREE
     };
 
+    enum class TextureUsage {
+        TRANSFER_SOURCE = 0x00000001,
+        TRANSFER_DESTINY = 0x00000002,
+        SAMPLING = 0x00000004,
+        STORAGE = 0x00000008,
+        COLOR_ATTACHMENT = 0x00000010,
+        DEPTH_STENCIL_ATTACHMENT = 0x00000020,
+        TRANSFER_ATTACHMENT = 0x00000040,
+        INPUT_ATTACHMENT = 0x00000080,
+        VIDEO_DECODE_DESTINY = 0x00000400,
+        VIDEO_DECODE_SOURCE = 0x00000800,
+        VIDEO_DECODE_DPB = 0x00001000,
+        FRAGMENT_DESTINY_MAP = 0x00000200,
+        FRAGMENT_SHADING_RATE_ATTACHMENT = 0x00000100,
+        ATTACHMENT_FEEDBACK_LOOP = 0x00080000,
+        INVOCATION_MARK = 0x00040000,
+        SAMPLE_WEIGHT = 0x00100000,
+        SAMPLE_BLOCK_MATCH = 0x00200000,
+    };
+
     enum class TextureViewType {
         NORMAL_1D,
         NORMAL_2D,
@@ -88,7 +108,6 @@ namespace neon {
         NEAREST,
         LINEAR
     };
-
 
     struct ImageCreateInfo {
         /**
@@ -142,6 +161,9 @@ namespace neon {
          */
         uint32_t mipmaps = 0;
 
+        std::vector<TextureUsage> usages = {TextureUsage::TRANSFER_SOURCE,
+                                            TextureUsage::TRANSFER_DESTINY,
+                                            TextureUsage::SAMPLING};
 
     };
 
