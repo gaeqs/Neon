@@ -132,11 +132,9 @@ namespace neon::deferred_utils {
             flashModel->addMaterial(material);
         }
 
-        room->newGameObject()->newComponent<LightSystem>(
-                directionalModel,
-                pointModel,
-                flashModel
-        );
+        auto go = room->newGameObject();
+        go->setName("Light system");
+        go->newComponent<LightSystem>(directionalModel, pointModel, flashModel);
 
         return frameBuffer->getTextures().front();
     }

@@ -26,8 +26,6 @@ vec3 getWorldDir (int layer, vec2 coords) {
     }
 }
 
-
-
 void main () {
     for (int i = 0; i < 6; i++) {
         gl_Layer = i;

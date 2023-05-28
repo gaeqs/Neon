@@ -86,6 +86,7 @@ void main() {
         color = ambient + mix(lo, bloom, BLOOM_INTENSITY);
     }
 
-    color = pow(color / (color + 1.0f), vec3(1.0f / 2.2f));
+    color = color / (color + 1.0f);
+    // We don't need to do gamma correction. The textures are already fixed.
     outColor = vec4(color, 1.0f);//vec4(normal, 1.0f);
 }

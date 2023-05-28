@@ -205,20 +205,23 @@ std::shared_ptr<FrameBuffer> initRender(
                                    "upsampling.vert",
                                    "upsampling.frag");
 
+    // G BUFFER
+
     std::vector<FrameBufferTextureCreateInfo> frameBufferFormats = {
             TextureFormat::R16FG16FB16FA16F, // ALBEDO
             TextureFormat::R16FG16F, // NORMAL XY
             TextureFormat::R16FG16F // METALLIC / ROUGHNESS
     };
 
-    // G BUFFER
-
-    auto fpFrameBuffer = std::make_shared<SimpleFrameBuffer>(
-            app, frameBufferFormats, true);
-    auto fpTextures = fpFrameBuffer->getTextures();
+    auto fpFrameBuffer = std::make_shared<SimpleFrameBuffer>(app,
+                                                             frameBufferFormats, /*depth buffer?*/
+                                                             true);
 
     render->addRenderPass(
             std::make_shared<DefaultRenderPassStrategy>(fpFrameBuffer));
+
+    // Out textures. You can use these in other frame buffers.
+    auto fpTextures = fpFrameBuffer->getTextures();
 
     // SSAO
 
@@ -305,13 +308,9 @@ std::shared_ptr<FrameBuffer> initRender(
     screenModel->addMaterial(ssaoMaterial);
     screenModel->addMaterial(ssaoBlurMaterial);
 
-    auto instance = screenModel->createInstance();
-    if (!instance.isOk()) {
-        throw std::runtime_error(instance.getError());
-    }
-    room->markUsingModel(screenModel.get());
-
-    app->getAssets().store(screenModel, neon::AssetStorageMode::PERMANENT);
+    auto screenModelGO = room->newGameObject();
+    screenModelGO->setName("Screen Model");
+    screenModelGO->newComponent<GraphicComponent>(screenModel);
 
     auto swapFrameBuffer = std::make_shared<SwapChainFrameBuffer>(
             room, false);
@@ -334,7 +333,7 @@ void loadModels(Application* application, Room* room,
                                        "parallax", "deferred.vert",
                                        "deferred_parallax.frag");
 
-    // This shader only writer on the depth buffer.
+    // This shader only writes on the depth buffer.
     // Allowing to precompute the depth buffer before
     // writing anything to the G-Buffer.
     auto shaderDepth = createShader(application,
@@ -371,10 +370,7 @@ void loadModels(Application* application, Room* room,
     }
 
     auto sansModel = sansResult.model;
-
-    for (int i = 0; i < sansModel->getMeshesAmount(); ++i) {
-        sansModel->getMesh(i)->getMaterials().insert(depthMaterial);
-    }
+    sansModel->addMaterial(depthMaterial);
 
     constexpr int AMOUNT = 1024 * 1;
     int q = static_cast<int>(std::sqrt(AMOUNT));
@@ -414,10 +410,7 @@ void loadModels(Application* application, Room* room,
     }
 
     auto zeppeliModel = zeppeliResult.model;
-
-    for (int i = 0; i < zeppeliModel->getMeshesAmount(); ++i) {
-        zeppeliModel->getMesh(i)->getMaterials().insert(depthMaterial);
-    }
+    zeppeliModel->addMaterial(depthMaterial);
 
     auto zeppeli = room->newGameObject();
     zeppeli->newComponent<GraphicComponent>(zeppeliModel);
@@ -510,7 +503,6 @@ std::shared_ptr<Room> getTestRoom(Application* application) {
     cameraMovement->setSpeed(10.0f);
 
     auto parameterUpdater = room->newGameObject();
-    parameterUpdater->newComponent<GlobalParametersUpdaterComponent>();
     parameterUpdater->newComponent<LockMouseComponent>(cameraMovement);
     parameterUpdater->newComponent<DockSpaceComponent>();
     parameterUpdater->newComponent<ViewportComponent>();
@@ -519,6 +511,10 @@ std::shared_ptr<Room> getTestRoom(Application* application) {
     parameterUpdater->newComponent<DebugOverlayComponent>(false, 100);
     parameterUpdater->newComponent<ComputeIrradianceSkyboxComponent>(
             skybox, screenModel);
+
+    auto globalParameters = room->newGameObject();
+    globalParameters->newComponent<GlobalParametersUpdaterComponent>();
+    globalParameters->setName("Global parameters");
 
     auto directionalLight = room->newGameObject();
     directionalLight->newComponent<DirectionalLight>();
