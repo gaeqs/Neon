@@ -54,7 +54,8 @@ namespace neon::deferred_utils {
 
         auto* app = room->getApplication();
 
-        std::vector<TextureFormat> outputFormatVector = {outputFormat};
+        std::vector<FrameBufferTextureCreateInfo> outputFormatVector =
+                {outputFormat};
 
         std::shared_ptr<Model> directionalModel = nullptr;
         std::shared_ptr<Model> pointModel = nullptr;

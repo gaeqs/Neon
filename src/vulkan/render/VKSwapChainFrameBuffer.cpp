@@ -144,6 +144,7 @@ namespace neon::vulkan {
             _renderPass(room->getApplication(),
                         {_vkApplication->getSwapChainImageFormat()},
                         depth, true, _vkApplication->getDepthImageFormat()),
+            _swapChainCount(_vkApplication->getSwapChainCount()),
             _depth(depth) {
         fetchSwapChainImages();
         createSwapChainImageViews();
@@ -199,6 +200,7 @@ namespace neon::vulkan {
         }
 
         createFrameBuffers();
+        _swapChainCount = _vkApplication->getSwapChainCount();
     }
 
     uint32_t VKSwapChainFrameBuffer::getColorAttachmentAmount() const {
@@ -234,8 +236,6 @@ namespace neon::vulkan {
     }
 
     bool VKSwapChainFrameBuffer::requiresRecreation() {
-        auto& extent = _vkApplication->getSwapChainExtent();
-        if (extent.width == 0 || extent.height == 0) return false;
-        return extent.width != getWidth() || extent.height != getHeight();
+        return _swapChainCount != _vkApplication->getSwapChainCount();
     }
 }

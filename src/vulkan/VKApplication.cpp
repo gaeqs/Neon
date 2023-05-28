@@ -24,8 +24,13 @@ namespace neon::vulkan {
             void* pUserData) {
 
         if (messageSeverity >=
-            VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT) {
+            VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT) {
             std::cerr << "[VULKAN ERROR]: " << pCallbackData->pMessage
+                      << std::endl;
+            std::cerr << "------------------------------" << std::endl;
+        } else if (messageSeverity >=
+                   VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT) {
+            std::cerr << "[VULKAN WARNING]: " << pCallbackData->pMessage
                       << std::endl;
             std::cerr << "------------------------------" << std::endl;
         } else {
@@ -83,45 +88,62 @@ namespace neon::vulkan {
         initImGui();
     }
 
-    bool VKApplication::preUpdate() {
-        vkWaitForFences(_device, 1, &_inFlightFences[_currentFrame], VK_TRUE,
-                        UINT64_MAX);
-
-        if (_framebufferResized) {
-            _framebufferResized = false;
-            recreateSwapChain();
-            return false;
+    bool VKApplication::preUpdate(Profiler& profiler) {
+        {
+            DEBUG_PROFILE_ID(profiler, wait, "Wait for GPU");
+            vkWaitForFences(_device, 1, &_inFlightFences[_currentFrame],
+                            VK_TRUE,
+                            UINT64_MAX);
         }
 
         auto& render = _room->getApplication()->getRender();
-        render->checkFrameBufferRecreationConditions();
+        {
+            DEBUG_PROFILE_ID(profiler, recreation, "FB Recreation");
+            render->checkFrameBufferRecreationConditions();
+        }
 
-        VkResult result = vkAcquireNextImageKHR(
-                _device, _swapChain, UINT64_MAX,
-                _imageAvailableSemaphores[_currentFrame], VK_NULL_HANDLE,
-                &_imageIndex);
+        VkResult result;
+        {
+            DEBUG_PROFILE_ID(profiler, adquireImage, "Image Acquisition");
+            result = vkAcquireNextImageKHR(
+                    _device, _swapChain, UINT64_MAX,
+                    _imageAvailableSemaphores[_currentFrame], VK_NULL_HANDLE,
+                    &_imageIndex);
+        }
 
         if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR) {
-            recreateSwapChain();
-            render->checkFrameBufferRecreationConditions();
+            {
+                DEBUG_PROFILE_ID(profiler, recreation2, "SC/FB Recreation");
+                recreateSwapChain();
+                render->checkFrameBufferRecreationConditions();
+            }
             return false;
         } else if (result != VK_SUCCESS) {
             throw std::runtime_error("Failed to acquire swap chain image!");
         }
 
-        vkResetFences(_device, 1, &_inFlightFences[_currentFrame]);
+        {
+            DEBUG_PROFILE_ID(profiler, fence, "Fence");
+            vkResetFences(_device, 1, &_inFlightFences[_currentFrame]);
+        }
 
-        vkResetCommandBuffer(_commandBuffers[_currentFrame], 0);
+        {
+            DEBUG_PROFILE_ID(profiler, resetCB, "Reset Command Buffer");
+            vkResetCommandBuffer(_commandBuffers[_currentFrame], 0);
+        }
 
         VkCommandBufferBeginInfo beginInfo{};
         beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
         beginInfo.flags = 0; // Optional
         beginInfo.pInheritanceInfo = nullptr; // Optional
 
-        if (vkBeginCommandBuffer(_commandBuffers[_currentFrame], &beginInfo)
-            != VK_SUCCESS) {
-            throw std::runtime_error(
-                    "Failed to begin recording command buffer!");
+        {
+            DEBUG_PROFILE_ID(profiler, beginCB, "Begin Command Buffer");
+            if (vkBeginCommandBuffer(_commandBuffers[_currentFrame], &beginInfo)
+                != VK_SUCCESS) {
+                throw std::runtime_error(
+                        "Failed to begin recording command buffer!");
+            }
         }
 
         ImGui_ImplVulkan_NewFrame();
@@ -382,7 +404,8 @@ namespace neon::vulkan {
         return (!onlyDiscrete || deviceProperties.deviceType ==
                                  VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU) &&
                families.isComplete() && requiredExtensions.empty() &&
-               swapChainAdequate && supportedFeatures.samplerAnisotropy;
+               swapChainAdequate && supportedFeatures.samplerAnisotropy
+               && supportedFeatures.geometryShader;
     }
 
     VKQueueFamilyIndices
@@ -432,6 +455,7 @@ namespace neon::vulkan {
 
         VkPhysicalDeviceFeatures deviceFeatures{};
         deviceFeatures.samplerAnisotropy = VK_TRUE;
+        deviceFeatures.geometryShader = VK_TRUE;
 
         VkPhysicalDeviceVulkan12Features vulkan12Features{};
         vulkan12Features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES;
@@ -519,6 +543,7 @@ namespace neon::vulkan {
         }
 
         _depthImageFormat = depthFormat.value();
+        ++_swapChainCount;
     }
 
     VKSwapChainSupportDetails
@@ -565,12 +590,12 @@ namespace neon::vulkan {
     VkPresentModeKHR VKApplication::chooseSwapPresentMode(
             const std::vector<VkPresentModeKHR>& availableModes) {
         for (const auto& mode: availableModes) {
-            if (mode == VK_PRESENT_MODE_FIFO_KHR) {
+            if (mode == VK_PRESENT_MODE_IMMEDIATE_KHR) {
                 return mode;
             }
         }
 
-        return VK_PRESENT_MODE_MAILBOX_KHR;
+        return VK_PRESENT_MODE_IMMEDIATE_KHR;
     }
 
     VkExtent2D
@@ -689,6 +714,13 @@ namespace neon::vulkan {
     }
 
     void VKApplication::recreateSwapChain() {
+        int width = 0, height = 0;
+        glfwGetFramebufferSize(_window, &width, &height);
+        while (width == 0 || height == 0) {
+            glfwGetFramebufferSize(_window, &width, &height);
+            glfwWaitEvents();
+        }
+
         vkDeviceWaitIdle(_device);
         cleanupSwapChain();
         createSwapChain();
@@ -796,5 +828,9 @@ namespace neon::vulkan {
 
     void VKApplication::setRoom(const std::shared_ptr<Room>& room) {
         _room = room;
+    }
+
+    uint32_t VKApplication::getSwapChainCount() const {
+        return _swapChainCount;
     }
 }

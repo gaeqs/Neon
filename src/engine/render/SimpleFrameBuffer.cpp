@@ -18,19 +18,19 @@ namespace neon {
 
     std::pair<uint32_t, uint32_t>
     SimpleFrameBuffer::defaultRecreationParameters(Application* app) {
-        return {app->getWidth(), app->getHeight()};
+        auto vp = app->getViewport();
+        return {vp.x, vp.y};
     }
 
     SimpleFrameBuffer::SimpleFrameBuffer(
             Application* application,
-            const std::vector<TextureFormat>& colorFormats,
+            const std::vector<FrameBufferTextureCreateInfo>& textureInfos,
             bool depth,
             Condition condition,
-            const Parameters& parameters,
-            const std::vector<SamplerCreateInfo>& sampleInfos) :
+            const Parameters& parameters) :
             _application(application),
-            _implementation(application, colorFormats,
-                            parameters(application), depth, sampleInfos),
+            _implementation(application, textureInfos,
+                            parameters(application), depth),
             _recreationCondition(std::move(condition)),
             _recreationParameters(parameters) {
 
@@ -38,15 +38,14 @@ namespace neon {
 
     SimpleFrameBuffer::SimpleFrameBuffer(
             Application* application,
-            const std::vector<TextureFormat>& colorFormats,
+            const std::vector<FrameBufferTextureCreateInfo>& textureInfos,
             std::shared_ptr<Texture> depthTexture,
             Condition condition,
-            const Parameters& parameters,
-            const std::vector<SamplerCreateInfo>& sampleInfos) :
+            const Parameters& parameters) :
             _application(application),
-            _implementation(application, colorFormats,
+            _implementation(application, textureInfos,
                             parameters(application),
-                            std::move(depthTexture), sampleInfos),
+                            std::move(depthTexture)),
             _recreationCondition(std::move(condition)),
             _recreationParameters(parameters) {
     }

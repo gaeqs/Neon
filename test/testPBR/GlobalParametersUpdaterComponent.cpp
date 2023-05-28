@@ -28,10 +28,12 @@ void GlobalParametersUpdaterComponent::onUpdate(float deltaTime) {
                     screenSize,
                     camera.getFrustum().getNear(),
                     camera.getFrustum().getFar(),
-                    metallic,
-                    roughness
             });
-    buffer.uploadData<int32_t>(1, useSSAO ? 1 : 0);
+    buffer.uploadData<PBRParameters>(1, PBRParameters{
+            metallic,
+            roughness,
+            useSSAO ? 1u : 0u
+    });
 }
 
 void GlobalParametersUpdaterComponent::drawEditor() {

@@ -19,7 +19,8 @@ namespace neon {
             _specularColor(1.0f, 1.0f, 1.0f),
             _constantAttenuation(1.0f),
             _linearAttenuation(1.0f),
-            _quadraticAttenuation(1.0f) {
+            _quadraticAttenuation(1.0f),
+            _radiance(1.0f) {
     }
 
     PointLight::PointLight(const std::shared_ptr<Model>& model) :
@@ -29,7 +30,8 @@ namespace neon {
             _specularColor(1.0f, 1.0f, 1.0f),
             _constantAttenuation(1.0f),
             _linearAttenuation(1.0f),
-            _quadraticAttenuation(1.0f) {
+            _quadraticAttenuation(1.0f),
+            _radiance(1.0f) {
     }
 
     void PointLight::onStart() {
@@ -48,8 +50,8 @@ namespace neon {
     void PointLight::onLateUpdate(float deltaTime) {
         auto position = getGameObject()->getTransform().getPosition();
         _graphicComponent->uploadData(Data{
-                _diffuseColor,
-                _specularColor,
+                _diffuseColor * _radiance,
+                _specularColor * _radiance,
                 position,
                 _constantAttenuation,
                 _linearAttenuation,
@@ -71,6 +73,14 @@ namespace neon {
 
     void PointLight::setSpecularColor(const glm::vec3& specularColor) {
         _specularColor = specularColor;
+    }
+
+    float PointLight::getRadiance() const {
+        return _radiance;
+    }
+
+    void PointLight::setRadiance(float radiance) {
+        _radiance = radiance;
     }
 
     float PointLight::getConstantAttenuation() const {
@@ -117,6 +127,12 @@ namespace neon {
         ImGui::ColorPicker3(imGuiUId("##specular").c_str(), &_specularColor.x,
                             ImGuiColorEditFlags_NoSidePreview);
         ImGui::PopItemWidth();
+
+        ImGui::AlignTextToFramePadding();
+        ImGui::Text("Radiance:");
+        ImGui::SameLine();
+        ImGui::DragFloat(imGuiUId("##radiance").c_str(), &_radiance,
+                         0.5f, 0.0f, 1000.0f);
 
         ImGui::Separator();
 

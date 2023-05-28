@@ -29,21 +29,22 @@ namespace neon::vulkan {
         info.layers = 1;
         info.usages = {TextureUsage::COLOR_ATTACHMENT, TextureUsage::SAMPLING};
 
-        for (const auto& format: _formats) {
-            info.format = format;
+        for (const auto& createInfo: _createInfos) {
+            info.format = createInfo.format;
+            info.layers = createInfo.layers;
             auto [image, memory] = vulkan_util::createImage(
                     _vkApplication->getDevice(),
                     _vkApplication->getPhysicalDevice(),
                     info,
-                    TextureViewType::NORMAL_2D
+                    createInfo.imageView.viewType
             );
 
             auto view = vulkan_util::createImageView(
                     _vkApplication->getDevice(),
                     image,
-                    conversions::vkFormat(format),
+                    conversions::vkFormat(info.format),
                     VK_IMAGE_ASPECT_COLOR_BIT,
-                    ImageViewCreateInfo()
+                    createInfo.imageView
             );
 
             _images.push_back(image);
@@ -88,6 +89,15 @@ namespace neon::vulkan {
     }
 
     void VKSimpleFrameBuffer::createFrameBuffer() {
+
+        uint32_t layers = 1;
+        if (!_createInfos.empty()) {
+            layers = _createInfos[0].layers;
+        }
+        for (const auto& item: _createInfos) {
+            layers = std::min(layers, item.layers);
+        }
+
         VkFramebufferCreateInfo framebufferInfo{};
         framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
         framebufferInfo.renderPass = _renderPass.getRaw();
@@ -95,7 +105,7 @@ namespace neon::vulkan {
         framebufferInfo.pAttachments = _imageViews.data();
         framebufferInfo.width = _extent.width;
         framebufferInfo.height = _extent.height;
-        framebufferInfo.layers = 1;
+        framebufferInfo.layers = layers;
 
         if (vkCreateFramebuffer(
                 _vkApplication->getDevice(),
@@ -119,7 +129,10 @@ namespace neon::vulkan {
                   (VkDescriptorSet) VK_NULL_HANDLE);
 
         vkDestroyFramebuffer(d, _frameBuffer, nullptr);
+    }
 
+    void VKSimpleFrameBuffer::cleanupImages() {
+        auto d = _vkApplication->getDevice();
         for (auto& view: _imageViews) {
             vkDestroyImageView(d, view, nullptr);
         }
@@ -135,10 +148,9 @@ namespace neon::vulkan {
 
     VKSimpleFrameBuffer::VKSimpleFrameBuffer(
             Application* application,
-            const std::vector<TextureFormat>& formats,
+            const std::vector<FrameBufferTextureCreateInfo>& textureInfos,
             std::pair<uint32_t, uint32_t> extent,
-            bool depth,
-            const std::vector<SamplerCreateInfo>& sampleInfos) :
+            bool depth) :
             VKFrameBuffer(),
             _vkApplication(&application->getImplementation()),
             _frameBuffer(VK_NULL_HANDLE),
@@ -148,25 +160,45 @@ namespace neon::vulkan {
             _layouts(),
             _textures(),
             _imGuiDescriptors(),
-            _formats(formats),
+            _createInfos(textureInfos),
             _extent({extent.first, extent.second}),
             _renderPass(application,
-                        conversions::vkFormat(formats), depth, false,
+                        conversions::vkFormat(textureInfos), depth, false,
                         _vkApplication->getDepthImageFormat()),
             _depth(depth) {
 
-        _imGuiDescriptors.resize(formats.size(), VK_NULL_HANDLE);
+        _imGuiDescriptors.resize(textureInfos.size(), VK_NULL_HANDLE);
 
         createImages(nullptr);
         createFrameBuffer();
 
-        SamplerCreateInfo info;
-        info.anisotropy = false;
-        info.minificationFilter = TextureFilter::NEAREST;
-        info.magnificationFilter = TextureFilter::NEAREST;
+        uint32_t i = 0;
+        for (const auto& info: textureInfos) {
+            auto texture = std::make_shared<Texture>(
+                    application,
+                    std::to_string(i),
+                    _images[i],
+                    _memories[i],
+                    _imageViews[i],
+                    _layouts[i],
+                    static_cast<int32_t>(_extent.width),
+                    static_cast<int32_t>(_extent.height),
+                    1,
+                    info.format,
+                    info.sampler
+            );
+            ++i;
 
-        // Create the textures
-        for (uint32_t i = 0; i < _imageViews.size(); ++i) {
+            _textures.push_back(texture);
+        }
+
+        // Create depth texture
+        if (depth) {
+
+            SamplerCreateInfo info;
+            info.anisotropy = false;
+            info.minificationFilter = TextureFilter::NEAREST;
+            info.magnificationFilter = TextureFilter::NEAREST;
 
             auto texture = std::make_shared<Texture>(
                     application,
@@ -178,9 +210,8 @@ namespace neon::vulkan {
                     static_cast<int32_t>(_extent.width),
                     static_cast<int32_t>(_extent.height),
                     1,
-                    i >= _formats.size() ? TextureFormat::DEPTH24STENCIL8
-                                         : _formats[i],
-                    i >= sampleInfos.size() ? info : sampleInfos[i]
+                    TextureFormat::DEPTH24STENCIL8,
+                    info
             );
 
             _textures.push_back(texture);
@@ -189,10 +220,9 @@ namespace neon::vulkan {
 
     VKSimpleFrameBuffer::VKSimpleFrameBuffer(
             Application* application,
-            const std::vector<TextureFormat>& formats,
+            const std::vector<FrameBufferTextureCreateInfo>& textureInfos,
             std::pair<uint32_t, uint32_t> extent,
-            std::shared_ptr<Texture> depthTexture,
-            const std::vector<SamplerCreateInfo>& sampleInfos) :
+            std::shared_ptr<Texture> depthTexture) :
             VKFrameBuffer(),
             _vkApplication(&application->getImplementation()),
             _frameBuffer(VK_NULL_HANDLE),
@@ -202,15 +232,15 @@ namespace neon::vulkan {
             _layouts(),
             _textures(),
             _imGuiDescriptors(),
-            _formats(formats),
+            _createInfos(textureInfos),
             _extent({extent.first, extent.second}),
             _renderPass(application,
-                        conversions::vkFormat(formats),
+                        conversions::vkFormat(textureInfos),
                         depthTexture != nullptr, false,
                         _vkApplication->getDepthImageFormat()),
             _depth(depthTexture != nullptr) {
 
-        _imGuiDescriptors.resize(formats.size(), VK_NULL_HANDLE);
+        _imGuiDescriptors.resize(textureInfos.size(), VK_NULL_HANDLE);
 
         createImages(depthTexture);
         createFrameBuffer();
@@ -220,11 +250,8 @@ namespace neon::vulkan {
         info.minificationFilter = TextureFilter::NEAREST;
         info.magnificationFilter = TextureFilter::NEAREST;
 
-        int skip = depthTexture == nullptr ? 0 : 1;
-
-        // Create the textures
-        for (uint32_t i = 0; i < _imageViews.size() - skip; ++i) {
-
+        uint32_t i = 0;
+        for (const auto& info: textureInfos) {
             auto texture = std::make_shared<Texture>(
                     application,
                     std::to_string(i),
@@ -235,9 +262,10 @@ namespace neon::vulkan {
                     static_cast<int32_t>(_extent.width),
                     static_cast<int32_t>(_extent.height),
                     1,
-                    _formats[i],
-                    i >= sampleInfos.size() ? info : sampleInfos[i]
+                    info.format,
+                    info.sampler
             );
+            ++i;
 
             _textures.push_back(texture);
         }
@@ -249,6 +277,11 @@ namespace neon::vulkan {
 
     VKSimpleFrameBuffer::~VKSimpleFrameBuffer() {
         cleanup();
+        cleanupImages();
+        // DO NOT cleanup images. Images will be destroyed automatically
+        // when their respective textures are deleted.
+        // This allows textures to be used externally even if
+        // the frame buffer is destroyed.
     }
 
     VkFramebuffer VKSimpleFrameBuffer::getRaw() const {
@@ -263,6 +296,7 @@ namespace neon::vulkan {
         _extent = {size.first, size.second};
 
         cleanup();
+        cleanupImages();
         createImages(nullptr);
         createFrameBuffer();
 
@@ -271,17 +305,18 @@ namespace neon::vulkan {
             _textures[i]->getImplementation().changeExternalImageView(
                     static_cast<int32_t>(_extent.width),
                     static_cast<int32_t>(_extent.height),
+                    _images[i],
                     _imageViews[i]
             );
         }
     }
 
     uint32_t VKSimpleFrameBuffer::getColorAttachmentAmount() const {
-        return _formats.size();
+        return _createInfos.size();
     }
 
     std::vector<VkFormat> VKSimpleFrameBuffer::getColorFormats() const {
-        return conversions::vkFormat(_formats);
+        return conversions::vkFormat(_createInfos);
     }
 
     VkFormat VKSimpleFrameBuffer::getDepthFormat() const {

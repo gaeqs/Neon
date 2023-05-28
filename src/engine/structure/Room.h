@@ -6,6 +6,7 @@
 #define RVTRACKING_ROOM_H
 
 #include <unordered_map>
+#include <unordered_set>
 
 #include <engine/geometry/Camera.h>
 
@@ -40,6 +41,8 @@ namespace neon {
 
         std::unordered_map<Model*, uint32_t> _usedModels;
 
+        std::unordered_set<IdentifiableWrapper<Component>> _destroyLater;
+
     public:
 
         Room(const Room& other) = delete;
@@ -61,6 +64,8 @@ namespace neon {
         IdentifiableWrapper<GameObject> newGameObject();
 
         void destroyGameObject(IdentifiableWrapper<GameObject> gameObject);
+
+        void destroyComponentLater(IdentifiableWrapper<Component> component);
 
         size_t getGameObjectAmount();
 

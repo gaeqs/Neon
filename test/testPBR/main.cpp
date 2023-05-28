@@ -20,6 +20,7 @@
 #include "LockMouseComponent.h"
 #include "ConstantRotationComponent.h"
 #include "BloomRender.h"
+#include "ComputeIrradianceSkyboxComponent.h"
 
 constexpr int32_t WIDTH = 800;
 constexpr int32_t HEIGHT = 600;
@@ -153,15 +154,18 @@ std::shared_ptr<Material> createSSAOBlurMaterial(
     return material;
 }
 
-std::shared_ptr<FrameBuffer> initRender(Room* room) {
+std::shared_ptr<FrameBuffer> initRender(
+        Room* room,
+        const std::shared_ptr<Model>& screenModel) {
     auto* app = room->getApplication();
 
     // Bindings for the global uniforms.
     // In this application, we have a buffer of global parameters
-    // and a skybox.
+    // and two textures: a skybox and an irradiance skybox.
     std::vector<ShaderUniformBinding> globalBindings = {
             {UniformBindingType::BUFFER, sizeof(GlobalParameters)},
-            {UniformBindingType::BUFFER, sizeof(int32_t)},
+            {UniformBindingType::BUFFER, sizeof(PBRParameters)},
+            {UniformBindingType::IMAGE,  0},
             {UniformBindingType::IMAGE,  0}
     };
 
@@ -201,8 +205,8 @@ std::shared_ptr<FrameBuffer> initRender(Room* room) {
                                    "upsampling.vert",
                                    "upsampling.frag");
 
-    std::vector<TextureFormat> frameBufferFormats = {
-            TextureFormat::R8G8B8A8, // ALBEDO
+    std::vector<FrameBufferTextureCreateInfo> frameBufferFormats = {
+            TextureFormat::R16FG16FB16FA16F, // ALBEDO
             TextureFormat::R16FG16F, // NORMAL XY
             TextureFormat::R16FG16F // METALLIC / ROUGHNESS
     };
@@ -218,26 +222,28 @@ std::shared_ptr<FrameBuffer> initRender(Room* room) {
 
     // SSAO
 
-    SamplerCreateInfo ssaoSamplerInfo;
-    ssaoSamplerInfo.anisotropy = false;
-    ssaoSamplerInfo.magnificationFilter = neon::TextureFilter::LINEAR;
-    ssaoSamplerInfo.minificationFilter = neon::TextureFilter::LINEAR;
+    std::vector<FrameBufferTextureCreateInfo> ssaoTextureInfo{
+            TextureFormat::R32F
+    };
+    ssaoTextureInfo[0].sampler.anisotropy = false;
+    ssaoTextureInfo[0].sampler.magnificationFilter = TextureFilter::LINEAR;
+    ssaoTextureInfo[0].sampler.minificationFilter = TextureFilter::LINEAR;
 
     auto ssaoFrameBuffer = std::make_shared<SimpleFrameBuffer>(
-            app, std::vector<TextureFormat>{TextureFormat::R32F}, false,
+            app, ssaoTextureInfo,
+            false,
             neon::SimpleFrameBuffer::defaultRecreationCondition,
-            neon::SimpleFrameBuffer::defaultRecreationParameters,
-            std::vector<SamplerCreateInfo>{ssaoSamplerInfo}
+            neon::SimpleFrameBuffer::defaultRecreationParameters
     );
 
     app->getRender()->addRenderPass(
             std::make_shared<DefaultRenderPassStrategy>(ssaoFrameBuffer));
 
     auto ssaoBlurFrameBuffer = std::make_shared<SimpleFrameBuffer>(
-            app, std::vector<TextureFormat>{TextureFormat::R32F}, false,
+            app, ssaoTextureInfo,
+            false,
             neon::SimpleFrameBuffer::defaultRecreationCondition,
-            neon::SimpleFrameBuffer::defaultRecreationParameters,
-            std::vector<SamplerCreateInfo>{ssaoSamplerInfo}
+            neon::SimpleFrameBuffer::defaultRecreationParameters
     );
 
     app->getRender()->addRenderPass(
@@ -262,23 +268,22 @@ std::shared_ptr<FrameBuffer> initRender(Room* room) {
             room,
             render.get(),
             fpTextures,
-            TextureFormat::R32FG32FB32FA32F,
+            TextureFormat::R16FG16FB16FA16F,
             directionalShader,
             pointShader,
             flashShader
     );
 
     // BLOOM
-    auto screenModel = deferred_utils::createScreenModel(app, "Screen Model");
-
     auto bloomRender = std::make_shared<BloomRender>(
-            app, downsampling, upsampling, albedo, screenModel, 3, 0.005f);
+            app, downsampling, upsampling, albedo, screenModel, 3, 0.01f);
 
     render->addRenderPass(bloomRender);
 
     // SCREEN
 
-    std::vector<TextureFormat> screenFormats = {TextureFormat::R8G8B8A8};
+    std::vector<FrameBufferTextureCreateInfo> screenFormats = {
+            TextureFormat::R8G8B8A8};
     auto screenFrameBuffer = std::make_shared<SimpleFrameBuffer>(
             app, screenFormats, false);
     render->addRenderPass(
@@ -328,6 +333,10 @@ void loadModels(Application* application, Room* room,
     auto shaderParallax = createShader(application,
                                        "parallax", "deferred.vert",
                                        "deferred_parallax.frag");
+
+    // This shader only writer on the depth buffer.
+    // Allowing to precompute the depth buffer before
+    // writing anything to the G-Buffer.
     auto shaderDepth = createShader(application,
                                     "depth", "deferred_depth.vert",
                                     "deferred_depth.frag");
@@ -484,14 +493,17 @@ std::shared_ptr<Texture> loadSkybox(Room* room) {
 }
 
 std::shared_ptr<Room> getTestRoom(Application* application) {
+    auto screenModel = deferred_utils::createScreenModel(
+            application, "Screen Model");
 
     auto room = std::make_shared<Room>(application);
 
-    auto fpFrameBuffer = initRender(room.get());
+    auto fpFrameBuffer = initRender(room.get(), screenModel);
 
     auto skybox = loadSkybox(room.get());
-    application->getRender()->getGlobalUniformBuffer().setTexture(2, skybox);
-
+    auto& globalBuffer = application->getRender()->getGlobalUniformBuffer();
+    globalBuffer.setTexture(2, skybox);
+    globalBuffer.setTexture(3, skybox);
 
     auto cameraController = room->newGameObject();
     auto cameraMovement = cameraController->newComponent<CameraMovementComponent>();
@@ -505,6 +517,8 @@ std::shared_ptr<Room> getTestRoom(Application* application) {
     auto goExplorer = parameterUpdater->newComponent<GameObjectExplorerComponent>();
     parameterUpdater->newComponent<SceneTreeComponent>(goExplorer);
     parameterUpdater->newComponent<DebugOverlayComponent>(false, 100);
+    parameterUpdater->newComponent<ComputeIrradianceSkyboxComponent>(
+            skybox, screenModel);
 
     auto directionalLight = room->newGameObject();
     directionalLight->newComponent<DirectionalLight>();
@@ -519,6 +533,7 @@ std::shared_ptr<Room> getTestRoom(Application* application) {
     pointLight->setConstantAttenuation(0.01f);
     pointLight->setLinearAttenuation(0.2);
     pointLight->setQuadraticAttenuation(0.1);
+    pointLight->setRadiance(100.0f);
 
     auto flashLightGO = room->newGameObject();
     auto flashLight = flashLightGO->newComponent<FlashLight>();
@@ -529,6 +544,7 @@ std::shared_ptr<Room> getTestRoom(Application* application) {
     flashLight->setConstantAttenuation(0.01f);
     flashLight->setLinearAttenuation(0.2);
     flashLight->setQuadraticAttenuation(0.1);
+    flashLight->setRadiance(100.0f);
 
 
     loadModels(application, room.get(), fpFrameBuffer);

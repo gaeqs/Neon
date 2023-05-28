@@ -13,8 +13,6 @@ layout (set = 0, binding = 0) uniform Matrices {
     vec2 screenSize;
     float near;
     float far;
-    float metallic;
-    float roughness;
 };
 
 layout (location = 0) out vec2 fragPosition;

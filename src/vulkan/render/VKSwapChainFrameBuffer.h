@@ -33,6 +33,7 @@ namespace neon::vulkan {
 
         VKRenderPass _renderPass;
 
+        uint32_t _swapChainCount;
 
         bool _depth;
 

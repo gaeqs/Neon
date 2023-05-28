@@ -115,8 +115,9 @@ namespace neon {
         return _globalUniformBuffer;
     }
 
-    void Render::beginRenderPass(const std::shared_ptr<FrameBuffer>& fb) const {
-        _implementation.beginRenderPass(fb);
+    void Render::beginRenderPass(const std::shared_ptr<FrameBuffer>& fb,
+                                 bool clear) const {
+        _implementation.beginRenderPass(fb, clear);
     }
 
     void Render::endRenderPass() const {

@@ -27,6 +27,7 @@ namespace neon {
     enum class PolygonMode;
     enum class CullMode;
     struct SamplerCreateInfo;
+    struct FrameBufferTextureCreateInfo;
 }
 
 namespace neon::vulkan::conversions {
@@ -36,6 +37,9 @@ namespace neon::vulkan::conversions {
     VkFormat vkFormat(const TextureFormat& format);
 
     std::vector<VkFormat> vkFormat(const std::vector<TextureFormat>& formats);
+
+    std::vector<VkFormat>
+    vkFormat(const std::vector<FrameBufferTextureCreateInfo>& infos);
 
     VkImageTiling vkImageTiling(const Tiling& tiling);
 

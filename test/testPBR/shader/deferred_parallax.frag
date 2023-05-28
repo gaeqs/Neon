@@ -21,8 +21,12 @@ layout (set = 0, binding = 0) uniform Matrices {
     vec2 screenSize;
     float near;
     float far;
+};
+
+layout (set = 0, binding = 1) uniform PBR {
     float metallic;
     float roughness;
+    int useSSAO;
 };
 
 vec2 parallaxMapping(in vec2 texCoords, in vec3 viewDir) {

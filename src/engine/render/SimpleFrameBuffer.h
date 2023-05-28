@@ -9,6 +9,7 @@
 
 #include <engine/render/FrameBuffer.h>
 #include <engine/render/TextureCreateInfo.h>
+#include <engine/render/FrameBufferTextureCreateInfo.h>
 
 #ifdef USE_VULKAN
 
@@ -49,18 +50,16 @@ namespace neon {
         defaultRecreationParameters(Application*);
 
         SimpleFrameBuffer(Application* application,
-                          const std::vector<TextureFormat>& colorFormats,
+                          const std::vector<FrameBufferTextureCreateInfo>& textureInfos,
                           bool depth,
                           Condition condition = defaultRecreationCondition,
-                          const Parameters& parameters = defaultRecreationParameters,
-                          const std::vector<SamplerCreateInfo>& sampleInfos = {});
+                          const Parameters& parameters = defaultRecreationParameters);
 
         SimpleFrameBuffer(Application* application,
-                          const std::vector<TextureFormat>& colorFormats,
+                          const std::vector<FrameBufferTextureCreateInfo>& textureInfos,
                           std::shared_ptr<Texture> depthTexture,
-                          Condition  condition = defaultRecreationCondition,
-                          const Parameters& parameters = defaultRecreationParameters,
-                          const std::vector<SamplerCreateInfo>& sampleInfos = {});
+                          Condition condition = defaultRecreationCondition,
+                          const Parameters& parameters = defaultRecreationParameters);
 
         ~SimpleFrameBuffer() override = default;
 

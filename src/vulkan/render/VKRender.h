@@ -39,7 +39,8 @@ namespace neon::vulkan {
                 const std::vector<std::shared_ptr<Material>>& sortedMaterials,
                 const std::vector<std::shared_ptr<RenderPassStrategy>>& strategies) const;
 
-        void beginRenderPass(const std::shared_ptr<FrameBuffer>& fb) const;
+        void beginRenderPass(const std::shared_ptr<FrameBuffer>& fb,
+                             bool clear) const;
 
         void endRenderPass() const;
 

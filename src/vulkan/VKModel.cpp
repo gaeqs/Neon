@@ -122,6 +122,26 @@ namespace neon::vulkan {
         }
     }
 
+    void VKModel::drawOutside(const std::shared_ptr<Material>& material) const {
+        if (_positions.empty()) return;
+
+        auto& vk = _application->getImplementation();
+        auto buffer = vk.getCurrentCommandBuffer();
+
+        vulkan_util::beginRenderPass(buffer, material->getTarget(), true);
+
+        for (const auto& mesh: _meshes) {
+            mesh->draw(
+                    material,
+                    buffer,
+                    _instancingBuffer->getRaw(),
+                    _positions.size(),
+                    &_application->getRender()->getGlobalUniformBuffer());
+        }
+
+        vkCmdEndRenderPass(buffer);
+    }
+
     void VKModel::defineInstanceStruct(std::type_index type, size_t size) {
         if (_instancingStructType == type) return;
         _instancingStructType = type;

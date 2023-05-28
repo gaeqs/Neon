@@ -7,6 +7,7 @@
 #include <stdexcept>
 
 #include <engine/render/TextureCreateInfo.h>
+#include <engine/render/FrameBufferTextureCreateInfo.h>
 #include <engine/shader/MaterialCreateInfo.h>
 #include <vulkan/vulkan_core.h>
 
@@ -88,6 +89,16 @@ std::vector<VkFormat> vc::vkFormat(const std::vector<TextureFormat>& formats) {
     map.reserve(formats.size());
     for (const auto& item: formats) {
         map.push_back(vkFormat(item));
+    }
+    return map;
+}
+
+std::vector<VkFormat>
+vc::vkFormat(const std::vector<FrameBufferTextureCreateInfo>& infos) {
+    std::vector<VkFormat> map;
+    map.reserve(infos.size());
+    for (const auto& item: infos) {
+        map.push_back(vkFormat(item.format));
     }
     return map;
 }

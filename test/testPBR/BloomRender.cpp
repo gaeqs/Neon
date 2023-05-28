@@ -46,10 +46,12 @@ BloomRender::BloomRender(neon::Application* application,
     upBlending.colorSourceBlendFactor = neon::BlendFactor::ONE;
     upInfo.blending.attachmentsBlending = {upBlending};
 
-    neon::SamplerCreateInfo sampleInfo;
-    sampleInfo.anisotropy = false;
-    sampleInfo.minificationFilter = neon::TextureFilter::LINEAR;
-    sampleInfo.magnificationFilter = neon::TextureFilter::LINEAR;
+
+    std::vector<neon::FrameBufferTextureCreateInfo> textureInfo{
+            neon::TextureFormat::R16FG16FB16FA16F};
+    textureInfo[0].sampler.anisotropy = false;
+    textureInfo[0].sampler.minificationFilter = neon::TextureFilter::LINEAR;
+    textureInfo[0].sampler.magnificationFilter = neon::TextureFilter::LINEAR;
 
 
     for (uint32_t i = 0; i < chainLength; ++i) {
@@ -59,8 +61,7 @@ BloomRender::BloomRender(neon::Application* application,
         mip.relativeSize = relativeSize;
         mip.frameBuffer = std::make_shared<neon::SimpleFrameBuffer>(
                 application,
-                std::vector<neon::TextureFormat>{
-                        neon::TextureFormat::R32FG32FB32FA32F},
+                textureInfo,
                 false,
                 // This will not be required. Set as default.
                 neon::SimpleFrameBuffer::defaultRecreationCondition,
@@ -72,8 +73,7 @@ BloomRender::BloomRender(neon::Application* application,
                             static_cast<uint32_t>(w * relativeSize),
                             static_cast<float>(h * relativeSize)
                     );
-                },
-                std::vector<neon::SamplerCreateInfo>{sampleInfo}
+                }
         );
 
         downInfo.target = mip.frameBuffer;
@@ -124,7 +124,7 @@ const {
         auto& buf = mip.upsamplingMaterial->getUniformBuffer();
         buf->setTexture(0, previousTexture);
         buf->prepareForFrame();
-        render->beginRenderPass(mip.frameBuffer);
+        render->beginRenderPass(mip.frameBuffer, true);
         _screenModel->draw(mip.upsamplingMaterial);
         render->endRenderPass();
         previousTexture = mip.frameBuffer->getTextures()[0];
@@ -144,7 +144,7 @@ bool BloomRender::requiresRecreation() {
 }
 
 void BloomRender::recreate() {
-    _extent = {_application->getWidth(), _application->getHeight()};
+    _extent = _application->getViewport();
     for (const auto& item: _mipChain) {
         item.frameBuffer->recreate();
     }

@@ -101,7 +101,7 @@ set(SOURCES
         engine/structure/Asset.cpp
         engine/structure/Asset.h
         engine/structure/collection/AssetCollection.cpp
-        engine/structure/collection/AssetCollection.h)
+        engine/structure/collection/AssetCollection.h engine/render/FrameBufferTextureCreateInfo.h)
 
 
 set(VULKAN_SOURCES

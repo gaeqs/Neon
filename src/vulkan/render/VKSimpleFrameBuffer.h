@@ -9,6 +9,7 @@
 #include <memory>
 
 #include <engine/render/TextureCreateInfo.h>
+#include <engine/render/FrameBufferTextureCreateInfo.h>
 #include <engine/structure/IdentifiableWrapper.h>
 
 #include <vulkan/render/VKFrameBuffer.h>
@@ -38,7 +39,7 @@ namespace neon::vulkan {
         std::vector<VkDescriptorSet> _imGuiDescriptors;
         std::vector<std::shared_ptr<Texture>> _textures;
 
-        std::vector<TextureFormat> _formats;
+        std::vector<FrameBufferTextureCreateInfo> _createInfos;
         VkExtent2D _extent;
 
         VKRenderPass _renderPass;
@@ -51,19 +52,19 @@ namespace neon::vulkan {
 
         void cleanup();
 
+        void cleanupImages();
+
     public:
 
         VKSimpleFrameBuffer(Application* application,
-                            const std::vector<TextureFormat>& formats,
+                            const std::vector<FrameBufferTextureCreateInfo>& textureInfos,
                             std::pair<uint32_t, uint32_t> extent,
-                            bool depth,
-                            const std::vector<SamplerCreateInfo>& sampleInfos);
+                            bool depth);
 
         VKSimpleFrameBuffer(Application* application,
-                            const std::vector<TextureFormat>& formats,
+                            const std::vector<FrameBufferTextureCreateInfo>& textureInfos,
                             std::pair<uint32_t, uint32_t> extent,
-                            std::shared_ptr<Texture> depthTexture,
-                            const std::vector<SamplerCreateInfo>& sampleInfos);
+                            std::shared_ptr<Texture> depthTexture);
 
         ~VKSimpleFrameBuffer() override;
 

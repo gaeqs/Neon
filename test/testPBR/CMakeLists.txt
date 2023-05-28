@@ -7,7 +7,7 @@ set(
         LockMouseComponent.cpp
         LockMouseComponent.h
         ConstantRotationComponent.cpp
-        ConstantRotationComponent.h BloomRender.cpp BloomRender.h)
+        ConstantRotationComponent.h BloomRender.cpp BloomRender.h ComputeIrradianceSkyboxComponent.cpp ComputeIrradianceSkyboxComponent.h)
 
 cmrc_add_resource_library(
         shaders_pbr
@@ -36,6 +36,9 @@ cmrc_add_resource_library(
         shader/downsampling.frag
         shader/upsampling.vert
         shader/upsampling.frag
+        shader/irradiance_map_creation.vert
+        shader/irradiance_map_creation.geom
+        shader/irradiance_map_creation.frag
 )
 
 cmrc_add_resource_library(

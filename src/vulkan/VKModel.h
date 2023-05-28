@@ -73,6 +73,8 @@ namespace neon::vulkan {
 
         void draw(const std::shared_ptr<Material>& material) const;
 
+        void drawOutside(const std::shared_ptr<Material>& material) const;
+
     };
 }
 

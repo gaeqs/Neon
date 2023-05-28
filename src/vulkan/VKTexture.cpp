@@ -196,7 +196,8 @@ namespace neon::vulkan {
     }
 
     void VKTexture::changeExternalImageView(
-            int32_t width, int32_t height, VkImageView imageView) {
+            int32_t width, int32_t height,
+            VkImage image, VkImageView imageView) {
 
         if (!_external) {
             std::cerr << "The image view of an internal texture cannot"
@@ -206,6 +207,7 @@ namespace neon::vulkan {
 
         _width = width;
         _height = height;
+        _image = image;
         _imageView = imageView;
         _externalDirtyFlag++;
         if (_externalDirtyFlag == 0) {

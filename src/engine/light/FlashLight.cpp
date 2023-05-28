@@ -19,7 +19,8 @@ namespace neon {
             _linearAttenuation(1.0f),
             _quadraticAttenuation(1.0f),
             _cutOff(0.91f),
-            _outerCutOff(0.82f) {
+            _outerCutOff(0.82f),
+            _radiance(1.0f) {
     }
 
     FlashLight::FlashLight(const std::shared_ptr<Model>& model) :
@@ -31,7 +32,8 @@ namespace neon {
             _linearAttenuation(1.0f),
             _quadraticAttenuation(1.0f),
             _cutOff(0.91f),
-            _outerCutOff(0.82f) {
+            _outerCutOff(0.82f),
+            _radiance(1.0f) {
     }
 
     void FlashLight::onStart() {
@@ -52,8 +54,8 @@ namespace neon {
         auto position = t.getPosition();
         auto direction = t.getRotation() * glm::vec3(0.0f, 0.0f, 1.0f);
         _graphicComponent->uploadData(Data{
-                _diffuseColor,
-                _specularColor,
+                _diffuseColor * _radiance,
+                _specularColor * _radiance,
                 position,
                 direction,
                 _constantAttenuation,
@@ -78,6 +80,14 @@ namespace neon {
 
     void FlashLight::setSpecularColor(const glm::vec3& specularColor) {
         _specularColor = specularColor;
+    }
+
+    float FlashLight::getRadiance() const {
+        return _radiance;
+    }
+
+    void FlashLight::setRadiance(float radiance) {
+        _radiance = radiance;
     }
 
     float FlashLight::getConstantAttenuation() const {
@@ -139,6 +149,12 @@ namespace neon {
         ImGui::ColorPicker3(imGuiUId("##specular").c_str(), &_specularColor.x,
                             ImGuiColorEditFlags_NoSidePreview);
         ImGui::PopItemWidth();
+
+        ImGui::AlignTextToFramePadding();
+        ImGui::Text("Radiance:");
+        ImGui::SameLine();
+        ImGui::DragFloat(imGuiUId("##radiance").c_str(), &_radiance,
+                         0.5f, 0.0f, 1000.0f);
 
         ImGui::Separator();
 

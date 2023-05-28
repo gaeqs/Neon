@@ -101,7 +101,7 @@ namespace neon {
                 {
                     DEBUG_PROFILE_ID(_profiler, preUpdate,
                                      "preUpdate (GPU Wait)");
-                    preUpdate = _implementation.preUpdate();
+                    preUpdate = _implementation.preUpdate(_profiler);
                 }
 
                 if (preUpdate) {

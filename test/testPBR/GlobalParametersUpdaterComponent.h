@@ -15,15 +15,18 @@ struct GlobalParameters {
     glm::vec2 screenSize;
     float near;
     float far;
+};
+
+struct PBRParameters {
     float metallic;
     float roughness;
+    uint32_t useSSAO;
 };
 
 class GlobalParametersUpdaterComponent : public neon::Component {
 
-    float metallic = 0.0f;
-    float roughness = 0.0f;
-
+    float metallic = 0.4f;
+    float roughness = 0.4f;
     bool useSSAO = true;
 
 public:
@@ -36,7 +39,7 @@ public:
 
     void drawEditor() override;
 
-    void onKey(const neon::KeyboardEvent &event) override;
+    void onKey(const neon::KeyboardEvent& event) override;
 
 };
 REGISTER_COMPONENT(GlobalParametersUpdaterComponent,

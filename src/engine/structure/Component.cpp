@@ -41,6 +41,10 @@ namespace neon {
         }
     }
 
+    void Component::destroyLater() {
+        getRoom()->destroyComponentLater(this);
+    }
+
     void Component::onConstruction() {
 
     }

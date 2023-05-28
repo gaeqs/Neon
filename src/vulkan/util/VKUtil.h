@@ -9,12 +9,15 @@
 #include <cstdint>
 #include <vector>
 #include <optional>
+#include <memory>
 #include <vulkan/vulkan.h>
 
 #include <engine/render/TextureCreateInfo.h>
 
 namespace neon {
     struct InputDescription;
+
+    class FrameBuffer;
 }
 
 namespace neon::vulkan {
@@ -84,6 +87,9 @@ namespace neon::vulkan::vulkan_util {
     toVulkanDescription(uint32_t binding, uint32_t startLocation,
                         const InputDescription& description);
 
+    void beginRenderPass(VkCommandBuffer commandBuffer,
+                         const std::shared_ptr<FrameBuffer>& fb,
+                         bool clear);
 }
 
 

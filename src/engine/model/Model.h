@@ -163,9 +163,28 @@ namespace neon {
         /**
          * Calls the draw calls for the meshes that
          * contains the given material.
+         * <p>
+         * This method can only be used
+         * when a draw operation is being performed.
+         *
          * @param material the material.
          */
         void draw(const std::shared_ptr<Material>& material) const;
+
+        /**
+         * Calls the draw calls for the meshes that
+         * contains the given material.
+         * <p>
+         * This method can only be used
+         * when a draw operation is being performed,
+         * but doesn't require the material to be attached
+         * to the model.
+         * <p>
+         * This method begins and ends a new render pass.
+         *
+         * @param material the material.
+         */
+        void drawOutside(const std::shared_ptr<Material>& material) const;
 
     };
 }

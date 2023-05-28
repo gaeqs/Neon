@@ -78,7 +78,8 @@ namespace neon {
 
         // region Strategy methods
 
-        void beginRenderPass(const std::shared_ptr<FrameBuffer>& fb) const;
+        void beginRenderPass(const std::shared_ptr<FrameBuffer>& fb,
+                             bool clear = true) const;
 
         void endRenderPass() const;
 
