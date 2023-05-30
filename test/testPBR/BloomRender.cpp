@@ -13,8 +13,7 @@ BloomRender::BloomRender(neon::Application* application,
                          std::shared_ptr<neon::ShaderProgram> upsamplingShader,
                          std::shared_ptr<neon::Texture> pbrTexture,
                          const std::shared_ptr<neon::Model>& screenModel,
-                         uint32_t chainLength,
-                         float filterRadius) :
+                         uint32_t chainLength) :
         _application(application),
         _mipChain(),
         _pbrTexture(std::move(pbrTexture)),
@@ -93,8 +92,6 @@ BloomRender::BloomRender(neon::Application* application,
 
         screenModel->addMaterial(mip.downsamplingMaterial);
         screenModel->addMaterial(mip.upsamplingMaterial);
-
-        mip.upsamplingMaterial->pushConstant("filterRadius", filterRadius);
 
         _mipChain.push_back(mip);
     }

@@ -104,7 +104,9 @@ namespace neon::vulkan {
 
 
         VkSamplerCreateInfo samplerInfo = vc::vkSamplerCreateInfo(
-                createInfo.sampler, properties.limits.maxSamplerAnisotropy);
+                createInfo.sampler,
+                static_cast<float>(createInfo.image.mipmaps),
+                properties.limits.maxSamplerAnisotropy);
 
         if (vkCreateSampler(_vkApplication->getDevice(), &samplerInfo, nullptr,
                             &_sampler) != VK_SUCCESS) {
@@ -123,7 +125,7 @@ namespace neon::vulkan {
             _width(static_cast<int>(width)),
             _height(static_cast<int>(height)),
             _depth(static_cast<int>(depth)),
-            _mipmapLevels(1),
+            _mipmapLevels(0),
             _layers(1),
             _stagingBuffer(nullptr),
             _image(image),
@@ -141,7 +143,9 @@ namespace neon::vulkan {
         );
 
         VkSamplerCreateInfo samplerInfo = vc::vkSamplerCreateInfo(
-                sampler, properties.limits.maxSamplerAnisotropy);
+                sampler,
+                static_cast<float>(_mipmapLevels),
+                properties.limits.maxSamplerAnisotropy);
 
         if (vkCreateSampler(_vkApplication->getDevice(), &samplerInfo, nullptr,
                             &_sampler) != VK_SUCCESS) {

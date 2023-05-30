@@ -32,8 +32,7 @@ public:
                 std::shared_ptr<neon::ShaderProgram> upsamplingShader,
                 std::shared_ptr<neon::Texture> pbrTexture,
                 const std::shared_ptr<neon::Model>& screenModel,
-                uint32_t chainLength,
-                float filterRadius);
+                uint32_t chainLength);
 
     [[nodiscard]] std::shared_ptr<neon::Texture> getBloomTexture() const;
 

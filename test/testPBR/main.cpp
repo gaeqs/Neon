@@ -166,6 +166,7 @@ std::shared_ptr<FrameBuffer> initRender(
             {UniformBindingType::BUFFER, sizeof(GlobalParameters)},
             {UniformBindingType::BUFFER, sizeof(PBRParameters)},
             {UniformBindingType::IMAGE,  0},
+            {UniformBindingType::IMAGE,  0},
             {UniformBindingType::IMAGE,  0}
     };
 
@@ -279,7 +280,7 @@ std::shared_ptr<FrameBuffer> initRender(
 
     // BLOOM
     auto bloomRender = std::make_shared<BloomRender>(
-            app, downsampling, upsampling, albedo, screenModel, 3, 0.01f);
+            app, downsampling, upsampling, albedo, screenModel, 3);
 
     render->addRenderPass(bloomRender);
 
@@ -480,9 +481,24 @@ std::shared_ptr<Texture> loadSkybox(Room* room) {
     TextureCreateInfo info;
     info.imageView.viewType = TextureViewType::CUBE;
     info.image.layers = 6;
+    info.image.mipmaps = 10;
 
     return Texture::createTextureFromFiles(room->getApplication(),
                                            "skybox", PATHS, info);
+}
+
+std::shared_ptr<Texture> loadBRDF(Room* room) {
+    TextureCreateInfo info;
+    info.imageView.viewType = TextureViewType::NORMAL_2D;
+    info.image.layers = 1;
+    info.image.mipmaps = 0;
+
+    return Texture::createTextureFromFile(
+            room->getApplication(),
+            "BRDF",
+            "resource/BRDF.png",
+            info
+    );
 }
 
 std::shared_ptr<Room> getTestRoom(Application* application) {
@@ -494,9 +510,11 @@ std::shared_ptr<Room> getTestRoom(Application* application) {
     auto fpFrameBuffer = initRender(room.get(), screenModel);
 
     auto skybox = loadSkybox(room.get());
+    auto brdf = loadBRDF(room.get());
     auto& globalBuffer = application->getRender()->getGlobalUniformBuffer();
     globalBuffer.setTexture(2, skybox);
     globalBuffer.setTexture(3, skybox);
+    globalBuffer.setTexture(4, brdf);
 
     auto cameraController = room->newGameObject();
     auto cameraMovement = cameraController->newComponent<CameraMovementComponent>();

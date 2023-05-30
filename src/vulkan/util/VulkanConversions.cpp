@@ -235,6 +235,7 @@ VkSamplerMipmapMode vc::vkSamplerMipmapMode(const MipmapMode& mipmapMode) {
 }
 
 VkSamplerCreateInfo vc::vkSamplerCreateInfo(const SamplerCreateInfo& sampler,
+                                            float maxLod,
                                             float deviceMaxAnisotropic) {
     VkSamplerCreateInfo samplerInfo{};
     samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
@@ -250,7 +251,7 @@ VkSamplerCreateInfo vc::vkSamplerCreateInfo(const SamplerCreateInfo& sampler,
     samplerInfo.mipmapMode = vc::vkSamplerMipmapMode(sampler.mipmapMode);
     samplerInfo.mipLodBias = 0.0f;
     samplerInfo.minLod = 0.0f;
-    samplerInfo.maxLod = 0.0f;
+    samplerInfo.maxLod = maxLod;
 
     samplerInfo.maxAnisotropy = sampler.maxAnisotropy < 0.0f
                                 ? deviceMaxAnisotropic

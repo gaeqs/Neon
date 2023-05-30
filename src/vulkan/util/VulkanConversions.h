@@ -58,6 +58,7 @@ namespace neon::vulkan::conversions {
     VkSamplerMipmapMode vkSamplerMipmapMode(const MipmapMode& mipmapMode);
 
     VkSamplerCreateInfo vkSamplerCreateInfo(const SamplerCreateInfo& sampler,
+                                            float maxLod,
                                             float deviceMaxAnisotropic);
 
     VkCompareOp vkCompareOp(const DepthCompareOperation& op);

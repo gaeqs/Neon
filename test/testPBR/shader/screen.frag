@@ -1,7 +1,7 @@
 #version 460
 
-const float BLOOM_INTENSITY = 0.04f;
-const float FRESNEL_DOT_MIN = 0.2f;
+const float FRESNEL_DOT_MIN = 0.0f;
+const float MAX_REFLECTION_LOD = 10.0;
 
 layout (location = 0) in vec2 fragTexCoords;
 layout (location = 1) in vec2 fragPosition;
@@ -20,10 +20,15 @@ layout (set = 0, binding = 1) uniform PBR {
     float metallic;
     float roughness;
     int useSSAO;
+    int ssaoFilterRadius;
+    float skyboxLod;
+    float bloomIntensity;
+    float bloomFilterRadius;
 };
 
 layout (set = 0, binding = 2) uniform samplerCube skybox;
 layout (set = 0, binding = 3) uniform samplerCube irradianceSkybox;
+layout (set = 0, binding = 4) uniform sampler2D brdf;
 
 layout (set = 1, binding = 0) uniform sampler2D diffuseTexture;
 layout (set = 1, binding = 1) uniform sampler2D normalTexture;
@@ -35,9 +40,9 @@ layout (set = 1, binding = 6) uniform sampler2D bloomTexture;
 
 layout (location = 0) out vec4 outColor;
 
-vec3 fresnelSchlick(vec3 v, vec3 n, vec3 f0) {
+vec3 fresnelSchlickRoughness(vec3 v, vec3 n, vec3 f0, float roughness) {
     float cosTheta = max(dot(v, n), FRESNEL_DOT_MIN);
-    return f0 + (1.0f - f0) * pow(clamp(1.0f - cosTheta, 0.0f, 1.0f), 5.0f);
+    return f0 + (max(vec3(1.0 - roughness), f0) - f0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
 }
 
 void main() {
@@ -55,8 +60,8 @@ void main() {
 
     if (depth == 1.0f) {
         // DRAW SKYBOX
-        vec3 skybox = texture(skybox, worldDirection).rgb;
-        color = skybox + bloom * BLOOM_INTENSITY;
+        vec3 skybox = textureLod(skybox, worldDirection, skyboxLod).rgb;
+        color = skybox + bloom * bloomIntensity;
     } else {
         // Finish PBR process
         vec2 normalXY = texture(normalTexture, fragTexCoords).xy;
@@ -71,19 +76,25 @@ void main() {
         vec3 n = vec3(normalXY, normalZ);
         vec3 v = -normalize(positionView);
 
-        vec3 irradiance = texture(irradianceSkybox, inverseView * n).rgb;
 
-        vec3 kS = fresnelSchlick(v, n, f0);
+        vec3 kS = fresnelSchlickRoughness(v, n, f0, metallicRoughness.y);
         vec3 kD = (1.0f - kS) * (1.0f - metallicRoughness.x);
 
+        vec3 irradiance = texture(irradianceSkybox, inverseView * n).rgb;
         vec3 diffuse = irradiance * albedo;
-        vec3 ambient = (kD * diffuse);
+
+        vec3 refl = reflect(-v, n);
+        vec3 prefilteredColor = textureLod(skybox, refl, metallicRoughness.y * MAX_REFLECTION_LOD).rgb;
+        vec2 envBRDF = texture(brdf, vec2(max(dot(n, v), 0.0), metallicRoughness.y)).rg;
+        vec3 specular = prefilteredColor * (kS * envBRDF.x + envBRDF.y);
+
+        vec3 ambient = kD * diffuse + specular;
 
         if (useSSAO > 0) {
             ambient *= ssao;
         }
 
-        color = ambient + mix(lo, bloom, BLOOM_INTENSITY);
+        color = ambient + mix(lo, bloom, bloomIntensity);
     }
 
     color = color / (color + 1.0f);

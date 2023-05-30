@@ -7,16 +7,22 @@ const float TOTAL = 16.0f;
 
 layout (location = 0) in vec2 texCoord;
 
-layout (set = 1, binding = 0) uniform sampler2D texInput;
-
-layout (push_constant) uniform Push {
-    float filterRadius;
+layout (set = 0, binding = 1) uniform PBR {
+    float metallic;
+    float roughness;
+    int useSSAO;
+    int ssaoFilterRadius;
+    float skyboxLod;
+    float bloomIntensity;
+    float bloomFilterRadius;
 };
+
+layout (set = 1, binding = 0) uniform sampler2D texInput;
 
 layout (location = 0) out vec3 color;
 
 void main () {
-    float fr = filterRadius;
+    float fr = bloomFilterRadius;
 
     // a - b - c
     // d - e - f

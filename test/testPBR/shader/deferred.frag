@@ -26,6 +26,10 @@ layout (set = 0, binding = 1) uniform PBR {
     float metallic;
     float roughness;
     int useSSAO;
+    int ssaoFilterRadius;
+    float skyboxLod;
+    float bloomIntensity;
+    float bloomFilterRadius;
 };
 
 void main() {
