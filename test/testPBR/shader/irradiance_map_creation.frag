@@ -1,6 +1,6 @@
 #version 460
 
-const float DELTA = 0.05f;
+const float DELTA = 0.1f;
 const float PI = 3.14159265359f;
 
 layout (location = 0) in vec2 texCoord;

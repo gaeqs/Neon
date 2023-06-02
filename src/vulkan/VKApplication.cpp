@@ -155,7 +155,7 @@ namespace neon::vulkan {
         return true;
     }
 
-    void VKApplication::endDraw() {
+    void VKApplication::endDraw(Profiler& profiler) {
         auto commandBuffer = _commandBuffers[_currentFrame];
 
         if (vkEndCommandBuffer(commandBuffer) != VK_SUCCESS) {
@@ -182,9 +182,13 @@ namespace neon::vulkan {
         submitInfo.signalSemaphoreCount = 1;
         submitInfo.pSignalSemaphores = signalSemaphores;
 
-        if (vkQueueSubmit(_graphicsQueue, 1, &submitInfo,
-                          _inFlightFences[_currentFrame]) != VK_SUCCESS) {
-            throw std::runtime_error("Failed to submit draw command buffer!");
+        {
+            DEBUG_PROFILE_ID(profiler, submit, "Submit");
+            if (vkQueueSubmit(_graphicsQueue, 1, &submitInfo,
+                              _inFlightFences[_currentFrame]) != VK_SUCCESS) {
+                throw std::runtime_error(
+                        "Failed to submit draw command buffer!");
+            }
         }
 
         VkPresentInfoKHR presentInfo{};
@@ -197,7 +201,10 @@ namespace neon::vulkan {
         presentInfo.pSwapchains = swapChains;
         presentInfo.pImageIndices = &_imageIndex;
         presentInfo.pResults = nullptr;
-        vkQueuePresentKHR(_presentQueue, &presentInfo);
+        {
+            DEBUG_PROFILE_ID(profiler, present, "Present");
+            vkQueuePresentKHR(_presentQueue, &presentInfo);
+        }
 
         _currentFrame = (_currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
     }
@@ -590,7 +597,7 @@ namespace neon::vulkan {
     VkPresentModeKHR VKApplication::chooseSwapPresentMode(
             const std::vector<VkPresentModeKHR>& availableModes) {
         for (const auto& mode: availableModes) {
-            if (mode == VK_PRESENT_MODE_IMMEDIATE_KHR) {
+            if (mode == VK_PRESENT_MODE_FIFO_KHR) {
                 return mode;
             }
         }

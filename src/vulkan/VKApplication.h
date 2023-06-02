@@ -139,7 +139,7 @@ namespace neon::vulkan {
 
         bool preUpdate(Profiler& profiler);
 
-        void endDraw();
+        void endDraw(Profiler& pofiler);
 
         void finishLoop();
 

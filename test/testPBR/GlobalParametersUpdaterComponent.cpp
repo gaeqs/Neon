@@ -61,6 +61,9 @@ void GlobalParametersUpdaterComponent::drawEditor() {
     ImGui::Checkbox(imGuiUId("Enabled##SSAO").c_str(),
                     reinterpret_cast<bool*>(&_pbr.useSSAO));
 
+    ImGui::Checkbox(imGuiUId("Show only##showSSAO").c_str(),
+                    reinterpret_cast<bool*>(&_pbr.shoOnlySSAO));
+
     ImGui::AlignTextToFramePadding();
     ImGui::Text("Blur radius:");
     ImGui::SameLine();

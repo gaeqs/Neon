@@ -373,7 +373,7 @@ void loadModels(Application* application, Room* room,
     auto sansModel = sansResult.model;
     sansModel->addMaterial(depthMaterial);
 
-    constexpr int AMOUNT = 1024 * 1;
+    constexpr int AMOUNT = 1024;
     int q = static_cast<int>(std::sqrt(AMOUNT));
     for (int i = 0; i < AMOUNT; i++) {
         auto sans = room->newGameObject();

@@ -114,7 +114,7 @@ namespace neon {
                     }
                     {
                         DEBUG_PROFILE(_profiler, endDraw);
-                        _implementation.endDraw();
+                        _implementation.endDraw(_profiler);
                     }
                 }
 

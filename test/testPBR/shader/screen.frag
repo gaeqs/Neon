@@ -20,6 +20,7 @@ layout (set = 0, binding = 1) uniform PBR {
     float metallic;
     float roughness;
     int useSSAO;
+    int showOnlySSAO;
     int ssaoFilterRadius;
     float skyboxLod;
     float bloomIntensity;
@@ -46,6 +47,13 @@ vec3 fresnelSchlickRoughness(vec3 v, vec3 n, vec3 f0, float roughness) {
 }
 
 void main() {
+
+    if(showOnlySSAO > 0) {
+        float ssao = texture(ssaoTexture, fragTexCoords).r;
+        outColor = vec4(vec3(ssao), 1.0f);
+        return;
+    }
+
     mat3 inverseView = transpose(mat3(view));
 
     float depth = texture(depthTexture, fragTexCoords).r;

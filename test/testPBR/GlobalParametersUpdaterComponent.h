@@ -21,6 +21,7 @@ struct PBRParameters {
     float metallic;
     float roughness;
     uint32_t useSSAO;
+    uint32_t shoOnlySSAO;
     uint32_t ssaoFilterRadius;
     float skyboxLod;
     float bloomIntensity;
@@ -29,7 +30,7 @@ struct PBRParameters {
 
 class GlobalParametersUpdaterComponent : public neon::Component {
 
-    PBRParameters _pbr = {0.4f, 0.4f, true, 2, 0.0f, 0.04f, 0.01f};
+    PBRParameters _pbr = {0.4f, 0.4f, true, false, 2, 0.0f, 0.04f, 0.01f};
 
 public:
 

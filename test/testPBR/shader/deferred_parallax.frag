@@ -1,5 +1,7 @@
 #version 460
 
+const float height_scale = 0.05f;
+
 layout(location = 0) in vec3 fragPosition;
 layout(location = 1) in vec2 fragTexCoords;
 layout(location = 2) in mat3 TBN;
@@ -27,14 +29,14 @@ layout (set = 0, binding = 1) uniform PBR {
     float metallic;
     float roughness;
     int useSSAO;
+    int showOnlySSAO;
     int ssaoFilterRadius;
     float skyboxLod;
     float bloomIntensity;
     float bloomFilterRadius;
 };
 
-vec2 parallaxMapping(in vec2 texCoords, in vec3 viewDir) {
-    const float height_scale = 0.05f;
+vec2 parallaxMapping(in vec2 texCoords, in vec3 viewDir, out float depth) {
     const float minLayers = 8.0;
     const float maxLayers = 32.0;
 
@@ -60,16 +62,18 @@ vec2 parallaxMapping(in vec2 texCoords, in vec3 viewDir) {
     float beforeDepth = texture(parallaxTexture, prevTexCoords).r - currentLayerDepth + layerDepth;
 
     float weight = afterDepth / (afterDepth - beforeDepth);
+    depth = currentDepthMapValue;
     return mix(currentTexCoords, prevTexCoords, weight);
-
 }
 
 void main() {
-    vec2 parallaxTexCoord = parallaxMapping(fragTexCoords, inverseTBN * normalize(-fragPosition));
+    float depth;
+    vec2 parallaxTexCoord = parallaxMapping(fragTexCoords, inverseTBN * normalize(-fragPosition), depth);
 
     if (parallaxTexCoord.x > 1.0 || parallaxTexCoord.y > 1.0 || parallaxTexCoord.x < 0.0 || parallaxTexCoord.y < 0.0)
     discard;
 
+    gl_FragDepth = min(1.0f, gl_FragCoord.z + depth * height_scale / (far - near));
     vec3 tn = texture(normalTexture, parallaxTexCoord).xyz;
     tn = normalize(tn * 2.0f - 1.0f);
     vec3 normal = TBN * tn;
