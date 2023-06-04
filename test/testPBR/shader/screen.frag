@@ -107,5 +107,5 @@ void main() {
 
     color = color / (color + 1.0f);
     // We don't need to do gamma correction. The textures are already fixed.
-    outColor = vec4(color, 1.0f);//vec4(normal, 1.0f);
+    outColor = vec4(pow(color, vec3(1.0f / 2.2f)), 1.0f);//vec4(normal, 1.0f);
 }
