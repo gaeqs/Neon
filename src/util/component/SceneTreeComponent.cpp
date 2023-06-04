@@ -23,7 +23,7 @@ namespace neon {
         bool mouseClickConsumed = false;
         for (const auto& obj: objects) {
             auto& children = obj->getChildren();
-            bool selected = _explorer && _explorer->getTarget().raw() == obj;
+            bool selected = _explorer && _explorer->getTarget() == obj;
 
             ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_None;
             if (children.empty()) flags |= ImGuiTreeNodeFlags_Leaf;
@@ -69,7 +69,7 @@ namespace neon {
                     bool mouseClickConsumed = false;
                     auto& children = obj->getChildren();
                     bool selected =
-                            _explorer && _explorer->getTarget().raw() == obj;
+                            _explorer && _explorer->getTarget() == obj;
 
                     ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_None;
                     if (children.empty()) flags |= ImGuiTreeNodeFlags_Leaf;

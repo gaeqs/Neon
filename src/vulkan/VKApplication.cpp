@@ -596,7 +596,7 @@ namespace neon::vulkan {
     VkPresentModeKHR VKApplication::chooseSwapPresentMode(
             const std::vector<VkPresentModeKHR>& availableModes) {
         for (const auto& mode: availableModes) {
-            if (mode == VK_PRESENT_MODE_FIFO_KHR) {
+            if (mode == VK_PRESENT_MODE_MAILBOX_KHR) {
                 return mode;
             }
         }
