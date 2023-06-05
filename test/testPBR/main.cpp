@@ -20,7 +20,6 @@
 #include "LockMouseComponent.h"
 #include "ConstantRotationComponent.h"
 #include "BloomRender.h"
-#include "ComputeIrradianceSkyboxComponent.h"
 
 constexpr int32_t WIDTH = 800;
 constexpr int32_t HEIGHT = 600;
