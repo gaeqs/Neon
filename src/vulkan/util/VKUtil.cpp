@@ -66,16 +66,16 @@ namespace neon::vulkan::vulkan_util {
         vkFreeCommandBuffers(device, pool, 1, &buffer);
     }
 
-    void copyBuffer(VKApplication* application,
+    void copyBuffer(VkCommandBuffer commandBuffer,
                     VkBuffer source, VkBuffer destiny, VkDeviceSize size) {
 
         VkBufferCopy copyRegion{};
         copyRegion.size = size;
-        vkCmdCopyBuffer(application->getCurrentCommandBuffer(),
+        vkCmdCopyBuffer(commandBuffer,
                         source, destiny, 1, &copyRegion);
     }
 
-    void copyBuffer(VKApplication* application,
+    void copyBuffer(VkCommandBuffer commandBuffer,
                     VkBuffer source, VkBuffer destiny,
                     VkDeviceSize sourceOffset, VkDeviceSize destinyOffset,
                     VkDeviceSize size) {
@@ -83,7 +83,7 @@ namespace neon::vulkan::vulkan_util {
         copyRegion.size = size;
         copyRegion.srcOffset = sourceOffset;
         copyRegion.dstOffset = destinyOffset;
-        vkCmdCopyBuffer(application->getCurrentCommandBuffer(),
+        vkCmdCopyBuffer(commandBuffer,
                         source, destiny, 1, &copyRegion);
 
     }
@@ -246,7 +246,8 @@ namespace neon::vulkan::vulkan_util {
 
         if (application->isRecordingCommandBuffer()) {
             vkCmdPipelineBarrier(
-                    application->getCurrentCommandBuffer(),
+                    application->getCurrentCommandBuffer()
+                    ->getImplementation().getCommandBuffer(),
                     sourceStage, destinationStage,
                     0, 0, nullptr, 0,
                     nullptr, 1, &barrier
@@ -297,7 +298,8 @@ namespace neon::vulkan::vulkan_util {
 
         if (application->isRecordingCommandBuffer()) {
             vkCmdCopyBufferToImage(
-                    application->getCurrentCommandBuffer(),
+                    application->getCurrentCommandBuffer()
+                    ->getImplementation().getCommandBuffer(),
                     buffer,
                     image,
                     VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
@@ -335,7 +337,8 @@ namespace neon::vulkan::vulkan_util {
         VkCommandBuffer commandBuffer;
 
         if (application->isRecordingCommandBuffer()) {
-            commandBuffer = application->getCurrentCommandBuffer();
+            commandBuffer = application->getCurrentCommandBuffer()
+                    ->getImplementation().getCommandBuffer();
         } else {
             commandBuffer = beginSingleTimeCommandBuffer(
                     application->getDevice(),

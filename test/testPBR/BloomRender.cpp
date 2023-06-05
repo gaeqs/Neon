@@ -103,14 +103,16 @@ void BloomRender::render(
         const std::vector<std::shared_ptr<neon::Material>>& sortedMaterials)
 const {
 
+    auto* cb = room->getApplication()->getCurrentCommandBuffer();
+
     // Downsampling
     std::shared_ptr<neon::Texture> previousTexture = _pbrTexture;
     for (const auto& mip: _mipChain) {
         auto& buf = mip.downsamplingMaterial->getUniformBuffer();
         buf->setTexture(0, previousTexture);
-        buf->prepareForFrame();
+        buf->prepareForFrame(cb);
         render->beginRenderPass(mip.frameBuffer);
-        _screenModel->draw(mip.downsamplingMaterial);
+        _screenModel->draw(mip.downsamplingMaterial.get());
         render->endRenderPass();
         previousTexture = mip.frameBuffer->getTextures()[0];
     }
@@ -120,9 +122,9 @@ const {
         const auto& mip = _mipChain[i];
         auto& buf = mip.upsamplingMaterial->getUniformBuffer();
         buf->setTexture(0, previousTexture);
-        buf->prepareForFrame();
+        buf->prepareForFrame(cb);
         render->beginRenderPass(mip.frameBuffer, true);
-        _screenModel->draw(mip.upsamplingMaterial);
+        _screenModel->draw(mip.upsamplingMaterial.get());
         render->endRenderPass();
         previousTexture = mip.frameBuffer->getTextures()[0];
     }

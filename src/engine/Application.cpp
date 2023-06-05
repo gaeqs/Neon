@@ -197,6 +197,10 @@ namespace neon {
         return _currentFrameInformation;
     }
 
+    CommandBuffer* Application::getCurrentCommandBuffer() const {
+        return _implementation.getCurrentCommandBuffer();
+    }
+
     void Application::setRoom(const std::shared_ptr<Room>& room) {
         if (room != nullptr && room->getApplication() != this) {
             throw std::runtime_error(

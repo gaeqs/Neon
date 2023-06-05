@@ -11,14 +11,16 @@
 #include <iostream>
 
 namespace neon::vulkan {
-    std::optional<std::shared_ptr<BufferMap<char>>> SimpleBuffer::rawMap() {
+    std::optional<std::shared_ptr<BufferMap<char>>> SimpleBuffer::rawMap(
+            const CommandBuffer* commandBuffer) {
         return std::make_shared<SimpleBufferMap<char>>(
                 _application->getDevice(), _vertexBufferMemory,
                 Range<uint32_t>(0, _size));
     }
 
     std::optional<std::shared_ptr<BufferMap<char>>>
-    SimpleBuffer::rawMap(Range<uint32_t> range) {
+    SimpleBuffer::rawMap(Range<uint32_t> range,
+                         const CommandBuffer* commandBuffer) {
         return std::make_shared<SimpleBufferMap<char>>(
                 _application->getDevice(), _vertexBufferMemory, range);
     }

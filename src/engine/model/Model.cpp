@@ -75,11 +75,12 @@ namespace neon {
         }
     }
 
-    void Model::draw(const std::shared_ptr<Material>& material) const {
+    void Model::draw(const Material* material) const {
         _implementation.draw(material);
     }
 
-    void Model::drawOutside(const std::shared_ptr<Material>& material) const {
-        _implementation.drawOutside(material);
+    void Model::drawOutside(const Material* material,
+                            const CommandBuffer* commandBuffer) const {
+        _implementation.drawOutside(material, commandBuffer);
     }
 }

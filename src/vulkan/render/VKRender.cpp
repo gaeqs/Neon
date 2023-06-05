@@ -37,20 +37,20 @@ namespace neon::vulkan {
     void VKRender::beginRenderPass(
             const std::shared_ptr<FrameBuffer>& fb, bool clear) const {
 
-        vulkan_util::beginRenderPass(
-                _vkApplication->getCurrentCommandBuffer(),
-                fb, clear);
+        auto* cb = _vkApplication->getCurrentCommandBuffer()
+                ->getImplementation().getCommandBuffer();
+
+        vulkan_util::beginRenderPass(cb, fb, clear);
 
         auto& frameBuffer = fb->getImplementation();
         if (frameBuffer.renderImGui()) {
             ImGui::Render();
-            ImGui_ImplVulkan_RenderDrawData(
-                    ImGui::GetDrawData(),
-                    _vkApplication->getCurrentCommandBuffer());
+            ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), cb);
         }
     }
 
     void VKRender::endRenderPass() const {
-        vkCmdEndRenderPass(_vkApplication->getCurrentCommandBuffer());
+        vkCmdEndRenderPass(_vkApplication->getCurrentCommandBuffer()
+                                   ->getImplementation().getCommandBuffer());
     }
 }

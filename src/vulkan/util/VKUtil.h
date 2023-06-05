@@ -35,10 +35,10 @@ namespace neon::vulkan::vulkan_util {
             VkDevice device, VkQueue queue,
             VkCommandPool pool, VkCommandBuffer buffer);
 
-    void copyBuffer(VKApplication* application,
+    void copyBuffer(VkCommandBuffer commandBuffer,
                     VkBuffer source, VkBuffer destiny, VkDeviceSize size);
 
-    void copyBuffer(VKApplication* application,
+    void copyBuffer(VkCommandBuffer commandBuffer,
                     VkBuffer source, VkBuffer destiny,
                     VkDeviceSize sourceOffset, VkDeviceSize destinyOffset,
                     VkDeviceSize size);

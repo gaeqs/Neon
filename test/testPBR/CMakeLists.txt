@@ -7,7 +7,9 @@ set(
         LockMouseComponent.cpp
         LockMouseComponent.h
         ConstantRotationComponent.cpp
-        ConstantRotationComponent.h BloomRender.cpp BloomRender.h ComputeIrradianceSkyboxComponent.cpp ComputeIrradianceSkyboxComponent.h)
+        ConstantRotationComponent.h
+        BloomRender.cpp
+        BloomRender.h)
 
 cmrc_add_resource_library(
         shaders_pbr

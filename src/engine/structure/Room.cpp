@@ -125,8 +125,10 @@ namespace neon {
 
         {
             DEBUG_PROFILE(p, uniformBuffers);
+
+            auto* cb = _application->getCurrentCommandBuffer();
             _application->getRender()->getGlobalUniformBuffer()
-                    .prepareForFrame();
+                    .prepareForFrame(cb);
 
             std::unordered_set<Material*> materials;
 
@@ -140,7 +142,7 @@ namespace neon {
 
             for (const auto& material: materials) {
                 if (material->getUniformBuffer() != nullptr) {
-                    material->getUniformBuffer()->prepareForFrame();
+                    material->getUniformBuffer()->prepareForFrame(cb);
                 }
             }
         }

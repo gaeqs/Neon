@@ -10,6 +10,7 @@
 #include <engine/render/Render.h>
 #include <engine/model/DefaultInstancingData.h>
 #include <engine/shader/Material.h>
+#include <engine/render/CommandBuffer.h>
 
 namespace neon::vulkan {
     void VKModel::reinitializeBuffer() {
@@ -108,25 +109,28 @@ namespace neon::vulkan {
         }
     }
 
-    void VKModel::draw(const std::shared_ptr<Material>& material) const {
+    void VKModel::draw(const Material* material) const {
+        auto sp = std::shared_ptr<Material>(const_cast<Material*>(material),
+                                            [](Material*) {});
         if (_positions.empty()) return;
         for (const auto& mesh: _meshes) {
-            if (!mesh->getMaterials().contains(material)) continue;
+            if (!mesh->getMaterials().contains(sp)) continue;
             auto& vk = _application->getImplementation();
             mesh->draw(
                     material,
-                    vk.getCurrentCommandBuffer(),
+                    vk.getCurrentCommandBuffer()
+                            ->getImplementation().getCommandBuffer(),
                     _instancingBuffer->getRaw(),
                     _positions.size(),
                     &_application->getRender()->getGlobalUniformBuffer());
         }
     }
 
-    void VKModel::drawOutside(const std::shared_ptr<Material>& material) const {
+    void VKModel::drawOutside(const Material* material,
+                              const CommandBuffer* commandBuffer) const {
         if (_positions.empty()) return;
 
-        auto& vk = _application->getImplementation();
-        auto buffer = vk.getCurrentCommandBuffer();
+        auto buffer = commandBuffer->getImplementation().getCommandBuffer();
 
         vulkan_util::beginRenderPass(buffer, material->getTarget(), true);
 

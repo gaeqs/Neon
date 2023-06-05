@@ -30,7 +30,7 @@ namespace neon::vulkan {
     }
 
     void VKMesh::draw(
-            const std::shared_ptr<Material>& material,
+            const Material* material,
             VkCommandBuffer commandBuffer,
             VkBuffer instancingBuffer,
             uint32_t instancingElements,

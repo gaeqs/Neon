@@ -83,9 +83,12 @@ namespace neon::vulkan {
          */
         [[nodiscard]] uint32_t getExternalDirtyFlag() const;
 
+        void makeInternal();
+
         void changeExternalImageView(
                 int32_t width, int32_t height,
-                VkImage image, VkImageView imageView);
+                VkImage image, VkDeviceMemory memory,
+                VkImageView imageView);
 
         void updateData(const void* data,
                         int32_t width,

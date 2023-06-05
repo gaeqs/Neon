@@ -277,11 +277,14 @@ namespace neon::vulkan {
 
     VKSimpleFrameBuffer::~VKSimpleFrameBuffer() {
         cleanup();
-        cleanupImages();
+
         // DO NOT cleanup images. Images will be destroyed automatically
         // when their respective textures are deleted.
         // This allows textures to be used externally even if
         // the frame buffer is destroyed.
+        for (const auto& texture: _textures) {
+            texture->getImplementation().makeInternal();
+        }
     }
 
     VkFramebuffer VKSimpleFrameBuffer::getRaw() const {
@@ -306,6 +309,7 @@ namespace neon::vulkan {
                     static_cast<int32_t>(_extent.width),
                     static_cast<int32_t>(_extent.height),
                     _images[i],
+                    _memories[i],
                     _imageViews[i]
             );
         }

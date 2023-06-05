@@ -159,7 +159,8 @@ namespace neon::vulkan {
         std::fill(_updated[index].begin(), _updated[index].end(), 0);
     }
 
-    void VKShaderUniformBuffer::prepareForFrame() {
+    void VKShaderUniformBuffer::prepareForFrame(
+            const CommandBuffer* commandBuffer) {
         uint32_t frame = _vkApplication->getCurrentFrame();
         for (int index = 0; index < _updated.size(); ++index) {
             auto& updated = _updated[index];
@@ -169,7 +170,7 @@ namespace neon::vulkan {
                     if (updated[frame] == 1) continue;
                     std::fill(updated.begin(), updated.end(), 1);
 
-                    auto optional = _buffers[index]->map<char>();
+                    auto optional = _buffers[index]->map<char>(commandBuffer);
                     if (optional.has_value()) {
                         auto& data = _data[index];
                         memcpy(optional.value()->raw(), data.data(),
@@ -184,27 +185,31 @@ namespace neon::vulkan {
                     if (updated[frame] == flag) continue;
                     updated[frame] = flag;
 
+                    VkDescriptorImageInfo imageInfo{};
+
                     if (texture != nullptr) {
                         auto& impl = texture->getImplementation();
-
-                        VkDescriptorImageInfo imageInfo{};
                         imageInfo.imageView = impl.getImageView();
                         imageInfo.sampler = impl.getSampler();
                         imageInfo.imageLayout = impl.getLayout();
-
-                        VkWriteDescriptorSet descriptorWrite{};
-                        descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-                        descriptorWrite.dstSet = _descriptorSets[frame];
-                        descriptorWrite.dstBinding = index;
-                        descriptorWrite.dstArrayElement = 0;
-
-                        descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-                        descriptorWrite.descriptorCount = 1;
-                        descriptorWrite.pImageInfo = &imageInfo;
-
-                        vkUpdateDescriptorSets(_vkApplication->getDevice(),
-                                               1, &descriptorWrite, 0, nullptr);
+                    } else {
+                        imageInfo.imageView = VK_NULL_HANDLE;
+                        imageInfo.sampler = VK_NULL_HANDLE;
+                        imageInfo.imageLayout = VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL;
                     }
+
+                    VkWriteDescriptorSet descriptorWrite{};
+                    descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+                    descriptorWrite.dstSet = _descriptorSets[frame];
+                    descriptorWrite.dstBinding = index;
+                    descriptorWrite.dstArrayElement = 0;
+
+                    descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+                    descriptorWrite.descriptorCount = 1;
+                    descriptorWrite.pImageInfo = &imageInfo;
+
+                    vkUpdateDescriptorSets(_vkApplication->getDevice(),
+                                           1, &descriptorWrite, 0, nullptr);
                 }
                     break;
             }

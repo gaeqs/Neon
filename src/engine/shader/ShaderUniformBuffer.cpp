@@ -31,8 +31,9 @@ namespace neon {
         _implementation.setTexture(index, std::move(texture));
     }
 
-    void ShaderUniformBuffer::prepareForFrame() {
-        _implementation.prepareForFrame();
+    void ShaderUniformBuffer::prepareForFrame(
+            const CommandBuffer* commandBuffer) {
+        _implementation.prepareForFrame(commandBuffer);
     }
 
     const ShaderUniformBuffer::Implementation&

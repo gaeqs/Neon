@@ -19,6 +19,8 @@ namespace neon {
     class Application;
 
     class Material;
+
+    class CommandBuffer;
 }
 
 namespace neon::vulkan {
@@ -71,9 +73,10 @@ namespace neon::vulkan {
 
         void flush();
 
-        void draw(const std::shared_ptr<Material>& material) const;
+        void draw(const Material* material) const;
 
-        void drawOutside(const std::shared_ptr<Material>& material) const;
+        void drawOutside(const Material* material,
+                         const CommandBuffer* commandBuffer) const;
 
     };
 }

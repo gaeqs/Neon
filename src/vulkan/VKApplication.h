@@ -11,6 +11,9 @@
 #include <memory>
 
 #include <GLFW/glfw3.h>
+
+#include <engine/render/CommandBuffer.h>
+
 #include <vulkan/vulkan.h>
 #include <vulkan/VKSwapChainSupportDetails.h>
 #include <vulkan/VKQueueFamilyIndices.h>
@@ -62,12 +65,11 @@ namespace neon::vulkan {
 
         VkCommandPool _commandPool;
 
-        std::vector<VkCommandBuffer> _commandBuffers;
+        std::vector<std::unique_ptr<CommandBuffer>> _commandBuffers;
         bool _recording = false;
 
         std::vector<VkSemaphore> _imageAvailableSemaphores;
         std::vector<VkSemaphore> _renderFinishedSemaphores;
-        std::vector<VkFence> _inFlightFences;
 
         uint32_t _currentFrame = 0;
         uint32_t _imageIndex;
@@ -179,7 +181,7 @@ namespace neon::vulkan {
 
         [[nodiscard]] VkCommandPool getCommandPool() const;
 
-        [[nodiscard]] VkCommandBuffer getCurrentCommandBuffer() const;
+        [[nodiscard]] CommandBuffer* getCurrentCommandBuffer() const;
 
         [[nodiscard]] VkDescriptorPool getImGuiPool() const;
 

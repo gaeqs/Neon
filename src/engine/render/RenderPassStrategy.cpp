@@ -29,7 +29,7 @@ namespace neon {
         for (const auto& material: materials) {
             if (material->getTarget() != _frameBuffer) continue;
             for (const auto& [model, amount]: room->usedModels()) {
-                model->draw(material);
+                model->draw(material.get());
             }
         }
         render->endRenderPass();

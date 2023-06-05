@@ -91,9 +91,7 @@ namespace neon::vulkan {
     bool VKApplication::preUpdate(Profiler& profiler) {
         {
             DEBUG_PROFILE_ID(profiler, wait, "Wait for GPU");
-            vkWaitForFences(_device, 1, &_inFlightFences[_currentFrame],
-                            VK_TRUE,
-                            UINT64_MAX);
+            _commandBuffers[_currentFrame]->reset();
         }
 
         auto& render = _room->getApplication()->getRender();
@@ -123,27 +121,8 @@ namespace neon::vulkan {
         }
 
         {
-            DEBUG_PROFILE_ID(profiler, fence, "Fence");
-            vkResetFences(_device, 1, &_inFlightFences[_currentFrame]);
-        }
-
-        {
-            DEBUG_PROFILE_ID(profiler, resetCB, "Reset Command Buffer");
-            vkResetCommandBuffer(_commandBuffers[_currentFrame], 0);
-        }
-
-        VkCommandBufferBeginInfo beginInfo{};
-        beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-        beginInfo.flags = 0; // Optional
-        beginInfo.pInheritanceInfo = nullptr; // Optional
-
-        {
             DEBUG_PROFILE_ID(profiler, beginCB, "Begin Command Buffer");
-            if (vkBeginCommandBuffer(_commandBuffers[_currentFrame], &beginInfo)
-                != VK_SUCCESS) {
-                throw std::runtime_error(
-                        "Failed to begin recording command buffer!");
-            }
+            _commandBuffers[_currentFrame]->begin(false);
         }
 
         ImGui_ImplVulkan_NewFrame();
@@ -156,45 +135,22 @@ namespace neon::vulkan {
     }
 
     void VKApplication::endDraw(Profiler& profiler) {
-        auto commandBuffer = _commandBuffers[_currentFrame];
-
-        if (vkEndCommandBuffer(commandBuffer) != VK_SUCCESS) {
-            throw std::runtime_error("Failed to record command buffer!");
-        }
+        _commandBuffers[_currentFrame]->end();
 
         _recording = false;
 
-        VkSemaphore waitSemaphores[] = {
-                _imageAvailableSemaphores[_currentFrame]};
         VkPipelineStageFlags waitStages[] = {
                 VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
 
-        VkSubmitInfo submitInfo{};
-        submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-        submitInfo.waitSemaphoreCount = 1;
-        submitInfo.pWaitSemaphores = waitSemaphores;
-        submitInfo.pWaitDstStageMask = waitStages;
-        submitInfo.commandBufferCount = 1;
-        submitInfo.pCommandBuffers = &_commandBuffers[_currentFrame];
 
-        VkSemaphore signalSemaphores[] = {
-                _renderFinishedSemaphores[_currentFrame]};
-        submitInfo.signalSemaphoreCount = 1;
-        submitInfo.pSignalSemaphores = signalSemaphores;
-
-        {
-            DEBUG_PROFILE_ID(profiler, submit, "Submit");
-            if (vkQueueSubmit(_graphicsQueue, 1, &submitInfo,
-                              _inFlightFences[_currentFrame]) != VK_SUCCESS) {
-                throw std::runtime_error(
-                        "Failed to submit draw command buffer!");
-            }
-        }
+        _commandBuffers[_currentFrame]->getImplementation().submit(
+                1, &_imageAvailableSemaphores[_currentFrame], waitStages,
+                1, &_renderFinishedSemaphores[_currentFrame]);
 
         VkPresentInfoKHR presentInfo{};
         presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
         presentInfo.waitSemaphoreCount = 1;
-        presentInfo.pWaitSemaphores = signalSemaphores;
+        presentInfo.pWaitSemaphores = &_renderFinishedSemaphores[_currentFrame];
 
         VkSwapchainKHR swapChains[] = {_swapChain};
         presentInfo.swapchainCount = 1;
@@ -642,25 +598,18 @@ namespace neon::vulkan {
     }
 
     void VKApplication::createCommandBuffers() {
-        _commandBuffers.resize(MAX_FRAMES_IN_FLIGHT);
+        _commandBuffers.clear();
+        _commandBuffers.reserve(MAX_FRAMES_IN_FLIGHT);
 
-        VkCommandBufferAllocateInfo allocInfo{};
-        allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-        allocInfo.commandPool = _commandPool;
-        allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-        allocInfo.commandBufferCount = _commandBuffers.size();
-
-        if (vkAllocateCommandBuffers(_device, &allocInfo,
-                                     _commandBuffers.data()) !=
-            VK_SUCCESS) {
-            throw std::runtime_error("Failed to allocate command buffers!");
+        for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
+            _commandBuffers.emplace_back(
+                    std::make_unique<CommandBuffer>(this, true));
         }
     }
 
     void VKApplication::createSyncObjects() {
         _imageAvailableSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
         _renderFinishedSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
-        _inFlightFences.resize(MAX_FRAMES_IN_FLIGHT);
 
         VkSemaphoreCreateInfo semaphoreInfo{};
         semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
@@ -675,9 +624,6 @@ namespace neon::vulkan {
                 VK_SUCCESS ||
                 vkCreateSemaphore(_device, &semaphoreInfo, nullptr,
                                   &_renderFinishedSemaphores[i]) !=
-                VK_SUCCESS ||
-                vkCreateFence(_device, &fenceInfo, nullptr,
-                              &_inFlightFences[i]) !=
                 VK_SUCCESS) {
                 throw std::runtime_error(
                         "Failed to create synchronization objects!");
@@ -746,9 +692,9 @@ namespace neon::vulkan {
         for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
             vkDestroySemaphore(_device, _imageAvailableSemaphores[i], nullptr);
             vkDestroySemaphore(_device, _renderFinishedSemaphores[i], nullptr);
-            vkDestroyFence(_device, _inFlightFences[i], nullptr);
         }
 
+        _commandBuffers.clear();
         vkDestroyCommandPool(_device, _commandPool, nullptr);
 
         cleanupSwapChain();
@@ -806,10 +752,10 @@ namespace neon::vulkan {
         return _commandPool;
     }
 
-    VkCommandBuffer VKApplication::getCurrentCommandBuffer() const {
+    CommandBuffer* VKApplication::getCurrentCommandBuffer() const {
         return _commandBuffers.empty()
-               ? VK_NULL_HANDLE
-               : _commandBuffers[_currentFrame];
+               ? nullptr
+               : _commandBuffers[_currentFrame].get();
     }
 
     VkDescriptorPool VKApplication::getImGuiPool() const {

@@ -199,9 +199,17 @@ namespace neon::vulkan {
         return _externalDirtyFlag;
     }
 
+    void VKTexture::makeInternal() {
+        if (!_external) {
+            std::cerr << "Image is already internal!" << std::endl;
+            return;
+        }
+        _external = false;
+    }
+
     void VKTexture::changeExternalImageView(
             int32_t width, int32_t height,
-            VkImage image, VkImageView imageView) {
+            VkImage image, VkDeviceMemory memory, VkImageView imageView) {
 
         if (!_external) {
             std::cerr << "The image view of an internal texture cannot"
@@ -212,6 +220,7 @@ namespace neon::vulkan {
         _width = width;
         _height = height;
         _image = image;
+        _imageMemory = memory;
         _imageView = imageView;
         _externalDirtyFlag++;
         if (_externalDirtyFlag == 0) {
@@ -225,6 +234,13 @@ namespace neon::vulkan {
         if (_external) {
             std::cerr << "Couldn't update data of a texture"
                          " with an external handler" << std::endl;
+            return;
+        }
+
+        if (_stagingBuffer == nullptr) {
+            std::cerr << "Couldn't update data of a texture"
+                         " staging buffer is not found because"
+                         "the texture was external" << std::endl;
             return;
         }
 

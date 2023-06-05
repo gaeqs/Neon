@@ -33,6 +33,8 @@ namespace neon {
 
     class Render;
 
+    class CommandBuffer;
+
     class Application {
 
     public:
@@ -100,6 +102,8 @@ namespace neon {
         void setRender(const std::shared_ptr<Render>& render);
 
         [[nodiscard]] FrameInformation getCurrentFrameInformation() const;
+
+        [[nodiscard]] CommandBuffer* getCurrentCommandBuffer() const;
 
         void setRoom(const std::shared_ptr<Room>& room);
 

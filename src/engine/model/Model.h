@@ -23,6 +23,8 @@ namespace neon {
 
     class Material;
 
+    class CommandBuffer;
+
     /**
      * Represents a model that can be rendered
      * inside a scene.
@@ -169,7 +171,7 @@ namespace neon {
          *
          * @param material the material.
          */
-        void draw(const std::shared_ptr<Material>& material) const;
+        void draw(const Material* material) const;
 
         /**
          * Calls the draw calls for the meshes that
@@ -183,8 +185,10 @@ namespace neon {
          * This method begins and ends a new render pass.
          *
          * @param material the material.
+         * @param commandBuffer the command buffer to use.
          */
-        void drawOutside(const std::shared_ptr<Material>& material) const;
+        void drawOutside(const Material* material,
+                         const CommandBuffer* commandBuffer) const;
 
     };
 }
