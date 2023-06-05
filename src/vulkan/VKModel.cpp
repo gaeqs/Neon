@@ -7,12 +7,15 @@
 #include <utility>
 
 #include <engine/Application.h>
+#include <engine/render/Render.h>
 #include <engine/model/DefaultInstancingData.h>
+#include <engine/shader/Material.h>
+#include <engine/render/CommandBuffer.h>
 
 namespace neon::vulkan {
     void VKModel::reinitializeBuffer() {
         _instancingBuffer = std::make_unique<StagingBuffer>(
-                _vkApplication,
+                &_application->getImplementation(),
                 VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
                 static_cast<uint32_t>(_instancingStructSize) *
                 BUFFER_DEFAULT_SIZE
@@ -21,14 +24,14 @@ namespace neon::vulkan {
     }
 
     VKModel::VKModel(Application* application, std::vector<VKMesh*> meshes) :
-            _vkApplication(&application->getImplementation()),
+            _application(application),
             _meshes(std::move(meshes)),
             _instancingStructType(
                     std::type_index(typeid(DefaultInstancingData))),
             _instancingStructSize(sizeof(DefaultInstancingData)),
             _positions(),
             _instancingBuffer(std::make_unique<StagingBuffer>(
-                    _vkApplication,
+                    &_application->getImplementation(),
                     VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
                     static_cast<uint32_t>(_instancingStructSize) *
                     BUFFER_DEFAULT_SIZE
@@ -106,20 +109,41 @@ namespace neon::vulkan {
         }
     }
 
-    void VKModel::draw(VkCommandBuffer buffer,
-                       VkRenderPass target,
-                       const ShaderUniformBuffer* global) {
+    void VKModel::draw(const Material* material) const {
+        auto sp = std::shared_ptr<Material>(const_cast<Material*>(material),
+                                            [](Material*) {});
+        if (_positions.empty()) return;
+        for (const auto& mesh: _meshes) {
+            if (!mesh->getMaterials().contains(sp)) continue;
+            auto& vk = _application->getImplementation();
+            mesh->draw(
+                    material,
+                    vk.getCurrentCommandBuffer()
+                            ->getImplementation().getCommandBuffer(),
+                    _instancingBuffer->getRaw(),
+                    _positions.size(),
+                    &_application->getRender()->getGlobalUniformBuffer());
+        }
+    }
+
+    void VKModel::drawOutside(const Material* material,
+                              const CommandBuffer* commandBuffer) const {
         if (_positions.empty()) return;
 
-        for (const auto& item: _meshes) {
-            item->draw(
+        auto buffer = commandBuffer->getImplementation().getCommandBuffer();
+
+        vulkan_util::beginRenderPass(buffer, material->getTarget(), true);
+
+        for (const auto& mesh: _meshes) {
+            mesh->draw(
+                    material,
                     buffer,
                     _instancingBuffer->getRaw(),
                     _positions.size(),
-                    global,
-                    target
-            );
+                    &_application->getRender()->getGlobalUniformBuffer());
         }
+
+        vkCmdEndRenderPass(buffer);
     }
 
     void VKModel::defineInstanceStruct(std::type_index type, size_t size) {

@@ -17,6 +17,10 @@
 
 namespace neon {
     class Application;
+
+    class Material;
+
+    class CommandBuffer;
 }
 
 namespace neon::vulkan {
@@ -26,7 +30,7 @@ namespace neon::vulkan {
 
         static constexpr uint32_t BUFFER_DEFAULT_SIZE = 1024 * 16;
 
-        VKApplication* _vkApplication;
+        Application* _application;
 
         std::vector<VKMesh*> _meshes;
 
@@ -69,9 +73,10 @@ namespace neon::vulkan {
 
         void flush();
 
-        void draw(VkCommandBuffer buffer,
-                  VkRenderPass target,
-                  const ShaderUniformBuffer* global);
+        void draw(const Material* material) const;
+
+        void drawOutside(const Material* material,
+                         const CommandBuffer* commandBuffer) const;
 
     };
 }

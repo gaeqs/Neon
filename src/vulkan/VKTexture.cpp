@@ -53,9 +53,6 @@ namespace neon::vulkan {
         auto pair = vulkan_util::createImage(
                 _vkApplication->getDevice(),
                 _vkApplication->getPhysicalDevice(),
-                VK_IMAGE_USAGE_TRANSFER_SRC_BIT |
-                VK_IMAGE_USAGE_TRANSFER_DST_BIT |
-                VK_IMAGE_USAGE_SAMPLED_BIT,
                 createInfo.image,
                 createInfo.imageView.viewType);
 
@@ -107,7 +104,9 @@ namespace neon::vulkan {
 
 
         VkSamplerCreateInfo samplerInfo = vc::vkSamplerCreateInfo(
-                createInfo.sampler, properties.limits.maxSamplerAnisotropy);
+                createInfo.sampler,
+                static_cast<float>(createInfo.image.mipmaps),
+                properties.limits.maxSamplerAnisotropy);
 
         if (vkCreateSampler(_vkApplication->getDevice(), &samplerInfo, nullptr,
                             &_sampler) != VK_SUCCESS) {
@@ -116,6 +115,8 @@ namespace neon::vulkan {
     }
 
     VKTexture::VKTexture(Application* application,
+                         VkImage image,
+                         VkDeviceMemory memory,
                          VkImageView imageView,
                          VkImageLayout layout,
                          uint32_t width, uint32_t height, uint32_t depth,
@@ -124,9 +125,11 @@ namespace neon::vulkan {
             _width(static_cast<int>(width)),
             _height(static_cast<int>(height)),
             _depth(static_cast<int>(depth)),
+            _mipmapLevels(0),
+            _layers(1),
             _stagingBuffer(nullptr),
-            _image(VK_NULL_HANDLE),
-            _imageMemory(VK_NULL_HANDLE),
+            _image(image),
+            _imageMemory(memory),
             _imageView(imageView),
             _sampler(VK_NULL_HANDLE),
             _layout(layout),
@@ -140,7 +143,9 @@ namespace neon::vulkan {
         );
 
         VkSamplerCreateInfo samplerInfo = vc::vkSamplerCreateInfo(
-                sampler, properties.limits.maxSamplerAnisotropy);
+                sampler,
+                static_cast<float>(_mipmapLevels),
+                properties.limits.maxSamplerAnisotropy);
 
         if (vkCreateSampler(_vkApplication->getDevice(), &samplerInfo, nullptr,
                             &_sampler) != VK_SUCCESS) {
@@ -170,6 +175,14 @@ namespace neon::vulkan {
         return _depth;
     }
 
+    VkImage VKTexture::getImage() const {
+        return _image;
+    }
+
+    VkDeviceMemory VKTexture::getMemory() const {
+        return _imageMemory;
+    }
+
     VkImageView VKTexture::getImageView() const {
         return _imageView;
     }
@@ -186,8 +199,17 @@ namespace neon::vulkan {
         return _externalDirtyFlag;
     }
 
+    void VKTexture::makeInternal() {
+        if (!_external) {
+            std::cerr << "Image is already internal!" << std::endl;
+            return;
+        }
+        _external = false;
+    }
+
     void VKTexture::changeExternalImageView(
-            int32_t width, int32_t height, VkImageView imageView) {
+            int32_t width, int32_t height,
+            VkImage image, VkDeviceMemory memory, VkImageView imageView) {
 
         if (!_external) {
             std::cerr << "The image view of an internal texture cannot"
@@ -197,6 +219,8 @@ namespace neon::vulkan {
 
         _width = width;
         _height = height;
+        _image = image;
+        _imageMemory = memory;
         _imageView = imageView;
         _externalDirtyFlag++;
         if (_externalDirtyFlag == 0) {
@@ -210,6 +234,13 @@ namespace neon::vulkan {
         if (_external) {
             std::cerr << "Couldn't update data of a texture"
                          " with an external handler" << std::endl;
+            return;
+        }
+
+        if (_stagingBuffer == nullptr) {
+            std::cerr << "Couldn't update data of a texture"
+                         " staging buffer is not found because"
+                         "the texture was external" << std::endl;
             return;
         }
 

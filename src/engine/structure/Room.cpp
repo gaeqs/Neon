@@ -8,7 +8,8 @@
 #include <utility>
 #include <unordered_set>
 
-#include "GameObject.h"
+#include <engine/structure/GameObject.h>
+#include <engine/structure/Component.h>
 #include <engine/Application.h>
 #include <engine/render/GraphicComponent.h>
 
@@ -63,6 +64,11 @@ namespace neon {
         _gameObjects.remove(gameObject.raw());
     }
 
+    void Room::destroyComponentLater(
+            IdentifiableWrapper<neon::Component> component) {
+        _destroyLater.insert(component);
+    }
+
     size_t Room::getGameObjectAmount() {
         return _gameObjects.size();
     }
@@ -88,6 +94,14 @@ namespace neon {
     }
 
     void Room::update(float deltaTime) {
+
+        for (const auto& component: _destroyLater) {
+            if (component.isValid()) {
+                component->destroy();
+            }
+        }
+        _destroyLater.clear();
+
         auto& p = getApplication()->getProfiler();
         {
             DEBUG_PROFILE(getApplication()->getProfiler(), update);
@@ -111,8 +125,10 @@ namespace neon {
 
         {
             DEBUG_PROFILE(p, uniformBuffers);
+
+            auto* cb = _application->getCurrentCommandBuffer();
             _application->getRender()->getGlobalUniformBuffer()
-                    .prepareForFrame();
+                    .prepareForFrame(cb);
 
             std::unordered_set<Material*> materials;
 
@@ -125,7 +141,9 @@ namespace neon {
             }
 
             for (const auto& material: materials) {
-                material->getUniformBuffer().prepareForFrame();
+                if (material->getUniformBuffer() != nullptr) {
+                    material->getUniformBuffer()->prepareForFrame(cb);
+                }
             }
         }
 

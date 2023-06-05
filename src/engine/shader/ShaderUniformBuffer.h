@@ -18,6 +18,8 @@ namespace neon {
 
     class ShaderUniformDescriptor;
 
+    class CommandBuffer;
+
     class ShaderUniformBuffer : public Asset {
 
     public:
@@ -57,7 +59,7 @@ namespace neon {
             uploadData(index, &data, sizeof(T));
         }
 
-        void prepareForFrame();
+        void prepareForFrame(const CommandBuffer* commandBuffer);
 
     };
 }

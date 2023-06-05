@@ -17,6 +17,7 @@ namespace neon {
 
         glm::vec3 _diffuseColor;
         glm::vec3 _specularColor;
+        float _radiance;
 
     public:
 
@@ -50,6 +51,10 @@ namespace neon {
         [[nodiscard]] const glm::vec3& getSpecularColor() const;
 
         void setSpecularColor(const glm::vec3& specularColor);
+
+        [[nodiscard]] float getRadiance() const;
+
+        void setRadiance(float radiance);
 
         void onStart() override;
 

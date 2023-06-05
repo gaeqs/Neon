@@ -7,14 +7,22 @@
 #include <stdexcept>
 
 #include <engine/render/TextureCreateInfo.h>
+#include <engine/render/FrameBufferTextureCreateInfo.h>
+#include <engine/shader/MaterialCreateInfo.h>
 #include <vulkan/vulkan_core.h>
 
 namespace vc = neon::vulkan::conversions;
 
 uint32_t vc::pixelSize(const TextureFormat& format) {
     switch (format) {
+        case TextureFormat::R32FG32FB32F:
+            return 12;
         case TextureFormat::R32FG32FB32FA32F:
             return 16;
+        case TextureFormat::R8:
+            return 1;
+        case TextureFormat::R8G8:
+            return 2;
         case TextureFormat::R8G8B8:
         case TextureFormat::B8G8R8:
             return 3;
@@ -37,6 +45,10 @@ uint32_t vc::pixelSize(const TextureFormat& format) {
 
 VkFormat vc::vkFormat(const TextureFormat& format) {
     switch (format) {
+        case TextureFormat::R8:
+            return VK_FORMAT_R8_UNORM;
+        case TextureFormat::R8G8:
+            return VK_FORMAT_R8G8_UNORM;
         case TextureFormat::R8G8B8:
             return VK_FORMAT_R8G8B8_UNORM;
         case TextureFormat::B8G8R8:
@@ -52,6 +64,8 @@ VkFormat vc::vkFormat(const TextureFormat& format) {
         case TextureFormat::R8G8B8A8:
             return VK_FORMAT_R8G8B8A8_UNORM;
 
+        case TextureFormat::R32FG32FB32F:
+            return VK_FORMAT_R32G32B32_SFLOAT;
         case TextureFormat::R32FG32FB32FA32F:
             return VK_FORMAT_R32G32B32A32_SFLOAT;
         case TextureFormat::R32F:
@@ -75,6 +89,16 @@ std::vector<VkFormat> vc::vkFormat(const std::vector<TextureFormat>& formats) {
     map.reserve(formats.size());
     for (const auto& item: formats) {
         map.push_back(vkFormat(item));
+    }
+    return map;
+}
+
+std::vector<VkFormat>
+vc::vkFormat(const std::vector<FrameBufferTextureCreateInfo>& infos) {
+    std::vector<VkFormat> map;
+    map.reserve(infos.size());
+    for (const auto& item: infos) {
+        map.push_back(vkFormat(item.format));
     }
     return map;
 }
@@ -211,6 +235,7 @@ VkSamplerMipmapMode vc::vkSamplerMipmapMode(const MipmapMode& mipmapMode) {
 }
 
 VkSamplerCreateInfo vc::vkSamplerCreateInfo(const SamplerCreateInfo& sampler,
+                                            float maxLod,
                                             float deviceMaxAnisotropic) {
     VkSamplerCreateInfo samplerInfo{};
     samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
@@ -226,7 +251,7 @@ VkSamplerCreateInfo vc::vkSamplerCreateInfo(const SamplerCreateInfo& sampler,
     samplerInfo.mipmapMode = vc::vkSamplerMipmapMode(sampler.mipmapMode);
     samplerInfo.mipLodBias = 0.0f;
     samplerInfo.minLod = 0.0f;
-    samplerInfo.maxLod = 0.0f;
+    samplerInfo.maxLod = maxLod;
 
     samplerInfo.maxAnisotropy = sampler.maxAnisotropy < 0.0f
                                 ? deviceMaxAnisotropic
@@ -354,6 +379,36 @@ VkBlendFactor vc::vkBlendFactor(const BlendFactor& factor) {
             return VK_BLEND_FACTOR_SRC1_ALPHA;
         case BlendFactor::ONE_MINUS_SRC1_ALPHA:
             return VK_BLEND_FACTOR_ONE_MINUS_SRC1_ALPHA;
+        default:
+            throw std::runtime_error("Conversion not found!");
+    }
+}
+
+VkPolygonMode vc::vkPolygonMode(const PolygonMode& polygonMode) {
+    switch (polygonMode) {
+        case PolygonMode::FILL:
+            return VK_POLYGON_MODE_FILL;
+        case PolygonMode::LINE:
+            return VK_POLYGON_MODE_LINE;
+        case PolygonMode::POINT:
+            return VK_POLYGON_MODE_POINT;
+        case PolygonMode::FILL_RECTANGLE_NVIDIA:
+            return VK_POLYGON_MODE_FILL_RECTANGLE_NV;
+        default:
+            throw std::runtime_error("Conversion not found!");
+    }
+}
+
+VkCullModeFlagBits vc::vkCullModeFlagBits(const CullMode& cullMode) {
+    switch (cullMode) {
+        case CullMode::NONE:
+            return VK_CULL_MODE_NONE;
+        case CullMode::FRONT:
+            return VK_CULL_MODE_FRONT_BIT;
+        case CullMode::BACK:
+            return VK_CULL_MODE_BACK_BIT;
+        case CullMode::BOTH:
+            return VK_CULL_MODE_FRONT_AND_BACK;
         default:
             throw std::runtime_error("Conversion not found!");
     }

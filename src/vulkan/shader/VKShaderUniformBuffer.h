@@ -14,15 +14,18 @@
 namespace neon {
     class Application;
 
-    class Buffer;
-
     class Texture;
 
     class ShaderUniformDescriptor;
+
+    class CommandBuffer;
 }
 
 namespace neon::vulkan {
+
     class VKApplication;
+
+    class Buffer;
 
     class VKShaderUniformBuffer {
 
@@ -51,7 +54,7 @@ namespace neon::vulkan {
 
         void setTexture(uint32_t index, std::shared_ptr<Texture> texture);
 
-        void prepareForFrame();
+        void prepareForFrame(const CommandBuffer* commandBuffer);
 
         void bind(VkCommandBuffer commandBuffer, VkPipelineLayout layout) const;
     };

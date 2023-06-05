@@ -4,6 +4,8 @@
 
 #include "StagingBuffer.h"
 
+#include <engine/render/CommandBuffer.h>
+
 namespace neon::vulkan {
     size_t StagingBuffer::size() const {
         return _deviceBuffer.size();
@@ -17,17 +19,31 @@ namespace neon::vulkan {
         return _deviceBuffer.getRaw();
     }
 
-    std::optional<std::shared_ptr<BufferMap<char>>> StagingBuffer::rawMap() {
+    std::optional<std::shared_ptr<BufferMap<char>>> StagingBuffer::rawMap(
+            const CommandBuffer* commandBuffer) {
+
+        auto* cb = commandBuffer == nullptr
+                   ? _application->getCurrentCommandBuffer()
+                   : commandBuffer;
+
         auto& buffer = _stagingBuffers[_application->getCurrentFrame()];
         return std::make_shared<StagingBufferMap<char>>(
-                _application, buffer, _deviceBuffer);
+                cb->getImplementation().getCommandBuffer(),
+                buffer, _deviceBuffer);
     }
 
     std::optional<std::shared_ptr<BufferMap<char>>>
-    StagingBuffer::rawMap(Range<uint32_t> range) {
+    StagingBuffer::rawMap(Range<uint32_t> range,
+                          const CommandBuffer* commandBuffer) {
+
+        auto* cb = commandBuffer == nullptr
+                   ? _application->getCurrentCommandBuffer()
+                   : commandBuffer;
+
         auto& buffer = _stagingBuffers[_application->getCurrentFrame()];
         return std::make_shared<StagingBufferMap<char>>(
-                _application, buffer, _deviceBuffer, range);
+                cb->getImplementation().getCommandBuffer(),
+                buffer, _deviceBuffer, range);
     }
 
 

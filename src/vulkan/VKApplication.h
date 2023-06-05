@@ -11,9 +11,14 @@
 #include <memory>
 
 #include <GLFW/glfw3.h>
+
+#include <engine/render/CommandBuffer.h>
+
 #include <vulkan/vulkan.h>
 #include <vulkan/VKSwapChainSupportDetails.h>
 #include <vulkan/VKQueueFamilyIndices.h>
+
+#include <util/profile/Profiler.h>
 
 namespace neon {
     class Room;
@@ -54,19 +59,17 @@ namespace neon::vulkan {
         VkSwapchainKHR _swapChain;
         VkFormat _swapChainImageFormat;
         VkExtent2D _swapChainExtent;
+        uint32_t _swapChainCount = 0;
 
         VkFormat _depthImageFormat;
 
-        bool _framebufferResized;
-
         VkCommandPool _commandPool;
 
-        std::vector<VkCommandBuffer> _commandBuffers;
+        std::vector<std::unique_ptr<CommandBuffer>> _commandBuffers;
         bool _recording = false;
 
         std::vector<VkSemaphore> _imageAvailableSemaphores;
         std::vector<VkSemaphore> _renderFinishedSemaphores;
-        std::vector<VkFence> _inFlightFences;
 
         uint32_t _currentFrame = 0;
         uint32_t _imageIndex;
@@ -136,9 +139,9 @@ namespace neon::vulkan {
 
         void postWindowCreation(GLFWwindow* window);
 
-        bool preUpdate();
+        bool preUpdate(Profiler& profiler);
 
-        void endDraw();
+        void endDraw(Profiler& pofiler);
 
         void finishLoop();
 
@@ -172,11 +175,13 @@ namespace neon::vulkan {
 
         [[nodiscard]] VkFormat getDepthImageFormat() const;
 
-        const VkExtent2D& getSwapChainExtent() const;
+        [[nodiscard]] const VkExtent2D& getSwapChainExtent() const;
+
+        [[nodiscard]] uint32_t getSwapChainCount() const;
 
         [[nodiscard]] VkCommandPool getCommandPool() const;
 
-        [[nodiscard]] VkCommandBuffer getCurrentCommandBuffer() const;
+        [[nodiscard]] CommandBuffer* getCurrentCommandBuffer() const;
 
         [[nodiscard]] VkDescriptorPool getImGuiPool() const;
 

@@ -13,6 +13,8 @@ namespace neon::vulkan {
         switch (type) {
             case ShaderType::VERTEX:
                 return VK_SHADER_STAGE_VERTEX_BIT;
+            case ShaderType::GEOMETRY:
+                return VK_SHADER_STAGE_GEOMETRY_BIT;
             case ShaderType::FRAGMENT:
                 return VK_SHADER_STAGE_FRAGMENT_BIT;
             default:

@@ -51,11 +51,11 @@ namespace neon::vulkan {
         info.depth = 1;
         info.mipmaps = 1;
         info.layers = 1;
+        info.usages = {TextureUsage::DEPTH_STENCIL_ATTACHMENT};
 
         auto pair = vulkan_util::createImage(
                 _vkApplication->getDevice(),
                 _vkApplication->getPhysicalDevice(),
-                VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
                 info,
                 TextureViewType::NORMAL_2D,
                 _vkApplication->getDepthImageFormat()
@@ -144,6 +144,7 @@ namespace neon::vulkan {
             _renderPass(room->getApplication(),
                         {_vkApplication->getSwapChainImageFormat()},
                         depth, true, _vkApplication->getDepthImageFormat()),
+            _swapChainCount(_vkApplication->getSwapChainCount()),
             _depth(depth) {
         fetchSwapChainImages();
         createSwapChainImageViews();
@@ -199,6 +200,7 @@ namespace neon::vulkan {
         }
 
         createFrameBuffers();
+        _swapChainCount = _vkApplication->getSwapChainCount();
     }
 
     uint32_t VKSwapChainFrameBuffer::getColorAttachmentAmount() const {
@@ -234,8 +236,6 @@ namespace neon::vulkan {
     }
 
     bool VKSwapChainFrameBuffer::requiresRecreation() {
-        auto& extent = _vkApplication->getSwapChainExtent();
-        if (extent.width == 0 || extent.height == 0) return false;
-        return extent.width != getWidth() || extent.height != getHeight();
+        return _swapChainCount != _vkApplication->getSwapChainCount();
     }
 }

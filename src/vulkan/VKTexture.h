@@ -46,7 +46,10 @@ namespace neon::vulkan {
         VKTexture(Application* application, const void* data,
                   const TextureCreateInfo& createInfo = TextureCreateInfo());
 
-        VKTexture(Application* application, VkImageView imageView,
+        VKTexture(Application* application,
+                  VkImage image,
+                  VkDeviceMemory memory,
+                  VkImageView imageView,
                   VkImageLayout layout,
                   uint32_t width, uint32_t height, uint32_t depth,
                   const SamplerCreateInfo& sampler = SamplerCreateInfo());
@@ -58,6 +61,10 @@ namespace neon::vulkan {
         [[nodiscard]] int32_t getHeight() const;
 
         [[nodiscard]] int32_t getDepth() const;
+
+        [[nodiscard]] VkImage getImage() const;
+
+        [[nodiscard]] VkDeviceMemory getMemory() const;
 
         [[nodiscard]] VkImageView getImageView() const;
 
@@ -76,8 +83,12 @@ namespace neon::vulkan {
          */
         [[nodiscard]] uint32_t getExternalDirtyFlag() const;
 
+        void makeInternal();
+
         void changeExternalImageView(
-                int32_t width, int32_t height, VkImageView imageView);
+                int32_t width, int32_t height,
+                VkImage image, VkDeviceMemory memory,
+                VkImageView imageView);
 
         void updateData(const void* data,
                         int32_t width,

@@ -9,32 +9,13 @@
 namespace neon {
     void ViewportComponent::onStart() {
         auto& r = getRoom()->getApplication()->getRender();
-        auto fb = r->getFrameBuffer(r->getPassesAmount() - 2);
-        _frameBuffer = std::dynamic_pointer_cast<SimpleFrameBuffer>(fb);
+        auto strategy = r->getStrategies()[r->getStrategyAmount() - 2];
+        auto defaultStrategy = std::dynamic_pointer_cast
+                <DefaultRenderPassStrategy>(strategy);
 
-
-        auto condition = [this](const SimpleFrameBuffer* fb) {
-            if (this->_windowSize.x <= 1 || this->_windowSize.y <= 1)
-                return false;
-
-            auto x = static_cast<uint32_t>(this->_windowSize.x);
-            auto y = static_cast<uint32_t>(this->_windowSize.y);
-
-            return fb->getWidth() != x || fb->getHeight() != y;
-        };
-
-        auto parameters = [this](const SimpleFrameBuffer* fb) {
-            return std::make_pair(
-                    static_cast<uint32_t>(this->_windowSize.x),
-                    static_cast<uint32_t>(this->_windowSize.y));
-        };
-
-        for (uint32_t i = 0; i < r->getPassesAmount(); ++i) {
-            if (auto f = std::dynamic_pointer_cast<SimpleFrameBuffer>(
-                    r->getFrameBuffer(i))) {
-                f->setRecreationCondition(condition);
-                f->setRecreationParameters(parameters);
-            }
+        if (defaultStrategy != nullptr) {
+            _frameBuffer = std::dynamic_pointer_cast<SimpleFrameBuffer>(
+                    defaultStrategy->getFrameBuffer());
         }
     }
 
@@ -43,6 +24,7 @@ namespace neon {
                                             ImVec2(100000, 100000));
         if (ImGui::Begin("Viewport")) {
             _windowSize = ImGui::GetContentRegionAvail();
+            getApplication()->forceViewport({_windowSize.x, _windowSize.y});
             if (_frameBuffer) {
                 ImGui::Image(_frameBuffer->getImGuiDescriptor(0), _windowSize);
             }

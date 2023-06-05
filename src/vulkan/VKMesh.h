@@ -8,6 +8,7 @@
 #include <cstdint>
 #include <type_traits>
 #include <vector>
+#include <unordered_set>
 #include <optional>
 #include <memory>
 
@@ -33,7 +34,7 @@ namespace neon::vulkan {
     class VKMesh {
 
         VKApplication* _vkApplication;
-        std::vector<std::shared_ptr<Material>>& _materials;
+        std::unordered_set<std::shared_ptr<Material>>& _materials;
 
         std::optional<std::unique_ptr<Buffer>> _vertexBuffer;
         std::optional<std::unique_ptr<Buffer>> _indexBuffer;
@@ -49,7 +50,7 @@ namespace neon::vulkan {
         VKMesh(const VKMesh& other) = delete;
 
         VKMesh(Application* application,
-               std::vector<std::shared_ptr<Material>>& materials,
+               std::unordered_set<std::shared_ptr<Material>>& materials,
                bool modifiableVertices,
                bool modifiableIndices
         );
@@ -122,15 +123,15 @@ namespace neon::vulkan {
 
         bool setIndices(const std::vector<uint32_t>& indices) const;
 
-        [[nodiscard]] const std::vector<std::shared_ptr<Material>>&
+        [[nodiscard]] const std::unordered_set<std::shared_ptr<Material>>&
         getMaterials() const;
 
         void draw(
+                const Material* material,
                 VkCommandBuffer commandBuffer,
                 VkBuffer instancingBuffer,
                 uint32_t instancingElements,
-                const ShaderUniformBuffer* global,
-                VkRenderPass target);
+                const ShaderUniformBuffer* global);
 
     };
 }

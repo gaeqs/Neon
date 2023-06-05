@@ -101,7 +101,7 @@ namespace neon {
                 {
                     DEBUG_PROFILE_ID(_profiler, preUpdate,
                                      "preUpdate (GPU Wait)");
-                    preUpdate = _implementation.preUpdate();
+                    preUpdate = _implementation.preUpdate(_profiler);
                 }
 
                 if (preUpdate) {
@@ -114,7 +114,7 @@ namespace neon {
                     }
                     {
                         DEBUG_PROFILE(_profiler, endDraw);
-                        _implementation.endDraw();
+                        _implementation.endDraw(_profiler);
                     }
                 }
 
@@ -170,6 +170,21 @@ namespace neon {
         return static_cast<float>(_width) / static_cast<float>(_height);
     }
 
+    glm::ivec2 Application::getViewport() const {
+        if (_forcedViewport.has_value()) {
+            return _forcedViewport.value();
+        }
+        return {_width, _height};
+    }
+
+    void Application::forceViewport(glm::ivec2 viewport) {
+        _forcedViewport = viewport;
+    }
+
+    void Application::removeForcedViewport() {
+        _forcedViewport = {};
+    }
+
     const std::shared_ptr<Render>& Application::getRender() const {
         return _render;
     }
@@ -180,6 +195,10 @@ namespace neon {
 
     FrameInformation Application::getCurrentFrameInformation() const {
         return _currentFrameInformation;
+    }
+
+    CommandBuffer* Application::getCurrentCommandBuffer() const {
+        return _implementation.getCurrentCommandBuffer();
     }
 
     void Application::setRoom(const std::shared_ptr<Room>& room) {

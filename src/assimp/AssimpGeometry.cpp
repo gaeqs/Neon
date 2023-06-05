@@ -104,8 +104,7 @@ namespace assimp_geometry {
             auto deltaUV1 = uvB - uvA;
             auto deltaUV2 = uvC - uvA;
 
-            float f =
-                    1.0f / (deltaUV1.x * deltaUV2.y - deltaUV2.x * deltaUV1.y);
+            float f = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV2.x * deltaUV1.y);
             auto t = glm::normalize(glm::vec3{
                     f * (deltaUV2.y * edge1.x - deltaUV1.y * edge2.x),
                     f * (deltaUV2.y * edge1.y - deltaUV1.y * edge2.y),
@@ -118,6 +117,12 @@ namespace assimp_geometry {
                     f * (deltaUV2.x * edge2.z - deltaUV1.x * edge1.z)
             });
 
+            if(std::isinf(f)) {
+                // t and b are invalid.
+                // make them random.
+                t = glm::vec3(1.0f, 0.0f, 0.0f);
+                b = glm::vec3(0.0f, 0.0f, 1.0f);
+            }
 
             for (uint32_t cvIndex = 0; cvIndex < face.mNumIndices; ++cvIndex) {
                 auto currentVertex = face.mIndices[cvIndex];
@@ -132,6 +137,12 @@ namespace assimp_geometry {
                 auto area = areas[{currentVertex, faceIndex}];
                 tangents[currentVertex] = tv * area;
                 count[currentVertex] += area;
+                if(std::isnan(area)) {
+                    std::cout << "B" << std::endl;
+                }
+                if(std::isnan(tv.x) || std::isnan(tv.y) || std::isnan(tv.z)) {
+                    std::cout << "C" << std::endl;
+                }
             }
         }
 
@@ -147,6 +158,9 @@ namespace assimp_geometry {
             auto n = glm::vec3(an.x, an.y, an.z);
             t = glm::normalize(t - n * glm::dot(n, t));
             tangents[i] = t;
+            if(std::isnan(tangents[i].x)) {
+                std::cout << "AAAAAAAAAA" << std::endl;
+            }
         }
 
         return tangents;

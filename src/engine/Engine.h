@@ -23,7 +23,9 @@
 #include <engine/model/Mesh.h>
 #include <engine/model/Model.h>
 
+#include <engine/render/CommandBuffer.h>
 #include <engine/render/FrameBuffer.h>
+#include <engine/render/FrameBufferTextureCreateInfo.h>
 #include <engine/render/FrameInformation.h>
 #include <engine/render/GraphicComponent.h>
 #include <engine/render/Render.h>

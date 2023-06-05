@@ -7,3 +7,4 @@ add_custom_command(TARGET tests PRE_BUILD
 
 add_subdirectory(test1)
 add_subdirectory(testCloth)
+add_subdirectory(testPBR)

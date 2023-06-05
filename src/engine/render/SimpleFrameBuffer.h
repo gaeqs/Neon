@@ -9,6 +9,7 @@
 
 #include <engine/render/FrameBuffer.h>
 #include <engine/render/TextureCreateInfo.h>
+#include <engine/render/FrameBufferTextureCreateInfo.h>
 
 #ifdef USE_VULKAN
 
@@ -24,28 +25,41 @@ namespace neon {
 
     public:
 
+        using Condition = std::function<bool(const SimpleFrameBuffer*)>;
+
+        using Parameters = std::function<std::pair<uint32_t, uint32_t>(
+                Application*)>;
+
 #ifdef USE_VULKAN
-    using Implementation = vulkan::VKSimpleFrameBuffer;
+        using Implementation = vulkan::VKSimpleFrameBuffer;
 #endif
 
     private:
 
+        Application* _application;
         Implementation _implementation;
 
-        std::function<bool(const SimpleFrameBuffer*)> _recreationCondition;
-        std::function<std::pair<uint32_t, uint32_t>(const SimpleFrameBuffer*)>
-                _recreationParameters;
+        Condition _recreationCondition;
+        Parameters _recreationParameters;
+
+    public:
 
         static bool defaultRecreationCondition(const SimpleFrameBuffer*);
 
         static std::pair<uint32_t, uint32_t>
-        defaultRecreationParameters(const SimpleFrameBuffer*);
-
-    public:
+        defaultRecreationParameters(Application*);
 
         SimpleFrameBuffer(Application* application,
-                          const std::vector<TextureFormat>& colorFormats,
-                          bool depth);
+                          const std::vector<FrameBufferTextureCreateInfo>& textureInfos,
+                          bool depth,
+                          Condition condition = defaultRecreationCondition,
+                          const Parameters& parameters = defaultRecreationParameters);
+
+        SimpleFrameBuffer(Application* application,
+                          const std::vector<FrameBufferTextureCreateInfo>& textureInfos,
+                          std::shared_ptr<Texture> depthTexture,
+                          Condition condition = defaultRecreationCondition,
+                          const Parameters& parameters = defaultRecreationParameters);
 
         ~SimpleFrameBuffer() override = default;
 
@@ -65,18 +79,13 @@ namespace neon {
 
         [[nodiscard]] uint32_t getHeight() const override;
 
-        [[nodiscard]] const std::function<bool(const SimpleFrameBuffer*)>&
-        getRecreationCondition() const;
+        [[nodiscard]] const Condition& getRecreationCondition() const;
 
-        void setRecreationCondition(const std::function<bool(
-                const SimpleFrameBuffer*)>& recreationCondition);
+        void setRecreationCondition(const Condition& recreationCondition);
 
-        [[nodiscard]] const std::function<std::pair<uint32_t, uint32_t>(
-                const SimpleFrameBuffer*)>& getRecreationParameters() const;
+        [[nodiscard]] const Parameters& getRecreationParameters() const;
 
-        void setRecreationParameters(
-                const std::function<std::pair<uint32_t, uint32_t>(
-                        const SimpleFrameBuffer*)>& recreationParameters);
+        void setRecreationParameters(const Parameters& recreationParameters);
 
         [[nodiscard]] ImTextureID getImGuiDescriptor(uint32_t index);
     };

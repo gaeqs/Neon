@@ -8,6 +8,7 @@
 namespace neon {
     enum class ShaderType {
         VERTEX,
+        GEOMETRY,
         FRAGMENT
     };
 }

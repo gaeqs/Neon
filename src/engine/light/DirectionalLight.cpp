@@ -14,7 +14,8 @@ namespace neon {
             _graphicComponent(),
             _customModel(),
             _diffuseColor(1.0f, 1.0f, 1.0f),
-            _specularColor(1.0f, 1.0f, 1.0f) {
+            _specularColor(1.0f, 1.0f, 1.0f),
+            _radiance(1.0f) {
     }
 
     DirectionalLight::DirectionalLight(const std::shared_ptr<Model>& model)
@@ -22,7 +23,8 @@ namespace neon {
             _graphicComponent(),
             _customModel(model),
             _diffuseColor(1.0f, 1.0f, 1.0f),
-            _specularColor(1.0f, 1.0f, 1.0f) {
+            _specularColor(1.0f, 1.0f, 1.0f),
+            _radiance(1.0f) {
     }
 
     void DirectionalLight::onStart() {
@@ -42,8 +44,8 @@ namespace neon {
         auto direction = getGameObject()->getTransform().getRotation()
                          * glm::vec3(0.0f, 0.0f, -1.0f);
         _graphicComponent->uploadData(Data{
-                _diffuseColor,
-                _specularColor,
+                _diffuseColor * _radiance,
+                _specularColor * _radiance,
                 direction
         });
     }
@@ -64,6 +66,14 @@ namespace neon {
         _specularColor = specularColor;
     }
 
+    float DirectionalLight::getRadiance() const {
+        return _radiance;
+    }
+
+    void DirectionalLight::setRadiance(float radiance) {
+        _radiance = radiance;
+    }
+
     void DirectionalLight::drawEditor() {
         float w = (ImGui::GetContentRegionAvail().x -
                    ImGui::GetStyle().ItemSpacing.y) * 0.50f;
@@ -80,5 +90,11 @@ namespace neon {
         ImGui::ColorPicker3(imGuiUId("##specular").c_str(), &_specularColor.x,
                             ImGuiColorEditFlags_NoSidePreview);
         ImGui::PopItemWidth();
+
+        ImGui::AlignTextToFramePadding();
+        ImGui::Text("Radiance:");
+        ImGui::SameLine();
+        ImGui::DragFloat(imGuiUId("##radiance").c_str(), &_radiance,
+                         0.5f, 0.0f, 1000.0f);
     }
 }

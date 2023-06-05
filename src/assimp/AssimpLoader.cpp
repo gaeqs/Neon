@@ -221,7 +221,7 @@ namespace neon::assimp_loader {
         }
 
         std::shared_ptr<Mesh> loadMesh(const aiMesh* mesh,
-                                       Mat material,
+                                       const Mat& material,
                                        const LoaderInfo& info) {
             std::vector<char> dataArray;
             dataArray.reserve(mesh->mNumVertices
@@ -284,9 +284,12 @@ namespace neon::assimp_loader {
                         const LoaderInfo& info) {
             for (int i = 0; i < scene->mNumMeshes; ++i) {
                 auto* aiMesh = scene->mMeshes[i];
+                auto mat = materials.size() > aiMesh->mMaterialIndex
+                           ? materials[aiMesh->mMaterialIndex]
+                           : nullptr;
                 meshes.push_back(loadMesh(
                         aiMesh,
-                        materials[aiMesh->mMaterialIndex],
+                        mat,
                         info
                 ));
             }
@@ -336,10 +339,12 @@ namespace neon::assimp_loader {
         std::vector<std::shared_ptr<Mesh>> meshes;
         std::vector<Mat> materials;
         meshes.reserve(scene->mNumMeshes);
-        materials.reserve(scene->mNumMaterials);
 
         loadTextures(scene, textures, loadedTextures, info);
-        loadMaterials(scene, materials, textures, info);
+        if (info.loadMaterials) {
+            materials.reserve(scene->mNumMaterials);
+            loadMaterials(scene, materials, textures, info);
+        }
         loadMeshes(scene, meshes, materials, info);
 
         auto model = std::make_shared<Model>(

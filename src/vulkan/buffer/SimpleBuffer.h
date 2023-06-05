@@ -75,10 +75,12 @@ namespace neon::vulkan {
 
         bool _modifiable;
 
-        std::optional<std::shared_ptr<BufferMap<char>>> rawMap() override;
+        std::optional<std::shared_ptr<BufferMap<char>>> rawMap(
+                const CommandBuffer* commandBuffer = nullptr) override;
 
         std::optional<std::shared_ptr<BufferMap<char>>> rawMap(
-                Range<uint32_t> range) override;
+                Range<uint32_t> range,
+                const CommandBuffer* commandBuffer = nullptr) override;
 
     public:
 

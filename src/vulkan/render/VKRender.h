@@ -5,14 +5,18 @@
 #ifndef NEON_VKRENDER_H
 #define NEON_VKRENDER_H
 
-#include <engine/render/RenderPassStrategy.h>
+#include <vector>
+#include <memory>
 
+#include <engine/render/RenderPassStrategy.h>
 #include <util/ClusteredLinkedCollection.h>
 
 namespace neon {
     class Application;
 
     class Room;
+
+    class Material;
 }
 
 namespace neon::vulkan {
@@ -31,8 +35,14 @@ namespace neon::vulkan {
 
         void render(
                 Room* room,
-                const std::vector<RenderPassStrategy>& strategies)
-        const;
+                const Render* render,
+                const std::vector<std::shared_ptr<Material>>& sortedMaterials,
+                const std::vector<std::shared_ptr<RenderPassStrategy>>& strategies) const;
+
+        void beginRenderPass(const std::shared_ptr<FrameBuffer>& fb,
+                             bool clear) const;
+
+        void endRenderPass() const;
 
         void setupFrameBufferRecreation();
 

@@ -21,6 +21,7 @@ namespace neon {
         float _constantAttenuation;
         float _linearAttenuation;
         float _quadraticAttenuation;
+        float _radiance;
 
     public:
 
@@ -60,6 +61,10 @@ namespace neon {
         [[nodiscard]] const glm::vec3& getSpecularColor() const;
 
         void setSpecularColor(const glm::vec3& specularColor);
+
+        [[nodiscard]] float getRadiance() const;
+
+        void setRadiance(float radiance);
 
         [[nodiscard]] float getConstantAttenuation() const;
 

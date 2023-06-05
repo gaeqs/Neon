@@ -19,10 +19,9 @@
 
 #define REGISTER_COMPONENT(clazz, name)                         \
     namespace {                                                 \
-        using namespace neon;                                   \
         struct _##clazz##_component_register_ {                 \
             _##clazz##_component_register_() {                  \
-                ComponentRegister::instance()                   \
+                neon::ComponentRegister::instance()             \
                     .registerComponent< clazz >( name );        \
             }                                                   \
         };                                                      \
@@ -119,6 +118,11 @@ namespace neon {
         void destroy();
 
         /**
+         * Destroys this component on the next frame.
+         */
+        void destroyLater();
+
+        /**
          * Virtual method invoked when this component is constructed.
          */
         virtual void onConstruction();
@@ -161,7 +165,6 @@ namespace neon {
          * @param event the event.
          */
         virtual void onCursorMove(const CursorMoveEvent& event);
-
 
         /**
          * Draws the editor of this component.

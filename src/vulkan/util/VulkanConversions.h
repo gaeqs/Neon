@@ -5,7 +5,6 @@
 #ifndef NEON_VULKANCONVERSIONS_H
 #define NEON_VULKANCONVERSIONS_H
 
-#include "engine/shader/MaterialCreateInfo.h"
 #include <vector>
 
 #include <vulkan/vulkan.h>
@@ -25,7 +24,10 @@ namespace neon {
     enum class BlendOperation;
     enum class BlendFactor;
     enum class BlendingLogicOperation;
+    enum class PolygonMode;
+    enum class CullMode;
     struct SamplerCreateInfo;
+    struct FrameBufferTextureCreateInfo;
 }
 
 namespace neon::vulkan::conversions {
@@ -35,6 +37,9 @@ namespace neon::vulkan::conversions {
     VkFormat vkFormat(const TextureFormat& format);
 
     std::vector<VkFormat> vkFormat(const std::vector<TextureFormat>& formats);
+
+    std::vector<VkFormat>
+    vkFormat(const std::vector<FrameBufferTextureCreateInfo>& infos);
 
     VkImageTiling vkImageTiling(const Tiling& tiling);
 
@@ -53,15 +58,20 @@ namespace neon::vulkan::conversions {
     VkSamplerMipmapMode vkSamplerMipmapMode(const MipmapMode& mipmapMode);
 
     VkSamplerCreateInfo vkSamplerCreateInfo(const SamplerCreateInfo& sampler,
+                                            float maxLod,
                                             float deviceMaxAnisotropic);
 
     VkCompareOp vkCompareOp(const DepthCompareOperation& op);
 
     VkBlendOp vkBlendOp(const BlendOperation& op);
 
-    VkLogicOp vkLogicOp (const BlendingLogicOperation& op);
+    VkLogicOp vkLogicOp(const BlendingLogicOperation& op);
 
     VkBlendFactor vkBlendFactor(const BlendFactor& factor);
+
+    VkPolygonMode vkPolygonMode(const PolygonMode& polygonMode);
+
+    VkCullModeFlagBits vkCullModeFlagBits(const CullMode& cullMode);
 }
 
 #endif //NEON_VULKANCONVERSIONS_H

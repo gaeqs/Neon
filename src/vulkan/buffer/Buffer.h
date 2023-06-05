@@ -11,6 +11,10 @@
 #include <vulkan/vulkan.h>
 #include <util/Range.h>
 
+namespace neon {
+    class CommandBuffer;
+}
+
 namespace neon::vulkan {
 
     class VKApplication;
@@ -46,10 +50,12 @@ namespace neon::vulkan {
 
     class Buffer {
 
-        virtual std::optional<std::shared_ptr<BufferMap<char>>> rawMap() = 0;
+        virtual std::optional<std::shared_ptr<BufferMap<char>>> rawMap(
+                const CommandBuffer* commandBuffer = nullptr) = 0;
 
         virtual std::optional<std::shared_ptr<BufferMap<char>>> rawMap(
-                Range<uint32_t> range) = 0;
+                Range <uint32_t> range,
+                const CommandBuffer* commandBuffer = nullptr) = 0;
 
     public:
 
@@ -68,8 +74,9 @@ namespace neon::vulkan {
         virtual VKApplication* getApplication() const = 0;
 
         template<class T>
-        std::optional<std::shared_ptr<BufferMap<T>>> map() {
-            auto optional = rawMap();
+        std::optional<std::shared_ptr<BufferMap<T>>> map(
+                const CommandBuffer* commandBuffer = nullptr) {
+            auto optional = rawMap(commandBuffer);
             if (optional.has_value()) {
                 return std::reinterpret_pointer_cast<BufferMap<T>>(
                         optional.value());
@@ -79,8 +86,9 @@ namespace neon::vulkan {
 
         template<class T>
         std::optional<std::shared_ptr<BufferMap<T>>>
-        map(Range<uint32_t> range) {
-            auto optional = rawMap(range);
+        map(Range <uint32_t> range,
+            const CommandBuffer* commandBuffer = nullptr) {
+            auto optional = rawMap(range, commandBuffer);
             if (optional.has_value()) {
                 return std::reinterpret_pointer_cast<BufferMap<T>>(
                         optional.value());

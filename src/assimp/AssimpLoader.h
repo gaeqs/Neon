@@ -153,6 +153,11 @@ namespace neon::assimp_loader {
         InstanceData instanceData;
 
         /**
+         * Whether materials should be loaded.
+         */
+        bool loadMaterials = true;
+
+        /**
          * Whether UVs should be flipped.
          */
         bool flipUVs = true;

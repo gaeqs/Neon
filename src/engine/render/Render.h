@@ -39,7 +39,7 @@ namespace neon {
 
         Implementation _implementation;
         Application* _application;
-        std::vector<RenderPassStrategy> _strategies;
+        std::vector<std::shared_ptr<RenderPassStrategy>> _strategies;
 
         std::shared_ptr<ShaderUniformDescriptor> _globalUniformDescriptor;
         ShaderUniformBuffer _globalUniformBuffer;
@@ -56,7 +56,7 @@ namespace neon {
 
         [[nodiscard]] Implementation& getImplementation();
 
-        void addRenderPass(const RenderPassStrategy& strategy);
+        void addRenderPass(const std::shared_ptr<RenderPassStrategy>& strategy);
 
         void clearRenderPasses();
 
@@ -64,9 +64,10 @@ namespace neon {
 
         void checkFrameBufferRecreationConditions();
 
-        [[nodiscard]] size_t getPassesAmount() const;
+        [[nodiscard]] size_t getStrategyAmount() const;
 
-        [[nodiscard]] std::shared_ptr<FrameBuffer> getFrameBuffer(size_t index);
+        [[nodiscard]] const std::vector<std::shared_ptr<RenderPassStrategy>>&
+        getStrategies() const;
 
         [[nodiscard]] const std::shared_ptr<ShaderUniformDescriptor>&
         getGlobalUniformDescriptor() const;
@@ -74,6 +75,15 @@ namespace neon {
         [[nodiscard]] const ShaderUniformBuffer& getGlobalUniformBuffer() const;
 
         [[nodiscard]] ShaderUniformBuffer& getGlobalUniformBuffer();
+
+        // region Strategy methods
+
+        void beginRenderPass(const std::shared_ptr<FrameBuffer>& fb,
+                             bool clear = true) const;
+
+        void endRenderPass() const;
+
+        // endregion
     };
 }
 

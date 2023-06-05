@@ -7,33 +7,39 @@
 #include <engine/model/Model.h>
 #include <engine/structure/Room.h>
 #include <engine/render/FrameBuffer.h>
-
-#include <vulkan/render/VKRenderPass.h>
+#include <engine/render/Render.h>
+#include <engine/shader/Material.h>
 
 namespace neon {
-    RenderPassStrategy::RenderPassStrategy(
-            const std::shared_ptr<FrameBuffer>& _frameBuffer,
-            const std::function<void(
-                    Room*,
-                    std::shared_ptr<FrameBuffer>)>& _strategy) :
-            frameBuffer(_frameBuffer),
-            strategy(_strategy) {
 
+    DefaultRenderPassStrategy::DefaultRenderPassStrategy(
+            const std::shared_ptr<FrameBuffer>& frameBuffer)
+            : _frameBuffer(frameBuffer) {}
+
+    const std::shared_ptr<FrameBuffer>&
+    DefaultRenderPassStrategy::getFrameBuffer() const {
+        return _frameBuffer;
     }
 
-    void RenderPassStrategy::defaultStrategy(
+    void DefaultRenderPassStrategy::render(
             Room* room,
-            const std::shared_ptr<FrameBuffer>& target) {
-        auto& app = room->getApplication()->getImplementation();
-        auto renderPass = target->getImplementation().getRenderPass().getRaw();
-        auto globalUniformBuffer = &room->getApplication()->getRender()
-                ->getGlobalUniformBuffer();
-        for (const auto& [model, amount]: room->usedModels()) {
-            model->getImplementation().draw(
-                    app.getCurrentCommandBuffer(),
-                    renderPass,
-                    globalUniformBuffer
-            );
+            const Render* render,
+            const std::vector<std::shared_ptr<Material>>& materials) const {
+        render->beginRenderPass(_frameBuffer);
+        for (const auto& material: materials) {
+            if (material->getTarget() != _frameBuffer) continue;
+            for (const auto& [model, amount]: room->usedModels()) {
+                model->draw(material.get());
+            }
         }
+        render->endRenderPass();
+    }
+
+    bool DefaultRenderPassStrategy::requiresRecreation() {
+        return _frameBuffer->requiresRecreation();
+    }
+
+    void DefaultRenderPassStrategy::recreate() {
+        _frameBuffer->recreate();
     }
 }

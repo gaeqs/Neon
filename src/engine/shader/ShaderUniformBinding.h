@@ -5,11 +5,10 @@
 #ifndef NEON_SHADERUNIFORMBINDING_H
 #define NEON_SHADERUNIFORMBINDING_H
 
-#include <engine/structure/IdentifiableWrapper.h>
-#include <engine/render/Texture.h>
 #include <cstdint>
 
 namespace neon {
+
     enum class UniformBindingType {
         BUFFER,
         IMAGE
@@ -21,6 +20,23 @@ namespace neon {
 
         ShaderUniformBinding(UniformBindingType type, uint32_t size)
                 : type(type), size(size) {}
+
+        /**
+         * Creates a ShaderUniformBinding representing an image.
+         * @return the ShaderUniformBinding.
+         */
+        inline static ShaderUniformBinding image() {
+            return {UniformBindingType::IMAGE, 0};
+        }
+
+        /**
+         * Creates a ShaderUniformBinding representing a buffer.
+         * @param the size of the buffer.
+         * @return the ShaderUniformBinding.
+         */
+        inline static ShaderUniformBinding buffer(uint32_t size) {
+            return {UniformBindingType::BUFFER, size};
+        }
     };
 }
 

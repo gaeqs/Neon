@@ -7,8 +7,10 @@
 #include <stdexcept>
 
 #include <engine/model/InputDescription.h>
+#include <engine/render/FrameBuffer.h>
 #include <vulkan/VKApplication.h>
 #include <vulkan/util/VulkanConversions.h>
+#include <vulkan/render/VKRenderPass.h>
 
 namespace vc = neon::vulkan::conversions;
 
@@ -64,16 +66,16 @@ namespace neon::vulkan::vulkan_util {
         vkFreeCommandBuffers(device, pool, 1, &buffer);
     }
 
-    void copyBuffer(VKApplication* application,
+    void copyBuffer(VkCommandBuffer commandBuffer,
                     VkBuffer source, VkBuffer destiny, VkDeviceSize size) {
 
         VkBufferCopy copyRegion{};
         copyRegion.size = size;
-        vkCmdCopyBuffer(application->getCurrentCommandBuffer(),
+        vkCmdCopyBuffer(commandBuffer,
                         source, destiny, 1, &copyRegion);
     }
 
-    void copyBuffer(VKApplication* application,
+    void copyBuffer(VkCommandBuffer commandBuffer,
                     VkBuffer source, VkBuffer destiny,
                     VkDeviceSize sourceOffset, VkDeviceSize destinyOffset,
                     VkDeviceSize size) {
@@ -81,7 +83,7 @@ namespace neon::vulkan::vulkan_util {
         copyRegion.size = size;
         copyRegion.srcOffset = sourceOffset;
         copyRegion.dstOffset = destinyOffset;
-        vkCmdCopyBuffer(application->getCurrentCommandBuffer(),
+        vkCmdCopyBuffer(commandBuffer,
                         source, destiny, 1, &copyRegion);
 
     }
@@ -89,7 +91,6 @@ namespace neon::vulkan::vulkan_util {
     std::pair<VkImage, VkDeviceMemory> createImage(
             VkDevice device,
             VkPhysicalDevice physicalDevice,
-            VkImageUsageFlags usage,
             const ImageCreateInfo& info,
             TextureViewType viewType,
             VkFormat override) {
@@ -112,9 +113,14 @@ namespace neon::vulkan::vulkan_util {
             imageInfo.format = override;
         }
 
+        VkImageUsageFlags usages = 0;
+        for (const auto& usage: info.usages) {
+            usages |= static_cast<VkImageUsageFlagBits>(usage);
+        }
+
         imageInfo.tiling = vc::vkImageTiling(info.tiling);
         imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-        imageInfo.usage = usage;
+        imageInfo.usage = usages;
         imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
         imageInfo.samples = vc::vkSampleCountFlagBits(info.samples);
 
@@ -240,7 +246,8 @@ namespace neon::vulkan::vulkan_util {
 
         if (application->isRecordingCommandBuffer()) {
             vkCmdPipelineBarrier(
-                    application->getCurrentCommandBuffer(),
+                    application->getCurrentCommandBuffer()
+                    ->getImplementation().getCommandBuffer(),
                     sourceStage, destinationStage,
                     0, 0, nullptr, 0,
                     nullptr, 1, &barrier
@@ -291,7 +298,8 @@ namespace neon::vulkan::vulkan_util {
 
         if (application->isRecordingCommandBuffer()) {
             vkCmdCopyBufferToImage(
-                    application->getCurrentCommandBuffer(),
+                    application->getCurrentCommandBuffer()
+                    ->getImplementation().getCommandBuffer(),
                     buffer,
                     image,
                     VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
@@ -329,7 +337,8 @@ namespace neon::vulkan::vulkan_util {
         VkCommandBuffer commandBuffer;
 
         if (application->isRecordingCommandBuffer()) {
-            commandBuffer = application->getCurrentCommandBuffer();
+            commandBuffer = application->getCurrentCommandBuffer()
+                    ->getImplementation().getCommandBuffer();
         } else {
             commandBuffer = beginSingleTimeCommandBuffer(
                     application->getDevice(),
@@ -531,5 +540,59 @@ namespace neon::vulkan::vulkan_util {
         }
 
         return {bindingDescription, attributes};
+    }
+
+    void beginRenderPass(VkCommandBuffer commandBuffer,
+                         const std::shared_ptr<FrameBuffer>& fb,
+                         bool clear) {
+        auto& frameBuffer = fb->getImplementation();
+        auto& renderPass = frameBuffer.getRenderPass();
+
+        VkRenderPassBeginInfo renderPassInfo{};
+        renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+        renderPassInfo.renderPass = renderPass.getRaw();
+        renderPassInfo.framebuffer = frameBuffer.getRaw();
+        renderPassInfo.renderArea.offset = {0, 0};
+        renderPassInfo.renderArea.extent = {
+                frameBuffer.getWidth(),
+                frameBuffer.getHeight()
+        };
+
+        std::vector<VkClearValue> clearValues;
+        if (clear) {
+            clearValues.resize(frameBuffer.getColorAttachmentAmount() +
+                               (frameBuffer.hasDepth() ? 1 : 0));
+
+            for (uint32_t i = 0; i < frameBuffer.getColorAttachmentAmount();
+                 ++i) {
+                clearValues[i].color = {0.0f, 0.0f, 0.0f, 1.0f};
+            }
+
+            if (frameBuffer.hasDepth()) {
+                clearValues[clearValues.size() - 1].depthStencil = {1.0f, 0};
+            }
+
+            renderPassInfo.clearValueCount = clearValues.size();
+            renderPassInfo.pClearValues = clearValues.data();
+        } else {
+            renderPassInfo.clearValueCount = 0;
+        }
+
+        vkCmdBeginRenderPass(commandBuffer, &renderPassInfo,
+                             VK_SUBPASS_CONTENTS_INLINE);
+
+        VkViewport viewport{};
+        viewport.x = 0.0f;
+        viewport.y = 0.0f;
+        viewport.width = static_cast<float>(frameBuffer.getWidth());
+        viewport.height = static_cast<float>(frameBuffer.getHeight());
+        viewport.minDepth = 0.0f;
+        viewport.maxDepth = 1.0f;
+        vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
+
+        VkRect2D scissor{};
+        scissor.offset = {0, 0};
+        scissor.extent = {frameBuffer.getWidth(), frameBuffer.getHeight()};
+        vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
     }
 }

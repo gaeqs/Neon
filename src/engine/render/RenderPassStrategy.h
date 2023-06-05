@@ -13,19 +13,51 @@ namespace neon {
 
     class FrameBuffer;
 
-    struct RenderPassStrategy {
+    class Material;
 
-        std::shared_ptr<FrameBuffer> frameBuffer;
-        std::function<void(Room*, std::shared_ptr<FrameBuffer>)> strategy;
+    class Render;
 
-        RenderPassStrategy(
-                const std::shared_ptr<FrameBuffer>& _frameBuffer,
-                const std::function<void(Room*, std::shared_ptr<FrameBuffer>)>&
-                _strategy);
+    class RenderPassStrategy {
 
-        static void defaultStrategy(
+    public:
+
+        RenderPassStrategy() = default;
+
+        virtual ~RenderPassStrategy() = default;
+
+        virtual void render(
                 Room* room,
-                const std::shared_ptr<FrameBuffer>& target);
+                const Render* render,
+                const std::vector<std::shared_ptr<Material>>& sortedMaterials)
+        const = 0;
+
+        virtual bool requiresRecreation() = 0;
+
+        virtual void recreate() = 0;
+
+    };
+
+    class DefaultRenderPassStrategy : public RenderPassStrategy {
+
+        std::shared_ptr<FrameBuffer> _frameBuffer;
+
+    public:
+
+        explicit DefaultRenderPassStrategy(
+                const std::shared_ptr<FrameBuffer>& frameBuffer);
+
+        [[nodiscard]] const std::shared_ptr<FrameBuffer>&
+        getFrameBuffer() const;
+
+        void render(
+                Room* room,
+                const Render* render,
+                const std::vector<std::shared_ptr<Material>>& sortedMaterials)
+        const override;
+
+        bool requiresRecreation() override;
+
+        void recreate() override;
     };
 }
 

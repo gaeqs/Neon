@@ -9,12 +9,15 @@
 #include <cstdint>
 #include <vector>
 #include <optional>
+#include <memory>
 #include <vulkan/vulkan.h>
 
 #include <engine/render/TextureCreateInfo.h>
 
 namespace neon {
     struct InputDescription;
+
+    class FrameBuffer;
 }
 
 namespace neon::vulkan {
@@ -32,10 +35,10 @@ namespace neon::vulkan::vulkan_util {
             VkDevice device, VkQueue queue,
             VkCommandPool pool, VkCommandBuffer buffer);
 
-    void copyBuffer(VKApplication* application,
+    void copyBuffer(VkCommandBuffer commandBuffer,
                     VkBuffer source, VkBuffer destiny, VkDeviceSize size);
 
-    void copyBuffer(VKApplication* application,
+    void copyBuffer(VkCommandBuffer commandBuffer,
                     VkBuffer source, VkBuffer destiny,
                     VkDeviceSize sourceOffset, VkDeviceSize destinyOffset,
                     VkDeviceSize size);
@@ -43,7 +46,6 @@ namespace neon::vulkan::vulkan_util {
     std::pair<VkImage, VkDeviceMemory> createImage(
             VkDevice device,
             VkPhysicalDevice physicalDevice,
-            VkImageUsageFlags usage,
             const ImageCreateInfo& info,
             TextureViewType viewType,
             VkFormat override = VK_FORMAT_UNDEFINED);
@@ -85,6 +87,9 @@ namespace neon::vulkan::vulkan_util {
     toVulkanDescription(uint32_t binding, uint32_t startLocation,
                         const InputDescription& description);
 
+    void beginRenderPass(VkCommandBuffer commandBuffer,
+                         const std::shared_ptr<FrameBuffer>& fb,
+                         bool clear);
 }
 
 

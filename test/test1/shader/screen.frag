@@ -27,7 +27,7 @@ void main() {
     float depth = texture(depthTexture, fragTexCoords).r;
     if (depth == 1.0f) {
         // DRAW SKYBOX
-        vec4 projectedPosition = vec4(fragPosition, depth, 1.0f);
+        vec4 projectedPosition = vec4(fragPosition, 1.0f, 1.0f);
         vec4 position4 = inverseProjection * projectedPosition;
         vec3 position = position4.xyz / position4.w;
 
