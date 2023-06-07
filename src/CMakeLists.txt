@@ -146,8 +146,16 @@ set(VULKAN_SOURCES
         vulkan/util/VulkanConversions.cpp
         vulkan/util/VulkanConversions.h vulkan/render/VKCommandBuffer.cpp vulkan/render/VKCommandBuffer.h)
 
+if (NEON_USE_QT)
+    list(APPEND VULKAN_SOURCES vulkan/QTApplication.h vulkan/QTApplication.cpp)
+endif ()
+
 cmrc_add_resource_library(dummy)
 
 add_library(neon STATIC ${SOURCES} ${VULKAN_SOURCES})
 target_link_libraries(neon PUBLIC ${LIBRARIES} ${CMAKE_DL_LIBS} dummy)
 target_compile_definitions(neon PUBLIC USE_VULKAN)
+
+if (NEON_USE_QT)
+    target_compile_definitions(neon PUBLIC USE_QT)
+endif ()
