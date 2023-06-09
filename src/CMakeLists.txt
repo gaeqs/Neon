@@ -101,7 +101,10 @@ set(SOURCES
         engine/structure/Asset.cpp
         engine/structure/Asset.h
         engine/structure/collection/AssetCollection.cpp
-        engine/structure/collection/AssetCollection.h engine/render/FrameBufferTextureCreateInfo.h engine/render/CommandBuffer.cpp engine/render/CommandBuffer.h)
+        engine/structure/collection/AssetCollection.h
+        engine/render/FrameBufferTextureCreateInfo.h
+        engine/render/CommandBuffer.cpp
+        engine/render/CommandBuffer.h)
 
 
 set(VULKAN_SOURCES
@@ -144,7 +147,10 @@ set(VULKAN_SOURCES
         vulkan/render/VKRender.cpp
         vulkan/render/VKRender.h
         vulkan/util/VulkanConversions.cpp
-        vulkan/util/VulkanConversions.h vulkan/render/VKCommandBuffer.cpp vulkan/render/VKCommandBuffer.h)
+        vulkan/util/VulkanConversions.h
+        vulkan/render/VKCommandBuffer.cpp
+        vulkan/render/VKCommandBuffer.h
+        vulkan/AbstractVKApplication.h)
 
 if (NEON_USE_QT)
     list(APPEND VULKAN_SOURCES vulkan/QTApplication.h vulkan/QTApplication.cpp)

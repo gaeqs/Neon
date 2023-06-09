@@ -10,11 +10,12 @@ namespace neon {
             _implementation(application, primary) {
     }
 
+
 #ifdef USE_VULKAN
 
-    CommandBuffer::CommandBuffer(vulkan::VKApplication* application,
-                                 bool primary) :
-            _implementation(application, primary) {
+    CommandBuffer::CommandBuffer(Application* application,
+                                 VkCommandBuffer commandBuffer) :
+            _implementation(application, commandBuffer) {
     }
 
 #endif

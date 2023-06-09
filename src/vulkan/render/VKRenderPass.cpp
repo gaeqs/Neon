@@ -7,7 +7,9 @@
 #include <stdexcept>
 
 #include <engine/Application.h>
+
 #include <vulkan/render/VKFrameBuffer.h>
+#include <vulkan/AbstractVKApplication.h>
 
 namespace neon::vulkan {
     VKRenderPass::VKRenderPass(VKRenderPass&& other) noexcept:
@@ -21,7 +23,8 @@ namespace neon::vulkan {
                                bool depth,
                                bool present,
                                VkFormat depthFormat) :
-            _vkApplication(&application->getImplementation()),
+            _vkApplication(dynamic_cast<AbstractVKApplication*>(
+                                   application->getImplementation())),
             _raw(VK_NULL_HANDLE) {
         std::vector<VkAttachmentDescription> attachments;
         attachments.reserve(colorFormats.size()

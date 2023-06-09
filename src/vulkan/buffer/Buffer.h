@@ -17,7 +17,7 @@ namespace neon {
 
 namespace neon::vulkan {
 
-    class VKApplication;
+    class AbstractVKApplication;
 
     template<class T>
     class BufferMap {
@@ -71,7 +71,7 @@ namespace neon::vulkan {
 
         virtual VkBuffer getRaw() const = 0;
 
-        virtual VKApplication* getApplication() const = 0;
+        virtual AbstractVKApplication* getApplication() const = 0;
 
         template<class T>
         std::optional<std::shared_ptr<BufferMap<T>>> map(

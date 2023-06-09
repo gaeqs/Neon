@@ -18,15 +18,6 @@
 #include <util/Result.h>
 #include <util/profile/Profiler.h>
 
-#ifdef USE_VULKAN
-
-#define GLFW_INCLUDE_VULKAN
-
-#include <GLFW/glfw3.h>
-#include <vulkan/VKApplication.h>
-
-#endif
-
 namespace neon {
 
     class Room;
@@ -35,49 +26,61 @@ namespace neon {
 
     class CommandBuffer;
 
-    class Application {
+    class Application;
+
+    class ApplicationImplementation {
 
     public:
 
-#ifdef USE_VULKAN
-        using Implementation = vulkan::VKApplication;
-#endif
+        ApplicationImplementation() = default;
 
-    protected:
+        virtual ~ApplicationImplementation() = default;
 
-        int32_t _width;
-        int32_t _height;
-        GLFWwindow* _window;
+        virtual void init(Application* application) = 0;
+
+        [[nodiscard]] virtual glm::ivec2 getWindowSize() const = 0;
+
+        [[nodiscard]] virtual FrameInformation
+        getCurrentFrameInformation() const = 0;
+
+        [[nodiscard]] virtual CommandBuffer*
+        getCurrentCommandBuffer() const = 0;
+
+        virtual void lockMouse(bool lock) = 0;
+
+        virtual Result<uint32_t, std::string> startGameLoop() = 0;
+
+        virtual void renderFrame(Room* room) = 0;
+
+    };
+
+    class Application {
+
+        std::unique_ptr<ApplicationImplementation> _implementation;
 
         std::shared_ptr<Room> _room;
 
         glm::dvec2 _lastCursorPosition;
-        FrameInformation _currentFrameInformation;
-
-        Implementation _implementation;
         Profiler _profiler;
-
         AssetCollection _assets;
-
         std::shared_ptr<Render> _render;
-
         std::optional<glm::ivec2> _forcedViewport;
 
     public:
 
-        Application(int32_t width, int32_t height);
+        explicit Application(
+                std::unique_ptr<ApplicationImplementation> implementation);
 
-        ~Application();
-
-        Result<GLFWwindow*, std::string> init(const std::string& name);
+        void init();
 
         [[nodiscard]] Result<uint32_t, std::string> startGameLoop();
 
-        [[nodiscard]] const Implementation& getImplementation() const;
+        [[nodiscard]] const ApplicationImplementation*
+        getImplementation() const;
 
-        [[nodiscard]] Implementation& getImplementation();
+        [[nodiscard]] ApplicationImplementation* getImplementation();
 
-        [[nodiscard]]  const Profiler& getProfiler() const;
+        [[nodiscard]] const Profiler& getProfiler() const;
 
         [[nodiscard]] Profiler& getProfiler();
 
@@ -103,7 +106,11 @@ namespace neon {
 
         [[nodiscard]] FrameInformation getCurrentFrameInformation() const;
 
+        [[nodiscard]] glm::dvec2 getLastCursorPosition() const;
+
         [[nodiscard]] CommandBuffer* getCurrentCommandBuffer() const;
+
+        [[nodiscard]] const std::shared_ptr<Room>& getRoom() const;
 
         void setRoom(const std::shared_ptr<Room>& room);
 
@@ -111,11 +118,9 @@ namespace neon {
 
         //region INTERNAL CALLS
 
-        void internalForceSizeValues(int32_t width, int32_t height);
+        void invokeKeyEvent(int key, int scancode, int action, int mods);
 
-        void internalKeyEvent(int key, int scancode, int action, int mods);
-
-        void internalCursorPosEvent(double x, double y);
+        void invokeCursorPosEvent(double x, double y);
 
         //endregion
     };

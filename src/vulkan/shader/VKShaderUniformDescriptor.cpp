@@ -21,7 +21,8 @@ namespace neon::vulkan {
     VKShaderUniformDescriptor::VKShaderUniformDescriptor(
             Application* application,
             const std::vector<ShaderUniformBinding>& bindings) :
-            _vkApplication(&application->getImplementation()),
+            _vkApplication(dynamic_cast<AbstractVKApplication*>(
+                                   application->getImplementation())),
             _bindings(bindings),
             _descriptorSetLayout(VK_NULL_HANDLE) {
 
@@ -55,7 +56,7 @@ namespace neon::vulkan {
                                      _descriptorSetLayout, nullptr);
     }
 
-    VKApplication* VKShaderUniformDescriptor::getVkApplication() const {
+    AbstractVKApplication* VKShaderUniformDescriptor::getVkApplication() const {
         return _vkApplication;
     }
 

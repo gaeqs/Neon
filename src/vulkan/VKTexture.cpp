@@ -15,7 +15,8 @@ namespace vc = neon::vulkan::conversions;
 namespace neon::vulkan {
     VKTexture::VKTexture(Application* application, const void* data,
                          const TextureCreateInfo& dummyInfo) :
-            _vkApplication(&application->getImplementation()),
+            _vkApplication(dynamic_cast<AbstractVKApplication*>(
+                                   application->getImplementation())),
             _width(static_cast<int>(dummyInfo.image.width)),
             _height(static_cast<int>(dummyInfo.image.height)),
             _depth(static_cast<int>(dummyInfo.image.depth)),
@@ -121,7 +122,8 @@ namespace neon::vulkan {
                          VkImageLayout layout,
                          uint32_t width, uint32_t height, uint32_t depth,
                          const SamplerCreateInfo& sampler) :
-            _vkApplication(&application->getImplementation()),
+            _vkApplication(dynamic_cast<AbstractVKApplication*>(
+                                   application->getImplementation())),
             _width(static_cast<int>(width)),
             _height(static_cast<int>(height)),
             _depth(static_cast<int>(depth)),

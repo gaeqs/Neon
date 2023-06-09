@@ -15,11 +15,11 @@ namespace neon {
 }
 
 namespace neon::vulkan {
-    class VKApplication;
+    class AbstractVKApplication;
 
     class VKSwapChainFrameBuffer : public VKFrameBuffer {
 
-        VKApplication* _vkApplication;
+        AbstractVKApplication* _vkApplication;
 
         std::vector<VkImage> _swapChainImages;
         std::vector<VkImageView> _swapChainImageViews;

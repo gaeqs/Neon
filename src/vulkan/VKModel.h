@@ -24,7 +24,7 @@ namespace neon {
 }
 
 namespace neon::vulkan {
-    class VKApplication;
+    class AbstractVKApplication;
 
     class VKModel {
 

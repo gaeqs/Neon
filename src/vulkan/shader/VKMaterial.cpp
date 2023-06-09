@@ -23,7 +23,8 @@ namespace neon::vulkan {
             Material* material,
             const MaterialCreateInfo& createInfo) :
             _material(material),
-            _vkApplication(&application->getImplementation()),
+            _vkApplication(dynamic_cast<AbstractVKApplication*>(
+                                   application->getImplementation())),
             _pipelineLayout(VK_NULL_HANDLE),
             _pipeline(VK_NULL_HANDLE),
             _pushConstants(),

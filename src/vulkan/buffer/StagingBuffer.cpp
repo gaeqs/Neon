@@ -47,7 +47,7 @@ namespace neon::vulkan {
     }
 
 
-    StagingBuffer::StagingBuffer(VKApplication* application,
+    StagingBuffer::StagingBuffer(AbstractVKApplication* application,
                                  VkBufferUsageFlags usage,
                                  uint32_t sizeInBytes) :
             _application(application),
@@ -75,7 +75,7 @@ namespace neon::vulkan {
         return _deviceBuffer;
     }
 
-    VKApplication* StagingBuffer::getApplication() const {
+    AbstractVKApplication* StagingBuffer::getApplication() const {
         return _application;
     }
 }

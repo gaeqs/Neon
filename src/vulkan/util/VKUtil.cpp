@@ -8,7 +8,8 @@
 
 #include <engine/model/InputDescription.h>
 #include <engine/render/FrameBuffer.h>
-#include <vulkan/VKApplication.h>
+#include <engine/render/CommandBuffer.h>
+#include <vulkan/AbstractVKApplication.h>
 #include <vulkan/util/VulkanConversions.h>
 #include <vulkan/render/VKRenderPass.h>
 
@@ -158,7 +159,7 @@ namespace neon::vulkan::vulkan_util {
     }
 
     void transitionImageLayout(
-            VKApplication* application,
+            AbstractVKApplication* application,
             VkImage image, VkFormat format,
             VkImageLayout oldLayout, VkImageLayout newLayout,
             uint32_t mipLevels,
@@ -274,7 +275,7 @@ namespace neon::vulkan::vulkan_util {
     }
 
     void copyBufferToImage(
-            VKApplication* application,
+            AbstractVKApplication* application,
             VkBuffer buffer, VkImage image,
             uint32_t width, uint32_t height, uint32_t depth,
             uint32_t layers) {
@@ -329,7 +330,7 @@ namespace neon::vulkan::vulkan_util {
     }
 
     void generateMipmaps(
-            VKApplication* application,
+            AbstractVKApplication* application,
             VkImage image,
             uint32_t width, uint32_t height, uint32_t depth,
             uint32_t levels, int32_t layers) {

@@ -14,7 +14,8 @@ namespace neon::vulkan {
                    std::unordered_set<std::shared_ptr<Material>>& materials,
                    bool modifiableVertices,
                    bool modifiableIndices) :
-            _vkApplication(&application->getImplementation()),
+            _vkApplication(dynamic_cast<AbstractVKApplication*>(
+                                   application->getImplementation())),
             _materials(materials),
             _vertexBuffer(),
             _indexBuffer(),

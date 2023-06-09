@@ -24,11 +24,11 @@ namespace neon {
 }
 
 namespace neon::vulkan {
-    class VKApplication;
+    class AbstractVKApplication;
 
     class VKSimpleFrameBuffer : public VKFrameBuffer {
 
-        VKApplication* _vkApplication;
+        AbstractVKApplication* _vkApplication;
 
         VkFramebuffer _frameBuffer;
 

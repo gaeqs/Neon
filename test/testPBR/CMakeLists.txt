@@ -53,4 +53,4 @@ cmrc_add_resource_library(
 add_executable(testPBR ${TEST_SOURCES})
 set_target_properties(testPBR PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${TEST_DIRECTORY})
 target_link_libraries(testPBR neon shaders_pbr resources_pbr)
-add_dependencies(testPBR tests)
+add_dependencies(testPBR neon_tests)

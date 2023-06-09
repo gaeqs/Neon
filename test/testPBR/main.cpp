@@ -5,6 +5,9 @@
 #include <random>
 
 #include <engine/Engine.h>
+
+#include <vulkan/VKApplication.h>
+
 #include <util/component/CameraMovementComponent.h>
 #include <util/component/DebugOverlayComponent.h>
 #include <util/component/DockSpaceComponent.h>
@@ -653,14 +656,10 @@ std::shared_ptr<Room> getTestRoom(Application* application) {
 int main() {
     std::srand(std::time(nullptr));
 
-    Application application(WIDTH, HEIGHT);
+    Application application(std::make_unique<vulkan::VKApplication>(
+            "Neon", WIDTH, HEIGHT));
 
-    auto initResult = application.init("Neon");
-    if (!initResult.isOk()) {
-        std::cerr << "[GLFW INIT]\t" << initResult.getError() << std::endl;
-        return EXIT_FAILURE;
-    }
-
+    application.init();
     application.setRoom(getTestRoom(&application));
 
     auto loopResult = application.startGameLoop();

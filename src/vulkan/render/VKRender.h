@@ -21,11 +21,11 @@ namespace neon {
 
 namespace neon::vulkan {
 
-    class VKApplication;
+    class AbstractVKApplication;
 
     class VKRender {
 
-        VKApplication* _vkApplication;
+        AbstractVKApplication* _vkApplication;
 
     public:
 

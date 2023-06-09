@@ -15,7 +15,8 @@
 namespace neon::vulkan {
     void VKModel::reinitializeBuffer() {
         _instancingBuffer = std::make_unique<StagingBuffer>(
-                &_application->getImplementation(),
+                dynamic_cast<AbstractVKApplication*>(
+                        _application->getImplementation()),
                 VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
                 static_cast<uint32_t>(_instancingStructSize) *
                 BUFFER_DEFAULT_SIZE
@@ -31,7 +32,8 @@ namespace neon::vulkan {
             _instancingStructSize(sizeof(DefaultInstancingData)),
             _positions(),
             _instancingBuffer(std::make_unique<StagingBuffer>(
-                    &_application->getImplementation(),
+                    dynamic_cast<AbstractVKApplication*>(
+                            application->getImplementation()),
                     VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
                     static_cast<uint32_t>(_instancingStructSize) *
                     BUFFER_DEFAULT_SIZE
@@ -115,10 +117,11 @@ namespace neon::vulkan {
         if (_positions.empty()) return;
         for (const auto& mesh: _meshes) {
             if (!mesh->getMaterials().contains(sp)) continue;
-            auto& vk = _application->getImplementation();
+            auto* vk = dynamic_cast<AbstractVKApplication*>(
+                    _application->getImplementation());
             mesh->draw(
                     material,
-                    vk.getCurrentCommandBuffer()
+                    vk->getCurrentCommandBuffer()
                             ->getImplementation().getCommandBuffer(),
                     _instancingBuffer->getRaw(),
                     _positions.size(),

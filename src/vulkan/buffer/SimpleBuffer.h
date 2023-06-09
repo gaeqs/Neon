@@ -12,7 +12,7 @@
 #include <vulkan/buffer/Buffer.h>
 
 namespace neon::vulkan {
-    class VKApplication;
+    class AbstractVKApplication;
 
     template<class T>
     class SimpleBufferMap : public BufferMap<T> {
@@ -69,7 +69,7 @@ namespace neon::vulkan {
 
         size_t _size;
 
-        VKApplication* _application;
+        AbstractVKApplication* _application;
         VkBuffer _vertexBuffer;
         VkDeviceMemory _vertexBufferMemory;
 
@@ -87,18 +87,18 @@ namespace neon::vulkan {
         SimpleBuffer(const SimpleBuffer& other) = delete;
 
         template<class T>
-        SimpleBuffer(VKApplication* application,
+        SimpleBuffer(AbstractVKApplication* application,
                      VkBufferUsageFlags usage, VkMemoryPropertyFlags properties,
                      const std::vector<T>& data):
                 SimpleBuffer(application, usage, properties, data.data(),
                              data.size() * sizeof(T)) {
         }
 
-        SimpleBuffer(VKApplication* application,
+        SimpleBuffer(AbstractVKApplication* application,
                      VkBufferUsageFlags usage, VkMemoryPropertyFlags properties,
                      uint32_t sizeInBytes);
 
-        SimpleBuffer(VKApplication* application,
+        SimpleBuffer(AbstractVKApplication* application,
                      VkBufferUsageFlags usage, VkMemoryPropertyFlags properties,
                      const void* data, uint32_t sizeInBytes);
 
@@ -110,7 +110,7 @@ namespace neon::vulkan {
 
         [[nodiscard]] VkBuffer getRaw() const override;
 
-        [[nodiscard]] VKApplication* getApplication() const override;
+        [[nodiscard]] AbstractVKApplication* getApplication() const override;
     };
 }
 

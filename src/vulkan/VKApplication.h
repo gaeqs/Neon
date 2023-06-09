@@ -5,16 +5,18 @@
 #ifndef NEON_VKAPPLICATION_H
 #define NEON_VKAPPLICATION_H
 
-#define GLFW_INCLUDE_VULKAN
-
 #include <vector>
 #include <memory>
+
+#define GLFW_INCLUDE_VULKAN
 
 #include <GLFW/glfw3.h>
 
 #include <engine/render/CommandBuffer.h>
+#include <engine/Application.h>
 
 #include <vulkan/vulkan.h>
+#include <vulkan/AbstractVKApplication.h>
 #include <vulkan/VKSwapChainSupportDetails.h>
 #include <vulkan/VKQueueFamilyIndices.h>
 
@@ -26,7 +28,7 @@ namespace neon {
 
 namespace neon::vulkan {
 
-    class VKApplication {
+    class VKApplication : public AbstractVKApplication {
 
         static constexpr int MAX_FRAMES_IN_FLIGHT = 2;
 
@@ -45,7 +47,12 @@ namespace neon::vulkan {
                 //VK_KHR_SEPARATE_DEPTH_STENCIL_LAYOUTS_EXTENSION_NAME
         };
 
+        Application* _application;
+
         GLFWwindow* _window;
+        std::string _name;
+        float _width;
+        float _height;
 
         VkInstance _instance;
         VkDebugUtilsMessengerEXT _debugMessenger;
@@ -59,24 +66,24 @@ namespace neon::vulkan {
         VkSwapchainKHR _swapChain;
         VkFormat _swapChainImageFormat;
         VkExtent2D _swapChainExtent;
-        uint32_t _swapChainCount = 0;
+        uint32_t _swapChainCount;
 
         VkFormat _depthImageFormat;
 
         VkCommandPool _commandPool;
 
         std::vector<std::unique_ptr<CommandBuffer>> _commandBuffers;
-        bool _recording = false;
+        bool _recording;
 
         std::vector<VkSemaphore> _imageAvailableSemaphores;
         std::vector<VkSemaphore> _renderFinishedSemaphores;
 
-        uint32_t _currentFrame = 0;
+        uint32_t _currentFrame;
         uint32_t _imageIndex;
 
-        std::shared_ptr<Room> _room;
-
         VkDescriptorPool _imGuiPool;
+
+        FrameInformation _currentFrameInformation;
 
         // region VULKAN INITIALIZATION
 
@@ -131,13 +138,28 @@ namespace neon::vulkan {
 
         VKApplication(const VKApplication& other) = delete;
 
-        VKApplication() = default;
+        VKApplication(std::string name, float width, float height);
 
-        ~VKApplication();
+        ~VKApplication() override;
+
+        void init(neon::Application* application) override;
+
+        [[nodiscard]] glm::ivec2 getWindowSize() const override;
+
+        [[nodiscard]]  FrameInformation
+        getCurrentFrameInformation() const override;
+
+        [[nodiscard]] CommandBuffer* getCurrentCommandBuffer() const override;
+
+        void lockMouse(bool lock) override;
+
+        Result<uint32_t, std::string> startGameLoop() override;
+
+        void renderFrame(neon::Room* room) override;
 
         void preWindowCreation();
 
-        void postWindowCreation(GLFWwindow* window);
+        void postWindowCreation();
 
         bool preUpdate(Profiler& profiler);
 
@@ -147,23 +169,21 @@ namespace neon::vulkan {
 
         void internalForceSizeValues(int32_t width, int32_t height);
 
-        void internalKeyEvent(int key, int scancode, int action, int mods);
+        [[nodiscard]] Application* getApplication() const;
 
-        void internalCursorPosEvent(double x, double y);
+        [[nodiscard]] uint32_t getCurrentFrame() const override;
 
-        [[nodiscard]] uint32_t getCurrentFrame() const;
+        [[nodiscard]] uint32_t getCurrentSwapChainImage() const override;
 
-        [[nodiscard]] uint32_t getCurrentSwapChainImage() const;
+        [[nodiscard]] uint32_t getMaxFramesInFlight() const override;
 
-        [[nodiscard]] uint32_t getMaxFramesInFlight() const;
+        [[nodiscard]] VkInstance getInstance() const override;
 
-        [[nodiscard]] VkInstance getInstance() const;
+        [[nodiscard]] VkPhysicalDevice getPhysicalDevice() const override;
 
-        [[nodiscard]] VkPhysicalDevice getPhysicalDevice() const;
+        [[nodiscard]] VkDevice getDevice() const override;
 
-        [[nodiscard]] VkDevice getDevice() const;
-
-        [[nodiscard]] VkQueue getGraphicsQueue() const;
+        [[nodiscard]] VkQueue getGraphicsQueue() const override;
 
         [[nodiscard]] VkQueue getPresentQueue() const;
 
@@ -171,23 +191,19 @@ namespace neon::vulkan {
 
         [[nodiscard]] VkSwapchainKHR getSwapChain() const;
 
-        [[nodiscard]] VkFormat getSwapChainImageFormat() const;
+        [[nodiscard]] VkFormat getSwapChainImageFormat() const override;
 
-        [[nodiscard]] VkFormat getDepthImageFormat() const;
+        [[nodiscard]] VkFormat getDepthImageFormat() const override;
 
-        [[nodiscard]] const VkExtent2D& getSwapChainExtent() const;
+        [[nodiscard]] VkExtent2D getSwapChainExtent() const override;
 
-        [[nodiscard]] uint32_t getSwapChainCount() const;
+        [[nodiscard]] uint32_t getSwapChainCount() const override;
 
-        [[nodiscard]] VkCommandPool getCommandPool() const;
+        [[nodiscard]] VkCommandPool getCommandPool() const override;
 
-        [[nodiscard]] CommandBuffer* getCurrentCommandBuffer() const;
+        [[nodiscard]] VkDescriptorPool getImGuiPool() const override;
 
-        [[nodiscard]] VkDescriptorPool getImGuiPool() const;
-
-        [[nodiscard]] bool isRecordingCommandBuffer() const;
-
-        void setRoom(const std::shared_ptr<Room>& room);
+        [[nodiscard]] bool isRecordingCommandBuffer() const override;
 
     };
 }

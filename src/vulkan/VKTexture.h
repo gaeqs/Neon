@@ -15,11 +15,11 @@ namespace neon {
 }
 
 namespace neon::vulkan {
-    class VKApplication;
+    class AbstractVKApplication;
 
     class VKTexture {
 
-        VKApplication* _vkApplication;
+        AbstractVKApplication* _vkApplication;
 
         int32_t _width, _height, _depth;
         uint32_t _mipmapLevels, _layers;

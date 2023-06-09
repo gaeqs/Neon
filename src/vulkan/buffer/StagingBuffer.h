@@ -15,7 +15,7 @@
 
 #include <vulkan/util/VKUtil.h>
 #include <vulkan/buffer/SimpleBuffer.h>
-#include <vulkan/VKApplication.h>
+#include <vulkan/AbstractVKApplication.h>
 
 namespace neon::vulkan {
 
@@ -88,7 +88,7 @@ namespace neon::vulkan {
 
     class StagingBuffer : public Buffer {
 
-        VKApplication* _application;
+        AbstractVKApplication* _application;
 
         std::vector<std::shared_ptr<SimpleBuffer>> _stagingBuffers;
         SimpleBuffer _deviceBuffer;
@@ -105,7 +105,7 @@ namespace neon::vulkan {
         StagingBuffer(const StagingBuffer& other) = delete;
 
         template<class T>
-        StagingBuffer(VKApplication* application,
+        StagingBuffer(AbstractVKApplication* application,
                       VkBufferUsageFlags usage, const std::vector<T>& data) :
                 _application(application),
                 _stagingBuffers(),
@@ -126,7 +126,7 @@ namespace neon::vulkan {
             map<T>(); // Transfers all data from the staging buffer to the device buffer.
         }
 
-        StagingBuffer(VKApplication* application,
+        StagingBuffer(AbstractVKApplication* application,
                       VkBufferUsageFlags usage, uint32_t sizeInBytes);
 
         ~StagingBuffer() override = default;
@@ -137,7 +137,7 @@ namespace neon::vulkan {
 
         VkBuffer getRaw() const override;
 
-        VKApplication* getApplication() const override;
+        AbstractVKApplication* getApplication() const override;
 
         SimpleBuffer& getDeviceBuffer();
 

@@ -18,8 +18,8 @@ namespace neon {
         UniformBindingType type;
         uint32_t size;
 
-        ShaderUniformBinding(UniformBindingType type, uint32_t size)
-                : type(type), size(size) {}
+        ShaderUniformBinding(UniformBindingType type_, uint32_t size_)
+                : type(type_), size(size_) {}
 
         /**
          * Creates a ShaderUniformBinding representing an image.
@@ -34,8 +34,8 @@ namespace neon {
          * @param the size of the buffer.
          * @return the ShaderUniformBinding.
          */
-        inline static ShaderUniformBinding buffer(uint32_t size) {
-            return {UniformBindingType::BUFFER, size};
+        inline static ShaderUniformBinding buffer(uint32_t size_) {
+            return {UniformBindingType::BUFFER, size_};
         }
     };
 }

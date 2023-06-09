@@ -15,7 +15,7 @@ namespace neon {
 
 namespace neon::vulkan {
 
-    class VKApplication;
+    class AbstractVKApplication;
 
     enum class VKCommandBufferStatus {
         CREATED,
@@ -25,13 +25,14 @@ namespace neon::vulkan {
 
     class VKCommandBuffer {
 
-        VKApplication* _vkApplication;
+        AbstractVKApplication* _vkApplication;
         VkCommandBuffer _commandBuffer;
 
         VKCommandBufferStatus _status;
 
         std::vector<VkFence> _fences;
         std::vector<VkFence> _freedFences;
+        bool _external;
 
         void waitForFences();
 
@@ -43,7 +44,8 @@ namespace neon::vulkan {
 
         VKCommandBuffer(Application* application, bool primary);
 
-        VKCommandBuffer(VKApplication* application, bool primary);
+        VKCommandBuffer(Application* application,
+                        VkCommandBuffer commandBuffer);
 
         ~VKCommandBuffer();
 

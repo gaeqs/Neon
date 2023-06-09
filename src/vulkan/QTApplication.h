@@ -28,65 +28,104 @@
 
 #include <QVulkanWindowRenderer>
 
+#include <vulkan/AbstractVKApplication.h>
+
 namespace neon::vulkan {
 
-    class QTApplication : public QVulkanWindowRenderer {
+    class QTApplication : public QVulkanWindowRenderer,
+                          public QVulkanWindow,
+                          public AbstractVKApplication {
+
+        using TimeStamp = std::chrono::time_point<
+                std::chrono::system_clock,
+                std::chrono::nanoseconds>;
+
+        Application* _application;
+
+        FrameInformation _currentFrameInformation;
+        TimeStamp _lastFrameTime;
+        float _lastFrameProcessTime;
+
+        uint32_t _swapChainCount;
+        bool _recording;
 
     public:
 
-        void preWindowCreation();
+        QTApplication();
 
-        void postWindowCreation(GLFWwindow* window);
+        ~QTApplication() override = default;
 
-        bool preUpdate(Profiler& profiler);
+        void init(Application* application) override;
 
-        void endDraw(Profiler& pofiler);
+        [[nodiscard]] glm::ivec2 getWindowSize() const override;
 
-        void finishLoop();
+        [[nodiscard]] FrameInformation
+        getCurrentFrameInformation() const override;
 
-        void internalForceSizeValues(int32_t width, int32_t height);
+        [[nodiscard]] CommandBuffer* getCurrentCommandBuffer() const override;
 
-        void internalKeyEvent(int key, int scancode, int action, int mods);
+        void lockMouse(bool lock) override;
 
-        void internalCursorPosEvent(double x, double y);
+        Result<uint32_t, std::string> startGameLoop() override;
 
-        [[nodiscard]] uint32_t getCurrentFrame() const;
+        void renderFrame(Room* room) override;
 
-        [[nodiscard]] uint32_t getCurrentSwapChainImage() const;
+        [[nodiscard]] VkInstance getInstance() const override;
 
-        [[nodiscard]] uint32_t getMaxFramesInFlight() const;
+        [[nodiscard]] VkDevice getDevice() const override;
 
-        [[nodiscard]] VkInstance getInstance() const;
+        [[nodiscard]] VkPhysicalDevice getPhysicalDevice() const override;
 
-        [[nodiscard]] VkPhysicalDevice getPhysicalDevice() const;
+        [[nodiscard]] VkQueue getGraphicsQueue() const override;
 
-        [[nodiscard]] VkDevice getDevice() const;
+        [[nodiscard]] VkFormat getSwapChainImageFormat() const override;
 
-        [[nodiscard]] VkQueue getGraphicsQueue() const;
+        [[nodiscard]] VkFormat getDepthImageFormat() const override;
 
-        [[nodiscard]] VkQueue getPresentQueue() const;
+        [[nodiscard]] VkCommandPool getCommandPool() const override;
 
-        [[nodiscard]] VkSurfaceKHR getSurface() const;
+        [[nodiscard]] VkSwapchainKHR getSwapChain() const override;
 
-        [[nodiscard]] VkSwapchainKHR getSwapChain() const;
+        [[nodiscard]] uint32_t getMaxFramesInFlight() const override;
 
-        [[nodiscard]] VkFormat getSwapChainImageFormat() const;
+        [[nodiscard]] uint32_t getCurrentFrame() const override;
 
-        [[nodiscard]] VkFormat getDepthImageFormat() const;
+        [[nodiscard]] uint32_t getCurrentSwapChainImage() const override;
 
-        [[nodiscard]] const VkExtent2D& getSwapChainExtent() const;
+        [[nodiscard]] uint32_t getSwapChainCount() const override;
 
-        [[nodiscard]] uint32_t getSwapChainCount() const;
+        [[nodiscard]] VkExtent2D getSwapChainExtent() const override;
 
-        [[nodiscard]] VkCommandPool getCommandPool() const;
+        [[nodiscard]] VkDescriptorPool getImGuiPool() const override;
 
-        [[nodiscard]] CommandBuffer* getCurrentCommandBuffer() const;
+        [[nodiscard]] bool isRecordingCommandBuffer() const override;
 
-        [[nodiscard]] VkDescriptorPool getImGuiPool() const;
+        void preInitResources() override;
 
-        [[nodiscard]] bool isRecordingCommandBuffer() const;
+        void initResources() override;
 
-        void setRoom(const std::shared_ptr<Room>& room);
+        void initSwapChainResources() override;
+
+        void releaseSwapChainResources() override;
+
+        void releaseResources() override;
+
+        void startNextFrame() override;
+
+        void physicalDeviceLost() override;
+
+        void logicalDeviceLost() override;
+
+        QVulkanWindowRenderer* createRenderer() override;
+
+    protected:
+
+        void exposeEvent(QExposeEvent* event) override;
+
+        void resizeEvent(QResizeEvent* event) override;
+
+        bool event(QEvent* event) override;
+
 
     };
 }

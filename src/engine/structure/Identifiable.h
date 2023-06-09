@@ -11,6 +11,8 @@ namespace neon {
     class Identifiable {
     public:
         [[nodiscard]] virtual uint64_t getId() const = 0;
+
+        virtual ~Identifiable() = default;
     };
 }
 
