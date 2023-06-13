@@ -11,6 +11,13 @@
 
 #include <vulkan/buffer/Buffer.h>
 
+namespace neon::vulkan::simple_buffer {
+    VkResult mapMemory(VkDevice device, VkDeviceMemory memory, uint32_t from,
+                       uint32_t size, int flags, void** destiny);
+
+    void unmapMemory(VkDevice device, VkDeviceMemory memory);
+}
+
 namespace neon::vulkan {
     class AbstractVKApplication;
 
@@ -32,9 +39,9 @@ namespace neon::vulkan {
                 _device(device),
                 _memory(memory),
                 _pointer(nullptr) {
-            auto result = vkMapMemory(device, memory, range.getFrom(),
-                                      range.size(),
-                                      0, (void**) &_pointer);
+            auto result = simple_buffer::mapMemory(
+                    device, memory, range.getFrom(), range.size(),
+                    0, (void**) &_pointer);
             if (result != VK_SUCCESS) {
                 throw std::runtime_error("Couldn't map buffer! Result: "
                                          + std::to_string(result));
@@ -59,7 +66,7 @@ namespace neon::vulkan {
 
         void dispose() override {
             if (_pointer == nullptr) return;
-            vkUnmapMemory(_device, _memory);
+            simple_buffer::unmapMemory(_device, _memory);
             _pointer = nullptr;
         }
 

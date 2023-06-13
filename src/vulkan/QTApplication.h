@@ -41,11 +41,13 @@ namespace neon::vulkan {
                 std::chrono::nanoseconds>;
 
         Application* _application;
+        std::function<void(QTApplication*)> _onInit;
 
         FrameInformation _currentFrameInformation;
         TimeStamp _lastFrameTime;
         float _lastFrameProcessTime;
 
+        mutable std::unique_ptr<CommandBuffer> _currentCommandBuffer;
         uint32_t _swapChainCount;
         bool _recording;
 
@@ -54,6 +56,9 @@ namespace neon::vulkan {
         QTApplication();
 
         ~QTApplication() override = default;
+
+        void setInitializationFunction(
+                std::function<void(QTApplication*)> func);
 
         void init(Application* application) override;
 

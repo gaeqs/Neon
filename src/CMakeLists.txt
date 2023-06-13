@@ -153,7 +153,14 @@ set(VULKAN_SOURCES
         vulkan/AbstractVKApplication.h)
 
 if (NEON_USE_QT)
-    list(APPEND VULKAN_SOURCES vulkan/QTApplication.h vulkan/QTApplication.cpp)
+    list(APPEND SOURCES
+            engine/render/QTSwapChainFrameBuffer.cpp
+            engine/render/QTSwapChainFrameBuffer.h)
+    list(APPEND VULKAN_SOURCES
+            vulkan/QTApplication.h
+            vulkan/QTApplication.cpp
+            vulkan/render/VKQTSwapChainFrameBuffer.cpp
+            vulkan/render/VKQTSwapChainFrameBuffer.h)
 endif ()
 
 cmrc_add_resource_library(dummy)

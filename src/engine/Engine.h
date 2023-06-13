@@ -35,6 +35,12 @@
 #include <engine/render/Texture.h>
 #include <engine/render/TextureCreateInfo.h>
 
+#ifdef USE_QT
+
+#include <engine/render/QTSwapChainFrameBuffer.h>
+
+#endif
+
 #include <engine/shader/Material.h>
 #include <engine/shader/MaterialCreateInfo.h>
 #include <engine/shader/ShaderProgram.h>

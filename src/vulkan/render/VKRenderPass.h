@@ -22,6 +22,7 @@ namespace neon::vulkan {
 
         AbstractVKApplication* _vkApplication;
         VkRenderPass _raw;
+        bool _external;
 
     public:
 
@@ -34,6 +35,8 @@ namespace neon::vulkan {
                      bool depth,
                      bool present,
                      VkFormat depthFormat);
+
+        VKRenderPass(Application* application, VkRenderPass pass);
 
         ~VKRenderPass();
 

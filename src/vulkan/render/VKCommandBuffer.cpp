@@ -36,7 +36,7 @@ namespace neon::vulkan {
                                      VkCommandBuffer commandBuffer) :
             _vkApplication(dynamic_cast<AbstractVKApplication*>(
                                    application->getImplementation())),
-            _commandBuffer(VK_NULL_HANDLE),
+            _commandBuffer(commandBuffer),
             _status(VKCommandBufferStatus::CREATED),
             _fences(),
             _external(true) {

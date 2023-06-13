@@ -26,13 +26,25 @@
 #include "QTApplication.h"
 
 #include <iostream>
+#include <utility>
 #include <engine/structure/Room.h>
+
+namespace {
+    bool debugFilter(VkDebugReportFlagsEXT flags,
+                     VkDebugReportObjectTypeEXT objectType, uint64_t object,
+                     size_t location, int32_t messageCode,
+                     const char* pLayerPrefix, const char* pMessage) {
+        return false;
+    }
+}
 
 neon::vulkan::QTApplication::QTApplication() :
         _application(nullptr),
+        _onInit(),
         _currentFrameInformation(0, 0.016f, 0.0f),
         _lastFrameTime(std::chrono::high_resolution_clock::now()),
         _lastFrameProcessTime(0.0f),
+        _currentCommandBuffer(),
         _swapChainCount(0),
         _recording(false) {
 }
@@ -53,8 +65,16 @@ neon::vulkan::QTApplication::getCurrentFrameInformation() const {
 
 neon::CommandBuffer*
 neon::vulkan::QTApplication::getCurrentCommandBuffer() const {
-    currentCommandBuffer()
-    return nullptr; // TODO
+    if (!isRecordingCommandBuffer()) {
+      return nullptr;
+    }
+    if (_currentCommandBuffer == nullptr) {
+        _currentCommandBuffer = std::make_unique<CommandBuffer>(
+                _application,
+                currentCommandBuffer()
+        );
+    }
+  return _currentCommandBuffer.get();
 }
 
 void neon::vulkan::QTApplication::lockMouse(bool lock) {
@@ -84,11 +104,14 @@ void neon::vulkan::QTApplication::renderFrame(neon::Room* room) {
         room->update(_currentFrameInformation.currentDeltaTime);
         room->preDraw();
         room->draw();
+        frameReady();
+        requestUpdate();
     }
 
     now = std::chrono::high_resolution_clock::now();
     auto processTime = now - _lastFrameTime;
     _lastFrameProcessTime = static_cast<float>(processTime.count()) * 1e-9f;
+    _currentCommandBuffer = nullptr;
 }
 
 VkInstance neon::vulkan::QTApplication::getInstance() const {
@@ -156,9 +179,13 @@ bool neon::vulkan::QTApplication::isRecordingCommandBuffer() const {
 }
 
 void neon::vulkan::QTApplication::preInitResources() {
+    vulkanInstance()->installDebugOutputFilter(debugFilter);
 }
 
 void neon::vulkan::QTApplication::initResources() {
+    if (_onInit) {
+        _onInit(this);
+    }
 }
 
 void neon::vulkan::QTApplication::initSwapChainResources() {
@@ -199,4 +226,9 @@ void neon::vulkan::QTApplication::resizeEvent(QResizeEvent* event) {
 
 bool neon::vulkan::QTApplication::event(QEvent* event) {
     return QVulkanWindow::event(event);
+}
+
+void neon::vulkan::QTApplication::setInitializationFunction(
+        std::function<void(QTApplication * )> func) {
+    _onInit = std::move(func);
 }
