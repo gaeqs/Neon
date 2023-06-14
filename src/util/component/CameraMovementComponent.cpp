@@ -40,9 +40,11 @@ namespace neon {
                 _d = event.action != KeyboardAction::RELEASE;
                 break;
             case KeyboardKey::LEFT_SHIFT:
+            case KeyboardKey::E:
                 _shift = event.action != KeyboardAction::RELEASE;
                 break;
             case KeyboardKey::SPACE:
+            case KeyboardKey::Q:
                 _space = event.action != KeyboardAction::RELEASE;
                 break;
             default:

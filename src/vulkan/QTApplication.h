@@ -125,12 +125,19 @@ namespace neon::vulkan {
 
     protected:
 
-        void exposeEvent(QExposeEvent* event) override;
+        void mouseMoveEvent(QMouseEvent* event) override;
 
-        void resizeEvent(QResizeEvent* event) override;
+        void mousePressEvent(QMouseEvent* event) override;
 
-        bool event(QEvent* event) override;
+        void mouseReleaseEvent(QMouseEvent*) override;
 
+        void keyPressEvent(QKeyEvent* event) override;
+
+        void keyReleaseEvent(QKeyEvent* event) override;
+
+    private:
+
+        static int32_t qtToGLFWKey (Qt::Key key) ;
 
     };
 }

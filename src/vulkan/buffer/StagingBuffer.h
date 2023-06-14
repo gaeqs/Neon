@@ -113,7 +113,7 @@ namespace neon::vulkan {
                               VK_BUFFER_USAGE_TRANSFER_DST_BIT | usage,
                               VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, data) {
 
-            for (int i = 0; i < _application->getMaxFramesInFlight(); ++i) {
+            for (uint32_t i = 0; i < _application->getMaxFramesInFlight(); ++i) {
                 _stagingBuffers.push_back(std::make_shared<SimpleBuffer>(
                         _application,
                         VK_BUFFER_USAGE_TRANSFER_SRC_BIT,

@@ -28,11 +28,10 @@ namespace neon::vulkan {
 
     class VKModel {
 
-        static constexpr uint32_t BUFFER_DEFAULT_SIZE = 1024 * 16;
-
         Application* _application;
 
         std::vector<VKMesh*> _meshes;
+        uint32_t _maximumInstances;
 
         std::type_index _instancingStructType;
         size_t _instancingStructSize;
@@ -43,13 +42,15 @@ namespace neon::vulkan {
         std::vector<char> _data;
         Range<uint32_t> _dataChangeRange;
 
+
         void reinitializeBuffer();
 
     public:
 
         VKModel(const VKModel& other) = delete;
 
-        VKModel(Application* application, std::vector<VKMesh*> meshes);
+        VKModel(Application* application, std::vector<VKMesh*> meshes,
+                uint32_t maximumInstances);
 
         [[nodiscard]] const std::type_index& getInstancingStructType() const;
 

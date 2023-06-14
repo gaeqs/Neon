@@ -35,6 +35,9 @@ namespace neon {
     class Model : public Asset {
 
     public:
+
+      static constexpr uint32_t DEFAULT_MAXIMUM_INSTANCES = 1024 * 16;
+
 #ifdef USE_VULKAN
         using Implementation = vulkan::VKModel;
 #endif
@@ -63,7 +66,8 @@ namespace neon {
          */
         Model(Application* application,
               const std::string& name,
-              std::vector<std::shared_ptr<Mesh>>& meshes);
+              std::vector<std::shared_ptr<Mesh>>& meshes,
+              uint32_t maximumInstances = DEFAULT_MAXIMUM_INSTANCES);
 
         /**
          * Returns the implementation of the model.

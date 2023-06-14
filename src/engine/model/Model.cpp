@@ -23,9 +23,11 @@ namespace neon {
 
     Model::Model(Application* application,
                  const std::string& name,
-                 std::vector<std::shared_ptr<Mesh>>& meshes) :
+                 std::vector<std::shared_ptr<Mesh>>& meshes,
+                 uint32_t maximumInstances) :
             Asset(typeid(Model), name),
-            _implementation(application, getMeshImplementations(meshes)),
+            _implementation(application, getMeshImplementations(meshes),
+                            maximumInstances),
             _meshes(std::move(meshes)) {
     }
 

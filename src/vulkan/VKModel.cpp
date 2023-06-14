@@ -19,14 +19,16 @@ namespace neon::vulkan {
                         _application->getImplementation()),
                 VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
                 static_cast<uint32_t>(_instancingStructSize) *
-                BUFFER_DEFAULT_SIZE
+                  _maximumInstances
         );
-        _data.resize(_instancingStructSize * BUFFER_DEFAULT_SIZE, 0);
+        _data.resize(_instancingStructSize * _maximumInstances, 0);
     }
 
-    VKModel::VKModel(Application* application, std::vector<VKMesh*> meshes) :
+    VKModel::VKModel(Application* application, std::vector<VKMesh*> meshes,
+                     uint32_t maximumInstances) :
             _application(application),
             _meshes(std::move(meshes)),
+            _maximumInstances(maximumInstances),
             _instancingStructType(
                     std::type_index(typeid(DefaultInstancingData))),
             _instancingStructSize(sizeof(DefaultInstancingData)),
@@ -36,9 +38,9 @@ namespace neon::vulkan {
                             application->getImplementation()),
                     VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
                     static_cast<uint32_t>(_instancingStructSize) *
-                    BUFFER_DEFAULT_SIZE
+                      maximumInstances
             )),
-            _data(_instancingStructSize * BUFFER_DEFAULT_SIZE, 0),
+            _data(_instancingStructSize * maximumInstances, 0),
             _dataChangeRange(0, 0) {
     }
 
@@ -47,7 +49,7 @@ namespace neon::vulkan {
     }
 
     Result<uint32_t*, std::string> VKModel::createInstance() {
-        if (_positions.size() >= BUFFER_DEFAULT_SIZE) {
+        if (_positions.size() >= _maximumInstances) {
             return {"Buffer is full"};
         }
 
