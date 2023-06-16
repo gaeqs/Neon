@@ -98,12 +98,13 @@ void neon::vulkan::QTApplication::renderFrame(neon::Room* room) {
 
     float seconds = static_cast<float>(duration.count()) * 1e-9f;
 
-
     _currentFrameInformation = {
             _currentFrameInformation.currentFrame + 1,
             seconds,
             _lastFrameProcessTime
     };
+
+    _application->getRender()->checkFrameBufferRecreationConditions();
 
     if (room != nullptr) {
         room->update(_currentFrameInformation.currentDeltaTime);
@@ -256,7 +257,6 @@ void neon::vulkan::QTApplication::keyPressEvent(QKeyEvent* event) {
             event->isAutoRepeat() ? 2 : 1,
             modifier
     );
-  std::cout << std::hex << event->key() << std::dec << std::endl;
 }
 
 void neon::vulkan::QTApplication::keyReleaseEvent(QKeyEvent* event) {
