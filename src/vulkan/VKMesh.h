@@ -131,7 +131,8 @@ namespace neon::vulkan {
                 VkCommandBuffer commandBuffer,
                 VkBuffer instancingBuffer,
                 uint32_t instancingElements,
-                const ShaderUniformBuffer* global);
+                const ShaderUniformBuffer* globalBuffer,
+                const ShaderUniformBuffer* modelBuffer);
 
     };
 }

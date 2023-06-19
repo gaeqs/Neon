@@ -113,7 +113,8 @@ namespace neon::vulkan {
         }
     }
 
-    void VKModel::draw(const Material* material) const {
+    void VKModel::draw(const Material* material,
+                       const ShaderUniformBuffer* modelBuffer) const {
         auto sp = std::shared_ptr<Material>(const_cast<Material*>(material),
                                             [](Material*) {});
         if (_positions.empty()) return;
@@ -127,11 +128,13 @@ namespace neon::vulkan {
                             ->getImplementation().getCommandBuffer(),
                     _instancingBuffer->getRaw(),
                     _positions.size(),
-                    &_application->getRender()->getGlobalUniformBuffer());
+                    &_application->getRender()->getGlobalUniformBuffer(),
+                    modelBuffer);
         }
     }
 
     void VKModel::drawOutside(const Material* material,
+                              const ShaderUniformBuffer* modelBuffer,
                               const CommandBuffer* commandBuffer) const {
         if (_positions.empty()) return;
 
@@ -145,7 +148,8 @@ namespace neon::vulkan {
                     buffer,
                     _instancingBuffer->getRaw(),
                     _positions.size(),
-                    &_application->getRender()->getGlobalUniformBuffer());
+                    &_application->getRender()->getGlobalUniformBuffer(),
+                    modelBuffer);
         }
 
         vkCmdEndRenderPass(buffer);

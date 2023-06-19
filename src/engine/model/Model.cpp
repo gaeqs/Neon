@@ -24,11 +24,18 @@ namespace neon {
     Model::Model(Application* application,
                  const std::string& name,
                  std::vector<std::shared_ptr<Mesh>>& meshes,
-                 uint32_t maximumInstances) :
+                 uint32_t maximumInstances,
+                 std::shared_ptr<ShaderUniformDescriptor> uniformDescriptor) :
             Asset(typeid(Model), name),
             _implementation(application, getMeshImplementations(meshes),
                             maximumInstances),
-            _meshes(std::move(meshes)) {
+            _meshes(std::move(meshes)),
+            _uniformBuffer() {
+        if (uniformDescriptor != nullptr) {
+            _uniformBuffer = std::make_unique<ShaderUniformBuffer>(
+                    name, uniformDescriptor);
+            _uniformBuffer->setBindingPoint(2);
+        }
     }
 
     Model::Implementation& Model::getImplementation() {
@@ -41,6 +48,11 @@ namespace neon {
 
     const std::type_index& Model::getInstancingStructType() const {
         return _implementation.getInstancingStructType();
+    }
+
+    const std::unique_ptr<ShaderUniformBuffer>&
+    Model::getUniformBuffer() const {
+        return _uniformBuffer;
     }
 
     Result<uint32_t*, std::string> Model::createInstance() {
@@ -78,11 +90,12 @@ namespace neon {
     }
 
     void Model::draw(const Material* material) const {
-        _implementation.draw(material);
+        _implementation.draw(material, _uniformBuffer.get());
     }
 
     void Model::drawOutside(const Material* material,
                             const CommandBuffer* commandBuffer) const {
-        _implementation.drawOutside(material, commandBuffer);
+        _implementation.drawOutside(material,
+                                    _uniformBuffer.get(), commandBuffer);
     }
 }

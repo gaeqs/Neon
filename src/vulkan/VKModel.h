@@ -21,6 +21,8 @@ namespace neon {
     class Material;
 
     class CommandBuffer;
+
+    class ShaderUniformBuffer;
 }
 
 namespace neon::vulkan {
@@ -74,9 +76,11 @@ namespace neon::vulkan {
 
         void flush();
 
-        void draw(const Material* material) const;
+        void draw(const Material* material,
+                  const ShaderUniformBuffer* modelBuffer) const;
 
         void drawOutside(const Material* material,
+                         const ShaderUniformBuffer* modelBuffer,
                          const CommandBuffer* commandBuffer) const;
 
     };

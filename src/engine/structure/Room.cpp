@@ -120,7 +120,9 @@ namespace neon {
 
         {
             DEBUG_PROFILE(p, models);
-            _components.flushModels();
+            for (const auto& [model, amount]: _usedModels) {
+                model->flush();
+            }
         }
 
         {

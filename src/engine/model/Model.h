@@ -36,7 +36,7 @@ namespace neon {
 
     public:
 
-      static constexpr uint32_t DEFAULT_MAXIMUM_INSTANCES = 1024 * 16;
+        static constexpr uint32_t DEFAULT_MAXIMUM_INSTANCES = 1024 * 16;
 
 #ifdef USE_VULKAN
         using Implementation = vulkan::VKModel;
@@ -46,6 +46,7 @@ namespace neon {
 
         Implementation _implementation;
         std::vector<std::shared_ptr<Mesh>> _meshes;
+        std::unique_ptr<ShaderUniformBuffer> _uniformBuffer;
 
         /**
          * Gets all implementations of the given meshes.
@@ -67,7 +68,8 @@ namespace neon {
         Model(Application* application,
               const std::string& name,
               std::vector<std::shared_ptr<Mesh>>& meshes,
-              uint32_t maximumInstances = DEFAULT_MAXIMUM_INSTANCES);
+              uint32_t maximumInstances = DEFAULT_MAXIMUM_INSTANCES,
+              std::shared_ptr<ShaderUniformDescriptor> uniformDescriptor = nullptr);
 
         /**
          * Returns the implementation of the model.
@@ -106,6 +108,13 @@ namespace neon {
          * @param size the size of the struct.
          */
         void defineInstanceStruct(std::type_index type, size_t size);
+
+        /**
+         * Returns the uniform buffer that contains the global data
+         * of this model.
+         * @return the uniform buffer.
+         */
+        const std::unique_ptr<ShaderUniformBuffer>& getUniformBuffer() const;
 
         /**
          * Creates an instance of this model.

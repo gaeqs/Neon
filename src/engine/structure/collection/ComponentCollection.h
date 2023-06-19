@@ -173,14 +173,6 @@ namespace neon {
          */
         void preDrawComponents(Profiler& profiler);
 
-        /**
-         * THIS METHOD SHOULD ONLY BE USED BY ROOMS!
-         * USERS MUSTN'T USE THIS METHOD.
-         * <p>
-         * Calls flush() on all models present in the graphic components.
-         */
-        void flushModels() const;
-
     };
 }
 
