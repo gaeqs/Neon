@@ -63,6 +63,10 @@ namespace neon {
         return _implementation.freeInstance(id);
     }
 
+    size_t Model::getInstanceAmount() const {
+        return _implementation.getInstanceAmount();
+    }
+
     void Model::uploadDataRaw(uint32_t id, const void* raw) {
         _implementation.uploadDataRaw(id, raw);
     }
@@ -73,6 +77,10 @@ namespace neon {
 
     void Model::defineInstanceStruct(std::type_index type, size_t size) {
         _implementation.defineInstanceStruct(type, size);
+    }
+
+    const std::vector<std::shared_ptr<Mesh>>& Model::getMeshes() const {
+        return _meshes;
     }
 
     size_t Model::getMeshesAmount() const {

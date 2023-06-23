@@ -67,6 +67,8 @@ namespace neon::vulkan {
 
         bool freeInstance(uint32_t id);
 
+        size_t getInstanceAmount() const;
+
         template<class InstanceData>
         void uploadData(uint32_t id, const InstanceData& data) {
             uploadDataRaw(id, &data);

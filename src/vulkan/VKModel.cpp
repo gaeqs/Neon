@@ -19,7 +19,7 @@ namespace neon::vulkan {
                         _application->getImplementation()),
                 VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
                 static_cast<uint32_t>(_instancingStructSize) *
-                  _maximumInstances
+                _maximumInstances
         );
         _data.resize(_instancingStructSize * _maximumInstances, 0);
     }
@@ -38,8 +38,9 @@ namespace neon::vulkan {
                             application->getImplementation()),
                     VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
                     static_cast<uint32_t>(_instancingStructSize) *
-                      maximumInstances
+                    maximumInstances
             )),
+            _instancingBufferMap(),
             _data(_instancingStructSize * maximumInstances, 0),
             _dataChangeRange(0, 0) {
     }
@@ -79,6 +80,10 @@ namespace neon::vulkan {
         delete toRemove;
 
         return true;
+    }
+
+    size_t VKModel::getInstanceAmount() const {
+        return _positions.size();
     }
 
     void VKModel::uploadDataRaw(uint32_t id, const void* raw) {

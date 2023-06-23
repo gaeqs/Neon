@@ -131,6 +131,12 @@ namespace neon {
         bool freeInstance(uint32_t id);
 
         /**
+         * Returns the amount of instances inside this model.
+         * @return the amount of instances.
+         */
+        size_t getInstanceAmount() const;
+
+        /**
          * Sets the instancing data of an instance.
          * @tparam InstanceData the type of the instance data.
          * @param id the identifier of the instance.
@@ -155,6 +161,12 @@ namespace neon {
          * before the room is rendered.
          */
         void flush();
+
+        /**
+         * Returns the list containing all meshes inside this model.
+         * @return the meshes.
+         */
+        const std::vector<std::shared_ptr<Mesh>>& getMeshes() const;
 
         /**
          * Return the amount of meshes this mode has.
