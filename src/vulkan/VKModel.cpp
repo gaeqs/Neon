@@ -40,7 +40,6 @@ namespace neon::vulkan {
                     static_cast<uint32_t>(_instancingStructSize) *
                     maximumInstances
             )),
-            _instancingBufferMap(),
             _data(_instancingStructSize * maximumInstances, 0),
             _dataChangeRange(0, 0) {
     }
@@ -105,6 +104,10 @@ namespace neon::vulkan {
         memcpy(_data.data() + _instancingStructSize * id,
                raw, _instancingStructSize);
         _dataChangeRange += Range<uint32_t>(id, id + 1);
+    }
+
+    const void* VKModel::fetchDataRaw(uint32_t id) const {
+        return _data.data() + _instancingStructSize * id;
     }
 
     void VKModel::flush() {

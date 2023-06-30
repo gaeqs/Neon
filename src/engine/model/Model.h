@@ -147,6 +147,11 @@ namespace neon {
             _implementation.uploadData(id, data);
         }
 
+        template<class InstanceData>
+        const InstanceData* fetchData(uint32_t id) const {
+            return _implementation.fetchData<InstanceData>(id);
+        }
+
         /**
          * Sets the instancing data of an instance.
          * @param id the identifier of the instance.

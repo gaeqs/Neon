@@ -76,6 +76,13 @@ namespace neon::vulkan {
 
         void uploadDataRaw(uint32_t id, const void* raw);
 
+        template<class InstanceData>
+        const InstanceData* fetchData(uint32_t id) const {
+            return reinterpret_cast<const InstanceData*>(fetchDataRaw(id));
+        }
+
+        const void* fetchDataRaw(uint32_t id) const;
+
         void flush();
 
         void draw(const Material* material,
