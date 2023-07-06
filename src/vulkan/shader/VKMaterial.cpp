@@ -124,8 +124,10 @@ namespace neon::vulkan {
                 defaultColorBlendAttachment
         );
 
-        for (int i = 0;
-             i < createInfo.blending.attachmentsBlending.size(); ++i) {
+        size_t maxOutColors = std::min(
+                createInfo.blending.attachmentsBlending.size(),
+                blendAttachments.size());
+        for (int i = 0; i < maxOutColors; ++i) {
             auto& att = createInfo.blending.attachmentsBlending[i];
             VkPipelineColorBlendAttachmentState cba{};
 
@@ -144,7 +146,7 @@ namespace neon::vulkan {
             cba.dstAlphaBlendFactor = vc::vkBlendFactor(
                     att.alphaDestinyBlendFactor);
 
-            blendAttachments[i] = cba;
+            blendAttachments.at(i) = cba;
         }
 
         VkPipelineColorBlendStateCreateInfo colorBlending{};
@@ -160,7 +162,7 @@ namespace neon::vulkan {
         colorBlending.blendConstants[3] = createInfo.blending.blendingConstants[3];
 
         std::vector<VkDescriptorSetLayout> uniformInfos;
-        uniformInfos.reserve(2);
+        uniformInfos.reserve(2 + createInfo.descriptions.extraUniforms.size());
         uniformInfos.push_back(
                 application->getRender()
                         ->getGlobalUniformDescriptor()
@@ -172,6 +174,10 @@ namespace neon::vulkan {
                                            .getDescriptorSetLayout());
         }
 
+        for (const auto& descriptor: createInfo.descriptions.extraUniforms) {
+            uniformInfos.push_back(descriptor->getImplementation()
+                                           .getDescriptorSetLayout());
+        }
 
         VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
         pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
@@ -285,7 +291,7 @@ namespace neon::vulkan {
 
     void VKMaterial::setTexture(const std::string& name,
                                 std::shared_ptr<Texture> texture) {
-        if(_material->getUniformBuffer() == nullptr) return;
+        if (_material->getUniformBuffer() == nullptr) return;
         auto& samplers = _material->getShader()->getImplementation()
                 .getSamplers();
         auto samplerIt = samplers.find(name);

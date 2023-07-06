@@ -7,6 +7,8 @@
 #include <engine/structure/Room.h>
 #include <engine/io/KeyboardEvent.h>
 #include <engine/io/CursorEvent.h>
+#include <engine/io/MouseButtonEvent.h>
+#include <engine/io/ScrollEvent.h>
 
 namespace neon {
 
@@ -130,6 +132,17 @@ namespace neon {
         }
     }
 
+    void Application::invokeMouseButtonEvent(int button, int action, int mods) {
+        MouseButtonEvent event{
+                static_cast<MouseButton>(button),
+                static_cast<KeyboardAction>(action),
+                mods
+        };
+        if (_room != nullptr) {
+            _room->onMouseButton(event);
+        }
+    }
+
     void Application::invokeCursorPosEvent(double x, double y) {
         glm::dvec2 current(x, y);
         auto delta = current - _lastCursorPosition;
@@ -142,6 +155,13 @@ namespace neon {
 
         if (_room != nullptr) {
             _room->onCursorMove(event);
+        }
+    }
+
+    void Application::invokeScrollEvent(double xOffset, double yOffset) {
+        ScrollEvent event{{xOffset, yOffset}};
+        if (_room != nullptr) {
+            _room->onScroll(event);
         }
     }
 }

@@ -135,9 +135,13 @@ namespace neon::vulkan {
 
         void keyReleaseEvent(QKeyEvent* event) override;
 
+        void wheelEvent(QWheelEvent* event) override;
+
     private:
 
-        static int32_t qtToGLFWKey (Qt::Key key) ;
+        static int32_t qtToGLFWKey(Qt::Key key);
+
+        static int32_t qtToGLFWMouseButton(Qt::MouseButton button);
 
     };
 }

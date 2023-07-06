@@ -120,7 +120,11 @@ namespace neon {
 
         void invokeKeyEvent(int key, int scancode, int action, int mods);
 
+        void invokeMouseButtonEvent(int button, int action, int mods);
+
         void invokeCursorPosEvent(double x, double y);
+
+        void invokeScrollEvent(double xOffset, double yOffset);
 
         //endregion
     };

@@ -120,6 +120,12 @@ namespace neon {
          */
         std::shared_ptr<ShaderUniformDescriptor> uniform = nullptr;
 
+        /**
+         * The extra uniform descriptions the material can have.
+         * This can be used, for example, by model uniforms.
+         */
+        std::vector<std::shared_ptr<ShaderUniformDescriptor>> extraUniforms = {};
+
     };
 
     struct MaterialAttachmentBlending {

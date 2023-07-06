@@ -36,6 +36,8 @@ set(SOURCES
         assimp/AssimpMaterialParameters.h
         engine/io/KeyboardEvent.h
         engine/io/CursorEvent.h
+        engine/io/MouseButtonEvent.h
+        engine/io/ScrollEvent.h
         engine/model/Mesh.cpp
         engine/model/Mesh.h
         engine/model/Model.cpp

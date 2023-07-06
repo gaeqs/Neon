@@ -31,7 +31,7 @@
 #include <engine/structure/Room.h>
 
 #include <QMouseEvent>
-#include <QKeyEvent>
+#include <QWheelEvent>
 #include <engine/io/KeyboardEvent.h>
 
 namespace {
@@ -233,11 +233,43 @@ void neon::vulkan::QTApplication::mouseMoveEvent(QMouseEvent* event) {
 }
 
 void neon::vulkan::QTApplication::mousePressEvent(QMouseEvent* event) {
+    auto qtMod = event->modifiers();
+    int modifier = 0;
+    if (qtMod & Qt::ShiftModifier)
+        modifier |= (int) neon::KeyboardModifier::SHIFT;
+    if (qtMod & Qt::ControlModifier)
+        modifier |= (int) neon::KeyboardModifier::CONTROL;
+    if (qtMod & Qt::AltModifier)
+        modifier |= (int) neon::KeyboardModifier::ALT;
+    if (qtMod & Qt::MetaModifier)
+        modifier |= (int) neon::KeyboardModifier::SUPER;
 
+
+    _application->invokeMouseButtonEvent(
+            qtToGLFWMouseButton(event->button()),
+            GLFW_PRESS,
+            modifier
+    );
 }
 
 void neon::vulkan::QTApplication::mouseReleaseEvent(QMouseEvent* event) {
+    auto qtMod = event->modifiers();
+    int modifier = 0;
+    if (qtMod & Qt::ShiftModifier)
+        modifier |= (int) neon::KeyboardModifier::SHIFT;
+    if (qtMod & Qt::ControlModifier)
+        modifier |= (int) neon::KeyboardModifier::CONTROL;
+    if (qtMod & Qt::AltModifier)
+        modifier |= (int) neon::KeyboardModifier::ALT;
+    if (qtMod & Qt::MetaModifier)
+        modifier |= (int) neon::KeyboardModifier::SUPER;
 
+
+    _application->invokeMouseButtonEvent(
+            qtToGLFWMouseButton(event->button()),
+            GLFW_RELEASE,
+            modifier
+    );
 }
 
 void neon::vulkan::QTApplication::keyPressEvent(QKeyEvent* event) {
@@ -278,6 +310,11 @@ void neon::vulkan::QTApplication::keyReleaseEvent(QKeyEvent* event) {
             0,
             modifier
     );
+}
+
+void neon::vulkan::QTApplication::wheelEvent(QWheelEvent* event) {
+    auto delta = event->angleDelta() / 15.0f;
+    _application->invokeScrollEvent(delta.x(), delta.y());
 }
 
 int32_t neon::vulkan::QTApplication::qtToGLFWKey(Qt::Key key) {
@@ -506,6 +543,28 @@ int32_t neon::vulkan::QTApplication::qtToGLFWKey(Qt::Key key) {
             return GLFW_KEY_MENU;
         default:
             return GLFW_KEY_UNKNOWN;
+    }
+}
+
+int32_t
+neon::vulkan::QTApplication::qtToGLFWMouseButton(Qt::MouseButton button) {
+    switch (button) {
+        case Qt::LeftButton:
+            return GLFW_MOUSE_BUTTON_1;
+        case Qt::RightButton:
+            return GLFW_MOUSE_BUTTON_2;
+        case Qt::MiddleButton:
+            return GLFW_MOUSE_BUTTON_3;
+        case Qt::ExtraButton4:
+            return GLFW_MOUSE_BUTTON_4;
+        case Qt::ExtraButton5:
+            return GLFW_MOUSE_BUTTON_5;
+        case Qt::ExtraButton6:
+            return GLFW_MOUSE_BUTTON_6;
+        case Qt::ExtraButton7:
+            return GLFW_MOUSE_BUTTON_7;
+        default:
+            return -1;
     }
 }
 

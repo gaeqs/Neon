@@ -23,9 +23,13 @@ namespace neon {
 
     class GraphicComponent;
 
-    class KeyboardEvent;
+    struct KeyboardEvent;
 
-    class CursorMoveEvent;
+    struct MouseButtonEvent;
+
+    struct CursorMoveEvent;
+
+    struct ScrollEvent;
 
 /**
  * This class holds all components inside a room.
@@ -139,10 +143,27 @@ namespace neon {
          * THIS METHOD SHOULD ONLY BE USED BY ROOMS!
          * USERS MUSTN'T USE THIS METHOD.
          * <p>
+         * Calls onMouseButton() on all components.
+         */
+        void invokeMouseButtonEvent(Profiler& profiler,
+                                    const MouseButtonEvent& event);
+
+        /**
+         * THIS METHOD SHOULD ONLY BE USED BY ROOMS!
+         * USERS MUSTN'T USE THIS METHOD.
+         * <p>
          * Calls onCursorMove() on all components.
          */
         void
         invokeCursorMoveEvent(Profiler& profiler, const CursorMoveEvent& event);
+
+        /**
+         * THIS METHOD SHOULD ONLY BE USED BY ROOMS!
+         * USERS MUSTN'T USE THIS METHOD.
+         * <p>
+         * Calls onScroll() on all components.
+         */
+        void invokeScrollEvent(Profiler& profiler, const ScrollEvent& event);
 
         /**
          * THIS METHOD SHOULD ONLY BE USED BY ROOMS!

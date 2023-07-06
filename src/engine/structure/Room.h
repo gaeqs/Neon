@@ -14,7 +14,7 @@
 #include <engine/structure/collection/IdentifiableCollection.h>
 #include <engine/render/Render.h>
 
-#include "util/ClusteredLinkedCollection.h"
+#include <util/ClusteredLinkedCollection.h>
 
 namespace neon {
 
@@ -24,9 +24,13 @@ namespace neon {
 
     class Component;
 
-    class KeyboardEvent;
+    struct KeyboardEvent;
 
-    class CursorMoveEvent;
+    struct CursorMoveEvent;
+
+    struct MouseButtonEvent;
+
+    struct ScrollEvent;
 
     class Model;
 
@@ -100,7 +104,11 @@ namespace neon {
 
         void onKey(const KeyboardEvent& event);
 
+        void onMouseButton(const MouseButtonEvent& event);
+
         void onCursorMove(const CursorMoveEvent& event);
+
+        void onScroll(const ScrollEvent& event);
 
         void update(float deltaTime);
 

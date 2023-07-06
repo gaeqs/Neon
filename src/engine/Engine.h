@@ -11,7 +11,8 @@
 
 #include <engine/io/CursorEvent.h>
 #include <engine/io/KeyboardEvent.h>
-#include <engine/io/KeyboardEvent.h>
+#include <engine/io/MouseButtonEvent.h>
+#include <engine/io/ScrollEvent.h>
 
 #include <engine/light/DirectionalLight.h>
 #include <engine/light/FlashLight.h>

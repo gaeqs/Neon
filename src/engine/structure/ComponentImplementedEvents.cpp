@@ -14,13 +14,17 @@ namespace neon {
             std::type_index onLateUpdateFunction,
             std::type_index onPreDrawFunction,
             std::type_index onKeyFunction,
-            std::type_index onCursorMoveFunction) :
+            std::type_index onMouseButtonFunction,
+            std::type_index onCursorMoveFunction,
+            std::type_index onScrollFunction) :
             onConstruction(onConstructionFunction !=typeid(&Component::onConstruction)),
             onStart(onStartFunction != typeid(&Component::onStart)),
             onUpdate(onUpdateFunction != typeid(&Component::onUpdate)),
             onLateUpdate(onLateUpdateFunction != typeid(&Component::onLateUpdate)),
             onPreDraw(onPreDrawFunction != typeid(&Component::onPreDraw)),
             onKey(onKeyFunction != typeid(&Component::onKey)),
-            onCursorMove(onCursorMoveFunction != typeid(&Component::onCursorMove)) {
+            onMouseButton(onMouseButtonFunction != typeid(&Component::onMouseButton)),
+            onCursorMove(onCursorMoveFunction != typeid(&Component::onCursorMove)),
+            onScroll(onScrollFunction != typeid(&Component::onScroll)){
     }
 }

@@ -26,7 +26,9 @@ namespace neon {
                     typeid(&T::onLateUpdate),
                     typeid(&T::onPreDraw),
                     typeid(&T::onKey),
-                    typeid(&T::onCursorMove)
+                    typeid(&T::onMouseButton),
+                    typeid(&T::onCursorMove),
+                    typeid(&T::onScroll)
             );
         }
 
@@ -36,7 +38,9 @@ namespace neon {
         bool onLateUpdate;
         bool onPreDraw;
         bool onKey;
+        bool onMouseButton;
         bool onCursorMove;
+        bool onScroll;
 
         ComponentImplementedEvents(
                 std::type_index onConstructionFunction,
@@ -45,7 +49,9 @@ namespace neon {
                 std::type_index onLateUpdateFunction,
                 std::type_index onPreDrawFunction,
                 std::type_index onKeyFunction,
-                std::type_index onCursorMoveFunction);
+                std::type_index onMouseButtonFunction,
+                std::type_index onCursorMoveFunction,
+                std::type_index onScrollFunction);
 
     };
 }

@@ -112,10 +112,11 @@ namespace neon::vulkan {
 
     void VKModel::flush() {
         if (_dataChangeRange.size() != 0) {
-            auto map = _instancingBuffer->map<char>(
-                    _dataChangeRange * _instancingStructSize);
+            auto range = _dataChangeRange * _instancingStructSize;
+            auto map = _instancingBuffer->map<char>(range);
             if (map.has_value()) {
-                memcpy(map.value()->raw(), _data.data(), _data.size());
+                memcpy(map.value()->raw(),
+                       _data.data() + range.getFrom(), range.size());
             }
             _dataChangeRange = Range<uint32_t>(0, 0);
         }

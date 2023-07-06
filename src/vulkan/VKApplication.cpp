@@ -37,10 +37,26 @@ namespace neon::vulkan {
                 ->invokeKeyEvent(key, scancode, action, mods);
     }
 
+    void mouse_button_callback(GLFWwindow* window, int button,
+                               int action, int mods) {
+        auto* application = static_cast<VKApplication*>(
+                glfwGetWindowUserPointer(
+                        window));
+
+        application->getApplication()
+                ->invokeMouseButtonEvent(button, action, mods);
+    }
+
     void cursor_pos_callback(GLFWwindow* window, double x, double y) {
         auto* application = static_cast<VKApplication*>(
                 glfwGetWindowUserPointer(window));
         application->getApplication()->invokeCursorPosEvent(x, y);
+    }
+
+    void scroll_callback(GLFWwindow* window, double xOffset, double yOffset) {
+        auto* application = static_cast<VKApplication*>(
+                glfwGetWindowUserPointer(window));
+        application->getApplication()->invokeScrollEvent(xOffset, yOffset);
     }
 
     static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
@@ -145,7 +161,9 @@ namespace neon::vulkan {
         glfwSetWindowUserPointer(_window, this);
         glfwSetWindowSizeCallback(_window, framebuffer_size_callback);
         glfwSetKeyCallback(_window, key_size_callback);
+        glfwSetMouseButtonCallback(_window, mouse_button_callback);
         glfwSetCursorPosCallback(_window, cursor_pos_callback);
+        glfwSetScrollCallback(_window, scroll_callback);
 
         postWindowCreation();
 
