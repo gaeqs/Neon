@@ -13,6 +13,20 @@
 #include <engine/render/CommandBuffer.h>
 
 namespace neon::vulkan {
+
+    std::vector<Mesh::Implementation*> VKModel::getMeshImplementations(
+            const std::vector<std::shared_ptr<Mesh>>& meshes) {
+
+        std::vector<Mesh::Implementation*> vector;
+        vector.reserve(meshes.size());
+
+        for (auto& item: meshes) {
+            vector.push_back(&item->getImplementation());
+        }
+
+        return vector;
+    }
+
     void VKModel::reinitializeBuffer() {
         _instancingBuffer = std::make_unique<StagingBuffer>(
                 dynamic_cast<AbstractVKApplication*>(
@@ -24,23 +38,21 @@ namespace neon::vulkan {
         _data.resize(_instancingStructSize * _maximumInstances, 0);
     }
 
-    VKModel::VKModel(Application* application, std::vector<VKMesh*> meshes,
-                     uint32_t maximumInstances) :
+    VKModel::VKModel(Application* application, const ModelCreateInfo& info) :
             _application(application),
-            _meshes(std::move(meshes)),
-            _maximumInstances(maximumInstances),
-            _instancingStructType(
-                    std::type_index(typeid(DefaultInstancingData))),
-            _instancingStructSize(sizeof(DefaultInstancingData)),
+            _meshes(getMeshImplementations(info.meshes)),
+            _maximumInstances(info.maximumInstances),
+            _instancingStructType(info.instanceType),
+            _instancingStructSize(info.instanceSize),
             _positions(),
             _instancingBuffer(std::make_unique<StagingBuffer>(
                     dynamic_cast<AbstractVKApplication*>(
                             application->getImplementation()),
                     VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
                     static_cast<uint32_t>(_instancingStructSize) *
-                    maximumInstances
+                    info.maximumInstances
             )),
-            _data(_instancingStructSize * maximumInstances, 0),
+            _data(_instancingStructSize * info.maximumInstances, 0),
             _dataChangeRange(0, 0) {
     }
 

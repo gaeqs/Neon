@@ -39,8 +39,9 @@ namespace neon::deferred_utils {
 
         mesh->setMeshData(vertices, indices);
 
-        std::vector<std::shared_ptr<Mesh>> meshes{std::move(mesh)};
-        return std::make_shared<Model>(application, name, meshes);
+        ModelCreateInfo info;
+        info.meshes.push_back(std::move(mesh));
+        return std::make_shared<Model>(application, name, info);
     }
 
     std::shared_ptr<Texture> createLightSystem(

@@ -8,32 +8,16 @@
 
 namespace neon {
 
-    std::vector<Mesh::Implementation*> Model::getMeshImplementations(
-            const std::vector<std::shared_ptr<Mesh>>& meshes) {
-
-        std::vector<Mesh::Implementation*> vector;
-        vector.reserve(meshes.size());
-
-        for (auto& item: meshes) {
-            vector.push_back(&item->getImplementation());
-        }
-
-        return vector;
-    }
-
     Model::Model(Application* application,
                  const std::string& name,
-                 std::vector<std::shared_ptr<Mesh>>& meshes,
-                 uint32_t maximumInstances,
-                 std::shared_ptr<ShaderUniformDescriptor> uniformDescriptor) :
+                 const ModelCreateInfo& info) :
             Asset(typeid(Model), name),
-            _implementation(application, getMeshImplementations(meshes),
-                            maximumInstances),
-            _meshes(std::move(meshes)),
+            _implementation(application, info),
+            _meshes(info.meshes),
             _uniformBuffer() {
-        if (uniformDescriptor != nullptr) {
+        if (info.uniformDescriptor != nullptr) {
             _uniformBuffer = std::make_unique<ShaderUniformBuffer>(
-                    name, uniformDescriptor);
+                    name, info.uniformDescriptor);
             _uniformBuffer->setBindingPoint(2);
         }
     }

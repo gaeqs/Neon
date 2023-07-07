@@ -10,6 +10,7 @@
 
 #include <engine/structure/Asset.h>
 #include <engine/model/Mesh.h>
+#include <engine/model/ModelCreateInfo.h>
 
 #ifdef USE_VULKAN
 
@@ -48,28 +49,19 @@ namespace neon {
         std::vector<std::shared_ptr<Mesh>> _meshes;
         std::unique_ptr<ShaderUniformBuffer> _uniformBuffer;
 
-        /**
-         * Gets all implementations of the given meshes.
-         * @param meshes the meshes.
-         * @return the implementations.
-         */
-        static std::vector<Mesh::Implementation*> getMeshImplementations(
-                const std::vector<std::shared_ptr<Mesh>>& meshes);
-
     public:
 
         Model(const Model& other) = delete;
 
         /**
          * Creates a model.
-         * @param room the room where the model is located at.
-         * @param meshes the meshes used by the model.
+         * @param application the application holding the model.
+         * @param name the name that identifies the model.
+         * @param info the information about the model.
          */
         Model(Application* application,
               const std::string& name,
-              std::vector<std::shared_ptr<Mesh>>& meshes,
-              uint32_t maximumInstances = DEFAULT_MAXIMUM_INSTANCES,
-              std::shared_ptr<ShaderUniformDescriptor> uniformDescriptor = nullptr);
+              const ModelCreateInfo& info);
 
         /**
          * Returns the implementation of the model.

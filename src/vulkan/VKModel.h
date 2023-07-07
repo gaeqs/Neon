@@ -10,6 +10,7 @@
 #include <memory>
 
 #include <engine/render/FrameBuffer.h>
+#include <engine/model/ModelCreateInfo.h>
 #include <vulkan/VKMesh.h>
 #include <vulkan/buffer/StagingBuffer.h>
 #include <util/Range.h>
@@ -44,6 +45,8 @@ namespace neon::vulkan {
         std::vector<char> _data;
         Range<uint32_t> _dataChangeRange;
 
+        static std::vector<Mesh::Implementation*> getMeshImplementations(
+                const std::vector<std::shared_ptr<Mesh>>& meshes);
 
         void reinitializeBuffer();
 
@@ -51,8 +54,7 @@ namespace neon::vulkan {
 
         VKModel(const VKModel& other) = delete;
 
-        VKModel(Application* application, std::vector<VKMesh*> meshes,
-                uint32_t maximumInstances);
+        VKModel(Application* application, const ModelCreateInfo& info);
 
         [[nodiscard]] const std::type_index& getInstancingStructType() const;
 

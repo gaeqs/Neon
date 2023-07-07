@@ -42,6 +42,7 @@ set(SOURCES
         engine/model/Mesh.h
         engine/model/Model.cpp
         engine/model/Model.h
+        engine/model/ModelCreateInfo.h
         engine/shader/ShaderUniformBuffer.cpp
         engine/shader/ShaderUniformBuffer.h
         engine/shader/ShaderUniformBinding.h
