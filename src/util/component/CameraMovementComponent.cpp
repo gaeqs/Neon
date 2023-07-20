@@ -58,7 +58,7 @@ namespace neon {
         auto &camera = getRoom()->getCamera();
 
         _eulerAngles.x += static_cast<float>(event.delta.y / 100.0);
-        _eulerAngles.y -= static_cast<float>(event.delta.x / 100.0);
+        _eulerAngles.y += static_cast<float>(event.delta.x / 100.0);
 
 
         _eulerAngles.x = glm::clamp(_eulerAngles.x, -LIMIT, LIMIT);

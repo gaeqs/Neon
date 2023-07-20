@@ -1,3 +1,4 @@
+
 //
 // Created by grial on 19/10/22.
 //
@@ -115,11 +116,11 @@ namespace neon {
 
         auto& p = getApplication()->getProfiler();
         {
-            DEBUG_PROFILE(getApplication()->getProfiler(), update);
+            DEBUG_PROFILE(p, update);
             _components.updateComponents(p, deltaTime);
         }
         {
-            DEBUG_PROFILE(getApplication()->getProfiler(), lateUpdate);
+            DEBUG_PROFILE(p, lateUpdate);
             _components.lateUpdateComponents(p, deltaTime);
         }
     }

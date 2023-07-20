@@ -169,13 +169,14 @@ namespace neon::model_utils {
         auto mesh = std::make_shared<Mesh>(room->getApplication(),
                                            "box", material);
         mesh->setMeshData(vertices, CUBE_TRIANGLE_INDEX);
-        std::vector<std::shared_ptr<Mesh>> meshes;
-        meshes.push_back(std::move(mesh));
+
+        ModelCreateInfo info;
+        info.meshes.push_back(std::move(mesh));
 
         auto model = std::make_shared<Model>(
                 room->getApplication(),
                 "box",
-                meshes
+                info
         );
 
         room->getApplication()->getAssets().store(model,

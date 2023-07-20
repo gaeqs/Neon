@@ -12,6 +12,7 @@
 
 #include <engine/structure/collection/ComponentCollection.h>
 #include <engine/structure/collection/IdentifiableCollection.h>
+#include <engine/structure/GameObject.h>
 #include <engine/render/Render.h>
 
 #include <util/ClusteredLinkedCollection.h>
