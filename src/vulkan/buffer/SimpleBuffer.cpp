@@ -7,7 +7,7 @@
 #include <cstring>
 
 #include <vulkan/util/VKUtil.h>
-#include <vulkan/VKApplication.h>
+#include <vulkan/AbstractVKApplication.h>
 #include <iostream>
 
 namespace neon::vulkan {
@@ -25,7 +25,7 @@ namespace neon::vulkan {
                 _application->getDevice(), _vertexBufferMemory, range);
     }
 
-    SimpleBuffer::SimpleBuffer(VKApplication* application,
+    SimpleBuffer::SimpleBuffer(AbstractVKApplication* application,
                                VkBufferUsageFlags usage,
                                VkMemoryPropertyFlags properties,
                                uint32_t sizeInBytes)
@@ -33,7 +33,7 @@ namespace neon::vulkan {
                            sizeInBytes) {
     }
 
-    SimpleBuffer::SimpleBuffer(VKApplication* application,
+    SimpleBuffer::SimpleBuffer(AbstractVKApplication* application,
                                VkBufferUsageFlags usage,
                                VkMemoryPropertyFlags properties,
                                const void* data,
@@ -99,11 +99,22 @@ namespace neon::vulkan {
         return _modifiable;
     }
 
-    VKApplication* SimpleBuffer::getApplication() const {
+    AbstractVKApplication* SimpleBuffer::getApplication() const {
         return _application;
     }
 
     VkBuffer SimpleBuffer::getRaw() const {
         return _vertexBuffer;
     }
+}
+
+VkResult neon::vulkan::simple_buffer::mapMemory(
+        VkDevice pT, VkDeviceMemory pT1, uint32_t from,
+        uint32_t size, int i, void** pVoid) {
+    return vkMapMemory(pT, pT1, from, size, i, pVoid);
+}
+
+void neon::vulkan::simple_buffer::unmapMemory(
+        VkDevice device, VkDeviceMemory memory) {
+    vkUnmapMemory(device, memory);
 }

@@ -20,13 +20,13 @@ namespace neon {
 }
 
 namespace neon::vulkan {
-    class VKApplication;
+    class AbstractVKApplication;
 
     class VKShaderProgram {
 
         static VkShaderStageFlagBits getStage(ShaderType type);
 
-        VKApplication* _vkApplication;
+        AbstractVKApplication* _vkApplication;
         std::vector<VkPipelineShaderStageCreateInfo> _shaders;
 
         std::unordered_map<std::string, VKShaderUniformBlock> _uniformBlocks;

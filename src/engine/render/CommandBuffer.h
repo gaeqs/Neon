@@ -34,7 +34,9 @@ namespace neon {
         CommandBuffer(Application* application, bool primary);
 
 #ifdef USE_VULKAN
-        CommandBuffer(vulkan::VKApplication* application, bool primary);
+
+        CommandBuffer(Application* application, VkCommandBuffer commandBuffer);
+
 #endif
 
         [[nodiscard]] const Implementation& getImplementation() const;

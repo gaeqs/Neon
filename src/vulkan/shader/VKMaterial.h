@@ -24,13 +24,13 @@ namespace neon {
 }
 
 namespace neon::vulkan {
-    class VKApplication;
+    class AbstractVKApplication;
 
     class VKMaterial {
 
         Material* _material;
 
-        VKApplication* _vkApplication;
+        AbstractVKApplication* _vkApplication;
         VkPipelineLayout _pipelineLayout;
         VkPipeline _pipeline;
 

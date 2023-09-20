@@ -7,12 +7,15 @@
 #include <stdexcept>
 
 #include <engine/Application.h>
+
 #include <vulkan/render/VKFrameBuffer.h>
+#include <vulkan/AbstractVKApplication.h>
 
 namespace neon::vulkan {
     VKRenderPass::VKRenderPass(VKRenderPass&& other) noexcept:
             _vkApplication(other._vkApplication),
-            _raw(other._raw) {
+            _raw(other._raw),
+            _external(other._external) {
         other._raw = VK_NULL_HANDLE;
     }
 
@@ -21,8 +24,10 @@ namespace neon::vulkan {
                                bool depth,
                                bool present,
                                VkFormat depthFormat) :
-            _vkApplication(&application->getImplementation()),
-            _raw(VK_NULL_HANDLE) {
+            _vkApplication(dynamic_cast<AbstractVKApplication*>(
+                                   application->getImplementation())),
+            _raw(VK_NULL_HANDLE),
+            _external(false) {
         std::vector<VkAttachmentDescription> attachments;
         attachments.reserve(colorFormats.size()
                             + (depth ? 1 : 0));
@@ -90,9 +95,13 @@ namespace neon::vulkan {
         VkSubpassDependency depthDependency{};
         depthDependency.srcSubpass = VK_SUBPASS_EXTERNAL;
         depthDependency.dstSubpass = 0;
-        depthDependency.srcStageMask = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT |VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
+        depthDependency.srcStageMask =
+                VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT |
+                VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
         depthDependency.srcAccessMask = 0;
-        depthDependency.dstStageMask = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT |VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
+        depthDependency.dstStageMask =
+                VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT |
+                VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
         depthDependency.dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
 
         VkSubpassDependency dependencies[] = {dependency, depthDependency};
@@ -110,8 +119,15 @@ namespace neon::vulkan {
 
     }
 
+    VKRenderPass::VKRenderPass(Application* application, VkRenderPass pass) :
+            _vkApplication(dynamic_cast<AbstractVKApplication*>(
+                                   application->getImplementation())),
+            _raw(pass),
+            _external(true) {
+    }
+
     VKRenderPass::~VKRenderPass() {
-        if (_raw != VK_NULL_HANDLE) {
+        if (_raw != VK_NULL_HANDLE && !_external) {
             vkDestroyRenderPass(_vkApplication->getDevice(), _raw, nullptr);
         }
     }

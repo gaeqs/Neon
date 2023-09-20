@@ -22,6 +22,7 @@ set(CMAKE_CXX_STANDARD 20)
 
 option(VULKAN_MODE "Enables Vulkan" OFF)
 option(NEON_TESTS "Enables Neon tests" OFF)
+option(NEON_USE_QT "Use QT implementation" OFF)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMake")
 include(CMake/CMakeRC.cmake)
@@ -67,6 +68,13 @@ list(APPEND LIBRARIES glfw ${GLFW_LIBRARIES})
 list(APPEND LIBRARIES ${VULKAN_LIB_LIST})
 list(APPEND LIBRARIES SPIRV glslang)
 list(APPEND LIBRARIES IMGUI IMPLOT)
+
+# QT
+
+if (NEON_USE_QT)
+    find_package(Qt5 REQUIRED COMPONENTS Core Gui)
+    list(APPEND LIBRARIES Qt5::Core Qt5::Gui)
+endif ()
 
 if (RELEASE_DEBUG)
     add_compile_definitions(RELEASE_DEBUG)

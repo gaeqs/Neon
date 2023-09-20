@@ -11,7 +11,8 @@
 
 #include <engine/io/CursorEvent.h>
 #include <engine/io/KeyboardEvent.h>
-#include <engine/io/KeyboardEvent.h>
+#include <engine/io/MouseButtonEvent.h>
+#include <engine/io/ScrollEvent.h>
 
 #include <engine/light/DirectionalLight.h>
 #include <engine/light/FlashLight.h>
@@ -34,6 +35,12 @@
 #include <engine/render/SwapChainFrameBuffer.h>
 #include <engine/render/Texture.h>
 #include <engine/render/TextureCreateInfo.h>
+
+#ifdef USE_QT
+
+#include <engine/render/QTSwapChainFrameBuffer.h>
+
+#endif
 
 #include <engine/shader/Material.h>
 #include <engine/shader/MaterialCreateInfo.h>

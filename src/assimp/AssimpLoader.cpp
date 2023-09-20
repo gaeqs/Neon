@@ -336,21 +336,22 @@ namespace neon::assimp_loader {
         std::map<std::string, Tex> textures;
         std::map<aiTexture*, Tex> loadedTextures;
 
-        std::vector<std::shared_ptr<Mesh>> meshes;
+        ModelCreateInfo modelInfo;
+        modelInfo.meshes.reserve(scene->mNumMeshes);
+
         std::vector<Mat> materials;
-        meshes.reserve(scene->mNumMeshes);
 
         loadTextures(scene, textures, loadedTextures, info);
         if (info.loadMaterials) {
             materials.reserve(scene->mNumMaterials);
             loadMaterials(scene, materials, textures, info);
         }
-        loadMeshes(scene, meshes, materials, info);
+        loadMeshes(scene, modelInfo.meshes, materials, info);
 
         auto model = std::make_shared<Model>(
                 info.application,
                 info.name,
-                meshes
+                modelInfo
         );
 
         model->defineInstanceStruct(

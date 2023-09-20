@@ -36,10 +36,13 @@ set(SOURCES
         assimp/AssimpMaterialParameters.h
         engine/io/KeyboardEvent.h
         engine/io/CursorEvent.h
+        engine/io/MouseButtonEvent.h
+        engine/io/ScrollEvent.h
         engine/model/Mesh.cpp
         engine/model/Mesh.h
         engine/model/Model.cpp
         engine/model/Model.h
+        engine/model/ModelCreateInfo.h
         engine/shader/ShaderUniformBuffer.cpp
         engine/shader/ShaderUniformBuffer.h
         engine/shader/ShaderUniformBinding.h
@@ -101,7 +104,10 @@ set(SOURCES
         engine/structure/Asset.cpp
         engine/structure/Asset.h
         engine/structure/collection/AssetCollection.cpp
-        engine/structure/collection/AssetCollection.h engine/render/FrameBufferTextureCreateInfo.h engine/render/CommandBuffer.cpp engine/render/CommandBuffer.h)
+        engine/structure/collection/AssetCollection.h
+        engine/render/FrameBufferTextureCreateInfo.h
+        engine/render/CommandBuffer.cpp
+        engine/render/CommandBuffer.h)
 
 
 set(VULKAN_SOURCES
@@ -144,10 +150,28 @@ set(VULKAN_SOURCES
         vulkan/render/VKRender.cpp
         vulkan/render/VKRender.h
         vulkan/util/VulkanConversions.cpp
-        vulkan/util/VulkanConversions.h vulkan/render/VKCommandBuffer.cpp vulkan/render/VKCommandBuffer.h)
+        vulkan/util/VulkanConversions.h
+        vulkan/render/VKCommandBuffer.cpp
+        vulkan/render/VKCommandBuffer.h
+        vulkan/AbstractVKApplication.h)
+
+if (NEON_USE_QT)
+    list(APPEND SOURCES
+            engine/render/QTSwapChainFrameBuffer.cpp
+            engine/render/QTSwapChainFrameBuffer.h)
+    list(APPEND VULKAN_SOURCES
+            vulkan/QTApplication.h
+            vulkan/QTApplication.cpp
+            vulkan/render/VKQTSwapChainFrameBuffer.cpp
+            vulkan/render/VKQTSwapChainFrameBuffer.h)
+endif ()
 
 cmrc_add_resource_library(dummy)
 
 add_library(neon STATIC ${SOURCES} ${VULKAN_SOURCES})
 target_link_libraries(neon PUBLIC ${LIBRARIES} ${CMAKE_DL_LIBS} dummy)
 target_compile_definitions(neon PUBLIC USE_VULKAN)
+
+if (NEON_USE_QT)
+    target_compile_definitions(neon PUBLIC USE_QT)
+endif ()

@@ -8,7 +8,8 @@
 
 #include <engine/model/InputDescription.h>
 #include <engine/render/FrameBuffer.h>
-#include <vulkan/VKApplication.h>
+#include <engine/render/CommandBuffer.h>
+#include <vulkan/AbstractVKApplication.h>
 #include <vulkan/util/VulkanConversions.h>
 #include <vulkan/render/VKRenderPass.h>
 
@@ -158,7 +159,7 @@ namespace neon::vulkan::vulkan_util {
     }
 
     void transitionImageLayout(
-            VKApplication* application,
+            AbstractVKApplication* application,
             VkImage image, VkFormat format,
             VkImageLayout oldLayout, VkImageLayout newLayout,
             uint32_t mipLevels,
@@ -247,7 +248,7 @@ namespace neon::vulkan::vulkan_util {
         if (application->isRecordingCommandBuffer()) {
             vkCmdPipelineBarrier(
                     application->getCurrentCommandBuffer()
-                    ->getImplementation().getCommandBuffer(),
+                            ->getImplementation().getCommandBuffer(),
                     sourceStage, destinationStage,
                     0, 0, nullptr, 0,
                     nullptr, 1, &barrier
@@ -274,7 +275,7 @@ namespace neon::vulkan::vulkan_util {
     }
 
     void copyBufferToImage(
-            VKApplication* application,
+            AbstractVKApplication* application,
             VkBuffer buffer, VkImage image,
             uint32_t width, uint32_t height, uint32_t depth,
             uint32_t layers) {
@@ -299,7 +300,7 @@ namespace neon::vulkan::vulkan_util {
         if (application->isRecordingCommandBuffer()) {
             vkCmdCopyBufferToImage(
                     application->getCurrentCommandBuffer()
-                    ->getImplementation().getCommandBuffer(),
+                            ->getImplementation().getCommandBuffer(),
                     buffer,
                     image,
                     VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
@@ -329,7 +330,7 @@ namespace neon::vulkan::vulkan_util {
     }
 
     void generateMipmaps(
-            VKApplication* application,
+            AbstractVKApplication* application,
             VkImage image,
             uint32_t width, uint32_t height, uint32_t depth,
             uint32_t levels, int32_t layers) {
@@ -565,11 +566,21 @@ namespace neon::vulkan::vulkan_util {
 
             for (uint32_t i = 0; i < frameBuffer.getColorAttachmentAmount();
                  ++i) {
-                clearValues[i].color = {0.0f, 0.0f, 0.0f, 1.0f};
+
+                auto clearColor = fb->getClearColor(i);
+                if (clearColor.has_value()) {
+                    auto c = clearColor.value();
+                    clearValues[i].color = {c.r, c.g, c.b, c.a};
+                } else {
+                    clearValues[i].color = {0.0f, 0.0f, 0.0f, 1.0f};
+                }
+
             }
 
             if (frameBuffer.hasDepth()) {
-                clearValues[clearValues.size() - 1].depthStencil = {1.0f, 0};
+                auto c = fb->getDepthClearColor();
+                clearValues[clearValues.size() - 1].depthStencil =
+                        {c.first, c.second};
             }
 
             renderPassInfo.clearValueCount = clearValues.size();

@@ -55,17 +55,18 @@ void Cloth::generateModel() {
         }
     }
 
-    std::vector<std::shared_ptr<neon::Mesh>> meshes;
-    meshes.push_back(std::make_unique<neon::Mesh>(
+    neon::ModelCreateInfo info;
+    info.meshes.push_back(std::make_unique<neon::Mesh>(
             getApplication(),
             "cloth",
             _material,
             true,
             false
     ));
-    meshes[0]->setMeshData(_vertices, indices);
+    info.meshes[0]->setMeshData(_vertices, indices);
+    info.maximumInstances = 1;
 
-    _model = std::make_shared<Model>(getApplication(), "cloth", meshes);
+    _model = std::make_shared<neon::Model>(getApplication(), "cloth", info);
 
     _massSpring = _physicsManager->createSimulableObject<MassSpring>(
             getGameObject(),

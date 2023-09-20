@@ -16,6 +16,8 @@
 
 #include <engine/io/KeyboardEvent.h>
 #include <engine/io/CursorEvent.h>
+#include <engine/io/MouseButtonEvent.h>
+#include <engine/io/ScrollEvent.h>
 
 #define REGISTER_COMPONENT(clazz, name)                         \
     namespace {                                                 \
@@ -155,16 +157,28 @@ namespace neon {
         virtual void onPreDraw();
 
         /**
-         * Virtual method invoked when a key is pressed.
+         * Virtual method invoked when a key is pressed, hold or released.
          * @param event the event.
          */
         virtual void onKey(const KeyboardEvent& event);
+
+        /**
+         * Virtual method invoked when a mouse button is pressed or released.
+         * @param event the event.
+         */
+        virtual void onMouseButton(const MouseButtonEvent& event);
 
         /**
          * Virtual method invoked when the cursor is moved.
          * @param event the event.
          */
         virtual void onCursorMove(const CursorMoveEvent& event);
+
+        /**
+         * Virtual method invoked when the user scrolls.
+         * @param event the event.
+         */
+        virtual void onScroll(const ScrollEvent& event);
 
         /**
          * Draws the editor of this component.

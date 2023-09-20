@@ -43,7 +43,7 @@ namespace neon::vulkan {
     }
 
     void VKSwapChainFrameBuffer::createDepthImage() {
-        auto& extent = _vkApplication->getSwapChainExtent();
+        auto extent = _vkApplication->getSwapChainExtent();
 
         ImageCreateInfo info;
         info.width = _extent.width;
@@ -83,7 +83,7 @@ namespace neon::vulkan {
     }
 
     void VKSwapChainFrameBuffer::createFrameBuffers() {
-        auto& extent = _vkApplication->getSwapChainExtent();
+        auto extent = _vkApplication->getSwapChainExtent();
 
         _swapChainFrameBuffers.resize(_swapChainImageViews.size());
         for (int i = 0; i < _swapChainImageViews.size(); ++i) {
@@ -133,7 +133,9 @@ namespace neon::vulkan {
     VKSwapChainFrameBuffer::VKSwapChainFrameBuffer(
             Room* room, bool depth) :
             VKFrameBuffer(),
-            _vkApplication(&room->getApplication()->getImplementation()),
+            _vkApplication(dynamic_cast<AbstractVKApplication*>(
+                                   room->getApplication()
+                                           ->getImplementation())),
             _swapChainImages(),
             _swapChainImageViews(),
             _depthImage(VK_NULL_HANDLE),

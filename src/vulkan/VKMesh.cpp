@@ -14,7 +14,8 @@ namespace neon::vulkan {
                    std::unordered_set<std::shared_ptr<Material>>& materials,
                    bool modifiableVertices,
                    bool modifiableIndices) :
-            _vkApplication(&application->getImplementation()),
+            _vkApplication(dynamic_cast<AbstractVKApplication*>(
+                                   application->getImplementation())),
             _materials(materials),
             _vertexBuffer(),
             _indexBuffer(),
@@ -34,7 +35,8 @@ namespace neon::vulkan {
             VkCommandBuffer commandBuffer,
             VkBuffer instancingBuffer,
             uint32_t instancingElements,
-            const ShaderUniformBuffer* global) {
+            const ShaderUniformBuffer* globalBuffer,
+            const ShaderUniformBuffer* modelBuffer) {
 
         if (!_vertexBuffer.has_value()) return;
 
@@ -59,12 +61,17 @@ namespace neon::vulkan {
 
         auto layout = mat.getPipelineLayout();
 
-        global->getImplementation().bind(commandBuffer, layout);
+        globalBuffer->getImplementation().bind(commandBuffer, layout);
 
         if (material->getUniformBuffer() != nullptr) {
             material->getUniformBuffer()
                     ->getImplementation().bind(commandBuffer, layout);
         }
+
+        if (modelBuffer != nullptr) {
+            modelBuffer->getImplementation().bind(commandBuffer, layout);
+        }
+
         vkCmdDrawIndexed(commandBuffer, _indexAmount, instancingElements,
                          0, 0, 0);
     }

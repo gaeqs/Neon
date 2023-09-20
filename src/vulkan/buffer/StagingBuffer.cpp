@@ -5,6 +5,7 @@
 #include "StagingBuffer.h"
 
 #include <engine/render/CommandBuffer.h>
+#include <iostream>
 
 namespace neon::vulkan {
     size_t StagingBuffer::size() const {
@@ -47,7 +48,7 @@ namespace neon::vulkan {
     }
 
 
-    StagingBuffer::StagingBuffer(VKApplication* application,
+    StagingBuffer::StagingBuffer(AbstractVKApplication* application,
                                  VkBufferUsageFlags usage,
                                  uint32_t sizeInBytes) :
             _application(application),
@@ -55,8 +56,9 @@ namespace neon::vulkan {
             _deviceBuffer(_application,
                           VK_BUFFER_USAGE_TRANSFER_DST_BIT | usage,
                           VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, sizeInBytes) {
+        _stagingBuffers.reserve(_application->getMaxFramesInFlight());
         for (int i = 0; i < _application->getMaxFramesInFlight(); ++i) {
-            _stagingBuffers.push_back(std::make_shared<SimpleBuffer>(
+            _stagingBuffers.push_back( std::make_shared<SimpleBuffer>(
                     _application,
                     VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
                     VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
@@ -75,7 +77,7 @@ namespace neon::vulkan {
         return _deviceBuffer;
     }
 
-    VKApplication* StagingBuffer::getApplication() const {
+    AbstractVKApplication* StagingBuffer::getApplication() const {
         return _application;
     }
 }

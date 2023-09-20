@@ -23,6 +23,8 @@
 constexpr int32_t WIDTH = 800;
 constexpr int32_t HEIGHT = 600;
 
+using namespace neon;
+
 CMRC_DECLARE(shaders);
 
 /**
@@ -76,7 +78,7 @@ std::shared_ptr<FrameBuffer> initRender(Room* room) {
     app->setRender(render);
 
     // The format of the first frame buffer.
-    std::vector<TextureFormat> frameBufferFormats = {
+    std::vector<FrameBufferTextureCreateInfo> frameBufferFormats = {
             TextureFormat::R8G8B8A8,
             TextureFormat::R16FG16F, // NORMAL XY
             TextureFormat::R16FG16F // NORMAL Z / SPECULAR
@@ -89,16 +91,18 @@ std::shared_ptr<FrameBuffer> initRender(Room* room) {
     auto fpFrameBuffer = std::make_shared<SimpleFrameBuffer>(
             room->getApplication(), frameBufferFormats, true);
 
-    render->addRenderPass({fpFrameBuffer, RenderPassStrategy::defaultStrategy});
+    render->addRenderPass(std::make_shared<DefaultRenderPassStrategy>(
+            fpFrameBuffer));
 
     // Here we create the second frame buffer.
     // Just like the first frame buffer, we define the output,
     // create the frame buffer and add a render pass.
-    std::vector<TextureFormat> screenFormats = {TextureFormat::R8G8B8A8};
+    std::vector<FrameBufferTextureCreateInfo> screenFormats = {
+            TextureFormat::R8G8B8A8};
     auto screenFrameBuffer = std::make_shared<SimpleFrameBuffer>(
             room->getApplication(), screenFormats, false);
-    render->addRenderPass(
-            {screenFrameBuffer, RenderPassStrategy::defaultStrategy});
+    render->addRenderPass(std::make_shared<DefaultRenderPassStrategy>(
+            screenFrameBuffer));
 
 
     // Here we create a model that renders the screen on
@@ -110,27 +114,24 @@ std::shared_ptr<FrameBuffer> initRender(Room* room) {
             app, "screen", "screen.vert", "screen.frag");
 
     auto textures = fpFrameBuffer->getTextures();
-    deferred_utils::ScreenModelCreationInfo info(
-            room->getApplication(),
-            "screen model",
-            textures,
-            screenFrameBuffer,
-            screenShader,
-            true,
-            true,
-            neon::AssetStorageMode::PERMANENT
-    );
 
     // We can also create a GraphicComponent that handles
     // an instance of the model.
     // This option is more direct.
-    auto screenModel = deferred_utils::createScreenModel(info);
-    room->markUsingModel(screenModel.get());
+    auto screenModel = deferred_utils::createScreenModel(app, "screen model");
 
-    auto instance = screenModel->createInstance();
-    if (!instance.isOk()) {
-        throw std::runtime_error(instance.getError());
-    }
+    std::shared_ptr<Material> screenMaterial = Material::create(
+            room->getApplication(), "Screen Model",
+            screenFrameBuffer, screenShader,
+            deferred_utils::DeferredVertex::getDescription(),
+            InputDescription(0, InputRate::INSTANCE),
+            {}, textures);
+    screenModel->addMaterial(screenMaterial);
+
+    auto screenModelGO = room->newGameObject();
+    screenModelGO->setName("Screen Model");
+    screenModelGO->newComponent<GraphicComponent>(screenModel);
+
 
     // Finally, we create the swap chain buffer.
     // We split the screen render in two frame buffers
@@ -141,8 +142,8 @@ std::shared_ptr<FrameBuffer> initRender(Room* room) {
     // If you don't use ImGUI, you don't have to
     // split the screen render in two frame buffers.
     auto swapFrameBuffer = std::make_shared<SwapChainFrameBuffer>(room, false);
-    render->addRenderPass(
-            {swapFrameBuffer, RenderPassStrategy::defaultStrategy});
+    render->addRenderPass(std::make_shared<DefaultRenderPassStrategy>(
+            swapFrameBuffer));
 
     return fpFrameBuffer;
 }
@@ -203,7 +204,7 @@ std::shared_ptr<Room> getTestRoom(Application* application) {
     clothMaterialInfo.descriptions.uniform = materialDescriptor;
     clothMaterialInfo.descriptions.instance = DefaultInstancingData::getInstancingDescription();
     clothMaterialInfo.descriptions.vertex = TestVertex::getDescription();
-    clothMaterialInfo.rasterizer.polygonMode = neon::PolygonMode::LINE;
+    clothMaterialInfo.rasterizer.polygonMode = neon::PolygonMode::FILL;
     clothMaterialInfo.rasterizer.cullMode = neon::CullMode::NONE;
 
     auto material = std::make_shared<Material>(application, "cloth",
@@ -226,14 +227,10 @@ std::shared_ptr<Room> getTestRoom(Application* application) {
 int main() {
     std::srand(std::time(nullptr));
 
-    Application application(WIDTH, HEIGHT);
+    Application application(std::make_unique<vulkan::VKApplication>(
+            "Neon", WIDTH, HEIGHT));
 
-    auto initResult = application.init("Neon");
-    if (!initResult.isOk()) {
-        std::cerr << "[GLFW INIT]\t" << initResult.getError() << std::endl;
-        return EXIT_FAILURE;
-    }
-
+    application.init();
     application.setRoom(getTestRoom(&application));
 
     auto loopResult = application.startGameLoop();

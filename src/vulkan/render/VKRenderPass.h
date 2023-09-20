@@ -16,12 +16,13 @@ namespace neon {
 
 namespace neon::vulkan {
 
-    class VKApplication;
+    class AbstractVKApplication;
 
     class VKRenderPass {
 
-        VKApplication* _vkApplication;
+        AbstractVKApplication* _vkApplication;
         VkRenderPass _raw;
+        bool _external;
 
     public:
 
@@ -34,6 +35,8 @@ namespace neon::vulkan {
                      bool depth,
                      bool present,
                      VkFormat depthFormat);
+
+        VKRenderPass(Application* application, VkRenderPass pass);
 
         ~VKRenderPass();
 

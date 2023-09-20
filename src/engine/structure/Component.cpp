@@ -65,7 +65,13 @@ namespace neon {
     void Component::onKey(const KeyboardEvent& event) {
     }
 
+    void Component::onMouseButton(const neon::MouseButtonEvent& event) {
+    }
+
     void Component::onCursorMove(const CursorMoveEvent& event) {
+    }
+
+    void Component::onScroll(const ScrollEvent& event) {
     }
 
     void Component::drawEditor() {

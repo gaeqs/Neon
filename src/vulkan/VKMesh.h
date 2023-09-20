@@ -17,7 +17,7 @@
 #include <engine/shader/Material.h>
 #include <engine/shader/ShaderUniformBuffer.h>
 
-#include <vulkan/VKApplication.h>
+#include <vulkan/AbstractVKApplication.h>
 #include <vulkan/buffer/SimpleBuffer.h>
 #include <vulkan/buffer/StagingBuffer.h>
 
@@ -27,13 +27,13 @@ namespace neon {
 
 namespace neon::vulkan {
 
-    class VKApplication;
+    class AbstractVKApplication;
 
     class VKShaderProgram;
 
     class VKMesh {
 
-        VKApplication* _vkApplication;
+        AbstractVKApplication* _vkApplication;
         std::unordered_set<std::shared_ptr<Material>>& _materials;
 
         std::optional<std::unique_ptr<Buffer>> _vertexBuffer;
@@ -131,7 +131,8 @@ namespace neon::vulkan {
                 VkCommandBuffer commandBuffer,
                 VkBuffer instancingBuffer,
                 uint32_t instancingElements,
-                const ShaderUniformBuffer* global);
+                const ShaderUniformBuffer* globalBuffer,
+                const ShaderUniformBuffer* modelBuffer);
 
     };
 }

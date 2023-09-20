@@ -8,25 +8,18 @@
 
 namespace neon {
 
-    std::vector<Mesh::Implementation*> Model::getMeshImplementations(
-            const std::vector<std::shared_ptr<Mesh>>& meshes) {
-
-        std::vector<Mesh::Implementation*> vector;
-        vector.reserve(meshes.size());
-
-        for (auto& item: meshes) {
-            vector.push_back(&item->getImplementation());
-        }
-
-        return vector;
-    }
-
     Model::Model(Application* application,
                  const std::string& name,
-                 std::vector<std::shared_ptr<Mesh>>& meshes) :
+                 const ModelCreateInfo& info) :
             Asset(typeid(Model), name),
-            _implementation(application, getMeshImplementations(meshes)),
-            _meshes(std::move(meshes)) {
+            _implementation(application, info),
+            _meshes(info.meshes),
+            _uniformBuffer() {
+        if (info.uniformDescriptor != nullptr) {
+            _uniformBuffer = std::make_unique<ShaderUniformBuffer>(
+                    name, info.uniformDescriptor);
+            _uniformBuffer->setBindingPoint(2);
+        }
     }
 
     Model::Implementation& Model::getImplementation() {
@@ -41,12 +34,21 @@ namespace neon {
         return _implementation.getInstancingStructType();
     }
 
+    const std::unique_ptr<ShaderUniformBuffer>&
+    Model::getUniformBuffer() const {
+        return _uniformBuffer;
+    }
+
     Result<uint32_t*, std::string> Model::createInstance() {
         return _implementation.createInstance();
     }
 
     bool Model::freeInstance(uint32_t id) {
         return _implementation.freeInstance(id);
+    }
+
+    size_t Model::getInstanceAmount() const {
+        return _implementation.getInstanceAmount();
     }
 
     void Model::uploadDataRaw(uint32_t id, const void* raw) {
@@ -59,6 +61,10 @@ namespace neon {
 
     void Model::defineInstanceStruct(std::type_index type, size_t size) {
         _implementation.defineInstanceStruct(type, size);
+    }
+
+    const std::vector<std::shared_ptr<Mesh>>& Model::getMeshes() const {
+        return _meshes;
     }
 
     size_t Model::getMeshesAmount() const {
@@ -76,11 +82,12 @@ namespace neon {
     }
 
     void Model::draw(const Material* material) const {
-        _implementation.draw(material);
+        _implementation.draw(material, _uniformBuffer.get());
     }
 
     void Model::drawOutside(const Material* material,
                             const CommandBuffer* commandBuffer) const {
-        _implementation.drawOutside(material, commandBuffer);
+        _implementation.drawOutside(material,
+                                    _uniformBuffer.get(), commandBuffer);
     }
 }

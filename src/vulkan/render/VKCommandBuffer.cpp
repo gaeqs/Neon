@@ -6,20 +6,19 @@
 
 #include <engine/Application.h>
 
+#include <vulkan/AbstractVKApplication.h>
 
 namespace neon::vulkan {
 
-    VKCommandBuffer::VKCommandBuffer(Application* application, bool primary) :
-            VKCommandBuffer(&application->getImplementation(), primary) {
-    }
-
     VKCommandBuffer::VKCommandBuffer(
-            VKApplication* application,
+            Application* application,
             bool primary) :
-            _vkApplication(application),
+            _vkApplication(dynamic_cast<AbstractVKApplication*>(
+                                   application->getImplementation())),
             _commandBuffer(VK_NULL_HANDLE),
             _status(VKCommandBufferStatus::CREATED),
-            _fences() {
+            _fences(),
+            _external(false) {
         VkCommandBufferAllocateInfo info{};
         info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
         info.commandPool = _vkApplication->getCommandPool();
@@ -33,6 +32,16 @@ namespace neon::vulkan {
         }
     }
 
+    VKCommandBuffer::VKCommandBuffer(Application* application,
+                                     VkCommandBuffer commandBuffer) :
+            _vkApplication(dynamic_cast<AbstractVKApplication*>(
+                                   application->getImplementation())),
+            _commandBuffer(commandBuffer),
+            _status(VKCommandBufferStatus::CREATED),
+            _fences(),
+            _external(true) {
+    }
+
     VKCommandBuffer::~VKCommandBuffer() {
         waitForFences();
 
@@ -40,9 +49,11 @@ namespace neon::vulkan {
             vkDestroyFence(_vkApplication->getDevice(), fence, nullptr);
         }
 
-        vkFreeCommandBuffers(_vkApplication->getDevice(),
-                             _vkApplication->getCommandPool(),
-                             1, &_commandBuffer);
+        if (!_external) {
+            vkFreeCommandBuffers(_vkApplication->getDevice(),
+                                 _vkApplication->getCommandPool(),
+                                 1, &_commandBuffer);
+        }
     }
 
     VkCommandBuffer VKCommandBuffer::getCommandBuffer() const {

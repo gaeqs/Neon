@@ -13,30 +13,46 @@
 #include <engine/render/CommandBuffer.h>
 
 namespace neon::vulkan {
-    void VKModel::reinitializeBuffer() {
-        _instancingBuffer = std::make_unique<StagingBuffer>(
-                &_application->getImplementation(),
-                VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
-                static_cast<uint32_t>(_instancingStructSize) *
-                BUFFER_DEFAULT_SIZE
-        );
-        _data.resize(_instancingStructSize * BUFFER_DEFAULT_SIZE, 0);
+
+    std::vector<Mesh::Implementation*> VKModel::getMeshImplementations(
+            const std::vector<std::shared_ptr<Mesh>>& meshes) {
+
+        std::vector<Mesh::Implementation*> vector;
+        vector.reserve(meshes.size());
+
+        for (auto& item: meshes) {
+            vector.push_back(&item->getImplementation());
+        }
+
+        return vector;
     }
 
-    VKModel::VKModel(Application* application, std::vector<VKMesh*> meshes) :
+    void VKModel::reinitializeBuffer() {
+        _instancingBuffer = std::make_unique<StagingBuffer>(
+                dynamic_cast<AbstractVKApplication*>(
+                        _application->getImplementation()),
+                VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
+                static_cast<uint32_t>(_instancingStructSize) *
+                _maximumInstances
+        );
+        _data.resize(_instancingStructSize * _maximumInstances, 0);
+    }
+
+    VKModel::VKModel(Application* application, const ModelCreateInfo& info) :
             _application(application),
-            _meshes(std::move(meshes)),
-            _instancingStructType(
-                    std::type_index(typeid(DefaultInstancingData))),
-            _instancingStructSize(sizeof(DefaultInstancingData)),
+            _meshes(getMeshImplementations(info.meshes)),
+            _maximumInstances(info.maximumInstances),
+            _instancingStructType(info.instanceType),
+            _instancingStructSize(info.instanceSize),
             _positions(),
             _instancingBuffer(std::make_unique<StagingBuffer>(
-                    &_application->getImplementation(),
+                    dynamic_cast<AbstractVKApplication*>(
+                            application->getImplementation()),
                     VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
                     static_cast<uint32_t>(_instancingStructSize) *
-                    BUFFER_DEFAULT_SIZE
+                    info.maximumInstances
             )),
-            _data(_instancingStructSize * BUFFER_DEFAULT_SIZE, 0),
+            _data(_instancingStructSize * info.maximumInstances, 0),
             _dataChangeRange(0, 0) {
     }
 
@@ -45,7 +61,7 @@ namespace neon::vulkan {
     }
 
     Result<uint32_t*, std::string> VKModel::createInstance() {
-        if (_positions.size() >= BUFFER_DEFAULT_SIZE) {
+        if (_positions.size() >= _maximumInstances) {
             return {"Buffer is full"};
         }
 
@@ -77,6 +93,10 @@ namespace neon::vulkan {
         return true;
     }
 
+    size_t VKModel::getInstanceAmount() const {
+        return _positions.size();
+    }
+
     void VKModel::uploadDataRaw(uint32_t id, const void* raw) {
         if (_instancingStructSize == 0) {
             std::cerr << "[OPENGL MODEL] Cannot upload data to buffer "
@@ -98,35 +118,44 @@ namespace neon::vulkan {
         _dataChangeRange += Range<uint32_t>(id, id + 1);
     }
 
+    const void* VKModel::fetchDataRaw(uint32_t id) const {
+        return _data.data() + _instancingStructSize * id;
+    }
+
     void VKModel::flush() {
         if (_dataChangeRange.size() != 0) {
-            auto map = _instancingBuffer->map<char>(
-                    _dataChangeRange * _instancingStructSize);
+            auto range = _dataChangeRange * _instancingStructSize;
+            auto map = _instancingBuffer->map<char>(range);
             if (map.has_value()) {
-                memcpy(map.value()->raw(), _data.data(), _data.size());
+                memcpy(map.value()->raw(),
+                       _data.data() + range.getFrom(), range.size());
             }
             _dataChangeRange = Range<uint32_t>(0, 0);
         }
     }
 
-    void VKModel::draw(const Material* material) const {
+    void VKModel::draw(const Material* material,
+                       const ShaderUniformBuffer* modelBuffer) const {
         auto sp = std::shared_ptr<Material>(const_cast<Material*>(material),
                                             [](Material*) {});
         if (_positions.empty()) return;
         for (const auto& mesh: _meshes) {
             if (!mesh->getMaterials().contains(sp)) continue;
-            auto& vk = _application->getImplementation();
+            auto* vk = dynamic_cast<AbstractVKApplication*>(
+                    _application->getImplementation());
             mesh->draw(
                     material,
-                    vk.getCurrentCommandBuffer()
+                    vk->getCurrentCommandBuffer()
                             ->getImplementation().getCommandBuffer(),
                     _instancingBuffer->getRaw(),
                     _positions.size(),
-                    &_application->getRender()->getGlobalUniformBuffer());
+                    &_application->getRender()->getGlobalUniformBuffer(),
+                    modelBuffer);
         }
     }
 
     void VKModel::drawOutside(const Material* material,
+                              const ShaderUniformBuffer* modelBuffer,
                               const CommandBuffer* commandBuffer) const {
         if (_positions.empty()) return;
 
@@ -140,7 +169,8 @@ namespace neon::vulkan {
                     buffer,
                     _instancingBuffer->getRaw(),
                     _positions.size(),
-                    &_application->getRender()->getGlobalUniformBuffer());
+                    &_application->getRender()->getGlobalUniformBuffer(),
+                    modelBuffer);
         }
 
         vkCmdEndRenderPass(buffer);

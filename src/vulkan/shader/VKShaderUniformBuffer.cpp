@@ -195,7 +195,7 @@ namespace neon::vulkan {
                     } else {
                         imageInfo.imageView = VK_NULL_HANDLE;
                         imageInfo.sampler = VK_NULL_HANDLE;
-                        imageInfo.imageLayout = VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL;
+                        imageInfo.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
                     }
 
                     VkWriteDescriptorSet descriptorWrite{};

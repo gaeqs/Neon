@@ -10,6 +10,7 @@
 
 #include <engine/structure/Asset.h>
 #include <engine/model/Mesh.h>
+#include <engine/model/ModelCreateInfo.h>
 
 #ifdef USE_VULKAN
 
@@ -35,6 +36,9 @@ namespace neon {
     class Model : public Asset {
 
     public:
+
+        static constexpr uint32_t DEFAULT_MAXIMUM_INSTANCES = 1024 * 16;
+
 #ifdef USE_VULKAN
         using Implementation = vulkan::VKModel;
 #endif
@@ -43,14 +47,7 @@ namespace neon {
 
         Implementation _implementation;
         std::vector<std::shared_ptr<Mesh>> _meshes;
-
-        /**
-         * Gets all implementations of the given meshes.
-         * @param meshes the meshes.
-         * @return the implementations.
-         */
-        static std::vector<Mesh::Implementation*> getMeshImplementations(
-                const std::vector<std::shared_ptr<Mesh>>& meshes);
+        std::unique_ptr<ShaderUniformBuffer> _uniformBuffer;
 
     public:
 
@@ -58,12 +55,13 @@ namespace neon {
 
         /**
          * Creates a model.
-         * @param room the room where the model is located at.
-         * @param meshes the meshes used by the model.
+         * @param application the application holding the model.
+         * @param name the name that identifies the model.
+         * @param info the information about the model.
          */
         Model(Application* application,
               const std::string& name,
-              std::vector<std::shared_ptr<Mesh>>& meshes);
+              const ModelCreateInfo& info);
 
         /**
          * Returns the implementation of the model.
@@ -104,6 +102,13 @@ namespace neon {
         void defineInstanceStruct(std::type_index type, size_t size);
 
         /**
+         * Returns the uniform buffer that contains the global data
+         * of this model.
+         * @return the uniform buffer.
+         */
+        const std::unique_ptr<ShaderUniformBuffer>& getUniformBuffer() const;
+
+        /**
          * Creates an instance of this model.
          * @return the identifier of the instance or the
          * error if something went wrong.
@@ -118,6 +123,12 @@ namespace neon {
         bool freeInstance(uint32_t id);
 
         /**
+         * Returns the amount of instances inside this model.
+         * @return the amount of instances.
+         */
+        size_t getInstanceAmount() const;
+
+        /**
          * Sets the instancing data of an instance.
          * @tparam InstanceData the type of the instance data.
          * @param id the identifier of the instance.
@@ -126,6 +137,11 @@ namespace neon {
         template<class InstanceData>
         void uploadData(uint32_t id, const InstanceData& data) {
             _implementation.uploadData(id, data);
+        }
+
+        template<class InstanceData>
+        const InstanceData* fetchData(uint32_t id) const {
+            return _implementation.fetchData<InstanceData>(id);
         }
 
         /**
@@ -142,6 +158,12 @@ namespace neon {
          * before the room is rendered.
          */
         void flush();
+
+        /**
+         * Returns the list containing all meshes inside this model.
+         * @return the meshes.
+         */
+        const std::vector<std::shared_ptr<Mesh>>& getMeshes() const;
 
         /**
          * Return the amount of meshes this mode has.

@@ -23,13 +23,13 @@ namespace neon {
 
 namespace neon::vulkan {
 
-    class VKApplication;
+    class AbstractVKApplication;
 
     class Buffer;
 
     class VKShaderUniformBuffer {
 
-        VKApplication* _vkApplication;
+        AbstractVKApplication* _vkApplication;
         VkDescriptorPool _descriptorPool;
 
         std::vector<std::shared_ptr<Buffer>> _buffers;

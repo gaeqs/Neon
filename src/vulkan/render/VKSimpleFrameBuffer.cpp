@@ -12,6 +12,7 @@
 #include <engine/render/Texture.h>
 #include <vulkan/util/VKUtil.h>
 #include <vulkan/util/VulkanConversions.h>
+#include <vulkan/AbstractVKApplication.h>
 
 namespace neon::vulkan {
     void VKSimpleFrameBuffer::createImages(
@@ -152,7 +153,8 @@ namespace neon::vulkan {
             std::pair<uint32_t, uint32_t> extent,
             bool depth) :
             VKFrameBuffer(),
-            _vkApplication(&application->getImplementation()),
+            _vkApplication(dynamic_cast<AbstractVKApplication*>(
+                                   application->getImplementation())),
             _frameBuffer(VK_NULL_HANDLE),
             _images(),
             _memories(),
@@ -224,7 +226,8 @@ namespace neon::vulkan {
             std::pair<uint32_t, uint32_t> extent,
             std::shared_ptr<Texture> depthTexture) :
             VKFrameBuffer(),
-            _vkApplication(&application->getImplementation()),
+            _vkApplication(dynamic_cast<AbstractVKApplication*>(
+                                   application->getImplementation())),
             _frameBuffer(VK_NULL_HANDLE),
             _images(),
             _memories(),
@@ -366,14 +369,14 @@ namespace neon::vulkan {
     }
 
     bool VKSimpleFrameBuffer::defaultRecreationCondition() const {
-        auto& extent = _vkApplication->getSwapChainExtent();
+        auto extent = _vkApplication->getSwapChainExtent();
         if (extent.width == 0 || extent.height == 0) return false;
         return extent.width != getWidth() || extent.height != getHeight();
     }
 
     std::pair<uint32_t, uint32_t>
     VKSimpleFrameBuffer::defaultRecreationParameters() const {
-        auto& extent = _vkApplication->getSwapChainExtent();
+        auto extent = _vkApplication->getSwapChainExtent();
         return {extent.width, extent.height};
     }
 }

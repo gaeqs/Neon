@@ -1,3 +1,4 @@
+
 //
 // Created by grial on 19/10/22.
 //
@@ -87,9 +88,20 @@ namespace neon {
         _components.invokeKeyEvent(getApplication()->getProfiler(), event);
     }
 
+    void Room::onMouseButton(const MouseButtonEvent& event) {
+        DEBUG_PROFILE(getApplication()->getProfiler(), onMouseButton);
+        _components.invokeMouseButtonEvent(getApplication()->getProfiler(), event);
+    }
+
     void Room::onCursorMove(const CursorMoveEvent& event) {
         DEBUG_PROFILE(getApplication()->getProfiler(), onCursorMove);
         _components.invokeCursorMoveEvent(getApplication()->getProfiler(),
+                                          event);
+    }
+
+    void Room::onScroll(const neon::ScrollEvent& event) {
+        DEBUG_PROFILE(getApplication()->getProfiler(), onCursorMove);
+        _components.invokeScrollEvent(getApplication()->getProfiler(),
                                           event);
     }
 
@@ -104,29 +116,34 @@ namespace neon {
 
         auto& p = getApplication()->getProfiler();
         {
-            DEBUG_PROFILE(getApplication()->getProfiler(), update);
+            DEBUG_PROFILE(p, update);
             _components.updateComponents(p, deltaTime);
         }
         {
-            DEBUG_PROFILE(getApplication()->getProfiler(), lateUpdate);
+            DEBUG_PROFILE(p, lateUpdate);
             _components.lateUpdateComponents(p, deltaTime);
         }
     }
 
     void Room::preDraw() {
         auto& p = getApplication()->getProfiler();
-        DEBUG_PROFILE(p, preDraw);
+      auto* cb = _application->getCurrentCommandBuffer();
+
+      DEBUG_PROFILE(p, preDraw);
         _components.preDrawComponents(p);
 
         {
             DEBUG_PROFILE(p, models);
-            _components.flushModels();
+            for (const auto& [model, amount]: _usedModels) {
+                model->flush();
+                if(model->getUniformBuffer() != nullptr) {
+                    model->getUniformBuffer()->prepareForFrame(cb);
+                }
+            }
         }
 
         {
             DEBUG_PROFILE(p, uniformBuffers);
-
-            auto* cb = _application->getCurrentCommandBuffer();
             _application->getRender()->getGlobalUniformBuffer()
                     .prepareForFrame(cb);
 

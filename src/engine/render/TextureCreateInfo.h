@@ -271,11 +271,11 @@ namespace neon {
         MipmapMode mipmapMode = MipmapMode::LINEAR;
     };
 
-/**
- * Information used to create a texture.
- * By default, this info is configured
- * to create an 2D albedo texture.
- */
+    /**
+     * Information used to create a texture.
+     * By default, this info is configured
+     * to create an 2D albedo texture.
+     */
     struct TextureCreateInfo {
 
         /**

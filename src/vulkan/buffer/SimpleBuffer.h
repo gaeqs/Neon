@@ -11,8 +11,15 @@
 
 #include <vulkan/buffer/Buffer.h>
 
+namespace neon::vulkan::simple_buffer {
+    VkResult mapMemory(VkDevice device, VkDeviceMemory memory, uint32_t from,
+                       uint32_t size, int flags, void** destiny);
+
+    void unmapMemory(VkDevice device, VkDeviceMemory memory);
+}
+
 namespace neon::vulkan {
-    class VKApplication;
+    class AbstractVKApplication;
 
     template<class T>
     class SimpleBufferMap : public BufferMap<T> {
@@ -32,9 +39,9 @@ namespace neon::vulkan {
                 _device(device),
                 _memory(memory),
                 _pointer(nullptr) {
-            auto result = vkMapMemory(device, memory, range.getFrom(),
-                                      range.size(),
-                                      0, (void**) &_pointer);
+            auto result = simple_buffer::mapMemory(
+                    device, memory, range.getFrom(), range.size(),
+                    0, (void**) &_pointer);
             if (result != VK_SUCCESS) {
                 throw std::runtime_error("Couldn't map buffer! Result: "
                                          + std::to_string(result));
@@ -59,7 +66,7 @@ namespace neon::vulkan {
 
         void dispose() override {
             if (_pointer == nullptr) return;
-            vkUnmapMemory(_device, _memory);
+            simple_buffer::unmapMemory(_device, _memory);
             _pointer = nullptr;
         }
 
@@ -69,7 +76,7 @@ namespace neon::vulkan {
 
         size_t _size;
 
-        VKApplication* _application;
+        AbstractVKApplication* _application;
         VkBuffer _vertexBuffer;
         VkDeviceMemory _vertexBufferMemory;
 
@@ -87,18 +94,18 @@ namespace neon::vulkan {
         SimpleBuffer(const SimpleBuffer& other) = delete;
 
         template<class T>
-        SimpleBuffer(VKApplication* application,
+        SimpleBuffer(AbstractVKApplication* application,
                      VkBufferUsageFlags usage, VkMemoryPropertyFlags properties,
                      const std::vector<T>& data):
                 SimpleBuffer(application, usage, properties, data.data(),
                              data.size() * sizeof(T)) {
         }
 
-        SimpleBuffer(VKApplication* application,
+        SimpleBuffer(AbstractVKApplication* application,
                      VkBufferUsageFlags usage, VkMemoryPropertyFlags properties,
                      uint32_t sizeInBytes);
 
-        SimpleBuffer(VKApplication* application,
+        SimpleBuffer(AbstractVKApplication* application,
                      VkBufferUsageFlags usage, VkMemoryPropertyFlags properties,
                      const void* data, uint32_t sizeInBytes);
 
@@ -110,7 +117,7 @@ namespace neon::vulkan {
 
         [[nodiscard]] VkBuffer getRaw() const override;
 
-        [[nodiscard]] VKApplication* getApplication() const override;
+        [[nodiscard]] AbstractVKApplication* getApplication() const override;
     };
 }
 

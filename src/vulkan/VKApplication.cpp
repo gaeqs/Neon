@@ -3,10 +3,12 @@
 //
 
 #include "VKApplication.h"
+
 #include <stdexcept>
 #include <iostream>
 #include <cstring>
 #include <algorithm>
+#include <utility>
 
 #include <engine/structure/Room.h>
 #include <vulkan/util/VKUtil.h>
@@ -17,6 +19,46 @@
 #include <implot.h>
 
 namespace neon::vulkan {
+
+    void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
+        auto* application = static_cast<VKApplication*>(
+                glfwGetWindowUserPointer(
+                        window));
+        application->internalForceSizeValues(width, height);
+    }
+
+    void key_size_callback(GLFWwindow* window, int key, int scancode,
+                           int action, int mods) {
+        auto* application = static_cast<VKApplication*>(
+                glfwGetWindowUserPointer(
+                        window));
+
+        application->getApplication()
+                ->invokeKeyEvent(key, scancode, action, mods);
+    }
+
+    void mouse_button_callback(GLFWwindow* window, int button,
+                               int action, int mods) {
+        auto* application = static_cast<VKApplication*>(
+                glfwGetWindowUserPointer(
+                        window));
+
+        application->getApplication()
+                ->invokeMouseButtonEvent(button, action, mods);
+    }
+
+    void cursor_pos_callback(GLFWwindow* window, double x, double y) {
+        auto* application = static_cast<VKApplication*>(
+                glfwGetWindowUserPointer(window));
+        application->getApplication()->invokeCursorPosEvent(x, y);
+    }
+
+    void scroll_callback(GLFWwindow* window, double xOffset, double yOffset) {
+        auto* application = static_cast<VKApplication*>(
+                glfwGetWindowUserPointer(window));
+        application->getApplication()->invokeScrollEvent(xOffset, yOffset);
+    }
+
     static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
             VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
             VkDebugUtilsMessageTypeFlagsEXT messageType,
@@ -70,12 +112,155 @@ namespace neon::vulkan {
         }
     }
 
+    VKApplication::VKApplication(std::string name, float width, float height) :
+            _application(nullptr),
+            _window(nullptr),
+            _name(std::move(name)),
+            _width(width),
+            _height(height),
+            _instance(VK_NULL_HANDLE),
+            _debugMessenger(VK_NULL_HANDLE),
+            _physicalDevice(VK_NULL_HANDLE),
+            _device(VK_NULL_HANDLE),
+            _graphicsQueue(VK_NULL_HANDLE),
+            _presentQueue(VK_NULL_HANDLE),
+            _surface(VK_NULL_HANDLE),
+            _surfaceFormat(),
+            _swapChain(VK_NULL_HANDLE),
+            _swapChainImageFormat(),
+            _swapChainExtent(),
+            _swapChainCount(0),
+            _depthImageFormat(),
+            _commandPool(VK_NULL_HANDLE),
+            _commandBuffers(),
+            _recording(false),
+            _imageAvailableSemaphores(),
+            _renderFinishedSemaphores(),
+            _currentFrame(0),
+            _imageIndex(0),
+            _imGuiPool(VK_NULL_HANDLE),
+            _currentFrameInformation() {
+
+    }
+
+    void VKApplication::init(neon::Application* application) {
+        _application = application;
+        if (!glfwInit()) {
+            throw std::runtime_error("Failed to initialize GLFW");
+        }
+
+        preWindowCreation();
+
+        _window = glfwCreateWindow(static_cast<int>(_width),
+                                   static_cast<int>(_height),
+                                   _name.c_str(), nullptr, nullptr);
+        if (!_window) {
+            throw std::runtime_error("Failed to open GLFW window");
+        }
+
+        glfwSetWindowUserPointer(_window, this);
+        glfwSetWindowSizeCallback(_window, framebuffer_size_callback);
+        glfwSetKeyCallback(_window, key_size_callback);
+        glfwSetMouseButtonCallback(_window, mouse_button_callback);
+        glfwSetCursorPosCallback(_window, cursor_pos_callback);
+        glfwSetScrollCallback(_window, scroll_callback);
+
+        postWindowCreation();
+
+    }
+
+    glm::ivec2 VKApplication::getWindowSize() const {
+        return {_width, _height};
+    }
+
+    FrameInformation VKApplication::getCurrentFrameInformation() const {
+        return _currentFrameInformation;
+    }
+
+    CommandBuffer* VKApplication::getCurrentCommandBuffer() const {
+        return _commandBuffers.empty()
+               ? nullptr
+               : _commandBuffers[_currentFrame].get();
+    }
+
+    void VKApplication::lockMouse(bool lock) {
+        if (lock) {
+            glfwSetInputMode(_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        } else {
+            glfwSetInputMode(_window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+        }
+    }
+
+    Result<uint32_t, std::string> VKApplication::startGameLoop() {
+        if (_window == nullptr) {
+            return {"Window is not initialized"};
+        }
+
+        uint32_t frames = 0;
+
+        auto lastTick = std::chrono::high_resolution_clock::now();
+        float lastFrameProcessTime = 0.0f;
+        try {
+            while (!glfwWindowShouldClose(_window)) {
+                DEBUG_PROFILE(_application->getProfiler(), tick);
+                auto now = std::chrono::high_resolution_clock::now();
+                auto duration = now - lastTick;
+                lastTick = now;
+
+                float seconds = static_cast<float>(duration.count()) * 1e-9f;
+
+                _currentFrameInformation = {
+                        frames,
+                        seconds,
+                        lastFrameProcessTime
+                };
+
+                renderFrame(_application->getRoom().get());
+
+                now = std::chrono::high_resolution_clock::now();
+                auto processTime = now - lastTick;
+
+                lastFrameProcessTime =
+                        static_cast<float>(processTime.count()) * 1e-9f;
+
+                ++frames;
+            }
+            finishLoop();
+        } catch (const std::exception& exception) {
+            return {exception.what()};
+        }
+
+        return {frames};
+    }
+
+    void VKApplication::renderFrame(neon::Room* room) {
+        bool preUpdateDone;
+        {
+            DEBUG_PROFILE_ID(_application->getProfiler(), preUpdate,
+                             "preUpdate (GPU Wait)");
+            preUpdateDone = preUpdate(_application->getProfiler());
+        }
+
+        if (preUpdateDone) {
+            glfwPollEvents();
+
+            if (room != nullptr) {
+                room->update(_currentFrameInformation.currentDeltaTime);
+                room->preDraw();
+                room->draw();
+            }
+            {
+                DEBUG_PROFILE(_application->getProfiler(), endDraw);
+                endDraw(_application->getProfiler());
+            }
+        }
+    }
+
     void VKApplication::preWindowCreation() {
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
     }
 
-    void VKApplication::postWindowCreation(GLFWwindow* window) {
-        _window = window;
+    void VKApplication::postWindowCreation() {
         createInstance();
         setupDebugMessenger();
         createSurface();
@@ -94,7 +279,7 @@ namespace neon::vulkan {
             _commandBuffers[_currentFrame]->reset();
         }
 
-        auto& render = _room->getApplication()->getRender();
+        auto& render = _application->getRender();
         {
             DEBUG_PROFILE_ID(profiler, recreation, "FB Recreation");
             render->checkFrameBufferRecreationConditions();
@@ -171,18 +356,9 @@ namespace neon::vulkan {
     }
 
     void VKApplication::internalForceSizeValues(int32_t width, int32_t height) {
-
+        _width = width;
+        _height = height;
     }
-
-    void VKApplication::internalKeyEvent(
-            int key, int scancode, int action, int mods) {
-
-    }
-
-    void VKApplication::internalCursorPosEvent(double x, double y) {
-
-    }
-
 
     void VKApplication::createInstance() {
         if (ENABLE_VALIDATION_LAYERS && !checkValidationLayerSupport()) {
@@ -603,7 +779,7 @@ namespace neon::vulkan {
 
         for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
             _commandBuffers.emplace_back(
-                    std::make_unique<CommandBuffer>(this, true));
+                    std::make_unique<CommandBuffer>(_application, true));
         }
     }
 
@@ -706,6 +882,8 @@ namespace neon::vulkan {
         }
 
         vkDestroyInstance(_instance, nullptr);
+
+        glfwTerminate();
     }
 
     uint32_t VKApplication::getCurrentFrame() const {
@@ -752,12 +930,6 @@ namespace neon::vulkan {
         return _commandPool;
     }
 
-    CommandBuffer* VKApplication::getCurrentCommandBuffer() const {
-        return _commandBuffers.empty()
-               ? nullptr
-               : _commandBuffers[_currentFrame].get();
-    }
-
     VkDescriptorPool VKApplication::getImGuiPool() const {
         return _imGuiPool;
     }
@@ -774,15 +946,15 @@ namespace neon::vulkan {
         return _depthImageFormat;
     }
 
-    const VkExtent2D& VKApplication::getSwapChainExtent() const {
+    VkExtent2D VKApplication::getSwapChainExtent() const {
         return _swapChainExtent;
-    }
-
-    void VKApplication::setRoom(const std::shared_ptr<Room>& room) {
-        _room = room;
     }
 
     uint32_t VKApplication::getSwapChainCount() const {
         return _swapChainCount;
+    }
+
+    Application* VKApplication::getApplication() const {
+        return _application;
     }
 }

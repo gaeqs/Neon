@@ -15,7 +15,7 @@ namespace neon::vulkan {
 
         static VkDescriptorType getType(UniformBindingType type);
 
-        VKApplication* _vkApplication;
+        AbstractVKApplication* _vkApplication;
         std::vector<ShaderUniformBinding> _bindings;
         VkDescriptorSetLayout _descriptorSetLayout;
 
@@ -31,7 +31,7 @@ namespace neon::vulkan {
 
         ~VKShaderUniformDescriptor();
 
-        [[nodiscard]] VKApplication* getVkApplication() const;
+        [[nodiscard]] AbstractVKApplication* getVkApplication() const;
 
         [[nodiscard]] const std::vector<ShaderUniformBinding>&
         getBindings() const;

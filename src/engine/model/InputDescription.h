@@ -18,8 +18,8 @@ namespace neon {
         uint32_t sizeInFloats;
         uint32_t offsetInBytes;
 
-        InputAttribute(uint32_t sizeInFloats, uint32_t offsetInBytes)
-                : sizeInFloats(sizeInFloats), offsetInBytes(offsetInBytes) {}
+        InputAttribute(uint32_t sizeInFloats_, uint32_t offsetInBytes_)
+                : sizeInFloats(sizeInFloats_), offsetInBytes(offsetInBytes_) {}
     };
 
     struct InputDescription {
@@ -27,9 +27,9 @@ namespace neon {
         InputRate rate;
         std::vector<InputAttribute> attributes;
 
-        InputDescription(uint32_t stride, InputRate rate)
-                : stride(stride),
-                  rate(rate),
+        InputDescription(uint32_t stride_, InputRate rate_)
+                : stride(stride_),
+                  rate(rate_),
                   attributes() {
         }
 

@@ -47,6 +47,23 @@ namespace neon {
         }
     }
 
+    void ComponentCollection::invokeMouseButtonEvent(neon::Profiler& profiler,
+                                                     const MouseButtonEvent& event) {
+        flushNotStartedComponents();
+        for (const auto& [type, data]: _components) {
+            if (!data.first.onMouseButton) continue;
+            DEBUG_PROFILE_ID(profiler, type, type.name());
+            auto ptr = std::static_pointer_cast
+                    <AbstractClusteredLinkedCollection>(data.second);
+            ptr->forEachRaw([&event](void* ptr) {
+                auto* component = reinterpret_cast<Component*>(ptr);
+                if (component->isEnabled()) {
+                    component->onMouseButton(event);
+                }
+            });
+        }
+    }
+
     void ComponentCollection::invokeCursorMoveEvent(Profiler& profiler,
                                                     const CursorMoveEvent& event) {
         flushNotStartedComponents();
@@ -59,6 +76,23 @@ namespace neon {
                 auto* component = reinterpret_cast<Component*>(ptr);
                 if (component->isEnabled()) {
                     component->onCursorMove(event);
+                }
+            });
+        }
+    }
+
+    void ComponentCollection::invokeScrollEvent(Profiler& profiler,
+                                                const ScrollEvent& event) {
+        flushNotStartedComponents();
+        for (const auto& [type, data]: _components) {
+            if (!data.first.onScroll) continue;
+            DEBUG_PROFILE_ID(profiler, type, type.name());
+            auto ptr = std::static_pointer_cast
+                    <AbstractClusteredLinkedCollection>(data.second);
+            ptr->forEachRaw([&event](void* ptr) {
+                auto* component = reinterpret_cast<Component*>(ptr);
+                if (component->isEnabled()) {
+                    component->onScroll(event);
                 }
             });
         }
@@ -117,20 +151,6 @@ namespace neon {
 
     void ComponentCollection::callOnConstruction(void* rawComponent) {
         reinterpret_cast<Component*>(rawComponent)->onConstruction();
-    }
-
-    void ComponentCollection::flushModels() const {
-        std::unordered_set<std::shared_ptr<Model>> updated;
-        auto ptr = getComponentsOfType<GraphicComponent>();
-        if (ptr == nullptr) return;
-        auto it = ptr->begin();
-        auto end = ptr->end();
-        while (it != end) {
-            if (updated.insert(it->getModel()).second) {
-                it->getModel()->flush();
-            }
-            ++it;
-        }
     }
 
     void ComponentCollection::flushNotStartedComponents() {

@@ -21,7 +21,7 @@ namespace neon {
 }
 
 namespace neon::vulkan {
-    class VKApplication;
+    class AbstractVKApplication;
 }
 
 namespace neon::vulkan::vulkan_util {
@@ -51,20 +51,20 @@ namespace neon::vulkan::vulkan_util {
             VkFormat override = VK_FORMAT_UNDEFINED);
 
     void transitionImageLayout(
-            VKApplication* application,
+            AbstractVKApplication* application,
             VkImage image, VkFormat format,
             VkImageLayout oldLayout, VkImageLayout newLayout,
             uint32_t mipLevels,
             uint32_t layers);
 
     void copyBufferToImage(
-            VKApplication* application,
+            AbstractVKApplication* application,
             VkBuffer buffer, VkImage image,
             uint32_t width, uint32_t height, uint32_t depth,
             uint32_t layers);
 
     void generateMipmaps(
-            VKApplication* application,
+            AbstractVKApplication* application,
             VkImage image,
             uint32_t width, uint32_t height, uint32_t depth,
             uint32_t levels, int32_t layers);

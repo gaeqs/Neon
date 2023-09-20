@@ -8,6 +8,8 @@
 #include <vulkan/VKShaderUniform.h>
 #include <vulkan/spirv/SPIRVCompiler.h>
 
+#include <vulkan/AbstractVKApplication.h>
+
 namespace neon::vulkan {
     VkShaderStageFlagBits VKShaderProgram::getStage(ShaderType type) {
         switch (type) {
@@ -31,7 +33,8 @@ namespace neon::vulkan {
     }
 
     VKShaderProgram::VKShaderProgram(Application* application) :
-            _vkApplication(&application->getImplementation()),
+            _vkApplication(dynamic_cast<AbstractVKApplication*>(
+                                   application->getImplementation())),
             _shaders(),
             _uniformBlocks(),
             _uniforms(),

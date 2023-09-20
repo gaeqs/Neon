@@ -11,12 +11,15 @@
 #include <vulkan/render/VKRenderPass.h>
 #include <vulkan/util/VKUtil.h>
 
+#include <vulkan/AbstractVKApplication.h>
+
 #include <imgui.h>
 #include <imgui_impl_vulkan.h>
 
 namespace neon::vulkan {
     VKRender::VKRender(Application* application) :
-            _vkApplication(&application->getImplementation()) {
+            _vkApplication(dynamic_cast<AbstractVKApplication*>(
+                                   application->getImplementation())) {
 
     }
 
