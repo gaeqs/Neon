@@ -94,7 +94,7 @@ std::shared_ptr<FrameBuffer> initRender(Room* room) {
                                      "screen.vert",
                                      "screen.frag");
 
-    std::vector<TextureFormat> frameBufferFormats = {
+    std::vector<FrameBufferTextureCreateInfo> frameBufferFormats = {
             TextureFormat::R8G8B8A8,
             TextureFormat::R16FG16F, // NORMAL XY
             TextureFormat::R16FG16F // NORMAL Z / SPECULAR
@@ -103,7 +103,8 @@ std::shared_ptr<FrameBuffer> initRender(Room* room) {
     auto fpFrameBuffer = std::make_shared<SimpleFrameBuffer>(
             app, frameBufferFormats, true);
 
-    render->addRenderPass({fpFrameBuffer, RenderPassStrategy::defaultStrategy});
+    render->addRenderPass(std::make_shared<DefaultRenderPassStrategy>(
+            fpFrameBuffer));
 
     auto albedo = deferred_utils::createLightSystem(
             room,
@@ -115,39 +116,37 @@ std::shared_ptr<FrameBuffer> initRender(Room* room) {
             flashShader
     );
 
-    std::vector<TextureFormat> screenFormats = {TextureFormat::R8G8B8A8};
+    std::vector<FrameBufferTextureCreateInfo> screenFormats =
+            {TextureFormat::R8G8B8A8};
     auto screenFrameBuffer = std::make_shared<SimpleFrameBuffer>(
             app, screenFormats, false);
-    render->addRenderPass(
-            {screenFrameBuffer, RenderPassStrategy::defaultStrategy});
+    render->addRenderPass(std::make_shared<DefaultRenderPassStrategy>(
+            screenFrameBuffer));
 
     auto textures = fpFrameBuffer->getTextures();
     textures[0] = albedo;
 
-    deferred_utils::ScreenModelCreationInfo info(
-            room->getApplication(),
-            "screen model",
-            textures,
-            screenFrameBuffer,
-            screenShader,
-            true,
-            true,
-            neon::AssetStorageMode::PERMANENT
-    );
+    std::shared_ptr<Material> screenMaterial = Material::create(
+            room->getApplication(), "Screen Model",
+            screenFrameBuffer, screenShader,
+            deferred_utils::DeferredVertex::getDescription(),
+            InputDescription(0, InputRate::INSTANCE),
+            {}, textures);
 
-    auto screenModel = deferred_utils::createScreenModel(info);
+    auto screenModel = deferred_utils::createScreenModel(room->getApplication(),
+                                                         "Screen Model");
 
-    auto instance = screenModel->createInstance();
-    if (!instance.isOk()) {
-        throw std::runtime_error(instance.getError());
-    }
-    room->markUsingModel(screenModel.get());
+    screenModel->addMaterial(screenMaterial);
+
+    auto screenModelGO = room->newGameObject();
+    screenModelGO->setName("Screen Model");
+    screenModelGO->newComponent<GraphicComponent>(screenModel);
 
     auto swapFrameBuffer = std::make_shared<SwapChainFrameBuffer>(
             room, false);
 
-    render->addRenderPass(
-            {swapFrameBuffer, RenderPassStrategy::defaultStrategy});
+    render->addRenderPass(std::make_shared<DefaultRenderPassStrategy>(
+            swapFrameBuffer));
 
     return fpFrameBuffer;
 }
@@ -349,14 +348,10 @@ std::shared_ptr<Room> getTestRoom(Application* application) {
 int main() {
     std::srand(std::time(nullptr));
 
-    Application application(WIDTH, HEIGHT);
+    Application application(std::make_unique<vulkan::VKApplication>(
+            "Neon", WIDTH, HEIGHT));
 
-    auto initResult = application.init("Neon");
-    if (!initResult.isOk()) {
-        std::cerr << "[GLFW INIT]\t" << initResult.getError() << std::endl;
-        return EXIT_FAILURE;
-    }
-
+    application.init();
     application.setRoom(getTestRoom(&application));
 
     auto loopResult = application.startGameLoop();
