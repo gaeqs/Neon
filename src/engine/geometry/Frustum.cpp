@@ -4,7 +4,6 @@
 
 #include "Frustum.h"
 
-#include <glm/gtc/matrix_transform.hpp>
 
 namespace neon {
 
@@ -14,13 +13,14 @@ namespace neon {
             _far(far),
             _aspectRatio(aspectRatio),
             _fovYDegrees(fovYDegrees),
-            _projection(glm::perspective(fovYDegrees, aspectRatio, near, far)) {
+            _projection(rush::Mat4f::perspective(fovYDegrees, aspectRatio,
+                                                 near, far)) {
 #ifdef USE_VULKAN
         _projection[1][1] *= -1;
 #endif
     }
 
-    const glm::mat4& Frustum::getProjection() const {
+    const rush::Mat4f& Frustum::getProjection() const {
         return _projection;
     }
 
@@ -56,10 +56,10 @@ namespace neon {
         return {_near, _far, _aspectRatio, fovYDegrees};
     }
 
-    const glm::mat4& Frustum::getInverseProjection() const {
+    const rush::Mat4f& Frustum::getInverseProjection() const {
         if (!_inverseProjection.has_value()) {
             auto* f = const_cast<Frustum*>(this);
-            f->_inverseProjection = glm::inverse(_projection);
+            f->_inverseProjection = _projection.inverse();
         }
         return _inverseProjection.value();
     }

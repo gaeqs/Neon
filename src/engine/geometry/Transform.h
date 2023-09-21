@@ -6,8 +6,7 @@
 #define RVTRACKING_TRANSFORM_H
 
 
-#include <glm/glm.hpp>
-#include <glm/gtc/quaternion.hpp>
+#include <rush/rush.h>
 
 #include <engine/structure/IdentifiableWrapper.h>
 
@@ -19,18 +18,18 @@ namespace neon {
 
         uint64_t _id;
 
-        glm::vec3 _position;
-        glm::quat _rotation;
-        glm::vec3 _scale;
+        rush::Vec3f _position;
+        rush::Quatf _rotation;
+        rush::Vec3f _scale;
 
         IdentifiableWrapper<GameObject> _gameObject;
         uint64_t _parentIdOnLastRefresh;
 
         bool _dirty;
-        glm::mat4 _localModel;
-        glm::mat4 _localNormal;
-        glm::mat4 _model;
-        glm::mat4 _normal;
+        rush::Mat4f _localModel;
+        rush::Mat4f _localNormal;
+        rush::Mat4f _model;
+        rush::Mat4f _normal;
 
         void recalculateIfRequired();
 
@@ -42,27 +41,27 @@ namespace neon {
 
         [[nodiscard]] IdentifiableWrapper<GameObject> getGameObject() const;
 
-        [[nodiscard]] const glm::vec3& getPosition() const;
+        [[nodiscard]] const rush::Vec3f& getPosition() const;
 
-        [[nodiscard]] const glm::quat& getRotation() const;
+        [[nodiscard]] const rush::Quatf& getRotation() const;
 
-        [[nodiscard]] const glm::vec3& getScale() const;
+        [[nodiscard]] const rush::Vec3f& getScale() const;
 
-        void setPosition(const glm::vec3& position);
+        void setPosition(const rush::Vec3f& position);
 
-        void setRotation(const glm::quat& rotation);
+        void setRotation(const rush::Quatf& rotation);
 
-        void setScale(const glm::vec3& scale);
+        void setScale(const rush::Vec3f& scale);
 
-        const glm::vec3& move(const glm::vec3& offset);
+        const rush::Vec3f& move(const rush::Vec3f& offset);
 
-        const glm::quat& lookAt(const glm::vec3& direction);
+        const rush::Quatf& lookAt(const rush::Vec3f& direction);
 
-        const glm::quat& rotate(const glm::vec3& direction, float angle);
+        const rush::Quatf& rotate(const rush::Vec3f& direction, float angle);
 
-        const glm::mat4& getModel();
+        const rush::Mat4f& getModel();
 
-        const glm::mat4& getNormal();
+        const rush::Mat4f& getNormal();
 
     };
 }

@@ -5,6 +5,8 @@
 #ifndef VRTRACKING_CAMERAMOVEMENTCOMPONENT_H
 #define VRTRACKING_CAMERAMOVEMENTCOMPONENT_H
 
+#include <rush/rush.h>
+
 #include <engine/structure/Component.h>
 
 namespace neon {
@@ -13,7 +15,7 @@ namespace neon {
         bool _w, _a, _s, _d, _shift, _space;
         float _speed;
 
-        glm::vec2 _eulerAngles;
+        rush::Vec2f _eulerAngles;
 
     public:
 

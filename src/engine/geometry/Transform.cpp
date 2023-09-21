@@ -7,7 +7,6 @@
 #include <glm/gtx/quaternion.hpp>
 
 #include <engine/structure/GameObject.h>
-#include <util/GLMUtils.h>
 
 namespace neon {
 
@@ -16,7 +15,7 @@ namespace neon {
     Transform::Transform(IdentifiableWrapper<GameObject> object) :
             _id(TRANSFORM_ID_GENERATOR++),
             _position(),
-            _rotation(glm::vec3(0.0f, 0.0f, 0.0f)),
+            _rotation(rush::Quatf::euler({0.0f, 0.0f, 0.0f})),
             _scale(1.0f, 1.0f, 1.0f),
             _gameObject(object),
             _parentIdOnLastRefresh(0),
@@ -29,61 +28,60 @@ namespace neon {
         return _gameObject;
     }
 
-    const glm::vec3& Transform::getPosition() const {
+    const rush::Vec3f& Transform::getPosition() const {
         return _position;
     }
 
-    const glm::quat& Transform::getRotation() const {
+    const rush::Quatf& Transform::getRotation() const {
         return _rotation;
     }
 
-    const glm::vec3& Transform::getScale() const {
+    const rush::Vec3f& Transform::getScale() const {
         return _scale;
     }
 
-    void Transform::setPosition(const glm::vec3& position) {
+    void Transform::setPosition(const rush::Vec3f& position) {
         _dirty = true;
         _position = position;
     }
 
-    void Transform::setRotation(const glm::quat& rotation) {
+    void Transform::setRotation(const rush::Quatf& rotation) {
         _dirty = true;
         _rotation = rotation;
     }
 
-    void Transform::setScale(const glm::vec3& scale) {
+    void Transform::setScale(const rush::Vec3f& scale) {
         _dirty = true;
         _scale = scale;
     }
 
 
-    const glm::vec3& Transform::move(const glm::vec3& offset) {
+    const rush::Vec3f& Transform::move(const rush::Vec3f& offset) {
         _dirty = true;
         _position += offset;
         return _position;
     }
 
-    const glm::quat& Transform::lookAt(const glm::vec3& direction) {
+    const rush::Quatf& Transform::lookAt(const rush::Vec3f& direction) {
         _dirty = true;
-        _rotation = glm::quatLookAt(glm::normalize(direction),
-                                    glm::vec3(0, 1, 0));
+        _rotation = rush::Quatf::lookAt(direction.normalized());
         return _rotation;
     }
 
-    const glm::quat&
-    Transform::rotate(const glm::vec3& direction, float angle) {
+    const rush::Quatf&
+    Transform::rotate(const rush::Vec3f& direction, float angle) {
         _dirty = true;
-        _rotation =
-                glm::angleAxis(angle, glm::normalize(direction)) * _rotation;
+        _rotation = rush::Quatf::angleAxis(angle, direction.normalized()) *
+                    _rotation;
         return _rotation;
     }
 
-    const glm::mat4& Transform::getModel() {
+    const rush::Mat4f& Transform::getModel() {
         recalculateIfRequired();
         return _model;
     }
 
-    const glm::mat4& Transform::getNormal() {
+    const rush::Mat4f& Transform::getNormal() {
         recalculateIfRequired();
         return _normal;
     }
@@ -92,8 +90,8 @@ namespace neon {
         auto parent = _gameObject->getParent();
         if (_dirty) {
             _dirty = false;
-            glm::trs(_localModel, _position, _rotation, _scale);
-            glm::normal_matrix(_localNormal, _rotation, _scale);
+            _localModel = rush::Mat4f::model(_scale, _rotation, _position);
+            _localNormal = rush::Mat4f::normal(_scale, _rotation);
 
             // Apply parent transformation
             if (parent != nullptr) {
