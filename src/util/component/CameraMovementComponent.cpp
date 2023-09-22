@@ -64,6 +64,8 @@ namespace neon {
     }
 
     void CameraMovementComponent::onUpdate(float deltaTime) {
+        constexpr float EPSILON = 0.0001f;
+
         auto& camera = getGameObject()->getRoom()->getCamera();
         rush::Vec3f direction;
 
@@ -78,9 +80,9 @@ namespace neon {
         if (_space) direction += rush::Vec3f(0.0f, 1.0f, 0.0f);
         if (_shift) direction -= rush::Vec3f(0.0f, 1.0f, 0.0f);
 
-        if (std::abs(direction.x()) < FLT_EPSILON
-            && std::abs(direction.y()) < FLT_EPSILON
-            && std::abs(direction.z()) < FLT_EPSILON)
+        if (std::abs(direction.x()) < EPSILON
+            && std::abs(direction.y()) < EPSILON
+            && std::abs(direction.z()) < EPSILON)
             return;
 
         auto offset = direction.normalized() * (_speed * deltaTime);
