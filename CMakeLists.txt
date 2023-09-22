@@ -53,7 +53,6 @@ add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/lib/spirv-tools)
 
 # RUSH
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/lib/Rush)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/lib/Rush/src)
 
 if (WIN32)
     list(APPEND LIBRARIES assimp::assimp)
@@ -70,6 +69,7 @@ list(APPEND LIBRARIES glfw ${GLFW_LIBRARIES})
 list(APPEND LIBRARIES ${VULKAN_LIB_LIST})
 list(APPEND LIBRARIES SPIRV glslang)
 list(APPEND LIBRARIES IMGUI IMPLOT)
+list(APPEND LIBRARIES rush)
 
 # QT
 
