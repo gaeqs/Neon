@@ -18,7 +18,7 @@ namespace neon {
             _shift(),
             _space(),
             _speed(1.0f),
-            _eulerAngles(0.0f) {
+            _eulerAngles() {
 
     }
 
