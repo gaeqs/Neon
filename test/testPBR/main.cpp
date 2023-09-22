@@ -118,7 +118,7 @@ std::shared_ptr<Material> createSSAOMaterial(
     }
 
     // GENERATE NOISE
-    std::vector<glm::vec3> noise;
+    std::vector<rush::Vec3f> noise;
     noise.reserve(NOISE_WIDTH * NOISE_WIDTH);
     for (uint32_t i = 0; i < NOISE_WIDTH * NOISE_WIDTH; ++i) {
         noise.emplace_back(

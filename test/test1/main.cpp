@@ -192,14 +192,14 @@ void loadModels(Application* application, Room* room,
             sans2->newComponent<GraphicComponent>(sansModel);
             sans2->newComponent<ConstantRotationComponent>();
             sans2->setParent(sans);
-            sans2->getTransform().setPosition(glm::vec3(-5.0f, 5.0f, 0.0f));
+            sans2->getTransform().setPosition(rush::Vec3f(-5.0f, 5.0f, 0.0f));
             sans2->setName("Children Sans");
         }
 
         float x = static_cast<float>(i % q) * 3.0f;
         float z = static_cast<float>(i / q) *
                   3.0f; // NOLINT(bugprone-integer-division)
-        sans->getTransform().setPosition(glm::vec3(x, 0, z));
+        sans->getTransform().setPosition(rush::Vec3f(x, 0, z));
         sans->setName("Sans " + std::to_string(i));
     }
 
@@ -222,7 +222,7 @@ void loadModels(Application* application, Room* room,
     auto zeppeli = room->newGameObject();
     zeppeli->newComponent<GraphicComponent>(zeppeliModel);
     zeppeli->newComponent<ConstantRotationComponent>();
-    zeppeli->getTransform().setPosition(glm::vec3(-10.0f, 10.0f, -10.0f));
+    zeppeli->getTransform().setPosition(rush::Vec3f(-10.0f, 10.0f, -10.0f));
     zeppeli->setName("Zeppeli");
 
     // CUBE
@@ -270,7 +270,7 @@ void loadModels(Application* application, Room* room,
     auto cube = room->newGameObject();
     cube->newComponent<GraphicComponent>(cubeModel);
     cube->newComponent<ConstantRotationComponent>();
-    cube->getTransform().setPosition(glm::vec3(0.0f, 10.0f, -10.0f));
+    cube->getTransform().setPosition(rush::Vec3f(0.0f, 10.0f, -10.0f));
     cube->setName("Cube");
 }
 
@@ -317,7 +317,7 @@ std::shared_ptr<Room> getTestRoom(Application* application) {
 
     auto directionalLight = room->newGameObject();
     directionalLight->newComponent<DirectionalLight>();
-    directionalLight->getTransform().lookAt(glm::vec3(0.45f, -0.6f, 0.65f));
+    directionalLight->getTransform().lookAt(rush::Vec3f(0.45f, -0.6f, 0.65f));
     directionalLight->setName("Directional light");
 
     auto pointLightGO = room->newGameObject();
@@ -332,7 +332,7 @@ std::shared_ptr<Room> getTestRoom(Application* application) {
     auto flashLightGO = room->newGameObject();
     auto flashLight = flashLightGO->newComponent<FlashLight>();
     flashLightGO->getTransform().setPosition({10.0f, 7.0f, 10.0f});
-    flashLightGO->getTransform().rotate(glm::vec3(1.0f, 0.0f, 0.0f), 1.0f);
+    flashLightGO->getTransform().rotate(rush::Vec3f(1.0f, 0.0f, 0.0f), 1.0f);
     flashLightGO->setName("Flash light");
     flashLight->setDiffuseColor({0.0f, 1.0f, 0.0f});
     flashLight->setConstantAttenuation(0.01f);

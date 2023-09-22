@@ -208,15 +208,15 @@ namespace neon {
 
         ImGui::Separator();
 
-        float cutOffAngle = glm::degrees(glm::acos(_cutOff));
-        float outerCutOffAngle = glm::degrees(glm::acos(_outerCutOff));
+        float cutOffAngle = rush::degrees(std::acos(_cutOff));
+        float outerCutOffAngle = rush::degrees(std::acos(_outerCutOff));
 
         ImGui::AlignTextToFramePadding();
         ImGui::Text("Cut off:");
         ImGui::SameLine();
         if (ImGui::DragFloat(imGuiUId("##cut_off").c_str(),
                              &cutOffAngle, 0.5f, 0.0f, 179.9f)) {
-            _cutOff = glm::cos(glm::radians(cutOffAngle));
+            _cutOff = std::cos(rush::radians(cutOffAngle));
             if (_cutOff < _outerCutOff) {
                 _outerCutOff = _cutOff;
             }
@@ -228,7 +228,7 @@ namespace neon {
         if (ImGui::DragFloat(imGuiUId("##outer_cut_off").c_str(),
                              &outerCutOffAngle,
                              0.5f, 0.0f, 179.9f)) {
-            _outerCutOff = glm::cos(glm::radians(outerCutOffAngle));
+            _outerCutOff = std::cos(rush::radians(outerCutOffAngle));
             if (_cutOff < _outerCutOff) {
                 _cutOff = _outerCutOff;
             }

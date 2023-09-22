@@ -8,7 +8,7 @@
 #include <functional>
 #include <memory>
 
-#include <glm/glm.hpp>
+#include <rush/rush.h>
 
 #include <engine/Engine.h>
 
@@ -28,129 +28,129 @@ namespace neon::model_utils {
                 20, 22, 21, 21, 22, 23,
         };
 
-        static const glm::vec3 CUBE_VERTICES[] = {
-                glm::vec3(-1.0f, -1.0f, 1.0f), //0
-                glm::vec3(1.0f, -1.0f, 1.0f), //1
-                glm::vec3(-1.0f, 1.0f, 1.0f), //2
-                glm::vec3(1.0f, 1.0f, 1.0f), //3
-                glm::vec3(-1.0f, -1.0f, -1.0f), //4
-                glm::vec3(1.0f, -1.0f, -1.0f), //5
-                glm::vec3(-1.0f, 1.0f, -1.0f), //6
-                glm::vec3(1.0f, 1.0f, -1.0f), //7
-                glm::vec3(1.0f, -1.0f, -1.0f), //8
-                glm::vec3(1.0f, -1.0f, 1.0f), //9
-                glm::vec3(1.0f, 1.0f, -1.0f), //10
-                glm::vec3(1.0f, 1.0f, 1.0f), //11
-                glm::vec3(-1.0f, -1.0f, -1.0f), //12
-                glm::vec3(-1.0f, -1.0f, 1.0f), //13
-                glm::vec3(-1.0f, 1.0f, -1.0f), //14
-                glm::vec3(-1.0f, 1.0f, 1.0f), //15
-                glm::vec3(-1.0f, 1.0f, -1.0f), //16
-                glm::vec3(-1.0f, 1.0f, 1.0f), //17
-                glm::vec3(1.0f, 1.0f, -1.0f), //18
-                glm::vec3(1.0f, 1.0f, 1.0f), //19
-                glm::vec3(-1.0f, -1.0f, -1.0f), //20
-                glm::vec3(-1.0f, -1.0f, 1.0f), //21
-                glm::vec3(1.0f, -1.0f, -1.0f), //22
-                glm::vec3(1.0f, -1.0f, 1.0f)  //23
+        static const rush::Vec3f CUBE_VERTICES[] = {
+                rush::Vec3f(-1.0f, -1.0f, 1.0f), //0
+                rush::Vec3f(1.0f, -1.0f, 1.0f), //1
+                rush::Vec3f(-1.0f, 1.0f, 1.0f), //2
+                rush::Vec3f(1.0f, 1.0f, 1.0f), //3
+                rush::Vec3f(-1.0f, -1.0f, -1.0f), //4
+                rush::Vec3f(1.0f, -1.0f, -1.0f), //5
+                rush::Vec3f(-1.0f, 1.0f, -1.0f), //6
+                rush::Vec3f(1.0f, 1.0f, -1.0f), //7
+                rush::Vec3f(1.0f, -1.0f, -1.0f), //8
+                rush::Vec3f(1.0f, -1.0f, 1.0f), //9
+                rush::Vec3f(1.0f, 1.0f, -1.0f), //10
+                rush::Vec3f(1.0f, 1.0f, 1.0f), //11
+                rush::Vec3f(-1.0f, -1.0f, -1.0f), //12
+                rush::Vec3f(-1.0f, -1.0f, 1.0f), //13
+                rush::Vec3f(-1.0f, 1.0f, -1.0f), //14
+                rush::Vec3f(-1.0f, 1.0f, 1.0f), //15
+                rush::Vec3f(-1.0f, 1.0f, -1.0f), //16
+                rush::Vec3f(-1.0f, 1.0f, 1.0f), //17
+                rush::Vec3f(1.0f, 1.0f, -1.0f), //18
+                rush::Vec3f(1.0f, 1.0f, 1.0f), //19
+                rush::Vec3f(-1.0f, -1.0f, -1.0f), //20
+                rush::Vec3f(-1.0f, -1.0f, 1.0f), //21
+                rush::Vec3f(1.0f, -1.0f, -1.0f), //22
+                rush::Vec3f(1.0f, -1.0f, 1.0f)  //23
         };
 
         //Normal de los vertices
-        const glm::vec3 CUBE_VERTEX_NORMALS[] = {
-                glm::vec3(0.0f, 0.0f, 1.0f),
-                glm::vec3(0.0f, 0.0f, 1.0f),
-                glm::vec3(0.0f, 0.0f, 1.0f),
-                glm::vec3(0.0f, 0.0f, 1.0f),
+        const rush::Vec3f CUBE_VERTEX_NORMALS[] = {
+                rush::Vec3f(0.0f, 0.0f, 1.0f),
+                rush::Vec3f(0.0f, 0.0f, 1.0f),
+                rush::Vec3f(0.0f, 0.0f, 1.0f),
+                rush::Vec3f(0.0f, 0.0f, 1.0f),
 
-                glm::vec3(0.0f, 0.0f, -1.0f),
-                glm::vec3(0.0f, 0.0f, -1.0f),
-                glm::vec3(0.0f, 0.0f, -1.0f),
-                glm::vec3(0.0f, 0.0f, -1.0f),
+                rush::Vec3f(0.0f, 0.0f, -1.0f),
+                rush::Vec3f(0.0f, 0.0f, -1.0f),
+                rush::Vec3f(0.0f, 0.0f, -1.0f),
+                rush::Vec3f(0.0f, 0.0f, -1.0f),
 
-                glm::vec3(1.0f, 0.0f, 0.0f),
-                glm::vec3(1.0f, 0.0f, 0.0f),
-                glm::vec3(1.0f, 0.0f, 0.0f),
-                glm::vec3(1.0f, 0.0f, 0.0f),
+                rush::Vec3f(1.0f, 0.0f, 0.0f),
+                rush::Vec3f(1.0f, 0.0f, 0.0f),
+                rush::Vec3f(1.0f, 0.0f, 0.0f),
+                rush::Vec3f(1.0f, 0.0f, 0.0f),
 
-                glm::vec3(-1.0f, 0.0f, 0.0f),
-                glm::vec3(-1.0f, 0.0f, 0.0f),
-                glm::vec3(-1.0f, 0.0f, 0.0f),
-                glm::vec3(-1.0f, 0.0f, 0.0f),
+                rush::Vec3f(-1.0f, 0.0f, 0.0f),
+                rush::Vec3f(-1.0f, 0.0f, 0.0f),
+                rush::Vec3f(-1.0f, 0.0f, 0.0f),
+                rush::Vec3f(-1.0f, 0.0f, 0.0f),
 
-                glm::vec3(0.0f, 1.0f, 0.0f),
-                glm::vec3(0.0f, 1.0f, 0.0f),
-                glm::vec3(0.0f, 1.0f, 0.0f),
-                glm::vec3(0.0f, 1.0f, 0.0f),
+                rush::Vec3f(0.0f, 1.0f, 0.0f),
+                rush::Vec3f(0.0f, 1.0f, 0.0f),
+                rush::Vec3f(0.0f, 1.0f, 0.0f),
+                rush::Vec3f(0.0f, 1.0f, 0.0f),
 
-                glm::vec3(0.0f, -1.0f, 0.0f),
-                glm::vec3(0.0f, -1.0f, 0.0f),
-                glm::vec3(0.0f, -1.0f, 0.0f),
-                glm::vec3(0.0f, -1.0f, 0.0f)
+                rush::Vec3f(0.0f, -1.0f, 0.0f),
+                rush::Vec3f(0.0f, -1.0f, 0.0f),
+                rush::Vec3f(0.0f, -1.0f, 0.0f),
+                rush::Vec3f(0.0f, -1.0f, 0.0f)
         };
 
-        const glm::vec2 CUBE_VERTEX_TEX_COORDS[] = {
-                glm::vec2(0.0f, 0.0f),
-                glm::vec2(1.0f, 0.0f),
-                glm::vec2(0.0f, 1.0f),
-                glm::vec2(1.0f, 1.0f),
+        const rush::Vec2f CUBE_VERTEX_TEX_COORDS[] = {
+                rush::Vec2f(0.0f, 0.0f),
+                rush::Vec2f(1.0f, 0.0f),
+                rush::Vec2f(0.0f, 1.0f),
+                rush::Vec2f(1.0f, 1.0f),
 
-                glm::vec2(1.0f, 0.0f),
-                glm::vec2(0.0f, 0.0f),
-                glm::vec2(1.0f, 1.0f),
-                glm::vec2(0.0f, 1.0f),
+                rush::Vec2f(1.0f, 0.0f),
+                rush::Vec2f(0.0f, 0.0f),
+                rush::Vec2f(1.0f, 1.0f),
+                rush::Vec2f(0.0f, 1.0f),
 
-                glm::vec2(1.0f, 0.0f),
-                glm::vec2(0.0f, 0.0f),
-                glm::vec2(1.0f, 1.0f),
-                glm::vec2(0.0f, 1.0f),
+                rush::Vec2f(1.0f, 0.0f),
+                rush::Vec2f(0.0f, 0.0f),
+                rush::Vec2f(1.0f, 1.0f),
+                rush::Vec2f(0.0f, 1.0f),
 
-                glm::vec2(0.0f, 0.0f),
-                glm::vec2(1.0f, 0.0f),
-                glm::vec2(0.0f, 1.0f),
-                glm::vec2(1.0f, 1.0f),
+                rush::Vec2f(0.0f, 0.0f),
+                rush::Vec2f(1.0f, 0.0f),
+                rush::Vec2f(0.0f, 1.0f),
+                rush::Vec2f(1.0f, 1.0f),
 
-                glm::vec2(0.0f, 1.0f),
-                glm::vec2(0.0f, 0.0f),
-                glm::vec2(1.0f, 1.0f),
-                glm::vec2(1.0f, 0.0f),
+                rush::Vec2f(0.0f, 1.0f),
+                rush::Vec2f(0.0f, 0.0f),
+                rush::Vec2f(1.0f, 1.0f),
+                rush::Vec2f(1.0f, 0.0f),
 
-                glm::vec2(0.0f, 0.0f),
-                glm::vec2(0.0f, 1.0f),
-                glm::vec2(1.0f, 0.0f),
-                glm::vec2(1.0f, 1.0f),
+                rush::Vec2f(0.0f, 0.0f),
+                rush::Vec2f(0.0f, 1.0f),
+                rush::Vec2f(1.0f, 0.0f),
+                rush::Vec2f(1.0f, 1.0f),
         };
 
 
-        const glm::vec3 CUBE_VERTEX_TANGENTS[] = {
-                glm::vec3(1.0f, 0.0f, 0.0f),
-                glm::vec3(1.0f, 0.0f, 0.0f),
-                glm::vec3(1.0f, 0.0f, 0.0f),
-                glm::vec3(1.0f, 0.0f, 0.0f),
+        const rush::Vec3f CUBE_VERTEX_TANGENTS[] = {
+                rush::Vec3f(1.0f, 0.0f, 0.0f),
+                rush::Vec3f(1.0f, 0.0f, 0.0f),
+                rush::Vec3f(1.0f, 0.0f, 0.0f),
+                rush::Vec3f(1.0f, 0.0f, 0.0f),
 
-                glm::vec3(-1.0f, 0.0f, 0.0f),
-                glm::vec3(-1.0f, 0.0f, 0.0f),
-                glm::vec3(-1.0f, 0.0f, 0.0f),
-                glm::vec3(-1.0f, 0.0f, 0.0f),
+                rush::Vec3f(-1.0f, 0.0f, 0.0f),
+                rush::Vec3f(-1.0f, 0.0f, 0.0f),
+                rush::Vec3f(-1.0f, 0.0f, 0.0f),
+                rush::Vec3f(-1.0f, 0.0f, 0.0f),
 
-                glm::vec3(0.0f, 0.0f, -1.0f),
-                glm::vec3(0.0f, 0.0f, -1.0f),
-                glm::vec3(0.0f, 0.0f, -1.0f),
-                glm::vec3(0.0f, 0.0f, -1.0f),
+                rush::Vec3f(0.0f, 0.0f, -1.0f),
+                rush::Vec3f(0.0f, 0.0f, -1.0f),
+                rush::Vec3f(0.0f, 0.0f, -1.0f),
+                rush::Vec3f(0.0f, 0.0f, -1.0f),
 
-                glm::vec3(0.0f, 0.0f, 1.0f),
-                glm::vec3(0.0f, 0.0f, 1.0f),
-                glm::vec3(0.0f, 0.0f, 1.0f),
-                glm::vec3(0.0f, 0.0f, 1.0f),
+                rush::Vec3f(0.0f, 0.0f, 1.0f),
+                rush::Vec3f(0.0f, 0.0f, 1.0f),
+                rush::Vec3f(0.0f, 0.0f, 1.0f),
+                rush::Vec3f(0.0f, 0.0f, 1.0f),
 
-                glm::vec3(1.0f, 0.0f, 0.0f),
-                glm::vec3(1.0f, 0.0f, 0.0f),
-                glm::vec3(1.0f, 0.0f, 0.0f),
-                glm::vec3(1.0f, 0.0f, 0.0f),
+                rush::Vec3f(1.0f, 0.0f, 0.0f),
+                rush::Vec3f(1.0f, 0.0f, 0.0f),
+                rush::Vec3f(1.0f, 0.0f, 0.0f),
+                rush::Vec3f(1.0f, 0.0f, 0.0f),
 
-                glm::vec3(1.0f, 0.0f, 0.0f),
-                glm::vec3(1.0f, 0.0f, 0.0f),
-                glm::vec3(1.0f, 0.0f, 0.0f),
-                glm::vec3(1.0f, 0.0f, 0.0f),
+                rush::Vec3f(1.0f, 0.0f, 0.0f),
+                rush::Vec3f(1.0f, 0.0f, 0.0f),
+                rush::Vec3f(1.0f, 0.0f, 0.0f),
+                rush::Vec3f(1.0f, 0.0f, 0.0f),
         };
 
         std::vector<Vertex> vertices;
@@ -161,7 +161,7 @@ namespace neon::model_utils {
                     CUBE_VERTICES[i],
                     CUBE_VERTEX_NORMALS[i],
                     CUBE_VERTEX_TANGENTS[i],
-                    glm::vec4(0.0f, 0.0f, 0.0f, 0.0f),
+                    rush::Vec4f(0.0f, 0.0f, 0.0f, 0.0f),
                     CUBE_VERTEX_TEX_COORDS[i]
             ));
         }
