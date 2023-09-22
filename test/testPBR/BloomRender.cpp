@@ -66,8 +66,8 @@ BloomRender::BloomRender(neon::Application* application,
                 neon::SimpleFrameBuffer::defaultRecreationCondition,
                 [relativeSize](neon::Application* app) {
                     auto vp = app->getViewport();
-                    auto w = static_cast<float>(vp.x);
-                    auto h = static_cast<float>(vp.y);
+                    auto w = static_cast<float>(vp.x());
+                    auto h = static_cast<float>(vp.y());
                     return std::make_pair(
                             static_cast<uint32_t>(w * relativeSize),
                             static_cast<float>(h * relativeSize)
@@ -138,7 +138,7 @@ std::shared_ptr<neon::Texture> BloomRender::getBloomTexture() const {
 
 bool BloomRender::requiresRecreation() {
     auto vp = _application->getViewport();
-    if (vp.x == 0 || vp.y == 0) return false;
+    if (vp.x() == 0 || vp.y() == 0) return false;
     return _extent != vp;
 }
 

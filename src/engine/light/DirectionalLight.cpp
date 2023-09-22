@@ -42,7 +42,7 @@ namespace neon {
 
     void DirectionalLight::onLateUpdate(float deltaTime) {
         auto direction = getGameObject()->getTransform().getRotation()
-                         * glm::vec3(0.0f, 0.0f, -1.0f);
+                         * rush::Vec3f(0.0f, 0.0f, -1.0f);
         _graphicComponent->uploadData(Data{
                 _diffuseColor * _radiance,
                 _specularColor * _radiance,
@@ -50,19 +50,19 @@ namespace neon {
         });
     }
 
-    const glm::vec3& DirectionalLight::getDiffuseColor() const {
+    const rush::Vec3f& DirectionalLight::getDiffuseColor() const {
         return _diffuseColor;
     }
 
-    void DirectionalLight::setDiffuseColor(const glm::vec3& diffuseColor) {
+    void DirectionalLight::setDiffuseColor(const rush::Vec3f& diffuseColor) {
         _diffuseColor = diffuseColor;
     }
 
-    const glm::vec3& DirectionalLight::getSpecularColor() const {
+    const rush::Vec3f& DirectionalLight::getSpecularColor() const {
         return _specularColor;
     }
 
-    void DirectionalLight::setSpecularColor(const glm::vec3& specularColor) {
+    void DirectionalLight::setSpecularColor(const rush::Vec3f& specularColor) {
         _specularColor = specularColor;
     }
 
@@ -79,15 +79,17 @@ namespace neon {
                    ImGui::GetStyle().ItemSpacing.y) * 0.50f;
 
         auto lookAt = getGameObject()->getTransform().getRotation() *
-                      glm::vec3(0.0f, 0.0f, -1.0f);
-        ImGui::Text("Looking at: (%0.3f, %0.3f, %0.3f)", lookAt.x, lookAt.y,
-                    lookAt.z);
+                      rush::Vec3f(0.0f, 0.0f, -1.0f);
+        ImGui::Text("Looking at: (%0.3f, %0.3f, %0.3f)", lookAt.x(), lookAt.y(),
+                    lookAt.z());
 
         ImGui::PushItemWidth(w);
-        ImGui::ColorPicker3(imGuiUId("##diffuse").c_str(), &_diffuseColor.x,
+        ImGui::ColorPicker3(imGuiUId("##diffuse").c_str(),
+                            _diffuseColor.toPointer(),
                             ImGuiColorEditFlags_NoSidePreview);
         ImGui::SameLine();
-        ImGui::ColorPicker3(imGuiUId("##specular").c_str(), &_specularColor.x,
+        ImGui::ColorPicker3(imGuiUId("##specular").c_str(),
+                            _specularColor.toPointer(),
                             ImGuiColorEditFlags_NoSidePreview);
         ImGui::PopItemWidth();
 

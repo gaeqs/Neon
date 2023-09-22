@@ -169,7 +169,7 @@ namespace neon::vulkan {
 
     }
 
-    glm::ivec2 VKApplication::getWindowSize() const {
+    rush::Vec2i VKApplication::getWindowSize() const {
         return {_width, _height};
     }
 
@@ -728,7 +728,7 @@ namespace neon::vulkan {
     VkPresentModeKHR VKApplication::chooseSwapPresentMode(
             const std::vector<VkPresentModeKHR>& availableModes) {
         for (const auto& mode: availableModes) {
-            if (mode == VK_PRESENT_MODE_MAILBOX_KHR) {
+            if (mode == VK_PRESENT_MODE_FIFO_KHR) {
                 return mode;
             }
         }

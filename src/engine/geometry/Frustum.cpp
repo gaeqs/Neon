@@ -13,11 +13,10 @@ namespace neon {
             _far(far),
             _aspectRatio(aspectRatio),
             _fovYDegrees(fovYDegrees),
-            _projection(rush::Mat4f::perspective(fovYDegrees, aspectRatio,
-                                                 near, far)) {
-#ifdef USE_VULKAN
-        _projection[1][1] *= -1;
-#endif
+            _projection(rush::Mat4f::perspective<
+                    rush::Hand::Right,
+                    rush::ProjectionFormat::Vulkan>(
+                    fovYDegrees, aspectRatio, near, far)) {
     }
 
     const rush::Mat4f& Frustum::getProjection() const {

@@ -59,19 +59,19 @@ namespace neon {
         });
     }
 
-    const glm::vec3& PointLight::getDiffuseColor() const {
+    const rush::Vec3f& PointLight::getDiffuseColor() const {
         return _diffuseColor;
     }
 
-    void PointLight::setDiffuseColor(const glm::vec3& diffuseColor) {
+    void PointLight::setDiffuseColor(const rush::Vec3f& diffuseColor) {
         _diffuseColor = diffuseColor;
     }
 
-    const glm::vec3& PointLight::getSpecularColor() const {
+    const rush::Vec3f& PointLight::getSpecularColor() const {
         return _specularColor;
     }
 
-    void PointLight::setSpecularColor(const glm::vec3& specularColor) {
+    void PointLight::setSpecularColor(const rush::Vec3f& specularColor) {
         _specularColor = specularColor;
     }
 
@@ -121,10 +121,12 @@ namespace neon {
         float w = (ImGui::GetContentRegionAvail().x -
                    ImGui::GetStyle().ItemSpacing.y) * 0.50f;
         ImGui::PushItemWidth(w);
-        ImGui::ColorPicker3(imGuiUId("##diffuse").c_str(), &_diffuseColor.x,
+        ImGui::ColorPicker3(imGuiUId("##diffuse").c_str(),
+                            _diffuseColor.toPointer(),
                             ImGuiColorEditFlags_NoSidePreview);
         ImGui::SameLine();
-        ImGui::ColorPicker3(imGuiUId("##specular").c_str(), &_specularColor.x,
+        ImGui::ColorPicker3(imGuiUId("##specular").c_str(),
+                            _specularColor.toPointer(),
                             ImGuiColorEditFlags_NoSidePreview);
         ImGui::PopItemWidth();
 

@@ -9,8 +9,6 @@
 #include <engine/io/KeyboardEvent.h>
 #include <engine/io/CursorEvent.h>
 
-#include <glm/glm.hpp>
-
 namespace neon {
     CameraMovementComponent::CameraMovementComponent() :
             _w(),
@@ -25,7 +23,7 @@ namespace neon {
     }
 
     void CameraMovementComponent::onKey(const KeyboardEvent& event) {
-        glm::vec3 movement;
+        rush::Vec3f movement;
         switch (event.key) {
             case KeyboardKey::W:
                 _w = event.action != KeyboardAction::RELEASE;
@@ -57,14 +55,12 @@ namespace neon {
 
         auto& camera = getRoom()->getCamera();
 
-        _eulerAngles.x() += static_cast<float>(event.delta.y / 100.0);
-        _eulerAngles.y() += static_cast<float>(event.delta.x / 100.0);
+        _eulerAngles -= event.delta.cast<float>()(1, 0).toVec() / 100.0f;
+        _eulerAngles.x() = std::clamp(_eulerAngles.x(), -LIMIT, LIMIT);
 
-
-        _eulerAngles.x() = glm::clamp(_eulerAngles.x(), -LIMIT, LIMIT);
-
-        camera.setRotation(rush::Quatf::euler(
-                {_eulerAngles.x(), _eulerAngles.y(), 0.0f}));
+        auto qX = rush::Quatf::angleAxis(_eulerAngles.x(), {1.0f, 0.0f, 0.0f});
+        auto qY = rush::Quatf::angleAxis(_eulerAngles.y(), {0.0f, 1.0f, 0.0f});
+        camera.setRotation(qY * qX);
     }
 
     void CameraMovementComponent::onUpdate(float deltaTime) {

@@ -63,15 +63,15 @@ namespace neon {
                     "Press \"Ctrl+L\" to enter/exit camera movement mode.");
             auto& camera = getRoom()->getCamera();
             ImGui::Text("Camera: (%f, %f, %f)",
-                        camera.getPosition().x,
-                        camera.getPosition().y,
-                        camera.getPosition().z);
+                        camera.getPosition().x(),
+                        camera.getPosition().y(),
+                        camera.getPosition().z());
 
             auto lookAt = camera.getForward();
             ImGui::Text("LookAt: (%f, %f, %f)",
-                        lookAt.x,
-                        lookAt.y,
-                        lookAt.z);
+                        lookAt.x(),
+                        lookAt.y(),
+                        lookAt.z());
 
             ImGui::Separator();
             if (ImGui::TreeNode("Performance")) {

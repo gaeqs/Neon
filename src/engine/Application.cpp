@@ -56,26 +56,26 @@ namespace neon {
     }
 
     int32_t Application::getWidth() const {
-        return _implementation->getWindowSize().x;
+        return _implementation->getWindowSize().x();
     }
 
     int32_t Application::getHeight() const {
-        return _implementation->getWindowSize().y;
+        return _implementation->getWindowSize().y();
     }
 
     float Application::getAspectRatio() const {
         auto vp = _implementation->getWindowSize();
-        return static_cast<float>(vp.x) / static_cast<float>(vp.y);
+        return static_cast<float>(vp.x()) / static_cast<float>(vp.y());
     }
 
-    glm::ivec2 Application::getViewport() const {
+    rush::Vec2i Application::getViewport() const {
         if (_forcedViewport.has_value()) {
             return _forcedViewport.value();
         }
         return _implementation->getWindowSize();
     }
 
-    void Application::forceViewport(glm::ivec2 viewport) {
+    void Application::forceViewport(rush::Vec2i viewport) {
         _forcedViewport = viewport;
     }
 
@@ -95,7 +95,7 @@ namespace neon {
         return _implementation->getCurrentFrameInformation();
     }
 
-    glm::dvec2 Application::getLastCursorPosition() const {
+    rush::Vec2d Application::getLastCursorPosition() const {
         return _lastCursorPosition;
     }
 
@@ -144,13 +144,13 @@ namespace neon {
     }
 
     void Application::invokeCursorPosEvent(double x, double y) {
-        glm::dvec2 current(x, y);
+        rush::Vec2d current(x, y);
         auto delta = current - _lastCursorPosition;
         _lastCursorPosition = current;
 
         CursorMoveEvent event{
-                current,
-                delta
+                current.cast<float>(),
+                delta.cast<float>()
         };
 
         if (_room != nullptr) {

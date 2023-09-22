@@ -11,7 +11,7 @@ void GlobalParametersUpdaterComponent::onStart() {
 
 void GlobalParametersUpdaterComponent::onUpdate(float deltaTime) {
     auto& camera = getRoom()->getCamera();
-    glm::vec2 screenSize(
+    rush::Vec2f screenSize(
             getApplication()->getWidth(),
             getApplication()->getHeight()
     );

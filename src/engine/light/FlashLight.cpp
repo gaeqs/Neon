@@ -52,7 +52,7 @@ namespace neon {
     void FlashLight::onLateUpdate(float deltaTime) {
         auto& t = getGameObject()->getTransform();
         auto position = t.getPosition();
-        auto direction = t.getRotation() * glm::vec3(0.0f, 0.0f, 1.0f);
+        auto direction = t.getRotation() * rush::Vec3f(0.0f, 0.0f, 1.0f);
         _graphicComponent->uploadData(Data{
                 _diffuseColor * _radiance,
                 _specularColor * _radiance,
@@ -66,19 +66,19 @@ namespace neon {
         });
     }
 
-    const glm::vec3& FlashLight::getDiffuseColor() const {
+    const rush::Vec3f& FlashLight::getDiffuseColor() const {
         return _diffuseColor;
     }
 
-    void FlashLight::setDiffuseColor(const glm::vec3& diffuseColor) {
+    void FlashLight::setDiffuseColor(const rush::Vec3f& diffuseColor) {
         _diffuseColor = diffuseColor;
     }
 
-    const glm::vec3& FlashLight::getSpecularColor() const {
+    const rush::Vec3f& FlashLight::getSpecularColor() const {
         return _specularColor;
     }
 
-    void FlashLight::setSpecularColor(const glm::vec3& specularColor) {
+    void FlashLight::setSpecularColor(const rush::Vec3f& specularColor) {
         _specularColor = specularColor;
     }
 
@@ -143,10 +143,12 @@ namespace neon {
         float w = (ImGui::GetContentRegionAvail().x -
                    ImGui::GetStyle().ItemSpacing.y) * 0.50f;
         ImGui::PushItemWidth(w);
-        ImGui::ColorPicker3(imGuiUId("##diffuse").c_str(), &_diffuseColor.x,
+        ImGui::ColorPicker3(imGuiUId("##diffuse").c_str(),
+                            _diffuseColor.toPointer(),
                             ImGuiColorEditFlags_NoSidePreview);
         ImGui::SameLine();
-        ImGui::ColorPicker3(imGuiUId("##specular").c_str(), &_specularColor.x,
+        ImGui::ColorPicker3(imGuiUId("##specular").c_str(),
+                            _specularColor.toPointer(),
                             ImGuiColorEditFlags_NoSidePreview);
         ImGui::PopItemWidth();
 

@@ -5,13 +5,13 @@
 #ifndef NEON_DEFAULTINSTANCINGDATA_H
 #define NEON_DEFAULTINSTANCINGDATA_H
 
-#include <glm/glm.hpp>
+#include <rush/rush.h>
 #include <engine/model/InputDescription.h>
 
 namespace neon {
     struct DefaultInstancingData {
-        glm::mat4 model;
-        glm::mat4 normal;
+        rush::Mat4f model;
+        rush::Mat4f normal;
 
         static InputDescription getInstancingDescription() {
             InputDescription description(

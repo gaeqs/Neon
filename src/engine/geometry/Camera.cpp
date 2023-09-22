@@ -35,15 +35,15 @@ namespace neon {
     }
 
     rush::Vec3f Camera::getForward() const {
-        return _rotationInverse * rush::Vec3f(0.0f, 0.0f, -1.0f);
+        return _rotation * rush::Vec3f(0.0f, 0.0f, -1.0f);
     }
 
     rush::Vec3f Camera::getUp() const {
-        return _rotationInverse * rush::Vec3f(0.0f, 1.0f, 0.0f);
+        return _rotation * rush::Vec3f(0.0f, 1.0f, 0.0f);
     }
 
     rush::Vec3f Camera::getRight() const {
-        return _rotationInverse * rush::Vec3f(1.0f, 0.0f, 0.0f);
+        return _rotation * rush::Vec3f(1.0f, 0.0f, 0.0f);
     }
 
     void Camera::setPosition(const rush::Vec3f& position) {
