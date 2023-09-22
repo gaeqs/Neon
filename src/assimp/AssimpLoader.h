@@ -10,7 +10,7 @@
 #include <utility>
 #include <vector>
 
-#include <glm/glm.hpp>
+#include <rush/rush.h>
 
 #include <cmrc/cmrc.hpp>
 
@@ -46,11 +46,11 @@ namespace neon::assimp_loader {
     };
 
     struct VertexParserData {
-        glm::vec3 position;
-        glm::vec3 normal;
-        glm::vec3 tangent;
-        glm::vec4 color;
-        glm::vec2 textureCoordinates;
+        rush::Vec3f position;
+        rush::Vec3f normal;
+        rush::Vec3f tangent;
+        rush::Vec4f color;
+        rush::Vec2f textureCoordinates;
     };
 
     struct VertexParser {

@@ -10,8 +10,9 @@
 #include <unordered_map>
 #include <vector>
 
+#include <rush/rush.h>
+
 #include <assimp/scene.h>
-#include <glm/glm.hpp>
 
 namespace assimp_geometry {
 
@@ -39,7 +40,7 @@ namespace assimp_geometry {
     std::unordered_map<VertexFace, float, VertexFaceHash>
     getInfluenceAreas(const aiMesh* mesh);
 
-    std::vector<glm::vec3> calculateTangents(const aiMesh* mesh);
+    std::vector<rush::Vec3f> calculateTangents(const aiMesh* mesh);
 
 }
 

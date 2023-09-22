@@ -59,7 +59,7 @@ void neon::vulkan::QTApplication::init(neon::Application* application) {
     _application = application;
 }
 
-glm::ivec2 neon::vulkan::QTApplication::getWindowSize() const {
+rush::Vec2i neon::vulkan::QTApplication::getWindowSize() const {
     QSize s = size();
     return {s.width(), s.height()};
 }

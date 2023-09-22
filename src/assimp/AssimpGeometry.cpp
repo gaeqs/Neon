@@ -29,7 +29,8 @@ namespace assimp_geometry {
         return cosine / sine;
     }
 
-    std::vector<uint32_t> getOtherVertices(const aiFace* face, uint32_t vertex) {
+    std::vector<uint32_t>
+    getOtherVertices(const aiFace* face, uint32_t vertex) {
         std::vector<uint32_t> vector;
         vector.reserve(face->mNumIndices - 1);
         for (int i = 0; i < face->mNumIndices; ++i) {
@@ -52,7 +53,7 @@ namespace assimp_geometry {
                 auto current = face.mIndices[vertexI];
                 auto other = getOtherVertices(&face, current);
 
-                if(other.size() < 2) break;
+                if (other.size() < 2) break;
 
                 auto a = mesh->mVertices[current];
                 auto b = mesh->mVertices[other[0]];
@@ -69,7 +70,7 @@ namespace assimp_geometry {
                     float bCot = cotan(b, a, c);
                     float cCot = cotan(c, a, b);
                     area = 0.125f * (ab.Length() * cCot +
-                                    ac.Length() * bCot);
+                                     ac.Length() * bCot);
                 }
 
                 map[{current, faceI}] = area;
@@ -80,8 +81,8 @@ namespace assimp_geometry {
         return map;
     }
 
-    std::vector<glm::vec3> calculateTangents(const aiMesh* mesh) {
-        std::vector<glm::vec3> tangents;
+    std::vector<rush::Vec3f> calculateTangents(const aiMesh* mesh) {
+        std::vector<rush::Vec3f> tangents;
         std::vector<float> count;
         tangents.resize(mesh->mNumVertices);
         count.resize(mesh->mNumVertices);
@@ -104,45 +105,40 @@ namespace assimp_geometry {
             auto deltaUV1 = uvB - uvA;
             auto deltaUV2 = uvC - uvA;
 
-            float f = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV2.x * deltaUV1.y);
-            auto t = glm::normalize(glm::vec3{
+            float f =
+                    1.0f / (deltaUV1.x * deltaUV2.y - deltaUV2.x * deltaUV1.y);
+            auto t = rush::Vec3f(
                     f * (deltaUV2.y * edge1.x - deltaUV1.y * edge2.x),
                     f * (deltaUV2.y * edge1.y - deltaUV1.y * edge2.y),
                     f * (deltaUV2.y * edge1.z - deltaUV1.y * edge2.z)
-            });
+            ).normalized();
 
-            auto b = glm::normalize(glm::vec3{
+            auto b = rush::Vec3f(
                     f * (deltaUV2.x * edge2.x - deltaUV1.x * edge1.x),
                     f * (deltaUV2.x * edge2.y - deltaUV1.x * edge1.y),
                     f * (deltaUV2.x * edge2.z - deltaUV1.x * edge1.z)
-            });
+            ).normalized();
 
-            if(std::isinf(f)) {
+            if (std::isinf(f)) {
                 // t and b are invalid.
                 // make them random.
-                t = glm::vec3(1.0f, 0.0f, 0.0f);
-                b = glm::vec3(0.0f, 0.0f, 1.0f);
+                t = rush::Vec3f(1.0f, 0.0f, 0.0f);
+                b = rush::Vec3f(0.0f, 0.0f, 1.0f);
             }
 
             for (uint32_t cvIndex = 0; cvIndex < face.mNumIndices; ++cvIndex) {
                 auto currentVertex = face.mIndices[cvIndex];
                 auto an = mesh->mNormals[currentVertex];
-                auto n = glm::vec3(an.x, an.y, an.z);
+                auto n = rush::Vec3f(an.x, an.y, an.z);
 
                 // Check handedness
                 auto tv = t;
-                if (glm::dot(glm::cross(n, t), b) < 0.0f) {
+                if (n.cross(t).dot(b) < 0.0f) {
                     tv *= 1.0f;
                 }
                 auto area = areas[{currentVertex, faceIndex}];
                 tangents[currentVertex] = tv * area;
                 count[currentVertex] += area;
-                if(std::isnan(area)) {
-                    std::cout << "B" << std::endl;
-                }
-                if(std::isnan(tv.x) || std::isnan(tv.y) || std::isnan(tv.z)) {
-                    std::cout << "C" << std::endl;
-                }
             }
         }
 
@@ -155,12 +151,9 @@ namespace assimp_geometry {
         for (uint32_t i = 0; i < mesh->mNumVertices; ++i) {
             auto t = tangents[i];
             auto an = mesh->mNormals[i];
-            auto n = glm::vec3(an.x, an.y, an.z);
-            t = glm::normalize(t - n * glm::dot(n, t));
+            auto n = rush::Vec3f(an.x, an.y, an.z);
+            t = (t - n * n.dot(t)).normalized();
             tangents[i] = t;
-            if(std::isnan(tangents[i].x)) {
-                std::cout << "AAAAAAAAAA" << std::endl;
-            }
         }
 
         return tangents;

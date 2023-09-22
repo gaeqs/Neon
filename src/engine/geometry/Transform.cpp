@@ -4,8 +4,6 @@
 
 #include "Transform.h"
 
-#include <glm/gtx/quaternion.hpp>
-
 #include <engine/structure/GameObject.h>
 
 namespace neon {
