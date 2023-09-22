@@ -861,6 +861,7 @@ namespace neon::vulkan {
     VKApplication::~VKApplication() {
         vkDestroyDescriptorPool(_device, _imGuiPool, nullptr);
         ImGui_ImplVulkan_Shutdown();
+        ImGui_ImplGlfw_Shutdown();
 
         ImPlot::DestroyContext();
         ImGui::DestroyContext();
