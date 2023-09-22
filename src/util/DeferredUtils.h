@@ -9,6 +9,8 @@
 #include <vector>
 #include <functional>
 
+#include <rush/rush.h>
+
 #include <engine/structure/IdentifiableWrapper.h>
 #include <engine/structure/collection/AssetCollection.h>
 #include <engine/model/InputDescription.h>
@@ -36,7 +38,7 @@ namespace neon {
 namespace neon::deferred_utils {
 
     struct DeferredVertex {
-        glm::vec2 position;
+        rush::Vec2f position;
 
         static InputDescription getDescription() {
             InputDescription description(
@@ -49,11 +51,11 @@ namespace neon::deferred_utils {
         }
 
         static DeferredVertex fromAssimp(
-                const glm::vec3& position,
-                [[maybe_unused]] const glm::vec3& normal,
-                [[maybe_unused]] const glm::vec3& tangent,
-                [[maybe_unused]] const glm::vec4& color,
-                [[maybe_unused]] const glm::vec2& texCoords) {
+                const rush::Vec3f& position,
+                [[maybe_unused]] const rush::Vec3f& normal,
+                [[maybe_unused]] const rush::Vec3f& tangent,
+                [[maybe_unused]] const rush::Vec4f& color,
+                [[maybe_unused]] const rush::Vec2f& texCoords) {
             return {position};
         }
     };

@@ -3,17 +3,10 @@
   "version-string" : "1.0.0",
   "builtin-baseline" : "b4f29c54450ddfc7efd2989cb9d32158ae291b40",
   "overrides" : [ {
-    "name" : "glm",
-    "version" : "0.9.9.8#2"
-  }, {
     "name" : "vulkan",
     "version" : "1.1.82.1#3"
   } ],
   "dependencies" : [ {
-    "name" : "glm",
-    "version>=" : "0.9.9.8#2",
-    "$comment" : "    # this is heuristically generated, and may not be correct\n\n    find_package(glm CONFIG REQUIRED)\n\n    target_link_libraries(main PRIVATE glm::glm)\n"
-  }, {
     "name" : "assimp",
     "version>=" : "5.2.5",
     "$comment" : "    # this is heuristically generated, and may not be correct\n\n    find_package(assimp CONFIG REQUIRED)\n\n    target_link_libraries(main PRIVATE assimp::assimp)\n"
@@ -27,5 +20,8 @@
   }, {
     "name" : "glfw3",
     "version>=" : "3.3.8#2"
+  }, {
+    "name" : "catch2",
+    "version>=" : "3.4.0"
   } ]
 }

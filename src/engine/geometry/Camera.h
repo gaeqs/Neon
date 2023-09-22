@@ -5,24 +5,24 @@
 #ifndef RVTRACKING_CAMERA_H
 #define RVTRACKING_CAMERA_H
 
-#include <glm/glm.hpp>
-#include <glm/gtc/quaternion.hpp>
+#include <rush/rush.h>
+
 #include <engine/geometry/Frustum.h>
 
 namespace neon {
 
     class Camera {
 
-        glm::vec3 _position;
-        glm::quat _rotation;
-        glm::quat _rotationInverse;
+        rush::Vec3f _position;
+        rush::Quatf _rotation;
+        rush::Quatf _rotationInverse;
         Frustum _frustum;
 
         bool _dirtyView;
         bool _dirtyProjection;
 
-        glm::mat4 _view;
-        glm::mat4 _viewProjection;
+        rush::Mat4f _view;
+        rush::Mat4f _viewProjection;
 
         void recalculateViewMatrix();
 
@@ -32,35 +32,35 @@ namespace neon {
 
         Camera(const Frustum& frustum);
 
-        const glm::vec3& getPosition() const;
+        const rush::Vec3f& getPosition() const;
 
-        const glm::quat& getRotation() const;
+        const rush::Quatf& getRotation() const;
 
         const Frustum& getFrustum() const;
 
-        glm::vec3 getForward() const;
+        rush::Vec3f getForward() const;
 
-        glm::vec3 getUp() const;
+        rush::Vec3f getUp() const;
 
-        glm::vec3 getRight() const;
+        rush::Vec3f getRight() const;
 
-        void setPosition(const glm::vec3& position);
+        void setPosition(const rush::Vec3f& position);
 
-        void setRotation(const glm::quat& rotation);
+        void setRotation(const rush::Quatf& rotation);
 
         void setFrustum(const Frustum& frustum);
 
-        const glm::vec3& move(const glm::vec3& offset);
+        const rush::Vec3f& move(const rush::Vec3f& offset);
 
-        const glm::quat& lookAt(const glm::vec3& direction);
+        const rush::Quatf& lookAt(const rush::Vec3f& direction);
 
-        const glm::quat& rotate(const glm::vec3& direction, float angle);
+        const rush::Quatf& rotate(const rush::Vec3f& direction, float angle);
 
-        const glm::quat& rotate(const glm::quat& quaternion);
+        const rush::Quatf& rotate(const rush::Quatf& quaternion);
 
-        const glm::mat4& getView();
+        const rush::Mat4f& getView();
 
-        const glm::mat4& getViewProjection();
+        const rush::Mat4f& getViewProjection();
     };
 }
 

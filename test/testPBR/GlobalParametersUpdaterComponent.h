@@ -5,14 +5,16 @@
 #ifndef NEON_GLOBALPARAMETERSUPDATERCOMPONENT_H
 #define NEON_GLOBALPARAMETERSUPDATERCOMPONENT_H
 
+#include <rush/rush.h>
+
 #include <engine/Engine.h>
 
 struct GlobalParameters {
-    glm::mat4 view;
-    glm::mat4 projection;
-    glm::mat4 projectionView;
-    glm::mat4 inverseProjection;
-    glm::vec2 screenSize;
+    rush::Mat4f view;
+    rush::Mat4f projection;
+    rush::Mat4f projectionView;
+    rush::Mat4f inverseProjection;
+    rush::Vec2f screenSize;
     float near;
     float far;
 };

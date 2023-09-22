@@ -7,7 +7,7 @@
 
 #include <optional>
 
-#include <glm/glm.hpp>
+#include <rush/rush.h>
 
 namespace neon {
 
@@ -18,8 +18,8 @@ namespace neon {
         float _aspectRatio;
         float _fovYDegrees;
 
-        glm::mat4 _projection;
-        std::optional<glm::mat4> _inverseProjection;
+        rush::Mat4f _projection;
+        std::optional<rush::Mat4f> _inverseProjection;
 
     public:
 
@@ -33,9 +33,9 @@ namespace neon {
 
         float getFovYDegrees() const;
 
-        const glm::mat4& getProjection() const;
+        const rush::Mat4f& getProjection() const;
 
-        const glm::mat4& getInverseProjection() const;
+        const rush::Mat4f& getInverseProjection() const;
 
         Frustum withNear(float near) const;
 

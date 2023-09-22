@@ -8,9 +8,9 @@
 #include <engine/Engine.h>
 
 struct GlobalParameters {
-    glm::mat4 view;
-    glm::mat4 projectionView;
-    glm::mat4 inverseProjection;
+    rush::Mat4f view;
+    rush::Mat4f projectionView;
+    rush::Mat4f inverseProjection;
     float near;
     float far;
 };

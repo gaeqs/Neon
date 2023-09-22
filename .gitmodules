@@ -14,3 +14,6 @@
 [submodule "lib/spirv-headers"]
 	path = lib/spirv-headers
 	url = https://github.com/KhronosGroup/SPIRV-Headers
+[submodule "lib/Rush"]
+	path = lib/Rush
+	url = https://github.com/gaeqs/Rush

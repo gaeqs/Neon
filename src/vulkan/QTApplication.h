@@ -62,7 +62,7 @@ namespace neon::vulkan {
 
         void init(Application* application) override;
 
-        [[nodiscard]] glm::ivec2 getWindowSize() const override;
+        [[nodiscard]] rush::Vec2i getWindowSize() const override;
 
         [[nodiscard]] FrameInformation
         getCurrentFrameInformation() const override;

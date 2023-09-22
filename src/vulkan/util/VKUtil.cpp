@@ -570,7 +570,7 @@ namespace neon::vulkan::vulkan_util {
                 auto clearColor = fb->getClearColor(i);
                 if (clearColor.has_value()) {
                     auto c = clearColor.value();
-                    clearValues[i].color = {c.r, c.g, c.b, c.a};
+                    clearValues[i].color = {c.x(), c.y(), c.z(), c.w()};
                 } else {
                     clearValues[i].color = {0.0f, 0.0f, 0.0f, 1.0f};
                 }

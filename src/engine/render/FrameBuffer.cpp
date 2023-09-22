@@ -10,13 +10,14 @@ namespace neon {
 
     }
 
-    std::optional<glm::vec4> FrameBuffer::getClearColor(uint32_t index) const {
+    std::optional<rush::Vec4f>
+    FrameBuffer::getClearColor(uint32_t index) const {
         auto it = _clearColors.find(index);
         if (it != _clearColors.end()) return it->second;
         return {};
     }
 
-    void FrameBuffer::setClearColor(uint32_t index, glm::vec4 color) {
+    void FrameBuffer::setClearColor(uint32_t index, rush::Vec4f color) {
         _clearColors[index] = color;
     }
 

@@ -17,7 +17,7 @@ struct std::hash<Eigen::Vector2i> {
 MassSpring::MassSpring(uint32_t dofIndexStart,
                        neon::IdentifiableWrapper<PhysicsManager> manager,
                        neon::IdentifiableWrapper<neon::GameObject> gameObject,
-                       std::vector<glm::vec3>& positions,
+                       std::vector<rush::Vec3f>& positions,
                        std::vector<uint32_t>& triangles,
                        float mass,
                        float stiffnessStretch,
@@ -33,7 +33,7 @@ MassSpring::MassSpring(uint32_t dofIndexStart,
     generateSprings(triangles, dampingBeta, stiffnessStretch, stiffnessBend);
 }
 
-void MassSpring::generateNodes(std::vector<glm::vec3>& positions,
+void MassSpring::generateNodes(std::vector<rush::Vec3f>& positions,
                                float mass, float dampingAlpha) {
     _nodes.reserve(positions.size());
     float massPerNode = mass / static_cast<float>(positions.size());
@@ -41,14 +41,14 @@ void MassSpring::generateNodes(std::vector<glm::vec3>& positions,
     uint32_t i = _index;
     for (const auto& position: positions) {
         auto pos = _gameObject->getTransform().getModel()
-                   * glm::vec4(position, 1.0f);
+                   * rush::Vec4f(position, 1.0f);
 
         _nodes.emplace_back(
                 i,
                 massPerNode,
                 dampingAlpha,
                 _index == i || _index + 57 == i,
-                Eigen::Vector3f(pos.x, pos.y, pos.z)
+                Eigen::Vector3f(pos.x(), pos.y(), pos.z())
         );
 
         i += 3;

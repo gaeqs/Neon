@@ -17,11 +17,11 @@ void ConstantRotationComponent::setSpeed(float speed) {
     _speed = speed;
 }
 
-const glm::vec3& ConstantRotationComponent::getAxis() const {
+const rush::Vec3f& ConstantRotationComponent::getAxis() const {
     return _axis;
 }
 
-void ConstantRotationComponent::setAxis(const glm::vec3& axis) {
+void ConstantRotationComponent::setAxis(const rush::Vec3f& axis) {
     _axis = axis;
 }
 
@@ -42,6 +42,6 @@ void ConstantRotationComponent::drawEditor() {
     ImGui::AlignTextToFramePadding();
     ImGui::Text("Axis:");
     ImGui::SameLine();
-    ImGui::DragFloat3(imGuiUId("##axis").c_str(), &_axis.x, 0.1f);
+    ImGui::DragFloat3(imGuiUId("##axis").c_str(), &_axis.x(), 0.1f);
     ImGui::PopItemWidth();
 }

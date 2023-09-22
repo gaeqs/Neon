@@ -11,7 +11,7 @@
 #include <memory>
 #include <optional>
 
-#include <glm/glm.hpp>
+#include <rush/rush.h>
 
 #include <engine/structure/collection/AssetCollection.h>
 #include <engine/render/FrameInformation.h>
@@ -38,7 +38,7 @@ namespace neon {
 
         virtual void init(Application* application) = 0;
 
-        [[nodiscard]] virtual glm::ivec2 getWindowSize() const = 0;
+        [[nodiscard]] virtual rush::Vec2i getWindowSize() const = 0;
 
         [[nodiscard]] virtual FrameInformation
         getCurrentFrameInformation() const = 0;
@@ -60,11 +60,11 @@ namespace neon {
 
         std::shared_ptr<Room> _room;
 
-        glm::dvec2 _lastCursorPosition;
+        rush::Vec2d _lastCursorPosition;
         Profiler _profiler;
         AssetCollection _assets;
         std::shared_ptr<Render> _render;
-        std::optional<glm::ivec2> _forcedViewport;
+        std::optional<rush::Vec2i> _forcedViewport;
 
     public:
 
@@ -94,9 +94,9 @@ namespace neon {
 
         [[nodiscard]] float getAspectRatio() const;
 
-        [[nodiscard]] glm::ivec2 getViewport() const;
+        [[nodiscard]] rush::Vec2i getViewport() const;
 
-        void forceViewport(glm::ivec2 viewport);
+        void forceViewport(rush::Vec2i viewport);
 
         void removeForcedViewport();
 
@@ -106,7 +106,7 @@ namespace neon {
 
         [[nodiscard]] FrameInformation getCurrentFrameInformation() const;
 
-        [[nodiscard]] glm::dvec2 getLastCursorPosition() const;
+        [[nodiscard]] rush::Vec2d getLastCursorPosition() const;
 
         [[nodiscard]] CommandBuffer* getCurrentCommandBuffer() const;
 

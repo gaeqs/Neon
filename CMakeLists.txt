@@ -30,7 +30,6 @@ include(CMake/CMakeRC.cmake)
 project(neon)
 
 find_package(glfw3 CONFIG REQUIRED)
-find_package(glm CONFIG REQUIRED)
 find_package(assimp CONFIG REQUIRED)
 find_package(Vulkan REQUIRED)
 
@@ -48,10 +47,13 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/lib/stb/src)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/lib/glslang)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/lib/glslang)
 
-
 # SPIRV-TOOLS
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/lib/spirv-headers)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/lib/spirv-tools)
+
+# RUSH
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/lib/Rush)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/lib/Rush/src)
 
 if (WIN32)
     list(APPEND LIBRARIES assimp::assimp)

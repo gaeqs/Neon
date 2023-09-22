@@ -5,6 +5,8 @@
 #ifndef NEON_FLASHLIGHT_H
 #define NEON_FLASHLIGHT_H
 
+#include <rush/rush.h>
+
 #include <engine/structure/Component.h>
 #include <engine/render/GraphicComponent.h>
 #include <engine/model/Model.h>
@@ -15,8 +17,8 @@ namespace neon {
         IdentifiableWrapper<GraphicComponent> _graphicComponent;
         std::shared_ptr<Model> _customModel;
 
-        glm::vec3 _diffuseColor;
-        glm::vec3 _specularColor;
+        rush::Vec3f _diffuseColor;
+        rush::Vec3f _specularColor;
         float _constantAttenuation;
         float _linearAttenuation;
         float _quadraticAttenuation;
@@ -27,10 +29,10 @@ namespace neon {
     public:
 
         struct Data {
-            glm::vec3 diffuseColor;
-            glm::vec3 specularColor;
-            glm::vec3 position;
-            glm::vec3 direction;
+            rush::Vec3f diffuseColor;
+            rush::Vec3f specularColor;
+            rush::Vec3f position;
+            rush::Vec3f direction;
             float constantAttenuation;
             float linearAttenuation;
             float quadraticAttenuation;
@@ -61,13 +63,13 @@ namespace neon {
 
         explicit FlashLight(const std::shared_ptr<Model>& model);
 
-        [[nodiscard]] const glm::vec3& getDiffuseColor() const;
+        [[nodiscard]] const rush::Vec3f& getDiffuseColor() const;
 
-        void setDiffuseColor(const glm::vec3& diffuseColor);
+        void setDiffuseColor(const rush::Vec3f& diffuseColor);
 
-        [[nodiscard]] const glm::vec3& getSpecularColor() const;
+        [[nodiscard]] const rush::Vec3f& getSpecularColor() const;
 
-        void setSpecularColor(const glm::vec3& specularColor);
+        void setSpecularColor(const rush::Vec3f& specularColor);
 
         [[nodiscard]] float getRadiance() const;
 

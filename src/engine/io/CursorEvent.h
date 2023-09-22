@@ -5,13 +5,13 @@
 #ifndef VRTRACKING_CURSOREVENT_H
 #define VRTRACKING_CURSOREVENT_H
 
-#include <glm/glm.hpp>
+#include <rush/rush.h>
 
 namespace neon {
 
     struct CursorMoveEvent {
-        glm::dvec2 position;
-        glm::dvec2 delta;
+        rush::Vec2f position;
+        rush::Vec2f delta;
     };
 }
 

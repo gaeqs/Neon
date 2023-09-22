@@ -10,8 +10,6 @@
 #include <vector>
 #include <memory>
 
-#include <glm/glm.hpp>
-
 #include <engine/structure/Asset.h>
 #include <engine/shader/ShaderUniformBuffer.h>
 #include <engine/shader/MaterialCreateInfo.h>

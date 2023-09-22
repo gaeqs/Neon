@@ -7,7 +7,7 @@
 
 #include <cstdint>
 #include <vector>
-#include <glm/glm.hpp>
+#include <rush/rush.h>
 
 #include <Eigen/Sparse>
 #include <Eigen/Sparse>
@@ -30,7 +30,7 @@ class MassSpring : public ISimulable {
     neon::IdentifiableWrapper<PhysicsManager> _manager;
     neon::IdentifiableWrapper<neon::GameObject> _gameObject;
 
-    void generateNodes(std::vector<glm::vec3>& positions,
+    void generateNodes(std::vector<rush::Vec3f>& positions,
                        float mass, float dampingAlpha);
 
     void generateSprings(std::vector<uint32_t>& triangles,
@@ -43,7 +43,7 @@ public:
     MassSpring(uint32_t dofIndexStart,
                neon::IdentifiableWrapper<PhysicsManager> manager,
                neon::IdentifiableWrapper<neon::GameObject> gameObject,
-               std::vector<glm::vec3>& positions,
+               std::vector<rush::Vec3f>& positions,
                std::vector<uint32_t>& triangles,
                float mass,
                float stiffnessStretch,

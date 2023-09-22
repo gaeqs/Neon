@@ -57,24 +57,27 @@ namespace neon {
         ImGui::Text("Position:");
         ImGui::SameLine();
         auto pos = _target->getTransform().getPosition();
-        if (ImGui::DragFloat3("##position", &pos.x, 0.1f)) {
+        if (ImGui::DragFloat3("##position", &pos.x(), 0.1f)) {
             _target->getTransform().setPosition(pos);
         }
 
         ImGui::AlignTextToFramePadding();
         ImGui::Text("Rotation:");
         ImGui::SameLine();
-        auto euler = glm::degrees(glm::eulerAngles(
-                _target->getTransform().getRotation()));
-        if (ImGui::DragFloat3("##rotation", &euler.x, 0.1f)) {
-            _target->getTransform().setRotation(glm::quat(glm::radians(euler)));
+
+        auto euler = rush::degrees(_target->getTransform()
+                                           .getRotation().euler());
+
+        if (ImGui::DragFloat3("##rotation", &euler.x(), 0.1f)) {
+            auto rotation = rush::Quatf::euler(rush::radians(euler));
+            _target->getTransform().setRotation(rotation);
         }
 
         ImGui::AlignTextToFramePadding();
         ImGui::Text("Scale:");
         ImGui::SameLine();
         auto scale = _target->getTransform().getScale();
-        if (ImGui::DragFloat3("##scale", &scale.x, 0.1f)) {
+        if (ImGui::DragFloat3("##scale", scale.toPointer(), 0.1f)) {
             _target->getTransform().setScale(scale);
         }
 

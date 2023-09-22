@@ -10,7 +10,7 @@
 class ConstantRotationComponent : public neon::Component {
 
     float _speed;
-    glm::vec3 _axis;
+    rush::Vec3f _axis;
 
 public:
 
@@ -20,9 +20,9 @@ public:
 
     void setSpeed(float speed);
 
-    [[nodiscard]] const glm::vec3& getAxis() const;
+    [[nodiscard]] const rush::Vec3f& getAxis() const;
 
-    void setAxis(const glm::vec3& axis);
+    void setAxis(const rush::Vec3f& axis);
 
     void onUpdate(float deltaTime) override;
 

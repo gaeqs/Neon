@@ -9,7 +9,7 @@
 #include <stdint.h>
 #include <vector>
 
-#include <glm/glm.hpp>
+#include <rush/rush.h>
 
 #include "TestVertex.h"
 #include "engine/structure/IdentifiableWrapper.h"
@@ -18,7 +18,7 @@
 void Cloth::generateModel() {
     _vertices.reserve(_width * _height);
 
-    std::vector<glm::vec3> positions;
+    std::vector<rush::Vec3f> positions;
     positions.reserve(_width * _height);
 
     auto w = static_cast<float>(_width);
@@ -27,10 +27,10 @@ void Cloth::generateModel() {
     for (float x = 0; x < w; x += 1.0f) {
         for (float z = 0; z < h; z += 1.0f) {
             _vertices.push_back(TestVertex{
-                    glm::vec3(x, 0.0f, z),
-                    glm::vec3(0.0f, 1.0f, 0.0f),
-                    glm::vec3(1.0f, 0.0f, 0.0f),
-                    glm::vec2(x / w, z / h)
+                    rush::Vec3f(x, 0.0f, z),
+                    rush::Vec3f(0.0f, 1.0f, 0.0f),
+                    rush::Vec3f(1.0f, 0.0f, 0.0f),
+                    rush::Vec2f(x / w, z / h)
             });
             positions.emplace_back(x, 0.0f, z);
         }

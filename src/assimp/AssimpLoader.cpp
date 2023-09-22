@@ -242,11 +242,11 @@ namespace neon::assimp_loader {
                 }
 
                 VertexParserData parserData{
-                        glm::vec3(aP.x, aP.y, aP.z),
-                        glm::vec3(aN.x, aN.y, aN.z),
+                        rush::Vec3f(aP.x, aP.y, aP.z),
+                        rush::Vec3f(aN.x, aN.y, aN.z),
                         tangents[i],
-                        glm::vec4(aC.r, aC.g, aC.b, aC.a),
-                        glm::vec2(aT.x, aT.y)
+                        rush::Vec4f(aC.r, aC.g, aC.b, aC.a),
+                        rush::Vec2f(aT.x, aT.y)
                 };
 
                 info.vertexParser.parseFunction(parserData, dataArray);

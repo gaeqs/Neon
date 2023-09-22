@@ -5,7 +5,6 @@
 
 #include "Room.h"
 
-#include <glm/glm.hpp>
 #include <utility>
 #include <unordered_set>
 
@@ -18,7 +17,7 @@ namespace neon {
 
     constexpr float DEFAULT_FRUSTUM_NEAR = 0.1f;
     constexpr float DEFAULT_FRUSTUM_FAR = 500.0f;
-    constexpr float DEFAULT_FRUSTUM_FOV = glm::radians(100.0f); // RADIANS
+    constexpr float DEFAULT_FRUSTUM_FOV = 1.7453f; // RADIANS
 
     Room::Room(Application* application) :
             _application(application),
@@ -90,7 +89,8 @@ namespace neon {
 
     void Room::onMouseButton(const MouseButtonEvent& event) {
         DEBUG_PROFILE(getApplication()->getProfiler(), onMouseButton);
-        _components.invokeMouseButtonEvent(getApplication()->getProfiler(), event);
+        _components.invokeMouseButtonEvent(getApplication()->getProfiler(),
+                                           event);
     }
 
     void Room::onCursorMove(const CursorMoveEvent& event) {
@@ -102,7 +102,7 @@ namespace neon {
     void Room::onScroll(const neon::ScrollEvent& event) {
         DEBUG_PROFILE(getApplication()->getProfiler(), onCursorMove);
         _components.invokeScrollEvent(getApplication()->getProfiler(),
-                                          event);
+                                      event);
     }
 
     void Room::update(float deltaTime) {
@@ -127,16 +127,16 @@ namespace neon {
 
     void Room::preDraw() {
         auto& p = getApplication()->getProfiler();
-      auto* cb = _application->getCurrentCommandBuffer();
+        auto* cb = _application->getCurrentCommandBuffer();
 
-      DEBUG_PROFILE(p, preDraw);
+        DEBUG_PROFILE(p, preDraw);
         _components.preDrawComponents(p);
 
         {
             DEBUG_PROFILE(p, models);
             for (const auto& [model, amount]: _usedModels) {
                 model->flush();
-                if(model->getUniformBuffer() != nullptr) {
+                if (model->getUniformBuffer() != nullptr) {
                     model->getUniformBuffer()->prepareForFrame(cb);
                 }
             }

@@ -9,8 +9,6 @@
 #include <engine/io/KeyboardEvent.h>
 #include <engine/io/CursorEvent.h>
 
-#include <glm/glm.hpp>
-
 namespace neon {
     CameraMovementComponent::CameraMovementComponent() :
             _w(),
@@ -24,8 +22,8 @@ namespace neon {
 
     }
 
-    void CameraMovementComponent::onKey(const KeyboardEvent &event) {
-        glm::vec3 movement;
+    void CameraMovementComponent::onKey(const KeyboardEvent& event) {
+        rush::Vec3f movement;
         switch (event.key) {
             case KeyboardKey::W:
                 _w = event.action != KeyboardAction::RELEASE;
@@ -52,44 +50,40 @@ namespace neon {
         }
     }
 
-    void CameraMovementComponent::onCursorMove(const CursorMoveEvent &event) {
+    void CameraMovementComponent::onCursorMove(const CursorMoveEvent& event) {
         constexpr float LIMIT = 1.5707963f - 0.1f; // PI / 2 - 0.1
 
-        auto &camera = getRoom()->getCamera();
+        auto& camera = getRoom()->getCamera();
 
-        _eulerAngles.x += static_cast<float>(event.delta.y / 100.0);
-        _eulerAngles.y += static_cast<float>(event.delta.x / 100.0);
+        _eulerAngles -= event.delta.cast<float>()(1, 0).toVec() / 100.0f;
+        _eulerAngles.x() = std::clamp(_eulerAngles.x(), -LIMIT, LIMIT);
 
-
-        _eulerAngles.x = glm::clamp(_eulerAngles.x, -LIMIT, LIMIT);
-
-        camera.setRotation(
-                glm::angleAxis(_eulerAngles.x, glm::vec3(1, 0, 0)) *
-                glm::angleAxis(_eulerAngles.y, glm::vec3(0, 1, 0))
-        );
+        auto qX = rush::Quatf::angleAxis(_eulerAngles.x(), {1.0f, 0.0f, 0.0f});
+        auto qY = rush::Quatf::angleAxis(_eulerAngles.y(), {0.0f, 1.0f, 0.0f});
+        camera.setRotation(qY * qX);
     }
 
     void CameraMovementComponent::onUpdate(float deltaTime) {
-        auto &camera = getGameObject()->getRoom()->getCamera();
-        glm::vec3 direction(0.0f);
+        auto& camera = getGameObject()->getRoom()->getCamera();
+        rush::Vec3f direction;
 
-        glm::vec3 forwardClamped = camera.getForward();
-        forwardClamped.y = 0.0f;
-        forwardClamped = glm::normalize(forwardClamped);
+        rush::Vec3f forwardClamped = camera.getForward();
+        forwardClamped.y() = 0.0f;
+        forwardClamped = forwardClamped.normalized();
 
         if (_w) direction += forwardClamped;
         if (_s) direction -= forwardClamped;
         if (_d) direction += camera.getRight();
         if (_a) direction -= camera.getRight();
-        if (_space) direction += glm::vec3(0.0f, 1.0f, 0.0f);
-        if (_shift) direction -= glm::vec3(0.0f, 1.0f, 0.0f);
+        if (_space) direction += rush::Vec3f(0.0f, 1.0f, 0.0f);
+        if (_shift) direction -= rush::Vec3f(0.0f, 1.0f, 0.0f);
 
-        if (std::abs(direction.x) < FLT_EPSILON
-            && std::abs(direction.y) < FLT_EPSILON
-            && std::abs(direction.z) < FLT_EPSILON)
+        if (std::abs(direction.x()) < FLT_EPSILON
+            && std::abs(direction.y()) < FLT_EPSILON
+            && std::abs(direction.z()) < FLT_EPSILON)
             return;
 
-        auto offset = glm::normalize(direction) * (_speed * deltaTime);
+        auto offset = direction.normalized() * (_speed * deltaTime);
         camera.move(offset);
     }
 

@@ -5,12 +5,12 @@
 #ifndef NEON_SCROLLEVENT_H
 #define NEON_SCROLLEVENT_H
 
-#include <glm/glm.hpp>
+#include <rush/rush.h>
 
 namespace neon {
 
     struct ScrollEvent {
-        glm::dvec2 delta;
+        rush::Vec2f delta;
     };
 }
 

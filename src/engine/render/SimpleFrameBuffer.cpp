@@ -12,14 +12,14 @@ namespace neon {
     bool SimpleFrameBuffer::defaultRecreationCondition(
             const SimpleFrameBuffer* fb) {
         auto vp = fb->_application->getViewport();
-        if (vp.x == 0 || vp.y == 0) return false;
-        return vp.x != fb->getWidth() || vp.y != fb->getHeight();
+        if (vp.x() == 0 || vp.y() == 0) return false;
+        return vp.x() != fb->getWidth() || vp.y() != fb->getHeight();
     }
 
     std::pair<uint32_t, uint32_t>
     SimpleFrameBuffer::defaultRecreationParameters(Application* app) {
         auto vp = app->getViewport();
-        return {vp.x, vp.y};
+        return {vp.x(), vp.y()};
     }
 
     SimpleFrameBuffer::SimpleFrameBuffer(

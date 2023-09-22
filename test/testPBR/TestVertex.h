@@ -8,10 +8,10 @@
 #include <engine/model/InputDescription.h>
 
 struct TestVertex {
-    glm::vec3 position;
-    glm::vec3 normal;
-    glm::vec3 tangent;
-    glm::vec2 texCoords;
+    rush::Vec3f position;
+    rush::Vec3f normal;
+    rush::Vec3f tangent;
+    rush::Vec2f texCoords;
 
     static neon::InputDescription getDescription() {
         neon::InputDescription description(
@@ -27,11 +27,11 @@ struct TestVertex {
     }
 
     static TestVertex fromAssimp(
-            const glm::vec3& position,
-            const glm::vec3& normal,
-            const glm::vec3& tangent,
-            const glm::vec4& color,
-            const glm::vec2& texCoords) {
+            const rush::Vec3f& position,
+            const rush::Vec3f& normal,
+            const rush::Vec3f& tangent,
+            const rush::Vec4f& color,
+            const rush::Vec2f& texCoords) {
         return {position, normal, tangent, texCoords};
     }
 };

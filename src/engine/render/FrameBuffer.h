@@ -16,7 +16,7 @@
 
 #include <vulkan/render/VKFrameBuffer.h>
 
-#include <glm/glm.hpp>
+#include <rush/rush.h>
 
 #endif
 
@@ -26,7 +26,7 @@ namespace neon {
 
     class FrameBuffer {
 
-        std::unordered_map<uint32_t, glm::vec4> _clearColors;
+        std::unordered_map<uint32_t, rush::Vec4f> _clearColors;
         std::pair<float, uint32_t> _depthClear;
 
     public:
@@ -41,10 +41,10 @@ namespace neon {
 
         virtual ~FrameBuffer() = default;
 
-        [[nodiscard]] std::optional<glm::vec4>
+        [[nodiscard]] std::optional<rush::Vec4f>
         getClearColor(uint32_t index) const;
 
-        void setClearColor(uint32_t index, glm::vec4 color);
+        void setClearColor(uint32_t index, rush::Vec4f color);
 
         [[nodiscard]] std::pair<float, uint32_t> getDepthClearColor() const;
 

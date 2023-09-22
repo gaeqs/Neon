@@ -71,8 +71,6 @@ set(SOURCES
         util/profile/ProfileStack.h
         util/profile/ProfileStackRecorder.cpp
         util/profile/ProfileStackRecorder.h
-        util/GLMUtils.cpp
-        util/GLMUtils.h
         engine/structure/ComponentImplementedEvents.cpp
         engine/structure/ComponentImplementedEvents.h
         engine/light/DirectionalLight.cpp

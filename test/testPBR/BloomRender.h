@@ -7,7 +7,7 @@
 
 #include <engine/Engine.h>
 
-#include <glm/glm.hpp>
+#include <rush/rush.h>
 
 struct BloomMip {
     float relativeSize;
@@ -23,7 +23,7 @@ class BloomRender : public neon::RenderPassStrategy {
     std::shared_ptr<neon::Texture> _pbrTexture;
     std::shared_ptr<neon::Model> _screenModel;
 
-    glm::ivec2 _extent;
+    rush::Vec2i _extent;
 
 public:
 
