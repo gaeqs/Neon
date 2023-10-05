@@ -26,6 +26,7 @@ namespace neon {
     enum class BlendingLogicOperation;
     enum class PolygonMode;
     enum class CullMode;
+    enum class PrimitiveTopology;
     struct SamplerCreateInfo;
     struct FrameBufferTextureCreateInfo;
 }
@@ -72,6 +73,8 @@ namespace neon::vulkan::conversions {
     VkPolygonMode vkPolygonMode(const PolygonMode& polygonMode);
 
     VkCullModeFlagBits vkCullModeFlagBits(const CullMode& cullMode);
+
+    VkPrimitiveTopology vkPrimitiveTopology(const PrimitiveTopology& topology);
 }
 
 #endif //NEON_VULKANCONVERSIONS_H

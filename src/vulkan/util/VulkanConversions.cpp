@@ -413,3 +413,32 @@ VkCullModeFlagBits vc::vkCullModeFlagBits(const CullMode& cullMode) {
             throw std::runtime_error("Conversion not found!");
     }
 }
+
+VkPrimitiveTopology
+vc::vkPrimitiveTopology(const neon::PrimitiveTopology& topology) {
+    switch (topology) {
+        case PrimitiveTopology::POINT_LIST:
+            return VK_PRIMITIVE_TOPOLOGY_POINT_LIST;
+        case PrimitiveTopology::LINE_LIST:
+            return VK_PRIMITIVE_TOPOLOGY_LINE_LIST;
+        case PrimitiveTopology::LINE_STRIP:
+            return VK_PRIMITIVE_TOPOLOGY_LINE_STRIP;
+        case PrimitiveTopology::TRIANGLE_STRIP:
+            return VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP;
+        case PrimitiveTopology::TRIANGLE_FAN:
+            return VK_PRIMITIVE_TOPOLOGY_TRIANGLE_FAN;
+        case PrimitiveTopology::LINE_LIST_WITH_ADJACENCY:
+            return VK_PRIMITIVE_TOPOLOGY_LINE_LIST_WITH_ADJACENCY;
+        case PrimitiveTopology::LINE_STRIP_WITH_ADJACENCY:
+            return VK_PRIMITIVE_TOPOLOGY_LINE_STRIP_WITH_ADJACENCY;
+        case PrimitiveTopology::TRIANGLE_LIST_WITH_ADJACENCY:
+            return VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST_WITH_ADJACENCY;
+        case PrimitiveTopology::TRIANGLE_STRIP_WITH_ADJACENCY:
+            return VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP_WITH_ADJACENCY;
+        case PrimitiveTopology::PATCH_LIST:
+            return VK_PRIMITIVE_TOPOLOGY_PATCH_LIST;
+        case PrimitiveTopology::TRIANGLE_LIST:
+        default:
+            return VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+    }
+}

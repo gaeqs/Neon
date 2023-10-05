@@ -103,6 +103,20 @@ namespace neon {
         CLOCKWISE = 1
     };
 
+    enum class PrimitiveTopology {
+        POINT_LIST = 0,
+        LINE_LIST = 1,
+        LINE_STRIP = 2,
+        TRIANGLE_LIST = 3,
+        TRIANGLE_STRIP = 4,
+        TRIANGLE_FAN = 5,
+        LINE_LIST_WITH_ADJACENCY = 6,
+        LINE_STRIP_WITH_ADJACENCY = 7,
+        TRIANGLE_LIST_WITH_ADJACENCY = 8,
+        TRIANGLE_STRIP_WITH_ADJACENCY = 9,
+        PATCH_LIST = 10
+    };
+
     struct MaterialDescriptions {
 
         /**
@@ -241,7 +255,7 @@ namespace neon {
         /**
          * The line width of the lines when the polygon mode is in line mode.
          */
-        float lineWidth = 1.0f;
+        float lineWidth = 5.0f;
 
         /**
          * Tells the rasterizer the face
@@ -292,6 +306,11 @@ namespace neon {
          * The rasterizer settings of the material.
          */
         MaterialRasterizer rasterizer = MaterialRasterizer();
+
+        /**
+         * The topology of the primitives.
+         */
+        PrimitiveTopology topology = PrimitiveTopology::TRIANGLE_LIST;
 
         MaterialCreateInfo(
                 std::shared_ptr<FrameBuffer> target_,
