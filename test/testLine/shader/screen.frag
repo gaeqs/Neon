@@ -3,7 +3,7 @@
 layout (location = 0) in vec2 fragTexCoords;
 layout (location = 1) in vec2 fragPosition;
 
-layout (set = 0, binding = 1) uniform samplerCube skybox;
+layout (set = 0, binding = 2) uniform samplerCube skybox;
 
 layout (set = 1, binding = 0) uniform sampler2D diffuseTexture;
 layout (set = 1, binding = 1) uniform sampler2D normalTexture;

@@ -61,7 +61,8 @@ std::shared_ptr<FrameBuffer> initRender(Room* room) {
     // In this application, we have a buffer of global parameters
     // and a skybox.
     std::vector<ShaderUniformBinding> globalBindings = {
-            {UniformBindingType::BUFFER, sizeof(GlobalParameters)},
+            {UniformBindingType::BUFFER, sizeof(Matrices)},
+            {UniformBindingType::BUFFER, sizeof(Timestamp)},
             {UniformBindingType::IMAGE,  0}
     };
 
@@ -176,7 +177,7 @@ std::shared_ptr<Room> getTestRoom(Application* application) {
 
     auto skybox = loadSkybox(room.get());
     room->getApplication()->getRender()->
-            getGlobalUniformBuffer().setTexture(1, skybox);
+            getGlobalUniformBuffer().setTexture(2, skybox);
 
 
     auto cameraController = room->newGameObject();
@@ -211,25 +212,31 @@ std::shared_ptr<Room> getTestRoom(Application* application) {
     auto material = std::make_shared<Material>(application, "line",
                                                lineMaterialInfo);
 
-    rush::BezierSegment<4, 3, float> seg{
+
+    rush::Vec3f vec = {1.0f, 5.0f, 3.0f};
+
+    rush::Vec4f vec2 = vec(1, 0, 2, 2);
+
+    rush::BezierSegment<4, 3, float> seg1{
             rush::Vec3f{1.0f, 3.0f, 5.0f},
             rush::Vec3f{0.0f, -10.0f, 3.0f},
             rush::Vec3f{-3.0f, 0.0f, 2.0f},
             rush::Vec3f{20.0f, 3.0f, 5.0f}
     };
 
+    auto seg2 = rush::BezierSegment<4, 3, float>::continuousTo(
+            seg1,
+            rush::Vec3f{10.0f, 6.0f, 0.0f},
+            rush::Vec3f{0.0f, 0.0f, 0.0f}
+    );
+
+    rush::BezierCurve<2, 4, 3, float> curve{seg1, seg2};
+
+    auto rectified = curve.rectified();
+
     auto line = room->newGameObject();
-
-    std::vector<rush::Vec3f> points;
-    points.reserve(101);
-    float f = 0.0f;
-    while (f <= 1.0f) {
-        points.push_back(seg.fetch(f));
-        f += 0.01f;
-    }
-
     line->setName("Line");
-    line->newComponent<Line>(material, points);
+    line->newComponent<Line<decltype(rectified)>>(material, rectified, 500);
 
     room->getCamera().lookAt({0, 1.0f, -1.0f});
     room->getCamera().setPosition({0.0f, 3.0f, 3.0f});

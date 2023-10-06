@@ -62,7 +62,7 @@ std::shared_ptr<FrameBuffer> initRender(Room* room) {
     // In this application, we have a buffer of global parameters
     // and a skybox.
     std::vector<ShaderUniformBinding> globalBindings = {
-            {UniformBindingType::BUFFER, sizeof(GlobalParameters)},
+            {UniformBindingType::BUFFER, sizeof(Matrices)},
             {UniformBindingType::IMAGE,  0}
     };
 

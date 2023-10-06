@@ -9,7 +9,7 @@
 
 #include <engine/Engine.h>
 
-struct GlobalParameters {
+struct Matrices {
     rush::Mat4f view;
     rush::Mat4f projection;
     rush::Mat4f projectionView;

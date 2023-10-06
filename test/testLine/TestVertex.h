@@ -11,6 +11,7 @@
 
 struct TestVertex {
     rush::Vec3f position;
+    float timestamp;
 
     static neon::InputDescription getDescription() {
         neon::InputDescription description(
@@ -18,6 +19,7 @@ struct TestVertex {
                 neon::InputRate::VERTEX
         );
         description.addAttribute(3, 0);
+        description.addAttribute(1, 12);
         return description;
     }
 
@@ -27,7 +29,7 @@ struct TestVertex {
             const rush::Vec3f& tangent,
             const rush::Vec4f& color,
             const rush::Vec2f& texCoords) {
-        return {position};
+        return {position, 0.0f};
     }
 };
 

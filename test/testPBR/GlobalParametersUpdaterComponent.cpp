@@ -18,9 +18,9 @@ void GlobalParametersUpdaterComponent::onUpdate(float deltaTime) {
 
     auto& buffer = getApplication()->getRender()->getGlobalUniformBuffer();
 
-    buffer.uploadData<GlobalParameters>(
+    buffer.uploadData<Matrices>(
             0,
-            GlobalParameters{
+            Matrices{
                     camera.getView(),
                     camera.getFrustum().getProjection(),
                     camera.getViewProjection(),
