@@ -255,7 +255,7 @@ namespace neon {
         /**
          * The line width of the lines when the polygon mode is in line mode.
          */
-        float lineWidth = 5.0f;
+        float lineWidth = 1.0f;
 
         /**
          * Tells the rasterizer the face

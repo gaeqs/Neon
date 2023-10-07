@@ -206,16 +206,12 @@ std::shared_ptr<Room> getTestRoom(Application* application) {
     lineMaterialInfo.descriptions.vertex = TestVertex::getDescription();
     lineMaterialInfo.rasterizer.polygonMode = neon::PolygonMode::FILL;
     lineMaterialInfo.rasterizer.cullMode = neon::CullMode::NONE;
+    lineMaterialInfo.rasterizer.lineWidth = 5.0f;
 
     lineMaterialInfo.topology = neon::PrimitiveTopology::LINE_STRIP;
 
     auto material = std::make_shared<Material>(application, "line",
                                                lineMaterialInfo);
-
-
-    rush::Vec3f vec = {1.0f, 5.0f, 3.0f};
-
-    rush::Vec4f vec2 = vec(1, 0, 2, 2);
 
     rush::BezierSegment<4, 3, float> seg1{
             rush::Vec3f{1.0f, 3.0f, 5.0f},
