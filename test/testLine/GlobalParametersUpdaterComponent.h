@@ -5,34 +5,23 @@
 #ifndef NEON_GLOBALPARAMETERSUPDATERCOMPONENT_H
 #define NEON_GLOBALPARAMETERSUPDATERCOMPONENT_H
 
-#include <rush/rush.h>
-
 #include <engine/Engine.h>
 
 struct Matrices {
     rush::Mat4f view;
-    rush::Mat4f projection;
     rush::Mat4f projectionView;
     rush::Mat4f inverseProjection;
-    rush::Vec2f screenSize;
     float near;
     float far;
 };
 
-struct PBRParameters {
-    float metallic;
-    float roughness;
-    uint32_t useSSAO;
-    uint32_t shoOnlySSAO;
-    uint32_t ssaoFilterRadius;
-    float skyboxLod;
-    float bloomIntensity;
-    float bloomFilterRadius;
+struct Timestamp {
+    float time;
 };
 
 class GlobalParametersUpdaterComponent : public neon::Component {
 
-    PBRParameters _pbr = {0.4f, 0.4f, true, false, 2, 0.0f, 0.04f, 0.01f};
+    float _timestamp = 0.0f;
 
 public:
 
@@ -43,8 +32,6 @@ public:
     void onUpdate(float deltaTime) override;
 
     void drawEditor() override;
-
-    void onKey(const neon::KeyboardEvent& event) override;
 
 };
 REGISTER_COMPONENT(GlobalParametersUpdaterComponent,

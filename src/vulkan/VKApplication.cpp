@@ -544,7 +544,8 @@ namespace neon::vulkan {
                                  VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU) &&
                families.isComplete() && requiredExtensions.empty() &&
                swapChainAdequate && supportedFeatures.samplerAnisotropy
-               && supportedFeatures.geometryShader;
+               && supportedFeatures.geometryShader
+               && supportedFeatures.wideLines;
     }
 
     VKQueueFamilyIndices
@@ -595,6 +596,7 @@ namespace neon::vulkan {
         VkPhysicalDeviceFeatures deviceFeatures{};
         deviceFeatures.samplerAnisotropy = VK_TRUE;
         deviceFeatures.geometryShader = VK_TRUE;
+        deviceFeatures.wideLines = VK_TRUE;
 
         VkPhysicalDeviceVulkan12Features vulkan12Features{};
         vulkan12Features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES;

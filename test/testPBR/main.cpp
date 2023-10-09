@@ -249,7 +249,7 @@ std::shared_ptr<FrameBuffer> initRender(
     // In this application, we have a buffer of global parameters
     // and two textures: a skybox and an irradiance skybox.
     std::vector<ShaderUniformBinding> globalBindings = {
-            {UniformBindingType::BUFFER, sizeof(GlobalParameters)},
+            {UniformBindingType::BUFFER, sizeof(Matrices)},
             {UniformBindingType::BUFFER, sizeof(PBRParameters)},
             {UniformBindingType::IMAGE,  0},
             {UniformBindingType::IMAGE,  0},

@@ -12,9 +12,9 @@ void GlobalParametersUpdaterComponent::onStart() {
 void GlobalParametersUpdaterComponent::onUpdate(float deltaTime) {
     auto& camera = getRoom()->getCamera();
     getApplication()->getRender()
-            ->getGlobalUniformBuffer().uploadData<GlobalParameters>(
+            ->getGlobalUniformBuffer().uploadData<Matrices>(
                     0,
-                    GlobalParameters{
+                    Matrices{
                             camera.getView(),
                             camera.getViewProjection(),
                             camera.getFrustum().getInverseProjection(),

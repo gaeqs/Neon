@@ -14,11 +14,10 @@
 
 #include <assimp/AssimpLoader.h>
 
-#include "Cloth.h"
+#include "Line.h"
 #include "TestVertex.h"
 #include "GlobalParametersUpdaterComponent.h"
 #include "LockMouseComponent.h"
-#include "cloth/PhysicsManager.h"
 
 constexpr int32_t WIDTH = 800;
 constexpr int32_t HEIGHT = 600;
@@ -63,6 +62,7 @@ std::shared_ptr<FrameBuffer> initRender(Room* room) {
     // and a skybox.
     std::vector<ShaderUniformBinding> globalBindings = {
             {UniformBindingType::BUFFER, sizeof(Matrices)},
+            {UniformBindingType::BUFFER, sizeof(Timestamp)},
             {UniformBindingType::IMAGE,  0}
     };
 
@@ -177,7 +177,7 @@ std::shared_ptr<Room> getTestRoom(Application* application) {
 
     auto skybox = loadSkybox(room.get());
     room->getApplication()->getRender()->
-            getGlobalUniformBuffer().setTexture(1, skybox);
+            getGlobalUniformBuffer().setTexture(2, skybox);
 
 
     auto cameraController = room->newGameObject();
@@ -200,23 +200,39 @@ std::shared_ptr<Room> getTestRoom(Application* application) {
     auto shader = createShader(application,
                                "deferred", "deferred.vert", "deferred.frag");
 
-    MaterialCreateInfo clothMaterialInfo(fpFrameBuffer, shader);
-    clothMaterialInfo.descriptions.uniform = materialDescriptor;
-    clothMaterialInfo.descriptions.instance = DefaultInstancingData::getInstancingDescription();
-    clothMaterialInfo.descriptions.vertex = TestVertex::getDescription();
-    clothMaterialInfo.rasterizer.polygonMode = neon::PolygonMode::FILL;
-    clothMaterialInfo.rasterizer.cullMode = neon::CullMode::NONE;
+    MaterialCreateInfo lineMaterialInfo(fpFrameBuffer, shader);
+    lineMaterialInfo.descriptions.uniform = materialDescriptor;
+    lineMaterialInfo.descriptions.instance = DefaultInstancingData::getInstancingDescription();
+    lineMaterialInfo.descriptions.vertex = TestVertex::getDescription();
+    lineMaterialInfo.rasterizer.polygonMode = neon::PolygonMode::FILL;
+    lineMaterialInfo.rasterizer.cullMode = neon::CullMode::NONE;
+    lineMaterialInfo.rasterizer.lineWidth = 5.0f;
 
-    auto material = std::make_shared<Material>(application, "cloth",
-                                               clothMaterialInfo);
+    lineMaterialInfo.topology = neon::PrimitiveTopology::LINE_STRIP;
 
-    auto physicManagerGO = room->newGameObject();
-    auto physicsManager = physicManagerGO->newComponent<PhysicsManager>(
-            IntegrationMode::IMPLICIT);
+    auto material = std::make_shared<Material>(application, "line",
+                                               lineMaterialInfo);
 
-    auto cloth = room->newGameObject();
-    cloth->setName("Cloth");
-    cloth->newComponent<Cloth>(material, physicsManager, 20, 20);
+    rush::BezierSegment<4, 3, float> seg1{
+            rush::Vec3f{1.0f, 3.0f, 5.0f},
+            rush::Vec3f{0.0f, -10.0f, 3.0f},
+            rush::Vec3f{-3.0f, 0.0f, 2.0f},
+            rush::Vec3f{20.0f, 3.0f, 5.0f}
+    };
+
+    auto seg2 = rush::BezierSegment<4, 3, float>::continuousTo(
+            seg1,
+            rush::Vec3f{10.0f, 6.0f, 0.0f},
+            rush::Vec3f{0.0f, 0.0f, 0.0f}
+    );
+
+    rush::BezierCurve<2, 4, 3, float> curve{seg1, seg2};
+
+    auto rectified = curve.rectified();
+
+    auto line = room->newGameObject();
+    line->setName("Line");
+    line->newComponent<Line<decltype(rectified)>>(material, rectified, 500);
 
     room->getCamera().lookAt({0, 1.0f, -1.0f});
     room->getCamera().setPosition({0.0f, 3.0f, 3.0f});
