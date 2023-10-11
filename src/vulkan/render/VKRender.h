@@ -26,6 +26,7 @@ namespace neon::vulkan {
     class VKRender {
 
         AbstractVKApplication* _vkApplication;
+        mutable bool _drawImGui;
 
     public:
 

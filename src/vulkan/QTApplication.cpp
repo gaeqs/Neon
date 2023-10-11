@@ -32,7 +32,16 @@
 
 #include <QMouseEvent>
 #include <QWheelEvent>
+#include <QVulkanFunctions>
 #include <engine/io/KeyboardEvent.h>
+
+#include <vulkan/vulkan.h>
+#include <vulkan/vulkan_core.h>
+
+#include <imgui.h>
+#include <imgui_impl_vulkan.h>
+#include <imgui_impl_glfw.cpp>
+#include <implot.h>
 
 namespace {
     bool debugFilter(VkDebugReportFlagsEXT flags,
@@ -52,7 +61,8 @@ neon::vulkan::QTApplication::QTApplication() :
         _lastFrameProcessTime(0.0f),
         _currentCommandBuffer(),
         _swapChainCount(0),
-        _recording(false) {
+        _recording(false),
+        _imGuiPool(VK_NULL_HANDLE) {
 }
 
 void neon::vulkan::QTApplication::init(neon::Application* application) {
@@ -104,6 +114,8 @@ void neon::vulkan::QTApplication::renderFrame(neon::Room* room) {
             seconds,
             _lastFrameProcessTime
     };
+
+    setupImGUIFrame();
 
     _application->getRender()->checkFrameBufferRecreationConditions();
 
@@ -177,8 +189,7 @@ VkExtent2D neon::vulkan::QTApplication::getSwapChainExtent() const {
 }
 
 VkDescriptorPool neon::vulkan::QTApplication::getImGuiPool() const {
-    std::cerr << "QTApplication doesn't support ImGUI" << std::endl;
-    return nullptr;
+    return _imGuiPool;
 }
 
 bool neon::vulkan::QTApplication::isRecordingCommandBuffer() const {
@@ -190,6 +201,7 @@ void neon::vulkan::QTApplication::preInitResources() {
 }
 
 void neon::vulkan::QTApplication::initResources() {
+    initImGui();
     if (_onInit) {
         _onInit(this);
     }
@@ -230,6 +242,8 @@ void neon::vulkan::QTApplication::setInitializationFunction(
 
 void neon::vulkan::QTApplication::mouseMoveEvent(QMouseEvent* event) {
     _application->invokeCursorPosEvent(event->x(), event->y());
+    ImGui::GetIO().AddMousePosEvent(static_cast<float>(event->x()),
+                                    static_cast<float>(event->y()));
 }
 
 void neon::vulkan::QTApplication::mousePressEvent(QMouseEvent* event) {
@@ -245,11 +259,17 @@ void neon::vulkan::QTApplication::mousePressEvent(QMouseEvent* event) {
         modifier |= (int) neon::KeyboardModifier::SUPER;
 
 
-    _application->invokeMouseButtonEvent(
-            qtToGLFWMouseButton(event->button()),
-            GLFW_PRESS,
-            modifier
-    );
+    int glfwButton = qtToGLFWMouseButton(event->button());
+
+    auto& io = ImGui::GetIO();
+    io.AddMouseButtonEvent(glfwButton, true);
+    if (!io.WantCaptureMouse) {
+        _application->invokeMouseButtonEvent(
+                glfwButton,
+                GLFW_PRESS,
+                modifier
+        );
+    }
 }
 
 void neon::vulkan::QTApplication::mouseReleaseEvent(QMouseEvent* event) {
@@ -265,11 +285,18 @@ void neon::vulkan::QTApplication::mouseReleaseEvent(QMouseEvent* event) {
         modifier |= (int) neon::KeyboardModifier::SUPER;
 
 
-    _application->invokeMouseButtonEvent(
-            qtToGLFWMouseButton(event->button()),
-            GLFW_RELEASE,
-            modifier
-    );
+    int glfwButton = qtToGLFWMouseButton(event->button());
+
+    auto& io = ImGui::GetIO();
+    io.AddMouseButtonEvent(glfwButton, false);
+    if (!io.WantCaptureMouse) {
+        _application->invokeMouseButtonEvent(
+                glfwButton,
+                GLFW_RELEASE,
+                modifier
+        );
+    }
+
 }
 
 void neon::vulkan::QTApplication::keyPressEvent(QKeyEvent* event) {
@@ -284,12 +311,16 @@ void neon::vulkan::QTApplication::keyPressEvent(QKeyEvent* event) {
     if (qtMod & Qt::MetaModifier)
         modifier |= (int) neon::KeyboardModifier::SUPER;
 
+    int glfwKey = qtToGLFWKey((Qt::Key) event->key());
+
     _application->invokeKeyEvent(
-            qtToGLFWKey((Qt::Key) event->key()),
+            glfwKey,
             event->nativeScanCode(),
             event->isAutoRepeat() ? 2 : 1,
             modifier
     );
+
+    ImGui::GetIO().AddKeyEvent(ImGui_ImplGlfw_KeyToImGuiKey(glfwKey), true);
 }
 
 void neon::vulkan::QTApplication::keyReleaseEvent(QKeyEvent* event) {
@@ -304,17 +335,71 @@ void neon::vulkan::QTApplication::keyReleaseEvent(QKeyEvent* event) {
     if (qtMod & Qt::MetaModifier)
         modifier |= (int) neon::KeyboardModifier::SUPER;
 
+    int glfwKey = qtToGLFWKey((Qt::Key) event->key());
+
     _application->invokeKeyEvent(
-            qtToGLFWKey((Qt::Key) event->key()),
+            glfwKey,
             event->nativeScanCode(),
             0,
             modifier
     );
+
+    ImGui::GetIO().AddKeyEvent(ImGui_ImplGlfw_KeyToImGuiKey(glfwKey), false);
 }
 
 void neon::vulkan::QTApplication::wheelEvent(QWheelEvent* event) {
-    auto delta = event->angleDelta() / 15.0f;
-    _application->invokeScrollEvent(delta.x(), delta.y());
+    auto x = static_cast<double>(event->angleDelta().x()) / 15.0;
+    auto y = static_cast<double>(event->angleDelta().y()) / 15.0;
+    _application->invokeScrollEvent(x, y);
+    ImGui::GetIO().AddMouseWheelEvent(static_cast<float>(x),
+                                      static_cast<float>(y));
+}
+
+
+void neon::vulkan::QTApplication::initImGui() {
+    VkDescriptorPoolSize pool_sizes[] = {
+            {VK_DESCRIPTOR_TYPE_SAMPLER,                1000},
+            {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1000},
+            {VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE,          1000},
+            {VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,          1000},
+            {VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER,   1000},
+            {VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER,   1000},
+            {VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,         1000},
+            {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,         1000},
+            {VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1000},
+            {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, 1000},
+            {VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT,       1000}
+    };
+
+    VkDescriptorPoolCreateInfo pool_info{};
+    pool_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+    pool_info.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
+    pool_info.maxSets = 1000;
+    pool_info.poolSizeCount = std::size(pool_sizes);
+    pool_info.pPoolSizes = pool_sizes;
+
+
+    auto* fun = vulkanInstance()->deviceFunctions(getDevice());
+    if (fun->vkCreateDescriptorPool(getDevice(), &pool_info,
+                                    nullptr, &_imGuiPool) != VK_SUCCESS) {
+        throw std::runtime_error("Failed to init ImGui!");
+    }
+
+    ImGui::CreateContext();
+    ImPlot::CreateContext();
+    ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+}
+
+void neon::vulkan::QTApplication::setupImGUIFrame() const {
+    auto size = getWindowSize().cast<float>();
+
+    ImGuiIO& io = ImGui::GetIO();
+    io.DisplaySize = ImVec2(size.x(), size.y());
+    io.DisplayFramebufferScale = ImVec2(1.0f, 1.0f);
+    io.DeltaTime = _currentFrameInformation.currentDeltaTime;
+
+    ImGui_ImplVulkan_NewFrame();
+    ImGui::NewFrame();
 }
 
 int32_t neon::vulkan::QTApplication::qtToGLFWKey(Qt::Key key) {
@@ -566,5 +651,10 @@ neon::vulkan::QTApplication::qtToGLFWMouseButton(Qt::MouseButton button) {
         default:
             return -1;
     }
+}
+
+neon::vulkan::QTApplication::~QTApplication() {
+    ImPlot::DestroyContext();
+    ImGui::DestroyContext();
 }
 

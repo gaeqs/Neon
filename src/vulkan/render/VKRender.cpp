@@ -19,7 +19,8 @@
 namespace neon::vulkan {
     VKRender::VKRender(Application* application) :
             _vkApplication(dynamic_cast<AbstractVKApplication*>(
-                                   application->getImplementation())) {
+                                   application->getImplementation())),
+            _drawImGui(false) {
 
     }
 
@@ -46,14 +47,19 @@ namespace neon::vulkan {
         vulkan_util::beginRenderPass(cb, fb, clear);
 
         auto& frameBuffer = fb->getImplementation();
-        if (frameBuffer.renderImGui()) {
-            ImGui::Render();
-            ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), cb);
-        }
+        _drawImGui = frameBuffer.renderImGui();
     }
 
     void VKRender::endRenderPass() const {
-        vkCmdEndRenderPass(_vkApplication->getCurrentCommandBuffer()
-                                   ->getImplementation().getCommandBuffer());
+        auto cb = _vkApplication->getCurrentCommandBuffer()
+                ->getImplementation().getCommandBuffer();
+
+        if (_drawImGui) {
+            ImGui::Render();
+            ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), cb);
+            _drawImGui = false;
+        }
+
+        vkCmdEndRenderPass(cb);
     }
 }

@@ -51,11 +51,13 @@ namespace neon::vulkan {
         uint32_t _swapChainCount;
         bool _recording;
 
+        VkDescriptorPool _imGuiPool;
+
     public:
 
         QTApplication();
 
-        ~QTApplication() override = default;
+        ~QTApplication() override;
 
         void setInitializationFunction(
                 std::function<void(QTApplication*)> func);
@@ -138,6 +140,10 @@ namespace neon::vulkan {
         void wheelEvent(QWheelEvent* event) override;
 
     private:
+
+        void initImGui();
+
+        void setupImGUIFrame() const;
 
         static int32_t qtToGLFWKey(Qt::Key key);
 
