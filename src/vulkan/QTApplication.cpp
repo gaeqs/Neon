@@ -312,16 +312,18 @@ void neon::vulkan::QTApplication::keyPressEvent(QKeyEvent* event) {
         modifier |= (int) neon::KeyboardModifier::SUPER;
 
     int glfwKey = qtToGLFWKey((Qt::Key) event->key());
-
-    _application->invokeKeyEvent(
-            glfwKey,
-            event->nativeScanCode(),
-            event->isAutoRepeat() ? 2 : 1,
-            modifier
-    );
-
-    ImGui::GetIO().AddKeyEvent(ImGui_ImplGlfw_KeyToImGuiKey(glfwKey), true);
+    auto& io = ImGui::GetIO();
+    io.AddKeyEvent(ImGui_ImplGlfw_KeyToImGuiKey(glfwKey), true);
+    if (!io.WantCaptureKeyboard) {
+        _application->invokeKeyEvent(
+                glfwKey,
+                event->nativeScanCode(),
+                event->isAutoRepeat() ? 2 : 1,
+                modifier
+        );
+    }
 }
+
 
 void neon::vulkan::QTApplication::keyReleaseEvent(QKeyEvent* event) {
     auto qtMod = event->modifiers();
@@ -336,23 +338,29 @@ void neon::vulkan::QTApplication::keyReleaseEvent(QKeyEvent* event) {
         modifier |= (int) neon::KeyboardModifier::SUPER;
 
     int glfwKey = qtToGLFWKey((Qt::Key) event->key());
-
-    _application->invokeKeyEvent(
-            glfwKey,
-            event->nativeScanCode(),
-            0,
-            modifier
-    );
-
-    ImGui::GetIO().AddKeyEvent(ImGui_ImplGlfw_KeyToImGuiKey(glfwKey), false);
+    auto& io = ImGui::GetIO();
+    io.AddKeyEvent(ImGui_ImplGlfw_KeyToImGuiKey(glfwKey), false);
+    if (!io.WantCaptureKeyboard) {
+        _application->invokeKeyEvent(
+                glfwKey,
+                event->nativeScanCode(),
+                0,
+                modifier
+        );
+    }
 }
 
 void neon::vulkan::QTApplication::wheelEvent(QWheelEvent* event) {
-    auto x = static_cast<double>(event->angleDelta().x()) / 15.0;
-    auto y = static_cast<double>(event->angleDelta().y()) / 15.0;
-    _application->invokeScrollEvent(x, y);
-    ImGui::GetIO().AddMouseWheelEvent(static_cast<float>(x),
-                                      static_cast<float>(y));
+    // https://doc.qt.io/qt-6/qwheelevent.html#angleDelta
+    constexpr double DELTAS_PER_STEP = 120.0;
+
+    auto x = static_cast<double>(event->angleDelta().x()) / DELTAS_PER_STEP;
+    auto y = static_cast<double>(event->angleDelta().y()) / DELTAS_PER_STEP;
+    auto& io = ImGui::GetIO();
+    io.AddMouseWheelEvent(static_cast<float>(x), static_cast<float>(y));
+    if (!io.WantCaptureMouse) {
+        _application->invokeScrollEvent(x, y);
+    }
 }
 
 
