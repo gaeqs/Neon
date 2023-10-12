@@ -35,7 +35,11 @@ namespace neon {
         flushNotStartedComponents();
         for (const auto& [type, data]: _components) {
             if (!data.first.onKey) continue;
-            DEBUG_PROFILE_ID(profiler, type, type.name());
+
+            auto entry = ComponentRegister::instance().getEntry(type);
+            auto name = entry.has_value() ? entry->name.c_str() : type.name();
+            DEBUG_PROFILE_ID(profiler, type, name);
+
             auto ptr = std::static_pointer_cast
                     <AbstractClusteredLinkedCollection>(data.second);
             ptr->forEachRaw([&event](void* ptr) {
@@ -52,7 +56,11 @@ namespace neon {
         flushNotStartedComponents();
         for (const auto& [type, data]: _components) {
             if (!data.first.onMouseButton) continue;
-            DEBUG_PROFILE_ID(profiler, type, type.name());
+
+            auto entry = ComponentRegister::instance().getEntry(type);
+            auto name = entry.has_value() ? entry->name.c_str() : type.name();
+            DEBUG_PROFILE_ID(profiler, type, name);
+
             auto ptr = std::static_pointer_cast
                     <AbstractClusteredLinkedCollection>(data.second);
             ptr->forEachRaw([&event](void* ptr) {
@@ -69,7 +77,11 @@ namespace neon {
         flushNotStartedComponents();
         for (const auto& [type, data]: _components) {
             if (!data.first.onCursorMove) continue;
-            DEBUG_PROFILE_ID(profiler, type, type.name());
+
+            auto entry = ComponentRegister::instance().getEntry(type);
+            auto name = entry.has_value() ? entry->name.c_str() : type.name();
+            DEBUG_PROFILE_ID(profiler, type, name);
+
             auto ptr = std::static_pointer_cast
                     <AbstractClusteredLinkedCollection>(data.second);
             ptr->forEachRaw([&event](void* ptr) {
@@ -86,7 +98,11 @@ namespace neon {
         flushNotStartedComponents();
         for (const auto& [type, data]: _components) {
             if (!data.first.onScroll) continue;
-            DEBUG_PROFILE_ID(profiler, type, type.name());
+
+            auto entry = ComponentRegister::instance().getEntry(type);
+            auto name = entry.has_value() ? entry->name.c_str() : type.name();
+            DEBUG_PROFILE_ID(profiler, type, name);
+
             auto ptr = std::static_pointer_cast
                     <AbstractClusteredLinkedCollection>(data.second);
             ptr->forEachRaw([&event](void* ptr) {
@@ -103,7 +119,11 @@ namespace neon {
         flushNotStartedComponents();
         for (const auto& [type, data]: _components) {
             if (!data.first.onUpdate) continue;
-            DEBUG_PROFILE_ID(profiler, type, type.name());
+
+            auto entry = ComponentRegister::instance().getEntry(type);
+            auto name = entry.has_value() ? entry->name.c_str() : type.name();
+            DEBUG_PROFILE_ID(profiler, type, name);
+
             auto ptr = std::static_pointer_cast
                     <AbstractClusteredLinkedCollection>(data.second);
             ptr->forEachRaw([deltaTime](void* ptr) {
@@ -120,7 +140,11 @@ namespace neon {
         flushNotStartedComponents();
         for (const auto& [type, data]: _components) {
             if (!data.first.onLateUpdate) continue;
-            DEBUG_PROFILE_ID(profiler, type, type.name());
+
+            auto entry = ComponentRegister::instance().getEntry(type);
+            auto name = entry.has_value() ? entry->name.c_str() : type.name();
+            DEBUG_PROFILE_ID(profiler, type, name);
+
             auto ptr = std::static_pointer_cast
                     <AbstractClusteredLinkedCollection>(data.second);
             ptr->forEachRaw([deltaTime](void* ptr) {
@@ -137,7 +161,11 @@ namespace neon {
         flushNotStartedComponents();
         for (const auto& [type, data]: _components) {
             if (!data.first.onPreDraw) continue;
-            DEBUG_PROFILE_ID(profiler, type, type.name());
+
+            auto entry = ComponentRegister::instance().getEntry(type);
+            auto name = entry.has_value() ? entry->name.c_str() : type.name();
+            DEBUG_PROFILE_ID(profiler, type, name);
+
             auto ptr = std::static_pointer_cast
                     <AbstractClusteredLinkedCollection>(data.second);
             ptr->forEachRaw([](void* ptr) {
