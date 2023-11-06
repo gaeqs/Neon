@@ -84,6 +84,7 @@ namespace neon::vulkan {
     }
 
     SimpleBuffer::~SimpleBuffer() {
+        vkDeviceWaitIdle(_application->getDevice());
         vkDestroyBuffer(_application->getDevice(), _vertexBuffer, nullptr);
         vkFreeMemory(_application->getDevice(), _vertexBufferMemory, nullptr);
 

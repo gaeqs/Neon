@@ -88,7 +88,7 @@ namespace neon::vulkan {
         if (!_indexBuffer.has_value() || _indexAmount == 0)
             return {};
 
-        auto map = _vertexBuffer.value()->map<uint32_t>();
+        auto map = _indexBuffer.value()->map<uint32_t>();
         if (!map.has_value()) return {};
 
         std::vector<uint32_t> vertices;
