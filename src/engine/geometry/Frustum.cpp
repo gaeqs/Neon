@@ -8,15 +8,15 @@
 namespace neon {
 
     Frustum::Frustum(float near, float far, float aspectRatio,
-                     float fovYDegrees) :
+                     float fovYRadians ) :
             _near(near),
             _far(far),
             _aspectRatio(aspectRatio),
-            _fovYDegrees(fovYDegrees),
+            _fovYRadians(fovYRadians),
             _projection(rush::Mat4f::perspective<
                     rush::Hand::Right,
                     rush::ProjectionFormat::Vulkan>(
-                    fovYDegrees, aspectRatio, near, far)) {
+              fovYRadians, aspectRatio, near, far)) {
     }
 
     const rush::Mat4f& Frustum::getProjection() const {
@@ -35,20 +35,20 @@ namespace neon {
         return _aspectRatio;
     }
 
-    float Frustum::getFovYDegrees() const {
-        return _fovYDegrees;
+    float Frustum::getFovYRadians( ) const {
+        return _fovYRadians;
     }
 
     Frustum Frustum::withNear(float near) const {
-        return {near, _far, _aspectRatio, _fovYDegrees};
+        return { near, _far, _aspectRatio, _fovYRadians};
     }
 
     Frustum Frustum::withFar(float far) const {
-        return {_near, far, _aspectRatio, _fovYDegrees};
+        return { _near, far, _aspectRatio, _fovYRadians};
     }
 
     Frustum Frustum::withAspectRatio(float aspectRatio) const {
-        return {_near, _far, aspectRatio, _fovYDegrees};
+        return { _near, _far, aspectRatio, _fovYRadians};
     }
 
     Frustum Frustum::withFov(float fovYDegrees) const {

@@ -16,14 +16,14 @@ namespace neon {
         float _near;
         float _far;
         float _aspectRatio;
-        float _fovYDegrees;
+        float _fovYRadians;
 
         rush::Mat4f _projection;
         std::optional<rush::Mat4f> _inverseProjection;
 
     public:
 
-        Frustum(float near, float far, float aspectRatio, float fovYDegrees);
+        Frustum(float near, float far, float aspectRatio, float fovYRadians );
 
         float getNear() const;
 
@@ -31,7 +31,7 @@ namespace neon {
 
         float getAspectRatio() const;
 
-        float getFovYDegrees() const;
+        float getFovYRadians( ) const;
 
         const rush::Mat4f& getProjection() const;
 
