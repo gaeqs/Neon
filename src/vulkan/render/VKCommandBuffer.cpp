@@ -169,7 +169,8 @@ namespace neon::vulkan {
     }
 
     bool VKCommandBuffer::isBeingUsed() {
-        if (_fences.empty()) return true;
+        if (_status == VKCommandBufferStatus::RECORDING) return false;
+        if (_fences.empty()) return false;
         auto device = _vkApplication->getDevice();
 
         bool used = std::ranges::any_of(
