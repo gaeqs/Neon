@@ -25,6 +25,7 @@
 #include <engine/model/Model.h>
 
 #include <engine/render/CommandBuffer.h>
+#include <engine/render/CommandPool.h>
 #include <engine/render/FrameBuffer.h>
 #include <engine/render/FrameBufferTextureCreateInfo.h>
 #include <engine/render/FrameInformation.h>
