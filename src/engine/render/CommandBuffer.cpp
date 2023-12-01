@@ -5,17 +5,18 @@
 #include "CommandBuffer.h"
 
 namespace neon {
-
-    CommandBuffer::CommandBuffer(Application* application, bool primary) :
-            _implementation(application, primary) {
+    CommandBuffer::CommandBuffer(Application* application,
+                                 bool primary) : _implementation(
+        application, primary) {
     }
 
 
 #ifdef USE_VULKAN
 
     CommandBuffer::CommandBuffer(Application* application,
-                                 VkCommandBuffer commandBuffer) :
-            _implementation(application, commandBuffer) {
+                                 VkCommandBuffer
+                                 commandBuffer) : _implementation(
+        application, commandBuffer) {
     }
 
 #endif
@@ -45,4 +46,7 @@ namespace neon {
         return _implementation.reset(releaseResources);
     }
 
+    bool CommandBuffer::isBeingUsed() {
+        return _implementation.isBeingUsed();
+    }
 }

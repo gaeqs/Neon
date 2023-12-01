@@ -12,23 +12,18 @@
 #endif
 
 namespace neon {
-
     class Application;
 
     class CommandBuffer {
-
     public:
-
 #ifdef USE_VULKAN
         using Implementation = vulkan::VKCommandBuffer;
 #endif
 
     private:
-
         Implementation _implementation;
 
     public:
-
         CommandBuffer(const CommandBuffer& other) = delete;
 
         CommandBuffer(Application* application, bool primary);
@@ -51,6 +46,7 @@ namespace neon {
 
         void reset(bool releaseResources = true);
 
+        bool isBeingUsed();
     };
 }
 
