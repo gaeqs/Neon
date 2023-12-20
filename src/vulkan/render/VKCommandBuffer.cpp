@@ -33,6 +33,28 @@ namespace neon::vulkan {
     }
 
     VKCommandBuffer::VKCommandBuffer(Application* application,
+                                     VkCommandPool pool, bool primary)
+        : _vkApplication(dynamic_cast<AbstractVKApplication*>(
+              application->getImplementation())),
+          _commandBuffer(VK_NULL_HANDLE),
+          _status(VKCommandBufferStatus::READY),
+          _fences(),
+          _freedFences(),
+          _external(false) {
+        VkCommandBufferAllocateInfo info{};
+        info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+        info.commandPool = pool;
+        info.level = primary
+                         ? VK_COMMAND_BUFFER_LEVEL_PRIMARY
+                         : VK_COMMAND_BUFFER_LEVEL_SECONDARY;
+        info.commandBufferCount = 1;
+        if (vkAllocateCommandBuffers(_vkApplication->getDevice(),
+                                     &info, &_commandBuffer) != VK_SUCCESS) {
+            throw std::runtime_error("Failed to allocate command buffers!");
+        }
+    }
+
+    VKCommandBuffer::VKCommandBuffer(Application* application,
                                      VkCommandBuffer
                                      commandBuffer) : _vkApplication(
             dynamic_cast<AbstractVKApplication*>(

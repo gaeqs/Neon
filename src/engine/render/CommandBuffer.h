@@ -30,6 +30,9 @@ namespace neon {
 
 #ifdef USE_VULKAN
 
+        CommandBuffer(Application* application, VkCommandPool pool,
+                      bool primary);
+
         CommandBuffer(Application* application, VkCommandBuffer commandBuffer);
 
 #endif

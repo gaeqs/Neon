@@ -6,6 +6,7 @@
 #define COMMANDPOOL_H
 
 #include <vector>
+#include <memory>
 
 #if USE_VULKAN
 
@@ -18,13 +19,22 @@ namespace neon {
     using Implementation = vulkan::VKCommandPool;
 #endif
 
+    class Application;
+
     class CommandBuffer;
 
     class CommandPool {
-        std::vector<CommandBuffer> _buffers;
-        std::vector<CommandBuffer> _usedBuffers;
+        std::vector<std::unique_ptr<CommandBuffer>> _buffers;
+        std::vector<size_t> _availableBuffers;
+        std::vector<size_t> _usedBuffers;
 
-        CommandBuffer& requestBuffer();
+        void checkUsedBufferForAvailability();
+
+    public:
+
+        explicit CommandPool(Application* application);
+
+        CommandBuffer* beginCommandBuffer(bool onlyOneSummit = false);
     };
 }
 

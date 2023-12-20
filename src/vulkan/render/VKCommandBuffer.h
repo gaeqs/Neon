@@ -45,6 +45,9 @@ namespace neon::vulkan {
 
         VKCommandBuffer(Application* application, bool primary);
 
+        VKCommandBuffer(Application* application, VkCommandPool pool,
+                        bool primary);
+
         VKCommandBuffer(Application* application,
                         VkCommandBuffer commandBuffer);
 
