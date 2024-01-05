@@ -24,6 +24,9 @@ namespace neon {
     class CommandBuffer;
 
     class CommandPool {
+
+        Implementation _implementation;
+
         std::vector<std::unique_ptr<CommandBuffer>> _buffers;
         std::vector<size_t> _availableBuffers;
         std::vector<size_t> _usedBuffers;
@@ -34,7 +37,13 @@ namespace neon {
 
         explicit CommandPool(Application* application);
 
-        CommandBuffer* beginCommandBuffer(bool onlyOneSummit = false);
+        ~CommandPool();
+
+        Implementation& getImplementation();
+
+        const Implementation& getImplementation() const;
+
+        CommandBuffer* beginCommandBuffer(bool onlyOneSummit);
     };
 }
 

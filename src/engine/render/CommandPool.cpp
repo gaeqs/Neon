@@ -8,19 +8,33 @@
 
 namespace neon {
     void CommandPool::checkUsedBufferForAvailability() {
-        for (size_t i = _usedBuffers.size() + 1; i > 0; --i) {
-            size_t index = _usedBuffers[i];
+        for (size_t i = _usedBuffers.size(); i > 0; --i) {
+            size_t index = _usedBuffers[i - 1];
             if (!_buffers[index]->isBeingUsed()) {
+                _buffers[index]->reset();
                 _availableBuffers.push_back(index);
-                _usedBuffers.erase(_usedBuffers.begin() + i);
+                _usedBuffers.erase(_usedBuffers.begin() + i - 1);
             }
         }
     }
 
     CommandPool::CommandPool(Application* application)
-        : _buffers(),
+        : _implementation(application),
+          _buffers(),
           _availableBuffers(),
           _usedBuffers() {
+    }
+
+    CommandPool::~CommandPool() {
+        _buffers.clear();
+    }
+
+    Implementation& CommandPool::getImplementation() {
+        return _implementation;
+    }
+
+    const Implementation& CommandPool::getImplementation() const {
+        return _implementation;
     }
 
     CommandBuffer* CommandPool::beginCommandBuffer(bool onlyOneSummit) {
@@ -38,6 +52,12 @@ namespace neon {
         }
 
         // All buffers used
-        return _buffers.emplace_back(nullptr, true);
+        std::unique_ptr ptr = _implementation.newCommandBuffer(true);
+        _usedBuffers.push_back(_buffers.size());
+        _buffers.push_back(std::move(ptr));
+
+        auto raw = _buffers.back().get();
+        raw->begin(true);
+        return raw;
     }
 }

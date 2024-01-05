@@ -47,6 +47,10 @@ namespace neon {
         return _implementation.submit();
     }
 
+    void CommandBuffer::wait() {
+        _implementation.waitForFences();
+    }
+
     void CommandBuffer::reset(bool releaseResources) {
         return _implementation.reset(releaseResources);
     }

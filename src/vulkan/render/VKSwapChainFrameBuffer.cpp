@@ -169,12 +169,14 @@ namespace neon::vulkan {
 
         ImGui_ImplVulkan_Init(&init_info, _renderPass.getRaw());
 
-        auto cmd = vulkan_util::beginSingleTimeCommandBuffer(
-                _vkApplication->getDevice(), _vkApplication->getCommandPool());
-        ImGui_ImplVulkan_CreateFontsTexture(cmd);
-        vulkan_util::endSingleTimeCommandBuffer(
-                _vkApplication->getDevice(), _vkApplication->getGraphicsQueue(),
-                _vkApplication->getCommandPool(), cmd);
+        auto cmd = _vkApplication->getCommandPool()->beginCommandBuffer(true);
+
+        ImGui_ImplVulkan_CreateFontsTexture(cmd->getImplementation()
+            .getCommandBuffer());
+
+        cmd->end();
+        cmd->submit();
+        cmd->wait();
 
         ImGui_ImplVulkan_DestroyFontUploadObjects();
     }

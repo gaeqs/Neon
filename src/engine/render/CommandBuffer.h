@@ -47,6 +47,8 @@ namespace neon {
 
         bool submit();
 
+        void wait();
+
         void reset(bool releaseResources = true);
 
         bool isBeingUsed();

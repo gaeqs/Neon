@@ -9,11 +9,13 @@
 #include <engine/Application.h>
 
 #include <vulkan/AbstractVKApplication.h>
+#include <engine/render/CommandPool.h>
 
 namespace neon::vulkan {
     VKCommandBuffer::VKCommandBuffer(Application* application, bool primary)
         : _vkApplication(dynamic_cast<AbstractVKApplication*>(
               application->getImplementation())),
+          _pool(_vkApplication->getCommandPool()->getImplementation().raw()),
           _commandBuffer(VK_NULL_HANDLE),
           _status(VKCommandBufferStatus::READY),
           _fences(),
@@ -21,7 +23,7 @@ namespace neon::vulkan {
           _external(false) {
         VkCommandBufferAllocateInfo info{};
         info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-        info.commandPool = _vkApplication->getCommandPool();
+        info.commandPool = _pool;
         info.level = primary
                          ? VK_COMMAND_BUFFER_LEVEL_PRIMARY
                          : VK_COMMAND_BUFFER_LEVEL_SECONDARY;
@@ -36,6 +38,7 @@ namespace neon::vulkan {
                                      VkCommandPool pool, bool primary)
         : _vkApplication(dynamic_cast<AbstractVKApplication*>(
               application->getImplementation())),
+          _pool(pool),
           _commandBuffer(VK_NULL_HANDLE),
           _status(VKCommandBufferStatus::READY),
           _fences(),
@@ -74,9 +77,11 @@ namespace neon::vulkan {
         }
 
         if (!_external) {
-            vkFreeCommandBuffers(_vkApplication->getDevice(),
-                                 _vkApplication->getCommandPool(),
-                                 1, &_commandBuffer);
+            vkFreeCommandBuffers(
+                _vkApplication->getDevice(),
+                _pool,
+                1, &_commandBuffer
+            );
         }
     }
 
@@ -86,7 +91,10 @@ namespace neon::vulkan {
 
     bool VKCommandBuffer::begin(bool onlyOneSubmit) {
         refreshStatus();
-        if (_status != VKCommandBufferStatus::READY) return false;
+        if (_status != VKCommandBufferStatus::READY) {
+            printInvalidState(VKCommandBufferStatus::READY);
+            return false;
+        }
         VkCommandBufferBeginInfo beginInfo{};
         beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
         beginInfo.flags = onlyOneSubmit
@@ -98,7 +106,10 @@ namespace neon::vulkan {
     }
 
     bool VKCommandBuffer::end() {
-        if (_status != VKCommandBufferStatus::RECORDING) return false;
+        if (_status != VKCommandBufferStatus::RECORDING) {
+            printInvalidState(VKCommandBufferStatus::RECORDING);
+            return false;
+        }
         vkEndCommandBuffer(_commandBuffer);
         _status = VKCommandBufferStatus::RECORDED;
         return true;
@@ -109,7 +120,10 @@ namespace neon::vulkan {
                                  VkPipelineStageFlags* waitStages,
                                  uint32_t signalSemaphoreAmount,
                                  VkSemaphore* signalSemaphores) {
-        if (_status != VKCommandBufferStatus::RECORDED) return false;
+        if (_status != VKCommandBufferStatus::RECORDED) {
+            printInvalidState(VKCommandBufferStatus::RECORDED);
+            return false;
+        }
 
         VkSubmitInfo submitInfo{};
         submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
@@ -158,7 +172,7 @@ namespace neon::vulkan {
 
     void VKCommandBuffer::refreshStatus() {
         if (_status == VKCommandBufferStatus::RECORDED) {
-            if (isBeingUsed()) {
+            if (!isBeingUsed()) {
                 _status = VKCommandBufferStatus::READY;
             }
         }
@@ -190,6 +204,28 @@ namespace neon::vulkan {
         return fence;
     }
 
+    void VKCommandBuffer::printInvalidState(
+        VKCommandBufferStatus expected) const {
+        auto getName = [](VKCommandBufferStatus s) {
+            switch (s) {
+                case VKCommandBufferStatus::READY:
+                    return "READY";
+                case VKCommandBufferStatus::RECORDING:
+                    return "RECORDING";
+                case VKCommandBufferStatus::RECORDED:
+                    return "RECORDED";
+                default:
+                    return "INVALID STATE";
+            }
+        };
+
+        std::cerr << std::format(
+            "Invalid command buffer status. Actual: {}. Expected: {}.",
+            getName(_status),
+            getName(expected)
+        ) << std::endl;
+    }
+
     bool VKCommandBuffer::isBeingUsed() {
         if (_status == VKCommandBufferStatus::RECORDING) return false;
         if (_fences.empty()) return false;
@@ -203,11 +239,14 @@ namespace neon::vulkan {
         );
 
         if (!used) {
+            vkResetFences(_vkApplication->getDevice(),
+                          _fences.size(), _fences.data());
             _freedFences.insert(
                 _freedFences.end(),
                 _fences.begin(),
                 _fences.end()
             );
+            _fences.clear();
         }
 
         return used;

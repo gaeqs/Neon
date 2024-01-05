@@ -28,13 +28,6 @@ namespace neon::vulkan::vulkan_util {
     uint32_t findMemoryType(VkPhysicalDevice device, uint32_t typeFilter,
                             VkMemoryPropertyFlags flags);
 
-    VkCommandBuffer beginSingleTimeCommandBuffer(
-            VkDevice device, VkCommandPool pool);
-
-    void endSingleTimeCommandBuffer(
-            VkDevice device, VkQueue queue,
-            VkCommandPool pool, VkCommandBuffer buffer);
-
     void copyBuffer(VkCommandBuffer commandBuffer,
                     VkBuffer source, VkBuffer destiny, VkDeviceSize size);
 
