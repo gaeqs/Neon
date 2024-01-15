@@ -107,7 +107,9 @@ set(SOURCES
         engine/render/CommandBuffer.cpp
         engine/render/CommandBuffer.h
         engine/render/CommandPool.cpp
-        engine/render/CommandPool.h)
+        engine/render/CommandPool.h
+        util/task/TaskRunner.cpp
+        util/task/TaskRunner.h)
 
 
 set(VULKAN_SOURCES

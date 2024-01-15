@@ -215,7 +215,11 @@ namespace neon::vulkan {
                     frames,
                     seconds,
                     lastFrameProcessTime
-                };
+                }; {
+                    DEBUG_PROFILE_ID(_application->getProfiler(), tasks,
+                                     "tasks");
+                    _application->getTaskRunner().flushMainThreadTasks();
+                }
 
                 renderFrame(_application->getRoom().get());
 
@@ -349,6 +353,7 @@ namespace neon::vulkan {
 
 
     void VKApplication::finishLoop() {
+        _application->getTaskRunner().joinAsyncTasks();
         vkDeviceWaitIdle(_device);
     }
 

@@ -18,8 +18,9 @@
 #include <util/Result.h>
 #include <util/profile/Profiler.h>
 
-namespace neon {
+#include "util/task/TaskRunner.h"
 
+namespace neon {
     class Room;
 
     class Render;
@@ -29,9 +30,7 @@ namespace neon {
     class Application;
 
     class ApplicationImplementation {
-
     public:
-
         ApplicationImplementation() = default;
 
         virtual ~ApplicationImplementation() = default;
@@ -51,11 +50,9 @@ namespace neon {
         virtual Result<uint32_t, std::string> startGameLoop() = 0;
 
         virtual void renderFrame(Room* room) = 0;
-
     };
 
     class Application {
-
         std::unique_ptr<ApplicationImplementation> _implementation;
 
         std::shared_ptr<Room> _room;
@@ -63,13 +60,13 @@ namespace neon {
         rush::Vec2d _lastCursorPosition;
         Profiler _profiler;
         AssetCollection _assets;
+        TaskRunner _taskRunner;
         std::shared_ptr<Render> _render;
         std::optional<rush::Vec2i> _forcedViewport;
 
     public:
-
         explicit Application(
-                std::unique_ptr<ApplicationImplementation> implementation);
+            std::unique_ptr<ApplicationImplementation> implementation);
 
         void init();
 
@@ -83,6 +80,10 @@ namespace neon {
         [[nodiscard]] const Profiler& getProfiler() const;
 
         [[nodiscard]] Profiler& getProfiler();
+
+        [[nodiscard]] const TaskRunner& getTaskRunner() const;
+
+        [[nodiscard]] TaskRunner& getTaskRunner();
 
         [[nodiscard]] const AssetCollection& getAssets() const;
 

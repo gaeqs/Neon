@@ -22,8 +22,8 @@
 #include "engine/shader/MaterialCreateInfo.h"
 #include "engine/shader/ShaderUniformBinding.h"
 
-constexpr int32_t WIDTH = 800;
-constexpr int32_t HEIGHT = 600;
+constexpr float WIDTH = 800;
+constexpr float HEIGHT = 600;
 
 CMRC_DECLARE(shaders);
 
@@ -45,7 +45,7 @@ std::shared_ptr<ShaderProgram> createShader(Application* application,
     auto defaultFrag = cmrc::shaders::get_filesystem().open(frag);
 
     auto result = ShaderProgram::createShader(
-            application, name, defaultVert, defaultFrag);
+        application, name, defaultVert, defaultFrag);
     if (!result.isOk()) {
         std::cerr << result.getError() << std::endl;
         throw std::runtime_error(result.getError());
@@ -62,13 +62,13 @@ std::shared_ptr<FrameBuffer> initRender(Room* room) {
     // In this application, we have a buffer of global parameters
     // and a skybox.
     std::vector<ShaderUniformBinding> globalBindings = {
-            {UniformBindingType::BUFFER, sizeof(Matrices)},
-            {UniformBindingType::IMAGE,  0}
+        {UniformBindingType::BUFFER, sizeof(Matrices)},
+        {UniformBindingType::IMAGE, 0}
     };
 
     // The description of the global uniforms.
     auto globalDescriptor = std::make_shared<ShaderUniformDescriptor>(
-            app, "default", globalBindings);
+        app, "default", globalBindings);
 
     // The render of the application.
     // We should set the render to the application before
@@ -95,46 +95,46 @@ std::shared_ptr<FrameBuffer> initRender(Room* room) {
                                      "screen.frag");
 
     std::vector<FrameBufferTextureCreateInfo> frameBufferFormats = {
-            TextureFormat::R8G8B8A8,
-            TextureFormat::R16FG16F, // NORMAL XY
-            TextureFormat::R16FG16F // NORMAL Z / SPECULAR
+        TextureFormat::R8G8B8A8,
+        TextureFormat::R16FG16F, // NORMAL XY
+        TextureFormat::R16FG16F // NORMAL Z / SPECULAR
     };
 
     auto fpFrameBuffer = std::make_shared<SimpleFrameBuffer>(
-            app, frameBufferFormats, true);
+        app, frameBufferFormats, true);
 
     render->addRenderPass(std::make_shared<DefaultRenderPassStrategy>(
-            fpFrameBuffer));
+        fpFrameBuffer));
 
     auto albedo = deferred_utils::createLightSystem(
-            room,
-            render.get(),
-            fpFrameBuffer->getTextures(),
-            TextureFormat::R8G8B8A8,
-            directionalShader,
-            pointShader,
-            flashShader
+        room,
+        render.get(),
+        fpFrameBuffer->getTextures(),
+        TextureFormat::R8G8B8A8,
+        directionalShader,
+        pointShader,
+        flashShader
     );
 
     std::vector<FrameBufferTextureCreateInfo> screenFormats =
             {TextureFormat::R8G8B8A8};
     auto screenFrameBuffer = std::make_shared<SimpleFrameBuffer>(
-            app, screenFormats, false);
+        app, screenFormats, false);
     render->addRenderPass(std::make_shared<DefaultRenderPassStrategy>(
-            screenFrameBuffer));
+        screenFrameBuffer));
 
     auto textures = fpFrameBuffer->getTextures();
     textures[0] = albedo;
 
     std::shared_ptr<Material> screenMaterial = Material::create(
-            room->getApplication(), "Screen Model",
-            screenFrameBuffer, screenShader,
-            deferred_utils::DeferredVertex::getDescription(),
-            InputDescription(0, InputRate::INSTANCE),
-            {}, textures);
+        room->getApplication(), "Screen Model",
+        screenFrameBuffer, screenShader,
+        deferred_utils::DeferredVertex::getDescription(),
+        InputDescription(0, InputRate::INSTANCE),
+        {}, textures);
 
     auto screenModel = deferred_utils::createScreenModel(room->getApplication(),
-                                                         "Screen Model");
+        "Screen Model");
 
     screenModel->addMaterial(screenMaterial);
 
@@ -143,17 +143,72 @@ std::shared_ptr<FrameBuffer> initRender(Room* room) {
     screenModelGO->newComponent<GraphicComponent>(screenModel);
 
     auto swapFrameBuffer = std::make_shared<SwapChainFrameBuffer>(
-            room, false);
+        room, false);
 
     render->addRenderPass(std::make_shared<DefaultRenderPassStrategy>(
-            swapFrameBuffer));
+        swapFrameBuffer));
 
     return fpFrameBuffer;
 }
 
+void sansLoadThread(Application* application,
+                    assimp_loader::LoaderInfo info) {
+    std::this_thread::sleep_for(std::chrono::milliseconds(3000));
+
+
+    auto sansResult = assimp_loader::load(R"(resource/Sans)", "Sans.obj",
+                                          info);
+
+    if (!sansResult.valid) {
+        std::cout << "Couldn't load Sans model!" << std::endl;
+        std::cout << std::filesystem::current_path() << std::endl;
+        exit(1);
+    }
+
+    auto sansModel = sansResult.model;
+
+    auto pool = CommandPool(application);
+    auto buffer = pool.beginCommandBuffer(true);
+    sansModel->flush(buffer);
+
+    buffer->end();
+    buffer->submit();
+
+    std::cout << "SANS UPLOADED!" << std::endl;
+
+    application->getTaskRunner().runOnMainThread(
+        [application, sansModel]() {
+            constexpr int AMOUNT = 1024 * 1;
+
+            auto room = application->getRoom();
+
+            int q = static_cast<int>(std::sqrt(AMOUNT));
+            for (int i = 0; i < AMOUNT; i++) {
+                auto sans = room->newGameObject();
+                sans->newComponent<GraphicComponent>(sansModel);
+                sans->newComponent<ConstantRotationComponent>();
+
+                if (i == 0) {
+                    auto sans2 = room->newGameObject();
+                    sans2->newComponent<GraphicComponent>(sansModel);
+                    sans2->newComponent<ConstantRotationComponent>();
+                    sans2->setParent(sans);
+                    sans2->getTransform().setPosition(
+                        rush::Vec3f(-5.0f, 5.0f, 0.0f));
+                    sans2->setName("Children Sans");
+                }
+
+                float x = static_cast<float>(i % q) * 3.0f;
+                float z = static_cast<float>(i / q) *
+                          3.0f; // NOLINT(bugprone-integer-division)
+                sans->getTransform().setPosition(rush::Vec3f(x, 0, z));
+                sans->setName("Sans " + std::to_string(i));
+            }
+        });
+}
+
 void loadModels(Application* application, Room* room,
                 const std::shared_ptr<FrameBuffer>& target) {
-
     std::shared_ptr<ShaderUniformDescriptor> materialDescriptor =
             ShaderUniformDescriptor::ofImages(application, "default", 2);
 
@@ -167,44 +222,13 @@ void loadModels(Application* application, Room* room,
     sansMaterialInfo.descriptions.uniform = materialDescriptor;
 
     auto sansLoaderInfo = assimp_loader::LoaderInfo::create<TestVertex>(
-            application, "Sans", sansMaterialInfo);
+        application, "Sans", sansMaterialInfo);
 
-    auto sansResult = assimp_loader::load(R"(resource/Sans)", "Sans.obj",
-                                          sansLoaderInfo);
-
-    if (!sansResult.valid) {
-        std::cout << "Couldn't load Sans model!" << std::endl;
-        std::cout << std::filesystem::current_path() << std::endl;
-        exit(1);
-    }
-
-    auto sansModel = sansResult.model;
-
-    constexpr int AMOUNT = 1024 * 1;
-    int q = static_cast<int>(std::sqrt(AMOUNT));
-    for (int i = 0; i < AMOUNT; i++) {
-        auto sans = room->newGameObject();
-        sans->newComponent<GraphicComponent>(sansModel);
-        sans->newComponent<ConstantRotationComponent>();
-
-        if (i == 0) {
-            auto sans2 = room->newGameObject();
-            sans2->newComponent<GraphicComponent>(sansModel);
-            sans2->newComponent<ConstantRotationComponent>();
-            sans2->setParent(sans);
-            sans2->getTransform().setPosition(rush::Vec3f(-5.0f, 5.0f, 0.0f));
-            sans2->setName("Children Sans");
-        }
-
-        float x = static_cast<float>(i % q) * 3.0f;
-        float z = static_cast<float>(i / q) *
-                  3.0f; // NOLINT(bugprone-integer-division)
-        sans->getTransform().setPosition(rush::Vec3f(x, 0, z));
-        sans->setName("Sans " + std::to_string(i));
-    }
+    application->getTaskRunner().executeAsync(
+        sansLoadThread, application, sansLoaderInfo);
 
     auto zeppeliLoaderInfo = assimp_loader::LoaderInfo::create<TestVertex>(
-            application, "Zeppeli", sansMaterialInfo);
+        application, "Zeppeli", sansMaterialInfo);
     zeppeliLoaderInfo.flipWindingOrder = true;
     zeppeliLoaderInfo.flipNormals = true;
 
@@ -231,24 +255,24 @@ void loadModels(Application* application, Room* room,
     albedoInfo.image.format = TextureFormat::R8G8B8A8_SRGB;
 
     std::shared_ptr<Texture> cubeAlbedo = Texture::createTextureFromFile(
-            application, "cube_albedo", "resource/Cube/bricks.png",
-            albedoInfo);
+        application, "cube_albedo", "resource/Cube/bricks.png",
+        albedoInfo);
 
     std::shared_ptr<Texture> cubeNormal = Texture::createTextureFromFile(
-            application, "cube_normal",
-            "resource/Cube/bricks_normal.png");
+        application, "cube_normal",
+        "resource/Cube/bricks_normal.png");
     std::shared_ptr<Texture> cubeParallax = Texture::createTextureFromFile(
-            application, "cube_parallax",
-            "resource/Cube/bricks_parallax.png");
+        application, "cube_parallax",
+        "resource/Cube/bricks_parallax.png");
 
     std::vector<ShaderUniformBinding> cubeMaterialBindings;
     cubeMaterialBindings.resize(3, {UniformBindingType::IMAGE, 0});
 
     std::shared_ptr<ShaderUniformDescriptor> cubeMaterialDescriptor;
     materialDescriptor = std::make_shared<ShaderUniformDescriptor>(
-            room->getApplication(),
-            "cubeMaterialDescriptor",
-            cubeMaterialBindings
+        room->getApplication(),
+        "cubeMaterialDescriptor",
+        cubeMaterialBindings
     );
 
     MaterialCreateInfo cubeMaterialInfo(target, shaderParallax);
@@ -258,14 +282,14 @@ void loadModels(Application* application, Room* room,
             DefaultInstancingData::getInstancingDescription();
 
     auto material = std::make_shared<Material>(
-            application, "cubeMaterial", cubeMaterialInfo);
+        application, "cubeMaterial", cubeMaterialInfo);
 
     material->getUniformBuffer()->setTexture(0, cubeAlbedo);
     material->getUniformBuffer()->setTexture(1, cubeNormal);
     material->getUniformBuffer()->setTexture(2, cubeParallax);
 
     auto cubeModel = model_utils::createCubeModel<TestVertex>(
-            room, material);
+        room, material);
 
     auto cube = room->newGameObject();
     cube->newComponent<GraphicComponent>(cubeModel);
@@ -276,12 +300,12 @@ void loadModels(Application* application, Room* room,
 
 std::shared_ptr<Texture> loadSkybox(Room* room) {
     static const std::vector<std::string> PATHS = {
-            "resource/Skybox/right.jpg",
-            "resource/Skybox/left.jpg",
-            "resource/Skybox/top.jpg",
-            "resource/Skybox/bottom.jpg",
-            "resource/Skybox/front.jpg",
-            "resource/Skybox/back.jpg",
+        "resource/Skybox/right.jpg",
+        "resource/Skybox/left.jpg",
+        "resource/Skybox/top.jpg",
+        "resource/Skybox/bottom.jpg",
+        "resource/Skybox/front.jpg",
+        "resource/Skybox/back.jpg",
     };
 
     TextureCreateInfo info;
@@ -293,7 +317,6 @@ std::shared_ptr<Texture> loadSkybox(Room* room) {
 }
 
 std::shared_ptr<Room> getTestRoom(Application* application) {
-
     auto room = std::make_shared<Room>(application);
 
     auto fpFrameBuffer = initRender(room.get());
@@ -303,7 +326,8 @@ std::shared_ptr<Room> getTestRoom(Application* application) {
 
 
     auto cameraController = room->newGameObject();
-    auto cameraMovement = cameraController->newComponent<CameraMovementComponent>();
+    auto cameraMovement = cameraController->newComponent<
+        CameraMovementComponent>();
     cameraMovement->setSpeed(10.0f);
 
     auto parameterUpdater = room->newGameObject();
@@ -311,7 +335,8 @@ std::shared_ptr<Room> getTestRoom(Application* application) {
     parameterUpdater->newComponent<LockMouseComponent>(cameraMovement);
     parameterUpdater->newComponent<DockSpaceComponent>();
     parameterUpdater->newComponent<ViewportComponent>();
-    auto goExplorer = parameterUpdater->newComponent<GameObjectExplorerComponent>();
+    auto goExplorer = parameterUpdater->newComponent<
+        GameObjectExplorerComponent>();
     parameterUpdater->newComponent<SceneTreeComponent>(goExplorer);
     parameterUpdater->newComponent<DebugOverlayComponent>(false, 100);
 
@@ -349,7 +374,7 @@ int main() {
     std::srand(std::time(nullptr));
 
     Application application(std::make_unique<vulkan::VKApplication>(
-            "Neon", WIDTH, HEIGHT));
+        "Neon", WIDTH, HEIGHT));
 
     application.init();
     application.setRoom(getTestRoom(&application));
@@ -357,12 +382,13 @@ int main() {
     auto loopResult = application.startGameLoop();
     if (loopResult.isOk()) {
         std::cout << "[APPLICATION]\tApplication closed. "
-                  << loopResult.getResult() << " frames generated."
-                  << std::endl;
-    } else {
+                << loopResult.getResult() << " frames generated."
+                << std::endl;
+    }
+    else {
         std::cout << "[APPLICATION]\tUnexpected game loop error: "
-                  << loopResult.getError()
-                  << std::endl;
+                << loopResult.getError()
+                << std::endl;
     }
 
     application.setRoom(nullptr);
