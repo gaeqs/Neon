@@ -136,8 +136,7 @@ namespace neon::vulkan {
         submitInfo.pSignalSemaphores = signalSemaphores;
 
         VkFence fence = fetchAvailableFence();
-        vkQueueSubmit(_vkApplication->getGraphicsQueue(), 1,
-                      &submitInfo, fence);
+        _vkApplication->getGraphicsQueue().submit(submitInfo, fence);
         _fences.push_back(fence);
 
         return true;

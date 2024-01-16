@@ -11,6 +11,8 @@
 #include <vulkan/vulkan.h>
 
 #include <vulkan/VKQueueFamilyIndices.h>
+#include <vulkan/render/VKThreadSafeQueue.h>
+
 
 namespace neon::vulkan {
     class AbstractVKApplication : public ApplicationImplementation {
@@ -23,7 +25,7 @@ namespace neon::vulkan {
 
         [[nodiscard]] virtual VkPhysicalDevice getPhysicalDevice() const = 0;
 
-        [[nodiscard]] virtual VkQueue getGraphicsQueue() const = 0;
+        [[nodiscard]] virtual VKThreadSafeQueue& getGraphicsQueue() = 0;
 
         [[nodiscard]] virtual VkFormat getSwapChainImageFormat() const = 0;
 

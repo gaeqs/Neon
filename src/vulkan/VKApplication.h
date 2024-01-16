@@ -19,8 +19,10 @@
 #include <vulkan/AbstractVKApplication.h>
 #include <vulkan/VKSwapChainSupportDetails.h>
 #include <vulkan/VKQueueFamilyIndices.h>
+#include <vulkan/render/VKThreadSafeQueue.h>
 
 #include <util/profile/Profiler.h>
+
 
 namespace neon {
     class Room;
@@ -57,8 +59,8 @@ namespace neon::vulkan {
         VkPhysicalDevice _physicalDevice;
         VKQueueFamilyIndices _familyIndices;
         VkDevice _device;
-        VkQueue _graphicsQueue;
-        VkQueue _presentQueue;
+        VKThreadSafeQueue _graphicsQueue;
+        VKThreadSafeQueue _presentQueue;
         VkSurfaceKHR _surface;
         VkSurfaceFormatKHR _surfaceFormat;
 
@@ -183,9 +185,9 @@ namespace neon::vulkan {
 
         [[nodiscard]] VKQueueFamilyIndices getFamilyIndices() const override;
 
-        [[nodiscard]] VkQueue getGraphicsQueue() const override;
+        [[nodiscard]] VKThreadSafeQueue& getGraphicsQueue() override;
 
-        [[nodiscard]] VkQueue getPresentQueue() const;
+        [[nodiscard]] VKThreadSafeQueue& getPresentQueue();
 
         [[nodiscard]] VkSurfaceKHR getSurface() const;
 

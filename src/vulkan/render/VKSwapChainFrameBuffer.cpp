@@ -161,7 +161,7 @@ namespace neon::vulkan {
         init_info.Instance = _vkApplication->getInstance();
         init_info.PhysicalDevice = _vkApplication->getPhysicalDevice();
         init_info.Device = _vkApplication->getDevice();
-        init_info.Queue = _vkApplication->getGraphicsQueue();
+        init_info.Queue = _vkApplication->getGraphicsQueue().getQueue();
         init_info.DescriptorPool = _vkApplication->getImGuiPool();
         init_info.MinImageCount = 3;
         init_info.ImageCount = 3;

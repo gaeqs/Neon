@@ -58,17 +58,20 @@ namespace neon::assimp_loader {
                 }
             }
 
+            TextureCreateInfo createInfo;
+            createInfo.commandBuffer = info.commandBuffer;
+
             if (texture->mHeight == 0) {
                 // Compressed format! Let's stbi decide.
                 return Texture::createTextureFromFile(
                         info.application,
                         texture->mFilename.C_Str(),
                         texture->pcData,
-                        texture->mWidth
+                        texture->mWidth,
+                        createInfo
                 );
             }
 
-            TextureCreateInfo createInfo;
             createInfo.image.width = texture->mWidth;
             createInfo.image.height = texture->mHeight;
             createInfo.image.depth = 1;

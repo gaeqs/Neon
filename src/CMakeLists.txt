@@ -157,7 +157,9 @@ set(VULKAN_SOURCES
         vulkan/render/VKCommandBuffer.h
         vulkan/AbstractVKApplication.h
         vulkan/render/VKCommandPool.cpp
-        vulkan/render/VKCommandPool.h)
+        vulkan/render/VKCommandPool.h
+        vulkan/render/VKThreadSafeQueue.cpp
+        vulkan/render/VKThreadSafeQueue.h)
 
 if (NEON_USE_QT)
     list(APPEND SOURCES

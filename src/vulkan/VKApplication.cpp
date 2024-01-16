@@ -345,7 +345,7 @@ namespace neon::vulkan {
         presentInfo.pImageIndices = &_imageIndex;
         presentInfo.pResults = nullptr; {
             DEBUG_PROFILE_ID(profiler, present, "Present");
-            vkQueuePresentKHR(_presentQueue, &presentInfo);
+            vkQueuePresentKHR(_presentQueue.getQueue(), &presentInfo);
         }
 
         _currentFrame = (_currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
@@ -623,18 +623,23 @@ namespace neon::vulkan {
             throw std::runtime_error("Failed to create logical device!");
         }
 
+        VkQueue graphics, present;
+
         vkGetDeviceQueue(
             _device,
             _familyIndices.graphics.value(),
             0,
-            &_graphicsQueue
+            &graphics
         );
         vkGetDeviceQueue(
             _device,
             _familyIndices.present.value(),
             0,
-            &_presentQueue
+            &present
         );
+
+        _graphicsQueue.setQueue(graphics);
+        _presentQueue.setQueue(present);
     }
 
     void VKApplication::createSwapChain() {
@@ -927,11 +932,11 @@ namespace neon::vulkan {
         return _familyIndices;
     }
 
-    VkQueue VKApplication::getGraphicsQueue() const {
+    VKThreadSafeQueue& VKApplication::getGraphicsQueue() {
         return _graphicsQueue;
     }
 
-    VkQueue VKApplication::getPresentQueue() const {
+    VKThreadSafeQueue& VKApplication::getPresentQueue() {
         return _presentQueue;
     }
 

@@ -161,10 +161,11 @@ namespace neon {
          */
         uint32_t mipmaps = 0;
 
-        std::vector<TextureUsage> usages = {TextureUsage::TRANSFER_SOURCE,
-                                            TextureUsage::TRANSFER_DESTINY,
-                                            TextureUsage::SAMPLING};
-
+        std::vector<TextureUsage> usages = {
+            TextureUsage::TRANSFER_SOURCE,
+            TextureUsage::TRANSFER_DESTINY,
+            TextureUsage::SAMPLING
+        };
     };
 
     struct ImageViewCreateInfo {
@@ -217,7 +218,6 @@ namespace neon {
     };
 
     struct SamplerCreateInfo {
-
         /**
          * The filter used when there's more fragments than texels.
          */
@@ -277,7 +277,6 @@ namespace neon {
      * to create an 2D albedo texture.
      */
     struct TextureCreateInfo {
-
         /**
          * The creation information of the image itself.
          */
@@ -292,6 +291,14 @@ namespace neon {
          * The creation information of the sampler.
          */
         SamplerCreateInfo sampler = SamplerCreateInfo();
+
+        /**
+         * Defines the command buffer used to create
+         * the texture.
+         * If this command buffer is nullptr, the default
+         * command buffer will be used.
+         */
+        CommandBuffer* commandBuffer = nullptr;
     };
 }
 

@@ -186,6 +186,14 @@ namespace neon::assimp_loader {
          */
         AssetStorageMode assetStorageMode = AssetStorageMode::WEAK;
 
+        /**
+          * Defines the command buffer used to create
+          * the textures of the model.
+          * If this command buffer is nullptr, the default
+          * command buffer will be used.
+          */
+        CommandBuffer* commandBuffer = nullptr;
+
     private:
 
         LoaderInfo(Application* application_,
