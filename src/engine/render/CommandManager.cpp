@@ -4,7 +4,6 @@
 
 #include "CommandManager.h"
 
-#include <iostream>
 #include <engine/render/CommandPool.h>
 
 namespace neon {
