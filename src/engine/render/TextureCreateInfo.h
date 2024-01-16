@@ -2,12 +2,16 @@
 // Created by gaelr on 28/01/2023.
 //
 
-#include <cstdint>
 
 #ifndef NEON_TEXTURECREATEINFO_H
 #define NEON_TEXTURECREATEINFO_H
 
+#include <cstdint>
+
 namespace neon {
+
+    class CommandBuffer;
+
     enum class TextureFormat {
         R8,
         R8G8,

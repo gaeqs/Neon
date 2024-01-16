@@ -134,8 +134,7 @@ namespace neon::vulkan {
                                                  _swapChainExtent(),
                                                  _swapChainCount(0),
                                                  _depthImageFormat(),
-                                                 _commandPool(nullptr),
-                                                 _commandBuffers(),
+                                                 _commandPool(),
                                                  _recording(false),
                                                  _imageAvailableSemaphores(),
                                                  _renderFinishedSemaphores(),
@@ -179,9 +178,7 @@ namespace neon::vulkan {
     }
 
     CommandBuffer* VKApplication::getCurrentCommandBuffer() const {
-        return _commandBuffers.empty()
-                   ? nullptr
-                   : _commandBuffers[_currentFrame].get();
+        return _currentCommandBuffer;
     }
 
     void VKApplication::lockMouse(bool lock) {
@@ -273,16 +270,11 @@ namespace neon::vulkan {
         createLogicalDevice();
         createSwapChain();
         createCommandPool();
-        createCommandBuffers();
         createSyncObjects();
         initImGui();
     }
 
-    bool VKApplication::preUpdate(Profiler& profiler) { {
-            DEBUG_PROFILE_ID(profiler, wait, "Wait for GPU");
-            _commandBuffers[_currentFrame]->reset();
-        }
-
+    bool VKApplication::preUpdate(Profiler& profiler) {
         auto& render = _application->getRender(); {
             DEBUG_PROFILE_ID(profiler, recreation, "FB Recreation");
             render->checkFrameBufferRecreationConditions();
@@ -308,7 +300,8 @@ namespace neon::vulkan {
             throw std::runtime_error("Failed to acquire swap chain image!");
         } {
             DEBUG_PROFILE_ID(profiler, beginCB, "Begin Command Buffer");
-            _commandBuffers[_currentFrame]->begin(false);
+            _currentCommandBuffer = _commandPool.getPool()
+                    .beginCommandBuffer(true);
         }
 
         ImGui_ImplVulkan_NewFrame();
@@ -321,7 +314,7 @@ namespace neon::vulkan {
     }
 
     void VKApplication::endDraw(Profiler& profiler) {
-        _commandBuffers[_currentFrame]->end();
+        _currentCommandBuffer->end();
 
         _recording = false;
 
@@ -329,8 +322,7 @@ namespace neon::vulkan {
             VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT
         };
 
-
-        _commandBuffers[_currentFrame]->getImplementation().submit(
+        _currentCommandBuffer->getImplementation().submit(
             1, &_imageAvailableSemaphores[_currentFrame], waitStages,
             1, &_renderFinishedSemaphores[_currentFrame]);
 
@@ -355,6 +347,10 @@ namespace neon::vulkan {
     void VKApplication::finishLoop() {
         _application->getTaskRunner().joinAsyncTasks();
         vkDeviceWaitIdle(_device);
+
+        // Free the command pool here and not in the
+        // destructor.
+        _commandPool = CommandPoolHolder();
     }
 
     void VKApplication::internalForceSizeValues(int32_t width, int32_t height) {
@@ -787,17 +783,7 @@ namespace neon::vulkan {
     }
 
     void VKApplication::createCommandPool() {
-        _commandPool = std::make_unique<CommandPool>(_application);
-    }
-
-    void VKApplication::createCommandBuffers() {
-        _commandBuffers.clear();
-        _commandBuffers.reserve(MAX_FRAMES_IN_FLIGHT);
-
-        for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
-            _commandBuffers.emplace_back(
-                std::make_unique<CommandBuffer>(_application, true));
-        }
+        _commandPool = _application->getCommandManager().fetchCommandPool();
     }
 
     void VKApplication::createSyncObjects() {
@@ -888,9 +874,6 @@ namespace neon::vulkan {
             vkDestroySemaphore(_device, _renderFinishedSemaphores[i], nullptr);
         }
 
-        _commandBuffers.clear();
-        _commandPool = nullptr;
-
         cleanupSwapChain();
         vkDestroyDevice(_device, nullptr);
         vkDestroySurfaceKHR(_instance, _surface, nullptr);
@@ -949,7 +932,7 @@ namespace neon::vulkan {
     }
 
     CommandPool* VKApplication::getCommandPool() const {
-        return _commandPool.get();
+        return &_commandPool.getPool();
     }
 
     VkDescriptorPool VKApplication::getImGuiPool() const {

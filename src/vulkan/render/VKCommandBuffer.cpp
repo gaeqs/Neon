@@ -12,6 +12,18 @@
 #include <engine/render/CommandPool.h>
 
 namespace neon::vulkan {
+    VKCommandBuffer::VKCommandBuffer(VKCommandBuffer&& move) noexcept
+        : _vkApplication(move._vkApplication),
+          _pool(move._pool),
+          _commandBuffer(move.getCommandBuffer()),
+          _status(move._status),
+          _fences(std::move(move._fences)),
+          _freedFences(std::move(move._freedFences)),
+          _external(move._external) {
+        move._pool = VK_NULL_HANDLE;
+        move._commandBuffer = VK_NULL_HANDLE;
+    }
+
     VKCommandBuffer::VKCommandBuffer(Application* application, bool primary)
         : _vkApplication(dynamic_cast<AbstractVKApplication*>(
               application->getImplementation())),
@@ -59,30 +71,19 @@ namespace neon::vulkan {
 
     VKCommandBuffer::VKCommandBuffer(Application* application,
                                      VkCommandBuffer
-                                     commandBuffer) : _vkApplication(
-            dynamic_cast<AbstractVKApplication*>(
-                application->getImplementation())),
-        _commandBuffer(commandBuffer),
-        _status(VKCommandBufferStatus::READY),
-        _fences(),
-        _freedFences(),
-        _external(true) {
+                                     commandBuffer)
+        : _vkApplication(dynamic_cast<AbstractVKApplication*>(
+              application->getImplementation())),
+          _commandBuffer(commandBuffer),
+          _pool(VK_NULL_HANDLE),
+          _status(VKCommandBufferStatus::READY),
+          _fences(),
+          _freedFences(),
+          _external(true) {
     }
 
     VKCommandBuffer::~VKCommandBuffer() {
-        waitForFences();
-
-        for (const auto& fence: _freedFences) {
-            vkDestroyFence(_vkApplication->getDevice(), fence, nullptr);
-        }
-
-        if (!_external) {
-            vkFreeCommandBuffers(
-                _vkApplication->getDevice(),
-                _pool,
-                1, &_commandBuffer
-            );
-        }
+        free();
     }
 
     VkCommandBuffer VKCommandBuffer::getCommandBuffer() const {
@@ -225,6 +226,24 @@ namespace neon::vulkan {
         ) << std::endl;
     }
 
+    void VKCommandBuffer::free() {
+        if (_commandBuffer == VK_NULL_HANDLE) return;
+
+        waitForFences();
+
+        for (const auto& fence: _freedFences) {
+            vkDestroyFence(_vkApplication->getDevice(), fence, nullptr);
+        }
+
+        if (!_external) {
+            vkFreeCommandBuffers(
+                _vkApplication->getDevice(),
+                _pool,
+                1, &_commandBuffer
+            );
+        }
+    }
+
     bool VKCommandBuffer::isBeingUsed() {
         if (_status == VKCommandBufferStatus::RECORDING) return false;
         if (_fences.empty()) return false;
@@ -249,5 +268,20 @@ namespace neon::vulkan {
         }
 
         return used;
+    }
+
+    VKCommandBuffer& VKCommandBuffer::operator
+    =(VKCommandBuffer&& move) noexcept {
+        if (this == &move) return *this; // SAME!
+        free();
+        _vkApplication = move._vkApplication;
+        _pool = move._pool;
+        _commandBuffer = move._commandBuffer;
+        _status = move._status;
+        _fences = std::move(move._fences);
+        _freedFences = std::move(move._freedFences);
+        move._pool = VK_NULL_HANDLE;
+        move._commandBuffer = VK_NULL_HANDLE;
+        return *this;
     }
 }

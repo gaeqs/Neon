@@ -41,8 +41,12 @@ namespace neon::vulkan {
 
         void printInvalidState(VKCommandBufferStatus expected) const;
 
+        void free();
+
     public:
         VKCommandBuffer(const VKCommandBuffer& other) = delete;
+
+        VKCommandBuffer(VKCommandBuffer&& move) noexcept;
 
         VKCommandBuffer(Application* application, bool primary);
 
@@ -71,6 +75,8 @@ namespace neon::vulkan {
         void reset(bool releaseResources = true);
 
         bool isBeingUsed();
+
+        VKCommandBuffer& operator=(VKCommandBuffer&& move) noexcept;
     };
 }
 

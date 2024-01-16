@@ -5,6 +5,10 @@
 #include "CommandBuffer.h"
 
 namespace neon {
+    CommandBuffer::CommandBuffer(CommandBuffer&& move) noexcept
+        : _implementation(std::move(move._implementation)) {
+    }
+
     CommandBuffer::CommandBuffer(Application* application,
                                  bool primary)
         : _implementation(application, primary) {
@@ -57,5 +61,10 @@ namespace neon {
 
     bool CommandBuffer::isBeingUsed() {
         return _implementation.isBeingUsed();
+    }
+
+    CommandBuffer& CommandBuffer::operator=(CommandBuffer&& move) noexcept {
+        _implementation = std::move(move._implementation);
+        return *this;
     }
 }

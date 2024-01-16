@@ -17,9 +17,13 @@ namespace neon {
                           _room(nullptr),
                           _lastCursorPosition(0.0, 0.0),
                           _profiler(),
+                          _commandManager(this),
                           _assets(),
                           _render(),
                           _forcedViewport() {
+    }
+
+    Application::~Application() {
     }
 
     void Application::init() {
@@ -43,6 +47,14 @@ namespace neon {
     }
 
     Profiler& Application::getProfiler() { return _profiler; }
+
+    const CommandManager& Application::getCommandManager() const {
+        return _commandManager;
+    }
+
+    CommandManager& Application::getCommandManager() {
+        return _commandManager;
+    }
 
     const TaskRunner& Application::getTaskRunner() const {
         return _taskRunner;

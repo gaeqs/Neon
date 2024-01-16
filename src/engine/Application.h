@@ -18,7 +18,8 @@
 #include <util/Result.h>
 #include <util/profile/Profiler.h>
 
-#include "util/task/TaskRunner.h"
+#include <engine/render/CommandManager.h>
+#include <util/task/TaskRunner.h>
 
 namespace neon {
     class Room;
@@ -61,12 +62,15 @@ namespace neon {
         Profiler _profiler;
         AssetCollection _assets;
         TaskRunner _taskRunner;
+        CommandManager _commandManager;
         std::shared_ptr<Render> _render;
         std::optional<rush::Vec2i> _forcedViewport;
 
     public:
         explicit Application(
             std::unique_ptr<ApplicationImplementation> implementation);
+
+        ~Application();
 
         void init();
 
@@ -80,6 +84,10 @@ namespace neon {
         [[nodiscard]] const Profiler& getProfiler() const;
 
         [[nodiscard]] Profiler& getProfiler();
+
+        [[nodiscard]] const CommandManager& getCommandManager() const;
+
+        [[nodiscard]] CommandManager& getCommandManager();
 
         [[nodiscard]] const TaskRunner& getTaskRunner() const;
 

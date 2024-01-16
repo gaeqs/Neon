@@ -23,6 +23,10 @@ namespace neon::vulkan {
         VkCommandPool _raw;
 
     public:
+        VKCommandPool(const VKCommandPool& other) = delete;
+
+        VKCommandPool(VKCommandPool&& move) noexcept;
+
         explicit VKCommandPool(Application* application);
 
         ~VKCommandPool();
@@ -31,6 +35,8 @@ namespace neon::vulkan {
 
         [[nodiscard]] std::unique_ptr<CommandBuffer> newCommandBuffer(
             bool primary) const;
+
+        VKCommandPool& operator=(VKCommandPool&& move) noexcept;
     };
 }
 

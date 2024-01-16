@@ -13,10 +13,15 @@
 #include <vulkan/VKQueueFamilyIndices.h>
 #include <vulkan/render/VKThreadSafeQueue.h>
 
+namespace neon {
+    class Application;
+}
 
 namespace neon::vulkan {
     class AbstractVKApplication : public ApplicationImplementation {
     public:
+        [[nodiscard]] virtual Application* getApplication() const = 0;
+
         [[nodiscard]] virtual VkInstance getInstance() const = 0;
 
         [[nodiscard]] virtual VKQueueFamilyIndices getFamilyIndices() const = 0;

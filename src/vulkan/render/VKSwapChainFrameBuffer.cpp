@@ -72,14 +72,24 @@ namespace neon::vulkan {
                 ImageViewCreateInfo()
         );
 
-        vulkan_util::transitionImageLayout(
-                _vkApplication,
-                _depthImage,
-                _vkApplication->getDepthImageFormat(),
-                VK_IMAGE_LAYOUT_UNDEFINED,
-                VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
-                1, 1
-        );
+        //
+        {
+            CommandPoolHolder holder = _vkApplication->getApplication()
+            ->getCommandManager().fetchCommandPool();
+            CommandBuffer* buffer = holder.getPool().beginCommandBuffer(true);
+            VkCommandBuffer rawBuffer = buffer->getImplementation().
+                    getCommandBuffer();
+
+            vulkan_util::transitionImageLayout(
+                    _vkApplication,
+                    _depthImage,
+                    _vkApplication->getDepthImageFormat(),
+                    VK_IMAGE_LAYOUT_UNDEFINED,
+                    VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+                    1, 1,
+                    rawBuffer
+            );
+        }
     }
 
     void VKSwapChainFrameBuffer::createFrameBuffers() {

@@ -9,6 +9,13 @@
 #include <engine/render/CommandBuffer.h>
 
 namespace neon::vulkan {
+    VKCommandPool::VKCommandPool(VKCommandPool&& move) noexcept
+        : _application(move._application),
+          _vkApplication(move._vkApplication),
+          _raw(move._raw) {
+        move._raw = VK_NULL_HANDLE;
+    }
+
     VKCommandPool::VKCommandPool(
         Application* application)
         : _application(application),
@@ -33,11 +40,13 @@ namespace neon::vulkan {
     }
 
     VKCommandPool::~VKCommandPool() {
-        vkDestroyCommandPool(
-            _vkApplication->getDevice(),
-            _raw,
-            nullptr
-        );
+        if (_raw != VK_NULL_HANDLE) {
+            vkDestroyCommandPool(
+                _vkApplication->getDevice(),
+                _raw,
+                nullptr
+            );
+        }
     }
 
     VkCommandPool VKCommandPool::raw() const {
@@ -47,5 +56,21 @@ namespace neon::vulkan {
     std::unique_ptr<CommandBuffer> VKCommandPool::newCommandBuffer(
         bool primary) const {
         return std::make_unique<CommandBuffer>(_application, _raw, primary);
+    }
+
+    VKCommandPool& VKCommandPool::operator=(VKCommandPool&& move) noexcept {
+        if(this == &move) return *this; // SAME!
+        if (_raw != VK_NULL_HANDLE) {
+            vkDestroyCommandPool(
+                _vkApplication->getDevice(),
+                _raw,
+                nullptr
+            );
+        }
+        _application = move._application;
+        _vkApplication = move._vkApplication;
+        _raw = move._raw;
+        move._raw = VK_NULL_HANDLE;
+        return *this;
     }
 }

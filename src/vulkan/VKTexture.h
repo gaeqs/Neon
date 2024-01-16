@@ -19,6 +19,7 @@ namespace neon::vulkan {
 
     class VKTexture {
 
+        Application* _application;
         AbstractVKApplication* _vkApplication;
 
         int32_t _width, _height, _depth;

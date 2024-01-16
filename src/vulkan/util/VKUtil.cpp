@@ -85,12 +85,12 @@ namespace neon::vulkan::vulkan_util {
                         source, destiny, 1, &copyRegion);
     }
 
-    std::pair<VkImage, VkDeviceMemory> createImage(
-        VkDevice device,
-        VkPhysicalDevice physicalDevice,
-        const ImageCreateInfo& info,
-        TextureViewType viewType,
-        VkFormat override) {
+    std::pair<VkImage, VkDeviceMemory>
+    createImage(VkDevice device,
+                VkPhysicalDevice physicalDevice,
+                const ImageCreateInfo& info,
+                TextureViewType viewType,
+                VkFormat override) {
         VkImage image;
         VkDeviceMemory memory;
 
@@ -155,12 +155,13 @@ namespace neon::vulkan::vulkan_util {
         return {image, memory};
     }
 
-    void transitionImageLayout(
-        AbstractVKApplication* application,
-        VkImage image, VkFormat format,
-        VkImageLayout oldLayout, VkImageLayout newLayout,
-        uint32_t mipLevels,
-        uint32_t layers) {
+    void transitionImageLayout(AbstractVKApplication* application,
+                               VkImage image, VkFormat format,
+                               VkImageLayout oldLayout,
+                               VkImageLayout newLayout,
+                               uint32_t mipLevels,
+                               uint32_t layers,
+                               VkCommandBuffer commandBuffer) {
         VkImageMemoryBarrier barrier{};
         barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
         barrier.oldLayout = oldLayout;
@@ -245,36 +246,19 @@ namespace neon::vulkan::vulkan_util {
             throw std::invalid_argument("unsupported layout transition!");
         }
 
-        if (application->isRecordingCommandBuffer()) {
-            vkCmdPipelineBarrier(
-                application->getCurrentCommandBuffer()
-                ->getImplementation().getCommandBuffer(),
-                sourceStage, destinationStage,
-                0, 0, nullptr, 0,
-                nullptr, 1, &barrier
-            );
-        }
-        else {
-            auto commandBuffer = application->getCommandPool()
-                    ->beginCommandBuffer(true);
-
-            vkCmdPipelineBarrier(
-                commandBuffer->getImplementation().getCommandBuffer(),
-                sourceStage, destinationStage,
-                0, 0, nullptr, 0,
-                nullptr, 1, &barrier
-            );
-
-            commandBuffer->end();
-            commandBuffer->submit();
-        }
+        vkCmdPipelineBarrier(
+            commandBuffer,
+            sourceStage, destinationStage,
+            0, 0, nullptr, 0,
+            nullptr, 1, &barrier
+        );
     }
 
-    void copyBufferToImage(
-        AbstractVKApplication* application,
-        VkBuffer buffer, VkImage image,
-        uint32_t width, uint32_t height, uint32_t depth,
-        uint32_t layers) {
+    void copyBufferToImage(AbstractVKApplication* application,
+                           VkBuffer buffer, VkImage image,
+                           uint32_t width, uint32_t height, uint32_t depth,
+                           uint32_t layers,
+                           VkCommandBuffer commandBuffer) {
         VkBufferImageCopy region{};
         region.bufferOffset = 0;
         region.bufferRowLength = 0;
@@ -292,49 +276,24 @@ namespace neon::vulkan::vulkan_util {
             depth,
         };
 
-        if (application->isRecordingCommandBuffer()) {
-            vkCmdCopyBufferToImage(
-                application->getCurrentCommandBuffer()
-                ->getImplementation().getCommandBuffer(),
-                buffer,
-                image,
-                VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-                1,
-                &region
-            );
-        }
-        else {
-            auto commandBuffer = application->getCommandPool()
-                    ->beginCommandBuffer(true);
-
-            vkCmdCopyBufferToImage(
-                commandBuffer->getImplementation().getCommandBuffer(),
-                buffer,
-                image,
-                VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-                1,
-                &region
-            );
-
-            commandBuffer->end();
-            commandBuffer->submit();
-        }
+        vkCmdCopyBufferToImage(
+            commandBuffer,
+            buffer,
+            image,
+            VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+            1,
+            &region
+        );
     }
 
-    void generateMipmaps(
-        AbstractVKApplication* application,
-        VkImage image,
-        uint32_t width, uint32_t height, uint32_t depth,
-        uint32_t levels, int32_t layers) {
-        CommandBuffer* commandBuffer;
-
-        if (application->isRecordingCommandBuffer()) {
-            commandBuffer = application->getCurrentCommandBuffer();
-        }
-        else {
-            commandBuffer = application->getCommandPool()
-                    ->beginCommandBuffer(true);
-        }
+    void generateMipmaps(AbstractVKApplication* application,
+                         VkImage image,
+                         uint32_t width,
+                         uint32_t height,
+                         uint32_t depth,
+                         uint32_t levels,
+                         int32_t layers,
+                         VkCommandBuffer commandBuffer) {
 
         VkImageMemoryBarrier barrier{};
         barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
@@ -358,7 +317,7 @@ namespace neon::vulkan::vulkan_util {
             barrier.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
 
             vkCmdPipelineBarrier(
-                commandBuffer->getImplementation().getCommandBuffer(),
+                commandBuffer,
                 VK_PIPELINE_STAGE_TRANSFER_BIT,
                 VK_PIPELINE_STAGE_TRANSFER_BIT, 0,
                 0, nullptr,
@@ -385,7 +344,7 @@ namespace neon::vulkan::vulkan_util {
             blit.dstSubresource.layerCount = layers;
 
             vkCmdBlitImage(
-                commandBuffer->getImplementation().getCommandBuffer(),
+                commandBuffer,
                 image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
                 image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
                 1, &blit,
@@ -398,7 +357,7 @@ namespace neon::vulkan::vulkan_util {
             barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
 
             vkCmdPipelineBarrier(
-                commandBuffer->getImplementation().getCommandBuffer(),
+                commandBuffer,
                 VK_PIPELINE_STAGE_TRANSFER_BIT,
                 VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0,
                 0, nullptr,
@@ -417,18 +376,13 @@ namespace neon::vulkan::vulkan_util {
         barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
 
         vkCmdPipelineBarrier(
-            commandBuffer->getImplementation().getCommandBuffer(),
+            commandBuffer,
             VK_PIPELINE_STAGE_TRANSFER_BIT,
             VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0,
             0, nullptr,
             0, nullptr,
             1, &barrier
         );
-
-        if (!application->isRecordingCommandBuffer()) {
-            commandBuffer->end();
-            commandBuffer->submit();
-        }
     }
 
     std::optional<VkFormat> findSupportedFormat(

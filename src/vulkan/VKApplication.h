@@ -71,9 +71,9 @@ namespace neon::vulkan {
 
         VkFormat _depthImageFormat;
 
-        std::unique_ptr<CommandPool> _commandPool;
+        CommandPoolHolder _commandPool;
 
-        std::vector<std::unique_ptr<CommandBuffer>> _commandBuffers;
+        CommandBuffer* _currentCommandBuffer;
         bool _recording;
 
         std::vector<VkSemaphore> _imageAvailableSemaphores;
@@ -123,8 +123,6 @@ namespace neon::vulkan {
 
         void createCommandPool();
 
-        void createCommandBuffers();
-
         void createSyncObjects();
 
         void initImGui();
@@ -169,7 +167,7 @@ namespace neon::vulkan {
 
         void internalForceSizeValues(int32_t width, int32_t height);
 
-        [[nodiscard]] Application* getApplication() const;
+        [[nodiscard]] Application* getApplication() const override;
 
         [[nodiscard]] uint32_t getCurrentFrame() const override;
 

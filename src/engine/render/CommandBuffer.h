@@ -26,6 +26,8 @@ namespace neon {
     public:
         CommandBuffer(const CommandBuffer& other) = delete;
 
+        CommandBuffer(CommandBuffer&& move) noexcept;
+
         CommandBuffer(Application* application, bool primary);
 
 #ifdef USE_VULKAN
@@ -52,6 +54,8 @@ namespace neon {
         void reset(bool releaseResources = true);
 
         bool isBeingUsed();
+
+        CommandBuffer& operator=(CommandBuffer&& move) noexcept;
     };
 }
 

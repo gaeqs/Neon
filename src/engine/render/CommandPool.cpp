@@ -18,6 +18,13 @@ namespace neon {
         }
     }
 
+    CommandPool::CommandPool(CommandPool&& move) noexcept
+        : _implementation(std::move(move._implementation)) {
+        _buffers = std::move(move._buffers);
+        _availableBuffers = std::move(move._availableBuffers);
+        _usedBuffers = std::move(move._usedBuffers);
+    }
+
     CommandPool::CommandPool(Application* application)
         : _implementation(application),
           _buffers(),
@@ -59,5 +66,15 @@ namespace neon {
         auto raw = _buffers.back().get();
         raw->begin(true);
         return raw;
+    }
+
+    CommandPool& CommandPool::operator=(CommandPool&& move) noexcept {
+        _buffers.clear();
+
+        _implementation = std::move(move._implementation);
+        _buffers = std::move(move._buffers);
+        _availableBuffers = std::move(move._availableBuffers);
+        _usedBuffers = std::move(move._usedBuffers);
+        return *this;
     }
 }
