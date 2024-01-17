@@ -111,7 +111,8 @@ set(SOURCES
         util/task/TaskRunner.cpp
         util/task/TaskRunner.h
         engine/render/CommandManager.cpp
-        engine/render/CommandManager.h)
+        engine/render/CommandManager.h
+        assimp/AssimpNewIOSystem.h)
 
 
 set(VULKAN_SOURCES
@@ -161,7 +162,9 @@ set(VULKAN_SOURCES
         vulkan/render/VKCommandPool.cpp
         vulkan/render/VKCommandPool.h
         vulkan/render/VKThreadSafeQueue.cpp
-        vulkan/render/VKThreadSafeQueue.h)
+        vulkan/render/VKThreadSafeQueue.h
+        assimp/AssimpNewIOSystem.cpp
+        assimp/AssimpNewIOSystem.h)
 
 if (NEON_USE_QT)
     list(APPEND SOURCES
