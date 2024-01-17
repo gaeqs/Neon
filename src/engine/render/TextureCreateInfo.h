@@ -302,7 +302,7 @@ namespace neon {
          * If this command buffer is nullptr, the default
          * command buffer will be used.
          */
-        CommandBuffer* commandBuffer = nullptr;
+        const CommandBuffer* commandBuffer = nullptr;
     };
 }
 

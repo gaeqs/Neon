@@ -82,6 +82,10 @@ namespace neon {
         }
     }
 
+    bool CommandPoolHolder::isValid() const {
+        return _valid;
+    }
+
     CommandPool& CommandPoolHolder::getPool() const {
         return _manager->_usedPools.at(_threadId);
     }

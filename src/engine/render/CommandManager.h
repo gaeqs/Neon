@@ -53,6 +53,8 @@ namespace neon {
 
         ~CommandPoolHolder() noexcept;
 
+        [[nodiscard]] bool isValid() const;
+
         [[nodiscard]] CommandPool& getPool() const;
 
         CommandPoolHolder& operator=(CommandPoolHolder&& move) noexcept;

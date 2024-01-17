@@ -153,16 +153,14 @@ std::shared_ptr<FrameBuffer> initRender(Room* room) {
 
 void sansLoadThread(Application* application,
                     assimp_loader::LoaderInfo info) {
-    std::cout << "ID: " << std::this_thread::get_id() << std::endl;
-    std::this_thread::sleep_for(std::chrono::milliseconds(3000));
-
-
+    DEBUG_PROFILE_ID(application->getProfiler(), sans, "Sans load thread");
     auto holder = application->getCommandManager().fetchCommandPool();
     auto buffer = holder.getPool().beginCommandBuffer(true);
 
     info.commandBuffer = buffer;
 
-    auto sansResult = assimp_loader::load(R"(resource/Sans)", "Sans.obj",
+    auto sansResult = assimp_loader::load(R"(resource/Sans)",
+                                          "Sans.obj",
                                           info);
 
     if (!sansResult.valid) {

@@ -75,7 +75,7 @@ namespace neon::vulkan {
 
         template<class T>
         std::optional<std::shared_ptr<BufferMap<T>>> map(
-                const CommandBuffer* commandBuffer = nullptr) {
+            const CommandBuffer* commandBuffer = nullptr) {
             auto optional = rawMap(commandBuffer);
             if (optional.has_value()) {
                 return std::reinterpret_pointer_cast<BufferMap<T>>(

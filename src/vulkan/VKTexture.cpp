@@ -64,13 +64,15 @@ namespace neon::vulkan {
         //
         {
             CommandPoolHolder holder;
-            CommandBuffer* buffer;
+            const CommandBuffer* buffer;
+            CommandBuffer* internalBuffer = nullptr;
             if (createInfo.commandBuffer != nullptr) {
                 buffer = createInfo.commandBuffer;
             }
             else {
                 holder = application->getCommandManager().fetchCommandPool();
-                buffer = holder.getPool().beginCommandBuffer(true);
+                internalBuffer = holder.getPool().beginCommandBuffer(true);
+                buffer = internalBuffer;
             }
             VkCommandBuffer rawBuffer = buffer->getImplementation().
                     getCommandBuffer();
@@ -104,9 +106,9 @@ namespace neon::vulkan {
                 rawBuffer
             );
 
-            if (createInfo.commandBuffer == nullptr) {
-                buffer->end();
-                buffer->submit();
+            if (internalBuffer != nullptr) {
+                internalBuffer->end();
+                internalBuffer->submit();
             }
         }
 
