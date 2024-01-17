@@ -27,6 +27,8 @@
 #include <engine/model/Mesh.h>
 #include <engine/model/Model.h>
 
+#include "AssimpNewIOSystem.h"
+
 namespace neon::assimp_loader {
 
     using Tex = std::shared_ptr<Texture>;
@@ -314,10 +316,8 @@ namespace neon::assimp_loader {
         Assimp::Importer importer;
 
         auto previous = std::filesystem::current_path();
-        importer.GetIOHandler()->ChangeDirectory(directory);
+        importer.SetIOHandler(new AssimpNewIOSystem(directory));
         auto scene = importer.ReadFile(file, decodeFlags(info));
-        std::filesystem::current_path(previous);
-
         return load(scene, info);
     }
 
@@ -327,7 +327,6 @@ namespace neon::assimp_loader {
         Assimp::Importer importer;
         auto scene = importer.ReadFileFromMemory(
                 buffer, length, decodeFlags(info));
-
         return load(scene, info);
     }
 
@@ -356,6 +355,8 @@ namespace neon::assimp_loader {
                 info.name,
                 modelInfo
         );
+
+        std::cout << "Meshes: " << scene->mNumMeshes<< std::endl;
 
         model->defineInstanceStruct(
                 info.instanceData.type,
