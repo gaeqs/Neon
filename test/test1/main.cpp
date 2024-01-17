@@ -157,8 +157,9 @@ void sansLoadThread(Application* application,
     std::this_thread::sleep_for(std::chrono::milliseconds(3000));
 
 
-    auto pool = CommandPool(application);
-    auto buffer = pool.beginCommandBuffer(true);
+    auto holder = application->getCommandManager().fetchCommandPool();
+    auto buffer = holder.getPool().beginCommandBuffer(true);
+
     info.commandBuffer = buffer;
 
     auto sansResult = assimp_loader::load(R"(resource/Sans)", "Sans.obj",

@@ -63,9 +63,15 @@ namespace neon::vulkan {
 
         //
         {
-            CommandPoolHolder holder = application->getCommandManager()
-                    .fetchCommandPool();
-            CommandBuffer* buffer = holder.getPool().beginCommandBuffer(true);
+            CommandPoolHolder holder;
+            CommandBuffer* buffer;
+            if (createInfo.commandBuffer != nullptr) {
+                buffer = createInfo.commandBuffer;
+            }
+            else {
+                holder = application->getCommandManager().fetchCommandPool();
+                buffer = holder.getPool().beginCommandBuffer(true);
+            }
             VkCommandBuffer rawBuffer = buffer->getImplementation().
                     getCommandBuffer();
 
@@ -98,8 +104,10 @@ namespace neon::vulkan {
                 rawBuffer
             );
 
-            buffer->end();
-            buffer->submit();
+            if (createInfo.commandBuffer == nullptr) {
+                buffer->end();
+                buffer->submit();
+            }
         }
 
         // generateMipmaps transforms image to

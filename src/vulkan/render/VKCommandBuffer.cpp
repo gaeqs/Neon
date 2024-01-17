@@ -245,7 +245,7 @@ namespace neon::vulkan {
     }
 
     bool VKCommandBuffer::isBeingUsed() {
-        if (_status == VKCommandBufferStatus::RECORDING) return false;
+        if (_status == VKCommandBufferStatus::RECORDING) return true;
         if (_fences.empty()) return false;
         auto device = _vkApplication->getDevice();
 
