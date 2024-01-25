@@ -17,8 +17,9 @@
 #include <engine/structure/collection/AssetCollection.h>
 #include <engine/model/InputDescription.h>
 #include <engine/model/DefaultInstancingData.h>
-#include <engine/structure/IdentifiableWrapper.h>
 #include <engine/shader/MaterialCreateInfo.h>
+
+#include <util/Result.h>
 
 
 namespace neon {
@@ -30,21 +31,6 @@ namespace neon {
 struct aiScene;
 
 namespace neon::assimp_loader {
-
-    struct Result {
-
-        /**
-         * Whether the result is valid.
-         */
-        bool valid = false;
-
-        /**
-         * The loaded model.
-         * This value is nullptr if the result is not valid.
-         */
-        std::shared_ptr<Model> model = nullptr;
-    };
-
     struct VertexParserData {
         rush::Vec3f position;
         rush::Vec3f normal;
@@ -54,7 +40,6 @@ namespace neon::assimp_loader {
     };
 
     struct VertexParser {
-
         using ParseFunction = std::function<void(const VertexParserData&,
                                                  std::vector<char>&)>;
 
@@ -64,21 +49,22 @@ namespace neon::assimp_loader {
 
         VertexParser(ParseFunction parseFunction_,
                      InputDescription description_,
-                     size_t structSize_) :
-                parseFunction(std::move(parseFunction_)),
-                description(std::move(description_)),
-                structSize(structSize_) {}
+                     size_t structSize_)
+            : parseFunction(std::move(parseFunction_)),
+              description(std::move(description_)),
+              structSize(structSize_) {
+        }
 
         template<typename Vertex>
         static VertexParser fromTemplate() {
             ParseFunction parseFunction = [](const VertexParserData& data,
                                              std::vector<char>& vec) {
                 Vertex v = Vertex::fromAssimp(
-                        data.position,
-                        data.normal,
-                        data.tangent,
-                        data.color,
-                        data.textureCoordinates
+                    data.position,
+                    data.normal,
+                    data.tangent,
+                    data.color,
+                    data.textureCoordinates
                 );
 
                 char* d = reinterpret_cast<char*>(&v);
@@ -90,7 +76,6 @@ namespace neon::assimp_loader {
 
             return {parseFunction, Vertex::getDescription(), sizeof(Vertex)};
         }
-
     };
 
     struct InstanceData {
@@ -99,23 +84,25 @@ namespace neon::assimp_loader {
         size_t size;
 
         InstanceData(InputDescription description_,
-                     const std::type_index& type_, size_t size_) :
-                description(std::move(description_)), type(type_),
-                size(size_) {}
+                     const std::type_index& type_,
+                     size_t size_)
+            : description(std::move(description_)),
+              type(type_),
+              size(size_) {
+        }
 
         template<typename Instance>
         static InstanceData fromTemplate() {
             return InstanceData(
-                    Instance::getInstancingDescription(),
-                    typeid(Instance),
-                    sizeof(Instance)
+                Instance::getInstancingDescription(),
+                typeid(Instance),
+                sizeof(Instance)
             );
         }
     };
 
 
     struct LoaderInfo {
-
         /**
          * The application where the model is loaded.
          */
@@ -195,33 +182,35 @@ namespace neon::assimp_loader {
         CommandBuffer* commandBuffer = nullptr;
 
     private:
-
         LoaderInfo(Application* application_,
                    std::string name_,
                    MaterialCreateInfo materialCreateInfo_,
                    VertexParser vertexParser_,
-                   InstanceData instanceData_) :
-                application(application_),
-                name(std::move(name_)),
-                materialCreateInfo(std::move(materialCreateInfo_)),
-                vertexParser(std::move(vertexParser_)),
-                instanceData(std::move(instanceData_)) {}
+                   InstanceData instanceData_)
+            : application(application_),
+              name(std::move(name_)),
+              materialCreateInfo(std::move(materialCreateInfo_)),
+              vertexParser(std::move(vertexParser_)),
+              instanceData(std::move(instanceData_)) {
+        }
 
     public:
-
         template<class Vertex, class Instance = DefaultInstancingData>
         static LoaderInfo create(Application* application,
                                  std::string name,
                                  MaterialCreateInfo materialCreateInfo) {
             return {
-                    application,
-                    std::move(name),
-                    materialCreateInfo,
-                    VertexParser::fromTemplate<Vertex>(),
-                    InstanceData::fromTemplate<Instance>()
+                application,
+                std::move(name),
+                materialCreateInfo,
+                VertexParser::fromTemplate<Vertex>(),
+                InstanceData::fromTemplate<Instance>()
             };
         }
+    };
 
+    enum class LoadError {
+        INVALID_SCENE
     };
 
     /**
@@ -231,8 +220,8 @@ namespace neon::assimp_loader {
      * @param info the information about the loading process.
      * @return the model.
      */
-    Result load(const cmrc::file& file,
-                const LoaderInfo& info);
+    Result<std::shared_ptr<Model>, LoadError> load(const cmrc::file& file,
+                                                   const LoaderInfo& info);
 
     /**
      * Loads the model located at the given file.
@@ -245,9 +234,9 @@ namespace neon::assimp_loader {
      * @param info the information about the loading process.
      * @return the model.
      */
-    Result load(const std::string& directory,
-                const std::string& file,
-                const LoaderInfo& info);
+    Result<std::shared_ptr<Model>, LoadError> load(const std::string& directory,
+                                                   const std::string& file,
+                                                   const LoaderInfo& info);
 
     /**
      * Loads the model codified in the given buffer.
@@ -256,9 +245,9 @@ namespace neon::assimp_loader {
      * @param info the information about the loading process.
      * @return the model.
      */
-    Result load(const void* buffer,
-                size_t length,
-                const LoaderInfo& info);
+    Result<std::shared_ptr<Model>, LoadError> load(const void* buffer,
+                                                   size_t length,
+                                                   const LoaderInfo& info);
 
     /**
      * Loads the model using an already loaded assimp scene.
@@ -266,8 +255,8 @@ namespace neon::assimp_loader {
      * @param info the information about the loading process.
      * @return the model.
      */
-    Result load(const aiScene* scene,
-                const LoaderInfo& info);
+    Result<std::shared_ptr<Model>, LoadError> load(const aiScene* scene,
+                                                   const LoaderInfo& info);
 }
 
 
