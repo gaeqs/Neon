@@ -13,7 +13,7 @@
 #include <rush/rush.h>
 
 template<typename Curve>
-class Line : public neon::Component {
+class Box : public neon::Component {
 
     std::shared_ptr<neon::Material> _material;
     std::shared_ptr<neon::Model> _model;
@@ -62,7 +62,7 @@ class Line : public neon::Component {
 
 public:
 
-    Line(std::shared_ptr<neon::Material> material, Curve curve,
+    Box(std::shared_ptr<neon::Material> material, Curve curve,
          uint32_t samples) :
             _material(material),
             _model(),
