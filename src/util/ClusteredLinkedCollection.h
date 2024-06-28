@@ -292,7 +292,7 @@ namespace neon {
         T* emplace(Args&& ... values) {
             if (_localSize == Size) {
                 expand();
-                return _next->emplace(values...);
+                return _next->emplace(std::forward<Args>(values)...);
             }
 
 
@@ -304,7 +304,7 @@ namespace neon {
             ++_localSize;
 
             auto* ptr = reinterpret_cast<T*>(_data + index * _objectSize);
-            return std::construct_at<T>(ptr, values...);
+            return std::construct_at<T>(ptr, std::forward<Args>(values)...);
         }
 
         bool remove(const T* value) {

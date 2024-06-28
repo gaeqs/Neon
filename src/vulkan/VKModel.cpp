@@ -99,14 +99,14 @@ namespace neon::vulkan {
 
     void VKModel::uploadDataRaw(uint32_t id, const void* raw) {
         if (_instancingStructSize == 0) {
-            std::cerr << "[OPENGL MODEL] Cannot upload data to buffer "
+            std::cerr << "[VULKAN MODEL] Cannot upload data to buffer "
                       << _instancingBuffer->getRaw()
                       << ": instance struct is not defined!"
                       << std::endl;
             return;
         }
         if (id >= _positions.size()) {
-            std::cerr << "[OPENGL MODEL] Cannot upload data to buffer "
+            std::cerr << "[VULKAN MODEL] Cannot upload data to buffer "
                       << _instancingBuffer->getRaw()
                       << ": invalid id " << id << "!"
                       << std::endl;

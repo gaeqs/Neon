@@ -9,7 +9,8 @@
 
 struct Matrices {
     rush::Mat4f view;
-    rush::Mat4f projectionView;
+    rush::Mat4f viewProjection;
+    rush::Mat4f alignedViewProjection;
     rush::Mat4f inverseProjection;
     float near;
     float far;

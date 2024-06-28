@@ -55,6 +55,13 @@ namespace neon {
         _dirtyView = true;
         _rotation = rotation;
         _rotationInverse = _rotation.inverse();
+
+#ifndef NDEBUG
+        if (!_rotation.isNormalized()) {
+            throw std::runtime_error("Rotation is not normalized ");
+        }
+#endif
+
     }
 
     void Camera::setFrustum(const Frustum& frustum) {
@@ -72,6 +79,13 @@ namespace neon {
         _dirtyView = true;
         _rotation = rush::Quatf::lookAt(direction.normalized());
         _rotationInverse = _rotation.inverse();
+
+#ifndef NDEBUG
+        if (!_rotation.isNormalized()) {
+            throw std::runtime_error("Rotation is not normalized ");
+        }
+#endif
+
         return _rotation;
     }
 
@@ -79,6 +93,13 @@ namespace neon {
     Camera::rotate(const rush::Vec3f& direction, float angle) {
         _dirtyView = true;
         _rotation = rush::Quatf::angleAxis(angle, direction) * _rotation;
+
+#ifndef NDEBUG
+        if (!_rotation.isNormalized()) {
+            throw std::runtime_error("Rotation is not normalized ");
+        }
+#endif
+
         _rotationInverse = _rotation.inverse();
         return _rotation;
     }
@@ -87,6 +108,13 @@ namespace neon {
         _dirtyView = true;
         _rotation = quaternion * _rotation;
         _rotationInverse = _rotation.inverse();
+
+#ifndef NDEBUG
+        if (!_rotation.isNormalized()) {
+            throw std::runtime_error("Rotation is not normalized ");
+        }
+#endif
+
         return _rotation;
     }
 

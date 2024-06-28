@@ -17,11 +17,12 @@ void GlobalParametersUpdaterComponent::onUpdate(float deltaTime) {
     auto& buffer = getApplication()->getRender()->getGlobalUniformBuffer();
 
     Matrices matrices{
-            camera.getView(),
-            camera.getViewProjection(),
-            camera.getFrustum().getInverseProjection(),
-            camera.getFrustum().getNear(),
-            camera.getFrustum().getFar()
+        camera.getView(),
+        camera.getViewProjection(),
+        camera.getFrustum().getProjection(),
+        camera.getFrustum().getInverseProjection(),
+        camera.getFrustum().getNear(),
+        camera.getFrustum().getFar()
     };
 
     Timestamp timestamp{_timestamp};

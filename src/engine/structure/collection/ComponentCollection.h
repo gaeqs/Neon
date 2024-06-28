@@ -79,7 +79,7 @@ namespace neon {
                         )
                 ));
 
-                T* component = pointer->emplace(values...);
+                T* component = pointer->emplace(std::forward<Args>(values)...);
                 if (events.onStart) {
                     _notStartedComponents.push(
                             static_cast<Component*>(component));
@@ -93,7 +93,7 @@ namespace neon {
             auto components = std::static_pointer_cast
                     <ClusteredLinkedCollection<T>>(it->second.second);
 
-            T* component = components->emplace(values...);
+            T* component = components->emplace(std::forward<Args>(values)...);
             if (it->second.first.onStart) {
                 _notStartedComponents.push(static_cast<Component*>(component));
             }

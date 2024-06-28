@@ -193,7 +193,8 @@ namespace neon {
         requires std::is_base_of_v<Component, T>
         IdentifiableWrapper<T> newComponent(Args &&... values) {
             IdentifiableWrapper<T> component =
-                    getRoomComponents().newComponent<T>(values...);
+                    getRoomComponents().newComponent<T>(
+                     std::forward<Args>(values)...);
             component->_gameObject = this;
             auto raw = *reinterpret_cast<IdentifiableWrapper<Component> *>(&component);
             _components.insert(raw);

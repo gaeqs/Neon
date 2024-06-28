@@ -16,9 +16,11 @@
 #include <assimp/AssimpLoader.h>
 #include <bits/random.h>
 
+#include "DebugRenderComponent.h"
 #include "TestVertex.h"
 #include "GlobalParametersUpdaterComponent.h"
 #include "LockMouseComponent.h"
+#include "OctreeRaycastView.h"
 #include "OctreeView.h"
 
 constexpr int32_t WIDTH = 800;
@@ -28,7 +30,7 @@ using namespace neon;
 
 CMRC_DECLARE(shaders);
 
-std::vector<rush::TreeContent<size_t, rush::AABB<3, float>>>
+std::vector<rush::TreeContent<size_t, rush::Sphere<3, float>>>
 generateDummyElements() {
     std::random_device os_seed;
     uint32_t seed = os_seed();
@@ -39,10 +41,13 @@ generateDummyElements() {
         return rush::Vec3f(d(g), d(g), d(g));
     };
 
-    std::vector<rush::TreeContent<size_t, rush::AABB<3, float>>> content;
-    for (size_t i = 0; i < 100000; ++i) {
+    std::vector<rush::TreeContent<size_t, rush::Sphere<3, float>>> content;
+    for (size_t i = 0; i < 1000; ++i) {
+
+        auto vec = rVec().normalized() * 5.0f;
+
         content.push_back({
-            rush::AABB(rVec(), {1.0f, 1.0f, 1.0f}),
+            rush::Sphere(vec, 0.1f),
             i
         });
     }
@@ -240,6 +245,10 @@ std::shared_ptr<Room> getTestRoom(Application* application) {
                                                lineMaterialInfo);
 
     auto box = room->newGameObject();
+    box->setName("Box");
+    auto debug = box->newComponent<DebugRenderComponent>(
+        fpFrameBuffer, room.get());
+
 
     rush::AABB<3, float> treeBounds = {
         {0.0f, 0.0f, 0.0f}, rush::Vec3f(10.0f)
@@ -247,11 +256,22 @@ std::shared_ptr<Room> getTestRoom(Application* application) {
 
     auto content = generateDummyElements();
 
-    rush::StaticTree<size_t, rush::AABB<3, float>, 3, float, 10, 5> tree(
+    rush::StaticTree<size_t, rush::Sphere<3, float>, 3, float, 10, 5> tree(
         treeBounds, content);
 
-    box->setName("Box");
-    box->newComponent<OctreeView>(material, tree, 0.0f);
+    for (const auto& c: content) {
+        debug->drawPermanent(
+            c.bounds.center,
+            {0.0f, 1.0f, 0.0f, 1.0f},
+            c.bounds.radius
+        );
+    }
+
+
+    box->newComponent<OctreeRaycastView<size_t, rush::Sphere<3, float>, 10, 5>>(
+        debug,
+        material,
+        std::move(tree));
 
     room->getCamera().lookAt({0, 1.0f, -1.0f});
     room->getCamera().setPosition({0.0f, 3.0f, 3.0f});

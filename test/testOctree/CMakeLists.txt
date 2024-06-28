@@ -7,7 +7,9 @@ set(
         LockMouseComponent.cpp
         LockMouseComponent.h
         BoxView.h
-        OctreeView.h)
+        OctreeView.h
+        OctreeRaycastView.h
+        DebugRenderComponent.h)
 
 cmrc_add_resource_library(
         shaders_octree
@@ -26,6 +28,8 @@ cmrc_add_resource_library(
         shader/point_light.frag
         shader/flash_light.vert
         shader/flash_light.frag
+        shader/debug.vert
+        shader/debug.frag
 )
 
 find_package(Eigen3 CONFIG REQUIRED)

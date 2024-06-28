@@ -2,14 +2,15 @@
 // Created by gaeqs on 6/8/24.
 //
 
-#ifndef OCTREE_H
-#define OCTREE_H
+#ifndef OCTREE_RAYCAST_H
+#define OCTREE_RAYCAST_H
 #include <vector>
 
 #include "TestVertex.h"
 #include <engine/Engine.h>
 
-class OctreeView : public neon::Component {
+template<typename Storage, typename Bounds, size_t MaxObjects, size_t Depth>
+class OctreeRaycastView : public neon::Component {
     const uint32_t BASE_INDICES[24] = {
         // Bottom
         0, 1,
@@ -39,10 +40,12 @@ class OctreeView : public neon::Component {
         {1.0f, 1.0f, 1.0f},
     };
 
+    neon::IdentifiableWrapper<DebugRenderComponent> _debug;
+    rush::StaticTree<Storage, Bounds, 3, float, MaxObjects, Depth> _tree;
     std::shared_ptr<neon::Material> _material;
     std::shared_ptr<neon::Model> _model;
     std::vector<std::pair<rush::AABB<3, float>, size_t>> _boxes;
-    float _index;
+    rush::StaticTreeRayCastResult<Storage, Bounds, 3, float> _lastHit;
 
 
     void addBox(std::vector<TestVertex>& vertices,
@@ -115,13 +118,13 @@ class OctreeView : public neon::Component {
     }
 
 public:
-    template<typename Storage, typename Bounds, size_t MaxObjects, size_t Depth>
-    OctreeView(std::shared_ptr<neon::Material> material,
-               const rush::StaticTree<Storage, Bounds, 3, float,
-                   MaxObjects, Depth>& tree,
-               float index)
-        : _material(std::move(material)),
-          _index(index) {
+    OctreeRaycastView(
+        const neon::IdentifiableWrapper<DebugRenderComponent>& debug,
+        std::shared_ptr<neon::Material> material,
+        rush::StaticTree<Storage, Bounds, 3, float, MaxObjects, Depth>&& tree)
+        : _debug(debug),
+          _tree(std::move(tree)),
+          _material(std::move(material)) {
         generateBoxes(tree.getRoot(), 0);
         std::cout << "BOXES: " << _boxes.size() << std::endl;
     }
@@ -129,7 +132,43 @@ public:
     void onStart() override {
         generateModel();
     }
+
+    void onMouseButton(const neon::MouseButtonEvent& event) override {
+        auto& camera = getRoom()->getCamera();
+        rush::Vec3f forward = camera.getForward();
+        rush::Vec3f origin = camera.getPosition();
+
+        rush::Ray3f ray(origin, forward);
+
+        std::cout << "-----------------" << std::endl;
+        std::cout << "Normalized: " << ray.isNormalized() << std::endl;
+        std::cout << camera.getRotation().length() << std::endl;
+        std::cout << ray.direction.length() << std::endl;
+
+        _lastHit = _tree.getRoot().raycast(ray);
+        std::cout << "ROOT LEAF? " << _tree.getRoot().isLeaf() << std::endl;
+        std::cout << (_lastHit.result.hit ? "true - " : "false - ")
+                << _lastHit.result.point << " - "
+                << _lastHit.result.distance << " - "
+                << _lastHit.result.normal;
+
+        if (_lastHit.result.hit) {
+            std::cout << " - " << _lastHit.element->bounds.center;
+        }
+
+        std::cout << std::endl;
+
+        std::cout << "-----------------" << std::endl;
+    }
+
+    void onUpdate(float deltaTime) override {
+        if (_lastHit.result.hit) {
+            _debug->drawElement(_lastHit.result.point,
+                                {1.0f, 0.0f, 0.0f, 1.0f},
+                                0.05f);
+        }
+    }
 };
 
 
-#endif //OCTREE_H
+#endif //OCTREE_RAYCAST_H

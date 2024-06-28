@@ -16,6 +16,7 @@ layout (set = 0, binding = 0) uniform Matrices
 {
     mat4 view;
     mat4 viewProjection;
+    mat4 projection;
     mat4 inverseProjection;
     float near;
     float far;
@@ -33,11 +34,17 @@ void main() {
 
         color = texture(skybox, inverseView * position);
     } else {
-        vec4 albedo = texture(diffuseTexture, fragTexCoords);
-        //vec2 normalXY = texture(normalTexture, fragTexCoords).xy;
-        //float normalZ = texture(normalZTexture, fragTexCoords).x;
-        //vec3 normal = inverseView * vec3(normalXY, normalZ);
+        color = texture(diffuseTexture, fragTexCoords);
+    }
 
-        color = albedo; //vec4(normal, 1.0f);
+    // Crosshair
+    const float CROSS_LENGTH = 0.01f;
+    const float CROSS_WIDTH = 0.002f;
+    float aspect = projection[1][1] / projection[0][0];
+    vec2 corrected = abs(vec2(fragPosition.x * aspect, fragPosition.y));
+
+    if(corrected.x < CROSS_LENGTH && corrected.y < CROSS_WIDTH ||
+       corrected.y < CROSS_LENGTH && corrected.x < CROSS_WIDTH) {
+        color = vec4(1 - color.xyz, color.w);
     }
 }
