@@ -9,6 +9,8 @@
 #include "TestVertex.h"
 #include <engine/Engine.h>
 
+#include "DebugRenderComponent.h"
+
 template<typename Storage, typename Bounds, size_t MaxObjects, size_t Depth>
 class OctreeRaycastView : public neon::Component {
     const uint32_t BASE_INDICES[24] = {
@@ -140,25 +142,7 @@ public:
 
         rush::Ray3f ray(origin, forward);
 
-        std::cout << "-----------------" << std::endl;
-        std::cout << "Normalized: " << ray.isNormalized() << std::endl;
-        std::cout << camera.getRotation().length() << std::endl;
-        std::cout << ray.direction.length() << std::endl;
-
         _lastHit = _tree.getRoot().raycast(ray);
-        std::cout << "ROOT LEAF? " << _tree.getRoot().isLeaf() << std::endl;
-        std::cout << (_lastHit.result.hit ? "true - " : "false - ")
-                << _lastHit.result.point << " - "
-                << _lastHit.result.distance << " - "
-                << _lastHit.result.normal;
-
-        if (_lastHit.result.hit) {
-            std::cout << " - " << _lastHit.element->bounds.center;
-        }
-
-        std::cout << std::endl;
-
-        std::cout << "-----------------" << std::endl;
     }
 
     void onUpdate(float deltaTime) override {
@@ -166,8 +150,44 @@ public:
             _debug->drawElement(_lastHit.result.point,
                                 {1.0f, 0.0f, 0.0f, 1.0f},
                                 0.05f);
+
+            auto bounds = _lastHit.element->bounds;
+            if constexpr (std::is_same_v<Bounds, rush::Triangle<float>>) {
+                for (float f = 0.0f; f <= 1.0f; f += 0.01f) {
+                    _debug->drawElement(
+                        bounds.a * f + bounds.b * (1.0f - f),
+                        rush::Vec4f(1.0f, 0.0f, 0.0f, 1.0f),
+                        0.01f
+                    );
+                    _debug->drawElement(
+                        bounds.b * f + bounds.c * (1.0f - f),
+                        rush::Vec4f(1.0f, 0.0f, 0.0f, 1.0f),
+                        0.01f
+                    );
+                    _debug->drawElement(
+                        bounds.c * f + bounds.a * (1.0f - f),
+                        rush::Vec4f(1.0f, 0.0f, 0.0f, 1.0f),
+                        0.01f
+                    );
+                }
+            }
         }
     }
+
+    void drawEditor() override {
+        ImGui::Text("Hit: %s", _lastHit.result.hit ? "Yes" : "No");
+        ImGui::Text("Point: (%f, %f, %f)",
+                    _lastHit.result.point.x(),
+                    _lastHit.result.point.y(),
+                    _lastHit.result.point.z());
+        ImGui::Text("Normal: (%f, %f, %f)",
+                    _lastHit.result.normal.x(),
+                    _lastHit.result.normal.y(),
+                    _lastHit.result.normal.z());
+        ImGui::Text("Distance: %f", _lastHit.result.distance);
+    }
+
+    KEY_REGISTER_COMPONENT(Registry, OctreeRaycastView, "Octree Raycast")
 };
 
 

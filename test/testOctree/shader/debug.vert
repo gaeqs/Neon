@@ -1,6 +1,6 @@
 #version 450
 
-layout (location = 0) in uint index;
+layout (location = 0) in float index;
 layout (location = 1) in vec3 position;
 layout (location = 2) in vec4 color;
 layout (location = 3) in float radius;
@@ -24,8 +24,8 @@ void main() {
     fragRadius = radius;
 
     vec2 local = vec2(
-      (float(index & 1u) * 2.0f - 1.0f) * radius,
-      (float(index & 2u) - 1.0f) * radius
+      (float(uint(index) & 1u) * 2.0f - 1.0f) * radius,
+      (float(uint(index) & 2u) - 1.0f) * radius
     );
 
     localPosition = local;

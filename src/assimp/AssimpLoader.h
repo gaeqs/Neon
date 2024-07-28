@@ -30,9 +30,24 @@ namespace neon {
 struct aiScene;
 
 namespace neon::assimp_loader {
+    struct VertexParserData {
+        rush::Vec3f position;
+        rush::Vec3f normal;
+        rush::Vec3f tangent;
+        rush::Vec4f color;
+        rush::Vec2f textureCoordinates;
+    };
+
+    struct LocalMesh {
+        std::vector<VertexParserData> vertices;
+        std::vector<uint32_t> indices;
+    };
+
+    struct LocalModel {
+        std::vector<LocalMesh> meshes;
+    };
 
     struct Result {
-
         /**
          * Whether the result is valid.
          */
@@ -43,18 +58,16 @@ namespace neon::assimp_loader {
          * This value is nullptr if the result is not valid.
          */
         std::shared_ptr<Model> model = nullptr;
-    };
 
-    struct VertexParserData {
-        rush::Vec3f position;
-        rush::Vec3f normal;
-        rush::Vec3f tangent;
-        rush::Vec4f color;
-        rush::Vec2f textureCoordinates;
+        /**
+         * The model data in CPU data.
+         * This value is nullptr if the parameter
+         * "loadLocalModel" has been set to false.
+         */
+        std::unique_ptr<LocalModel> localModel = nullptr;
     };
 
     struct VertexParser {
-
         using ParseFunction = std::function<void(const VertexParserData&,
                                                  std::vector<char>&)>;
 
@@ -64,21 +77,22 @@ namespace neon::assimp_loader {
 
         VertexParser(ParseFunction parseFunction_,
                      InputDescription description_,
-                     size_t structSize_) :
-                parseFunction(std::move(parseFunction_)),
-                description(std::move(description_)),
-                structSize(structSize_) {}
+                     size_t structSize_) : parseFunction(
+                                               std::move(parseFunction_)),
+                                           description(std::move(description_)),
+                                           structSize(structSize_) {
+        }
 
         template<typename Vertex>
         static VertexParser fromTemplate() {
             ParseFunction parseFunction = [](const VertexParserData& data,
                                              std::vector<char>& vec) {
                 Vertex v = Vertex::fromAssimp(
-                        data.position,
-                        data.normal,
-                        data.tangent,
-                        data.color,
-                        data.textureCoordinates
+                    data.position,
+                    data.normal,
+                    data.tangent,
+                    data.color,
+                    data.textureCoordinates
                 );
 
                 char* d = reinterpret_cast<char*>(&v);
@@ -90,7 +104,6 @@ namespace neon::assimp_loader {
 
             return {parseFunction, Vertex::getDescription(), sizeof(Vertex)};
         }
-
     };
 
     struct InstanceData {
@@ -99,23 +112,24 @@ namespace neon::assimp_loader {
         size_t size;
 
         InstanceData(InputDescription description_,
-                     const std::type_index& type_, size_t size_) :
-                description(std::move(description_)), type(type_),
-                size(size_) {}
+                     const std::type_index& type_,
+                     size_t size_) : description(std::move(description_)),
+                                     type(type_),
+                                     size(size_) {
+        }
 
         template<typename Instance>
         static InstanceData fromTemplate() {
             return InstanceData(
-                    Instance::getInstancingDescription(),
-                    typeid(Instance),
-                    sizeof(Instance)
+                Instance::getInstancingDescription(),
+                typeid(Instance),
+                sizeof(Instance)
             );
         }
     };
 
 
     struct LoaderInfo {
-
         /**
          * The application where the model is loaded.
          */
@@ -186,34 +200,40 @@ namespace neon::assimp_loader {
          */
         AssetStorageMode assetStorageMode = AssetStorageMode::WEAK;
 
-    private:
+        /**
+        * Whether the model data should be stored in CPU data too.
+        */
+        bool loadLocalModel = false;
 
+    private:
         LoaderInfo(Application* application_,
                    std::string name_,
                    MaterialCreateInfo materialCreateInfo_,
                    VertexParser vertexParser_,
-                   InstanceData instanceData_) :
-                application(application_),
-                name(std::move(name_)),
-                materialCreateInfo(std::move(materialCreateInfo_)),
-                vertexParser(std::move(vertexParser_)),
-                instanceData(std::move(instanceData_)) {}
+                   InstanceData instanceData_) : application(application_),
+                                                 name(std::move(name_)),
+                                                 materialCreateInfo(
+                                                     std::move(
+                                                         materialCreateInfo_)),
+                                                 vertexParser(
+                                                     std::move(vertexParser_)),
+                                                 instanceData(
+                                                     std::move(instanceData_)) {
+        }
 
     public:
-
         template<class Vertex, class Instance = DefaultInstancingData>
         static LoaderInfo create(Application* application,
                                  std::string name,
                                  MaterialCreateInfo materialCreateInfo) {
             return {
-                    application,
-                    std::move(name),
-                    materialCreateInfo,
-                    VertexParser::fromTemplate<Vertex>(),
-                    InstanceData::fromTemplate<Instance>()
+                application,
+                std::move(name),
+                materialCreateInfo,
+                VertexParser::fromTemplate<Vertex>(),
+                InstanceData::fromTemplate<Instance>()
             };
         }
-
     };
 
     /**

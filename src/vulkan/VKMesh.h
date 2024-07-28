@@ -105,7 +105,7 @@ namespace neon::vulkan {
             vertices.resize(amount);
 
             for (int i = 0; i < amount; ++i) {
-                vertices.push_back(map[i]);
+                vertices.push_back(map.value().get()->get(i));
             }
 
             return vertices;

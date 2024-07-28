@@ -20,6 +20,7 @@
 #include "TestVertex.h"
 #include "GlobalParametersUpdaterComponent.h"
 #include "LockMouseComponent.h"
+#include "ObjectRaycastView.h"
 #include "OctreeRaycastView.h"
 #include "OctreeView.h"
 
@@ -43,7 +44,6 @@ generateDummyElements() {
 
     std::vector<rush::TreeContent<size_t, rush::Sphere<3, float>>> content;
     for (size_t i = 0; i < 1000; ++i) {
-
         auto vec = rVec().normalized() * 5.0f;
 
         content.push_back({
@@ -178,6 +178,119 @@ std::shared_ptr<FrameBuffer> initRender(Room* room) {
     return fpFrameBuffer;
 }
 
+void loadModels(Application* application, Room* room,
+                const std::shared_ptr<FrameBuffer>& target,
+                const std::shared_ptr<Material>& lineMaterial) {
+    std::shared_ptr materialDescriptor =
+            ShaderUniformDescriptor::ofImages(application,
+                                              "default", 2);
+
+    auto shader = createShader(application,
+                               "model",
+                               "model.vert", "model.frag");
+
+    MaterialCreateInfo sansMaterialInfo(target, shader);
+    sansMaterialInfo.descriptions.uniform = materialDescriptor;
+
+    auto sansLoaderInfo = assimp_loader::LoaderInfo::create<ModelVertex>(
+        application, "Sans", sansMaterialInfo);
+    sansLoaderInfo.loadLocalModel = true;
+
+    auto sansResult = assimp_loader::load(R"(resource/Sans)",
+                                          "Sans.obj", sansLoaderInfo);
+
+    if (!sansResult.valid) {
+        std::cout << "Couldn't load Sans model!" << std::endl;
+        exit(1);
+    }
+
+    auto sansModel = sansResult.model;
+
+    auto sans = room->newGameObject();
+    sans->newComponent<GraphicComponent>(sansModel);
+
+    rush::Vec3f t = rush::Vec3f(20, 0, 0);
+
+    sans->getTransform().setPosition(t);
+    sans->setName("Sans");
+
+
+    // Get triangles
+
+    auto& sansLoadModel = sansResult.localModel;
+
+    std::vector<rush::Triangle<float>> triangles;
+    triangles.reserve(10000);
+
+    for (auto& mesh : sansLoadModel->meshes) {
+        for (size_t n = 0; n < mesh.indices.size(); n += 3) {
+            triangles.emplace_back(
+                mesh.vertices[mesh.indices[n]].position + t,
+                mesh.vertices[mesh.indices[n + 1]].position + t,
+                mesh.vertices[mesh.indices[n + 2]].position + t
+            );
+        }
+    }
+
+    std::cout << "AMOUNT: " << triangles.size() << std::endl;
+
+    // Generate sans tree
+
+    rush::AABB<3, float> treeBounds = {
+        {20.0f, 0.0f, 0.0f}, rush::Vec3f(5.0f)
+    };
+
+    std::vector<rush::TreeContent<size_t, rush::Triangle<float>>> contents;
+    contents.reserve(triangles.size());
+
+    for (size_t i = 0; i < triangles.size(); ++i) {
+        contents.emplace_back(triangles[i], i);
+    }
+
+    rush::StaticTree<size_t, rush::Triangle<float>, 3, float, 10, 5> tree(
+        treeBounds, contents);
+
+
+    auto box = room->newGameObject();
+    box->setName("Octree Raycast View");
+    auto debug = box->newComponent<DebugRenderComponent>(
+        target, room);
+
+    box->newComponent<OctreeRaycastView<size_t, rush::Triangle<float>, 10, 5>>(
+        debug,
+        lineMaterial,
+        std::move(tree));
+
+    rush::Triangle<float> tri(
+        {-10.0f, 0.0f, 0.0f},
+        {-10.0f, 0.0f, 2.0f},
+        {-8.0f, 1.0f, 1.0f}
+    );
+
+    for (float f = 0.0f; f <= 1.0f; f += 0.01f) {
+        debug->drawPermanent(
+            tri.a * f + tri.b * (1.0f - f),
+            rush::Vec4f(1.0f, 0.0f, 0.0f, 1.0f),
+            0.01f
+        );
+        debug->drawPermanent(
+            tri.b * f + tri.c * (1.0f - f),
+            rush::Vec4f(1.0f, 0.0f, 0.0f, 1.0f),
+            0.01f
+        );
+        debug->drawPermanent(
+            tri.c * f + tri.a * (1.0f - f),
+            rush::Vec4f(1.0f, 0.0f, 0.0f, 1.0f),
+            0.01f
+        );
+    }
+
+    box->newComponent<ObjectRaycastView<rush::Triangle<float>>>(
+        debug,
+        tri
+    );
+}
+
 std::shared_ptr<Texture> loadSkybox(Room* room) {
     static const std::vector<std::string> PATHS = {
         "resource/Skybox/right.jpg",
@@ -276,6 +389,8 @@ std::shared_ptr<Room> getTestRoom(Application* application) {
     room->getCamera().lookAt({0, 1.0f, -1.0f});
     room->getCamera().setPosition({0.0f, 3.0f, 3.0f});
 
+    loadModels(application, room.get(), fpFrameBuffer, material);
+
     return room;
 }
 
@@ -293,7 +408,8 @@ int main() {
         std::cout << "[APPLICATION]\tApplication closed. "
                 << loopResult.getResult() << " frames generated."
                 << std::endl;
-    } else {
+    }
+    else {
         std::cout << "[APPLICATION]\tUnexpected game loop error: "
                 << loopResult.getError()
                 << std::endl;

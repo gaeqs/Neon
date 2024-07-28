@@ -30,6 +30,14 @@
         _##clazz##_component_register_ __##clazz##_register;    \
     }                                                           \
 
+#define KEY_REGISTER_COMPONENT(key, clazz, name)                \
+        struct _##key##_component_register_ {                   \
+            _##key##_component_register_() {                    \
+                neon::ComponentRegister::instance()             \
+                    .registerComponent< clazz >( name );        \
+            }                                                   \
+        };                                                      \
+        _##key##_component_register_ __##key##_register;        \
 
 namespace neon {
 

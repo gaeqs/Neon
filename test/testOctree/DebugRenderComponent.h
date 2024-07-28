@@ -60,7 +60,7 @@ class DebugRenderComponent : public neon::Component {
         neon::MaterialCreateInfo info(_target, program);
 
         info.descriptions.vertex = neon::InputDescription(
-            sizeof(uint32_t),
+            sizeof(float),
             neon::InputRate::VERTEX);
         info.descriptions.vertex.addAttribute(1, 0);
         info.descriptions.instance = Instance::getInstancingDescription();
@@ -83,7 +83,7 @@ class DebugRenderComponent : public neon::Component {
         ));
         info.maximumInstances = 2000000;
 
-        std::vector<uint32_t> vertices{0, 1, 2, 3};
+        std::vector<float> vertices{0.0f, 1.0f, 2.0f, 3.0f};
 
         std::vector<uint32_t> indices{
             0, 1, 2, 1, 3, 2

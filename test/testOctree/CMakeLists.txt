@@ -9,7 +9,8 @@ set(
         BoxView.h
         OctreeView.h
         OctreeRaycastView.h
-        DebugRenderComponent.h)
+        DebugRenderComponent.h
+        ObjectRaycastView.h)
 
 cmrc_add_resource_library(
         shaders_octree
@@ -30,6 +31,8 @@ cmrc_add_resource_library(
         shader/flash_light.frag
         shader/debug.vert
         shader/debug.frag
+        shader/model.vert
+        shader/model.frag
 )
 
 find_package(Eigen3 CONFIG REQUIRED)
