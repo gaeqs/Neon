@@ -146,7 +146,9 @@ namespace neon::vulkan {
     void VKApplication::init(neon::Application* application) {
         _application = application;
         if (!glfwInit()) {
-            throw std::runtime_error("Failed to initialize GLFW");
+            const char* error;
+            glfwGetError(&error);
+            throw std::runtime_error(std::format("Failed to initialize GLFW: {}", error));
         }
 
         preWindowCreation();
@@ -158,8 +160,9 @@ namespace neon::vulkan {
             throw std::runtime_error("Failed to open GLFW window");
         }
 
+        glfwSetWindowAttrib(_window, GLFW_DECORATED, 1);
         glfwSetWindowUserPointer(_window, this);
-        glfwSetWindowSizeCallback(_window, framebuffer_size_callback);
+        glfwSetFramebufferSizeCallback(_window, framebuffer_size_callback);
         glfwSetKeyCallback(_window, key_size_callback);
         glfwSetMouseButtonCallback(_window, mouse_button_callback);
         glfwSetCursorPosCallback(_window, cursor_pos_callback);
@@ -294,7 +297,9 @@ namespace neon::vulkan {
                     &_imageIndex);
         }
 
-        if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR) {
+        if (result == VK_ERROR_OUT_OF_DATE_KHR ||
+            result == VK_SUBOPTIMAL_KHR ||
+            _requiresSwapchainRecreation) {
             {
                 DEBUG_PROFILE_ID(profiler, recreation2, "SC/FB Recreation");
                 recreateSwapChain();
@@ -358,6 +363,7 @@ namespace neon::vulkan {
     void VKApplication::internalForceSizeValues(int32_t width, int32_t height) {
         _width = width;
         _height = height;
+        _requiresSwapchainRecreation = true;
     }
 
     void VKApplication::createInstance() {
@@ -854,6 +860,7 @@ namespace neon::vulkan {
         vkDeviceWaitIdle(_device);
         cleanupSwapChain();
         createSwapChain();
+        _requiresSwapchainRecreation = false;
     }
 
     void VKApplication::cleanupSwapChain() {
