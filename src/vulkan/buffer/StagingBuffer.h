@@ -18,11 +18,15 @@
 #include <vulkan/AbstractVKApplication.h>
 
 namespace neon::vulkan {
+
     class StagingBuffer;
 
     template<class T>
     class StagingBufferMap : public BufferMap<T> {
-        VkCommandBuffer _commandBuffer;
+        CommandPoolHolder _poolHolder;
+
+        const CommandBuffer* _externalCommandBuffer;
+        CommandBuffer* _internalCommandBuffer;
 
         std::shared_ptr<SimpleBuffer> _stagingBuffer;
         SimpleBuffer& _deviceBuffer;
@@ -31,28 +35,46 @@ namespace neon::vulkan {
         std::optional<Range<uint32_t>> _range;
 
     public:
+
         StagingBufferMap(const StagingBufferMap& other) = delete;
 
-        StagingBufferMap(VkCommandBuffer commandBuffer,
+        StagingBufferMap(Application* application,
+                         const CommandBuffer* commandBuffer,
                          std::shared_ptr<SimpleBuffer> stagingBuffer,
                          SimpleBuffer& deviceBuffer)
             : BufferMap<T>(),
-              _commandBuffer(commandBuffer),
+              _externalCommandBuffer(commandBuffer),
+              _internalCommandBuffer(nullptr),
               _stagingBuffer(std::move(stagingBuffer)),
               _deviceBuffer(deviceBuffer),
               _map(_stagingBuffer->map<T>().value()) {
+            if (_externalCommandBuffer == nullptr) {
+                _poolHolder = application->getCommandManager().
+                        fetchCommandPool();
+                _internalCommandBuffer = _poolHolder.getPool()
+                        .beginCommandBuffer(true);
+            }
         }
 
-        StagingBufferMap(VkCommandBuffer commandBuffer,
+        StagingBufferMap(Application* application,
+                         const CommandBuffer* commandBuffer,
                          std::shared_ptr<SimpleBuffer> stagingBuffer,
                          SimpleBuffer& deviceBuffer,
                          Range<uint32_t> range)
             : BufferMap<T>(),
-              _commandBuffer(commandBuffer),
-              _stagingBuffer(std::move(stagingBuffer)),
+              _externalCommandBuffer(commandBuffer),
+              _internalCommandBuffer(nullptr),
+              _stagingBuffer(
+                  std::move(stagingBuffer)),
               _deviceBuffer(deviceBuffer),
               _map(_stagingBuffer->map<T>(range).value()),
-              _range(range) {
+              _range(range){
+            if (_externalCommandBuffer == nullptr) {
+                _poolHolder = application->getCommandManager().
+                        fetchCommandPool();
+                _internalCommandBuffer = _poolHolder.getPool()
+                        .beginCommandBuffer(true);
+            }
         }
 
         ~StagingBufferMap() override {
@@ -74,9 +96,15 @@ namespace neon::vulkan {
         void dispose() override {
             if (_map->raw() == nullptr) return;
             _map->dispose();
+
+            bool internal = _internalCommandBuffer != nullptr;
+            auto buffer = internal
+                              ? _internalCommandBuffer
+                              : _externalCommandBuffer;
+
             if (_range.has_value()) {
                 vulkan_util::copyBuffer(
-                    _commandBuffer,
+                    buffer->getImplementation().getCommandBuffer(),
                     _stagingBuffer->getRaw(),
                     _deviceBuffer.getRaw(),
                     _range.value().getFrom(),
@@ -85,11 +113,17 @@ namespace neon::vulkan {
                 );
             } else {
                 vulkan_util::copyBuffer(
-                    _commandBuffer,
+                    buffer->getImplementation().getCommandBuffer(),
                     _stagingBuffer->getRaw(),
                     _deviceBuffer.getRaw(),
                     _deviceBuffer.size()
                 );
+            }
+            if (internal) {
+                // Command buffer is not external.
+                // End and submit.
+                _internalCommandBuffer->end();
+                _internalCommandBuffer->submit();
             }
         }
     };
@@ -108,18 +142,20 @@ namespace neon::vulkan {
             const CommandBuffer* commandBuffer = nullptr) override;
 
     public:
+
         StagingBuffer(const StagingBuffer& other) = delete;
 
         template<class T>
         StagingBuffer(AbstractVKApplication* application,
                       VkBufferUsageFlags usage,
-                      const std::vector<T>& data) : _application(application),
-                                                    _stagingBuffers(),
-                                                    _deviceBuffer(_application,
-                                                        VK_BUFFER_USAGE_TRANSFER_DST_BIT
-                                                        | usage,
-                                                        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-                                                        data) {
+                      const std::vector<T>& data)
+            : _application(application),
+              _stagingBuffers(),
+              _deviceBuffer(_application,
+                            VK_BUFFER_USAGE_TRANSFER_DST_BIT
+                            | usage,
+                            VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+                            data) {
             for (uint32_t i = 0; i < _application->getMaxFramesInFlight(); ++
                  i) {
                 _stagingBuffers.push_back(std::make_shared<SimpleBuffer>(

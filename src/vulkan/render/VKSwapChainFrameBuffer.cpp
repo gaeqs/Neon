@@ -72,14 +72,24 @@ namespace neon::vulkan {
                 ImageViewCreateInfo()
         );
 
-        vulkan_util::transitionImageLayout(
-                _vkApplication,
-                _depthImage,
-                _vkApplication->getDepthImageFormat(),
-                VK_IMAGE_LAYOUT_UNDEFINED,
-                VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
-                1, 1
-        );
+        //
+        {
+            CommandPoolHolder holder = _vkApplication->getApplication()
+            ->getCommandManager().fetchCommandPool();
+            CommandBuffer* buffer = holder.getPool().beginCommandBuffer(true);
+            VkCommandBuffer rawBuffer = buffer->getImplementation().
+                    getCommandBuffer();
+
+            vulkan_util::transitionImageLayout(
+                    _vkApplication,
+                    _depthImage,
+                    _vkApplication->getDepthImageFormat(),
+                    VK_IMAGE_LAYOUT_UNDEFINED,
+                    VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+                    1, 1,
+                    rawBuffer
+            );
+        }
     }
 
     void VKSwapChainFrameBuffer::createFrameBuffers() {
@@ -161,7 +171,7 @@ namespace neon::vulkan {
         init_info.Instance = _vkApplication->getInstance();
         init_info.PhysicalDevice = _vkApplication->getPhysicalDevice();
         init_info.Device = _vkApplication->getDevice();
-        init_info.Queue = _vkApplication->getGraphicsQueue();
+        init_info.Queue = _vkApplication->getGraphicsQueue().getQueue();
         init_info.DescriptorPool = _vkApplication->getImGuiPool();
         init_info.MinImageCount = 3;
         init_info.ImageCount = 3;
@@ -169,12 +179,14 @@ namespace neon::vulkan {
 
         ImGui_ImplVulkan_Init(&init_info, _renderPass.getRaw());
 
-        auto cmd = vulkan_util::beginSingleTimeCommandBuffer(
-                _vkApplication->getDevice(), _vkApplication->getCommandPool());
-        ImGui_ImplVulkan_CreateFontsTexture(cmd);
-        vulkan_util::endSingleTimeCommandBuffer(
-                _vkApplication->getDevice(), _vkApplication->getGraphicsQueue(),
-                _vkApplication->getCommandPool(), cmd);
+        auto cmd = _vkApplication->getCommandPool()->beginCommandBuffer(true);
+
+        ImGui_ImplVulkan_CreateFontsTexture(cmd->getImplementation()
+            .getCommandBuffer());
+
+        cmd->end();
+        cmd->submit();
+        cmd->wait();
 
         ImGui_ImplVulkan_DestroyFontUploadObjects();
     }

@@ -19,19 +19,18 @@
 #include <implot.h>
 
 namespace neon::vulkan {
-
     void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
         auto* application = static_cast<VKApplication*>(
-                glfwGetWindowUserPointer(
-                        window));
+            glfwGetWindowUserPointer(
+                window));
         application->internalForceSizeValues(width, height);
     }
 
     void key_size_callback(GLFWwindow* window, int key, int scancode,
                            int action, int mods) {
         auto* application = static_cast<VKApplication*>(
-                glfwGetWindowUserPointer(
-                        window));
+            glfwGetWindowUserPointer(
+                window));
 
         application->getApplication()
                 ->invokeKeyEvent(key, scancode, action, mods);
@@ -40,8 +39,8 @@ namespace neon::vulkan {
     void mouse_button_callback(GLFWwindow* window, int button,
                                int action, int mods) {
         auto* application = static_cast<VKApplication*>(
-                glfwGetWindowUserPointer(
-                        window));
+            glfwGetWindowUserPointer(
+                window));
 
         application->getApplication()
                 ->invokeMouseButtonEvent(button, action, mods);
@@ -49,35 +48,36 @@ namespace neon::vulkan {
 
     void cursor_pos_callback(GLFWwindow* window, double x, double y) {
         auto* application = static_cast<VKApplication*>(
-                glfwGetWindowUserPointer(window));
+            glfwGetWindowUserPointer(window));
         application->getApplication()->invokeCursorPosEvent(x, y);
     }
 
     void scroll_callback(GLFWwindow* window, double xOffset, double yOffset) {
         auto* application = static_cast<VKApplication*>(
-                glfwGetWindowUserPointer(window));
+            glfwGetWindowUserPointer(window));
         application->getApplication()->invokeScrollEvent(xOffset, yOffset);
     }
 
     static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
-            VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
-            VkDebugUtilsMessageTypeFlagsEXT messageType,
-            const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
-            void* pUserData) {
-
+        VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
+        VkDebugUtilsMessageTypeFlagsEXT messageType,
+        const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
+        void* pUserData) {
         if (messageSeverity >=
             VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT) {
             std::cerr << "[VULKAN ERROR]: " << pCallbackData->pMessage
-                      << std::endl;
+                    << std::endl;
             std::cerr << "------------------------------" << std::endl;
-        } else if (messageSeverity >=
-                   VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT) {
+        }
+        else if (messageSeverity >=
+                 VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT) {
             std::cerr << "[VULKAN WARNING]: " << pCallbackData->pMessage
-                      << std::endl;
+                    << std::endl;
             std::cerr << "------------------------------" << std::endl;
-        } else {
+        }
+        else {
             std::cout << "[VULKAN DEBUG]: " << pCallbackData->pMessage
-                      << std::endl;
+                    << std::endl;
             std::cout << "------------------------------" << std::endl;
         }
 
@@ -85,62 +85,63 @@ namespace neon::vulkan {
     }
 
     static VkResult createDebugUtilsMessengerEXT(
-            VkInstance instance,
-            const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo,
-            const VkAllocationCallbacks* pAllocator,
-            VkDebugUtilsMessengerEXT* pDebugMessenger
+        VkInstance instance,
+        const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo,
+        const VkAllocationCallbacks* pAllocator,
+        VkDebugUtilsMessengerEXT* pDebugMessenger
     ) {
-        auto func = (PFN_vkCreateDebugUtilsMessengerEXT) vkGetInstanceProcAddr(
-                instance, "vkCreateDebugUtilsMessengerEXT");
+        auto func = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(
+            instance, "vkCreateDebugUtilsMessengerEXT");
         if (func != nullptr) {
             return func(instance, pCreateInfo, pAllocator, pDebugMessenger);
-        } else {
+        }
+        else {
             return VK_ERROR_EXTENSION_NOT_PRESENT;
         }
     }
 
     void destroyDebugUtilsMessengerEXT(
-            VkInstance instance,
-            VkDebugUtilsMessengerEXT debugMessenger,
-            const VkAllocationCallbacks* pAllocator
+        VkInstance instance,
+        VkDebugUtilsMessengerEXT debugMessenger,
+        const VkAllocationCallbacks* pAllocator
     ) {
-        auto func = (PFN_vkDestroyDebugUtilsMessengerEXT) vkGetInstanceProcAddr(
-                instance,
-                "vkDestroyDebugUtilsMessengerEXT");
+        auto func = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(
+            instance,
+            "vkDestroyDebugUtilsMessengerEXT");
         if (func != nullptr) {
             func(instance, debugMessenger, pAllocator);
         }
     }
 
-    VKApplication::VKApplication(std::string name, float width, float height) :
-            _application(nullptr),
-            _window(nullptr),
-            _name(std::move(name)),
-            _width(width),
-            _height(height),
-            _instance(VK_NULL_HANDLE),
-            _debugMessenger(VK_NULL_HANDLE),
-            _physicalDevice(VK_NULL_HANDLE),
-            _device(VK_NULL_HANDLE),
-            _graphicsQueue(VK_NULL_HANDLE),
-            _presentQueue(VK_NULL_HANDLE),
-            _surface(VK_NULL_HANDLE),
-            _surfaceFormat(),
-            _swapChain(VK_NULL_HANDLE),
-            _swapChainImageFormat(),
-            _swapChainExtent(),
-            _swapChainCount(0),
-            _depthImageFormat(),
-            _commandPool(VK_NULL_HANDLE),
-            _commandBuffers(),
-            _recording(false),
-            _imageAvailableSemaphores(),
-            _renderFinishedSemaphores(),
-            _currentFrame(0),
-            _imageIndex(0),
-            _imGuiPool(VK_NULL_HANDLE),
-            _currentFrameInformation() {
-
+    VKApplication::VKApplication(std::string name, float width,
+                                 float height) : _application(nullptr),
+                                                 _window(nullptr),
+                                                 _name(std::move(name)),
+                                                 _width(width),
+                                                 _height(height),
+                                                 _instance(VK_NULL_HANDLE),
+                                                 _debugMessenger(
+                                                     VK_NULL_HANDLE),
+                                                 _physicalDevice(
+                                                     VK_NULL_HANDLE),
+                                                 _device(VK_NULL_HANDLE),
+                                                 _graphicsQueue(VK_NULL_HANDLE),
+                                                 _presentQueue(VK_NULL_HANDLE),
+                                                 _surface(VK_NULL_HANDLE),
+                                                 _surfaceFormat(),
+                                                 _swapChain(VK_NULL_HANDLE),
+                                                 _swapChainImageFormat(),
+                                                 _swapChainExtent(),
+                                                 _swapChainCount(0),
+                                                 _depthImageFormat(),
+                                                 _commandPool(),
+                                                 _recording(false),
+                                                 _imageAvailableSemaphores(),
+                                                 _renderFinishedSemaphores(),
+                                                 _currentFrame(0),
+                                                 _imageIndex(0),
+                                                 _imGuiPool(VK_NULL_HANDLE),
+                                                 _currentFrameInformation() {
     }
 
     void VKApplication::init(neon::Application* application) {
@@ -169,7 +170,6 @@ namespace neon::vulkan {
         glfwSetScrollCallback(_window, scroll_callback);
 
         postWindowCreation();
-
     }
 
     rush::Vec2i VKApplication::getWindowSize() const {
@@ -181,15 +181,14 @@ namespace neon::vulkan {
     }
 
     CommandBuffer* VKApplication::getCurrentCommandBuffer() const {
-        return _commandBuffers.empty()
-               ? nullptr
-               : _commandBuffers[_currentFrame].get();
+        return _currentCommandBuffer;
     }
 
     void VKApplication::lockMouse(bool lock) {
         if (lock) {
             glfwSetInputMode(_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-        } else {
+        }
+        else {
             glfwSetInputMode(_window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
         }
     }
@@ -213,10 +212,14 @@ namespace neon::vulkan {
                 float seconds = static_cast<float>(duration.count()) * 1e-9f;
 
                 _currentFrameInformation = {
-                        frames,
-                        seconds,
-                        lastFrameProcessTime
-                };
+                    frames,
+                    seconds,
+                    lastFrameProcessTime
+                }; {
+                    DEBUG_PROFILE_ID(_application->getProfiler(), tasks,
+                                     "tasks");
+                    _application->getTaskRunner().flushMainThreadTasks();
+                }
 
                 renderFrame(_application->getRoom().get());
 
@@ -229,7 +232,8 @@ namespace neon::vulkan {
                 ++frames;
             }
             finishLoop();
-        } catch (const std::exception& exception) {
+        }
+        catch (const std::exception& exception) {
             return {exception.what()};
         }
 
@@ -237,8 +241,7 @@ namespace neon::vulkan {
     }
 
     void VKApplication::renderFrame(neon::Room* room) {
-        bool preUpdateDone;
-        {
+        bool preUpdateDone; {
             DEBUG_PROFILE_ID(_application->getProfiler(), preUpdate,
                              "preUpdate (GPU Wait)");
             preUpdateDone = preUpdate(_application->getProfiler());
@@ -251,8 +254,7 @@ namespace neon::vulkan {
                 room->update(_currentFrameInformation.currentDeltaTime);
                 room->preDraw();
                 room->draw();
-            }
-            {
+            } {
                 DEBUG_PROFILE(_application->getProfiler(), endDraw);
                 endDraw(_application->getProfiler());
             }
@@ -271,30 +273,22 @@ namespace neon::vulkan {
         createLogicalDevice();
         createSwapChain();
         createCommandPool();
-        createCommandBuffers();
         createSyncObjects();
         initImGui();
     }
 
     bool VKApplication::preUpdate(Profiler& profiler) {
-        {
-            DEBUG_PROFILE_ID(profiler, wait, "Wait for GPU");
-            _commandBuffers[_currentFrame]->reset();
-        }
-
-        auto& render = _application->getRender();
-        {
+        auto& render = _application->getRender(); {
             DEBUG_PROFILE_ID(profiler, recreation, "FB Recreation");
             render->checkFrameBufferRecreationConditions();
         }
 
-        VkResult result;
-        {
+        VkResult result; {
             DEBUG_PROFILE_ID(profiler, adquireImage, "Image Acquisition");
             result = vkAcquireNextImageKHR(
-                    _device, _swapChain, UINT64_MAX,
-                    _imageAvailableSemaphores[_currentFrame], VK_NULL_HANDLE,
-                    &_imageIndex);
+                _device, _swapChain, UINT64_MAX,
+                _imageAvailableSemaphores[_currentFrame], VK_NULL_HANDLE,
+                &_imageIndex);
         }
 
         if (result == VK_ERROR_OUT_OF_DATE_KHR ||
@@ -306,13 +300,13 @@ namespace neon::vulkan {
                 render->checkFrameBufferRecreationConditions();
             }
             return false;
-        } else if (result != VK_SUCCESS) {
-            throw std::runtime_error("Failed to acquire swap chain image!");
         }
-
-        {
+        else if (result != VK_SUCCESS) {
+            throw std::runtime_error("Failed to acquire swap chain image!");
+        } {
             DEBUG_PROFILE_ID(profiler, beginCB, "Begin Command Buffer");
-            _commandBuffers[_currentFrame]->begin(false);
+            _currentCommandBuffer = _commandPool.getPool()
+                    .beginCommandBuffer(true);
         }
 
         ImGui_ImplVulkan_NewFrame();
@@ -325,17 +319,17 @@ namespace neon::vulkan {
     }
 
     void VKApplication::endDraw(Profiler& profiler) {
-        _commandBuffers[_currentFrame]->end();
+        _currentCommandBuffer->end();
 
         _recording = false;
 
         VkPipelineStageFlags waitStages[] = {
-                VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
+            VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT
+        };
 
-
-        _commandBuffers[_currentFrame]->getImplementation().submit(
-                1, &_imageAvailableSemaphores[_currentFrame], waitStages,
-                1, &_renderFinishedSemaphores[_currentFrame]);
+        _currentCommandBuffer->getImplementation().submit(
+            1, &_imageAvailableSemaphores[_currentFrame], waitStages,
+            1, &_renderFinishedSemaphores[_currentFrame]);
 
         VkPresentInfoKHR presentInfo{};
         presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
@@ -346,10 +340,9 @@ namespace neon::vulkan {
         presentInfo.swapchainCount = 1;
         presentInfo.pSwapchains = swapChains;
         presentInfo.pImageIndices = &_imageIndex;
-        presentInfo.pResults = nullptr;
-        {
+        presentInfo.pResults = nullptr; {
             DEBUG_PROFILE_ID(profiler, present, "Present");
-            vkQueuePresentKHR(_presentQueue, &presentInfo);
+            vkQueuePresentKHR(_presentQueue.getQueue(), &presentInfo);
         }
 
         _currentFrame = (_currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
@@ -357,7 +350,12 @@ namespace neon::vulkan {
 
 
     void VKApplication::finishLoop() {
+        _application->getTaskRunner().joinAsyncTasks();
         vkDeviceWaitIdle(_device);
+
+        // Free the command pool here and not in the
+        // destructor.
+        _commandPool = CommandPoolHolder();
     }
 
     void VKApplication::internalForceSizeValues(int32_t width, int32_t height) {
@@ -369,7 +367,7 @@ namespace neon::vulkan {
     void VKApplication::createInstance() {
         if (ENABLE_VALIDATION_LAYERS && !checkValidationLayerSupport()) {
             throw std::runtime_error(
-                    "Validation layer required but not available!");
+                "Validation layer required but not available!");
         }
 
         VkApplicationInfo applicationInfo{};
@@ -393,7 +391,8 @@ namespace neon::vulkan {
         if (ENABLE_VALIDATION_LAYERS) {
             createInfo.enabledLayerCount = VALIDATION_LAYERS.size();
             createInfo.ppEnabledLayerNames = VALIDATION_LAYERS.data();
-        } else {
+        }
+        else {
             createInfo.enabledLayerCount = 0;
         }
 
@@ -450,7 +449,8 @@ namespace neon::vulkan {
         if (!ENABLE_VALIDATION_LAYERS) return;
 
         VkDebugUtilsMessengerCreateInfoEXT createInfo{};
-        createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
+        createInfo.sType =
+                VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
         createInfo.messageSeverity =
                 VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT |
                 VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT |
@@ -483,7 +483,7 @@ namespace neon::vulkan {
 
         if (deviceCount == 0) {
             throw std::runtime_error(
-                    "Failed to find GPUs with Vulkan support!");
+                "Failed to find GPUs with Vulkan support!");
         }
 
         std::vector<VkPhysicalDevice> devices(deviceCount);
@@ -507,8 +507,9 @@ namespace neon::vulkan {
 
         if (_physicalDevice == VK_NULL_HANDLE) {
             throw std::runtime_error(
-                    "Failed to find GPUs with Vulkan support!");
-        } else {
+                "Failed to find GPUs with Vulkan support!");
+        }
+        else {
             std::cout << "Selected physical device: ";
             VkPhysicalDeviceProperties deviceProperties;
             vkGetPhysicalDeviceProperties(_physicalDevice, &deviceProperties);
@@ -533,13 +534,13 @@ namespace neon::vulkan {
                                              extensions.data());
 
         auto requiredExtensions = std::unordered_set<std::string>(
-                DEVICE_EXTENSIONS.begin(), DEVICE_EXTENSIONS.end());
+            DEVICE_EXTENSIONS.begin(), DEVICE_EXTENSIONS.end());
         for (const auto& item: extensions) {
             requiredExtensions.erase(item.extensionName);
         }
 
         VKSwapChainSupportDetails swapChainSupport = querySwapChainSupport(
-                device);
+            device);
         bool swapChainAdequate = !swapChainSupport.formats.empty() &&
                                  !swapChainSupport.presentModes.empty();
 
@@ -547,7 +548,7 @@ namespace neon::vulkan {
         vkGetPhysicalDeviceFeatures(device, &supportedFeatures);
 
         return (!onlyDiscrete || deviceProperties.deviceType ==
-                                 VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU) &&
+                VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU) &&
                families.isComplete() && requiredExtensions.empty() &&
                swapChainAdequate && supportedFeatures.samplerAnisotropy
                && supportedFeatures.geometryShader
@@ -586,11 +587,11 @@ namespace neon::vulkan {
     }
 
     void VKApplication::createLogicalDevice() {
-        VKQueueFamilyIndices indices = findQueueFamilies(_physicalDevice);
+        _familyIndices = findQueueFamilies(_physicalDevice);
 
         float priority = 1.0f;
         std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
-        for (const auto& item: indices.getValidIndices()) {
+        for (const auto& item: _familyIndices.getValidIndices()) {
             VkDeviceQueueCreateInfo queueCreateInfo{};
             queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
             queueCreateInfo.queueFamilyIndex = item;
@@ -605,7 +606,8 @@ namespace neon::vulkan {
         deviceFeatures.wideLines = VK_TRUE;
 
         VkPhysicalDeviceVulkan12Features vulkan12Features{};
-        vulkan12Features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES;
+        vulkan12Features.sType =
+                VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES;
         vulkan12Features.separateDepthStencilLayouts = VK_TRUE;
 
 
@@ -623,8 +625,23 @@ namespace neon::vulkan {
             throw std::runtime_error("Failed to create logical device!");
         }
 
-        vkGetDeviceQueue(_device, indices.graphics.value(), 0, &_graphicsQueue);
-        vkGetDeviceQueue(_device, indices.present.value(), 0, &_presentQueue);
+        VkQueue graphics, present;
+
+        vkGetDeviceQueue(
+            _device,
+            _familyIndices.graphics.value(),
+            0,
+            &graphics
+        );
+        vkGetDeviceQueue(
+            _device,
+            _familyIndices.present.value(),
+            0,
+            &present
+        );
+
+        _graphicsQueue.setQueue(graphics);
+        _presentQueue.setQueue(present);
     }
 
     void VKApplication::createSwapChain() {
@@ -650,14 +667,16 @@ namespace neon::vulkan {
         createInfo.imageArrayLayers = 1;
         createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 
-        auto indices = findQueueFamilies(_physicalDevice);
-        uint32_t queueFamilyIndices[] = {indices.graphics.value(),
-                                         indices.present.value()};
-        if (indices.graphics != indices.present) {
+        uint32_t queueFamilyIndices[] = {
+            _familyIndices.graphics.value(),
+            _familyIndices.present.value()
+        };
+        if (_familyIndices.graphics != _familyIndices.present) {
             createInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
             createInfo.queueFamilyIndexCount = 2;
             createInfo.pQueueFamilyIndices = queueFamilyIndices;
-        } else {
+        }
+        else {
             createInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
             createInfo.queueFamilyIndexCount = 0; // Optional
             createInfo.pQueueFamilyIndices = nullptr; // Optional
@@ -679,11 +698,13 @@ namespace neon::vulkan {
         _swapChainExtent = extent;
 
         auto depthFormat = vulkan_util::findSupportedFormat(
-                _physicalDevice,
-                {VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT,
-                 VK_FORMAT_D24_UNORM_S8_UINT},
-                VK_IMAGE_TILING_OPTIMAL,
-                VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT
+            _physicalDevice,
+            {
+                VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT,
+                VK_FORMAT_D24_UNORM_S8_UINT
+            },
+            VK_IMAGE_TILING_OPTIMAL,
+            VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT
         );
         if (!depthFormat.has_value()) {
             throw std::runtime_error("Couldn't find depth format!");
@@ -715,15 +736,15 @@ namespace neon::vulkan {
         if (presentModeCount != 0) {
             details.presentModes.resize(presentModeCount);
             vkGetPhysicalDeviceSurfacePresentModesKHR(device, _surface,
-                                                      &presentModeCount,
-                                                      details.presentModes.data());
+                &presentModeCount,
+                details.presentModes.data());
         }
 
         return details;
     }
 
     VkSurfaceFormatKHR VKApplication::chooseSwapSurfaceFormat(
-            const std::vector<VkSurfaceFormatKHR>& availableFormats) {
+        const std::vector<VkSurfaceFormatKHR>& availableFormats) {
         for (const auto& format: availableFormats) {
             if (format.format == VK_FORMAT_B8G8R8A8_UNORM) {
                 return format;
@@ -734,7 +755,7 @@ namespace neon::vulkan {
     }
 
     VkPresentModeKHR VKApplication::chooseSwapPresentMode(
-            const std::vector<VkPresentModeKHR>& availableModes) {
+        const std::vector<VkPresentModeKHR>& availableModes) {
         for (const auto& mode: availableModes) {
             if (mode == VK_PRESENT_MODE_FIFO_KHR) {
                 return mode;
@@ -746,49 +767,29 @@ namespace neon::vulkan {
 
     VkExtent2D
     VKApplication::chooseSwapExtent(
-            const VkSurfaceCapabilitiesKHR& capabilities) {
+        const VkSurfaceCapabilitiesKHR& capabilities) {
         if (capabilities.currentExtent.width !=
             std::numeric_limits<uint32_t>::max()) {
             // Fixed mode
             return capabilities.currentExtent;
-        } else {
+        }
+        else {
             // Bounds mode
             int width, height;
             glfwGetFramebufferSize(_window, &width, &height);
             return {
-                    std::clamp(static_cast<uint32_t>(width),
-                               capabilities.minImageExtent.width,
-                               capabilities.maxImageExtent.width),
-                    std::clamp(static_cast<uint32_t>(height),
-                               capabilities.minImageExtent.height,
-                               capabilities.maxImageExtent.height),
+                std::clamp(static_cast<uint32_t>(width),
+                           capabilities.minImageExtent.width,
+                           capabilities.maxImageExtent.width),
+                std::clamp(static_cast<uint32_t>(height),
+                           capabilities.minImageExtent.height,
+                           capabilities.maxImageExtent.height),
             };
         }
     }
 
     void VKApplication::createCommandPool() {
-        VKQueueFamilyIndices queueFamilyIndices = findQueueFamilies(
-                _physicalDevice);
-
-        VkCommandPoolCreateInfo poolInfo{};
-        poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-        poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-        poolInfo.queueFamilyIndex = queueFamilyIndices.graphics.value();
-
-        if (vkCreateCommandPool(_device, &poolInfo, nullptr, &_commandPool) !=
-            VK_SUCCESS) {
-            throw std::runtime_error("Failed to create command pool!");
-        }
-    }
-
-    void VKApplication::createCommandBuffers() {
-        _commandBuffers.clear();
-        _commandBuffers.reserve(MAX_FRAMES_IN_FLIGHT);
-
-        for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
-            _commandBuffers.emplace_back(
-                    std::make_unique<CommandBuffer>(_application, true));
-        }
+        _commandPool = _application->getCommandManager().fetchCommandPool();
     }
 
     void VKApplication::createSyncObjects() {
@@ -810,24 +811,24 @@ namespace neon::vulkan {
                                   &_renderFinishedSemaphores[i]) !=
                 VK_SUCCESS) {
                 throw std::runtime_error(
-                        "Failed to create synchronization objects!");
+                    "Failed to create synchronization objects!");
             }
         }
     }
 
     void VKApplication::initImGui() {
         VkDescriptorPoolSize pool_sizes[] = {
-                {VK_DESCRIPTOR_TYPE_SAMPLER,                1000},
-                {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1000},
-                {VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE,          1000},
-                {VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,          1000},
-                {VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER,   1000},
-                {VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER,   1000},
-                {VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,         1000},
-                {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,         1000},
-                {VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1000},
-                {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, 1000},
-                {VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT,       1000}
+            {VK_DESCRIPTOR_TYPE_SAMPLER, 1000},
+            {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1000},
+            {VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 1000},
+            {VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1000},
+            {VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER, 1000},
+            {VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER, 1000},
+            {VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1000},
+            {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1000},
+            {VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1000},
+            {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, 1000},
+            {VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, 1000}
         };
 
         VkDescriptorPoolCreateInfo pool_info{};
@@ -880,9 +881,6 @@ namespace neon::vulkan {
             vkDestroySemaphore(_device, _renderFinishedSemaphores[i], nullptr);
         }
 
-        _commandBuffers.clear();
-        vkDestroyCommandPool(_device, _commandPool, nullptr);
-
         cleanupSwapChain();
         vkDestroyDevice(_device, nullptr);
         vkDestroySurfaceKHR(_instance, _surface, nullptr);
@@ -920,11 +918,15 @@ namespace neon::vulkan {
         return _device;
     }
 
-    VkQueue VKApplication::getGraphicsQueue() const {
+    VKQueueFamilyIndices VKApplication::getFamilyIndices() const {
+        return _familyIndices;
+    }
+
+    VKThreadSafeQueue& VKApplication::getGraphicsQueue() {
         return _graphicsQueue;
     }
 
-    VkQueue VKApplication::getPresentQueue() const {
+    VKThreadSafeQueue& VKApplication::getPresentQueue() {
         return _presentQueue;
     }
 
@@ -936,8 +938,8 @@ namespace neon::vulkan {
         return _swapChain;
     }
 
-    VkCommandPool VKApplication::getCommandPool() const {
-        return _commandPool;
+    CommandPool* VKApplication::getCommandPool() const {
+        return &_commandPool.getPool();
     }
 
     VkDescriptorPool VKApplication::getImGuiPool() const {

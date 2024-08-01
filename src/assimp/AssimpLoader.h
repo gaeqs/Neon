@@ -17,8 +17,9 @@
 #include <engine/structure/collection/AssetCollection.h>
 #include <engine/model/InputDescription.h>
 #include <engine/model/DefaultInstancingData.h>
-#include <engine/structure/IdentifiableWrapper.h>
 #include <engine/shader/MaterialCreateInfo.h>
+
+#include <util/Result.h>
 
 
 namespace neon {
@@ -201,27 +202,34 @@ namespace neon::assimp_loader {
         AssetStorageMode assetStorageMode = AssetStorageMode::WEAK;
 
         /**
+          * Defines the command buffer used to create
+          * the textures of the model.
+          * If this command buffer is nullptr, the default
+          * command buffer will be used.
+          */
+        CommandBuffer* commandBuffer = nullptr;
+
+        /**
         * Whether the model data should be stored in CPU data too.
         */
         bool loadLocalModel = false;
 
     private:
+
         LoaderInfo(Application* application_,
                    std::string name_,
                    MaterialCreateInfo materialCreateInfo_,
                    VertexParser vertexParser_,
-                   InstanceData instanceData_) : application(application_),
-                                                 name(std::move(name_)),
-                                                 materialCreateInfo(
-                                                     std::move(
-                                                         materialCreateInfo_)),
-                                                 vertexParser(
-                                                     std::move(vertexParser_)),
-                                                 instanceData(
-                                                     std::move(instanceData_)) {
+                   InstanceData instanceData_)
+            : application(application_),
+              name(std::move(name_)),
+              materialCreateInfo(std::move(materialCreateInfo_)),
+              vertexParser(std::move(vertexParser_)),
+              instanceData(std::move(instanceData_)) {
         }
 
     public:
+
         template<class Vertex, class Instance = DefaultInstancingData>
         static LoaderInfo create(Application* application,
                                  std::string name,
@@ -234,6 +242,10 @@ namespace neon::assimp_loader {
                 InstanceData::fromTemplate<Instance>()
             };
         }
+    };
+
+    enum class LoadError {
+        INVALID_SCENE
     };
 
     /**

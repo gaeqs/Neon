@@ -153,11 +153,14 @@ namespace neon {
 
         /**
          * Uploads the instancing data to the GPU.
-         *
+         * <p>
          * This method is invoked automatically
          * before the room is rendered.
+         * <p>
+         * You can provide this method an external command buffer.
+         * This allows you to upload the model data asynchonously.
          */
-        void flush();
+        void flush(const CommandBuffer* commandBuffer = nullptr);
 
         /**
          * Returns the list containing all meshes inside this model.

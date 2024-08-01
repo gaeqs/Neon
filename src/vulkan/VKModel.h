@@ -30,7 +30,6 @@ namespace neon::vulkan {
     class AbstractVKApplication;
 
     class VKModel {
-
         Application* _application;
 
         std::vector<VKMesh*> _meshes;
@@ -46,12 +45,11 @@ namespace neon::vulkan {
         Range<uint32_t> _dataChangeRange;
 
         static std::vector<Mesh::Implementation*> getMeshImplementations(
-                const std::vector<std::shared_ptr<Mesh>>& meshes);
+            const std::vector<std::shared_ptr<Mesh>>& meshes);
 
         void reinitializeBuffer();
 
     public:
-
         VKModel(const VKModel& other) = delete;
 
         VKModel(Application* application, const ModelCreateInfo& info);
@@ -85,7 +83,7 @@ namespace neon::vulkan {
 
         const void* fetchDataRaw(uint32_t id) const;
 
-        void flush();
+        void flush(const CommandBuffer* commandBuffer);
 
         void draw(const Material* material,
                   const ShaderUniformBuffer* modelBuffer) const;
@@ -93,7 +91,6 @@ namespace neon::vulkan {
         void drawOutside(const Material* material,
                          const ShaderUniformBuffer* modelBuffer,
                          const CommandBuffer* commandBuffer) const;
-
     };
 }
 

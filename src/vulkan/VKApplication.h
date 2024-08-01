@@ -19,21 +19,21 @@
 #include <vulkan/AbstractVKApplication.h>
 #include <vulkan/VKSwapChainSupportDetails.h>
 #include <vulkan/VKQueueFamilyIndices.h>
+#include <vulkan/render/VKThreadSafeQueue.h>
 
 #include <util/profile/Profiler.h>
+
 
 namespace neon {
     class Room;
 }
 
 namespace neon::vulkan {
-
     class VKApplication : public AbstractVKApplication {
-
         static constexpr int MAX_FRAMES_IN_FLIGHT = 2;
 
         const std::vector<const char*> VALIDATION_LAYERS = {
-                "VK_LAYER_KHRONOS_validation"
+            "VK_LAYER_KHRONOS_validation"
         };
 
 #ifdef NDEBUG
@@ -43,8 +43,8 @@ namespace neon::vulkan {
 #endif
 
         const std::vector<const char*> DEVICE_EXTENSIONS = {
-                VK_KHR_SWAPCHAIN_EXTENSION_NAME,
-                //VK_KHR_SEPARATE_DEPTH_STENCIL_LAYOUTS_EXTENSION_NAME
+            VK_KHR_SWAPCHAIN_EXTENSION_NAME,
+            //VK_KHR_SEPARATE_DEPTH_STENCIL_LAYOUTS_EXTENSION_NAME
         };
 
         Application* _application;
@@ -57,9 +57,10 @@ namespace neon::vulkan {
         VkInstance _instance;
         VkDebugUtilsMessengerEXT _debugMessenger;
         VkPhysicalDevice _physicalDevice;
+        VKQueueFamilyIndices _familyIndices;
         VkDevice _device;
-        VkQueue _graphicsQueue;
-        VkQueue _presentQueue;
+        VKThreadSafeQueue _graphicsQueue;
+        VKThreadSafeQueue _presentQueue;
         VkSurfaceKHR _surface;
         VkSurfaceFormatKHR _surfaceFormat;
 
@@ -70,9 +71,9 @@ namespace neon::vulkan {
 
         VkFormat _depthImageFormat;
 
-        VkCommandPool _commandPool;
+        CommandPoolHolder _commandPool;
 
-        std::vector<std::unique_ptr<CommandBuffer>> _commandBuffers;
+        CommandBuffer* _currentCommandBuffer;
         bool _recording;
 
         std::vector<VkSemaphore> _imageAvailableSemaphores;
@@ -112,18 +113,16 @@ namespace neon::vulkan {
         querySwapChainSupport(VkPhysicalDevice device);
 
         VkSurfaceFormatKHR chooseSwapSurfaceFormat(
-                const std::vector<VkSurfaceFormatKHR>& availableFormats);
+            const std::vector<VkSurfaceFormatKHR>& availableFormats);
 
         VkPresentModeKHR
         chooseSwapPresentMode(
-                const std::vector<VkPresentModeKHR>& availableModes);
+            const std::vector<VkPresentModeKHR>& availableModes);
 
         VkExtent2D
         chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities);
 
         void createCommandPool();
-
-        void createCommandBuffers();
 
         void createSyncObjects();
 
@@ -136,7 +135,6 @@ namespace neon::vulkan {
         // endregion
 
     public:
-
         VKApplication(const VKApplication& other) = delete;
 
         VKApplication(std::string name, float width, float height);
@@ -147,7 +145,7 @@ namespace neon::vulkan {
 
         [[nodiscard]] rush::Vec2i getWindowSize() const override;
 
-        [[nodiscard]]  FrameInformation
+        [[nodiscard]] FrameInformation
         getCurrentFrameInformation() const override;
 
         [[nodiscard]] CommandBuffer* getCurrentCommandBuffer() const override;
@@ -170,7 +168,7 @@ namespace neon::vulkan {
 
         void internalForceSizeValues(int32_t width, int32_t height);
 
-        [[nodiscard]] Application* getApplication() const;
+        [[nodiscard]] Application* getApplication() const override;
 
         [[nodiscard]] uint32_t getCurrentFrame() const override;
 
@@ -184,9 +182,11 @@ namespace neon::vulkan {
 
         [[nodiscard]] VkDevice getDevice() const override;
 
-        [[nodiscard]] VkQueue getGraphicsQueue() const override;
+        [[nodiscard]] VKQueueFamilyIndices getFamilyIndices() const override;
 
-        [[nodiscard]] VkQueue getPresentQueue() const;
+        [[nodiscard]] VKThreadSafeQueue& getGraphicsQueue() override;
+
+        [[nodiscard]] VKThreadSafeQueue& getPresentQueue();
 
         [[nodiscard]] VkSurfaceKHR getSurface() const;
 
@@ -200,12 +200,11 @@ namespace neon::vulkan {
 
         [[nodiscard]] uint32_t getSwapChainCount() const override;
 
-        [[nodiscard]] VkCommandPool getCommandPool() const override;
+        [[nodiscard]] CommandPool* getCommandPool() const override;
 
         [[nodiscard]] VkDescriptorPool getImGuiPool() const override;
 
         [[nodiscard]] bool isRecordingCommandBuffer() const override;
-
     };
 }
 

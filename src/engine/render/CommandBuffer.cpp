@@ -5,17 +5,27 @@
 #include "CommandBuffer.h"
 
 namespace neon {
+    CommandBuffer::CommandBuffer(CommandBuffer&& move) noexcept
+        : _implementation(std::move(move._implementation)) {
+    }
 
-    CommandBuffer::CommandBuffer(Application* application, bool primary) :
-            _implementation(application, primary) {
+    CommandBuffer::CommandBuffer(Application* application,
+                                 bool primary)
+        : _implementation(application, primary) {
     }
 
 
 #ifdef USE_VULKAN
 
+    CommandBuffer::CommandBuffer(Application* application, VkCommandPool pool,
+                                 bool primary)
+        : _implementation(application, pool, primary) {
+    }
+
     CommandBuffer::CommandBuffer(Application* application,
-                                 VkCommandBuffer commandBuffer) :
-            _implementation(application, commandBuffer) {
+                                 VkCommandBuffer
+                                 commandBuffer)
+        : _implementation(application, commandBuffer) {
     }
 
 #endif
@@ -41,8 +51,20 @@ namespace neon {
         return _implementation.submit();
     }
 
+    void CommandBuffer::wait() {
+        _implementation.waitForFences();
+    }
+
     void CommandBuffer::reset(bool releaseResources) {
         return _implementation.reset(releaseResources);
     }
 
+    bool CommandBuffer::isBeingUsed() {
+        return _implementation.isBeingUsed();
+    }
+
+    CommandBuffer& CommandBuffer::operator=(CommandBuffer&& move) noexcept {
+        _implementation = std::move(move._implementation);
+        return *this;
+    }
 }

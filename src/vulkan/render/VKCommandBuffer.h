@@ -14,18 +14,17 @@ namespace neon {
 }
 
 namespace neon::vulkan {
-
     class AbstractVKApplication;
 
     enum class VKCommandBufferStatus {
-        CREATED,
+        READY,
         RECORDING,
-        FINISHED
+        RECORDED
     };
 
     class VKCommandBuffer {
-
         AbstractVKApplication* _vkApplication;
+        VkCommandPool _pool;
         VkCommandBuffer _commandBuffer;
 
         VKCommandBufferStatus _status;
@@ -34,15 +33,25 @@ namespace neon::vulkan {
         std::vector<VkFence> _freedFences;
         bool _external;
 
-        void waitForFences();
+        void refreshStatus();
 
-        VkFence fetchFence();
+        VkFence fetchAvailableFence();
+
+        VkFence createFence() const;
+
+        void printInvalidState(VKCommandBufferStatus expected) const;
+
+        void free();
 
     public:
-
         VKCommandBuffer(const VKCommandBuffer& other) = delete;
 
+        VKCommandBuffer(VKCommandBuffer&& move) noexcept;
+
         VKCommandBuffer(Application* application, bool primary);
+
+        VKCommandBuffer(Application* application, VkCommandPool pool,
+                        bool primary);
 
         VKCommandBuffer(Application* application,
                         VkCommandBuffer commandBuffer);
@@ -50,6 +59,8 @@ namespace neon::vulkan {
         ~VKCommandBuffer();
 
         [[nodiscard]] VkCommandBuffer getCommandBuffer() const;
+
+        void waitForFences();
 
         bool begin(bool onlyOneSubmit = false);
 
@@ -63,6 +74,9 @@ namespace neon::vulkan {
 
         void reset(bool releaseResources = true);
 
+        bool isBeingUsed();
+
+        VKCommandBuffer& operator=(VKCommandBuffer&& move) noexcept;
     };
 }
 

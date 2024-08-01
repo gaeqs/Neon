@@ -450,13 +450,13 @@ void loadModels(Application* application, Room* room,
     auto sansResult = assimp_loader::load(R"(resource/Sans)", "Sans.obj",
                                           sansLoaderInfo);
 
-    if (!sansResult.valid) {
+    if (!sansResult.isOk()) {
         std::cout << "Couldn't load Sans model!" << std::endl;
         std::cout << std::filesystem::current_path() << std::endl;
         exit(1);
     }
 
-    auto sansModel = sansResult.model;
+    auto sansModel = sansResult.getResult();
     sansModel->addMaterial(depthMaterial);
 
     constexpr int AMOUNT = 1024;
@@ -490,13 +490,13 @@ void loadModels(Application* application, Room* room,
     auto zeppeliResult = assimp_loader::load(R"(resource/Zeppeli)",
                                              "William.obj", zeppeliLoaderInfo);
 
-    if (!zeppeliResult.valid) {
+    if (!zeppeliResult.isOk()) {
         std::cout << "Couldn't load zeppeli model!" << std::endl;
         std::cout << std::filesystem::current_path() << std::endl;
         exit(1);
     }
 
-    auto zeppeliModel = zeppeliResult.model;
+    auto zeppeliModel = zeppeliResult.getResult();
     zeppeliModel->addMaterial(depthMaterial);
 
     auto zeppeli = room->newGameObject();

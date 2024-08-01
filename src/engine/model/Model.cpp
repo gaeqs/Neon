@@ -55,8 +55,8 @@ namespace neon {
         _implementation.uploadDataRaw(id, raw);
     }
 
-    void Model::flush() {
-        _implementation.flush();
+    void Model::flush(const CommandBuffer* commandBuffer) {
+        _implementation.flush(commandBuffer);
     }
 
     void Model::defineInstanceStruct(std::type_index type, size_t size) {

@@ -6,28 +6,37 @@
 #define VISIMPL_ABSTRACTVKAPPLICATION_H
 
 #include <engine/Application.h>
+#include <engine/render/CommandPool.h>
 
 #include <vulkan/vulkan.h>
 
+#include <vulkan/VKQueueFamilyIndices.h>
+#include <vulkan/render/VKThreadSafeQueue.h>
+
+namespace neon {
+    class Application;
+}
+
 namespace neon::vulkan {
-
     class AbstractVKApplication : public ApplicationImplementation {
-
     public:
+        [[nodiscard]] virtual Application* getApplication() const = 0;
 
         [[nodiscard]] virtual VkInstance getInstance() const = 0;
+
+        [[nodiscard]] virtual VKQueueFamilyIndices getFamilyIndices() const = 0;
 
         [[nodiscard]] virtual VkDevice getDevice() const = 0;
 
         [[nodiscard]] virtual VkPhysicalDevice getPhysicalDevice() const = 0;
 
-        [[nodiscard]] virtual VkQueue getGraphicsQueue() const = 0;
+        [[nodiscard]] virtual VKThreadSafeQueue& getGraphicsQueue() = 0;
 
         [[nodiscard]] virtual VkFormat getSwapChainImageFormat() const = 0;
 
         [[nodiscard]] virtual VkFormat getDepthImageFormat() const = 0;
 
-        [[nodiscard]] virtual VkCommandPool getCommandPool() const = 0;
+        [[nodiscard]] virtual CommandPool* getCommandPool() const = 0;
 
         [[nodiscard]] virtual VkSwapchainKHR getSwapChain() const = 0;
 
@@ -70,7 +79,6 @@ namespace neon::vulkan {
          * @return whether the current command buffer is recording.
          */
         [[nodiscard]] virtual bool isRecordingCommandBuffer() const = 0;
-
     };
 }
 

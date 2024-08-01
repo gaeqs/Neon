@@ -27,7 +27,10 @@
 #include <engine/model/Mesh.h>
 #include <engine/model/Model.h>
 
+#include "AssimpNewIOSystem.h"
+
 namespace neon::assimp_loader {
+
     using Tex = std::shared_ptr<Texture>;
     using Mat = std::shared_ptr<Material>;
 
@@ -48,6 +51,7 @@ namespace neon::assimp_loader {
                         const std::string& name,
                         const std::map<aiTexture*, Tex>& loadedTextures,
                         const LoaderInfo& info) {
+
             // Let's check if the texture is already loaded!
             for (const auto& [aiTexture, actualTexture]: loadedTextures) {
                 if (aiTexture->mWidth == texture->mWidth
@@ -56,13 +60,17 @@ namespace neon::assimp_loader {
                 }
             }
 
+            TextureCreateInfo createInfo;
+            createInfo.commandBuffer = info.commandBuffer;
+
             if (texture->mHeight == 0) {
                 // Compressed format! Let's stbi decide.
                 return Texture::createTextureFromFile(
                     info.application,
                     texture->mFilename.C_Str(),
                     texture->pcData,
-                    texture->mWidth
+                    texture->mWidth,
+                    createInfo
                 );
             }
 
@@ -310,8 +318,15 @@ namespace neon::assimp_loader {
         }
     }
 
-    Result load(const cmrc::file& file,
-                const LoaderInfo& info) {
+    LoadError::LoadError(std::string message) : _message(std::move(message)) {
+    }
+
+    const std::string& LoadError::getMessage() const {
+        return _message;
+    }
+
+    Result<std::shared_ptr<Model>, LoadError> load(const cmrc::file& file,
+                                                   const LoaderInfo& info) {
         Assimp::Importer importer;
         auto scene = importer.ReadFileFromMemory(
             file.begin(), file.size(), decodeFlags(info));
@@ -319,22 +334,20 @@ namespace neon::assimp_loader {
         return load(scene, info);
     }
 
-    Result load(const std::string& directory,
-                const std::string& file,
-                const LoaderInfo& info) {
+    Result<std::shared_ptr<Model>, LoadError> load(const std::string& directory,
+                                                   const std::string& file,
+                                                   const LoaderInfo& info) {
         Assimp::Importer importer;
 
         auto previous = std::filesystem::current_path();
-        importer.GetIOHandler()->ChangeDirectory(directory);
+        importer.SetIOHandler(new AssimpNewIOSystem(directory));
         auto scene = importer.ReadFile(file, decodeFlags(info));
-        std::filesystem::current_path(previous);
-
         return load(scene, info);
     }
 
-    Result load(const void* buffer,
-                size_t length,
-                const LoaderInfo& info) {
+    Result<std::shared_ptr<Model>, LoadError> load(const void* buffer,
+                                                   size_t length,
+                                                   const LoaderInfo& info) {
         Assimp::Importer importer;
         auto scene = importer.ReadFileFromMemory(
             buffer, length, decodeFlags(info));
@@ -342,9 +355,9 @@ namespace neon::assimp_loader {
         return load(scene, info);
     }
 
-    Result load(const aiScene* scene,
-                const LoaderInfo& info) {
-        if (!scene) return {false};
+    Result<std::shared_ptr<Model>, LoadError> load(const aiScene* scene,
+                                                   const LoaderInfo& info) {
+        if (!scene) return LoadError::INVALID_SCENE;
 
         // Init collections
         std::map<std::string, Tex> textures;

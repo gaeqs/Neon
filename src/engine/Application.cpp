@@ -11,16 +11,19 @@
 #include <engine/io/ScrollEvent.h>
 
 namespace neon {
-
     Application::Application(
-            std::unique_ptr<ApplicationImplementation> implementation) :
-            _implementation(std::move(implementation)),
-            _room(nullptr),
-            _lastCursorPosition(0.0, 0.0),
-            _profiler(),
-            _assets(),
-            _render(),
-            _forcedViewport() {
+        std::unique_ptr<ApplicationImplementation>
+        implementation) : _implementation(std::move(implementation)),
+                          _room(nullptr),
+                          _lastCursorPosition(0.0, 0.0),
+                          _profiler(),
+                          _commandManager(this),
+                          _assets(),
+                          _render(),
+                          _forcedViewport() {
+    }
+
+    Application::~Application() {
     }
 
     void Application::init() {
@@ -43,8 +46,22 @@ namespace neon {
         return _profiler;
     }
 
-    Profiler& Application::getProfiler() {
-        return _profiler;
+    Profiler& Application::getProfiler() { return _profiler; }
+
+    const CommandManager& Application::getCommandManager() const {
+        return _commandManager;
+    }
+
+    CommandManager& Application::getCommandManager() {
+        return _commandManager;
+    }
+
+    const TaskRunner& Application::getTaskRunner() const {
+        return _taskRunner;
+    }
+
+    TaskRunner& Application::getTaskRunner() {
+        return _taskRunner;
     }
 
     const AssetCollection& Application::getAssets() const {
@@ -110,7 +127,7 @@ namespace neon {
     void Application::setRoom(const std::shared_ptr<Room>& room) {
         if (room != nullptr && room->getApplication() != this) {
             throw std::runtime_error(
-                    "Room's application is not this application!");
+                "Room's application is not this application!");
         }
         _room = room;
     }
@@ -122,10 +139,10 @@ namespace neon {
     void Application::invokeKeyEvent(int key, int scancode,
                                      int action, int mods) {
         KeyboardEvent event{
-                scancode,
-                mods,
-                static_cast<KeyboardKey>(key),
-                static_cast<KeyboardAction>(action)
+            scancode,
+            mods,
+            static_cast<KeyboardKey>(key),
+            static_cast<KeyboardAction>(action)
         };
         if (_room != nullptr) {
             _room->onKey(event);
@@ -134,9 +151,9 @@ namespace neon {
 
     void Application::invokeMouseButtonEvent(int button, int action, int mods) {
         MouseButtonEvent event{
-                static_cast<MouseButton>(button),
-                static_cast<KeyboardAction>(action),
-                mods
+            static_cast<MouseButton>(button),
+            static_cast<KeyboardAction>(action),
+            mods
         };
         if (_room != nullptr) {
             _room->onMouseButton(event);
@@ -149,8 +166,8 @@ namespace neon {
         _lastCursorPosition = current;
 
         CursorMoveEvent event{
-                current.cast<float>(),
-                delta.cast<float>()
+            current.cast<float>(),
+            delta.cast<float>()
         };
 
         if (_room != nullptr) {
