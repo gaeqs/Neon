@@ -26,11 +26,17 @@ namespace neon {
     }
 
     CommandPool::CommandPool(Application* application)
-        : _implementation(application),
-          _buffers(),
-          _availableBuffers(),
-          _usedBuffers() {
+        : _implementation(application) {
     }
+
+
+#ifdef USE_VULKAN
+
+    CommandPool::CommandPool(Application* application, VkCommandPool pool)
+        : _implementation(application, pool) {
+    }
+    
+#endif
 
     CommandPool::~CommandPool() {
         _buffers.clear();
