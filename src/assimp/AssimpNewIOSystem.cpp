@@ -62,7 +62,7 @@ namespace neon::assimp_loader {
     }
 
     aiReturn AssimpNewIOStream::Seek(size_t pOffset, aiOrigin pOrigin) {
-        _stream.seekg(pOffset, pOrigin);
+        _stream.seekg(pOffset, static_cast<std::ios_base::seekdir>(pOrigin));
         return aiReturn_SUCCESS;
     }
 

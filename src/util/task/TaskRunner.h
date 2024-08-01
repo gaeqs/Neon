@@ -8,6 +8,7 @@
 #include <vector>
 #include <functional>
 #include <mutex>
+#include <thread>
 
 class TaskRunner {
     struct AsyncTask {

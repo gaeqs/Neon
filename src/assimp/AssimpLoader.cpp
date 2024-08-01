@@ -6,7 +6,7 @@
 #include "engine/structure/collection/AssetCollection.h"
 
 #include <memory>
-#include <stdint.h>
+#include <cstdint>
 #include <string>
 #include <vector>
 #include <filesystem>
@@ -74,7 +74,6 @@ namespace neon::assimp_loader {
                 );
             }
 
-            TextureCreateInfo createInfo;
             createInfo.image.width = texture->mWidth;
             createInfo.image.height = texture->mHeight;
             createInfo.image.depth = 1;
@@ -318,14 +317,7 @@ namespace neon::assimp_loader {
         }
     }
 
-    LoadError::LoadError(std::string message) : _message(std::move(message)) {
-    }
-
-    const std::string& LoadError::getMessage() const {
-        return _message;
-    }
-
-    Result<std::shared_ptr<Model>, LoadError> load(const cmrc::file& file,
+    Result load(const cmrc::file& file,
                                                    const LoaderInfo& info) {
         Assimp::Importer importer;
         auto scene = importer.ReadFileFromMemory(
@@ -334,7 +326,7 @@ namespace neon::assimp_loader {
         return load(scene, info);
     }
 
-    Result<std::shared_ptr<Model>, LoadError> load(const std::string& directory,
+    Result load(const std::string& directory,
                                                    const std::string& file,
                                                    const LoaderInfo& info) {
         Assimp::Importer importer;
@@ -345,7 +337,7 @@ namespace neon::assimp_loader {
         return load(scene, info);
     }
 
-    Result<std::shared_ptr<Model>, LoadError> load(const void* buffer,
+    Result load(const void* buffer,
                                                    size_t length,
                                                    const LoaderInfo& info) {
         Assimp::Importer importer;
@@ -355,9 +347,9 @@ namespace neon::assimp_loader {
         return load(scene, info);
     }
 
-    Result<std::shared_ptr<Model>, LoadError> load(const aiScene* scene,
+    Result load(const aiScene* scene,
                                                    const LoaderInfo& info) {
-        if (!scene) return LoadError::INVALID_SCENE;
+        if (!scene) return {LoadError::INVALID_SCENE};
 
         // Init collections
         std::map<std::string, Tex> textures;
@@ -392,6 +384,6 @@ namespace neon::assimp_loader {
 
         info.application->getAssets().store(model, AssetStorageMode::WEAK);
 
-        return {true, model, std::move(local)};
+        return {{}, model, std::move(local)};
     }
 }

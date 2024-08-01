@@ -199,7 +199,7 @@ void loadModels(Application* application, Room* room,
     auto sansResult = assimp_loader::load(R"(resource/Sans)",
                                           "Sans.obj", sansLoaderInfo);
 
-    if (!sansResult.valid) {
+    if (sansResult.error.has_value()) {
         std::cout << "Couldn't load Sans model!" << std::endl;
         exit(1);
     }

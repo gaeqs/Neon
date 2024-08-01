@@ -163,13 +163,13 @@ void sansLoadThread(Application* application,
                                           "Sans.obj",
                                           info);
 
-    if (!sansResult.isOk()) {
+    if (sansResult.error.has_value()) {
         std::cout << "Couldn't load Sans model!" << std::endl;
         std::cout << std::filesystem::current_path() << std::endl;
         exit(1);
     }
 
-    auto sansModel = sansResult.getResult();
+    auto sansModel = sansResult.model;
     sansModel->flush(buffer);
 
     buffer->end();
@@ -236,13 +236,13 @@ void loadModels(Application* application, Room* room,
     auto zeppeliResult = assimp_loader::load(R"(resource/Zeppeli)",
                                              "William.obj", zeppeliLoaderInfo);
 
-    if (!zeppeliResult.isOk()) {
+    if (zeppeliResult.error.has_value()) {
         std::cout << "Couldn't load zeppeli model!" << std::endl;
         std::cout << std::filesystem::current_path() << std::endl;
         exit(1);
     }
 
-    auto zeppeliModel = zeppeliResult.getResult();
+    auto zeppeliModel = zeppeliResult.model;
 
     auto zeppeli = room->newGameObject();
     zeppeli->newComponent<GraphicComponent>(zeppeliModel);

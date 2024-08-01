@@ -9,6 +9,7 @@
 #include <typeindex>
 #include <utility>
 #include <vector>
+#include <optional>
 
 #include <rush/rush.h>
 
@@ -19,9 +20,6 @@
 #include <engine/model/DefaultInstancingData.h>
 #include <engine/shader/MaterialCreateInfo.h>
 
-#include <util/Result.h>
-
-
 namespace neon {
     class Model;
 
@@ -31,6 +29,7 @@ namespace neon {
 struct aiScene;
 
 namespace neon::assimp_loader {
+
     struct VertexParserData {
         rush::Vec3f position;
         rush::Vec3f normal;
@@ -48,11 +47,15 @@ namespace neon::assimp_loader {
         std::vector<LocalMesh> meshes;
     };
 
+    enum class LoadError {
+        INVALID_SCENE
+    };
+
     struct Result {
         /**
          * Whether the result is valid.
          */
-        bool valid = false;
+        std::optional<LoadError> error = {};
 
         /**
          * The loaded model.
@@ -242,10 +245,6 @@ namespace neon::assimp_loader {
                 InstanceData::fromTemplate<Instance>()
             };
         }
-    };
-
-    enum class LoadError {
-        INVALID_SCENE
     };
 
     /**

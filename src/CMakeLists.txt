@@ -33,7 +33,6 @@ set(SOURCES
         engine/model/DefaultInstancingData.h
         util/component/CameraMovementComponent.cpp
         util/component/CameraMovementComponent.h
-        assimp/AssimpMaterialParameters.h
         engine/io/KeyboardEvent.h
         engine/io/CursorEvent.h
         engine/io/MouseButtonEvent.h
@@ -81,8 +80,6 @@ set(SOURCES
         engine/light/PointLight.cpp
         engine/light/FlashLight.h
         engine/light/FlashLight.cpp
-        assimp/AssimpGeometry.cpp
-        assimp/AssimpGeometry.h
         util/component/DockSpaceComponent.h
         util/component/DockSpaceComponent.cpp
         util/component/ViewportComponent.h
@@ -99,6 +96,11 @@ set(SOURCES
         engine/shader/MaterialCreateInfo.h
         assimp/AssimpLoader.cpp
         assimp/AssimpLoader.h
+        assimp/AssimpNewIOSystem.cpp
+        assimp/AssimpNewIOSystem.h
+        assimp/AssimpGeometry.cpp
+        assimp/AssimpGeometry.h
+        assimp/AssimpMaterialParameters.h
         engine/structure/Asset.cpp
         engine/structure/Asset.h
         engine/structure/collection/AssetCollection.cpp
@@ -111,8 +113,7 @@ set(SOURCES
         util/task/TaskRunner.cpp
         util/task/TaskRunner.h
         engine/render/CommandManager.cpp
-        engine/render/CommandManager.h
-        assimp/AssimpNewIOSystem.h)
+        engine/render/CommandManager.h)
 
 
 set(VULKAN_SOURCES
@@ -162,9 +163,7 @@ set(VULKAN_SOURCES
         vulkan/render/VKCommandPool.cpp
         vulkan/render/VKCommandPool.h
         vulkan/render/VKThreadSafeQueue.cpp
-        vulkan/render/VKThreadSafeQueue.h
-        assimp/AssimpNewIOSystem.cpp
-        assimp/AssimpNewIOSystem.h)
+        vulkan/render/VKThreadSafeQueue.h)
 
 if (NEON_USE_QT)
     list(APPEND SOURCES
