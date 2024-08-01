@@ -12,7 +12,8 @@ namespace neon::vulkan {
     VKCommandPool::VKCommandPool(VKCommandPool&& move) noexcept
         : _application(move._application),
           _vkApplication(move._vkApplication),
-          _raw(move._raw) {
+          _raw(move._raw),
+          _external(move._external) {
         move._raw = VK_NULL_HANDLE;
     }
 
@@ -21,7 +22,8 @@ namespace neon::vulkan {
         : _application(application),
           _vkApplication(dynamic_cast<AbstractVKApplication*>(
               application->getImplementation())),
-          _raw() {
+          _raw(),
+          _external(false) {
         auto optional = _vkApplication->getFamilyIndices().graphics;
         if (!optional.has_value()) {
             throw std::runtime_error("No graphic queue found!");
@@ -39,8 +41,18 @@ namespace neon::vulkan {
         }
     }
 
+    VKCommandPool::VKCommandPool(
+        Application* application,
+        VkCommandPool external)
+        : _application(application),
+          _vkApplication(dynamic_cast<AbstractVKApplication*>(
+              application->getImplementation())),
+          _raw(external),
+          _external(true) {
+    }
+
     VKCommandPool::~VKCommandPool() {
-        if (_raw != VK_NULL_HANDLE) {
+        if (_raw != VK_NULL_HANDLE && !_external) {
             vkDestroyCommandPool(
                 _vkApplication->getDevice(),
                 _raw,
@@ -59,7 +71,7 @@ namespace neon::vulkan {
     }
 
     VKCommandPool& VKCommandPool::operator=(VKCommandPool&& move) noexcept {
-        if(this == &move) return *this; // SAME!
+        if (this == &move) return *this; // SAME!
         if (_raw != VK_NULL_HANDLE) {
             vkDestroyCommandPool(
                 _vkApplication->getDevice(),

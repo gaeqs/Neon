@@ -43,6 +43,10 @@ namespace neon::vulkan {
         Application* _application;
         std::function<void(QTApplication*)> _onInit;
 
+        VKThreadSafeQueue _graphicsQueue;
+        mutable std::unique_ptr<CommandPool> _commandPool;
+        VKQueueFamilyIndices _indices;
+
         FrameInformation _currentFrameInformation;
         TimeStamp _lastFrameTime;
         float _lastFrameProcessTime;
@@ -83,13 +87,13 @@ namespace neon::vulkan {
 
         [[nodiscard]] VkPhysicalDevice getPhysicalDevice() const override;
 
-        [[nodiscard]] VkQueue getGraphicsQueue() const override;
+        [[nodiscard]] VKThreadSafeQueue& getGraphicsQueue() override;
 
         [[nodiscard]] VkFormat getSwapChainImageFormat() const override;
 
         [[nodiscard]] VkFormat getDepthImageFormat() const override;
 
-        [[nodiscard]] VkCommandPool getCommandPool() const override;
+        [[nodiscard]] CommandPool* getCommandPool() const override;
 
         [[nodiscard]] VkSwapchainKHR getSwapChain() const override;
 
@@ -106,6 +110,10 @@ namespace neon::vulkan {
         [[nodiscard]] VkDescriptorPool getImGuiPool() const override;
 
         [[nodiscard]] bool isRecordingCommandBuffer() const override;
+
+        [[nodiscard]] Application* getApplication() const override;
+
+        [[nodiscard]] VKQueueFamilyIndices getFamilyIndices() const override;
 
         void preInitResources() override;
 

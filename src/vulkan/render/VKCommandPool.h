@@ -21,6 +21,7 @@ namespace neon::vulkan {
         Application* _application;
         AbstractVKApplication* _vkApplication;
         VkCommandPool _raw;
+        bool _external;
 
     public:
         VKCommandPool(const VKCommandPool& other) = delete;
@@ -28,6 +29,9 @@ namespace neon::vulkan {
         VKCommandPool(VKCommandPool&& move) noexcept;
 
         explicit VKCommandPool(Application* application);
+
+        explicit VKCommandPool(Application* application,
+                               VkCommandPool external);
 
         ~VKCommandPool();
 
