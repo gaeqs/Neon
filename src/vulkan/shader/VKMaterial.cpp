@@ -19,79 +19,95 @@ namespace vc = neon::vulkan::conversions;
 
 namespace neon::vulkan {
     VKMaterial::VKMaterial(
-            Application* application,
-            Material* material,
-            const MaterialCreateInfo& createInfo) :
-            _material(material),
-            _vkApplication(dynamic_cast<AbstractVKApplication*>(
-                                   application->getImplementation())),
-            _pipelineLayout(VK_NULL_HANDLE),
-            _pipeline(VK_NULL_HANDLE),
-            _pushConstants(),
-            _pushConstantStages(0),
-            _target(createInfo.target->getImplementation().getRenderPass().getRaw()) {
-
+        Application* application,
+        Material* material,
+        const MaterialCreateInfo& createInfo)
+        : _material(material),
+          _vkApplication(dynamic_cast<AbstractVKApplication*>(
+              application->getImplementation())),
+          _pipelineLayout(VK_NULL_HANDLE),
+          _pipeline(VK_NULL_HANDLE),
+          _pushConstants(),
+          _pushConstantStages(0),
+          _target(
+              createInfo.target->getImplementation().getRenderPass().getRaw()) {
         std::vector<VkDynamicState> dynamicStates = {
-                VK_DYNAMIC_STATE_VIEWPORT,
-                VK_DYNAMIC_STATE_SCISSOR
+            VK_DYNAMIC_STATE_VIEWPORT,
+            VK_DYNAMIC_STATE_SCISSOR
         };
 
-        auto [vBinding, vAttributes] = vulkan_util::toVulkanDescription(
-                0, 0, createInfo.descriptions.vertex);
-
-        auto [iBinding, iAttributes] = vulkan_util::toVulkanDescription(
-                1, createInfo.descriptions.vertex.attributes.size(),
-                createInfo.descriptions.instance);
-
-        VkVertexInputBindingDescription bindings[] = {vBinding, iBinding};
-
         std::vector<VkVertexInputAttributeDescription> attributes;
-        attributes.insert(attributes.end(), vAttributes.begin(),
-                          vAttributes.end());
-        attributes.insert(attributes.end(), iAttributes.begin(),
-                          iAttributes.end());
+        std::vector<VkVertexInputBindingDescription> bindings;
 
+        for (auto& description: createInfo.descriptions.vertex) {
+            auto [binding, att] = vulkan_util::toVulkanDescription(
+                bindings.size(),
+                attributes.size(),
+                description
+            );
+
+            bindings.push_back(binding);
+            attributes.insert(attributes.end(), att.begin(), att.end());
+        }
+
+        for (auto& description: createInfo.descriptions.instance) {
+            auto [binding, att] = vulkan_util::toVulkanDescription(
+                bindings.size(),
+                attributes.size(),
+                description
+            );
+
+            bindings.push_back(binding);
+            attributes.insert(attributes.end(), att.begin(), att.end());
+        }
 
         VkPipelineDynamicStateCreateInfo dynamicState{};
-        dynamicState.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
-        dynamicState.dynamicStateCount = static_cast<uint32_t>(dynamicStates.size());
+        dynamicState.sType =
+                VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
+        dynamicState.dynamicStateCount = static_cast<uint32_t>(dynamicStates.
+            size());
         dynamicState.pDynamicStates = dynamicStates.data();
 
         VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
-        vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-        vertexInputInfo.vertexBindingDescriptionCount = 2;
-        vertexInputInfo.pVertexBindingDescriptions = bindings;
+        vertexInputInfo.sType =
+                VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
+        vertexInputInfo.vertexBindingDescriptionCount = bindings.size();
+        vertexInputInfo.pVertexBindingDescriptions = bindings.data();
         vertexInputInfo.vertexAttributeDescriptionCount = attributes.size();
         vertexInputInfo.pVertexAttributeDescriptions = attributes.data();
 
         VkPipelineInputAssemblyStateCreateInfo inputAssembly{};
-        inputAssembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
+        inputAssembly.sType =
+                VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
         inputAssembly.topology = vc::vkPrimitiveTopology(createInfo.topology);
         inputAssembly.primitiveRestartEnable = VK_FALSE;
 
         VkPipelineViewportStateCreateInfo viewportState{};
-        viewportState.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
+        viewportState.sType =
+                VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
         viewportState.viewportCount = 1;
         viewportState.scissorCount = 1;
 
         auto& ra = createInfo.rasterizer;
         VkPipelineRasterizationStateCreateInfo rasterizer{};
-        rasterizer.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
+        rasterizer.sType =
+                VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
         rasterizer.depthClampEnable = VK_FALSE;
         rasterizer.rasterizerDiscardEnable = VK_FALSE;
         rasterizer.polygonMode = vc::vkPolygonMode(ra.polygonMode);
         rasterizer.lineWidth = ra.lineWidth;
         rasterizer.cullMode = vc::vkCullModeFlagBits(ra.cullMode);
         rasterizer.frontFace = ra.frontFace == FrontFace::COUNTER_CLOCKWISE
-                               ? VK_FRONT_FACE_COUNTER_CLOCKWISE
-                               : VK_FRONT_FACE_CLOCKWISE;
+                                   ? VK_FRONT_FACE_COUNTER_CLOCKWISE
+                                   : VK_FRONT_FACE_CLOCKWISE;
         rasterizer.depthBiasEnable = VK_FALSE;
         rasterizer.depthBiasConstantFactor = 0.0f; // Optional
         rasterizer.depthBiasClamp = 0.0f; // Optional
         rasterizer.depthBiasSlopeFactor = 0.0f; // Optional
 
         VkPipelineMultisampleStateCreateInfo multisampling{};
-        multisampling.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
+        multisampling.sType =
+                VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
         multisampling.sampleShadingEnable = VK_FALSE;
         multisampling.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
         multisampling.minSampleShading = 1.0f; // Optional
@@ -101,7 +117,8 @@ namespace neon::vulkan {
 
         auto& di = createInfo.depthStencil;
         VkPipelineDepthStencilStateCreateInfo depthStencil{};
-        depthStencil.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
+        depthStencil.sType =
+                VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
         depthStencil.depthTestEnable = di.depthTest;
         depthStencil.depthWriteEnable = di.depthWrite;
         depthStencil.depthCompareOp = vc::vkCompareOp(di.depthCompareOperation);
@@ -120,13 +137,13 @@ namespace neon::vulkan {
 
         std::vector<VkPipelineColorBlendAttachmentState> blendAttachments;
         blendAttachments.resize(
-                createInfo.target->getImplementation().getColorAttachmentAmount(),
-                defaultColorBlendAttachment
+            createInfo.target->getImplementation().getColorAttachmentAmount(),
+            defaultColorBlendAttachment
         );
 
         size_t maxOutColors = std::min(
-                createInfo.blending.attachmentsBlending.size(),
-                blendAttachments.size());
+            createInfo.blending.attachmentsBlending.size(),
+            blendAttachments.size());
         for (int i = 0; i < maxOutColors; ++i) {
             auto& att = createInfo.blending.attachmentsBlending[i];
             VkPipelineColorBlendAttachmentState cba{};
@@ -136,51 +153,57 @@ namespace neon::vulkan {
 
             cba.colorBlendOp = vc::vkBlendOp(att.colorBlendOperation);
             cba.srcColorBlendFactor = vc::vkBlendFactor(
-                    att.colorSourceBlendFactor);
+                att.colorSourceBlendFactor);
             cba.dstColorBlendFactor = vc::vkBlendFactor(
-                    att.colorDestinyBlendFactor);
+                att.colorDestinyBlendFactor);
 
             cba.alphaBlendOp = vc::vkBlendOp(att.alphaBlendOperation);
             cba.srcAlphaBlendFactor = vc::vkBlendFactor(
-                    att.alphaSourceBlendFactor);
+                att.alphaSourceBlendFactor);
             cba.dstAlphaBlendFactor = vc::vkBlendFactor(
-                    att.alphaDestinyBlendFactor);
+                att.alphaDestinyBlendFactor);
 
             blendAttachments.at(i) = cba;
         }
 
         VkPipelineColorBlendStateCreateInfo colorBlending{};
-        colorBlending.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
+        colorBlending.sType =
+                VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
         colorBlending.logicOpEnable = createInfo.blending.logicBlending;
         colorBlending.logicOp = vc::vkLogicOp(
-                createInfo.blending.logicOperation);
+            createInfo.blending.logicOperation);
         colorBlending.attachmentCount = blendAttachments.size();
         colorBlending.pAttachments = blendAttachments.data();
-        colorBlending.blendConstants[0] = createInfo.blending.blendingConstants[0];
-        colorBlending.blendConstants[1] = createInfo.blending.blendingConstants[1];
-        colorBlending.blendConstants[2] = createInfo.blending.blendingConstants[2];
-        colorBlending.blendConstants[3] = createInfo.blending.blendingConstants[3];
+        colorBlending.blendConstants[0] = createInfo.blending.blendingConstants[
+            0];
+        colorBlending.blendConstants[1] = createInfo.blending.blendingConstants[
+            1];
+        colorBlending.blendConstants[2] = createInfo.blending.blendingConstants[
+            2];
+        colorBlending.blendConstants[3] = createInfo.blending.blendingConstants[
+            3];
 
         std::vector<VkDescriptorSetLayout> uniformInfos;
         uniformInfos.reserve(2 + createInfo.descriptions.extraUniforms.size());
         uniformInfos.push_back(
-                application->getRender()
-                        ->getGlobalUniformDescriptor()
-                        ->getImplementation().getDescriptorSetLayout());
+            application->getRender()
+            ->getGlobalUniformDescriptor()
+            ->getImplementation().getDescriptorSetLayout());
         if (material->getUniformBuffer() != nullptr) {
             uniformInfos.push_back(material->getUniformBuffer()
-                                           ->getDescriptor()
-                                           ->getImplementation()
-                                           .getDescriptorSetLayout());
+                ->getDescriptor()
+                ->getImplementation()
+                .getDescriptorSetLayout());
         }
 
         for (const auto& descriptor: createInfo.descriptions.extraUniforms) {
             uniformInfos.push_back(descriptor->getImplementation()
-                                           .getDescriptorSetLayout());
+                .getDescriptorSetLayout());
         }
 
         VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
-        pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+        pipelineLayoutInfo.sType =
+                VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
         pipelineLayoutInfo.setLayoutCount = uniformInfos.size();
         pipelineLayoutInfo.pSetLayouts = uniformInfos.data();
 
@@ -190,7 +213,8 @@ namespace neon::vulkan {
         if (blocks.empty()) {
             pipelineLayoutInfo.pushConstantRangeCount = 0;
             pipelineLayoutInfo.pPushConstantRanges = nullptr;
-        } else {
+        }
+        else {
             VkPushConstantRange range;
             range.offset = 0;
             range.size = 0;
@@ -261,7 +285,7 @@ namespace neon::vulkan {
     }
 
     void VKMaterial::pushConstant(
-            const std::string& name, const void* data, uint32_t size) {
+        const std::string& name, const void* data, uint32_t size) {
         auto& uniforms = _material->getShader()->getImplementation()
                 .getUniforms();
         auto uniformIt = uniforms.find(name);
@@ -273,19 +297,19 @@ namespace neon::vulkan {
 
         uint32_t from = uniform.offset;
         uint32_t to = std::min(from + size, static_cast<uint32_t>(
-                _pushConstants.size()));
+                                   _pushConstants.size()));
         memcpy(_pushConstants.data() + from, data, to - from);
     }
 
     void VKMaterial::uploadConstants(VkCommandBuffer buffer) const {
         if (_pushConstantStages == 0) return;
         vkCmdPushConstants(
-                buffer,
-                _pipelineLayout,
-                _pushConstantStages,
-                0,
-                _pushConstants.size(),
-                _pushConstants.data()
+            buffer,
+            _pipelineLayout,
+            _pushConstantStages,
+            0,
+            _pushConstants.size(),
+            _pushConstants.data()
         );
     }
 
@@ -298,7 +322,7 @@ namespace neon::vulkan {
         if (samplerIt == samplers.end()) return;
 
         _material->getUniformBuffer()->setTexture(
-                samplerIt->second.binding,
-                std::move(texture));
+            samplerIt->second.binding,
+            std::move(texture));
     }
 }

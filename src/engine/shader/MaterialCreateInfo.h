@@ -120,14 +120,14 @@ namespace neon {
     struct MaterialDescriptions {
 
         /**
-         * The description of the vertex buffer.
+         * The descriptions of the vertex buffers.
          */
-        InputDescription vertex = InputDescription(0, InputRate::VERTEX);
+        std::vector<InputDescription> vertex = {};
 
         /**
-         * The description of the instance buffer.
+         * The descriptions of the instance buffers.
          */
-        InputDescription instance = InputDescription(0, InputRate::INSTANCE);
+        std::vector<InputDescription> instance = {};
 
         /**
          * The description of the material's uniform buffer.
@@ -138,12 +138,11 @@ namespace neon {
          * The extra uniform descriptions the material can have.
          * This can be used, for example, by model uniforms.
          */
-        std::vector<std::shared_ptr<ShaderUniformDescriptor>> extraUniforms = {};
-
+        std::vector<std::shared_ptr<ShaderUniformDescriptor>> extraUniforms =
+                {};
     };
 
     struct MaterialAttachmentBlending {
-
         /**
          * The color channels the attachment can write to.
          */
@@ -184,11 +183,9 @@ namespace neon {
          * The blend factor applied to the destiny alpha.
          */
         BlendFactor alphaDestinyBlendFactor = BlendFactor::ZERO;
-
     };
 
     struct MaterialBlending {
-
         /**
          * Whether logic blending operations are enabled.
          */
@@ -208,11 +205,9 @@ namespace neon {
          * The blending constants to use in blending operations.
          */
         float blendingConstants[4] = {0};
-
     };
 
     struct MaterialDepthStencil {
-
         /**
          * Whether depth test is enabled for the material.
          */
@@ -226,7 +221,8 @@ namespace neon {
         /**
          * The compare operation for the depth test.
          */
-        DepthCompareOperation depthCompareOperation = DepthCompareOperation::LESS;
+        DepthCompareOperation depthCompareOperation =
+                DepthCompareOperation::LESS;
 
         /**
          * Whether depth
@@ -242,11 +238,9 @@ namespace neon {
          * The maximum bounds of the depth test.
          */
         float maxDepthBounds = 1.0f;
-
     };
 
     struct MaterialRasterizer {
-
         /**
          * The polygon mode the rasterizer should use.
          */
@@ -268,11 +262,9 @@ namespace neon {
          * face is the front face.
          */
         FrontFace frontFace = FrontFace::COUNTER_CLOCKWISE;
-
     };
 
     struct MaterialCreateInfo {
-
         /**
          * The target framebuffer for the material.
          * This is the framebuffer where models using
@@ -313,10 +305,10 @@ namespace neon {
         PrimitiveTopology topology = PrimitiveTopology::TRIANGLE_LIST;
 
         MaterialCreateInfo(
-                std::shared_ptr<FrameBuffer> target_,
-                std::shared_ptr<ShaderProgram> shader_) :
-                target(std::move(target_)),
-                shader(std::move(shader_)) {
+            std::shared_ptr<FrameBuffer> target_,
+            std::shared_ptr<ShaderProgram>
+            shader_) : target(std::move(target_)),
+                       shader(std::move(shader_)) {
         }
     };
 }

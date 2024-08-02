@@ -26,17 +26,15 @@ namespace neon {
 }
 
 namespace neon::vulkan {
-
     class AbstractVKApplication;
 
     class VKShaderProgram;
 
     class VKMesh {
-
         AbstractVKApplication* _vkApplication;
         std::unordered_set<std::shared_ptr<Material>>& _materials;
 
-        std::optional<std::unique_ptr<Buffer>> _vertexBuffer;
+        std::vector<std::unique_ptr<Buffer>> _vertexBuffers;
         std::optional<std::unique_ptr<Buffer>> _indexBuffer;
 
         size_t _verticesSize;
@@ -46,7 +44,6 @@ namespace neon::vulkan {
         bool _modifiableIndices;
 
     public:
-
         VKMesh(const VKMesh& other) = delete;
 
         VKMesh(Application* application,
@@ -55,34 +52,76 @@ namespace neon::vulkan {
                bool modifiableIndices
         );
 
-        template<class Vertex>
-        void uploadData(const std::vector<Vertex>& vertices,
-                        const std::vector<uint32_t>& indices) {
-
+        template<typename... Types>
+        void uploadVertices(const std::vector<Types>&... data) {
+            _vertexBuffers.clear();
+            _vertexBuffers.reserve(sizeof...(data));
             if (_modifiableVertices) {
-                _vertexBuffer = std::make_unique<StagingBuffer>(
-                        _vkApplication,
-                        VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
-                        vertices);
-            } else {
-                _vertexBuffer = std::make_unique<SimpleBuffer>(
-                        _vkApplication,
-                        VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
-                        VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT,
-                        vertices);
+                ([&] {
+                    _vertexBuffers.push_back(
+                        std::make_unique<StagingBuffer>(
+                            _vkApplication,
+                            VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
+                            data
+                        )
+                    );
+                }(), ...);
+            }
+            else {
+                ([&] {
+                    _vertexBuffers.push_back(
+                        std::make_unique<SimpleBuffer>(
+                            _vkApplication,
+                            VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
+                            VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT,
+                            data
+                        )
+                    );
+                }(), ...);
+            }
+        }
+
+        template<class Vertex>
+        void uploadData(const std::vector<std::vector<Vertex>>& vertices,
+                        const std::vector<uint32_t>& indices) {
+            _vertexBuffers.clear();
+            _vertexBuffers.reserve(vertices.size());
+            if (_modifiableVertices) {
+                for (auto& vec: vertices) {
+                    _vertexBuffers.push_back(
+                        std::make_unique<StagingBuffer>(
+                            _vkApplication,
+                            VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
+                            vec
+                        )
+                    );
+                }
+            }
+            else {
+                for (auto& vec: vertices) {
+                    _vertexBuffers.push_back(
+                        std::make_unique<SimpleBuffer>(
+                            _vkApplication,
+                            VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
+                            VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT,
+                            vec
+                        )
+                    );
+                }
             }
 
             if (_modifiableIndices) {
                 _indexBuffer = std::make_unique<StagingBuffer>(
-                        _vkApplication,
-                        VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
-                        indices);
-            } else {
+                    _vkApplication,
+                    VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
+                    indices);
+            }
+            else {
                 _indexBuffer = std::make_unique<SimpleBuffer>(
-                        _vkApplication,
-                        VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
-                        VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT,
-                        indices);
+                    _vkApplication,
+                    VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
+                    VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT,
+                    indices);
             }
 
             _indexAmount = indices.size();
@@ -90,13 +129,13 @@ namespace neon::vulkan {
         }
 
         template<class Vertex>
-        std::vector<Vertex> getVertices() const {
-            if (!_vertexBuffer.has_value()
+        std::vector<Vertex> getVertices(size_t index) const {
+            if (!_vertexBuffers.size() <= index
                 || _verticesSize == 0
                 || sizeof(Vertex) == 0)
                 return {};
 
-            auto map = _vertexBuffer.value()->map<Vertex>();
+            auto map = _vertexBuffers.at(index)->map<Vertex>();
             if (!map.has_value()) return {};
 
             size_t amount = _verticesSize / sizeof(Vertex);
@@ -117,7 +156,7 @@ namespace neon::vulkan {
                                vertices.size() * sizeof(Vertex));
         }
 
-        bool setVertices(const void* data, size_t length) const;
+        bool setVertices(size_t index, const void* data, size_t length) const;
 
         [[nodiscard]] std::vector<uint32_t> getIndices() const;
 
@@ -127,13 +166,12 @@ namespace neon::vulkan {
         getMaterials() const;
 
         void draw(
-                const Material* material,
-                VkCommandBuffer commandBuffer,
-                VkBuffer instancingBuffer,
-                uint32_t instancingElements,
-                const ShaderUniformBuffer* globalBuffer,
-                const ShaderUniformBuffer* modelBuffer);
-
+            const Material* material,
+            VkCommandBuffer commandBuffer,
+            VkBuffer instancingBuffer,
+            uint32_t instancingElements,
+            const ShaderUniformBuffer* globalBuffer,
+            const ShaderUniformBuffer* modelBuffer);
     };
 }
 

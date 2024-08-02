@@ -37,38 +37,22 @@ namespace neon::vulkan {
     }
 
     VKModel::VKModel(Application* application,
-                     const ModelCreateInfo& info) : _application(application),
-                                                    _meshes(
-                                                        getMeshImplementations(
-                                                            info.meshes)),
-                                                    _maximumInstances(
-                                                        info.maximumInstances),
-                                                    _instancingStructType(
-                                                        info.instanceType),
-                                                    _instancingStructSize(
-                                                        info.instanceSize),
-                                                    _positions(),
-                                                    _instancingBuffer(
-                                                        std::make_unique<
-                                                            StagingBuffer>(
-                                                            dynamic_cast<
-                                                                AbstractVKApplication
-                                                                *>(
-                                                                application->
-                                                                getImplementation()),
-                                                            VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
-                                                            static_cast<
-                                                                uint32_t>(
-                                                                _instancingStructSize)
-                                                            *
-                                                            info.
-                                                            maximumInstances
-                                                        )),
-                                                    _data(
-                                                        _instancingStructSize *
-                                                        info.maximumInstances,
-                                                        0),
-                                                    _dataChangeRange(0, 0) {
+                     const ModelCreateInfo& info)
+        : _application(application),
+          _meshes(getMeshImplementations(info.meshes)),
+          _maximumInstances(info.maximumInstances),
+          _instancingStructType(info.instanceType),
+          _instancingStructSize(info.instanceSize),
+          _positions(),
+          _instancingBuffer(std::make_unique<StagingBuffer>(
+              dynamic_cast<AbstractVKApplication*>(
+                  application->getImplementation()),
+              VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
+              static_cast<uint32_t>(_instancingStructSize) * info.
+              maximumInstances
+          )),
+          _data(_instancingStructSize * info.maximumInstances, 0),
+          _dataChangeRange(0, 0) {
     }
 
     const std::type_index& VKModel::getInstancingStructType() const {
@@ -115,16 +99,16 @@ namespace neon::vulkan {
     void VKModel::uploadDataRaw(uint32_t id, const void* raw) {
         if (_instancingStructSize == 0) {
             std::cerr << "[VULKAN MODEL] Cannot upload data to buffer "
-                      << _instancingBuffer->getRaw()
-                      << ": instance struct is not defined!"
-                      << std::endl;
+                    << _instancingBuffer->getRaw()
+                    << ": instance struct is not defined!"
+                    << std::endl;
             return;
         }
         if (id >= _positions.size()) {
             std::cerr << "[VULKAN MODEL] Cannot upload data to buffer "
-                      << _instancingBuffer->getRaw()
-                      << ": invalid id " << id << "!"
-                      << std::endl;
+                    << _instancingBuffer->getRaw()
+                    << ": invalid id " << id << "!"
+                    << std::endl;
             return;
         }
 

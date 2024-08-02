@@ -428,9 +428,9 @@ void loadModels(Application* application, Room* room,
                                     "deferred_depth.frag");
 
     MaterialCreateInfo depthMaterialInfo(target, shaderDepth);
-    depthMaterialInfo.descriptions.vertex = TestVertex::getDescription();
-    depthMaterialInfo.descriptions.instance =
-            DefaultInstancingData::getInstancingDescription();
+    depthMaterialInfo.descriptions.vertex.push_back(TestVertex::getDescription());
+    depthMaterialInfo.descriptions.instance.push_back(
+            DefaultInstancingData::getInstancingDescription());
     depthMaterialInfo.depthStencil.depthCompareOperation =
             DepthCompareOperation::LESS;
 
@@ -533,9 +533,9 @@ void loadModels(Application* application, Room* room,
 
     MaterialCreateInfo cubeMaterialInfo(target, shaderParallax);
     cubeMaterialInfo.descriptions.uniform = materialDescriptor;
-    cubeMaterialInfo.descriptions.vertex = TestVertex::getDescription();
-    cubeMaterialInfo.descriptions.instance =
-            DefaultInstancingData::getInstancingDescription();
+    cubeMaterialInfo.descriptions.vertex.push_back(TestVertex::getDescription());
+    cubeMaterialInfo.descriptions.instance.push_back(
+            DefaultInstancingData::getInstancingDescription());
 
     auto material = std::make_shared<Material>(
             application, "cubeMaterial", cubeMaterialInfo);

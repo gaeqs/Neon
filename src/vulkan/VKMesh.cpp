@@ -9,20 +9,23 @@
 #include <vulkan/VKApplication.h>
 
 namespace neon::vulkan {
-
-    VKMesh::VKMesh(Application* application,
-                   std::unordered_set<std::shared_ptr<Material>>& materials,
-                   bool modifiableVertices,
-                   bool modifiableIndices) :
-            _vkApplication(dynamic_cast<AbstractVKApplication*>(
-                                   application->getImplementation())),
-            _materials(materials),
-            _vertexBuffer(),
-            _indexBuffer(),
-            _verticesSize(0),
-            _indexAmount(0),
-            _modifiableVertices(modifiableVertices),
-            _modifiableIndices(modifiableIndices) {
+    VKMesh::VKMesh(
+        Application* application,
+        std::unordered_set<std::shared_ptr<Material>>& materials,
+        bool modifiableVertices,
+        bool modifiableIndices)
+        : _vkApplication(
+              dynamic_cast<AbstractVKApplication*>(application->
+                  getImplementation())),
+          _materials(materials),
+          _vertexBuffers(),
+          _indexBuffer(),
+          _verticesSize(0),
+          _indexAmount(0),
+          _modifiableVertices(
+              modifiableVertices),
+          _modifiableIndices(
+              modifiableIndices) {
     }
 
     const std::unordered_set<std::shared_ptr<Material>>&
@@ -31,24 +34,44 @@ namespace neon::vulkan {
     }
 
     void VKMesh::draw(
-            const Material* material,
-            VkCommandBuffer commandBuffer,
-            VkBuffer instancingBuffer,
-            uint32_t instancingElements,
-            const ShaderUniformBuffer* globalBuffer,
-            const ShaderUniformBuffer* modelBuffer) {
+        const Material* material,
+        VkCommandBuffer commandBuffer,
+        VkBuffer instancingBuffer,
+        uint32_t instancingElements,
+        const ShaderUniformBuffer* globalBuffer,
+        const ShaderUniformBuffer* modelBuffer) {
+        constexpr size_t MAX_BUFFERS = 32;
 
-        if (!_vertexBuffer.has_value()) return;
+        if (_vertexBuffers.empty()) return;
 
-        VkBuffer buffers[] = {_vertexBuffer.value()->getRaw(),
-                              instancingBuffer};
-        VkDeviceSize offsets[] = {0, 0};
 
-        vkCmdBindVertexBuffers(commandBuffer, 0, 2, buffers, offsets);
+        VkBuffer buffers[MAX_BUFFERS];
+        VkDeviceSize offsets[MAX_BUFFERS];
+
+        size_t i = 0;
+        for (; i < std::min(_vertexBuffers.size(), MAX_BUFFERS); ++i) {
+            buffers[i] = _vertexBuffers[i]->getRaw();
+            offsets[i] = 0;
+        }
+
+        if (i < MAX_BUFFERS) {
+            buffers[i] = instancingBuffer;
+            offsets[i] = 0;
+            ++i;
+        }
+
+        vkCmdBindVertexBuffers(
+            commandBuffer,
+            0,
+            i,
+            buffers,
+            offsets
+        );
         vkCmdBindIndexBuffer(
-                commandBuffer,
-                _indexBuffer.value()->getRaw(),
-                0, VK_INDEX_TYPE_UINT32
+            commandBuffer,
+            _indexBuffer.value()->getRaw(),
+            0,
+            VK_INDEX_TYPE_UINT32
         );
 
         auto& mat = material->getImplementation();
@@ -72,13 +95,21 @@ namespace neon::vulkan {
             modelBuffer->getImplementation().bind(commandBuffer, layout);
         }
 
-        vkCmdDrawIndexed(commandBuffer, _indexAmount, instancingElements,
-                         0, 0, 0);
+        vkCmdDrawIndexed(
+            commandBuffer,
+            _indexAmount,
+            instancingElements,
+            0,
+            0,
+            0
+        );
     }
 
-    bool VKMesh::setVertices(const void* data, size_t length) const {
+    bool VKMesh::setVertices(size_t index,
+                             const void* data,
+                             size_t length) const {
         if (!_modifiableVertices) return false;
-        auto map = _vertexBuffer.value()->map<char>();
+        auto map = _vertexBuffers.at(index)->map<char>();
         if (!map.has_value()) return false;
         memcpy(map.value()->raw(), data, std::min(length, _verticesSize));
         return true;

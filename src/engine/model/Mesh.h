@@ -20,7 +20,6 @@
 #endif
 
 namespace neon {
-
     class Application;
 
     /**
@@ -28,19 +27,16 @@ namespace neon {
      * used by models to render an object.
      */
     class Mesh : public Asset {
-
     public:
 #ifdef USE_VULKAN
         using Implementation = vulkan::VKMesh;
 #endif
 
     private:
-
         Implementation _implementation;
         std::unordered_set<std::shared_ptr<Material>> _materials;
 
     public:
-
         Mesh(const Mesh& other) = delete;
 
         /**
@@ -95,9 +91,16 @@ namespace neon {
          * @param indices the indices to upload.
          */
         template<class Vertex>
-        void setMeshData(const std::vector<Vertex>& vertices,
+        void setMeshData(const std::vector<std::vector<Vertex>>& vertices,
                          const std::vector<uint32_t>& indices) {
             _implementation.uploadData(vertices, indices);
+        }
+
+        template<class Vertex>
+        void setMeshData(const std::vector<Vertex>& vertices,
+                         const std::vector<uint32_t>& indices) {
+            std::vector<std::vector<Vertex>> vec = {vertices};
+            _implementation.uploadData(vec, indices);
         }
 
         /**
@@ -145,11 +148,12 @@ namespace neon {
          * <p>
          * This method requires vertices to be modifiable.
          *
+         * @param index the index of the buffer.
          * @param data the vertices in raw format.
          * @param length the length of the data buffer.
          * @return whether the operation was successful.
          */
-        bool setVertices(const void* data, size_t length) const;
+        bool setVertices(size_t index, const void* data, size_t length) const;
 
         /**
          * Returns the indices of this mesh.
@@ -200,7 +204,6 @@ namespace neon {
          * @param material the material.
          */
         void setMaterial(const std::shared_ptr<Material>& material);
-
     };
 }
 

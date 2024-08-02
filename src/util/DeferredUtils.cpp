@@ -20,21 +20,20 @@
 #include <engine/light/LightSystem.h>
 
 namespace neon::deferred_utils {
-
     std::shared_ptr<Model> createScreenModel(Application* application,
                                              const std::string& name) {
         static std::vector<DeferredVertex> vertices = {
-                {{-1.0f, 1.0f}},
-                {{1.0f,  1.0f}},
-                {{1.0f,  -1.0f}},
-                {{-1.0f, -1.0f}},
+            {{-1.0f, 1.0f}},
+            {{1.0f, 1.0f}},
+            {{1.0f, -1.0f}},
+            {{-1.0f, -1.0f}},
         };
         static std::vector<uint32_t> indices = {0, 1, 2, 0, 2, 3};
 
         auto mesh = std::make_shared<Mesh>(
-                application,
-                name,
-                std::unordered_set<std::shared_ptr<Material>>()
+            application,
+            name,
+            std::unordered_set<std::shared_ptr<Material>>()
         );
 
         mesh->setMeshData(vertices, indices);
@@ -45,14 +44,13 @@ namespace neon::deferred_utils {
     }
 
     std::shared_ptr<Texture> createLightSystem(
-            Room* room,
-            Render* render,
-            const std::vector<std::shared_ptr<Texture>>& textures,
-            TextureFormat outputFormat,
-            const std::shared_ptr<ShaderProgram>& directionalShader,
-            const std::shared_ptr<ShaderProgram>& pointShader,
-            const std::shared_ptr<ShaderProgram>& flashShader) {
-
+        Room* room,
+        Render* render,
+        const std::vector<std::shared_ptr<Texture>>& textures,
+        TextureFormat outputFormat,
+        const std::shared_ptr<ShaderProgram>& directionalShader,
+        const std::shared_ptr<ShaderProgram>& pointShader,
+        const std::shared_ptr<ShaderProgram>& flashShader) {
         auto* app = room->getApplication();
 
         std::vector<FrameBufferTextureCreateInfo> outputFormatVector =
@@ -63,9 +61,9 @@ namespace neon::deferred_utils {
         std::shared_ptr<Model> flashModel = nullptr;
 
         auto frameBuffer = std::make_shared<SimpleFrameBuffer>(
-                room->getApplication(), outputFormatVector, false);
+            room->getApplication(), outputFormatVector, false);
         render->addRenderPass(
-                std::make_shared<DefaultRenderPassStrategy>(frameBuffer));
+            std::make_shared<DefaultRenderPassStrategy>(frameBuffer));
 
         std::vector<ShaderUniformBinding> bindings;
         for (const auto& _: textures) {
@@ -73,7 +71,7 @@ namespace neon::deferred_utils {
         }
 
         auto uniformDescriptor = std::make_shared<ShaderUniformDescriptor>(
-                app, "Light", bindings);
+            app, "Light", bindings);
 
         MaterialAttachmentBlending blend;
         blend.blend = true;
@@ -82,17 +80,18 @@ namespace neon::deferred_utils {
 
         MaterialCreateInfo info(frameBuffer, directionalShader);
         info.blending.attachmentsBlending.push_back(blend);
-        info.descriptions.vertex = DeferredVertex::getDescription();
+        info.descriptions.vertex.push_back(DeferredVertex::getDescription());
         info.descriptions.uniform = uniformDescriptor;
 
         if (directionalShader != nullptr) {
             info.shader = directionalShader;
-            info.descriptions.instance = DirectionalLight::Data::getDescription();
+            info.descriptions.instance.push_back(
+                DirectionalLight::Data::getDescription());
             directionalModel = createScreenModel(app, "Directional Light");
             directionalModel->defineInstanceStruct<DirectionalLight::Data>();
 
             auto material = std::make_shared<Material>(
-                    app, "Directional Light", info);
+                app, "Directional Light", info);
 
             for (int i = 0; i < textures.size(); ++i) {
                 material->getUniformBuffer()->setTexture(i, textures[i]);
@@ -103,12 +102,13 @@ namespace neon::deferred_utils {
 
         if (pointShader != nullptr) {
             info.shader = pointShader;
-            info.descriptions.instance = PointLight::Data::getDescription();
+            info.descriptions.instance.push_back(
+                PointLight::Data::getDescription());
             pointModel = createScreenModel(app, "Point Light");
             pointModel->defineInstanceStruct<PointLight::Data>();
 
             auto material = std::make_shared<Material>(
-                    app, "Point Light", info);
+                app, "Point Light", info);
 
             for (int i = 0; i < textures.size(); ++i) {
                 material->getUniformBuffer()->setTexture(i, textures[i]);
@@ -119,12 +119,13 @@ namespace neon::deferred_utils {
 
         if (flashShader != nullptr) {
             info.shader = flashShader;
-            info.descriptions.instance = FlashLight::Data::getDescription();
+            info.descriptions.instance.push_back(
+                FlashLight::Data::getDescription());
             flashModel = createScreenModel(app, "Flash Light");
             flashModel->defineInstanceStruct<FlashLight::Data>();
 
             auto material = std::make_shared<Material>(
-                    app, "Flash Light", info);
+                app, "Flash Light", info);
 
             for (int i = 0; i < textures.size(); ++i) {
                 material->getUniformBuffer()->setTexture(i, textures[i]);
