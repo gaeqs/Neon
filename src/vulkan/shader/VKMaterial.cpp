@@ -40,7 +40,8 @@ namespace neon::vulkan {
         std::vector<VkVertexInputBindingDescription> bindings;
 
         for (auto& description: createInfo.descriptions.vertex) {
-            auto [binding, att] = vulkan_util::toVulkanDescription(
+            auto [binding,
+                att] = vulkan_util::toVulkanDescription(
                 bindings.size(),
                 attributes.size(),
                 description

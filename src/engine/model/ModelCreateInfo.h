@@ -37,8 +37,7 @@
 namespace neon {
 
     /**
-     * Information used to create a model.
-     * Fill an instance of this struct to
+     * Information used to create a model.a gua
      * configure a model.
      */
     struct ModelCreateInfo {

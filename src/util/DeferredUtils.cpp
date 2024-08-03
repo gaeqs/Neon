@@ -36,7 +36,8 @@ namespace neon::deferred_utils {
             std::unordered_set<std::shared_ptr<Material>>()
         );
 
-        mesh->setMeshData(vertices, indices);
+        mesh->uploadVertices(vertices);
+        mesh->uploadIndices(indices);
 
         ModelCreateInfo info;
         info.meshes.push_back(std::move(mesh));
@@ -85,6 +86,7 @@ namespace neon::deferred_utils {
 
         if (directionalShader != nullptr) {
             info.shader = directionalShader;
+            info.descriptions.instance.clear();
             info.descriptions.instance.push_back(
                 DirectionalLight::Data::getDescription());
             directionalModel = createScreenModel(app, "Directional Light");
@@ -102,6 +104,7 @@ namespace neon::deferred_utils {
 
         if (pointShader != nullptr) {
             info.shader = pointShader;
+            info.descriptions.instance.clear();
             info.descriptions.instance.push_back(
                 PointLight::Data::getDescription());
             pointModel = createScreenModel(app, "Point Light");
@@ -119,6 +122,7 @@ namespace neon::deferred_utils {
 
         if (flashShader != nullptr) {
             info.shader = flashShader;
+            info.descriptions.instance.clear();
             info.descriptions.instance.push_back(
                 FlashLight::Data::getDescription());
             flashModel = createScreenModel(app, "Flash Light");

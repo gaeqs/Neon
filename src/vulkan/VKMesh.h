@@ -35,10 +35,11 @@ namespace neon::vulkan {
         std::unordered_set<std::shared_ptr<Material>>& _materials;
 
         std::vector<std::unique_ptr<Buffer>> _vertexBuffers;
-        std::optional<std::unique_ptr<Buffer>> _indexBuffer;
+        std::vector<size_t> _vertexSizes;
 
-        size_t _verticesSize;
+        std::optional<std::unique_ptr<Buffer>> _indexBuffer;
         uint32_t _indexAmount;
+
 
         bool _modifiableVertices;
         bool _modifiableIndices;
@@ -55,6 +56,7 @@ namespace neon::vulkan {
         template<typename... Types>
         void uploadVertices(const std::vector<Types>&... data) {
             _vertexBuffers.clear();
+            _vertexSizes.clear();
             _vertexBuffers.reserve(sizeof...(data));
             if (_modifiableVertices) {
                 ([&] {
@@ -65,6 +67,7 @@ namespace neon::vulkan {
                             data
                         )
                     );
+                    _vertexSizes.push_back(data.size() * sizeof(Types));
                 }(), ...);
             }
             else {
@@ -77,39 +80,12 @@ namespace neon::vulkan {
                             data
                         )
                     );
+                    _vertexSizes.push_back(data.size() * sizeof(Types));
                 }(), ...);
             }
         }
 
-        template<class Vertex>
-        void uploadData(const std::vector<std::vector<Vertex>>& vertices,
-                        const std::vector<uint32_t>& indices) {
-            _vertexBuffers.clear();
-            _vertexBuffers.reserve(vertices.size());
-            if (_modifiableVertices) {
-                for (auto& vec: vertices) {
-                    _vertexBuffers.push_back(
-                        std::make_unique<StagingBuffer>(
-                            _vkApplication,
-                            VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
-                            vec
-                        )
-                    );
-                }
-            }
-            else {
-                for (auto& vec: vertices) {
-                    _vertexBuffers.push_back(
-                        std::make_unique<SimpleBuffer>(
-                            _vkApplication,
-                            VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
-                            VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT,
-                            vec
-                        )
-                    );
-                }
-            }
-
+        void uploadIndices(const std::vector<uint32_t>& indices) {
             if (_modifiableIndices) {
                 _indexBuffer = std::make_unique<StagingBuffer>(
                     _vkApplication,
@@ -125,20 +101,20 @@ namespace neon::vulkan {
             }
 
             _indexAmount = indices.size();
-            _verticesSize = vertices.size() * sizeof(Vertex);
         }
 
         template<class Vertex>
-        std::vector<Vertex> getVertices(size_t index) const {
+        std::vector<Vertex> getVertices(size_t index,
+                                        CommandBuffer* cmd = nullptr) const {
             if (!_vertexBuffers.size() <= index
-                || _verticesSize == 0
+                || _vertexSizes[index] == 0
                 || sizeof(Vertex) == 0)
                 return {};
 
-            auto map = _vertexBuffers.at(index)->map<Vertex>();
+            auto map = _vertexBuffers.at(index)->map<Vertex>(cmd);
             if (!map.has_value()) return {};
 
-            size_t amount = _verticesSize / sizeof(Vertex);
+            size_t amount = _vertexSizes[index] / sizeof(Vertex);
 
             std::vector<Vertex> vertices;
             vertices.resize(amount);
@@ -151,16 +127,28 @@ namespace neon::vulkan {
         }
 
         template<class Vertex>
-        bool setVertices(const std::vector<Vertex>& vertices) const {
-            return setVertices(vertices.data(),
-                               vertices.size() * sizeof(Vertex));
+        bool setVertices(size_t index,
+                         const std::vector<Vertex>& vertices,
+                         CommandBuffer* cmd = nullptr) const {
+
+            return setVertices(
+                index,
+                vertices.data(),
+                vertices.size() * sizeof(Vertex),
+                cmd
+            );
         }
 
-        bool setVertices(size_t index, const void* data, size_t length) const;
+        bool setVertices(size_t index,
+                         const void* data,
+                         size_t length,
+                         CommandBuffer* cmd = nullptr) const;
 
-        [[nodiscard]] std::vector<uint32_t> getIndices() const;
+        [[nodiscard]] std::vector<uint32_t>
+        getIndices(CommandBuffer* cmd = nullptr) const;
 
-        bool setIndices(const std::vector<uint32_t>& indices) const;
+        bool setIndices(const std::vector<uint32_t>& indices,
+                        CommandBuffer* cmd = nullptr) const;
 
         [[nodiscard]] const std::unordered_set<std::shared_ptr<Material>>&
         getMaterials() const;

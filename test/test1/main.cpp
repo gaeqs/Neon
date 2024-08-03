@@ -278,9 +278,9 @@ void loadModels(Application* application, Room* room,
 
     MaterialCreateInfo cubeMaterialInfo(target, shaderParallax);
     cubeMaterialInfo.descriptions.uniform = materialDescriptor;
-    cubeMaterialInfo.descriptions.vertex = TestVertex::getDescription();
-    cubeMaterialInfo.descriptions.instance =
-            DefaultInstancingData::getInstancingDescription();
+    cubeMaterialInfo.descriptions.vertex.push_back(TestVertex::getDescription());
+    cubeMaterialInfo.descriptions.instance.push_back(
+            DefaultInstancingData::getInstancingDescription());
 
     auto material = std::make_shared<Material>(
         application, "cubeMaterial", cubeMaterialInfo);

@@ -18,9 +18,6 @@ namespace neon::vulkan {
               dynamic_cast<AbstractVKApplication*>(application->
                   getImplementation())),
           _materials(materials),
-          _vertexBuffers(),
-          _indexBuffer(),
-          _verticesSize(0),
           _indexAmount(0),
           _modifiableVertices(
               modifiableVertices),
@@ -107,19 +104,20 @@ namespace neon::vulkan {
 
     bool VKMesh::setVertices(size_t index,
                              const void* data,
-                             size_t length) const {
+                             size_t length,
+                             CommandBuffer* cmd) const {
         if (!_modifiableVertices) return false;
-        auto map = _vertexBuffers.at(index)->map<char>();
+        auto map = _vertexBuffers.at(index)->map<char>(cmd);
         if (!map.has_value()) return false;
-        memcpy(map.value()->raw(), data, std::min(length, _verticesSize));
+        memcpy(map.value()->raw(), data, std::min(length, _vertexSizes[index]));
         return true;
     }
 
-    std::vector<uint32_t> VKMesh::getIndices() const {
+    std::vector<uint32_t> VKMesh::getIndices(CommandBuffer* cmd) const {
         if (!_indexBuffer.has_value() || _indexAmount == 0)
             return {};
 
-        auto map = _indexBuffer.value()->map<uint32_t>();
+        auto map = _indexBuffer.value()->map<uint32_t>(cmd);
         if (!map.has_value()) return {};
 
         std::vector<uint32_t> vertices;
@@ -132,9 +130,10 @@ namespace neon::vulkan {
         return vertices;
     }
 
-    bool VKMesh::setIndices(const std::vector<uint32_t>& indices) const {
+    bool VKMesh::setIndices(const std::vector<uint32_t>& indices,
+                            CommandBuffer* cmd) const {
         if (!_modifiableIndices) return false;
-        auto map = _indexBuffer.value()->map<char>();
+        auto map = _indexBuffer.value()->map<char>(cmd);
         if (!map.has_value()) return false;
         memcpy(map.value()->raw(), indices.data(),
                std::min(indices.size(), static_cast<size_t>(_indexAmount))

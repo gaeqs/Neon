@@ -61,15 +61,17 @@ namespace neon {
 
     bool Mesh::setVertices(size_t index,
                            const void* data,
-                           size_t length) const {
-        return _implementation.setVertices(index, data, length);
+                           size_t length,
+                           CommandBuffer* cmd) const {
+        return _implementation.setVertices(index, data, length, cmd);
     }
 
-    std::vector<uint32_t> Mesh::getIndices() const {
-        return _implementation.getIndices();
+    std::vector<uint32_t> Mesh::getIndices(CommandBuffer* cmd) const {
+        return _implementation.getIndices(cmd);
     }
 
-    bool Mesh::setIndices(const std::vector<uint32_t>& indices) const {
-        return _implementation.setIndices(indices);
+    bool Mesh::setIndices(const std::vector<uint32_t>& indices,
+                          CommandBuffer* cmd) const {
+        return _implementation.setIndices(indices, cmd);
     }
 }

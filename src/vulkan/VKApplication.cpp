@@ -146,6 +146,7 @@ namespace neon::vulkan {
 
     void VKApplication::init(neon::Application* application) {
         _application = application;
+        glfwInitHint(GLFW_PLATFORM, GLFW_PLATFORM_X11);
         if (!glfwInit()) {
             const char* error;
             glfwGetError(&error);

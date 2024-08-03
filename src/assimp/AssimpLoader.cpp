@@ -290,7 +290,8 @@ namespace neon::assimp_loader {
                 info.application->getAssets()
                         .store(result, info.assetStorageMode);
             }
-            result->setMeshData(dataArray, indices);
+            result->uploadVertices(dataArray);
+            result->uploadIndices(indices);
 
             return result;
         }
