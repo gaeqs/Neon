@@ -78,6 +78,8 @@ namespace neon::vulkan {
 
         std::vector<VkSemaphore> _imageAvailableSemaphores;
         std::vector<VkSemaphore> _renderFinishedSemaphores;
+        std::vector<CommandBuffer*> _assignedCommandBuffer;
+
 
         bool _requiresSwapchainRecreation;
         uint32_t _currentFrame;

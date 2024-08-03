@@ -150,7 +150,8 @@ namespace neon::vulkan {
         if (!glfwInit()) {
             const char* error;
             glfwGetError(&error);
-            throw std::runtime_error(std::format("Failed to initialize GLFW: {}", error));
+            throw std::runtime_error(
+                std::format("Failed to initialize GLFW: {}", error));
         }
 
         preWindowCreation();
@@ -282,6 +283,13 @@ namespace neon::vulkan {
         auto& render = _application->getRender(); {
             DEBUG_PROFILE_ID(profiler, recreation, "FB Recreation");
             render->checkFrameBufferRecreationConditions();
+        } {
+            DEBUG_PROFILE_ID(profiler, adquireImage, "Wait for fences");
+            auto* cmd = _assignedCommandBuffer[_currentFrame];
+            if(cmd != nullptr) {
+                cmd->wait();
+                _assignedCommandBuffer[_currentFrame] = nullptr;
+            }
         }
 
         VkResult result; {
@@ -329,8 +337,11 @@ namespace neon::vulkan {
         };
 
         _currentCommandBuffer->getImplementation().submit(
-            1, &_imageAvailableSemaphores[_currentFrame], waitStages,
+            1,
+            &_imageAvailableSemaphores[_currentFrame], waitStages,
             1, &_renderFinishedSemaphores[_currentFrame]);
+
+        _assignedCommandBuffer[_currentFrame] = _currentCommandBuffer;
 
         VkPresentInfoKHR presentInfo{};
         presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
@@ -796,6 +807,7 @@ namespace neon::vulkan {
     void VKApplication::createSyncObjects() {
         _imageAvailableSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
         _renderFinishedSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
+        _assignedCommandBuffer.resize(MAX_FRAMES_IN_FLIGHT);
 
         VkSemaphoreCreateInfo semaphoreInfo{};
         semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;

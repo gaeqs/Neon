@@ -174,6 +174,7 @@ void sansLoadThread(Application* application,
 
     buffer->end();
     buffer->submit();
+    buffer->wait();
 
     std::cout << "SANS UPLOADED!" << std::endl;
 

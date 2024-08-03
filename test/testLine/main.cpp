@@ -202,8 +202,8 @@ std::shared_ptr<Room> getTestRoom(Application* application) {
 
     MaterialCreateInfo lineMaterialInfo(fpFrameBuffer, shader);
     lineMaterialInfo.descriptions.uniform = materialDescriptor;
-    lineMaterialInfo.descriptions.instance = DefaultInstancingData::getInstancingDescription();
-    lineMaterialInfo.descriptions.vertex = TestVertex::getDescription();
+    lineMaterialInfo.descriptions.instance.push_back(DefaultInstancingData::getInstancingDescription());
+    lineMaterialInfo.descriptions.vertex.push_back(TestVertex::getDescription());
     lineMaterialInfo.rasterizer.polygonMode = neon::PolygonMode::FILL;
     lineMaterialInfo.rasterizer.cullMode = neon::CullMode::NONE;
     lineMaterialInfo.rasterizer.lineWidth = 5.0f;
