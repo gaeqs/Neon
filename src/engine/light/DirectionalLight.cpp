@@ -43,7 +43,7 @@ namespace neon {
     void DirectionalLight::onLateUpdate(float deltaTime) {
         auto direction = getGameObject()->getTransform().getRotation()
                          * rush::Vec3f(0.0f, 0.0f, -1.0f);
-        _graphicComponent->uploadData(Data{
+        _graphicComponent->uploadData(0,Data{
                 _diffuseColor * _radiance,
                 _specularColor * _radiance,
                 direction

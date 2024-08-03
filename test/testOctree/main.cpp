@@ -148,7 +148,11 @@ std::shared_ptr<FrameBuffer> initRender(Room* room) {
     // We can also create a GraphicComponent that handles
     // an instance of the model.
     // This option is more direct.
-    auto screenModel = deferred_utils::createScreenModel(app, "screen model");
+    auto screenModel = deferred_utils::createScreenModel(
+        app,
+        ModelCreateInfo(),
+        "screen model"
+    );
 
     std::shared_ptr<Material> screenMaterial = Material::create(
         room->getApplication(), "Screen Model",
@@ -222,7 +226,7 @@ void loadModels(Application* application, Room* room,
     std::vector<rush::Triangle<float>> triangles;
     triangles.reserve(10000);
 
-    for (auto& mesh : sansLoadModel->meshes) {
+    for (auto& mesh: sansLoadModel->meshes) {
         for (size_t n = 0; n < mesh.indices.size(); n += 3) {
             triangles.emplace_back(
                 mesh.vertices[mesh.indices[n]].position + t,
@@ -345,9 +349,10 @@ std::shared_ptr<Room> getTestRoom(Application* application) {
 
     MaterialCreateInfo lineMaterialInfo(fpFrameBuffer, shader);
     lineMaterialInfo.descriptions.uniform = materialDescriptor;
-    lineMaterialInfo.descriptions.instance =
-            DefaultInstancingData::getInstancingDescription();
-    lineMaterialInfo.descriptions.vertex = TestVertex::getDescription();
+    lineMaterialInfo.descriptions.instance.push_back(
+        DefaultInstancingData::getInstancingDescription());
+    lineMaterialInfo.descriptions.vertex.
+            push_back(TestVertex::getDescription());
     lineMaterialInfo.rasterizer.polygonMode = neon::PolygonMode::FILL;
     lineMaterialInfo.rasterizer.cullMode = neon::CullMode::NONE;
     lineMaterialInfo.rasterizer.lineWidth = 5.0f;

@@ -53,7 +53,7 @@ namespace neon {
         auto& t = getGameObject()->getTransform();
         auto position = t.getPosition();
         auto direction = t.getRotation() * rush::Vec3f(0.0f, 0.0f, 1.0f);
-        _graphicComponent->uploadData(Data{
+        _graphicComponent->uploadData(0, Data{
                 _diffuseColor * _radiance,
                 _specularColor * _radiance,
                 position,

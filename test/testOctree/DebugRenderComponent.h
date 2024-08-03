@@ -59,11 +59,12 @@ class DebugRenderComponent : public neon::Component {
 
         neon::MaterialCreateInfo info(_target, program);
 
-        info.descriptions.vertex = neon::InputDescription(
-            sizeof(float),
-            neon::InputRate::VERTEX);
-        info.descriptions.vertex.addAttribute(1, 0);
-        info.descriptions.instance = Instance::getInstancingDescription();
+        neon::InputDescription desc(sizeof(float), neon::InputRate::VERTEX);
+        desc.addAttribute(1, 0);
+
+        info.descriptions.vertex.push_back(desc);
+        info.descriptions.instance.push_back(
+            Instance::getInstancingDescription());
 
 
         return std::make_shared<
@@ -89,12 +90,13 @@ class DebugRenderComponent : public neon::Component {
             0, 1, 2, 1, 3, 2
         };
 
-        info.meshes[0]->setMeshData(vertices, indices);
+        info.meshes[0]->uploadVertices(vertices);
+        info.meshes[0]->uploadIndices(indices);
+
+        info.defineInstanceType<Instance>();
 
         auto model = std::make_shared<neon::Model>(
             room->getApplication(), "debug", info);
-
-        model->defineInstanceStruct<Instance>();
 
         return model;
     }
@@ -118,7 +120,8 @@ public:
         if (!_frontInstances.empty()) {
             instance = _frontInstances.back();
             _frontInstances.pop_back();
-        } else {
+        }
+        else {
             auto result = _model->createInstance();
             if (!result.isOk()) {
                 std::cerr << result.getError() << std::endl;
@@ -128,8 +131,11 @@ public:
         }
 
         _backInstances.push_back(instance);
-        _model->uploadData<Instance>(*instance,
-                                     Instance(position, color, radius));
+        _model->uploadData<Instance>(
+            *instance,
+            0,
+            Instance(position, color, radius)
+        );
     }
 
     void drawPermanent(const rush::Vec3f& position,
@@ -139,7 +145,8 @@ public:
         if (!_frontInstances.empty()) {
             instance = _frontInstances.back();
             _frontInstances.pop_back();
-        } else {
+        }
+        else {
             auto result = _model->createInstance();
             if (!result.isOk()) {
                 std::cerr << result.getError() << std::endl;
@@ -147,8 +154,11 @@ public:
             }
             instance = result.getResult();
         }
-        _model->uploadData<Instance>(*instance,
-                                     Instance(position, color, radius));
+        _model->uploadData<Instance>(
+            *instance,
+            0,
+            Instance(position, color, radius)
+        );
     }
 
 

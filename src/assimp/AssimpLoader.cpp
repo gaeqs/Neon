@@ -112,7 +112,10 @@ namespace neon::assimp_loader {
 
             auto mInfo = info.materialCreateInfo;
             mInfo.descriptions.vertex.push_back(info.vertexParser.description);
-            mInfo.descriptions.instance.push_back(info.instanceData.description);
+
+            for (auto iData : info.instanceDatas) {
+                mInfo.descriptions.instance.push_back(iData.description);
+            }
 
             auto m = std::make_shared<Material>(
                 info.application,
@@ -357,6 +360,11 @@ namespace neon::assimp_loader {
         ModelCreateInfo modelInfo;
         modelInfo.meshes.reserve(scene->mNumMeshes);
 
+        for (auto iData : info.instanceDatas) {
+            modelInfo.instanceTypes.push_back(iData.type);
+            modelInfo.instanceSizes.push_back(iData.size);
+        }
+
         std::vector<Mat> materials;
 
         loadTextures(scene, textures, loadedTextures, info);
@@ -370,15 +378,11 @@ namespace neon::assimp_loader {
                                                 : nullptr;
         loadMeshes(scene, modelInfo.meshes, materials, info, local);
 
+
         auto model = std::make_shared<Model>(
             info.application,
             info.name,
             modelInfo
-        );
-
-        model->defineInstanceStruct(
-            info.instanceData.type,
-            info.instanceData.size
         );
 
         info.application->getAssets().store(model, AssetStorageMode::WEAK);

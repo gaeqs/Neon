@@ -33,7 +33,7 @@ namespace neon::vulkan {
     void VKMesh::draw(
         const Material* material,
         VkCommandBuffer commandBuffer,
-        VkBuffer instancingBuffer,
+        const std::vector<std::unique_ptr<Buffer>>& instancingBuffers,
         uint32_t instancingElements,
         const ShaderUniformBuffer* globalBuffer,
         const ShaderUniformBuffer* modelBuffer) {
@@ -51,10 +51,13 @@ namespace neon::vulkan {
             offsets[i] = 0;
         }
 
-        if (i < MAX_BUFFERS) {
-            buffers[i] = instancingBuffer;
+
+        for (size_t j = 0;
+             j < instancingBuffers.size() && i < MAX_BUFFERS;
+             ++j, ++i) {
+            auto& buffer = instancingBuffers[j];
+            buffers[i] = buffer == nullptr ? VK_NULL_HANDLE : buffer->getRaw();
             offsets[i] = 0;
-            ++i;
         }
 
         vkCmdBindVertexBuffers(

@@ -156,7 +156,7 @@ namespace neon::vulkan {
         void draw(
             const Material* material,
             VkCommandBuffer commandBuffer,
-            VkBuffer instancingBuffer,
+            const std::vector<std::unique_ptr<Buffer>>& instancingBuffers,
             uint32_t instancingElements,
             const ShaderUniformBuffer* globalBuffer,
             const ShaderUniformBuffer* modelBuffer);

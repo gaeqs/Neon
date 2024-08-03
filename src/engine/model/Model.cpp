@@ -7,17 +7,16 @@
 #include <engine/structure/Room.h>
 
 namespace neon {
-
     Model::Model(Application* application,
                  const std::string& name,
-                 const ModelCreateInfo& info) :
-            Asset(typeid(Model), name),
-            _implementation(application, info),
-            _meshes(info.meshes),
-            _uniformBuffer() {
+                 const ModelCreateInfo& info) : Asset(typeid(Model), name),
+                                                _implementation(
+                                                    application, info),
+                                                _meshes(info.meshes),
+                                                _uniformBuffer() {
         if (info.uniformDescriptor != nullptr) {
             _uniformBuffer = std::make_unique<ShaderUniformBuffer>(
-                    name, info.uniformDescriptor);
+                name, info.uniformDescriptor);
             _uniformBuffer->setBindingPoint(2);
         }
     }
@@ -30,8 +29,9 @@ namespace neon {
         return _implementation;
     }
 
-    const std::type_index& Model::getInstancingStructType() const {
-        return _implementation.getInstancingStructType();
+    const std::vector<std::type_index>&
+    Model::getInstancingStructTypes() const {
+        return _implementation.getInstancingStructTypes();
     }
 
     const std::unique_ptr<ShaderUniformBuffer>&
@@ -51,16 +51,12 @@ namespace neon {
         return _implementation.getInstanceAmount();
     }
 
-    void Model::uploadDataRaw(uint32_t id, const void* raw) {
-        _implementation.uploadDataRaw(id, raw);
+    void Model::uploadDataRaw(uint32_t id, size_t index, const void* raw) {
+        _implementation.uploadDataRaw(id, index, raw);
     }
 
     void Model::flush(const CommandBuffer* commandBuffer) {
         _implementation.flush(commandBuffer);
-    }
-
-    void Model::defineInstanceStruct(std::type_index type, size_t size) {
-        _implementation.defineInstanceStruct(type, size);
     }
 
     const std::vector<std::shared_ptr<Mesh>>& Model::getMeshes() const {

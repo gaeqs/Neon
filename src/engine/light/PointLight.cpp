@@ -49,7 +49,7 @@ namespace neon {
 
     void PointLight::onLateUpdate(float deltaTime) {
         auto position = getGameObject()->getTransform().getPosition();
-        _graphicComponent->uploadData(Data{
+        _graphicComponent->uploadData(0, Data{
                 _diffuseColor * _radiance,
                 _specularColor * _radiance,
                 position,

@@ -34,13 +34,14 @@
 #include <engine/model/DefaultInstancingData.h>
 #include <engine/model/Mesh.h>
 
-namespace neon {
-
+namespace neon
+{
     /**
      * Information used to create a model.a gua
      * configure a model.
      */
-    struct ModelCreateInfo {
+    struct ModelCreateInfo
+    {
         static constexpr uint32_t DEFAULT_MAXIMUM_INSTANCES = 1024 * 16;
 
         /**
@@ -66,7 +67,9 @@ namespace neon {
          * Use the method "defineInstanceType()" to change this variable.
          * Don't do it explicitly!
          */
-        std::type_index instanceType = typeid(DefaultInstancingData);
+        std::vector<std::type_index> instanceTypes = {
+            typeid(DefaultInstancingData)
+        };
 
         /**
          * The size in bytes of each instance.
@@ -74,12 +77,18 @@ namespace neon {
          * Use the method "defineInstanceType()" to change this variable.
          * Don't do it explicitly!
          */
-        size_t instanceSize = sizeof(DefaultInstancingData);
+        std::vector<size_t> instanceSizes = {sizeof(DefaultInstancingData)};
 
-        template<typename Type>
-        void defineInstanceType() {
-            instanceType = typeid(Type);
-            instanceSize = sizeof(Type);
+        template <typename... Types>
+        void defineInstanceType()
+        {
+            instanceTypes.clear();
+            instanceSizes.clear();
+            ([&]
+            {
+                instanceTypes.emplace_back(typeid(Types));
+                instanceSizes.push_back(sizeof(Types));
+            }(), ...);
         }
     };
 }

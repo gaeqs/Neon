@@ -133,8 +133,11 @@ std::shared_ptr<FrameBuffer> initRender(Room* room) {
         InputDescription(0, InputRate::INSTANCE),
         {}, textures);
 
-    auto screenModel = deferred_utils::createScreenModel(room->getApplication(),
-        "Screen Model");
+    auto screenModel = deferred_utils::createScreenModel(
+        room->getApplication(),
+        ModelCreateInfo(),
+        "Screen Model"
+    );
 
     screenModel->addMaterial(screenMaterial);
 
@@ -279,9 +282,10 @@ void loadModels(Application* application, Room* room,
 
     MaterialCreateInfo cubeMaterialInfo(target, shaderParallax);
     cubeMaterialInfo.descriptions.uniform = materialDescriptor;
-    cubeMaterialInfo.descriptions.vertex.push_back(TestVertex::getDescription());
+    cubeMaterialInfo.descriptions.vertex.
+            push_back(TestVertex::getDescription());
     cubeMaterialInfo.descriptions.instance.push_back(
-            DefaultInstancingData::getInstancingDescription());
+        DefaultInstancingData::getInstancingDescription());
 
     auto material = std::make_shared<Material>(
         application, "cubeMaterial", cubeMaterialInfo);

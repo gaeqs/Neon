@@ -21,6 +21,7 @@
 
 namespace neon::deferred_utils {
     std::shared_ptr<Model> createScreenModel(Application* application,
+                                             ModelCreateInfo info,
                                              const std::string& name) {
         static std::vector<DeferredVertex> vertices = {
             {{-1.0f, 1.0f}},
@@ -39,7 +40,6 @@ namespace neon::deferred_utils {
         mesh->uploadVertices(vertices);
         mesh->uploadIndices(indices);
 
-        ModelCreateInfo info;
         info.meshes.push_back(std::move(mesh));
         return std::make_shared<Model>(application, name, info);
     }
@@ -89,8 +89,9 @@ namespace neon::deferred_utils {
             info.descriptions.instance.clear();
             info.descriptions.instance.push_back(
                 DirectionalLight::Data::getDescription());
-            directionalModel = createScreenModel(app, "Directional Light");
-            directionalModel->defineInstanceStruct<DirectionalLight::Data>();
+            ModelCreateInfo m;
+            m.defineInstanceType<DirectionalLight::Data>();
+            directionalModel = createScreenModel(app, m, "Directional Light");
 
             auto material = std::make_shared<Material>(
                 app, "Directional Light", info);
@@ -107,8 +108,9 @@ namespace neon::deferred_utils {
             info.descriptions.instance.clear();
             info.descriptions.instance.push_back(
                 PointLight::Data::getDescription());
-            pointModel = createScreenModel(app, "Point Light");
-            pointModel->defineInstanceStruct<PointLight::Data>();
+            ModelCreateInfo m;
+            m.defineInstanceType<PointLight::Data>();
+            pointModel = createScreenModel(app, m, "Point Light");
 
             auto material = std::make_shared<Material>(
                 app, "Point Light", info);
@@ -125,8 +127,10 @@ namespace neon::deferred_utils {
             info.descriptions.instance.clear();
             info.descriptions.instance.push_back(
                 FlashLight::Data::getDescription());
-            flashModel = createScreenModel(app, "Flash Light");
-            flashModel->defineInstanceStruct<FlashLight::Data>();
+
+            ModelCreateInfo m;
+            m.defineInstanceType<FlashLight::Data>();
+            flashModel = createScreenModel(app, m, "Flash Light");
 
             auto material = std::make_shared<Material>(
                 app, "Flash Light", info);
