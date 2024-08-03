@@ -9,11 +9,11 @@
 namespace neon {
     Model::Model(Application* application,
                  const std::string& name,
-                 const ModelCreateInfo& info) : Asset(typeid(Model), name),
-                                                _implementation(
-                                                    application, info),
-                                                _meshes(info.meshes),
-                                                _uniformBuffer() {
+                 const ModelCreateInfo& info)
+        : Asset(typeid(Model), name),
+          _implementation(application, info),
+          _meshes(info.meshes),
+          _shouldAutoFlush(info.shouldAutoFlush) {
         if (info.uniformDescriptor != nullptr) {
             _uniformBuffer = std::make_unique<ShaderUniformBuffer>(
                 name, info.uniformDescriptor);
@@ -57,6 +57,14 @@ namespace neon {
 
     void Model::flush(const CommandBuffer* commandBuffer) {
         _implementation.flush(commandBuffer);
+    }
+
+    bool Model::shouldAutoFlush() const {
+        return _shouldAutoFlush;
+    }
+
+    void Model::setShouldAutoFlush(bool autoFlush) {
+        _shouldAutoFlush = autoFlush;
     }
 
     const std::vector<std::shared_ptr<Mesh>>& Model::getMeshes() const {

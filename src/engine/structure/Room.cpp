@@ -1,4 +1,3 @@
-
 //
 // Created by grial on 19/10/22.
 //
@@ -14,20 +13,19 @@
 #include <engine/render/GraphicComponent.h>
 
 namespace neon {
-
     constexpr float DEFAULT_FRUSTUM_NEAR = 0.1f;
     constexpr float DEFAULT_FRUSTUM_FAR = 500.0f;
     constexpr float DEFAULT_FRUSTUM_FOV = 1.7453f; // RADIANS
 
-    Room::Room(Application* application) :
-            _application(application),
-            _camera(Frustum(DEFAULT_FRUSTUM_NEAR, DEFAULT_FRUSTUM_FAR, 1.0f,
-                            DEFAULT_FRUSTUM_FOV)),
-            _gameObjects(),
-            _components(),
+    Room::Room(Application* application) : _application(application),
+                                           _camera(Frustum(
+                                               DEFAULT_FRUSTUM_NEAR,
+                                               DEFAULT_FRUSTUM_FAR, 1.0f,
+                                               DEFAULT_FRUSTUM_FOV)),
+                                           _gameObjects(),
+                                           _components(),
 
-            _usedModels() {
-
+                                           _usedModels() {
     }
 
     Room::~Room() {
@@ -65,7 +63,7 @@ namespace neon {
     }
 
     void Room::destroyComponentLater(
-            IdentifiableWrapper<neon::Component> component) {
+        IdentifiableWrapper<neon::Component> component) {
         _destroyLater.insert(component);
     }
 
@@ -78,7 +76,7 @@ namespace neon {
     }
 
     void Room::forEachGameObject(
-            std::function<void(const GameObject*)> consumer) const {
+        std::function<void(const GameObject*)> consumer) const {
         _gameObjects.forEach(std::move(consumer));
     }
 
@@ -106,7 +104,6 @@ namespace neon {
     }
 
     void Room::update(float deltaTime) {
-
         for (const auto& component: _destroyLater) {
             if (component.isValid()) {
                 component->destroy();
@@ -114,12 +111,10 @@ namespace neon {
         }
         _destroyLater.clear();
 
-        auto& p = getApplication()->getProfiler();
-        {
+        auto& p = getApplication()->getProfiler(); {
             DEBUG_PROFILE(p, update);
             _components.updateComponents(p, deltaTime);
-        }
-        {
+        } {
             DEBUG_PROFILE(p, lateUpdate);
             _components.lateUpdateComponents(p, deltaTime);
         }
@@ -130,19 +125,17 @@ namespace neon {
         auto* cb = _application->getCurrentCommandBuffer();
 
         DEBUG_PROFILE(p, preDraw);
-        _components.preDrawComponents(p);
-
-        {
+        _components.preDrawComponents(p); {
             DEBUG_PROFILE(p, models);
             for (const auto& [model, amount]: _usedModels) {
-                model->flush();
+                if (model->shouldAutoFlush()) {
+                    model->flush();
+                }
                 if (model->getUniformBuffer() != nullptr) {
                     model->getUniformBuffer()->prepareForFrame(cb);
                 }
             }
-        }
-
-        {
+        } {
             DEBUG_PROFILE(p, uniformBuffers);
             _application->getRender()->getGlobalUniformBuffer()
                     .prepareForFrame(cb);
@@ -163,7 +156,6 @@ namespace neon {
                 }
             }
         }
-
     }
 
     void Room::draw() {
@@ -184,7 +176,8 @@ namespace neon {
         if (it == _usedModels.end()) return;
         if (it->second <= 1) {
             _usedModels.erase(model);
-        } else {
+        }
+        else {
             --it->second;
         }
     }

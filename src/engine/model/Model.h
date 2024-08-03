@@ -45,6 +45,8 @@ namespace neon {
         std::vector<std::shared_ptr<Mesh>> _meshes;
         std::unique_ptr<ShaderUniformBuffer> _uniformBuffer;
 
+        bool _shouldAutoFlush;
+
     public:
         Model(const Model& other) = delete;
 
@@ -102,12 +104,13 @@ namespace neon {
          * Returns the amount of instances inside this model.
          * @return the amount of instances.
          */
-        size_t getInstanceAmount() const;
+        [[nodiscard]] size_t getInstanceAmount() const;
 
         /**
-         * Sets the instancing data of an instance.
+         * Sets the instancing data of an instance buffer.
          * @tparam InstanceData the type of the instance data.
          * @param id the identifier of the instance.
+         * @param index the index of the instance buffer.
          * @param data the data to upload.
          */
         template<class InstanceData>
@@ -121,8 +124,9 @@ namespace neon {
         }
 
         /**
-         * Sets the instancing data of an instance.
+         * Sets the instancing data of an instance buffer.
          * @param id the identifier of the instance.
+         * @param index the index of the buffer,
          * @param raw the data to upload.
          */
         void uploadDataRaw(uint32_t id, size_t index, const void* raw);
@@ -131,7 +135,7 @@ namespace neon {
          * Uploads the instancing data to the GPU.
          * <p>
          * This method is invoked automatically
-         * before the room is rendered.
+         * before the room is rendered if shouldAutoFlush() is true.
          * <p>
          * You can provide this method an external command buffer.
          * This allows you to upload the model data asynchonously.
@@ -139,10 +143,31 @@ namespace neon {
         void flush(const CommandBuffer* commandBuffer = nullptr);
 
         /**
+         * Whether the renderer should call Model::flush() before rendering.
+         * Set this flag to false if you want to manage the instance data
+         * asyncronally.
+         *
+         * @return whether the renderer should call Model::flush() before
+         * rendering.
+         */
+        [[nodiscard]] bool shouldAutoFlush() const;
+
+        /**
+        * Sets whetehr the renderer should call Model::flush() before rendering.
+        * Set this flag to false if you want to manage the instance data
+        * asyncronally.
+        *
+        * @param autoFlush whether the renderer should call Model::flush()
+        * before rendering.
+        */
+        void setShouldAutoFlush(bool autoFlush);
+
+        /**
          * Returns the list containing all meshes inside this model.
          * @return the meshes.
          */
-        const std::vector<std::shared_ptr<Mesh>>& getMeshes() const;
+        [[nodiscard]] const std::vector<std::shared_ptr<Mesh>>&
+        getMeshes() const;
 
         /**
          * Return the amount of meshes this mode has.

@@ -34,14 +34,12 @@
 #include <engine/model/DefaultInstancingData.h>
 #include <engine/model/Mesh.h>
 
-namespace neon
-{
+namespace neon {
     /**
      * Information used to create a model.a gua
      * configure a model.
      */
-    struct ModelCreateInfo
-    {
+    struct ModelCreateInfo {
         static constexpr uint32_t DEFAULT_MAXIMUM_INSTANCES = 1024 * 16;
 
         /**
@@ -62,6 +60,14 @@ namespace neon
         std::shared_ptr<ShaderUniformDescriptor> uniformDescriptor = nullptr;
 
         /**
+        * Whether the renderer should call Model::flush() before rendering.
+        *
+        * Set this flag to false if you want to manage the instance data
+        * asyncronally.
+        */
+        bool shouldAutoFlush = true;
+
+        /**
          * The type of the instance data.
          *
          * Use the method "defineInstanceType()" to change this variable.
@@ -79,13 +85,11 @@ namespace neon
          */
         std::vector<size_t> instanceSizes = {sizeof(DefaultInstancingData)};
 
-        template <typename... Types>
-        void defineInstanceType()
-        {
+        template<typename... Types>
+        void defineInstanceType() {
             instanceTypes.clear();
             instanceSizes.clear();
-            ([&]
-            {
+            ([&] {
                 instanceTypes.emplace_back(typeid(Types));
                 instanceSizes.push_back(sizeof(Types));
             }(), ...);
