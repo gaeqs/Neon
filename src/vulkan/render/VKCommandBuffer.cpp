@@ -15,24 +15,33 @@ namespace neon::vulkan {
     VKCommandBuffer::VKCommandBuffer(VKCommandBuffer&& move) noexcept
         : _vkApplication(move._vkApplication),
           _pool(move._pool),
+          _queue(move._queue),
           _commandBuffer(move.getCommandBuffer()),
           _status(move._status),
           _fences(std::move(move._fences)),
           _freedFences(std::move(move._freedFences)),
           _external(move._external) {
         move._pool = VK_NULL_HANDLE;
+        move._queue = VK_NULL_HANDLE;
         move._commandBuffer = VK_NULL_HANDLE;
     }
 
     VKCommandBuffer::VKCommandBuffer(Application* application, bool primary)
         : _vkApplication(dynamic_cast<AbstractVKApplication*>(
               application->getImplementation())),
-          _pool(_vkApplication->getCommandPool()->getImplementation().raw()),
           _commandBuffer(VK_NULL_HANDLE),
           _status(VKCommandBufferStatus::READY),
           _fences(),
           _freedFences(),
           _external(false) {
+        auto& pool = _vkApplication->getCommandPool()->getImplementation();
+        _pool = pool.raw();
+        _queue = pool.getQueue();
+
+        if(_queue == nullptr) {
+            std::cerr << "Queue is null!" << std::endl;
+        }
+
         VkCommandBufferAllocateInfo info{};
         info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
         info.commandPool = _pool;
@@ -40,22 +49,30 @@ namespace neon::vulkan {
                          ? VK_COMMAND_BUFFER_LEVEL_PRIMARY
                          : VK_COMMAND_BUFFER_LEVEL_SECONDARY;
         info.commandBufferCount = 1;
-        if (vkAllocateCommandBuffers(_vkApplication->getDevice(),
+        if (vkAllocateCommandBuffers(_vkApplication->getDevice()->getRaw(),
                                      &info, &_commandBuffer) != VK_SUCCESS) {
             throw std::runtime_error("Failed to allocate command buffers!");
         }
     }
 
     VKCommandBuffer::VKCommandBuffer(Application* application,
-                                     VkCommandPool pool, bool primary)
+                                     VkCommandPool pool,
+                                     VkQueue queue,
+                                     bool primary)
         : _vkApplication(dynamic_cast<AbstractVKApplication*>(
               application->getImplementation())),
           _pool(pool),
+          _queue(queue),
           _commandBuffer(VK_NULL_HANDLE),
           _status(VKCommandBufferStatus::READY),
           _fences(),
           _freedFences(),
           _external(false) {
+
+        if(_queue == nullptr) {
+            std::cerr << "Queue is null!" << std::endl;
+        }
+
         VkCommandBufferAllocateInfo info{};
         info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
         info.commandPool = pool;
@@ -63,23 +80,25 @@ namespace neon::vulkan {
                          ? VK_COMMAND_BUFFER_LEVEL_PRIMARY
                          : VK_COMMAND_BUFFER_LEVEL_SECONDARY;
         info.commandBufferCount = 1;
-        if (vkAllocateCommandBuffers(_vkApplication->getDevice(),
+        if (vkAllocateCommandBuffers(_vkApplication->getDevice()->getRaw(),
                                      &info, &_commandBuffer) != VK_SUCCESS) {
             throw std::runtime_error("Failed to allocate command buffers!");
         }
     }
 
     VKCommandBuffer::VKCommandBuffer(Application* application,
-                                     VkCommandBuffer
-                                     commandBuffer)
+                                     VkCommandBuffer commandBuffer,
+                                     VkQueue queue)
         : _vkApplication(dynamic_cast<AbstractVKApplication*>(
               application->getImplementation())),
           _commandBuffer(commandBuffer),
           _pool(VK_NULL_HANDLE),
+          _queue(queue),
           _status(VKCommandBufferStatus::READY),
-          _fences(),
-          _freedFences(),
           _external(true) {
+        if(_queue == nullptr) {
+            std::cerr << "Queue is null!" << std::endl;
+        }
     }
 
     VKCommandBuffer::~VKCommandBuffer() {
@@ -136,8 +155,9 @@ namespace neon::vulkan {
         submitInfo.signalSemaphoreCount = signalSemaphoreAmount;
         submitInfo.pSignalSemaphores = signalSemaphores;
 
+        VkQueue queue = _queue;
         VkFence fence = fetchAvailableFence();
-        _vkApplication->getGraphicsQueue().submit(submitInfo, fence);
+        vkQueueSubmit(queue, 1, &submitInfo, fence);
         _fences.push_back(fence);
 
         return true;
@@ -157,10 +177,10 @@ namespace neon::vulkan {
 
     void VKCommandBuffer::waitForFences() {
         if (_fences.empty()) return;
-        vkWaitForFences(_vkApplication->getDevice(),
+        vkWaitForFences(_vkApplication->getDevice()->getRaw(),
                         _fences.size(), _fences.data(), VK_TRUE, UINT64_MAX);
 
-        vkResetFences(_vkApplication->getDevice(),
+        vkResetFences(_vkApplication->getDevice()->getRaw(),
                       _fences.size(), _fences.data());
 
         for (const auto& fence: _fences) {
@@ -195,7 +215,8 @@ namespace neon::vulkan {
         fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
         fenceInfo.flags = 0;
 
-        if (vkCreateFence(_vkApplication->getDevice(), &fenceInfo, nullptr,
+        if (vkCreateFence(_vkApplication->getDevice()->getRaw(), &fenceInfo,
+                          nullptr,
                           &fence)
             != VK_SUCCESS) {
             throw std::runtime_error("Failed to create fence!");
@@ -232,12 +253,13 @@ namespace neon::vulkan {
         waitForFences();
 
         for (const auto& fence: _freedFences) {
-            vkDestroyFence(_vkApplication->getDevice(), fence, nullptr);
+            vkDestroyFence(_vkApplication->getDevice()->getRaw(), fence,
+                           nullptr);
         }
 
         if (!_external) {
             vkFreeCommandBuffers(
-                _vkApplication->getDevice(),
+                _vkApplication->getDevice()->getRaw(),
                 _pool,
                 1, &_commandBuffer
             );
@@ -247,7 +269,7 @@ namespace neon::vulkan {
     bool VKCommandBuffer::isBeingUsed() {
         if (_status == VKCommandBufferStatus::RECORDING) return true;
         if (_fences.empty()) return false;
-        auto device = _vkApplication->getDevice();
+        auto device = _vkApplication->getDevice()->getRaw();
 
         bool used = std::ranges::any_of(
             _fences,
@@ -257,7 +279,7 @@ namespace neon::vulkan {
         );
 
         if (!used) {
-            vkResetFences(_vkApplication->getDevice(),
+            vkResetFences(_vkApplication->getDevice()->getRaw(),
                           _fences.size(), _fences.data());
             _freedFences.insert(
                 _freedFences.end(),

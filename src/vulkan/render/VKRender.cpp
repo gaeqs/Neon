@@ -35,7 +35,7 @@ namespace neon::vulkan {
     }
 
     void VKRender::setupFrameBufferRecreation() {
-        vkDeviceWaitIdle(_vkApplication->getDevice());
+        vkDeviceWaitIdle(_vkApplication->getDevice()->getRaw());
     }
 
     void VKRender::beginRenderPass(

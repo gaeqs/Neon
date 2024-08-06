@@ -120,7 +120,6 @@ set(VULKAN_SOURCES
         vulkan/VKApplication.cpp
         vulkan/VKApplication.h
         vulkan/VKSwapChainSupportDetails.h
-        vulkan/VKQueueFamilyIndices.h
         vulkan/VKTexture.cpp
         vulkan/VKTexture.h
         vulkan/buffer/Buffer.h
@@ -162,8 +161,16 @@ set(VULKAN_SOURCES
         vulkan/AbstractVKApplication.h
         vulkan/render/VKCommandPool.cpp
         vulkan/render/VKCommandPool.h
-        vulkan/render/VKThreadSafeQueue.cpp
-        vulkan/render/VKThreadSafeQueue.h)
+        vulkan/queue/VKQueueFamily.cpp
+        vulkan/queue/VKQueueFamily.h
+        vulkan/queue/VKQueueFamilyCollection.cpp
+        vulkan/queue/VKQueueFamilyCollection.h
+        vulkan/queue/VKQueue.cpp
+        vulkan/queue/VKQueue.h
+        vulkan/device/VKDevice.cpp
+        vulkan/device/VKDevice.h
+        vulkan/queue/VKQueueProvider.cpp
+        vulkan/queue/VKQueueProvider.h)
 
 if (NEON_USE_QT)
     list(APPEND SOURCES

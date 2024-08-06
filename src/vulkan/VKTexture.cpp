@@ -53,7 +53,7 @@ namespace neon::vulkan {
         VkFormat vkFormat = vc::vkFormat(createInfo.image.format);
 
         auto pair = vulkan_util::createImage(
-            _vkApplication->getDevice(),
+            _vkApplication->getDevice()->getRaw(),
             _vkApplication->getPhysicalDevice(),
             createInfo.image,
             createInfo.imageView.viewType);
@@ -116,7 +116,7 @@ namespace neon::vulkan {
         // VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
 
         _imageView = vulkan_util::createImageView(
-            _vkApplication->getDevice(),
+            _vkApplication->getDevice()->getRaw(),
             _image,
             vkFormat,
             VK_IMAGE_ASPECT_COLOR_BIT,
@@ -135,7 +135,7 @@ namespace neon::vulkan {
             static_cast<float>(createInfo.image.mipmaps),
             properties.limits.maxSamplerAnisotropy);
 
-        if (vkCreateSampler(_vkApplication->getDevice(), &samplerInfo, nullptr,
+        if (vkCreateSampler(_vkApplication->getDevice()->getRaw(), &samplerInfo, nullptr,
                             &_sampler) != VK_SUCCESS) {
             throw std::runtime_error("Failed to create texture sampler!");
         }
@@ -174,19 +174,19 @@ namespace neon::vulkan {
             static_cast<float>(_mipmapLevels),
             properties.limits.maxSamplerAnisotropy);
 
-        if (vkCreateSampler(_vkApplication->getDevice(), &samplerInfo, nullptr,
+        if (vkCreateSampler(_vkApplication->getDevice()->getRaw(), &samplerInfo, nullptr,
                             &_sampler) != VK_SUCCESS) {
             throw std::runtime_error("Failed to create texture sampler!");
         }
     }
 
     VKTexture::~VKTexture() {
-        vkDestroySampler(_vkApplication->getDevice(), _sampler, nullptr);
+        vkDestroySampler(_vkApplication->getDevice()->getRaw(), _sampler, nullptr);
         if (!_external) {
-            vkDestroyImageView(_vkApplication->getDevice(), _imageView,
+            vkDestroyImageView(_vkApplication->getDevice()->getRaw(), _imageView,
                                nullptr);
-            vkDestroyImage(_vkApplication->getDevice(), _image, nullptr);
-            vkFreeMemory(_vkApplication->getDevice(), _imageMemory, nullptr);
+            vkDestroyImage(_vkApplication->getDevice()->getRaw(), _image, nullptr);
+            vkFreeMemory(_vkApplication->getDevice()->getRaw(), _imageMemory, nullptr);
         }
     }
 

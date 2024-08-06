@@ -25,6 +25,7 @@ namespace neon::vulkan {
     class VKCommandBuffer {
         AbstractVKApplication* _vkApplication;
         VkCommandPool _pool;
+        VkQueue _queue;
         VkCommandBuffer _commandBuffer;
 
         VKCommandBufferStatus _status;
@@ -50,11 +51,14 @@ namespace neon::vulkan {
 
         VKCommandBuffer(Application* application, bool primary);
 
-        VKCommandBuffer(Application* application, VkCommandPool pool,
+        VKCommandBuffer(Application* application,
+                        VkCommandPool pool,
+                        VkQueue queue,
                         bool primary);
 
         VKCommandBuffer(Application* application,
-                        VkCommandBuffer commandBuffer);
+                        VkCommandBuffer commandBuffer,
+                        VkQueue queue);
 
         ~VKCommandBuffer();
 

@@ -233,7 +233,7 @@ namespace neon::vulkan {
             pipelineLayoutInfo.pPushConstantRanges = &range;
         }
 
-        if (vkCreatePipelineLayout(_vkApplication->getDevice(),
+        if (vkCreatePipelineLayout(_vkApplication->getDevice()->getRaw(),
                                    &pipelineLayoutInfo, nullptr,
                                    &_pipelineLayout) != VK_SUCCESS) {
             throw std::runtime_error("Failed to create pipeline layout!");
@@ -259,7 +259,7 @@ namespace neon::vulkan {
         pipelineInfo.subpass = 0;
 
         if (vkCreateGraphicsPipelines(
-                _vkApplication->getDevice(), VK_NULL_HANDLE, 1, &pipelineInfo,
+                _vkApplication->getDevice()->getRaw(), VK_NULL_HANDLE, 1, &pipelineInfo,
                 nullptr, &_pipeline) != VK_SUCCESS) {
             throw std::runtime_error("Failed to create graphics pipeline!");
         }
@@ -267,7 +267,7 @@ namespace neon::vulkan {
 
     VKMaterial::~VKMaterial() {
         if (_pipeline != VK_NULL_HANDLE) {
-            auto device = _vkApplication->getDevice();
+            auto device = _vkApplication->getDevice()->getRaw();
             vkDestroyPipeline(device, _pipeline, nullptr);
             vkDestroyPipelineLayout(device, _pipelineLayout, nullptr);
         }

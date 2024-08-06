@@ -27,18 +27,17 @@ namespace neon::vulkan {
     void VKShaderProgram::deleteShaders() {
         for (const auto& item: _shaders) {
             vkDestroyShaderModule(
-                    _vkApplication->getDevice(), item.module, nullptr);
+                _vkApplication->getDevice()->getRaw(),
+                item.module,
+                nullptr
+            );
         }
         _shaders.clear();
     }
 
-    VKShaderProgram::VKShaderProgram(Application* application) :
-            _vkApplication(dynamic_cast<AbstractVKApplication*>(
-                                   application->getImplementation())),
-            _shaders(),
-            _uniformBlocks(),
-            _uniforms(),
-            _samplers() {
+    VKShaderProgram::VKShaderProgram(Application* application) : _vkApplication(
+        dynamic_cast<AbstractVKApplication*>(
+            application->getImplementation())) {
     }
 
     VKShaderProgram::~VKShaderProgram() {
@@ -47,7 +46,7 @@ namespace neon::vulkan {
 
     std::optional<std::string>
     VKShaderProgram::compile(
-            const std::unordered_map<ShaderType, std::string>& raw) {
+        const std::unordered_map<ShaderType, std::string>& raw) {
         deleteShaders();
 
         SPIRVCompiler compiler;
@@ -74,13 +73,18 @@ namespace neon::vulkan {
 
             VkShaderModule shaderModule;
 
-            if (vkCreateShaderModule(_vkApplication->getDevice(), &moduleInfo,
-                                     nullptr, &shaderModule) != VK_SUCCESS) {
+            if (vkCreateShaderModule(
+                    _vkApplication->getDevice()->getRaw(),
+                    &moduleInfo,
+                    nullptr,
+                    &shaderModule
+                ) != VK_SUCCESS) {
                 return "Failed to create shader module.";
             }
 
             VkPipelineShaderStageCreateInfo stageInfo{};
-            stageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+            stageInfo.sType =
+                    VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
             stageInfo.stage = stage;
             stageInfo.module = shaderModule;
             stageInfo.pName = "main";
@@ -115,4 +119,3 @@ namespace neon::vulkan {
         return _samplers;
     }
 }
-

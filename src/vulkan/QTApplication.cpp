@@ -226,6 +226,7 @@ getFamilyIndices() const {
 
 void neon::vulkan::QTApplication::preInitResources() {
     vulkanInstance()->installDebugOutputFilter(debugFilter);
+    setQueueCreateInfoModifier()
 }
 
 void neon::vulkan::QTApplication::initResources() {

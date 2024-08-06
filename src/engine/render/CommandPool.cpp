@@ -32,10 +32,12 @@ namespace neon {
 
 #ifdef USE_VULKAN
 
-    CommandPool::CommandPool(Application* application, VkCommandPool pool)
-        : _implementation(application, pool) {
+    CommandPool::CommandPool(Application* application,
+                             VkCommandPool pool,
+                             VkQueue queue)
+        : _implementation(application, pool, queue) {
     }
-    
+
 #endif
 
     CommandPool::~CommandPool() {
