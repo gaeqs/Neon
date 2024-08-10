@@ -32,6 +32,7 @@
 
 #include <QMouseEvent>
 #include <QWheelEvent>
+#include <QSurface>
 #include <QVulkanFunctions>
 #include <engine/io/KeyboardEvent.h>
 
@@ -55,15 +56,13 @@ namespace {
 
 neon::vulkan::QTApplication::QTApplication()
     : _application(nullptr),
-      _onInit(),
-      _graphicsQueue(VK_NULL_HANDLE),
+      _queueFamilies(),
       _commandPool(nullptr),
       _currentFrameInformation(
           0, 0.016f, 0.0f),
       _lastFrameTime(
           std::chrono::high_resolution_clock::now()),
       _lastFrameProcessTime(0.0f),
-      _currentCommandBuffer(),
       _swapChainCount(0),
       _recording(false),
       _imGuiPool(VK_NULL_HANDLE) {
@@ -85,15 +84,6 @@ neon::vulkan::QTApplication::getCurrentFrameInformation() const {
 
 neon::CommandBuffer*
 neon::vulkan::QTApplication::getCurrentCommandBuffer() const {
-    if (!isRecordingCommandBuffer()) {
-        return nullptr;
-    }
-    if (_currentCommandBuffer == nullptr) {
-        _currentCommandBuffer = std::make_unique<CommandBuffer>(
-            _application,
-            currentCommandBuffer()
-        );
-    }
     return _currentCommandBuffer.get();
 }
 
@@ -134,26 +124,18 @@ void neon::vulkan::QTApplication::renderFrame(neon::Room* room) {
     now = std::chrono::high_resolution_clock::now();
     auto processTime = now - _lastFrameTime;
     _lastFrameProcessTime = static_cast<float>(processTime.count()) * 1e-9f;
-    _currentCommandBuffer = nullptr;
 }
 
 VkInstance neon::vulkan::QTApplication::getInstance() const {
     return vulkanInstance()->vkInstance();
 }
 
-VkDevice neon::vulkan::QTApplication::getDevice() const {
-    return device();
+neon::vulkan::VKDevice* neon::vulkan::QTApplication::getDevice() const {
+    return _device.get();
 }
 
 VkPhysicalDevice neon::vulkan::QTApplication::getPhysicalDevice() const {
     return physicalDevice();
-}
-
-VKThreadSafeQueue& neon::vulkan::QTApplication::getGraphicsQueue() {
-    if (_graphicsQueue.getQueue() == VK_NULL_HANDLE) {
-        _graphicsQueue.setQueue(graphicsQueue());
-    }
-    return _graphicsQueue;
 }
 
 VkFormat neon::vulkan::QTApplication::getSwapChainImageFormat() const {
@@ -170,7 +152,8 @@ neon::CommandPool* neon::vulkan::QTApplication::getCommandPool() const {
         if (pool != VK_NULL_HANDLE) {
             _commandPool = std::make_unique<CommandPool>(
                 getApplication(),
-                pool
+                pool,
+                graphicsQueue()
             );
         }
     }
@@ -219,23 +202,83 @@ neon::Application* neon::vulkan::QTApplication::getApplication() const {
     return _application;
 }
 
-neon::vulkan::VKQueueFamilyIndices neon::vulkan::QTApplication::
-getFamilyIndices() const {
-    return _indices;
+VkQueue neon::vulkan::QTApplication::getGraphicsQueue() {
+    return graphicsQueue();
 }
 
 void neon::vulkan::QTApplication::preInitResources() {
     vulkanInstance()->installDebugOutputFilter(debugFilter);
-    setQueueCreateInfoModifier()
+
+    _queueFamilies = std::make_unique<VKQueueFamilyCollection>(
+        physicalDevice(),
+        vulkanInstance()->surfaceForWindow(this)
+    );
+
+    uint32_t maxQueues = 0;
+    for (auto family: _queueFamilies->getFamilies()) {
+        maxQueues = std::max(family.getCount(), maxQueues);
+    }
+    _queuePriorities.resize(maxQueues, 1.0f);
+
+    _presentQueues.resize(_queueFamilies->getFamilies().size());
+
+    std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
+    queueCreateInfos.reserve(_queueFamilies->getFamilies().size());
+
+    for (auto family: _queueFamilies->getFamilies()) {
+        VkDeviceQueueCreateInfo info{};
+        info.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+        info.queueFamilyIndex = family.getIndex();
+        info.queueCount = family.getCount();
+        info.pQueuePriorities = _queuePriorities.data();
+        queueCreateInfos.push_back(info);
+        _presentQueues[family.getIndex()] = family.getCount();
+    }
+
+
+    setQueueCreateInfoModifier(
+        [queueCreateInfos](const VkQueueFamilyProperties* prop,
+                           uint32_t amount,
+                           QVector<VkDeviceQueueCreateInfo>& vec) {
+            auto def = vec.front();
+            std::cout << "DEFAULT INFO: " << std::endl;
+            std::cout << " - Family infex:" << def.queueFamilyIndex <<
+                    std::endl;
+            std::cout << " - Queue count:" << def.queueCount << std::endl;
+            std::cout << " - Queue priorities:" << *def.pQueuePriorities <<
+                    std::endl;
+
+            def = queueCreateInfos.front();
+
+            std::cout << "REMPLACE INFO: " << std::endl;
+            std::cout << " - Family infex:" << def.queueFamilyIndex <<
+                    std::endl;
+            std::cout << " - Queue count:" << def.queueCount << std::endl;
+            std::cout << " - Queue priorities:" << *def.pQueuePriorities <<
+                    std::endl;
+
+
+            /* vec.clear();
+             for (auto& info : queueCreateInfos) {
+                 vec.push_back(info);
+             }*/
+        }
+    );
 }
 
 void neon::vulkan::QTApplication::initResources() {
+    _device = std::make_unique<VKDevice>(
+        device(),
+        *_queueFamilies,
+        _presentQueues
+    );
+
+    _device->getQueueProvider()->markUsed(std::this_thread::get_id(), 0, 0);
+
     initImGui();
     if (_onInit) {
         _onInit(this);
     }
-    _indices.graphics = graphicsQueueFamilyIndex();
-    _indices.present = {};
 }
 
 void neon::vulkan::QTApplication::initSwapChainResources() {
@@ -250,9 +293,15 @@ void neon::vulkan::QTApplication::releaseResources() {
 
 void neon::vulkan::QTApplication::startNextFrame() {
     _recording = true;
+    _currentCommandBuffer = std::make_unique<CommandBuffer>(
+        _application,
+        currentCommandBuffer(),
+        graphicsQueue()
+    );
     if (_application != nullptr) {
         renderFrame(_application->getRoom().get());
     }
+    _currentCommandBuffer = nullptr;
     _recording = false;
 }
 
@@ -417,8 +466,8 @@ void neon::vulkan::QTApplication::initImGui() {
     pool_info.pPoolSizes = pool_sizes;
 
 
-    auto* fun = vulkanInstance()->deviceFunctions(getDevice());
-    if (fun->vkCreateDescriptorPool(getDevice(), &pool_info,
+    auto* fun = vulkanInstance()->deviceFunctions(device());
+    if (fun->vkCreateDescriptorPool(device(), &pool_info,
                                     nullptr, &_imGuiPool) != VK_SUCCESS) {
         throw std::runtime_error("Failed to init ImGui!");
     }

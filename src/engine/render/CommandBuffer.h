@@ -57,7 +57,7 @@ namespace neon {
 
         void reset(bool releaseResources = true);
 
-        bool isBeingUsed();
+        bool isBeingUsed() const;
 
         CommandBuffer& operator=(CommandBuffer&& move) noexcept;
     };

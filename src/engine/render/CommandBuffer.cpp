@@ -60,7 +60,7 @@ namespace neon {
         return _implementation.reset(releaseResources);
     }
 
-    bool CommandBuffer::isBeingUsed() {
+    bool CommandBuffer::isBeingUsed() const {
         return _implementation.isBeingUsed();
     }
 

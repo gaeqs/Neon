@@ -184,6 +184,8 @@ namespace neon::vulkan {
                         auto& data = _data[index];
                         memcpy(optional.value()->raw(), data.data(),
                                data.size());
+                    } else {
+                        std::cout << "Optional has no value" << std::endl;
                     }
                 }
                 break;

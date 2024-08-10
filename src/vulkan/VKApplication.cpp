@@ -146,7 +146,7 @@ namespace neon::vulkan {
 
     void VKApplication::init(neon::Application* application) {
         _application = application;
-        //glfwInitHint(GLFW_PLATFORM, GLFW_PLATFORM_X11);
+        glfwInitHint(GLFW_PLATFORM, GLFW_PLATFORM_X11);
         if (!glfwInit()) {
             const char* error;
             glfwGetError(&error);
@@ -637,10 +637,24 @@ namespace neon::vulkan {
         createInfo.clipped = VK_TRUE;
         createInfo.oldSwapchain = VK_NULL_HANDLE;
 
-        if (vkCreateSwapchainKHR(_device->getRaw(), &createInfo, nullptr,
-                                 &_swapChain) !=
-            VK_SUCCESS) {
-            throw std::runtime_error("Failed to create swap chain!");
+        VkResult result = vkCreateSwapchainKHR(
+            _device->getRaw(),
+            &createInfo,
+            nullptr,
+            &_swapChain
+        );
+
+        if (result != VK_SUCCESS) {
+            throw std::runtime_error(
+                std::format(
+                    "Failed to create swap chain! Error code: {}.\n"
+                    "Device is: {}\n"
+                    "Surface is: {}",
+                    static_cast<int>(result),
+                    static_cast<void*>(_device->getRaw()),
+                    static_cast<void*>(_surface)
+                )
+            );
         }
 
         _surfaceFormat = format;

@@ -17,9 +17,7 @@ namespace neon::vulkan {
     class VKQueueHolder;
 
 
-
     class VKQueueProvider {
-
         struct UsedQueue {
             uint32_t index;
             VkQueue queue;
@@ -52,10 +50,12 @@ namespace neon::vulkan {
 
         [[nodiscard]] VKQueueFamilyCollection getFamilies() const;
 
-        VKQueueHolder fetchQueue(size_t familyIndex);
+        VKQueueHolder fetchQueue(uint32_t familyIndex);
 
         VKQueueHolder fetchCompatibleQueue(
             const VKQueueFamily::Capabilities& capabilities);
+
+        bool markUsed(std::thread::id thread, uint32_t family, uint32_t index);
     };
 
     class VKQueueHolder {
@@ -89,7 +89,6 @@ namespace neon::vulkan {
         [[nodiscard]] bool isValid() const;
 
         VKQueueHolder& operator=(VKQueueHolder&& move) noexcept;
-
     };
 }
 

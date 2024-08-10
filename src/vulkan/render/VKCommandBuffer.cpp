@@ -38,7 +38,7 @@ namespace neon::vulkan {
         _pool = pool.raw();
         _queue = pool.getQueue();
 
-        if(_queue == nullptr) {
+        if (_queue == nullptr) {
             std::cerr << "Queue is null!" << std::endl;
         }
 
@@ -68,8 +68,7 @@ namespace neon::vulkan {
           _fences(),
           _freedFences(),
           _external(false) {
-
-        if(_queue == nullptr) {
+        if (_queue == nullptr) {
             std::cerr << "Queue is null!" << std::endl;
         }
 
@@ -96,7 +95,7 @@ namespace neon::vulkan {
           _queue(queue),
           _status(VKCommandBufferStatus::READY),
           _external(true) {
-        if(_queue == nullptr) {
+        if (_queue == nullptr) {
             std::cerr << "Queue is null!" << std::endl;
         }
     }
@@ -120,7 +119,12 @@ namespace neon::vulkan {
         beginInfo.flags = onlyOneSubmit
                               ? VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT
                               : 0;
-        vkBeginCommandBuffer(_commandBuffer, &beginInfo);
+        VkResult result = vkBeginCommandBuffer(_commandBuffer, &beginInfo);
+        if (result != VK_SUCCESS) {
+            std::cout << "Error starting command buffer " << _commandBuffer <<
+                    ". Resturn status: " << result << "." << std::endl;
+            return false;
+        }
         _status = VKCommandBufferStatus::RECORDING;
         return true;
     }
@@ -266,7 +270,7 @@ namespace neon::vulkan {
         }
     }
 
-    bool VKCommandBuffer::isBeingUsed() {
+    bool VKCommandBuffer::isBeingUsed() const {
         if (_status == VKCommandBufferStatus::RECORDING) return true;
         if (_fences.empty()) return false;
         auto device = _vkApplication->getDevice()->getRaw();

@@ -30,8 +30,8 @@ namespace neon::vulkan {
 
         VKCommandBufferStatus _status;
 
-        std::vector<VkFence> _fences;
-        std::vector<VkFence> _freedFences;
+        mutable std::vector<VkFence> _fences;
+        mutable std::vector<VkFence> _freedFences;
         bool _external;
 
         void refreshStatus();
@@ -78,7 +78,7 @@ namespace neon::vulkan {
 
         void reset(bool releaseResources = true);
 
-        bool isBeingUsed();
+        bool isBeingUsed() const;
 
         VKCommandBuffer& operator=(VKCommandBuffer&& move) noexcept;
     };

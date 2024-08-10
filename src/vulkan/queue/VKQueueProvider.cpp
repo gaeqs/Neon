@@ -59,14 +59,13 @@ namespace neon::vulkan {
         return _families;
     }
 
-    VKQueueHolder VKQueueProvider::fetchQueue(size_t familyIndex) {
+    VKQueueHolder VKQueueProvider::fetchQueue(uint32_t familyIndex) {
         if (_availableQueues.size() <= familyIndex) {
             std::cerr << "[NEON] Invalid queue family index: " << familyIndex <<
                     "." << std::endl;
             return {};
         }
 
-        uint32_t family = static_cast<uint32_t>(familyIndex);
         std::thread::id threadId = std::this_thread::get_id();
 
         std::unique_lock lock(_mutexes[familyIndex]);
@@ -79,7 +78,7 @@ namespace neon::vulkan {
             return {
                 this,
                 entry->second.queue,
-                family,
+                familyIndex,
                 entry->second.index
             };
         }
@@ -94,11 +93,11 @@ namespace neon::vulkan {
         queues.pop_back();
 
         VkQueue queue;
-        vkGetDeviceQueue(_device, family, index, &queue);
+        vkGetDeviceQueue(_device, familyIndex, index, &queue);
 
         map[threadId] = UsedQueue(index, queue, 1);
 
-        return {this, queue, family, index};
+        return {this, queue, familyIndex, index};
     }
 
     VKQueueHolder VKQueueProvider::fetchCompatibleQueue(
@@ -144,6 +143,48 @@ namespace neon::vulkan {
 
             _anyCondition.wait(lock);
         }
+    }
+
+    bool VKQueueProvider::markUsed(std::thread::id thread, uint32_t family,
+                                   uint32_t index) {
+        if (_availableQueues.size() <= family) {
+            std::cerr << "[NEON] Invalid queue family index: " << family <<
+                    "." << std::endl;
+            return false;
+        }
+
+        std::unique_lock lock(_mutexes[family]);
+
+        auto& map = _usedQueues[family];
+        auto entry = map.find(thread);
+        if (entry != map.end()) {
+            if (entry->second.index == index) {
+                entry->second.amount++;
+                return true;
+            }
+            std::cerr << "[NEON] Cannot mark thread " << thread
+                    << " on family " << family <<
+                    ". Another queue index is assigned." << std::endl;
+            return false;
+        }
+
+        auto& available = _availableQueues[family];
+        auto pos = std::ranges::find(available, index);
+
+        if (pos == available.end()) {
+            std::cerr << "[NEON] Queue " << index
+                    << " of family " << family <<
+                    ". Is already being used." << std::endl;
+            return false;
+        }
+
+        available.erase(pos);
+
+        VkQueue queue;
+        vkGetDeviceQueue(_device, index, index, &queue);
+
+        map[thread] = UsedQueue(index, queue, 1);
+        return true;
     }
 
     VKQueueHolder::VKQueueHolder()
