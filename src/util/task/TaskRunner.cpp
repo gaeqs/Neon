@@ -12,6 +12,9 @@ void TaskRunner::runOnMainThread(std::function<void()> task) {
     _mainThreadMutex.lock();
     _mainThreadTasks.push_back(std::move(task));
     _mainThreadMutex.unlock();
+
+    Task<int> a;
+    Task<void> b;
 }
 
 void TaskRunner::flushMainThreadTasks() {

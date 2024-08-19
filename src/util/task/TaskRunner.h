@@ -5,10 +5,52 @@
 #ifndef TASKRUNNER_H
 #define TASKRUNNER_H
 
+#include <condition_variable>
 #include <vector>
 #include <functional>
 #include <mutex>
+#include <optional>
 #include <thread>
+
+template<typename Result>
+class Task {
+    std::atomic_bool _finished;
+    std::mutex _valueMutex;
+    std::condition_variable _valueCondition;
+
+    std::optional<Result> _result;
+
+public :
+    Task() :
+        _finished(false),
+        _result() {
+    }
+
+    ~Task();
+
+    bool hasFinished();
+
+    void wait();
+
+    const std::optional<Result>& getResult() {
+        return _result;
+    }
+
+    void setResult(Result&& result) { {
+            std::lock_guard lock(_valueMutex);
+            _result = std::move(result);
+            _finished = true;
+        }
+        _valueCondition.notify_all();
+    }
+};
+
+template<>
+class Task<void> {
+    bool hasFinished();
+
+    void wait();
+};
 
 class TaskRunner {
     struct AsyncTask {
