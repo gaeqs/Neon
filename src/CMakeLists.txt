@@ -185,7 +185,9 @@ endif ()
 
 cmrc_add_resource_library(dummy)
 
-add_library(neon STATIC ${SOURCES} ${VULKAN_SOURCES})
+add_library(neon STATIC ${SOURCES} ${VULKAN_SOURCES}
+        util/task/Coroutine.h
+        util/task/Coroutine.cpp)
 target_link_libraries(neon PUBLIC ${LIBRARIES} ${CMAKE_DL_LIBS} dummy)
 target_compile_definitions(neon PUBLIC USE_VULKAN)
 

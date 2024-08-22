@@ -46,7 +46,7 @@ std::shared_ptr<ShaderProgram> createShader(Application* application,
 
     auto result = ShaderProgram::createShader(
         application, name, defaultVert, defaultFrag);
-    if (!result.isOk()) {
+    if(!result.isOk()) {
         std::cerr << result.getError() << std::endl;
         throw std::runtime_error(result.getError());
     }
@@ -166,7 +166,7 @@ void sansLoadThread(Application* application,
                                           "Sans.obj",
                                           info);
 
-    if (sansResult.error.has_value()) {
+    if(sansResult.error.has_value()) {
         std::cout << "Couldn't load Sans model!" << std::endl;
         std::cout << std::filesystem::current_path() << std::endl;
         exit(1);
@@ -188,12 +188,12 @@ void sansLoadThread(Application* application,
             auto room = application->getRoom();
 
             int q = static_cast<int>(std::sqrt(AMOUNT));
-            for (int i = 0; i < AMOUNT; i++) {
+            for(int i = 0; i < AMOUNT; i++) {
                 auto sans = room->newGameObject();
                 sans->newComponent<GraphicComponent>(sansModel);
                 sans->newComponent<ConstantRotationComponent>();
 
-                if (i == 0) {
+                if(i == 0) {
                     auto sans2 = room->newGameObject();
                     sans2->newComponent<GraphicComponent>(sansModel);
                     sans2->newComponent<ConstantRotationComponent>();
@@ -229,8 +229,10 @@ void loadModels(Application* application, Room* room,
     auto sansLoaderInfo = assimp_loader::LoaderInfo::create<TestVertex>(
         application, "Sans", sansMaterialInfo);
 
-    application->getTaskRunner().executeAsync(
-        sansLoadThread, application, sansLoaderInfo);
+    std::function func = sansLoadThread;
+
+    auto task = application->getTaskRunner().executeAsync(
+        func, application, sansLoaderInfo);
 
     auto zeppeliLoaderInfo = assimp_loader::LoaderInfo::create<TestVertex>(
         application, "Zeppeli", sansMaterialInfo);
@@ -240,7 +242,7 @@ void loadModels(Application* application, Room* room,
     auto zeppeliResult = assimp_loader::load(R"(resource/Zeppeli)",
                                              "William.obj", zeppeliLoaderInfo);
 
-    if (zeppeliResult.error.has_value()) {
+    if(zeppeliResult.error.has_value()) {
         std::cout << "Couldn't load zeppeli model!" << std::endl;
         std::cout << std::filesystem::current_path() << std::endl;
         exit(1);
@@ -322,6 +324,14 @@ std::shared_ptr<Texture> loadSkybox(Room* room) {
                                            "skybox", PATHS, info);
 }
 
+
+neon::Coroutine testCoroutine(std::string print) {
+    while(true) {
+        std::cout << print << std::endl;
+        co_yield new WaitForSeconds(2.0f);
+    } 
+}
+
 std::shared_ptr<Room> getTestRoom(Application* application) {
     auto room = std::make_shared<Room>(application);
 
@@ -373,25 +383,32 @@ std::shared_ptr<Room> getTestRoom(Application* application) {
 
     loadModels(application, room.get(), fpFrameBuffer);
 
+
+    application->getTaskRunner().launchCoroutine(
+        testCoroutine("Hello from coroutine!"));
+
     return room;
 }
 
 int main() {
     std::srand(std::time(nullptr));
 
+    std::cout << "A" << std::endl;
     Application application(std::make_unique<vulkan::VKApplication>(
         "Neon", WIDTH, HEIGHT));
+    std::cout << "B" << std::endl;
 
     application.init();
+    std::cout << "C" << std::endl;
     application.setRoom(getTestRoom(&application));
+    std::cout << "D" << std::endl;
 
     auto loopResult = application.startGameLoop();
-    if (loopResult.isOk()) {
+    if(loopResult.isOk()) {
         std::cout << "[APPLICATION]\tApplication closed. "
                 << loopResult.getResult() << " frames generated."
                 << std::endl;
-    }
-    else {
+    } else {
         std::cout << "[APPLICATION]\tUnexpected game loop error: "
                 << loopResult.getError()
                 << std::endl;

@@ -6,91 +6,159 @@
 #define TASKRUNNER_H
 
 #include <condition_variable>
+#include <coroutine>
 #include <vector>
 #include <functional>
 #include <mutex>
 #include <optional>
+#include <queue>
 #include <thread>
+#include <utility>
 
-template<typename Result>
-class Task {
-    std::atomic_bool _finished;
-    std::mutex _valueMutex;
-    std::condition_variable _valueCondition;
+#include <util/task/Coroutine.h>
 
-    std::optional<Result> _result;
+namespace neon {
+    template<typename Result>
+    class Task {
+        std::atomic_bool _finished;
+        std::mutex _valueMutex;
+        std::condition_variable _valueCondition;
 
-public :
-    Task() :
-        _finished(false),
-        _result() {
-    }
+        std::optional<Result> _result;
 
-    ~Task();
+    public :
+        Task() :
+            _finished(false),
+            _result() {}
 
-    bool hasFinished();
+        bool hasFinished() {
+            return _finished;
+        }
 
-    void wait();
+        void wait() {
+            if(_finished) return;
+            std::unique_lock lock(_valueMutex);
+            _valueCondition.wait(lock);
+        }
 
-    const std::optional<Result>& getResult() {
-        return _result;
-    }
+        const std::optional<Result>& getResult() {
+            return _result;
+        }
 
-    void setResult(Result&& result) { {
-            std::lock_guard lock(_valueMutex);
+        void setResult(Result&& result) {
+            std::unique_lock lock(_valueMutex);
             _result = std::move(result);
             _finished = true;
+            _valueCondition.notify_all();
         }
-        _valueCondition.notify_all();
-    }
-};
-
-template<>
-class Task<void> {
-    bool hasFinished();
-
-    void wait();
-};
-
-class TaskRunner {
-    struct AsyncTask {
-        std::thread thread;
-        std::atomic_bool finished = false;
     };
 
-    std::vector<std::unique_ptr<AsyncTask>> _tasks;
-    std::vector<std::function<void()>> _mainThreadTasks;
-    std::mutex _mutex, _mainThreadMutex;
+    template<>
+    class Task<void> {
+        std::atomic_bool _finished;
+        std::mutex _valueMutex;
+        std::condition_variable _valueCondition;
 
-public:
-    TaskRunner();
+    public:
+        Task() = default;
 
-    void runOnMainThread(std::function<void()> task);
+        bool hasFinished() {
+            return _finished;
+        }
 
-    void flushMainThreadTasks();
+        void wait() {
+            if(_finished) return;
+            std::unique_lock lock(_valueMutex);
+            _valueCondition.wait(lock);
+        }
 
-    template<class Fn, class... Param>
-    void executeAsync(Fn&& function, Param&&... args) {
-        auto task = std::make_unique<AsyncTask>();
-        auto raw = task.get();
-        task->thread = std::thread([=] {
-            function(args...);
-            raw->finished = true;
-        });
-        _mutex.lock();
-        std::erase_if(_tasks, [](const std::unique_ptr<AsyncTask>& t) {
-            if (t->finished) {
-                t->thread.join();
-                return true;
-            }
-            return false;
-        });
-        _tasks.push_back(std::move(task));
-        _mutex.unlock();
-    }
+        void finish() {
+            _finished = true;
+            _valueCondition.notify_all();
+        }
+    };
 
-    void joinAsyncTasks();
-};
+    class TaskRunner {
+        std::vector<std::thread> _workers;
+        std::queue<std::function<void()>> _pendingTasks;
+        std::vector<std::function<void()>> _mainThreadTasks;
+        std::vector<Coroutine> _coroutines;
+        std::mutex _mutex, _coroutineMutex, _mainThreadMutex;
+        std::condition_variable _pendingTasksCondition;
 
+        bool _stop;
+
+    public:
+        TaskRunner();
+
+        ~TaskRunner();
+
+        void shutdown();
+
+        void runOnMainThread(std::function<void()> task);
+
+        void flushMainThreadTasks();
+
+        void launchCoroutine(Coroutine&& coroutine);
+
+        template<typename Return, typename... Params>
+        std::shared_ptr<Task<Return>>
+        executeAsync(const std::function<Return(Params...)>& function,
+                     Params... args) {
+            if(_stop) return nullptr;
+            std::shared_ptr<Task<Return>> task = std::make_shared<Task<
+                Return>>();
+
+
+            std::function<void()> run = [
+                        task,
+                        function,
+                        ...a = std::move(args)
+                    ] {
+                if constexpr(std::is_void_v<Return>) {
+                    function(a...);
+                    task->finish();
+                } else {
+                    task->setResult(function(a...));
+                }
+            };
+
+            std::unique_lock lock(_mutex);
+            _pendingTasks.push(std::move(run));
+            _pendingTasksCondition.notify_one();
+
+            return task;
+        }
+
+        template<typename Return, typename... Params>
+        std::shared_ptr<Task<Return>>
+        executeAsync(const std::function<Return(Params...)>& function,
+                     Params&&... args) {
+            if(_stop) return nullptr;
+            std::shared_ptr<Task<Return>> task = std::make_shared<Task<
+                Return>>();
+
+
+            std::function<void()> run = [
+                        task,
+                        function,
+                        ...a = std::forward<Params>(args)
+                    ] {
+                if constexpr(std::is_void_v<Return>) {
+                    function(a...);
+                    task->finish();
+                } else {
+                    task->setResult(function(a...));
+                }
+            };
+
+            std::unique_lock lock(_mutex);
+            _pendingTasks.push(std::move(run));
+            _pendingTasksCondition.notify_one();
+
+            return task;
+        }
+    };
+}
 
 #endif //TASKRUNNER_H

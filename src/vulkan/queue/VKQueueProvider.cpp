@@ -3,6 +3,7 @@
 //
 
 #include "VKQueueProvider.h"
+#include <iostream>
 
 namespace neon::vulkan {
     void VKQueueProvider::freeQueue(uint32_t family, uint32_t index) {
@@ -162,8 +163,7 @@ namespace neon::vulkan {
                 entry->second.amount++;
                 return true;
             }
-            std::cerr << "[NEON] Cannot mark thread " << thread
-                    << " on family " << family <<
+            std::cerr << "[NEON] Cannot mark family " << family <<
                     ". Another queue index is assigned." << std::endl;
             return false;
         }

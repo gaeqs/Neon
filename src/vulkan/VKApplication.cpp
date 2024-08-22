@@ -368,7 +368,7 @@ namespace neon::vulkan {
 
 
     void VKApplication::finishLoop() {
-        _application->getTaskRunner().joinAsyncTasks();
+        _application->getTaskRunner().shutdown();
         vkDeviceWaitIdle(_device->getRaw());
 
         // Free the command pool here and not in the
