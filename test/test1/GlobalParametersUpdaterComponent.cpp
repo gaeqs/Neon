@@ -10,7 +10,6 @@ void GlobalParametersUpdaterComponent::onStart() {
 }
 
 void GlobalParametersUpdaterComponent::onUpdate(float deltaTime) {
-        std::cout << "LOOP" << std::endl;
     auto& camera = getRoom()->getCamera();
     getApplication()->getRender()
             ->getGlobalUniformBuffer().uploadData<Matrices>(

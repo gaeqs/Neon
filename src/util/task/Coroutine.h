@@ -43,9 +43,9 @@ namespace neon {
                 _exception = std::current_exception();
             }
 
-            std::suspend_always yield_value(CoroutineWaitReason* reason) {
-                _currentWaitReason = std::unique_ptr<CoroutineWaitReason>(
-                    reason);
+            template<typename T>
+            std::suspend_always yield_value(const T& reason) {
+                _currentWaitReason = std::make_unique<T>(reason);
                 return {};
             }
 

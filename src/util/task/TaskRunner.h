@@ -20,11 +20,20 @@
 namespace neon {
     template<typename Result>
     class Task {
+        friend class TaskRunner;
+
         std::atomic_bool _finished;
         std::mutex _valueMutex;
         std::condition_variable _valueCondition;
 
         std::optional<Result> _result;
+
+        void setResult(Result&& result) {
+            std::unique_lock lock(_valueMutex);
+            _result = std::move(result);
+            _finished = true;
+            _valueCondition.notify_all();
+        }
 
     public :
         Task() :
@@ -44,20 +53,20 @@ namespace neon {
         const std::optional<Result>& getResult() {
             return _result;
         }
-
-        void setResult(Result&& result) {
-            std::unique_lock lock(_valueMutex);
-            _result = std::move(result);
-            _finished = true;
-            _valueCondition.notify_all();
-        }
     };
 
     template<>
     class Task<void> {
+        friend class TaskRunner;
+
         std::atomic_bool _finished;
         std::mutex _valueMutex;
         std::condition_variable _valueCondition;
+
+        void finish() {
+            _finished = true;
+            _valueCondition.notify_all();
+        }
 
     public:
         Task() = default;
@@ -70,11 +79,6 @@ namespace neon {
             if(_finished) return;
             std::unique_lock lock(_valueMutex);
             _valueCondition.wait(lock);
-        }
-
-        void finish() {
-            _finished = true;
-            _valueCondition.notify_all();
         }
     };
 
@@ -100,6 +104,33 @@ namespace neon {
         void flushMainThreadTasks();
 
         void launchCoroutine(Coroutine&& coroutine);
+
+        template<typename Return>
+       std::shared_ptr<Task<Return>>
+       executeAsync(const std::function<Return()>& function) {
+            if(_stop) return nullptr;
+            std::shared_ptr<Task<Return>> task = std::make_shared<Task<
+                Return>>();
+
+
+            std::function<void()> run = [
+                        task,
+                        function
+                    ] {
+                if constexpr(std::is_void_v<Return>) {
+                    function();
+                    task->finish();
+                } else {
+                    task->setResult(function());
+                }
+            };
+
+            std::unique_lock lock(_mutex);
+            _pendingTasks.push(std::move(run));
+            _pendingTasksCondition.notify_one();
+
+            return task;
+        }
 
         template<typename Return, typename... Params>
         std::shared_ptr<Task<Return>>

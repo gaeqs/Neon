@@ -324,14 +324,6 @@ std::shared_ptr<Texture> loadSkybox(Room* room) {
                                            "skybox", PATHS, info);
 }
 
-
-neon::Coroutine testCoroutine(std::string print) {
-    while(true) {
-        std::cout << print << std::endl;
-        co_yield new WaitForSeconds(2.0f);
-    } 
-}
-
 std::shared_ptr<Room> getTestRoom(Application* application) {
     auto room = std::make_shared<Room>(application);
 
@@ -383,25 +375,17 @@ std::shared_ptr<Room> getTestRoom(Application* application) {
 
     loadModels(application, room.get(), fpFrameBuffer);
 
-
-    application->getTaskRunner().launchCoroutine(
-        testCoroutine("Hello from coroutine!"));
-
     return room;
 }
 
 int main() {
     std::srand(std::time(nullptr));
 
-    std::cout << "A" << std::endl;
     Application application(std::make_unique<vulkan::VKApplication>(
         "Neon", WIDTH, HEIGHT));
-    std::cout << "B" << std::endl;
 
     application.init();
-    std::cout << "C" << std::endl;
     application.setRoom(getTestRoom(&application));
-    std::cout << "D" << std::endl;
 
     auto loopResult = application.startGameLoop();
     if(loopResult.isOk()) {
