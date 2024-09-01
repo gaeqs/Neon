@@ -14,6 +14,13 @@ neon::Coroutine<int> coroutine1() {
     co_return 42;
 }
 
+neon::Coroutine<int> coroutineCancel() {
+    co_yield neon::WaitForNextFrame();
+
+    FAIL("Coroutine has been resumed");
+    co_return 42;
+}
+
 
 struct CoroutineHolder {
     int value;
@@ -24,7 +31,6 @@ struct CoroutineHolder {
         co_yield neon::WaitForNextFrame();
         co_return value;
     }
-
 };
 
 TEST_CASE("Coroutine", "[coroutine]") {
@@ -75,4 +81,31 @@ TEST_CASE("Coroutine struct", "[coroutine]") {
     REQUIRE(task->hasFinished());
     REQUIRE(task->getResult().has_value());
     REQUIRE(task->getResult() == 20);
+}
+
+TEST_CASE("Coroutine cancel", "[coroutine]") {
+    neon::TaskRunner runner;
+
+    neon::Coroutine<int> coroutine = coroutineCancel();
+    auto task = coroutine.asTask();
+
+    REQUIRE(coroutine.isValid());
+    runner.launchCoroutine(std::move(coroutine));
+    REQUIRE(!coroutine.isValid());
+
+    REQUIRE(!task->hasFinished());
+    REQUIRE(!task->isCancelled());
+    REQUIRE(!task->getResult().has_value());
+
+    runner.flushMainThreadTasks(); // co_yield
+    REQUIRE(!task->hasFinished());
+    REQUIRE(!task->isCancelled());
+    REQUIRE(!task->getResult().has_value());
+
+    task->cancel();
+
+    runner.flushMainThreadTasks(); // co_return
+    REQUIRE(!task->hasFinished());
+    REQUIRE(task->isCancelled());
+    REQUIRE(!task->getResult().has_value());
 }

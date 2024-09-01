@@ -29,26 +29,21 @@ namespace neon {
      */
     template<typename Result>
     class Task {
-        std::atomic_bool _finished;
         std::mutex _valueMutex;
         std::condition_variable _valueCondition;
 
         std::optional<Result> _result;
+        std::atomic_bool _finished;
+        std::atomic_bool _cancelled;
 
     public :
-        void setResult(Result&& result) {
-            std::unique_lock lock(_valueMutex);
-            _result = std::move(result);
-            _finished = true;
-            _valueCondition.notify_all();
-        }
-
         /**
         * Creates a Task instance.
         */
         Task() :
+            _result(),
             _finished(false),
-            _result() {}
+            _cancelled(false) {}
 
         /**
          * Returns whether this task has finished.
@@ -59,15 +54,48 @@ namespace neon {
         }
 
         /**
+         * Returns whether this task was cancelled.
+         * @return whether this task was cancelled.
+         */
+        [[nodiscard]] bool isCancelled() const {
+            return _cancelled;
+        }
+
+        /**
          * Suspends the current thread until
-         * this task finishes.
+         * this task finishes or is cancelled.
          * <p>
          * If this task has already finished, this method does nothing.
          */
         void wait() {
-            if(_finished) return;
             std::unique_lock lock(_valueMutex);
+            if(_finished || _cancelled) return;
             _valueCondition.wait(lock);
+        }
+
+        /**
+         * Sets the result of the task.
+         * @param result the result.
+         */
+        void setResult(Result&& result) {
+            std::unique_lock lock(_valueMutex);
+            if(_finished || _cancelled) return;
+            _result = std::move(result);
+            _finished = true;
+            _valueCondition.notify_all();
+        }
+
+        /**
+         * Cancels the execution of this task.
+         * If the task was already running, this
+         * function won't be able to stop the execution,
+         * but it will stop the assignment of the result.
+         */
+        void cancel() {
+            std::unique_lock lock(_valueMutex);
+            if(_finished | _cancelled) return;
+            _cancelled = true;
+            _valueCondition.notify_all();
         }
 
         /**
@@ -108,16 +136,12 @@ namespace neon {
     */
     template<>
     class Task<void> {
-        std::atomic_bool _finished;
         std::mutex _valueMutex;
         std::condition_variable _valueCondition;
+        std::atomic_bool _finished;
+        std::atomic_bool _cancelled;
 
     public:
-        void finish() {
-            _finished = true;
-            _valueCondition.notify_all();
-        }
-
         /**
          * Creates a Task instance.
          */
@@ -128,8 +152,39 @@ namespace neon {
          * Returns whether this task has finished.
          * @return whether this task has finished.
          */
-        bool hasFinished() const {
+        [[nodiscard]] bool hasFinished() const {
             return _finished;
+        }
+
+        /**
+         * Returns whether this task was cancelled.
+         * @return whether this task was cancelled.
+         */
+        [[nodiscard]] bool isCancelled() const {
+            return _cancelled;
+        }
+
+        /**
+         * Cancels the execution of this task.
+         * If the task was already running, this
+         * function won't be able to stop the execution,
+         * but it will stop the assignment of the result.
+         */
+        void cancel() {
+            std::unique_lock lock(_valueMutex);
+            if(_finished | _cancelled) return;
+            _cancelled = true;
+            _valueCondition.notify_all();
+        }
+
+        /**
+         * Marks this task as finished.
+         */
+        void finish() {
+            std::unique_lock lock(_valueMutex);
+            if(_finished | _cancelled) return;
+            _finished = true;
+            _valueCondition.notify_all();
         }
 
         /**
@@ -139,8 +194,8 @@ namespace neon {
          * If this task has already finished, this method does nothing.
          */
         void wait() {
-            if(_finished) return;
             std::unique_lock lock(_valueMutex);
+            if(_finished | _cancelled) return;
             _valueCondition.wait(lock);
         }
     };
@@ -237,6 +292,7 @@ namespace neon {
                         function,
                         t = std::move(tuple)
                     ] {
+                if(task->isCancelled()) return;
                 Tu tu = std::move(*t);
                 if constexpr(std::is_void_v<Return>) {
                     function(std::move(std::get<decltype(args)>(tu))...);
@@ -277,6 +333,7 @@ namespace neon {
                         function,
                         t = std::move(tuple)
                     ] {
+                if(task->isCancelled()) return;
                 Tu tu = std::move(*t);
                 if constexpr(std::is_void_v<Return>) {
                     function(std::move(std::get<decltype(args)>(tu))...);

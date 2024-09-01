@@ -111,6 +111,10 @@ namespace neon {
             }
         }
 
+        [[nodiscard]] bool isCancelled() const {
+            return _handler.promise()._task->isCancelled();
+        }
+
         [[nodiscard]] bool isReady() const override {
             if(isDone()) return false;
             auto& reason = _handler.promise()._currentWaitReason;
@@ -118,15 +122,16 @@ namespace neon {
         }
 
         [[nodiscard]] bool isDone() const override {
-            return !_valid || _handler.done();
+            return !_valid || _handler.done() || isCancelled();
         }
+
 
         [[nodiscard]] bool isValid() const override {
             return _valid;
         }
 
         void launch() const override {
-            if(!_valid || _handler.done()) return;
+            if(isDone()) return;
             _handler();
         }
 
@@ -229,6 +234,10 @@ namespace neon {
             }
         }
 
+        [[nodiscard]] bool isCancelled() const {
+            return _handler.promise()._task->isCancelled();
+        }
+
         [[nodiscard]] bool isReady() const override {
             if(isDone()) return false;
             auto& reason = _handler.promise()._currentWaitReason;
@@ -236,7 +245,7 @@ namespace neon {
         }
 
         [[nodiscard]] bool isDone() const override {
-            return !_valid || _handler.done();
+            return !_valid || _handler.done() || isCancelled();
         }
 
         [[nodiscard]] bool isValid() const override {
@@ -244,7 +253,7 @@ namespace neon {
         }
 
         void launch() const override {
-            if(!_valid || _handler.done()) return;
+            if(isDone()) return;
             _handler();
         }
 
@@ -293,7 +302,6 @@ namespace neon {
      */
     class WaitForNextFrame : public CoroutineWaitReason {
     public:
-
         /**
          * Suspends the coroutine and resumes it the next frame
          */
@@ -311,7 +319,6 @@ namespace neon {
         std::function<bool()> _predicate;
 
     public:
-
         /**
          * Suspends the coroutine until the given predicate returns true.
          */
@@ -329,7 +336,6 @@ namespace neon {
         std::function<bool()> _predicate;
 
     public:
-
         /**
          * Suspends the coroutine until the given predicate returns false.
          */
