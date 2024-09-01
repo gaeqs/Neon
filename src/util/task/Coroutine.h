@@ -86,7 +86,6 @@ namespace neon {
             }
 
             void return_value(auto value) {
-                std::cout << typeid(decltype(value)).name() << std::endl;
                 if constexpr(!std::is_void_v<Return>) {
                     _task->setResult(std::move(value));
                 }
