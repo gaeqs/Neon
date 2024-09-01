@@ -5,6 +5,7 @@
 #include "Coroutine.h"
 
 namespace neon {
+
     WaitForSeconds::WaitForSeconds(float seconds) {
         auto now = std::chrono::system_clock::now();
 

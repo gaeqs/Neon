@@ -84,4 +84,8 @@ namespace neon {
     AssetCollection& Component::getAssets() const {
         return getRoom()->getApplication()->getAssets();
     }
+
+    TaskRunner& Component::getTaskRunner() const {
+        return getRoom()->getApplication()->getTaskRunner();
+    }
 }

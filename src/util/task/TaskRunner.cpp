@@ -8,7 +8,7 @@
 
 namespace neon {
     TaskRunner::TaskRunner(): _stop(false) {
-        uint32_t threads = std::min(std::thread::hardware_concurrency(), 2u) -
+        uint32_t threads = std::max(std::thread::hardware_concurrency(), 2u) -
                            1u;
         _workers.reserve(threads);
 
@@ -50,25 +50,21 @@ namespace neon {
         }
     }
 
-    void TaskRunner::runOnMainThread(std::function<void()> task) {
-        std::unique_lock lock(_mainThreadMutex);
-        _mainThreadTasks.push_back(std::move(task));
-    }
-
     void TaskRunner::flushMainThreadTasks() {
+        if(_stop) return;
         //
         {
             std::unique_lock lock(_coroutineMutex);
             std::erase_if(
                 _coroutines,
-                [](const Coroutine& it) {
-                    return it.isDone();
+                [](const auto& it) {
+                    return it->isDone();
                 }
             );
 
             for(auto& coroutine: _coroutines) {
-                if(coroutine.isReady()) {
-                    coroutine.launch();
+                if(coroutine->isReady()) {
+                    coroutine->launch();
                 }
             }
         }
@@ -85,10 +81,5 @@ namespace neon {
             }
             _mainThreadTasks.pop_back();
         }
-    }
-
-    void TaskRunner::launchCoroutine(Coroutine&& coroutine) {
-        std::unique_lock lock(_coroutineMutex);
-        _coroutines.push_back(std::move(coroutine));
     }
 }

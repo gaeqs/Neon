@@ -2,8 +2,8 @@
 // Created by grial on 19/10/22.
 //
 
-#ifndef RVTRACKING_ROOM_H
-#define RVTRACKING_ROOM_H
+#ifndef NEON_ROOM_H
+#define NEON_ROOM_H
 
 #include <unordered_map>
 #include <unordered_set>
@@ -124,4 +124,4 @@ namespace neon {
 }
 
 
-#endif //RVTRACKING_ROOM_H
+#endif //NEON_ROOM_H
