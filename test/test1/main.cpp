@@ -181,8 +181,8 @@ void sansLoadThread(Application* application,
 
     std::cout << "SANS UPLOADED!" << std::endl;
 
-    application->getTaskRunner().runOnMainThread(
-        [application, sansModel]() {
+    application->getTaskRunner().executeOnMainThread(
+        [application, sansModel] {
             constexpr int AMOUNT = 1024 * 1;
 
             auto room = application->getRoom();

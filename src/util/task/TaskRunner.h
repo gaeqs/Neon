@@ -278,10 +278,10 @@ namespace neon {
          * @param args the arguments passed to the function-
          * @return the task that monitors the state of the function.
          */
-        template<typename Return, typename... FParams>
-        std::shared_ptr<Task<Return>>
-        executeOnMainThread(std::function<Return(FParams...)>& function,
-                            auto... args) {
+        auto executeOnMainThread(auto function,
+                                 auto... args) ->
+            std::shared_ptr<Task<decltype(function(args...))>> {
+            using Return = decltype(function(args...));
             using Tu = std::tuple<decltype(args)...>;
             if(_stop) return nullptr;
             std::shared_ptr task = std::make_shared<Task<Return>>();
@@ -319,10 +319,10 @@ namespace neon {
          * @param args the arguments passed to the function-
          * @return the task that monitors the state of the function.
          */
-        template<typename Return, typename... FParams>
-        std::shared_ptr<Task<Return>>
-        executeAsync(std::function<Return(FParams...)>& function,
-                     auto... args) {
+        auto executeAsync(auto function,
+                          auto... args) ->
+            std::shared_ptr<Task<decltype(function(args...))>> {
+            using Return = decltype(function(args...));
             using Tu = std::tuple<decltype(args)...>;
             if(_stop) return nullptr;
             std::shared_ptr task = std::make_shared<Task<Return>>();

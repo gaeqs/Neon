@@ -144,7 +144,7 @@ namespace neon {
          * result of the coroutine.
          * @return the neon::Task representing this coroutine.
          */
-        const std::shared_ptr<Task<Return>>& asTask() {
+        const std::shared_ptr<Task<Return>>& asTask() const {
             return _handler.promise()._task;
         }
 
@@ -264,7 +264,7 @@ namespace neon {
          *
          * @return the neon::Task representing this coroutine.
          */
-        const std::shared_ptr<Task<void>>& asTask() {
+        const std::shared_ptr<Task<void>>& asTask() const {
             return _handler.promise()._task;
         }
 

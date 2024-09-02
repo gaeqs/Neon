@@ -852,6 +852,8 @@ namespace neon::vulkan {
         }
 
         cleanupSwapChain();
+        _graphicQueue = VKQueueHolder();
+        _presentQueue = VKQueueHolder();
         delete _device;
         vkDestroySurfaceKHR(_instance, _surface, nullptr);
 

@@ -7,7 +7,7 @@
 
 namespace neon::vulkan {
     void VKQueueProvider::freeQueue(uint32_t family, uint32_t index) {
-        if (_availableQueues.size() <= family) {
+        if(_availableQueues.size() <= family) {
             std::cerr << "[NEON] Invalid queue family index: " << family <<
                     "." << std::endl;
             return;
@@ -19,18 +19,16 @@ namespace neon::vulkan {
         // Check if the thread is using a queue of the same family
         auto& map = _usedQueues[family];
         auto entry = map.find(threadId);
-        if (entry != map.end()) {
-            if (entry->second.amount < 2) {
+        if(entry != map.end()) {
+            if(entry->second.amount < 2) {
                 map.erase(entry);
-            }
-            else {
+                _availableQueues[family].push_back(index);
+                _conditions[family].notify_one();
+                _anyCondition.notify_one();
+            } else {
                 entry->second.amount--;
             }
         }
-
-        _availableQueues[family].push_back(index);
-        _conditions[family].notify_one();
-        _anyCondition.notify_one();
     }
 
     VKQueueProvider::
@@ -43,10 +41,10 @@ namespace neon::vulkan {
           _conditions(_families.getFamilies().size()) {
         _usedQueues.resize(_families.getFamilies().size());
         _availableQueues.reserve(presentQueues.size());
-        for (uint32_t count: presentQueues) {
+        for(uint32_t count: presentQueues) {
             auto& vec = _availableQueues.emplace_back();
             vec.reserve(count);
-            for (uint32_t i = 0; i < count; ++i) {
+            for(uint32_t i = 0; i < count; ++i) {
                 vec.push_back(i);
             }
         }
@@ -61,20 +59,19 @@ namespace neon::vulkan {
     }
 
     VKQueueHolder VKQueueProvider::fetchQueue(uint32_t familyIndex) {
-        if (_availableQueues.size() <= familyIndex) {
+        if(_availableQueues.size() <= familyIndex) {
             std::cerr << "[NEON] Invalid queue family index: " << familyIndex <<
                     "." << std::endl;
             return {};
         }
 
         std::thread::id threadId = std::this_thread::get_id();
-
         std::unique_lock lock(_mutexes[familyIndex]);
 
         // Check if the thread is using a queue of the same family
         auto& map = _usedQueues[familyIndex];
         auto entry = map.find(threadId);
-        if (entry != map.end()) {
+        if(entry != map.end()) {
             entry->second.amount++;
             return {
                 this,
@@ -106,21 +103,21 @@ namespace neon::vulkan {
         std::vector<const VKQueueFamily*> families;
         _families.getAllCompatibleQueueFamilies(capabilities, families);
 
-        if (families.empty()) return {};
-        if (families.size() == 1) return fetchQueue(families[0]->getIndex());
+        if(families.empty()) return {};
+        if(families.size() == 1) return fetchQueue(families[0]->getIndex());
 
         std::thread::id threadId = std::this_thread::get_id();
         std::unique_lock lock(_anyMutex);
 
-        while (true) {
-            for (auto& family: families) {
+        while(true) {
+            for(auto& family: families) {
                 uint32_t familyIndex = family->getIndex();
                 std::unique_lock queueLock(_mutexes[familyIndex]);
 
                 // Check if the thread is using a queue of the same family
                 auto& map = _usedQueues[familyIndex];
                 auto entry = map.find(threadId);
-                if (entry != map.end()) {
+                if(entry != map.end()) {
                     entry->second.amount++;
                     return {
                         this,
@@ -131,7 +128,7 @@ namespace neon::vulkan {
                 }
 
                 auto& queues = _availableQueues[familyIndex];
-                if (!queues.empty()) {
+                if(!queues.empty()) {
                     uint32_t index = queues.back();
                     queues.pop_back();
 
@@ -148,7 +145,7 @@ namespace neon::vulkan {
 
     bool VKQueueProvider::markUsed(std::thread::id thread, uint32_t family,
                                    uint32_t index) {
-        if (_availableQueues.size() <= family) {
+        if(_availableQueues.size() <= family) {
             std::cerr << "[NEON] Invalid queue family index: " << family <<
                     "." << std::endl;
             return false;
@@ -158,8 +155,8 @@ namespace neon::vulkan {
 
         auto& map = _usedQueues[family];
         auto entry = map.find(thread);
-        if (entry != map.end()) {
-            if (entry->second.index == index) {
+        if(entry != map.end()) {
+            if(entry->second.index == index) {
                 entry->second.amount++;
                 return true;
             }
@@ -171,7 +168,7 @@ namespace neon::vulkan {
         auto& available = _availableQueues[family];
         auto pos = std::ranges::find(available, index);
 
-        if (pos == available.end()) {
+        if(pos == available.end()) {
             std::cerr << "[NEON] Queue " << index
                     << " of family " << family <<
                     ". Is already being used." << std::endl;
@@ -192,8 +189,7 @@ namespace neon::vulkan {
           _queue(VK_NULL_HANDLE),
           _family(0),
           _index(0),
-          _valid(false) {
-    }
+          _valid(false) {}
 
     VKQueueHolder::VKQueueHolder(VKQueueProvider* provider,
                                  VkQueue queue,
@@ -203,8 +199,7 @@ namespace neon::vulkan {
           _queue(queue),
           _family(family),
           _index(index),
-          _valid(true) {
-    }
+          _valid(true) {}
 
     VKQueueHolder::VKQueueHolder(VKQueueHolder&& move) noexcept
         : _provider(move._provider),
@@ -216,7 +211,7 @@ namespace neon::vulkan {
     }
 
     VKQueueHolder::~VKQueueHolder() {
-        if (_valid) {
+        if(_valid) {
             _provider->freeQueue(_family, _index);
         }
     }

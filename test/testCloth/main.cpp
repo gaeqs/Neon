@@ -47,7 +47,7 @@ std::shared_ptr<ShaderProgram> createShader(Application* application,
     shader->addShader(ShaderType::FRAGMENT, defaultFrag);
 
     auto result = shader->compile();
-    if (result.has_value()) {
+    if(result.has_value()) {
         std::cerr << result.value() << std::endl;
         throw std::runtime_error(result.value());
     }
@@ -62,13 +62,13 @@ std::shared_ptr<FrameBuffer> initRender(Room* room) {
     // In this application, we have a buffer of global parameters
     // and a skybox.
     std::vector<ShaderUniformBinding> globalBindings = {
-            {UniformBindingType::BUFFER, sizeof(Matrices)},
-            {UniformBindingType::IMAGE,  0}
+        {UniformBindingType::BUFFER, sizeof(Matrices)},
+        {UniformBindingType::IMAGE, 0}
     };
 
     // The description of the global uniforms.
     auto globalDescriptor = std::make_shared<ShaderUniformDescriptor>(
-            app, "default", globalBindings);
+        app, "default", globalBindings);
 
     // The render of the application.
     // We should set the render to the application before
@@ -79,9 +79,9 @@ std::shared_ptr<FrameBuffer> initRender(Room* room) {
 
     // The format of the first frame buffer.
     std::vector<FrameBufferTextureCreateInfo> frameBufferFormats = {
-            TextureFormat::R8G8B8A8,
-            TextureFormat::R16FG16F, // NORMAL XY
-            TextureFormat::R16FG16F // NORMAL Z / SPECULAR
+        TextureFormat::R8G8B8A8,
+        TextureFormat::R16FG16F, // NORMAL XY
+        TextureFormat::R16FG16F // NORMAL Z / SPECULAR
     };
 
     // Here we create the first frame buffer.
@@ -89,20 +89,21 @@ std::shared_ptr<FrameBuffer> initRender(Room* room) {
     // to the render as a render pass.
     // We'll use the default strategy for the rendering.
     auto fpFrameBuffer = std::make_shared<SimpleFrameBuffer>(
-            room->getApplication(), frameBufferFormats, true);
+        room->getApplication(), frameBufferFormats, true);
 
     render->addRenderPass(std::make_shared<DefaultRenderPassStrategy>(
-            fpFrameBuffer));
+        fpFrameBuffer));
 
     // Here we create the second frame buffer.
     // Just like the first frame buffer, we define the output,
     // create the frame buffer and add a render pass.
     std::vector<FrameBufferTextureCreateInfo> screenFormats = {
-            TextureFormat::R8G8B8A8};
+        TextureFormat::R8G8B8A8
+    };
     auto screenFrameBuffer = std::make_shared<SimpleFrameBuffer>(
-            room->getApplication(), screenFormats, false);
+        room->getApplication(), screenFormats, false);
     render->addRenderPass(std::make_shared<DefaultRenderPassStrategy>(
-            screenFrameBuffer));
+        screenFrameBuffer));
 
 
     // Here we create a model that renders the screen on
@@ -111,21 +112,23 @@ std::shared_ptr<FrameBuffer> initRender(Room* room) {
     // output textures of the first render pass.
 
     auto screenShader = createShader(
-            app, "screen", "screen.vert", "screen.frag");
+        app, "screen", "screen.vert", "screen.frag");
 
     auto textures = fpFrameBuffer->getTextures();
 
     // We can also create a GraphicComponent that handles
     // an instance of the model.
     // This option is more direct.
-    auto screenModel = deferred_utils::createScreenModel(app, "screen model");
+    auto screenModel = deferred_utils::createScreenModel(app,
+        ModelCreateInfo(),
+        "screen model");
 
     std::shared_ptr<Material> screenMaterial = Material::create(
-            room->getApplication(), "Screen Model",
-            screenFrameBuffer, screenShader,
-            deferred_utils::DeferredVertex::getDescription(),
-            InputDescription(0, InputRate::INSTANCE),
-            {}, textures);
+        room->getApplication(), "Screen Model",
+        screenFrameBuffer, screenShader,
+        deferred_utils::DeferredVertex::getDescription(),
+        InputDescription(0, InputRate::INSTANCE),
+        {}, textures);
     screenModel->addMaterial(screenMaterial);
 
     auto screenModelGO = room->newGameObject();
@@ -143,19 +146,19 @@ std::shared_ptr<FrameBuffer> initRender(Room* room) {
     // split the screen render in two frame buffers.
     auto swapFrameBuffer = std::make_shared<SwapChainFrameBuffer>(room, false);
     render->addRenderPass(std::make_shared<DefaultRenderPassStrategy>(
-            swapFrameBuffer));
+        swapFrameBuffer));
 
     return fpFrameBuffer;
 }
 
 std::shared_ptr<Texture> loadSkybox(Room* room) {
     static const std::vector<std::string> PATHS = {
-            "resource/Skybox/right.jpg",
-            "resource/Skybox/left.jpg",
-            "resource/Skybox/top.jpg",
-            "resource/Skybox/bottom.jpg",
-            "resource/Skybox/front.jpg",
-            "resource/Skybox/back.jpg",
+        "resource/Skybox/right.jpg",
+        "resource/Skybox/left.jpg",
+        "resource/Skybox/top.jpg",
+        "resource/Skybox/bottom.jpg",
+        "resource/Skybox/front.jpg",
+        "resource/Skybox/back.jpg",
     };
 
     TextureCreateInfo info;
@@ -163,15 +166,14 @@ std::shared_ptr<Texture> loadSkybox(Room* room) {
     info.image.layers = 6;
 
     return Texture::createTextureFromFiles(
-            room->getApplication(),
-            "skybox",
-            PATHS,
-            info
+        room->getApplication(),
+        "skybox",
+        PATHS,
+        info
     );
 }
 
 std::shared_ptr<Room> getTestRoom(Application* application) {
-
     auto room = std::make_shared<Room>(application);
     auto fpFrameBuffer = initRender(room.get());
 
@@ -182,7 +184,8 @@ std::shared_ptr<Room> getTestRoom(Application* application) {
 
     auto cameraController = room->newGameObject();
     cameraController->newComponent<GlobalParametersUpdaterComponent>();
-    auto cameraMovement = cameraController->newComponent<CameraMovementComponent>();
+    auto cameraMovement = cameraController->newComponent<
+        CameraMovementComponent>();
     cameraMovement->setSpeed(10.0f);
 
     auto imgui = room->newGameObject();
@@ -202,8 +205,9 @@ std::shared_ptr<Room> getTestRoom(Application* application) {
 
     MaterialCreateInfo clothMaterialInfo(fpFrameBuffer, shader);
     clothMaterialInfo.descriptions.uniform = materialDescriptor;
-    clothMaterialInfo.descriptions.instance = DefaultInstancingData::getInstancingDescription();
-    clothMaterialInfo.descriptions.vertex = TestVertex::getDescription();
+    clothMaterialInfo.descriptions.instance.push_back(
+            DefaultInstancingData::getInstancingDescription());
+    clothMaterialInfo.descriptions.vertex.push_back(TestVertex::getDescription());
     clothMaterialInfo.rasterizer.polygonMode = neon::PolygonMode::FILL;
     clothMaterialInfo.rasterizer.cullMode = neon::CullMode::NONE;
 
@@ -212,7 +216,7 @@ std::shared_ptr<Room> getTestRoom(Application* application) {
 
     auto physicManagerGO = room->newGameObject();
     auto physicsManager = physicManagerGO->newComponent<PhysicsManager>(
-            IntegrationMode::IMPLICIT);
+        IntegrationMode::IMPLICIT);
 
     auto cloth = room->newGameObject();
     cloth->setName("Cloth");
@@ -228,20 +232,20 @@ int main() {
     std::srand(std::time(nullptr));
 
     Application application(std::make_unique<vulkan::VKApplication>(
-            "Neon", WIDTH, HEIGHT));
+        "Neon", WIDTH, HEIGHT));
 
     application.init();
     application.setRoom(getTestRoom(&application));
 
     auto loopResult = application.startGameLoop();
-    if (loopResult.isOk()) {
+    if(loopResult.isOk()) {
         std::cout << "[APPLICATION]\tApplication closed. "
-                  << loopResult.getResult() << " frames generated."
-                  << std::endl;
+                << loopResult.getResult() << " frames generated."
+                << std::endl;
     } else {
         std::cout << "[APPLICATION]\tUnexpected game loop error: "
-                  << loopResult.getError()
-                  << std::endl;
+                << loopResult.getError()
+                << std::endl;
     }
 
     application.setRoom(nullptr);
