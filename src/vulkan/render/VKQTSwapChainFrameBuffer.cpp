@@ -27,8 +27,8 @@ neon::vulkan::VKQTSwapChainFrameBuffer::VKQTSwapChainFrameBuffer(
     ImGui_ImplVulkan_InitInfo init_info = {};
     init_info.Instance = _qtApplication->getInstance();
     init_info.PhysicalDevice = _qtApplication->getPhysicalDevice();
-    init_info.Device = _qtApplication->getDevice();
-    init_info.Queue = _qtApplication->getGraphicsQueue().getQueue();
+    init_info.Device = _qtApplication->getDevice()->getRaw();
+    init_info.Queue = _qtApplication->getGraphicsQueue();
     init_info.DescriptorPool = _qtApplication->getImGuiPool();
     init_info.MinImageCount = 3;
     init_info.ImageCount = 3;

@@ -41,7 +41,9 @@ namespace neon {
 
 #ifdef USE_VULKAN
 
-        CommandPool(Application* application, VkCommandPool pool);
+        CommandPool(Application* application,
+                    VkCommandPool pool,
+                    VkQueue queue);
 
 #endif
 

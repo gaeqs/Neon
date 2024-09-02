@@ -6,37 +6,80 @@
 
 #include <iostream>
 
-TaskRunner::TaskRunner() = default;
+namespace neon {
+    TaskRunner::TaskRunner(): _stop(false) {
+        uint32_t threads = std::max(std::thread::hardware_concurrency(), 2u) -
+                           1u;
+        _workers.reserve(threads);
 
-void TaskRunner::runOnMainThread(std::function<void()> task) {
-    _mainThreadMutex.lock();
-    _mainThreadTasks.push_back(std::move(task));
-    _mainThreadMutex.unlock();
-}
+        for(uint32_t i = 0; i < threads; ++i) {
+            _workers.emplace_back([this] {
+                std::function<void()> task;
+                while(true) {
+                    {
+                        std::unique_lock lock(_mutex);
+                        _pendingTasksCondition.wait(lock, [this] {
+                            return !_pendingTasks.empty() || _stop;
+                        });
 
-void TaskRunner::flushMainThreadTasks() {
-    _mainThreadMutex.lock();
+                        if(_stop && _pendingTasks.empty()) return;
 
-    while (!_mainThreadTasks.empty()) {
-        try {
-            _mainThreadTasks.back()();
+                        task = std::move(_pendingTasks.front());
+                        _pendingTasks.pop();
+                    }
+                    task();
+                }
+            });
         }
-        catch (std::exception& ex) {
-            std::cerr <<
-                    "Error while executing task: " << ex.what() << "." <<
-                    std::endl;
-        }
-        _mainThreadTasks.pop_back();
     }
 
-    _mainThreadMutex.unlock();
-}
-
-void TaskRunner::joinAsyncTasks() {
-    _mutex.lock();
-    for (auto& asyncTask : _tasks) {
-        asyncTask->thread.join();
+    TaskRunner::~TaskRunner() {
+        shutdown();
     }
-    _tasks.clear();
-    _mutex.unlock();
+
+    void TaskRunner::shutdown() {
+        if(_stop) return;
+        //
+        {
+            std::unique_lock lock(_mutex);
+            _stop = true;
+        }
+        _pendingTasksCondition.notify_all();
+        for(auto& worker: _workers) {
+            worker.join();
+        }
+    }
+
+    void TaskRunner::flushMainThreadTasks() {
+        if(_stop) return;
+        //
+        {
+            std::unique_lock lock(_coroutineMutex);
+            std::erase_if(
+                _coroutines,
+                [](const auto& it) {
+                    return it->isDone();
+                }
+            );
+
+            for(auto& coroutine: _coroutines) {
+                if(coroutine->isReady()) {
+                    coroutine->launch();
+                }
+            }
+        }
+
+        std::unique_lock lock(_mainThreadMutex);
+
+        while(!_mainThreadTasks.empty()) {
+            try {
+                _mainThreadTasks.back()();
+            } catch(std::exception& ex) {
+                std::cerr <<
+                        "Error while executing task: " << ex.what() << "." <<
+                        std::endl;
+            }
+            _mainThreadTasks.pop_back();
+        }
+    }
 }

@@ -29,13 +29,13 @@ BloomRender::BloomRender(neon::Application* application,
             application, "Bloom", bindings);
 
     neon::MaterialCreateInfo downInfo(nullptr, std::move(downsamplingShader));
-    downInfo.descriptions.vertex = neon::deferred_utils
-    ::DeferredVertex::getDescription();
+    downInfo.descriptions.vertex.push_back(neon::deferred_utils
+    ::DeferredVertex::getDescription());
     downInfo.descriptions.uniform = uniformDescriptor;
 
     neon::MaterialCreateInfo upInfo(nullptr, std::move(upsamplingShader));
-    upInfo.descriptions.vertex = neon::deferred_utils
-    ::DeferredVertex::getDescription();
+    upInfo.descriptions.vertex.push_back(neon::deferred_utils
+    ::DeferredVertex::getDescription());
     upInfo.descriptions.uniform = uniformDescriptor;
 
     // Enables additive blending!

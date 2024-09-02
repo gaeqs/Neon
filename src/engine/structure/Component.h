@@ -2,10 +2,8 @@
 // Created by gaelr on 19/10/2022.
 //
 
-#ifndef RVTRACKING_COMPONENT_H
-#define RVTRACKING_COMPONENT_H
-
-#include "Asset.h"
+#ifndef NEON_COMPONENT_H
+#define NEON_COMPONENT_H
 
 #include <cstdint>
 
@@ -13,11 +11,6 @@
 #include <engine/structure/Identifiable.h>
 #include <engine/structure/IdentifiableWrapper.h>
 #include <engine/structure/ComponentRegister.h>
-
-#include <engine/io/KeyboardEvent.h>
-#include <engine/io/CursorEvent.h>
-#include <engine/io/MouseButtonEvent.h>
-#include <engine/io/ScrollEvent.h>
 
 #define REGISTER_COMPONENT(clazz, name)                         \
     namespace {                                                 \
@@ -28,8 +21,7 @@
             }                                                   \
         };                                                      \
         _##clazz##_component_register_ __##clazz##_register;    \
-    }                                                           \
-
+    }
 #define KEY_REGISTER_COMPONENT(key, clazz, name)                \
         struct _##key##_component_register_ {                   \
             _##key##_component_register_() {                    \
@@ -37,13 +29,14 @@
                     .registerComponent< clazz >( name );        \
             }                                                   \
         };                                                      \
-        _##key##_component_register_ __##key##_register;        \
+        _##key##_component_register_ __##key##_register;
 
 namespace neon {
-
     class Application;
 
     class AssetCollection;
+
+    class TaskRunner;
 
     /**
      * Represents a component inside a game object.
@@ -55,10 +48,10 @@ namespace neon {
      * using the appropriated methods.
      */
     class Component : public Identifiable {
-
         friend class GameObject;
 
-        template<class T> friend
+        template<class T>
+        friend
         class IdentifiableWrapper;
 
         uint64_t _id;
@@ -66,7 +59,6 @@ namespace neon {
         IdentifiableWrapper<GameObject> _gameObject;
 
     public:
-
         Component(const Component& component) = delete;
 
         /**
@@ -83,7 +75,7 @@ namespace neon {
          * Children of this class may override
          * this destructor.
          */
-        virtual ~Component() = default;
+        ~Component() override = default;
 
         /**
          * Returns the unique identifier of this component.
@@ -208,11 +200,32 @@ namespace neon {
             return _gameObject->getRoom();
         }
 
+        /**
+         * Shortcut to the application.
+         * @return the application where this component is running.
+         */
         [[nodiscard]] Application* getApplication() const;
 
+        /**
+         * Shortcut to the application's AssetCollection.
+         * @return the asset collection.
+         */
         [[nodiscard]] AssetCollection& getAssets() const;
 
-        inline std::string imGuiUId(const std::string& id) const {
+        /**
+         * Shortcut to the application's TaskRunner.
+         * @return the task runner.
+         */
+        [[nodiscard]] TaskRunner& getTaskRunner() const;
+
+        /**
+         * Concatenates the ImGUI identifier of this component to the
+         * given text.
+         * The identified won't be displayed in the ImGUI interface.
+         * @param id the given text.
+         * @return the concatenated string.
+         */
+        [[nodiscard]] std::string imGuiUId(const std::string& id) const {
             return id + "##" + std::to_string(_id);
         }
 
@@ -221,4 +234,4 @@ namespace neon {
 }
 
 
-#endif //RVTRACKING_COMPONENT_H
+#endif //NEON_COMPONENT_H

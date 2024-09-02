@@ -33,9 +33,9 @@ namespace neon {
         void setModel(const std::shared_ptr<Model>& model);
 
         template<class InstanceData>
-        void uploadData(const InstanceData& data) {
+        void uploadData(size_t index, const InstanceData& data) {
             if (_modelTargetId.has_value()) {
-                _model->uploadData(*_modelTargetId.value(), data);
+                _model->uploadData(*_modelTargetId.value(), index, data);
             }
         }
 

@@ -20,7 +20,6 @@
 #endif
 
 namespace neon {
-
     class Application;
 
     /**
@@ -28,19 +27,16 @@ namespace neon {
      * used by models to render an object.
      */
     class Mesh : public Asset {
-
     public:
 #ifdef USE_VULKAN
         using Implementation = vulkan::VKMesh;
 #endif
 
     private:
-
         Implementation _implementation;
         std::unordered_set<std::shared_ptr<Material>> _materials;
 
     public:
-
         Mesh(const Mesh& other) = delete;
 
         /**
@@ -82,22 +78,32 @@ namespace neon {
         [[nodiscard]] const Implementation& getImplementation() const;
 
         /**
-         * Sets the vertices and indices of this mesh.
-         * <p>
-         * This will recreate the mesh's buffers.
-         * This method doesn't require the modification flags
-         * to work.
-         * You can use this method even if this mesh is not modifiable.
-         * <p>
-         * Use this method to upload your mesh data.
-         * @tparam Vertex the vertex type.
-         * @param vertices the vertices to upload.
-         * @param indices the indices to upload.
+         * Creates new buffers and uploads all the given
+         * vertex data to the GPU.
+         * All the previous vertex data stored in this mesh
+         * will be lost.
+         *
+         * You can give several vectors with different types
+         * to this funcion. Each given vector will create
+         * a different buffer that can be accessed individually.
+         *
+         * @tparam Types the types of the data to upload.
+         * @param data the data.
          */
-        template<class Vertex>
-        void setMeshData(const std::vector<Vertex>& vertices,
-                         const std::vector<uint32_t>& indices) {
-            _implementation.uploadData(vertices, indices);
+        template<typename... Types>
+        void uploadVertices(const std::vector<Types>&... data) {
+            _implementation.uploadVertices(data...);
+        }
+
+        /**
+         * Creates new buffers and uploads all the given
+         * indices to the GPU.
+         * All the previous indices stored in this mesh
+         * will be lost.
+         * @param indices the indices.
+         */
+        void uploadIndices(const std::vector<uint32_t>& indices) {
+            _implementation.uploadIndices(indices);
         }
 
         /**
@@ -110,8 +116,10 @@ namespace neon {
          * @return the vertices.
          */
         template<class Vertex>
-        [[nodiscard]] std::vector<Vertex> getVertices() const {
-            return _implementation.getVertices<Vertex>();
+        [[nodiscard]] std::vector<Vertex>
+        getVertices(size_t index,
+                    CommandBuffer* cmd = nullptr) const {
+            return _implementation.getVertices<Vertex>(index, cmd);
         }
 
         /**
@@ -130,8 +138,10 @@ namespace neon {
          * @return whether the operation was successful.
          */
         template<class Vertex>
-        bool setVertices(const std::vector<Vertex>& vertices) const {
-            return _implementation.setVertices(vertices);
+        bool setVertices(size_t index,
+                         const std::vector<Vertex>& vertices,
+                         CommandBuffer* cmd = nullptr) const {
+            return _implementation.setVertices(index, vertices, cmd);
         }
 
         /**
@@ -145,11 +155,15 @@ namespace neon {
          * <p>
          * This method requires vertices to be modifiable.
          *
+         * @param index the index of the buffer.
          * @param data the vertices in raw format.
          * @param length the length of the data buffer.
          * @return whether the operation was successful.
          */
-        bool setVertices(const void* data, size_t length) const;
+        bool setVertices(size_t index,
+                         const void* data,
+                         size_t length,
+                         CommandBuffer* cmd = nullptr) const;
 
         /**
          * Returns the indices of this mesh.
@@ -159,7 +173,8 @@ namespace neon {
          *
          * @return the indices.
          */
-        [[nodiscard]] std::vector<uint32_t> getIndices() const;
+        [[nodiscard]] std::vector<uint32_t>
+        getIndices(CommandBuffer* cmd = nullptr) const;
 
         /**
          * Modifies the vertices of this mesh.
@@ -176,7 +191,8 @@ namespace neon {
          * @return whether the operation was successful.
          */
         [[nodiscard]] bool
-        setIndices(const std::vector<uint32_t>& indices) const;
+        setIndices(const std::vector<uint32_t>& indices,
+                   CommandBuffer* cmd = nullptr) const;
 
         /**
          * Returns the materials of the mesh.
@@ -200,7 +216,6 @@ namespace neon {
          * @param material the material.
          */
         void setMaterial(const std::shared_ptr<Material>& material);
-
     };
 }
 

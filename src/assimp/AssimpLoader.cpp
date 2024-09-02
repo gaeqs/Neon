@@ -30,7 +30,6 @@
 #include "AssimpNewIOSystem.h"
 
 namespace neon::assimp_loader {
-
     using Tex = std::shared_ptr<Texture>;
     using Mat = std::shared_ptr<Material>;
 
@@ -51,7 +50,6 @@ namespace neon::assimp_loader {
                         const std::string& name,
                         const std::map<aiTexture*, Tex>& loadedTextures,
                         const LoaderInfo& info) {
-
             // Let's check if the texture is already loaded!
             for (const auto& [aiTexture, actualTexture]: loadedTextures) {
                 if (aiTexture->mWidth == texture->mWidth
@@ -113,8 +111,11 @@ namespace neon::assimp_loader {
             };
 
             auto mInfo = info.materialCreateInfo;
-            mInfo.descriptions.vertex = info.vertexParser.description;
-            mInfo.descriptions.instance = info.instanceData.description;
+            mInfo.descriptions.vertex.push_back(info.vertexParser.description);
+
+            for (auto iData : info.instanceDatas) {
+                mInfo.descriptions.instance.push_back(iData.description);
+            }
 
             auto m = std::make_shared<Material>(
                 info.application,
@@ -292,7 +293,8 @@ namespace neon::assimp_loader {
                 info.application->getAssets()
                         .store(result, info.assetStorageMode);
             }
-            result->setMeshData(dataArray, indices);
+            result->uploadVertices(dataArray);
+            result->uploadIndices(indices);
 
             return result;
         }
@@ -318,7 +320,7 @@ namespace neon::assimp_loader {
     }
 
     Result load(const cmrc::file& file,
-                                                   const LoaderInfo& info) {
+                const LoaderInfo& info) {
         Assimp::Importer importer;
         auto scene = importer.ReadFileFromMemory(
             file.begin(), file.size(), decodeFlags(info));
@@ -327,8 +329,8 @@ namespace neon::assimp_loader {
     }
 
     Result load(const std::string& directory,
-                                                   const std::string& file,
-                                                   const LoaderInfo& info) {
+                const std::string& file,
+                const LoaderInfo& info) {
         Assimp::Importer importer;
 
         auto previous = std::filesystem::current_path();
@@ -338,8 +340,8 @@ namespace neon::assimp_loader {
     }
 
     Result load(const void* buffer,
-                                                   size_t length,
-                                                   const LoaderInfo& info) {
+                size_t length,
+                const LoaderInfo& info) {
         Assimp::Importer importer;
         auto scene = importer.ReadFileFromMemory(
             buffer, length, decodeFlags(info));
@@ -348,7 +350,7 @@ namespace neon::assimp_loader {
     }
 
     Result load(const aiScene* scene,
-                                                   const LoaderInfo& info) {
+                const LoaderInfo& info) {
         if (!scene) return {LoadError::INVALID_SCENE};
 
         // Init collections
@@ -357,6 +359,11 @@ namespace neon::assimp_loader {
 
         ModelCreateInfo modelInfo;
         modelInfo.meshes.reserve(scene->mNumMeshes);
+
+        for (auto iData : info.instanceDatas) {
+            modelInfo.instanceTypes.push_back(iData.type);
+            modelInfo.instanceSizes.push_back(iData.size);
+        }
 
         std::vector<Mat> materials;
 
@@ -371,15 +378,11 @@ namespace neon::assimp_loader {
                                                 : nullptr;
         loadMeshes(scene, modelInfo.meshes, materials, info, local);
 
+
         auto model = std::make_shared<Model>(
             info.application,
             info.name,
             modelInfo
-        );
-
-        model->defineInstanceStruct(
-            info.instanceData.type,
-            info.instanceData.size
         );
 
         info.application->getAssets().store(model, AssetStorageMode::WEAK);

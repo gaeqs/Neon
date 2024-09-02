@@ -14,23 +14,21 @@
 #include <utility>
 
 namespace neon {
-    GraphicComponent::GraphicComponent() :
-            _model(),
-            _modelTargetId(),
-            _firstPreDrawExecuted(false) {
-
+    GraphicComponent::GraphicComponent() : _model(),
+                                           _modelTargetId(),
+                                           _firstPreDrawExecuted(false) {
     }
 
-    GraphicComponent::GraphicComponent(std::shared_ptr<Model> model) :
-            _model(std::move(model)),
-            _modelTargetId(),
-            _firstPreDrawExecuted(false) {
-
+    GraphicComponent::GraphicComponent(
+        std::shared_ptr<Model> model) : _model(std::move(model)),
+                                        _modelTargetId(),
+                                        _firstPreDrawExecuted(false) {
         if (_model != nullptr) {
             auto result = _model->createInstance();
             if (result.isOk()) {
                 _modelTargetId = result.getResult();
-            } else {
+            }
+            else {
                 std::cerr << result.getError() << std::endl;
             }
         }
@@ -65,12 +63,12 @@ namespace neon {
             auto result = _model->createInstance();
             if (result.isOk()) {
                 _modelTargetId = result.getResult();
-            } else {
+            }
+            else {
                 std::cerr << result.getError() << std::endl;
                 _modelTargetId = {};
             }
         }
-
     }
 
     void GraphicComponent::onPreDraw() {
@@ -82,14 +80,19 @@ namespace neon {
         }
 
         if (!_modelTargetId.has_value()) return;
-        if (_model->getInstancingStructType() != typeid(DefaultInstancingData))
-            return;
 
-        // Update default data!
-        uploadData(DefaultInstancingData{
-                getGameObject()->getTransform().getModel(),
-                getGameObject()->getTransform().getNormal(),
-        });
+        auto& types = _model->getInstancingStructTypes();
+
+        const DefaultInstancingData data{
+            getGameObject()->getTransform().getModel(),
+            getGameObject()->getTransform().getNormal(),
+        };
+
+        for (size_t i = 0; i < types.size(); ++i) {
+            if (types[i] == typeid(DefaultInstancingData)) {
+                uploadData(i, data);
+            }
+        }
     }
 
     void GraphicComponent::drawEditor() {
@@ -99,7 +102,8 @@ namespace neon {
 
         if (_model) {
             ImGui::Text("Using model %s", _model->getName().c_str());
-        } else {
+        }
+        else {
             ImGui::Text("This GraphicComponent is not using any model.");
         }
 

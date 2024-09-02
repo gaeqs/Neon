@@ -46,7 +46,7 @@ std::shared_ptr<ShaderProgram> createShader(Application* application,
 
     auto result = ShaderProgram::createShader(
         application, name, defaultVert, defaultFrag);
-    if (!result.isOk()) {
+    if(!result.isOk()) {
         std::cerr << result.getError() << std::endl;
         throw std::runtime_error(result.getError());
     }
@@ -133,8 +133,11 @@ std::shared_ptr<FrameBuffer> initRender(Room* room) {
         InputDescription(0, InputRate::INSTANCE),
         {}, textures);
 
-    auto screenModel = deferred_utils::createScreenModel(room->getApplication(),
-        "Screen Model");
+    auto screenModel = deferred_utils::createScreenModel(
+        room->getApplication(),
+        ModelCreateInfo(),
+        "Screen Model"
+    );
 
     screenModel->addMaterial(screenMaterial);
 
@@ -163,7 +166,7 @@ void sansLoadThread(Application* application,
                                           "Sans.obj",
                                           info);
 
-    if (sansResult.error.has_value()) {
+    if(sansResult.error.has_value()) {
         std::cout << "Couldn't load Sans model!" << std::endl;
         std::cout << std::filesystem::current_path() << std::endl;
         exit(1);
@@ -174,6 +177,7 @@ void sansLoadThread(Application* application,
 
     buffer->end();
     buffer->submit();
+    buffer->wait();
 
     std::cout << "SANS UPLOADED!" << std::endl;
 
@@ -184,12 +188,12 @@ void sansLoadThread(Application* application,
             auto room = application->getRoom();
 
             int q = static_cast<int>(std::sqrt(AMOUNT));
-            for (int i = 0; i < AMOUNT; i++) {
+            for(int i = 0; i < AMOUNT; i++) {
                 auto sans = room->newGameObject();
                 sans->newComponent<GraphicComponent>(sansModel);
                 sans->newComponent<ConstantRotationComponent>();
 
-                if (i == 0) {
+                if(i == 0) {
                     auto sans2 = room->newGameObject();
                     sans2->newComponent<GraphicComponent>(sansModel);
                     sans2->newComponent<ConstantRotationComponent>();
@@ -225,8 +229,10 @@ void loadModels(Application* application, Room* room,
     auto sansLoaderInfo = assimp_loader::LoaderInfo::create<TestVertex>(
         application, "Sans", sansMaterialInfo);
 
-    application->getTaskRunner().executeAsync(
-        sansLoadThread, application, sansLoaderInfo);
+    std::function func = sansLoadThread;
+
+    auto task = application->getTaskRunner().executeAsync(
+        func, application, sansLoaderInfo);
 
     auto zeppeliLoaderInfo = assimp_loader::LoaderInfo::create<TestVertex>(
         application, "Zeppeli", sansMaterialInfo);
@@ -236,7 +242,7 @@ void loadModels(Application* application, Room* room,
     auto zeppeliResult = assimp_loader::load(R"(resource/Zeppeli)",
                                              "William.obj", zeppeliLoaderInfo);
 
-    if (zeppeliResult.error.has_value()) {
+    if(zeppeliResult.error.has_value()) {
         std::cout << "Couldn't load zeppeli model!" << std::endl;
         std::cout << std::filesystem::current_path() << std::endl;
         exit(1);
@@ -278,9 +284,10 @@ void loadModels(Application* application, Room* room,
 
     MaterialCreateInfo cubeMaterialInfo(target, shaderParallax);
     cubeMaterialInfo.descriptions.uniform = materialDescriptor;
-    cubeMaterialInfo.descriptions.vertex = TestVertex::getDescription();
-    cubeMaterialInfo.descriptions.instance =
-            DefaultInstancingData::getInstancingDescription();
+    cubeMaterialInfo.descriptions.vertex.
+            push_back(TestVertex::getDescription());
+    cubeMaterialInfo.descriptions.instance.push_back(
+        DefaultInstancingData::getInstancingDescription());
 
     auto material = std::make_shared<Material>(
         application, "cubeMaterial", cubeMaterialInfo);
@@ -381,12 +388,11 @@ int main() {
     application.setRoom(getTestRoom(&application));
 
     auto loopResult = application.startGameLoop();
-    if (loopResult.isOk()) {
+    if(loopResult.isOk()) {
         std::cout << "[APPLICATION]\tApplication closed. "
                 << loopResult.getResult() << " frames generated."
                 << std::endl;
-    }
-    else {
+    } else {
         std::cout << "[APPLICATION]\tUnexpected game loop error: "
                 << loopResult.getError()
                 << std::endl;

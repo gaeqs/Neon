@@ -18,14 +18,15 @@ namespace neon {
 #ifdef USE_VULKAN
 
     CommandBuffer::CommandBuffer(Application* application, VkCommandPool pool,
+                                 VkQueue queue,
                                  bool primary)
-        : _implementation(application, pool, primary) {
+        : _implementation(application, pool, queue, primary) {
     }
 
     CommandBuffer::CommandBuffer(Application* application,
-                                 VkCommandBuffer
-                                 commandBuffer)
-        : _implementation(application, commandBuffer) {
+                                 VkCommandBuffer commandBuffer,
+                                 VkQueue queue)
+        : _implementation(application, commandBuffer, queue) {
     }
 
 #endif
@@ -59,7 +60,7 @@ namespace neon {
         return _implementation.reset(releaseResources);
     }
 
-    bool CommandBuffer::isBeingUsed() {
+    bool CommandBuffer::isBeingUsed() const {
         return _implementation.isBeingUsed();
     }
 

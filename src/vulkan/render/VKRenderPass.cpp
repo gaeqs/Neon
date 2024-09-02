@@ -109,7 +109,7 @@ namespace neon::vulkan {
         renderPassInfo.pDependencies = dependencies;
 
         if (vkCreateRenderPass(
-                _vkApplication->getDevice(),
+                _vkApplication->getDevice()->getRaw(),
                 &renderPassInfo,
                 nullptr,
                 &_raw
@@ -128,7 +128,7 @@ namespace neon::vulkan {
 
     VKRenderPass::~VKRenderPass() {
         if (_raw != VK_NULL_HANDLE && !_external) {
-            vkDestroyRenderPass(_vkApplication->getDevice(), _raw, nullptr);
+            vkDestroyRenderPass(_vkApplication->getDevice()->getRaw(), _raw, nullptr);
         }
     }
 

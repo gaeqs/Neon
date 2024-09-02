@@ -14,7 +14,7 @@ namespace neon::vulkan {
     std::optional<std::shared_ptr<BufferMap<char>>> SimpleBuffer::rawMap(
             const CommandBuffer* commandBuffer) {
         return std::make_shared<SimpleBufferMap<char>>(
-                _application->getDevice(), _vertexBufferMemory,
+                _application->getDevice()->getRaw(), _vertexBufferMemory,
                 Range<uint32_t>(0, _size));
     }
 
@@ -22,7 +22,7 @@ namespace neon::vulkan {
     SimpleBuffer::rawMap(Range<uint32_t> range,
                          const CommandBuffer* commandBuffer) {
         return std::make_shared<SimpleBufferMap<char>>(
-                _application->getDevice(), _vertexBufferMemory, range);
+                _application->getDevice()->getRaw(), _vertexBufferMemory, range);
     }
 
     SimpleBuffer::SimpleBuffer(AbstractVKApplication* application,
@@ -44,20 +44,23 @@ namespace neon::vulkan {
             _vertexBuffer(VK_NULL_HANDLE),
             _vertexBufferMemory(VK_NULL_HANDLE),
             _modifiable(properties & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT) {
+
+        VkDevice device = _application->getDevice()->getRaw();
+
         VkBufferCreateInfo bufferInfo{};
         bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
         bufferInfo.size = _size;
         bufferInfo.usage = usage;
         bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
-        if (vkCreateBuffer(_application->getDevice(),
+        if (vkCreateBuffer(device,
                            &bufferInfo, nullptr, &_vertexBuffer) !=
             VK_SUCCESS) {
             throw std::runtime_error("failed to create vertex buffer!");
         }
 
         VkMemoryRequirements requirements;
-        vkGetBufferMemoryRequirements(_application->getDevice(),
+        vkGetBufferMemoryRequirements(device,
                                       _vertexBuffer, &requirements);
 
         VkMemoryAllocateInfo allocInfo{};
@@ -69,13 +72,13 @@ namespace neon::vulkan {
                 properties
         );
 
-        if (vkAllocateMemory(_application->getDevice(), &allocInfo, nullptr,
+        if (vkAllocateMemory(device, &allocInfo, nullptr,
                              &_vertexBufferMemory) != VK_SUCCESS) {
             throw std::runtime_error(
                     "failed to allocate vertex buffer memory!");
         }
 
-        vkBindBufferMemory(_application->getDevice(),
+        vkBindBufferMemory(device,
                            _vertexBuffer, _vertexBufferMemory, 0);
         if (data != nullptr && sizeInBytes != 0 && _modifiable) {
             memcpy(map<char>().value()->raw(), data, _size);
@@ -84,9 +87,10 @@ namespace neon::vulkan {
     }
 
     SimpleBuffer::~SimpleBuffer() {
-        vkDeviceWaitIdle(_application->getDevice());
-        vkDestroyBuffer(_application->getDevice(), _vertexBuffer, nullptr);
-        vkFreeMemory(_application->getDevice(), _vertexBufferMemory, nullptr);
+        VkDevice device = _application->getDevice()->getRaw();
+
+        vkDestroyBuffer(device, _vertexBuffer, nullptr);
+        vkFreeMemory(device, _vertexBufferMemory, nullptr);
 
         _vertexBuffer = VK_NULL_HANDLE;
         _vertexBufferMemory = VK_NULL_HANDLE;

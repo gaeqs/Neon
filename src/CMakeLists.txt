@@ -113,14 +113,14 @@ set(SOURCES
         util/task/TaskRunner.cpp
         util/task/TaskRunner.h
         engine/render/CommandManager.cpp
-        engine/render/CommandManager.h)
+        engine/render/CommandManager.h
+        util/task/AbstractCoroutine.h)
 
 
 set(VULKAN_SOURCES
         vulkan/VKApplication.cpp
         vulkan/VKApplication.h
         vulkan/VKSwapChainSupportDetails.h
-        vulkan/VKQueueFamilyIndices.h
         vulkan/VKTexture.cpp
         vulkan/VKTexture.h
         vulkan/buffer/Buffer.h
@@ -162,8 +162,16 @@ set(VULKAN_SOURCES
         vulkan/AbstractVKApplication.h
         vulkan/render/VKCommandPool.cpp
         vulkan/render/VKCommandPool.h
-        vulkan/render/VKThreadSafeQueue.cpp
-        vulkan/render/VKThreadSafeQueue.h)
+        vulkan/queue/VKQueueFamily.cpp
+        vulkan/queue/VKQueueFamily.h
+        vulkan/queue/VKQueueFamilyCollection.cpp
+        vulkan/queue/VKQueueFamilyCollection.h
+        vulkan/queue/VKQueue.cpp
+        vulkan/queue/VKQueue.h
+        vulkan/device/VKDevice.cpp
+        vulkan/device/VKDevice.h
+        vulkan/queue/VKQueueProvider.cpp
+        vulkan/queue/VKQueueProvider.h)
 
 if (NEON_USE_QT)
     list(APPEND SOURCES
@@ -178,7 +186,9 @@ endif ()
 
 cmrc_add_resource_library(dummy)
 
-add_library(neon STATIC ${SOURCES} ${VULKAN_SOURCES})
+add_library(neon STATIC ${SOURCES} ${VULKAN_SOURCES}
+        util/task/Coroutine.h
+        util/task/Coroutine.cpp)
 target_link_libraries(neon PUBLIC ${LIBRARIES} ${CMAKE_DL_LIBS} dummy)
 target_compile_definitions(neon PUBLIC USE_VULKAN)
 

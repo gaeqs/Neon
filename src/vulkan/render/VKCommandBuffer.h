@@ -25,12 +25,13 @@ namespace neon::vulkan {
     class VKCommandBuffer {
         AbstractVKApplication* _vkApplication;
         VkCommandPool _pool;
+        VkQueue _queue;
         VkCommandBuffer _commandBuffer;
 
         VKCommandBufferStatus _status;
 
-        std::vector<VkFence> _fences;
-        std::vector<VkFence> _freedFences;
+        mutable std::vector<VkFence> _fences;
+        mutable std::vector<VkFence> _freedFences;
         bool _external;
 
         void refreshStatus();
@@ -50,11 +51,14 @@ namespace neon::vulkan {
 
         VKCommandBuffer(Application* application, bool primary);
 
-        VKCommandBuffer(Application* application, VkCommandPool pool,
+        VKCommandBuffer(Application* application,
+                        VkCommandPool pool,
+                        VkQueue queue,
                         bool primary);
 
         VKCommandBuffer(Application* application,
-                        VkCommandBuffer commandBuffer);
+                        VkCommandBuffer commandBuffer,
+                        VkQueue queue);
 
         ~VKCommandBuffer();
 
@@ -74,7 +78,7 @@ namespace neon::vulkan {
 
         void reset(bool releaseResources = true);
 
-        bool isBeingUsed();
+        bool isBeingUsed() const;
 
         VKCommandBuffer& operator=(VKCommandBuffer&& move) noexcept;
     };

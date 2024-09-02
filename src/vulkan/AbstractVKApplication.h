@@ -10,8 +10,7 @@
 
 #include <vulkan/vulkan.h>
 
-#include <vulkan/VKQueueFamilyIndices.h>
-#include <vulkan/render/VKThreadSafeQueue.h>
+#include <vulkan/device/VKDevice.h>
 
 namespace neon {
     class Application;
@@ -24,13 +23,11 @@ namespace neon::vulkan {
 
         [[nodiscard]] virtual VkInstance getInstance() const = 0;
 
-        [[nodiscard]] virtual VKQueueFamilyIndices getFamilyIndices() const = 0;
-
-        [[nodiscard]] virtual VkDevice getDevice() const = 0;
+        [[nodiscard]] virtual VKDevice* getDevice() const = 0;
 
         [[nodiscard]] virtual VkPhysicalDevice getPhysicalDevice() const = 0;
 
-        [[nodiscard]] virtual VKThreadSafeQueue& getGraphicsQueue() = 0;
+        [[nodiscard]] virtual VkQueue getGraphicsQueue() = 0;
 
         [[nodiscard]] virtual VkFormat getSwapChainImageFormat() const = 0;
 

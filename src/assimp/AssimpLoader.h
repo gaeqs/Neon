@@ -29,7 +29,6 @@ namespace neon {
 struct aiScene;
 
 namespace neon::assimp_loader {
-
     struct VertexParserData {
         rush::Vec3f position;
         rush::Vec3f normal;
@@ -165,10 +164,10 @@ namespace neon::assimp_loader {
         VertexParser vertexParser;
 
         /**
-         * The information about the instance structure
-         * the loader will use.
+         * The information about the instance structures
+         * the model will use.
          */
-        InstanceData instanceData;
+        std::vector<InstanceData> instanceDatas;
 
         /**
          * Whether materials should be loaded.
@@ -218,31 +217,29 @@ namespace neon::assimp_loader {
         bool loadLocalModel = false;
 
     private:
-
         LoaderInfo(Application* application_,
                    std::string name_,
                    MaterialCreateInfo materialCreateInfo_,
                    VertexParser vertexParser_,
-                   InstanceData instanceData_)
+                   std::vector<InstanceData> instanceData_)
             : application(application_),
               name(std::move(name_)),
               materialCreateInfo(std::move(materialCreateInfo_)),
               vertexParser(std::move(vertexParser_)),
-              instanceData(std::move(instanceData_)) {
+              instanceDatas(std::move(instanceData_)) {
         }
 
     public:
-
         template<class Vertex, class Instance = DefaultInstancingData>
         static LoaderInfo create(Application* application,
                                  std::string name,
                                  MaterialCreateInfo materialCreateInfo) {
-            return {
+            return LoaderInfo{
                 application,
                 std::move(name),
                 materialCreateInfo,
                 VertexParser::fromTemplate<Vertex>(),
-                InstanceData::fromTemplate<Instance>()
+                {InstanceData::fromTemplate<Instance>()}
             };
         }
     };

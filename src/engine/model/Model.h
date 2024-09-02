@@ -19,7 +19,6 @@
 #endif
 
 namespace neon {
-
     class Application;
 
     class Material;
@@ -34,9 +33,7 @@ namespace neon {
      * of meshes that share the same position.
      */
     class Model : public Asset {
-
     public:
-
         static constexpr uint32_t DEFAULT_MAXIMUM_INSTANCES = 1024 * 16;
 
 #ifdef USE_VULKAN
@@ -44,13 +41,13 @@ namespace neon {
 #endif
 
     private:
-
         Implementation _implementation;
         std::vector<std::shared_ptr<Mesh>> _meshes;
         std::unique_ptr<ShaderUniformBuffer> _uniformBuffer;
 
-    public:
+        bool _shouldAutoFlush;
 
+    public:
         Model(const Model& other) = delete;
 
         /**
@@ -79,27 +76,8 @@ namespace neon {
          * Returns the type of the structure used for instancing data,
          * @return the type.
          */
-        [[nodiscard]] const std::type_index& getInstancingStructType() const;
-
-        /**
-         * Defines the type of the structure used for instancing data.
-         * Calling this method clears the instancing buffer.
-         *
-         * @tparam InstanceData the structure.
-         */
-        template<class InstanceData>
-        void defineInstanceStruct() {
-            _implementation.defineInstanceStruct<InstanceData>();
-        }
-
-        /**
-         * Defines the type of the structure used for instancing data.
-         * Calling this method clears the instancing buffer.
-         *
-         * @param type the type.
-         * @param size the size of the struct.
-         */
-        void defineInstanceStruct(std::type_index type, size_t size);
+        [[nodiscard]] const std::vector<std::type_index>&
+        getInstancingStructTypes() const;
 
         /**
          * Returns the uniform buffer that contains the global data
@@ -126,36 +104,38 @@ namespace neon {
          * Returns the amount of instances inside this model.
          * @return the amount of instances.
          */
-        size_t getInstanceAmount() const;
+        [[nodiscard]] size_t getInstanceAmount() const;
 
         /**
-         * Sets the instancing data of an instance.
+         * Sets the instancing data of an instance buffer.
          * @tparam InstanceData the type of the instance data.
          * @param id the identifier of the instance.
+         * @param index the index of the instance buffer.
          * @param data the data to upload.
          */
         template<class InstanceData>
-        void uploadData(uint32_t id, const InstanceData& data) {
-            _implementation.uploadData(id, data);
+        void uploadData(uint32_t id, size_t index, const InstanceData& data) {
+            _implementation.uploadData(id, index, data);
         }
 
         template<class InstanceData>
-        const InstanceData* fetchData(uint32_t id) const {
-            return _implementation.fetchData<InstanceData>(id);
+        const InstanceData* fetchData(uint32_t id, size_t index) const {
+            return _implementation.fetchData<InstanceData>(id, index);
         }
 
         /**
-         * Sets the instancing data of an instance.
+         * Sets the instancing data of an instance buffer.
          * @param id the identifier of the instance.
+         * @param index the index of the buffer,
          * @param raw the data to upload.
          */
-        void uploadDataRaw(uint32_t id, const void* raw);
+        void uploadDataRaw(uint32_t id, size_t index, const void* raw);
 
         /**
          * Uploads the instancing data to the GPU.
          * <p>
          * This method is invoked automatically
-         * before the room is rendered.
+         * before the room is rendered if shouldAutoFlush() is true.
          * <p>
          * You can provide this method an external command buffer.
          * This allows you to upload the model data asynchonously.
@@ -163,10 +143,31 @@ namespace neon {
         void flush(const CommandBuffer* commandBuffer = nullptr);
 
         /**
+         * Whether the renderer should call Model::flush() before rendering.
+         * Set this flag to false if you want to manage the instance data
+         * asyncronally.
+         *
+         * @return whether the renderer should call Model::flush() before
+         * rendering.
+         */
+        [[nodiscard]] bool shouldAutoFlush() const;
+
+        /**
+        * Sets whetehr the renderer should call Model::flush() before rendering.
+        * Set this flag to false if you want to manage the instance data
+        * asyncronally.
+        *
+        * @param autoFlush whether the renderer should call Model::flush()
+        * before rendering.
+        */
+        void setShouldAutoFlush(bool autoFlush);
+
+        /**
          * Returns the list containing all meshes inside this model.
          * @return the meshes.
          */
-        const std::vector<std::shared_ptr<Mesh>>& getMeshes() const;
+        [[nodiscard]] const std::vector<std::shared_ptr<Mesh>>&
+        getMeshes() const;
 
         /**
          * Return the amount of meshes this mode has.
@@ -214,7 +215,6 @@ namespace neon {
          */
         void drawOutside(const Material* material,
                          const CommandBuffer* commandBuffer) const;
-
     };
 }
 

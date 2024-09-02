@@ -34,6 +34,8 @@ namespace neon::vulkan {
         std::shared_ptr<BufferMap<T>> _map;
         std::optional<Range<uint32_t>> _range;
 
+        bool _disposed = false;
+
     public:
 
         StagingBufferMap(const StagingBufferMap& other) = delete;
@@ -78,7 +80,7 @@ namespace neon::vulkan {
         }
 
         ~StagingBufferMap() override {
-            dispose();
+            disposeStagingBuffer();
         };
 
         T& operator[](size_t index) override {
@@ -93,7 +95,10 @@ namespace neon::vulkan {
             return _map->raw();
         }
 
-        void dispose() override {
+        void disposeStagingBuffer() {
+            if(_disposed) {
+                std::cerr << "Buffer map already disposed" << std::endl;
+            }
             if (_map->raw() == nullptr) return;
             _map->dispose();
 
@@ -125,6 +130,12 @@ namespace neon::vulkan {
                 _internalCommandBuffer->end();
                 _internalCommandBuffer->submit();
             }
+
+            _disposed = true;
+        }
+
+        void dispose() override {
+            disposeStagingBuffer();
         }
     };
 

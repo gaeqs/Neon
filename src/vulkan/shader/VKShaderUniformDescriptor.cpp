@@ -45,14 +45,14 @@ namespace neon::vulkan {
         layoutInfo.pBindings = layoutBindings.data();
 
         if (vkCreateDescriptorSetLayout(
-                _vkApplication->getDevice(), &layoutInfo,
+                _vkApplication->getDevice()->getRaw(), &layoutInfo,
                 nullptr, &_descriptorSetLayout) != VK_SUCCESS) {
             throw std::runtime_error("Failed to create descriptor set layout!");
         }
     }
 
     VKShaderUniformDescriptor::~VKShaderUniformDescriptor() {
-        vkDestroyDescriptorSetLayout(_vkApplication->getDevice(),
+        vkDestroyDescriptorSetLayout(_vkApplication->getDevice()->getRaw(),
                                      _descriptorSetLayout, nullptr);
     }
 

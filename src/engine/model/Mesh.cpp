@@ -13,11 +13,12 @@ namespace neon {
                const std::string& name,
                std::shared_ptr<Material> material,
                bool modifiableVertices,
-               bool modifiableIndices) :
-            Asset(typeid(Mesh), name),
-            _implementation(application, _materials,
-                            modifiableVertices, modifiableIndices),
-            _materials() {
+               bool modifiableIndices) : Asset(typeid(Mesh), name),
+                                         _implementation(
+                                             application, _materials,
+                                             modifiableVertices,
+                                             modifiableIndices),
+                                         _materials() {
         if (material != nullptr) {
             _materials.insert(std::move(material));
         }
@@ -27,12 +28,12 @@ namespace neon {
                const std::string& name,
                std::unordered_set<std::shared_ptr<Material>> materials,
                bool modifiableVertices,
-               bool modifiableIndices) :
-            Asset(typeid(Mesh), name),
-            _implementation(application, _materials,
-                            modifiableVertices, modifiableIndices),
-            _materials(std::move(materials)) {
-
+               bool modifiableIndices) : Asset(typeid(Mesh), name),
+                                         _implementation(
+                                             application, _materials,
+                                             modifiableVertices,
+                                             modifiableIndices),
+                                         _materials(std::move(materials)) {
     }
 
 
@@ -58,15 +59,19 @@ namespace neon {
         _materials.insert(material);
     }
 
-    bool Mesh::setVertices(const void* data, size_t length) const {
-        return _implementation.setVertices(data, length);
+    bool Mesh::setVertices(size_t index,
+                           const void* data,
+                           size_t length,
+                           CommandBuffer* cmd) const {
+        return _implementation.setVertices(index, data, length, cmd);
     }
 
-    std::vector<uint32_t> Mesh::getIndices() const {
-        return _implementation.getIndices();
+    std::vector<uint32_t> Mesh::getIndices(CommandBuffer* cmd) const {
+        return _implementation.getIndices(cmd);
     }
 
-    bool Mesh::setIndices(const std::vector<uint32_t>& indices) const {
-        return _implementation.setIndices(indices);
+    bool Mesh::setIndices(const std::vector<uint32_t>& indices,
+                          CommandBuffer* cmd) const {
+        return _implementation.setIndices(indices, cmd);
     }
 }

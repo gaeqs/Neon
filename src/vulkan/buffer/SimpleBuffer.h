@@ -49,7 +49,9 @@ namespace neon::vulkan {
         }
 
         ~SimpleBufferMap() override {
-            dispose();
+            if (_pointer == nullptr) return;
+            simple_buffer::unmapMemory(_device, _memory);
+            _pointer = nullptr;
         };
 
         T& operator[](size_t index) override {

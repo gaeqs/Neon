@@ -7,16 +7,14 @@
 
 #include <memory>
 #include <vector>
-#include <functional>
 
 #include <rush/rush.h>
 
-#include <engine/structure/IdentifiableWrapper.h>
 #include <engine/structure/collection/AssetCollection.h>
 #include <engine/model/InputDescription.h>
 #include <engine/render/TextureCreateInfo.h>
 #include <engine/shader/MaterialCreateInfo.h>
-#include <engine/shader/ShaderUniformBinding.h>
+#include <engine/model/ModelCreateInfo.h>
 
 
 namespace neon {
@@ -36,14 +34,13 @@ namespace neon {
 }
 
 namespace neon::deferred_utils {
-
     struct DeferredVertex {
         rush::Vec2f position;
 
         static InputDescription getDescription() {
             InputDescription description(
-                    sizeof(DeferredVertex),
-                    InputRate::VERTEX
+                sizeof(DeferredVertex),
+                InputRate::VERTEX
             );
             description.addAttribute(2, 0);
 
@@ -51,27 +48,27 @@ namespace neon::deferred_utils {
         }
 
         static DeferredVertex fromAssimp(
-                const rush::Vec3f& position,
-                [[maybe_unused]] const rush::Vec3f& normal,
-                [[maybe_unused]] const rush::Vec3f& tangent,
-                [[maybe_unused]] const rush::Vec4f& color,
-                [[maybe_unused]] const rush::Vec2f& texCoords) {
+            const rush::Vec3f& position,
+            [[maybe_unused]] const rush::Vec3f& normal,
+            [[maybe_unused]] const rush::Vec3f& tangent,
+            [[maybe_unused]] const rush::Vec4f& color,
+            [[maybe_unused]] const rush::Vec2f& texCoords) {
             return {position};
         }
     };
 
     std::shared_ptr<Model> createScreenModel(Application* application,
+                                             ModelCreateInfo info,
                                              const std::string& name);
 
     std::shared_ptr<Texture> createLightSystem(
-            Room* room,
-            Render* render,
-            const std::vector<std::shared_ptr<Texture>>& textures,
-            TextureFormat outputFormat,
-            const std::shared_ptr<ShaderProgram>& directionalShader,
-            const std::shared_ptr<ShaderProgram>& pointShader,
-            const std::shared_ptr<ShaderProgram>& flashShader);
-
+        Room* room,
+        Render* render,
+        const std::vector<std::shared_ptr<Texture>>& textures,
+        TextureFormat outputFormat,
+        const std::shared_ptr<ShaderProgram>& directionalShader,
+        const std::shared_ptr<ShaderProgram>& pointShader,
+        const std::shared_ptr<ShaderProgram>& flashShader);
 };
 
 

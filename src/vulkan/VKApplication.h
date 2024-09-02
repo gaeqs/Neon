@@ -18,8 +18,7 @@
 #include <vulkan/vulkan.h>
 #include <vulkan/AbstractVKApplication.h>
 #include <vulkan/VKSwapChainSupportDetails.h>
-#include <vulkan/VKQueueFamilyIndices.h>
-#include <vulkan/render/VKThreadSafeQueue.h>
+#include <vulkan/device/VKDevice.h>
 
 #include <util/profile/Profiler.h>
 
@@ -57,10 +56,11 @@ namespace neon::vulkan {
         VkInstance _instance;
         VkDebugUtilsMessengerEXT _debugMessenger;
         VkPhysicalDevice _physicalDevice;
-        VKQueueFamilyIndices _familyIndices;
-        VkDevice _device;
-        VKThreadSafeQueue _graphicsQueue;
-        VKThreadSafeQueue _presentQueue;
+
+        VKDevice* _device;
+        VKQueueHolder _graphicQueue;
+        VKQueueHolder _presentQueue;
+
         VkSurfaceKHR _surface;
         VkSurfaceFormatKHR _surfaceFormat;
 
@@ -78,6 +78,8 @@ namespace neon::vulkan {
 
         std::vector<VkSemaphore> _imageAvailableSemaphores;
         std::vector<VkSemaphore> _renderFinishedSemaphores;
+        std::vector<CommandBuffer*> _assignedCommandBuffer;
+
 
         bool _requiresSwapchainRecreation;
         uint32_t _currentFrame;
@@ -102,8 +104,6 @@ namespace neon::vulkan {
         void pickPhysicalDevice();
 
         bool isDeviceSuitable(VkPhysicalDevice device, bool onlyDiscrete);
-
-        VKQueueFamilyIndices findQueueFamilies(VkPhysicalDevice device);
 
         void createLogicalDevice();
 
@@ -180,13 +180,9 @@ namespace neon::vulkan {
 
         [[nodiscard]] VkPhysicalDevice getPhysicalDevice() const override;
 
-        [[nodiscard]] VkDevice getDevice() const override;
+        [[nodiscard]] VKDevice* getDevice() const override;
 
-        [[nodiscard]] VKQueueFamilyIndices getFamilyIndices() const override;
-
-        [[nodiscard]] VKThreadSafeQueue& getGraphicsQueue() override;
-
-        [[nodiscard]] VKThreadSafeQueue& getPresentQueue();
+        [[nodiscard]] VkQueue getGraphicsQueue() override;
 
         [[nodiscard]] VkSurfaceKHR getSurface() const;
 

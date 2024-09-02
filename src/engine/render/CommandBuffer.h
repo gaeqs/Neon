@@ -32,10 +32,14 @@ namespace neon {
 
 #ifdef USE_VULKAN
 
-        CommandBuffer(Application* application, VkCommandPool pool,
+        CommandBuffer(Application* application,
+                      VkCommandPool pool,
+                      VkQueue queue,
                       bool primary);
 
-        CommandBuffer(Application* application, VkCommandBuffer commandBuffer);
+        CommandBuffer(Application* application,
+                      VkCommandBuffer commandBuffer,
+                      VkQueue queue);
 
 #endif
 
@@ -53,7 +57,7 @@ namespace neon {
 
         void reset(bool releaseResources = true);
 
-        bool isBeingUsed();
+        bool isBeingUsed() const;
 
         CommandBuffer& operator=(CommandBuffer&& move) noexcept;
     };

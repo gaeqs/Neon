@@ -34,14 +34,14 @@ namespace neon::vulkan {
             info.format = createInfo.format;
             info.layers = createInfo.layers;
             auto [image, memory] = vulkan_util::createImage(
-                    _vkApplication->getDevice(),
+                    _vkApplication->getDevice()->getRaw(),
                     _vkApplication->getPhysicalDevice(),
                     info,
                     createInfo.imageView.viewType
             );
 
             auto view = vulkan_util::createImageView(
-                    _vkApplication->getDevice(),
+                    _vkApplication->getDevice()->getRaw(),
                     image,
                     conversions::vkFormat(info.format),
                     VK_IMAGE_ASPECT_COLOR_BIT,
@@ -60,7 +60,7 @@ namespace neon::vulkan {
             info.usages = {TextureUsage::DEPTH_STENCIL_ATTACHMENT,
                            TextureUsage::SAMPLING};
             auto [image, memory] = vulkan_util::createImage(
-                    _vkApplication->getDevice(),
+                    _vkApplication->getDevice()->getRaw(),
                     _vkApplication->getPhysicalDevice(),
                     info,
                     TextureViewType::NORMAL_2D,
@@ -68,7 +68,7 @@ namespace neon::vulkan {
             );
 
             auto view = vulkan_util::createImageView(
-                    _vkApplication->getDevice(),
+                    _vkApplication->getDevice()->getRaw(),
                     image,
                     _vkApplication->getDepthImageFormat(),
                     VK_IMAGE_ASPECT_DEPTH_BIT,
@@ -109,7 +109,7 @@ namespace neon::vulkan {
         framebufferInfo.layers = layers;
 
         if (vkCreateFramebuffer(
-                _vkApplication->getDevice(),
+                _vkApplication->getDevice()->getRaw(),
                 &framebufferInfo,
                 nullptr,
                 &_frameBuffer
@@ -119,7 +119,7 @@ namespace neon::vulkan {
     }
 
     void VKSimpleFrameBuffer::cleanup() {
-        auto d = _vkApplication->getDevice();
+        auto d = _vkApplication->getDevice()->getRaw();
 
         for (const auto& item: _imGuiDescriptors) {
             if (item != VK_NULL_HANDLE) {
@@ -133,7 +133,7 @@ namespace neon::vulkan {
     }
 
     void VKSimpleFrameBuffer::cleanupImages() {
-        auto d = _vkApplication->getDevice();
+        auto d = _vkApplication->getDevice()->getRaw();
         for (auto& view: _imageViews) {
             vkDestroyImageView(d, view, nullptr);
         }

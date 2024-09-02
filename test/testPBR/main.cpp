@@ -47,7 +47,7 @@ std::shared_ptr<ShaderProgram> createShader(Application* application,
     auto defaultFrag = cmrc::shaders::get_filesystem().open(frag);
 
     auto result = ShaderProgram::createShader(
-            application, name, defaultVert, defaultFrag);
+        application, name, defaultVert, defaultFrag);
     if (!result.isOk()) {
         std::cerr << result.getError() << std::endl;
         throw std::runtime_error(result.getError());
@@ -66,11 +66,11 @@ std::shared_ptr<ShaderProgram> createShader(Application* application,
  * @return the shader program.
  */
 std::shared_ptr<neon::ShaderProgram> createShader(
-        neon::Application* application,
-        const std::string& name,
-        const std::string& vert,
-        const std::string& geom,
-        const std::string& frag) {
+    neon::Application* application,
+    const std::string& name,
+    const std::string& vert,
+    const std::string& geom,
+    const std::string& frag) {
     auto defaultVert = cmrc::shaders::get_filesystem().open(vert);
     auto defaultGeom = cmrc::shaders::get_filesystem().open(geom);
     auto defaultFrag = cmrc::shaders::get_filesystem().open(frag);
@@ -91,9 +91,9 @@ std::shared_ptr<neon::ShaderProgram> createShader(
 }
 
 std::shared_ptr<Material> createSSAOMaterial(
-        Room* room,
-        const std::shared_ptr<FrameBuffer>& ssaoFrameBuffer,
-        std::vector<std::shared_ptr<Texture>> textures) {
+    Room* room,
+    const std::shared_ptr<FrameBuffer>& ssaoFrameBuffer,
+    std::vector<std::shared_ptr<Texture>> textures) {
     constexpr uint32_t SAMPLES = 64;
     constexpr uint32_t NOISE_WIDTH = 4;
 
@@ -108,12 +108,12 @@ std::shared_ptr<Material> createSSAOMaterial(
     for (uint32_t i = 0; i < SAMPLES; ++i) {
         float scale = static_cast<float>(i) / 64.0f;
         samples.push_back(
-                rush::Vec4f(
-                        randomFloats(randomGenerator) * 2.0f - 1.0f,
-                        randomFloats(randomGenerator) * 2.0f - 1.0f,
-                        randomFloats(randomGenerator),
-                        0.0f
-                ).normalized() * std::lerp(0.1f, 1.0f, scale)
+            rush::Vec4f(
+                randomFloats(randomGenerator) * 2.0f - 1.0f,
+                randomFloats(randomGenerator) * 2.0f - 1.0f,
+                randomFloats(randomGenerator),
+                0.0f
+            ).normalized() * std::lerp(0.1f, 1.0f, scale)
         );
     }
 
@@ -122,9 +122,9 @@ std::shared_ptr<Material> createSSAOMaterial(
     noise.reserve(NOISE_WIDTH * NOISE_WIDTH);
     for (uint32_t i = 0; i < NOISE_WIDTH * NOISE_WIDTH; ++i) {
         noise.emplace_back(
-                randomFloats(randomGenerator) * 2.0f - 1.0f,
-                randomFloats(randomGenerator) * 2.0f - 1.0f,
-                0.0f
+            randomFloats(randomGenerator) * 2.0f - 1.0f,
+            randomFloats(randomGenerator) * 2.0f - 1.0f,
+            0.0f
         );
     }
 
@@ -145,10 +145,10 @@ std::shared_ptr<Material> createSSAOMaterial(
     noiseTextureCreateInfo.sampler.vAddressMode = AddressMode::REPEAT;
 
     auto noiseTexture = std::make_shared<Texture>(
-            room->getApplication(),
-            "SSAO_noise",
-            noise.data(),
-            noiseTextureCreateInfo
+        room->getApplication(),
+        "SSAO_noise",
+        noise.data(),
+        noiseTextureCreateInfo
     );
     textures.push_back(noiseTexture);
 
@@ -158,53 +158,51 @@ std::shared_ptr<Material> createSSAOMaterial(
                                    "ssao.frag");
 
     std::shared_ptr<Material> material = Material::create(
-            room->getApplication(), "SSAO",
-            ssaoFrameBuffer, ssaoShader,
-            deferred_utils::DeferredVertex::getDescription(),
-            InputDescription(0, InputRate::INSTANCE),
-            {{samples.data(), SAMPLES * sizeof(rush::Vec4f)}},
-            textures);
+        room->getApplication(), "SSAO",
+        ssaoFrameBuffer, ssaoShader,
+        deferred_utils::DeferredVertex::getDescription(),
+        InputDescription(0, InputRate::INSTANCE),
+        {{samples.data(), SAMPLES * sizeof(rush::Vec4f)}},
+        textures);
 
     return material;
 }
 
 
 std::shared_ptr<Material> createSSAOBlurMaterial(
-        Room* room,
-        const std::shared_ptr<FrameBuffer>& ssaoFrameBuffer,
-        const std::vector<std::shared_ptr<Texture>>& textures) {
-
+    Room* room,
+    const std::shared_ptr<FrameBuffer>& ssaoFrameBuffer,
+    const std::vector<std::shared_ptr<Texture>>& textures) {
     auto ssaoShader = createShader(room->getApplication(),
                                    "SSAO",
                                    "ssao_blur.vert",
                                    "ssao_blur.frag");
 
     std::shared_ptr<Material> material = Material::create(
-            room->getApplication(), "SSAO Blur",
-            ssaoFrameBuffer, ssaoShader,
-            deferred_utils::DeferredVertex::getDescription(),
-            InputDescription(0, InputRate::INSTANCE),
-            {},
-            textures);
+        room->getApplication(), "SSAO Blur",
+        ssaoFrameBuffer, ssaoShader,
+        deferred_utils::DeferredVertex::getDescription(),
+        InputDescription(0, InputRate::INSTANCE),
+        {},
+        textures);
 
     return material;
 }
 
 std::shared_ptr<Texture> computeIrradiance(
-        Application* app,
-        const std::shared_ptr<Model>& screenModel,
-        const std::shared_ptr<Texture>& skybox) {
-
+    Application* app,
+    const std::shared_ptr<Model>& screenModel,
+    const std::shared_ptr<Texture>& skybox) {
     neon::FrameBufferTextureCreateInfo testInfo;
     testInfo.layers = 6;
     testInfo.imageView.viewType = neon::TextureViewType::CUBE;
 
     auto testFrameBuffer = std::make_shared<neon::SimpleFrameBuffer>(
-            app,
-            std::vector<neon::FrameBufferTextureCreateInfo>{testInfo},
-            false,
-            [](const auto& _) { return false; },
-            [](const auto& _) { return std::make_pair(1024, 1024); });
+        app,
+        std::vector<neon::FrameBufferTextureCreateInfo>{testInfo},
+        false,
+        [](const auto& _) { return false; },
+        [](const auto& _) { return std::make_pair(1024, 1024); });
 
 
     auto irradianceShader = createShader(app,
@@ -216,12 +214,12 @@ std::shared_ptr<Texture> computeIrradiance(
     // This material should not be destroyed yet.
     // We have to wait for the component to be destroyed!
     auto material = neon::Material::create(
-            app, "Irradiance",
-            testFrameBuffer, irradianceShader,
-            neon::deferred_utils::DeferredVertex::getDescription(),
-            neon::InputDescription(0, neon::InputRate::INSTANCE),
-            {},
-            {skybox});
+        app, "Irradiance",
+        testFrameBuffer, irradianceShader,
+        neon::deferred_utils::DeferredVertex::getDescription(),
+        neon::InputDescription(0, neon::InputRate::INSTANCE),
+        {},
+        {skybox});
 
     neon::CommandBuffer cf(app, true);
     cf.begin(true);
@@ -241,24 +239,24 @@ std::shared_ptr<Texture> computeIrradiance(
 }
 
 std::shared_ptr<FrameBuffer> initRender(
-        Room* room,
-        const std::shared_ptr<Model>& screenModel) {
+    Room* room,
+    const std::shared_ptr<Model>& screenModel) {
     auto* app = room->getApplication();
 
     // Bindings for the global uniforms.
     // In this application, we have a buffer of global parameters
     // and two textures: a skybox and an irradiance skybox.
     std::vector<ShaderUniformBinding> globalBindings = {
-            {UniformBindingType::BUFFER, sizeof(Matrices)},
-            {UniformBindingType::BUFFER, sizeof(PBRParameters)},
-            {UniformBindingType::IMAGE,  0},
-            {UniformBindingType::IMAGE,  0},
-            {UniformBindingType::IMAGE,  0}
+        {UniformBindingType::BUFFER, sizeof(Matrices)},
+        {UniformBindingType::BUFFER, sizeof(PBRParameters)},
+        {UniformBindingType::IMAGE, 0},
+        {UniformBindingType::IMAGE, 0},
+        {UniformBindingType::IMAGE, 0}
     };
 
     // The description of the global uniforms.
     auto globalDescriptor = std::make_shared<ShaderUniformDescriptor>(
-            app, "default", globalBindings);
+        app, "default", globalBindings);
 
     // The render of the application.
     // We should set the render to the application before
@@ -295,17 +293,17 @@ std::shared_ptr<FrameBuffer> initRender(
     // G BUFFER
 
     std::vector<FrameBufferTextureCreateInfo> frameBufferFormats = {
-            TextureFormat::R16FG16FB16FA16F, // ALBEDO
-            TextureFormat::R16FG16F, // NORMAL XY
-            TextureFormat::R16FG16F // METALLIC / ROUGHNESS
+        TextureFormat::R16FG16FB16FA16F, // ALBEDO
+        TextureFormat::R16FG16F, // NORMAL XY
+        TextureFormat::R16FG16F // METALLIC / ROUGHNESS
     };
 
     auto fpFrameBuffer = std::make_shared<SimpleFrameBuffer>(app,
-                                                             frameBufferFormats, /*depth buffer?*/
-                                                             true);
+        frameBufferFormats, /*depth buffer?*/
+        true);
 
     render->addRenderPass(
-            std::make_shared<DefaultRenderPassStrategy>(fpFrameBuffer));
+        std::make_shared<DefaultRenderPassStrategy>(fpFrameBuffer));
 
     // Out textures. You can use these in other frame buffers.
     auto fpTextures = fpFrameBuffer->getTextures();
@@ -313,71 +311,72 @@ std::shared_ptr<FrameBuffer> initRender(
     // SSAO
 
     std::vector<FrameBufferTextureCreateInfo> ssaoTextureInfo{
-            TextureFormat::R32F
+        TextureFormat::R32F
     };
     ssaoTextureInfo[0].sampler.anisotropy = false;
     ssaoTextureInfo[0].sampler.magnificationFilter = TextureFilter::LINEAR;
     ssaoTextureInfo[0].sampler.minificationFilter = TextureFilter::LINEAR;
 
     auto ssaoFrameBuffer = std::make_shared<SimpleFrameBuffer>(
-            app, ssaoTextureInfo,
-            false,
-            neon::SimpleFrameBuffer::defaultRecreationCondition,
-            neon::SimpleFrameBuffer::defaultRecreationParameters
+        app, ssaoTextureInfo,
+        false,
+        neon::SimpleFrameBuffer::defaultRecreationCondition,
+        neon::SimpleFrameBuffer::defaultRecreationParameters
     );
 
     app->getRender()->addRenderPass(
-            std::make_shared<DefaultRenderPassStrategy>(ssaoFrameBuffer));
+        std::make_shared<DefaultRenderPassStrategy>(ssaoFrameBuffer));
 
     auto ssaoBlurFrameBuffer = std::make_shared<SimpleFrameBuffer>(
-            app, ssaoTextureInfo,
-            false,
-            neon::SimpleFrameBuffer::defaultRecreationCondition,
-            neon::SimpleFrameBuffer::defaultRecreationParameters
+        app, ssaoTextureInfo,
+        false,
+        neon::SimpleFrameBuffer::defaultRecreationCondition,
+        neon::SimpleFrameBuffer::defaultRecreationParameters
     );
 
     app->getRender()->addRenderPass(
-            std::make_shared<DefaultRenderPassStrategy>(ssaoBlurFrameBuffer));
+        std::make_shared<DefaultRenderPassStrategy>(ssaoBlurFrameBuffer));
 
 
     auto ssaoMaterial = createSSAOMaterial(
-            room, ssaoFrameBuffer,
-            {
-                    fpTextures.at(0), // ALBEDO
-                    fpTextures.at(1), // NORMAL XY
-                    fpTextures.at(3)  // DEPTH
-            }
+        room, ssaoFrameBuffer,
+        {
+            fpTextures.at(0), // ALBEDO
+            fpTextures.at(1), // NORMAL XY
+            fpTextures.at(3) // DEPTH
+        }
     );
 
     auto ssaoBlurMaterial = createSSAOBlurMaterial(
-            room, ssaoBlurFrameBuffer, ssaoFrameBuffer->getTextures());
+        room, ssaoBlurFrameBuffer, ssaoFrameBuffer->getTextures());
 
     // LIGHT SYSTEM
 
     auto albedo = deferred_utils::createLightSystem(
-            room,
-            render.get(),
-            fpTextures,
-            TextureFormat::R16FG16FB16FA16F,
-            directionalShader,
-            pointShader,
-            flashShader
+        room,
+        render.get(),
+        fpTextures,
+        TextureFormat::R16FG16FB16FA16F,
+        directionalShader,
+        pointShader,
+        flashShader
     );
 
     // BLOOM
     auto bloomRender = std::make_shared<BloomRender>(
-            app, downsampling, upsampling, albedo, screenModel, 3);
+        app, downsampling, upsampling, albedo, screenModel, 3);
 
     render->addRenderPass(bloomRender);
 
     // SCREEN
 
     std::vector<FrameBufferTextureCreateInfo> screenFormats = {
-            TextureFormat::R8G8B8A8};
+        TextureFormat::R8G8B8A8
+    };
     auto screenFrameBuffer = std::make_shared<SimpleFrameBuffer>(
-            app, screenFormats, false);
+        app, screenFormats, false);
     render->addRenderPass(
-            std::make_shared<DefaultRenderPassStrategy>(screenFrameBuffer));
+        std::make_shared<DefaultRenderPassStrategy>(screenFrameBuffer));
 
     auto textures = fpFrameBuffer->getTextures();
     textures.push_back(albedo);
@@ -385,11 +384,11 @@ std::shared_ptr<FrameBuffer> initRender(
     textures.push_back(bloomRender->getBloomTexture()); // BLOOM
 
     std::shared_ptr<Material> screenMaterial = Material::create(
-            room->getApplication(), "Screen Model",
-            screenFrameBuffer, screenShader,
-            deferred_utils::DeferredVertex::getDescription(),
-            InputDescription(0, InputRate::INSTANCE),
-            {}, textures);
+        room->getApplication(), "Screen Model",
+        screenFrameBuffer, screenShader,
+        deferred_utils::DeferredVertex::getDescription(),
+        InputDescription(0, InputRate::INSTANCE),
+        {}, textures);
 
     screenModel->addMaterial(screenMaterial);
     screenModel->addMaterial(ssaoMaterial);
@@ -400,17 +399,16 @@ std::shared_ptr<FrameBuffer> initRender(
     screenModelGO->newComponent<GraphicComponent>(screenModel);
 
     auto swapFrameBuffer = std::make_shared<SwapChainFrameBuffer>(
-            room, false);
+        room, false);
 
     render->addRenderPass(
-            std::make_shared<DefaultRenderPassStrategy>(swapFrameBuffer));
+        std::make_shared<DefaultRenderPassStrategy>(swapFrameBuffer));
 
     return fpFrameBuffer;
 }
 
 void loadModels(Application* application, Room* room,
                 const std::shared_ptr<FrameBuffer>& target) {
-
     std::shared_ptr<ShaderUniformDescriptor> materialDescriptor =
             ShaderUniformDescriptor::ofImages(application, "default", 2);
 
@@ -428,14 +426,15 @@ void loadModels(Application* application, Room* room,
                                     "deferred_depth.frag");
 
     MaterialCreateInfo depthMaterialInfo(target, shaderDepth);
-    depthMaterialInfo.descriptions.vertex = TestVertex::getDescription();
-    depthMaterialInfo.descriptions.instance =
-            DefaultInstancingData::getInstancingDescription();
+    depthMaterialInfo.descriptions.vertex.push_back(
+        TestVertex::getDescription());
+    depthMaterialInfo.descriptions.instance.push_back(
+        DefaultInstancingData::getInstancingDescription());
     depthMaterialInfo.depthStencil.depthCompareOperation =
             DepthCompareOperation::LESS;
 
     auto depthMaterial = std::make_shared<Material>(
-            application, "depth", depthMaterialInfo);
+        application, "depth", depthMaterialInfo);
     depthMaterial->setPriority(1);
 
 
@@ -445,7 +444,7 @@ void loadModels(Application* application, Room* room,
             DepthCompareOperation::LESS_OR_EQUAL;
 
     auto sansLoaderInfo = assimp_loader::LoaderInfo::create<TestVertex>(
-            application, "Sans", sansMaterialInfo);
+        application, "Sans", sansMaterialInfo);
 
     auto sansResult = assimp_loader::load(R"(resource/Sans)", "Sans.obj",
                                           sansLoaderInfo);
@@ -483,7 +482,7 @@ void loadModels(Application* application, Room* room,
     }
 
     auto zeppeliLoaderInfo = assimp_loader::LoaderInfo::create<TestVertex>(
-            application, "Zeppeli", sansMaterialInfo);
+        application, "Zeppeli", sansMaterialInfo);
     zeppeliLoaderInfo.flipWindingOrder = true;
     zeppeliLoaderInfo.flipNormals = true;
 
@@ -511,41 +510,42 @@ void loadModels(Application* application, Room* room,
     albedoInfo.image.format = TextureFormat::R8G8B8A8_SRGB;
 
     std::shared_ptr<Texture> cubeAlbedo = Texture::createTextureFromFile(
-            application, "cube_albedo", "resource/Cube/bricks.png",
-            albedoInfo);
+        application, "cube_albedo", "resource/Cube/bricks.png",
+        albedoInfo);
 
     std::shared_ptr<Texture> cubeNormal = Texture::createTextureFromFile(
-            application, "cube_normal",
-            "resource/Cube/bricks_normal.png");
+        application, "cube_normal",
+        "resource/Cube/bricks_normal.png");
     std::shared_ptr<Texture> cubeParallax = Texture::createTextureFromFile(
-            application, "cube_parallax",
-            "resource/Cube/bricks_parallax.png");
+        application, "cube_parallax",
+        "resource/Cube/bricks_parallax.png");
 
     std::vector<ShaderUniformBinding> cubeMaterialBindings;
     cubeMaterialBindings.resize(3, {UniformBindingType::IMAGE, 0});
 
     std::shared_ptr<ShaderUniformDescriptor> cubeMaterialDescriptor;
     materialDescriptor = std::make_shared<ShaderUniformDescriptor>(
-            room->getApplication(),
-            "cubeMaterialDescriptor",
-            cubeMaterialBindings
+        room->getApplication(),
+        "cubeMaterialDescriptor",
+        cubeMaterialBindings
     );
 
     MaterialCreateInfo cubeMaterialInfo(target, shaderParallax);
     cubeMaterialInfo.descriptions.uniform = materialDescriptor;
-    cubeMaterialInfo.descriptions.vertex = TestVertex::getDescription();
-    cubeMaterialInfo.descriptions.instance =
-            DefaultInstancingData::getInstancingDescription();
+    cubeMaterialInfo.descriptions.vertex.
+            push_back(TestVertex::getDescription());
+    cubeMaterialInfo.descriptions.instance.push_back(
+        DefaultInstancingData::getInstancingDescription());
 
     auto material = std::make_shared<Material>(
-            application, "cubeMaterial", cubeMaterialInfo);
+        application, "cubeMaterial", cubeMaterialInfo);
 
     material->getUniformBuffer()->setTexture(0, cubeAlbedo);
     material->getUniformBuffer()->setTexture(1, cubeNormal);
     material->getUniformBuffer()->setTexture(2, cubeParallax);
 
     auto cubeModel = model_utils::createCubeModel<TestVertex>(
-            room, material);
+        room, material);
 
     auto cube = room->newGameObject();
     cube->newComponent<GraphicComponent>(cubeModel);
@@ -556,12 +556,12 @@ void loadModels(Application* application, Room* room,
 
 std::shared_ptr<Texture> loadSkybox(Room* room) {
     static const std::vector<std::string> PATHS = {
-            "resource/Skybox/right.jpg",
-            "resource/Skybox/left.jpg",
-            "resource/Skybox/top.jpg",
-            "resource/Skybox/bottom.jpg",
-            "resource/Skybox/front.jpg",
-            "resource/Skybox/back.jpg",
+        "resource/Skybox/right.jpg",
+        "resource/Skybox/left.jpg",
+        "resource/Skybox/top.jpg",
+        "resource/Skybox/bottom.jpg",
+        "resource/Skybox/front.jpg",
+        "resource/Skybox/back.jpg",
     };
 
     TextureCreateInfo info;
@@ -580,16 +580,18 @@ std::shared_ptr<Texture> loadBRDF(Room* room) {
     info.image.mipmaps = 0;
 
     return Texture::createTextureFromFile(
-            room->getApplication(),
-            "BRDF",
-            "resource/BRDF.png",
-            info
+        room->getApplication(),
+        "BRDF",
+        "resource/BRDF.png",
+        info
     );
 }
 
 std::shared_ptr<Room> getTestRoom(Application* application) {
     auto screenModel = deferred_utils::createScreenModel(
-            application, "Screen Model");
+        application,
+        ModelCreateInfo(),
+        "Screen Model");
 
     auto room = std::make_shared<Room>(application);
 
@@ -605,14 +607,16 @@ std::shared_ptr<Room> getTestRoom(Application* application) {
 
 
     auto cameraController = room->newGameObject();
-    auto cameraMovement = cameraController->newComponent<CameraMovementComponent>();
+    auto cameraMovement = cameraController->newComponent<
+        CameraMovementComponent>();
     cameraMovement->setSpeed(10.0f);
 
     auto parameterUpdater = room->newGameObject();
     parameterUpdater->newComponent<LockMouseComponent>(cameraMovement);
     parameterUpdater->newComponent<DockSpaceComponent>();
     parameterUpdater->newComponent<ViewportComponent>();
-    auto goExplorer = parameterUpdater->newComponent<GameObjectExplorerComponent>();
+    auto goExplorer = parameterUpdater->newComponent<
+        GameObjectExplorerComponent>();
     parameterUpdater->newComponent<SceneTreeComponent>(goExplorer);
     parameterUpdater->newComponent<DebugOverlayComponent>(false, 100);
 
@@ -656,7 +660,7 @@ int main() {
     std::srand(std::time(nullptr));
 
     Application application(std::make_unique<vulkan::VKApplication>(
-            "Neon", WIDTH, HEIGHT));
+        "Neon", WIDTH, HEIGHT));
 
     application.init();
     application.setRoom(getTestRoom(&application));
@@ -664,12 +668,13 @@ int main() {
     auto loopResult = application.startGameLoop();
     if (loopResult.isOk()) {
         std::cout << "[APPLICATION]\tApplication closed. "
-                  << loopResult.getResult() << " frames generated."
-                  << std::endl;
-    } else {
+                << loopResult.getResult() << " frames generated."
+                << std::endl;
+    }
+    else {
         std::cout << "[APPLICATION]\tUnexpected game loop error: "
-                  << loopResult.getError()
-                  << std::endl;
+                << loopResult.getError()
+                << std::endl;
     }
 
     application.setRoom(nullptr);
