@@ -7,8 +7,8 @@
 
 
 #include <cstdint>
-#include <vulkan/buffer/SimpleBuffer.h>
-#include <engine/render/TextureCreateInfo.h>
+#include <vulkan/render/buffer/SimpleBuffer.h>
+#include <neon/render/texture/TextureCreateInfo.h>
 
 namespace neon {
     class Application;

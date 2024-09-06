@@ -2,7 +2,7 @@
 #include <memory>
 #include <vector>
 
-#include <engine/Engine.h>
+#include <neon/Engine.h>
 
 #include <util/component/CameraMovementComponent.h>
 #include <util/component/DebugOverlayComponent.h>

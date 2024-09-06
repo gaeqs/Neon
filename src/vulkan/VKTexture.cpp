@@ -4,8 +4,8 @@
 
 #include "VKTexture.h"
 
-#include <engine/Application.h>
-#include <engine/structure/Room.h>
+#include <neon/Application.h>
+#include <neon/structure/Room.h>
 
 #include <vulkan/util/VKUtil.h>
 #include <vulkan/util/VulkanConversions.h>

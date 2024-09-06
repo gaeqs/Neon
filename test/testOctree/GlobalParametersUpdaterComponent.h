@@ -5,7 +5,7 @@
 #ifndef NEON_GLOBALPARAMETERSUPDATERCOMPONENT_H
 #define NEON_GLOBALPARAMETERSUPDATERCOMPONENT_H
 
-#include <engine/Engine.h>
+#include <neon/Engine.h>
 
 struct Matrices {
     rush::Mat4f view;

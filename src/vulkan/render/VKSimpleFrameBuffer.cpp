@@ -8,8 +8,8 @@
 
 #include <imgui_impl_vulkan.h>
 
-#include <engine/structure/Room.h>
-#include <engine/render/Texture.h>
+#include <neon/structure/Room.h>
+#include <neon/render/texture/Texture.h>
 #include <vulkan/util/VKUtil.h>
 #include <vulkan/util/VulkanConversions.h>
 #include <vulkan/AbstractVKApplication.h>

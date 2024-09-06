@@ -5,7 +5,7 @@
 #ifndef DEBUGRENDERCOMPONENT_H
 #define DEBUGRENDERCOMPONENT_H
 
-#include <engine/Engine.h>
+#include <neon/Engine.h>
 
 #include <utility>
 

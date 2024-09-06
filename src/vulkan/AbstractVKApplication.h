@@ -5,8 +5,8 @@
 #ifndef VISIMPL_ABSTRACTVKAPPLICATION_H
 #define VISIMPL_ABSTRACTVKAPPLICATION_H
 
-#include <engine/Application.h>
-#include <engine/render/CommandPool.h>
+#include <neon/Application.h>
+#include <neon/render/buffer/CommandPool.h>
 
 #include <vulkan/vulkan.h>
 

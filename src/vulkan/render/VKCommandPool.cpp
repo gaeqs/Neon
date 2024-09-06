@@ -6,7 +6,7 @@
 
 #include <vulkan/AbstractVKApplication.h>
 
-#include <engine/render/CommandBuffer.h>
+#include <neon/render/buffer/CommandBuffer.h>
 
 namespace neon::vulkan {
     VKCommandPool::VKCommandPool(VKCommandPool&& move) noexcept

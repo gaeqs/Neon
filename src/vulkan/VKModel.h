@@ -9,11 +9,11 @@
 #include <typeindex>
 #include <memory>
 
-#include <engine/model/ModelCreateInfo.h>
+#include <neon/render/model/ModelCreateInfo.h>
 #include <vulkan/VKMesh.h>
-#include <vulkan/buffer/StagingBuffer.h>
-#include <util/Range.h>
-#include <util/Result.h>
+#include <vulkan/render/buffer/StagingBuffer.h>
+#include <neon/util/Range.h>
+#include <neon/util/Result.h>
 
 namespace neon {
     class Application;

@@ -14,12 +14,11 @@
 
 #include <vulkan/vulkan.h>
 
-#include <engine/shader/Material.h>
-#include <engine/shader/ShaderUniformBuffer.h>
+#include <neon/render/shader/Material.h>
+#include <neon/render/shader/ShaderUniformBuffer.h>
 
-#include <vulkan/AbstractVKApplication.h>
-#include <vulkan/buffer/SimpleBuffer.h>
-#include <vulkan/buffer/StagingBuffer.h>
+#include <vulkan/render/buffer/SimpleBuffer.h>
+#include <vulkan/render/buffer/StagingBuffer.h>
 
 namespace neon {
     class Application;

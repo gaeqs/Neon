@@ -23,6 +23,8 @@
 // Created by grial on 7/06/23.
 //
 
+#ifdef USE_QT
+
 #include "QTApplication.h"
 
 #include <iostream>
@@ -744,3 +746,5 @@ neon::vulkan::QTApplication::~QTApplication() {
     ImPlot::DestroyContext();
     ImGui::DestroyContext();
 }
+
+#endif

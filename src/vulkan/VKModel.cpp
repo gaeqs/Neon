@@ -4,13 +4,10 @@
 
 #include "VKModel.h"
 
-#include <utility>
-
-#include <engine/Application.h>
-#include <engine/render/Render.h>
-#include <engine/model/DefaultInstancingData.h>
-#include <engine/shader/Material.h>
-#include <engine/render/CommandBuffer.h>
+#include <neon/Application.h>
+#include <neon/render/Render.h>
+#include <neon/render/shader/Material.h>
+#include <neon/render/buffer/CommandBuffer.h>
 
 namespace neon::vulkan {
     std::vector<Mesh::Implementation*> VKModel::getMeshImplementations(

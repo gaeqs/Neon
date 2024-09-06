@@ -6,10 +6,10 @@
 
 #include <ranges>
 
-#include <engine/Application.h>
+#include <neon/Application.h>
 
 #include <vulkan/AbstractVKApplication.h>
-#include <engine/render/CommandPool.h>
+#include <neon/render/buffer/CommandPool.h>
 
 namespace neon::vulkan {
     VKCommandBuffer::VKCommandBuffer(VKCommandBuffer&& move) noexcept

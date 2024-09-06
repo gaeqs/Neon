@@ -4,19 +4,19 @@
 #include <filesystem>
 #include <random>
 
-#include <engine/Engine.h>
+#include <neon/Engine.h>
 
 #include <vulkan/VKApplication.h>
 
-#include <util/component/CameraMovementComponent.h>
-#include <util/component/DebugOverlayComponent.h>
-#include <util/component/DockSpaceComponent.h>
-#include <util/component/ViewportComponent.h>
-#include <util/component/SceneTreeComponent.h>
-#include <util/component/GameObjectExplorerComponent.h>
-#include <util/DeferredUtils.h>
-#include <util/ModelUtils.h>
-#include <assimp/AssimpLoader.h>
+#include <neon/util/component/CameraMovementComponent.h>
+#include <neon/util/component/DebugOverlayComponent.h>
+#include <neon/util/component/DockSpaceComponent.h>
+#include <neon/util/component/ViewportComponent.h>
+#include <neon/util/component/SceneTreeComponent.h>
+#include <neon/util/component/GameObjectExplorerComponent.h>
+#include <neon/util/DeferredUtils.h>
+#include <neon/util/ModelUtils.h>
+#include <neon/assimp/AssimpLoader.h>
 
 #include "TestVertex.h"
 #include "GlobalParametersUpdaterComponent.h"
