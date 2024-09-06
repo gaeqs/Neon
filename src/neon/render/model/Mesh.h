@@ -15,7 +15,7 @@
 
 #ifdef USE_VULKAN
 
-#include <vulkan/VKMesh.h>
+#include <vulkan/render/model/VKMesh.h>
 
 #endif
 

@@ -10,7 +10,7 @@
 #include <memory>
 
 #include <neon/render/model/ModelCreateInfo.h>
-#include <vulkan/VKMesh.h>
+#include <vulkan/render/model/VKMesh.h>
 #include <vulkan/render/buffer/StagingBuffer.h>
 #include <neon/util/Range.h>
 #include <neon/util/Result.h>

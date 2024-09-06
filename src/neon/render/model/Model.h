@@ -14,7 +14,7 @@
 
 #ifdef USE_VULKAN
 
-#include <vulkan/VKModel.h>
+#include <vulkan/render/model/VKModel.h>
 
 #endif
 
