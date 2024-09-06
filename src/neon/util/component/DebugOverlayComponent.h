@@ -5,7 +5,7 @@
 #ifndef NEON_DEBUGOVERLAYCOMPONENT_H
 #define NEON_DEBUGOVERLAYCOMPONENT_H
 
-#include <neon/Engine.h>
+#include <neon/Neon.h>
 
 #include <implot.h>
 

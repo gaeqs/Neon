@@ -8,7 +8,7 @@
 #include "TestVertex.h"
 
 #include <cstdint>
-#include <neon/Engine.h>
+#include <neon/Neon.h>
 
 #include <rush/rush.h>
 

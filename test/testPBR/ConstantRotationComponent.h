@@ -5,7 +5,7 @@
 #ifndef NEON_CONSTANTROTATIONCOMPONENT_H
 #define NEON_CONSTANTROTATIONCOMPONENT_H
 
-#include <neon/Engine.h>
+#include <neon/Neon.h>
 
 class ConstantRotationComponent : public neon::Component {
 

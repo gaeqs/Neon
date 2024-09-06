@@ -5,7 +5,7 @@
 #ifndef NEON_LOCKMOUSECOMPONENT_H
 #define NEON_LOCKMOUSECOMPONENT_H
 
-#include <neon/Engine.h>
+#include <neon/Neon.h>
 
 #include <util/component/CameraMovementComponent.h>
 

@@ -4,7 +4,7 @@
 #include <filesystem>
 #include <random>
 
-#include <neon/Engine.h>
+#include <neon/Neon.h>
 
 #include <vulkan/VKApplication.h>
 

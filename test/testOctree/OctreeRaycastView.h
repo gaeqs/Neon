@@ -7,7 +7,7 @@
 #include <vector>
 
 #include "TestVertex.h"
-#include <neon/Engine.h>
+#include <neon/Neon.h>
 
 #include "DebugRenderComponent.h"
 

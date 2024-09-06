@@ -3,7 +3,7 @@
 #include <vector>
 #include <random>
 
-#include <neon/Engine.h>
+#include <neon/Neon.h>
 
 #include <neon/util/component/CameraMovementComponent.h>
 #include <neon/util/component/DebugOverlayComponent.h>

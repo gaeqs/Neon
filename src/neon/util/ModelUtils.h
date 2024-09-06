@@ -10,7 +10,7 @@
 
 #include <rush/rush.h>
 
-#include <neon/Engine.h>
+#include <neon/Neon.h>
 
 namespace neon::model_utils {
     template<class Vertex>

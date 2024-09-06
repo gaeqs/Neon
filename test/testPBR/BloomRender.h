@@ -5,7 +5,7 @@
 #ifndef NEON_BLOOMRENDER_H
 #define NEON_BLOOMRENDER_H
 
-#include <neon/Engine.h>
+#include <neon/Neon.h>
 
 #include <rush/rush.h>
 

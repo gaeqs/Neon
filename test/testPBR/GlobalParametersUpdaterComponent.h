@@ -7,7 +7,7 @@
 
 #include <rush/rush.h>
 
-#include <neon/Engine.h>
+#include <neon/Neon.h>
 
 struct Matrices {
     rush::Mat4f view;
