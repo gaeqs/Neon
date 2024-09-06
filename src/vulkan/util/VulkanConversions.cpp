@@ -6,9 +6,9 @@
 
 #include <stdexcept>
 
-#include <engine/render/TextureCreateInfo.h>
-#include <engine/render/FrameBufferTextureCreateInfo.h>
-#include <engine/shader/MaterialCreateInfo.h>
+#include <neon/render/texture/TextureCreateInfo.h>
+#include <neon/render/buffer/FrameBufferTextureCreateInfo.h>
+#include <neon/render/shader/MaterialCreateInfo.h>
 #include <vulkan/vulkan_core.h>
 
 namespace vc = neon::vulkan::conversions;

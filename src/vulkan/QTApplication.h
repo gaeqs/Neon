@@ -26,6 +26,8 @@
 #ifndef VISIMPL_QTAPPLICATION_H
 #define VISIMPL_QTAPPLICATION_H
 
+#ifdef USE_QT
+
 #include <QVulkanWindowRenderer>
 
 #include <vulkan/AbstractVKApplication.h>
@@ -160,5 +162,7 @@ namespace neon::vulkan {
 
     };
 }
+
+#endif
 
 #endif //VISIMPL_QTAPPLICATION_H

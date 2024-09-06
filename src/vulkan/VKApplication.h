@@ -12,15 +12,15 @@
 
 #include <GLFW/glfw3.h>
 
-#include <engine/render/CommandBuffer.h>
-#include <engine/Application.h>
+#include <neon/render/buffer/CommandBuffer.h>
+#include <neon/Application.h>
+#include <neon/util/profile/Profiler.h>
 
 #include <vulkan/vulkan.h>
 #include <vulkan/AbstractVKApplication.h>
 #include <vulkan/VKSwapChainSupportDetails.h>
 #include <vulkan/device/VKDevice.h>
 
-#include <util/profile/Profiler.h>
 
 
 namespace neon {

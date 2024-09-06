@@ -7,7 +7,7 @@
 #include <vector>
 
 #include "TestVertex.h"
-#include <engine/Engine.h>
+#include <neon/Neon.h>
 
 class OctreeView : public neon::Component {
     const uint32_t BASE_INDICES[24] = {

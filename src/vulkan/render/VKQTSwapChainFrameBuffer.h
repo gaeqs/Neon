@@ -5,6 +5,8 @@
 #ifndef VISIMPL_VKQTSWAPCHAINFRAMEBUFFER_H
 #define VISIMPL_VKQTSWAPCHAINFRAMEBUFFER_H
 
+#ifdef USE_QT
+
 #include <vulkan/render/VKFrameBuffer.h>
 #include <vulkan/render/VKRenderPass.h>
 
@@ -51,5 +53,6 @@ namespace neon::vulkan {
 
 }
 
+#endif
 
 #endif //VISIMPL_VKQTSWAPCHAINFRAMEBUFFER_H

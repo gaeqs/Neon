@@ -8,9 +8,7 @@
 #include <vector>
 #include <memory>
 
-#include <engine/render/TextureCreateInfo.h>
-#include <engine/render/FrameBufferTextureCreateInfo.h>
-#include <engine/structure/IdentifiableWrapper.h>
+#include <neon/render/buffer/FrameBufferTextureCreateInfo.h>
 
 #include <vulkan/render/VKFrameBuffer.h>
 #include <vulkan/render/VKRenderPass.h>

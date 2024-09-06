@@ -3,24 +3,24 @@
 #include <vector>
 #include <filesystem>
 
-#include <engine/Engine.h>
-#include <util/component/CameraMovementComponent.h>
-#include <util/component/DebugOverlayComponent.h>
-#include <util/component/DockSpaceComponent.h>
-#include <util/component/ViewportComponent.h>
-#include <util/component/SceneTreeComponent.h>
-#include <util/component/GameObjectExplorerComponent.h>
-#include <util/DeferredUtils.h>
-#include <util/ModelUtils.h>
-#include <assimp/AssimpLoader.h>
+#include <neon/Neon.h>
+#include <neon/util/component/CameraMovementComponent.h>
+#include <neon/util/component/DebugOverlayComponent.h>
+#include <neon/util/component/DockSpaceComponent.h>
+#include <neon/util/component/ViewportComponent.h>
+#include <neon/util/component/SceneTreeComponent.h>
+#include <neon/util/component/GameObjectExplorerComponent.h>
+#include <neon/util/DeferredUtils.h>
+#include <neon/util/ModelUtils.h>
+#include <neon/assimp/AssimpLoader.h>
 
 #include "TestVertex.h"
 #include "GlobalParametersUpdaterComponent.h"
 #include "LockMouseComponent.h"
 #include "ConstantRotationComponent.h"
-#include "engine/shader/Material.h"
-#include "engine/shader/MaterialCreateInfo.h"
-#include "engine/shader/ShaderUniformBinding.h"
+#include "neon/render/shader/Material.h"
+#include "neon/render/shader/MaterialCreateInfo.h"
+#include "neon/render/shader/ShaderUniformBinding.h"
 
 constexpr float WIDTH = 800;
 constexpr float HEIGHT = 600;

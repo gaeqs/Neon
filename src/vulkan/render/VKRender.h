@@ -8,8 +8,7 @@
 #include <vector>
 #include <memory>
 
-#include <engine/render/RenderPassStrategy.h>
-#include <util/ClusteredLinkedCollection.h>
+#include <neon/render/RenderPassStrategy.h>
 
 namespace neon {
     class Application;

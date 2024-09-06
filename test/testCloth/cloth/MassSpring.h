@@ -13,7 +13,7 @@
 #include <Eigen/Sparse>
 #include <Eigen/Dense>
 
-#include <engine/Engine.h>
+#include <neon/Neon.h>
 
 #include "ISimulable.h"
 #include "Node.h"

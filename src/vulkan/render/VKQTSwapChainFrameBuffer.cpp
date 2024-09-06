@@ -2,6 +2,8 @@
 // Created by gaelr on 10/06/23.
 //
 
+#ifdef USE_QT
+
 #include "VKQTSwapChainFrameBuffer.h"
 
 #include <vulkan/QTApplication.h>
@@ -91,3 +93,5 @@ uint32_t neon::vulkan::VKQTSwapChainFrameBuffer::getHeight() const {
 bool neon::vulkan::VKQTSwapChainFrameBuffer::renderImGui() {
     return true;
 }
+
+#endif

@@ -4,7 +4,7 @@
 
 #include "BloomRender.h"
 
-#include <util/DeferredUtils.h>
+#include <neon/util/DeferredUtils.h>
 
 #include <utility>
 

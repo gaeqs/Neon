@@ -6,9 +6,8 @@
 
 #include <stdexcept>
 
-#include <engine/model/InputDescription.h>
-#include <engine/render/FrameBuffer.h>
-#include <engine/render/CommandBuffer.h>
+#include <neon/render/model/InputDescription.h>
+#include <neon/render/buffer/FrameBuffer.h>
 #include <vulkan/AbstractVKApplication.h>
 #include <vulkan/util/VulkanConversions.h>
 #include <vulkan/render/VKRenderPass.h>

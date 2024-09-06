@@ -5,7 +5,7 @@
 #ifndef RVTRACKING_TESTVERTEX_H
 #define RVTRACKING_TESTVERTEX_H
 
-#include <engine/model/InputDescription.h>
+#include <neon/render/model/InputDescription.h>
 
 #include <rush/rush.h>
 

@@ -12,7 +12,7 @@
 #include <memory>
 #include <vulkan/vulkan.h>
 
-#include <engine/render/TextureCreateInfo.h>
+#include <neon/render/texture/TextureCreateInfo.h>
 
 namespace neon {
     struct InputDescription;

@@ -10,7 +10,7 @@
 #include "cloth/MassSpring.h"
 
 #include <cstdint>
-#include <engine/Engine.h>
+#include <neon/Neon.h>
 
 class Cloth : public neon::Component {
 

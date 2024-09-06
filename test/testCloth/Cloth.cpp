@@ -12,7 +12,7 @@
 #include <rush/rush.h>
 
 #include "TestVertex.h"
-#include "engine/structure/IdentifiableWrapper.h"
+#include "neon/structure/IdentifiableWrapper.h"
 
 
 void Cloth::generateModel() {
