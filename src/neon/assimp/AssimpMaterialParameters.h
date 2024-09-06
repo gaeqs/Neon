@@ -2,8 +2,8 @@
 // Created by gaelr on 26/10/2022.
 //
 
-#ifndef VRTRACKING_ASSIMPMATERIALPARAMETRS_H
-#define VRTRACKING_ASSIMPMATERIALPARAMETRS_H
+#ifndef NEON_ASSIMPMATERIALPARAMETRS_H
+#define NEON_ASSIMPMATERIALPARAMETRS_H
 
 #include <string>
 
@@ -25,4 +25,4 @@ const std::string EMISSIVE_TEXTURE = "emissiveTexture";
 const std::string DISPLACEMENT_TEXTURE = "displacementTexture";
 const std::string NORMAL_TEXTURE = "normalTexture";
 
-#endif //VRTRACKING_ASSIMPMATERIALPARAMETRS_H
+#endif //NEON_ASSIMPMATERIALPARAMETRS_H

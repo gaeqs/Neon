@@ -2,8 +2,8 @@
 // Created by grial on 31/10/22.
 //
 
-#ifndef VRTRACKING_KEYBOARDEVENT_H
-#define VRTRACKING_KEYBOARDEVENT_H
+#ifndef NEON_KEYBOARDEVENT_H
+#define NEON_KEYBOARDEVENT_H
 
 namespace neon {
 
@@ -159,4 +159,4 @@ namespace neon {
     };
 }
 
-#endif //VRTRACKING_KEYBOARDEVENT_H
+#endif //NEON_KEYBOARDEVENT_H
