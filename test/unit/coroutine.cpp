@@ -5,8 +5,8 @@
 #include <iostream>
 #include <catch2/catch_all.hpp>
 
-#include <util/task/Coroutine.h>
-#include <util/task/TaskRunner.h>
+#include <neon/util/task/Coroutine.h>
+#include <neon/util/task/TaskRunner.h>
 
 
 neon::Coroutine<int> coroutine1() {

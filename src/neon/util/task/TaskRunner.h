@@ -278,14 +278,16 @@ namespace neon {
          * @param args the arguments passed to the function-
          * @return the task that monitors the state of the function.
          */
-        auto executeOnMainThread(auto function,
-                                 auto... args) ->
-            std::shared_ptr<Task<decltype(function(args...))>> {
-            using Return = decltype(function(args...));
-            using Tu = std::tuple<decltype(args)...>;
+        template<typename Func, typename... Args>
+            auto executeOnMainThread(Func&& function,
+                              Args&&... args) -> std::shared_ptr<Task<decltype(
+                function(std::forward<Args>(args)...))>> {
+            using Return = decltype(function(std::forward<Args>(args)...));
+            using Tu = std::tuple<std::decay_t<Args>...>;
             if(_stop) return nullptr;
             std::shared_ptr task = std::make_shared<Task<Return>>();
-            std::shared_ptr tuple = std::make_shared<Tu>(std::move(args)...);
+            std::shared_ptr tuple = std::make_shared<Tu>(
+                std::forward<Args>(args)...);
 
             std::function<void()> run = [
                         task,
@@ -295,11 +297,10 @@ namespace neon {
                 if(task->isCancelled()) return;
                 Tu tu = std::move(*t);
                 if constexpr(std::is_void_v<Return>) {
-                    function(std::move(std::get<decltype(args)>(tu))...);
+                    function(std::move(std::get<std::decay_t<Args>>(tu))...);
                     task->finish();
                 } else {
-                    task->setResult(
-                        function(std::move(std::get<decltype(args)>(tu))...));
+                    task->setResult(function(std::move(std::get<std::decay_t<Args>>(tu))...));
                 }
             };
 
@@ -319,14 +320,16 @@ namespace neon {
          * @param args the arguments passed to the function-
          * @return the task that monitors the state of the function.
          */
-        auto executeAsync(auto function,
-                          auto... args) ->
-            std::shared_ptr<Task<decltype(function(args...))>> {
-            using Return = decltype(function(args...));
-            using Tu = std::tuple<decltype(args)...>;
+        template<typename Func, typename... Args>
+        auto executeAsync(Func&& function,
+                          Args&&... args) -> std::shared_ptr<Task<decltype(
+            function(std::forward<Args>(args)...))>> {
+            using Return = decltype(function(std::forward<Args>(args)...));
+            using Tu = std::tuple<std::decay_t<Args>...>;
             if(_stop) return nullptr;
             std::shared_ptr task = std::make_shared<Task<Return>>();
-            std::shared_ptr tuple = std::make_shared<Tu>(std::move(args)...);
+            std::shared_ptr tuple = std::make_shared<Tu>(
+                std::forward<Args>(args)...);
 
             std::function<void()> run = [
                         task,
@@ -336,11 +339,10 @@ namespace neon {
                 if(task->isCancelled()) return;
                 Tu tu = std::move(*t);
                 if constexpr(std::is_void_v<Return>) {
-                    function(std::move(std::get<decltype(args)>(tu))...);
+                    function(std::move(std::get<std::decay_t<Args>>(tu))...);
                     task->finish();
                 } else {
-                    task->setResult(
-                        function(std::move(std::get<decltype(args)>(tu))...));
+                    task->setResult(function(std::move(std::get<std::decay_t<Args>>(tu))...));
                 }
             };
 

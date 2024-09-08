@@ -5,7 +5,7 @@
 #include <iostream>
 #include <catch2/catch_all.hpp>
 
-#include "util/task/TaskRunner.h"
+#include <neon/util/task/TaskRunner.h>
 
 TEST_CASE("Task wait", "[task]") {
     neon::TaskRunner runner;
@@ -62,13 +62,13 @@ TEST_CASE("Task parameters unique_ptr", "[task]") {
     std::function func = [&finished1](std::unique_ptr<int> a) {
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
         finished1 = true;
-        return a;
+        return std::move(a);
     };
 
     std::function func2 = [&finished2](std::unique_ptr<int> a) {
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
         finished2 = true;
-        return a;
+        return std::move(a);
     };
 
 
