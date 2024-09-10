@@ -46,8 +46,8 @@ std::shared_ptr<ShaderProgram> createShader(Application* application,
 
     auto result = ShaderProgram::createShader(
         application, name, defaultVert, defaultFrag);
-    if(!result.isOk()) {
-        std::cerr << result.getError() << std::endl;
+    if (!result.isOk()) {
+        application->getLogger().error(result.getError());
         throw std::runtime_error(result.getError());
     }
 
@@ -166,9 +166,11 @@ void sansLoadThread(Application* application,
                                           "Sans.obj",
                                           info);
 
-    if(sansResult.error.has_value()) {
-        std::cout << "Couldn't load Sans model!" << std::endl;
-        std::cout << std::filesystem::current_path() << std::endl;
+    if (sansResult.error.has_value()) {
+        application->getLogger().error(
+            MessageBuilder()
+            .print("Couldn't load Sans model! ")
+            .print(std::filesystem::current_path()));
         exit(1);
     }
 
@@ -179,7 +181,7 @@ void sansLoadThread(Application* application,
     buffer->submit();
     buffer->wait();
 
-    std::cout << "SANS UPLOADED!" << std::endl;
+    application->getLogger().done("SANS UPLOADED!");
 
     application->getTaskRunner().executeOnMainThread(
         [application, sansModel] {
@@ -188,12 +190,12 @@ void sansLoadThread(Application* application,
             auto room = application->getRoom();
 
             int q = static_cast<int>(std::sqrt(AMOUNT));
-            for(int i = 0; i < AMOUNT; i++) {
+            for (int i = 0; i < AMOUNT; i++) {
                 auto sans = room->newGameObject();
                 sans->newComponent<GraphicComponent>(sansModel);
                 sans->newComponent<ConstantRotationComponent>();
 
-                if(i == 0) {
+                if (i == 0) {
                     auto sans2 = room->newGameObject();
                     sans2->newComponent<GraphicComponent>(sansModel);
                     sans2->newComponent<ConstantRotationComponent>();
@@ -242,9 +244,11 @@ void loadModels(Application* application, Room* room,
     auto zeppeliResult = assimp_loader::load(R"(resource/Zeppeli)",
                                              "William.obj", zeppeliLoaderInfo);
 
-    if(zeppeliResult.error.has_value()) {
-        std::cout << "Couldn't load zeppeli model!" << std::endl;
-        std::cout << std::filesystem::current_path() << std::endl;
+    if (zeppeliResult.error.has_value()) {
+        application->getLogger().error(
+            MessageBuilder()
+            .print("Couldn't load Zeppeli model! ")
+            .print(std::filesystem::current_path()));
         exit(1);
     }
 
@@ -347,6 +351,7 @@ std::shared_ptr<Room> getTestRoom(Application* application) {
         GameObjectExplorerComponent>();
     parameterUpdater->newComponent<SceneTreeComponent>(goExplorer);
     parameterUpdater->newComponent<DebugOverlayComponent>(false, 100);
+    parameterUpdater->newComponent<LogComponent>();
 
     auto directionalLight = room->newGameObject();
     directionalLight->newComponent<DirectionalLight>();
@@ -388,14 +393,15 @@ int main() {
     application.setRoom(getTestRoom(&application));
 
     auto loopResult = application.startGameLoop();
-    if(loopResult.isOk()) {
-        std::cout << "[APPLICATION]\tApplication closed. "
-                << loopResult.getResult() << " frames generated."
-                << std::endl;
+    if (loopResult.isOk()) {
+        application.getLogger().done(MessageBuilder()
+            .print("Application closed. ")
+            .print(loopResult.getResult(), TextEffect::foreground4bits(2))
+            .print(" frames generated."));
     } else {
-        std::cout << "[APPLICATION]\tUnexpected game loop error: "
-                << loopResult.getError()
-                << std::endl;
+        application.getLogger().done(MessageBuilder()
+            .print("Unexpected game loop error: ")
+            .print(loopResult.getError(), TextEffect::foreground4bits(1)));
     }
 
     application.setRoom(nullptr);

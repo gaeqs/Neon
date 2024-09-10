@@ -33,10 +33,9 @@
 
 namespace neon {
     class Application;
-
     class AssetCollection;
-
     class TaskRunner;
+    class Logger;
 
     /**
      * Represents a component inside a game object.
@@ -217,6 +216,44 @@ namespace neon {
          * @return the task runner.
          */
         [[nodiscard]] TaskRunner& getTaskRunner() const;
+
+        /**
+         * Shortcut to the application's Logger.
+         * @return the logger.
+         */
+        [[nodiscard]] Logger& getLogger() const;
+
+        /**
+         * Prints an info message in the application's logger.
+         * @param message the message.
+         */
+        void info(const std::string& message) const;
+
+
+        /**
+         * Prints a done message in the application's logger.
+         * @param message the message.
+         */
+        void done(const std::string& message) const;
+
+        /**
+         * Prints a debug message in the application's logger.
+         * @param message the message.
+         */
+        void debug(const std::string& message) const;
+
+        /**
+         * Prints a warning message in the application's logger.
+         * @param message the message.
+         */
+        void warning(const std::string& message);
+
+        /**
+         * Prints an error message in the application's logger.
+         * @param message the message.
+         */
+        void error(const std::string& message);
+
 
         /**
          * Concatenates the ImGUI identifier of this component to the
