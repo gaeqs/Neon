@@ -82,7 +82,6 @@ namespace neon {
     }
 
     void LogComponent::onPreDraw() {
-        ImGui::ShowDemoWindow();
         if (ImGui::Begin("Log")) {
             std::unique_lock lock(_mutex);
             ImGuiListClipper clipper;
@@ -115,8 +114,8 @@ namespace neon {
                     }
                 }
             }
-            ImGui::End();
         }
+        ImGui::End();
     }
 
     void LogComponent::
