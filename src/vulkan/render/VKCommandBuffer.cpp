@@ -39,7 +39,8 @@ namespace neon::vulkan {
         _queue = pool.getQueue();
 
         if (_queue == nullptr) {
-            std::cerr << "Queue is null!" << std::endl;
+            _vkApplication->getApplication()->getLogger().error(
+                "Queue is null!");
         }
 
         VkCommandBufferAllocateInfo info{};
@@ -69,7 +70,8 @@ namespace neon::vulkan {
           _freedFences(),
           _external(false) {
         if (_queue == nullptr) {
-            std::cerr << "Queue is null!" << std::endl;
+            _vkApplication->getApplication()->getLogger().error(
+                "Queue is null!");
         }
 
         VkCommandBufferAllocateInfo info{};
@@ -96,7 +98,8 @@ namespace neon::vulkan {
           _status(VKCommandBufferStatus::READY),
           _external(true) {
         if (_queue == nullptr) {
-            std::cerr << "Queue is null!" << std::endl;
+            _vkApplication->getApplication()->getLogger().error(
+                "Queue is null!");
         }
     }
 
@@ -248,11 +251,13 @@ namespace neon::vulkan {
             }
         };
 
-        std::cerr << std::format(
-            "Invalid command buffer status. Actual: {}. Expected: {}.",
-            getName(_status),
-            getName(expected)
-        ) << std::endl;
+        _vkApplication->getApplication()->getLogger().error(MessageBuilder()
+            .group("vulkan")
+            .print("Invalid format buffer status. Actual: ")
+            .print(getName(_status))
+            .print(". Expected: ")
+            .print(getName(expected))
+            .print("."));
     }
 
     void VKCommandBuffer::free() {

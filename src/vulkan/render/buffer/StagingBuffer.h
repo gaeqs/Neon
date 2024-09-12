@@ -18,7 +18,6 @@
 #include <vulkan/AbstractVKApplication.h>
 
 namespace neon::vulkan {
-
     class StagingBuffer;
 
     template<class T>
@@ -37,7 +36,6 @@ namespace neon::vulkan {
         bool _disposed = false;
 
     public:
-
         StagingBufferMap(const StagingBufferMap& other) = delete;
 
         StagingBufferMap(Application* application,
@@ -70,7 +68,7 @@ namespace neon::vulkan {
                   std::move(stagingBuffer)),
               _deviceBuffer(deviceBuffer),
               _map(_stagingBuffer->map<T>(range).value()),
-              _range(range){
+              _range(range) {
             if (_externalCommandBuffer == nullptr) {
                 _poolHolder = application->getCommandManager().
                         fetchCommandPool();
@@ -96,8 +94,11 @@ namespace neon::vulkan {
         }
 
         void disposeStagingBuffer() {
-            if(_disposed) {
-                std::cerr << "Buffer map already disposed" << std::endl;
+            if (_disposed) {
+                Logger::defaultLogger()->warning(MessageBuilder()
+                    .group("vulkan")
+                    .print("Buffer map already disposed"));
+                return;
             }
             if (_map->raw() == nullptr) return;
             _map->dispose();
@@ -153,7 +154,6 @@ namespace neon::vulkan {
             const CommandBuffer* commandBuffer = nullptr) override;
 
     public:
-
         StagingBuffer(const StagingBuffer& other) = delete;
 
         template<class T>

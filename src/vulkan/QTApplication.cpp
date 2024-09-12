@@ -49,8 +49,21 @@ namespace {
                      VkDebugReportObjectTypeEXT objectType, uint64_t object,
                      size_t location, int32_t messageCode,
                      const char* pLayerPrefix, const char* pMessage) {
-        std::cerr << pMessage << std::endl;
-        return false;
+        auto log = neon::Logger::defaultLogger();
+        auto message = neon::MessageBuilder()
+                .group("vulkan")
+                .print(pMessage);
+
+        if (flags & (VK_DEBUG_REPORT_WARNING_BIT_EXT |
+                     VK_DEBUG_REPORT_PERFORMANCE_WARNING_BIT_EXT))
+            log->warning(message);
+        else if (flags & VK_DEBUG_REPORT_ERROR_BIT_EXT)
+            log->error(message);
+        else if (flags & VK_DEBUG_REPORT_DEBUG_BIT_EXT)
+            log->debug(message);
+        else log->info(message);
+
+        return true;
     }
 }
 
@@ -161,7 +174,8 @@ neon::CommandPool* neon::vulkan::QTApplication::getCommandPool() const {
 }
 
 VkSwapchainKHR neon::vulkan::QTApplication::getSwapChain() const {
-    std::cerr << "QTApplication doesn't expose a swap chain!" << std::endl;
+    _application->getLogger().error(
+        "QTApplication doesn't expose a swap chain!");
     return nullptr;
 }
 
