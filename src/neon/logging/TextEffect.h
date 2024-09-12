@@ -28,6 +28,9 @@ namespace neon {
         BRIGHT_WHITE = 15,
     };
 
+    /**
+     * Represents a text effect you can use on messages.
+     */
     struct TextEffect {
         uint8_t code;
         uint8_t metadata[4];

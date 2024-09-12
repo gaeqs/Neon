@@ -76,7 +76,7 @@ namespace neon {
                              const std::vector<const MessageGroup*>& groups) {
         printLocation(message.sourceLocation);
         for (auto* group: groups | std::ranges::views::reverse) {
-            for (auto& part: group->prefix) {
+            for (auto& part: group->prefix.parts) {
                 printPart(part);
             }
         }

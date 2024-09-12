@@ -94,7 +94,7 @@ namespace neon {
                     auto& [message, groups] = _messages.at(row);
                     bool first = !printLocation(message.sourceLocation);
                     for (auto& group: groups) {
-                        for (auto& prefix: group.prefix) {
+                        for (auto& prefix: group.prefix.parts) {
                             if (first) first = false;
                             else ImGui::SameLine(0, 0);
                             printPart(prefix);

@@ -156,7 +156,8 @@ namespace neon {
         return *this;
     }
 
-    MessageGroupBuilder& MessageGroupBuilder::print(std::string message, TextEffect effect) {
+    MessageGroupBuilder& MessageGroupBuilder::print(
+        std::string message, TextEffect effect) {
         MessagePart part;
         part.text = std::move(message);
         part.effects.reserve(_effectAmount);
@@ -172,13 +173,15 @@ namespace neon {
         return *this;
     }
 
-    MessageGroupBuilder& MessageGroupBuilder::println(const std::string& message) {
+    MessageGroupBuilder&
+    MessageGroupBuilder::println(const std::string& message) {
         print(message + "\n");
         return *this;
     }
 
-    MessageGroupBuilder& MessageGroupBuilder::println(const std::string& message,
-                                      TextEffect effect) {
+    MessageGroupBuilder&
+    MessageGroupBuilder::println(const std::string& message,
+                                 TextEffect effect) {
         print(message + "\n", effect);
         return *this;
     }
@@ -186,7 +189,7 @@ namespace neon {
     MessageGroup MessageGroupBuilder::build(std::string name) const {
         MessageGroup group;
         group.name = std::move(name);
-        group.prefix = _builtMessages;
+        group.prefix.parts = _builtMessages;
         return group;
     }
 }
