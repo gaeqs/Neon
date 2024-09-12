@@ -11,6 +11,9 @@
 #include <neon/util/component/LogComponent.h>
 
 namespace neon {
+    /**
+     * Logger output used by a LogComponent.
+     */
     class ImGuiLogOutput : public LogOutput {
         IdentifiableWrapper<LogComponent> _component;
 
