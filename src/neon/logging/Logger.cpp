@@ -61,19 +61,19 @@ namespace neon {
         _groups[group.name] = std::move(group);
     }
 
-    void Logger::removeGroup(const std::string& group) {
+    bool Logger::removeGroup(const std::string& group) {
         std::unique_lock lock(_mutex);
-        _groups.erase(group);
+        return _groups.erase(group) > 0;
     }
 
-    void Logger::removeOutput(uint64_t id) {
+    bool Logger::removeOutput(uint64_t id) {
         std::unique_lock lock(_mutex);
-        std::erase_if(
+        return std::erase_if(
             _outputs,
             [id](const std::unique_ptr<LogOutput>& output) {
                 return output->getId() == id;
             }
-        );
+        ) > 0;
     }
 
     void Logger::print(const Message& message) const {

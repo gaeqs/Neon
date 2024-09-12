@@ -13,20 +13,42 @@
 #include "TextEffect.h"
 
 namespace neon {
+    /**
+     * Represents a part of a message.
+     */
     struct MessagePart {
         std::vector<TextEffect> effects;
         std::string text;
     };
 
+    /**
+     * Represents a message that can be printed
+     * by a Logger.
+     * <p>
+     * Messages contains the time point and the source location
+     * where it was created.
+     * It is recommended send MessageBuilders to loggers instead
+     * of messages.
+     * <p>
+     * A message is split in several part, each one with several
+     * styles that tells the output how to format the part.
+     */
     struct Message {
         std::chrono::system_clock::time_point timePoint;
         std::source_location sourceLocation;
         std::vector<std::string> groups;
         std::vector<MessagePart> parts;
 
+        /**
+         * Creates an empty message.
+         */
         explicit Message(std::source_location location =
                 std::source_location::current());
 
+        /**
+         * Creates a message containing only one part with the given string.
+         * @param message the given string.
+         */
         explicit Message(std::string message,
                          std::source_location location =
                                  std::source_location::current());
@@ -131,7 +153,8 @@ namespace neon {
 
         MessageGroupBuilder& println(const std::string& message);
 
-        MessageGroupBuilder& println(const std::string& message, TextEffect effect);
+        MessageGroupBuilder& println(const std::string& message,
+                                     TextEffect effect);
 
         [[nodiscard]] MessageGroup build(std::string name) const;
     };
