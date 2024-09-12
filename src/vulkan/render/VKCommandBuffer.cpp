@@ -121,8 +121,12 @@ namespace neon::vulkan {
                               : 0;
         VkResult result = vkBeginCommandBuffer(_commandBuffer, &beginInfo);
         if (result != VK_SUCCESS) {
-            std::cout << "Error starting command buffer " << _commandBuffer <<
-                    ". Resturn status: " << result << "." << std::endl;
+            _vkApplication->getApplication()->getLogger().error(MessageBuilder()
+                .print("Error starting command buffer ")
+                .print(_commandBuffer)
+                .print(". Return status: ")
+                .print(result, TextEffect::foreground4bits(1))
+                .print("."));
             return false;
         }
         _status = VKCommandBufferStatus::RECORDING;

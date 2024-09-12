@@ -23,20 +23,18 @@
 // Created by grial on 7/06/23.
 //
 
+#include <neon/io/KeyboardEvent.h>
 #ifdef USE_QT
 
 #include "QTApplication.h"
 
-#include <iostream>
 #include <utility>
 
-#include <engine/structure/Room.h>
+#include <neon/structure/Room.h>
 
-#include <QMouseEvent>
 #include <QWheelEvent>
 #include <QSurface>
 #include <QVulkanFunctions>
-#include <engine/io/KeyboardEvent.h>
 
 #include <vulkan/vulkan.h>
 #include <vulkan/vulkan_core.h>
@@ -67,8 +65,7 @@ neon::vulkan::QTApplication::QTApplication()
       _lastFrameProcessTime(0.0f),
       _swapChainCount(0),
       _recording(false),
-      _imGuiPool(VK_NULL_HANDLE) {
-}
+      _imGuiPool(VK_NULL_HANDLE) {}
 
 void neon::vulkan::QTApplication::init(neon::Application* application) {
     _application = application;
@@ -242,28 +239,10 @@ void neon::vulkan::QTApplication::preInitResources() {
         [queueCreateInfos](const VkQueueFamilyProperties* prop,
                            uint32_t amount,
                            QVector<VkDeviceQueueCreateInfo>& vec) {
-            auto def = vec.front();
-            std::cout << "DEFAULT INFO: " << std::endl;
-            std::cout << " - Family infex:" << def.queueFamilyIndex <<
-                    std::endl;
-            std::cout << " - Queue count:" << def.queueCount << std::endl;
-            std::cout << " - Queue priorities:" << *def.pQueuePriorities <<
-                    std::endl;
-
-            def = queueCreateInfos.front();
-
-            std::cout << "REMPLACE INFO: " << std::endl;
-            std::cout << " - Family infex:" << def.queueFamilyIndex <<
-                    std::endl;
-            std::cout << " - Queue count:" << def.queueCount << std::endl;
-            std::cout << " - Queue priorities:" << *def.pQueuePriorities <<
-                    std::endl;
-
-
-            /* vec.clear();
-             for (auto& info : queueCreateInfos) {
-                 vec.push_back(info);
-             }*/
+            vec.clear();
+            for (auto& info: queueCreateInfos) {
+                vec.push_back(info);
+            }
         }
     );
 }
@@ -287,11 +266,9 @@ void neon::vulkan::QTApplication::initSwapChainResources() {
     ++_swapChainCount;
 }
 
-void neon::vulkan::QTApplication::releaseSwapChainResources() {
-}
+void neon::vulkan::QTApplication::releaseSwapChainResources() {}
 
-void neon::vulkan::QTApplication::releaseResources() {
-}
+void neon::vulkan::QTApplication::releaseResources() {}
 
 void neon::vulkan::QTApplication::startNextFrame() {
     _recording = true;
@@ -307,11 +284,9 @@ void neon::vulkan::QTApplication::startNextFrame() {
     _recording = false;
 }
 
-void neon::vulkan::QTApplication::physicalDeviceLost() {
-}
+void neon::vulkan::QTApplication::physicalDeviceLost() {}
 
-void neon::vulkan::QTApplication::logicalDeviceLost() {
-}
+void neon::vulkan::QTApplication::logicalDeviceLost() {}
 
 QVulkanWindowRenderer* neon::vulkan::QTApplication::createRenderer() {
     return this;

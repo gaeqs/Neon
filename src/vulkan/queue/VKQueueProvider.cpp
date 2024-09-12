@@ -3,7 +3,6 @@
 //
 
 #include "VKQueueProvider.h"
-#include <iostream>
 
 namespace neon::vulkan {
     void VKQueueProvider::freeQueue(uint32_t family, uint32_t index) {

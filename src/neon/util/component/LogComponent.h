@@ -11,7 +11,7 @@
 
 namespace neon {
     class LogComponent : public Component {
-        std::vector<std::pair<Message, std::optional<MessageGroup>>> _messages;
+        std::vector<std::pair<Message, std::vector<MessageGroup>>> _messages;
         mutable std::mutex _mutex;
         SimpleMessage _locationMessage;
 
@@ -29,7 +29,7 @@ namespace neon {
         void onPreDraw() override;
 
         void addMessage(const Message& message,
-                        const MessageGroup* group);
+                        const std::vector<const MessageGroup*>& groups);
     };
 }
 

@@ -21,7 +21,7 @@ namespace neon {
     struct Message {
         std::chrono::system_clock::time_point timePoint;
         std::source_location sourceLocation;
-        std::optional<std::string> group;
+        std::vector<std::string> groups;
         std::vector<MessagePart> parts;
 
         explicit Message(std::source_location location =
@@ -47,7 +47,7 @@ namespace neon {
 
 
     class MessageBuilder {
-        std::optional<std::string> _group;
+        std::vector<std::string> _groups;
         std::vector<MessagePart> _builtMessages;
         std::vector<std::vector<TextEffect>> _stack;
         size_t _effectAmount;
@@ -57,7 +57,7 @@ namespace neon {
 
         MessageBuilder& group(std::string group);
 
-        MessageBuilder& removeGroup();
+        MessageBuilder& removeGroups();
 
         MessageBuilder& push();
 
@@ -119,19 +119,19 @@ namespace neon {
     public:
         MessageGroupBuilder();
 
-        void push();
+        MessageGroupBuilder& push();
 
-        bool pop();
+        MessageGroupBuilder& pop();
 
-        void effect(TextEffect effect);
+        MessageGroupBuilder& effect(TextEffect effect);
 
-        void print(std::string message);
+        MessageGroupBuilder& print(std::string message);
 
-        void print(std::string message, TextEffect effect);
+        MessageGroupBuilder& print(std::string message, TextEffect effect);
 
-        void println(const std::string& message);
+        MessageGroupBuilder& println(const std::string& message);
 
-        void println(const std::string& message, TextEffect effect);
+        MessageGroupBuilder& println(const std::string& message, TextEffect effect);
 
         [[nodiscard]] MessageGroup build(std::string name) const;
     };

@@ -12,7 +12,7 @@ namespace neon {
     ImGuiLogOutput::~ImGuiLogOutput() = default;
 
     void ImGuiLogOutput::print(const Message& message,
-                               const MessageGroup* group) {
-        _component->addMessage(message, group);
+                               const std::vector<const MessageGroup*>& groups) {
+        _component->addMessage(message, groups);
     }
 }

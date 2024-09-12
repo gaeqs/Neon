@@ -6,9 +6,10 @@
 #define STDLOGOUTPUT_H
 
 #include <source_location>
+#include <vector>
 
-#include "LogOutput.h"
-#include "Message.h"
+#include <neon/logging/LogOutput.h>
+#include <neon/logging/Message.h>
 
 
 namespace neon {
@@ -27,7 +28,7 @@ namespace neon {
         STDLogOutput(const STDLogOutput& other) = delete;
 
         void print(const Message& message,
-                   const MessageGroup* group) override;
+                   const std::vector<const MessageGroup*>& groups) override;
     };
 }
 

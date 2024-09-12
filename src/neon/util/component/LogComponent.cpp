@@ -7,6 +7,7 @@
 #include <filesystem>
 
 #include <imgui.h>
+#include <ranges>
 #include <neon/Application.h>
 #include <neon/logging/ImGuiLogOutput.h>
 #include <neon/logging/Logger.h>
@@ -90,14 +91,21 @@ namespace neon {
             while (clipper.Step()) {
                 for (int row = clipper.DisplayStart;
                      row < clipper.DisplayEnd; row++) {
-                    auto& [message, group] = _messages.at(row);
+                    auto& [message, groups] = _messages.at(row);
                     bool first = !printLocation(message.sourceLocation);
-                    if (group.has_value()) {
-                        for (auto& prefix: group->prefix) {
+                    for (auto& group: groups) {
+                        for (auto& prefix: group.prefix) {
                             if (first) first = false;
                             else ImGui::SameLine(0, 0);
                             printPart(prefix);
                         }
+                    }
+
+                    if (!first) {
+                        if (!message.parts.empty()) {
+                            ImGui::SameLine();
+                        }
+                        first = true;
                     }
 
                     for (auto& part: message.parts) {
@@ -111,11 +119,18 @@ namespace neon {
         }
     }
 
-    void LogComponent::addMessage(const Message& message,
-                                  const MessageGroup* group) {
+    void LogComponent::
+    addMessage(const Message& message,
+               const std::vector<const MessageGroup*>& groups) {
         std::unique_lock lock(_mutex);
-        std::optional<MessageGroup> g;
-        if (group != nullptr) g = *group;
+
+        std::vector<MessageGroup> g;
+        g.reserve(groups.size());
+
+        for (const auto* group: groups | std::ranges::views::reverse) {
+            g.emplace_back(*group);
+        }
+
         _messages.emplace_back(message, g);
     }
 }

@@ -4,7 +4,6 @@
 
 #include "AssimpNewIOSystem.h"
 
-#include <iostream>
 #include <assimp/DefaultIOStream.h>
 
 #include <utility>

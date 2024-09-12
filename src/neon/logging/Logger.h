@@ -4,6 +4,7 @@
 
 #ifndef LOGGER_H
 #define LOGGER_H
+
 #include <memory>
 #include <unordered_map>
 #include <vector>
@@ -24,7 +25,8 @@ namespace neon {
         Logger(const Logger& other) = delete;
 
         explicit Logger(bool withDefaultGroups = true,
-                        bool withDefaultOutput = true);
+                        bool withDefaultOutput = true,
+                        bool defaultLogger = false);
 
         void addOutput(std::unique_ptr<LogOutput>&& output);
 
@@ -113,6 +115,8 @@ namespace neon {
 
 
         // endregion
+
+        static Logger* defaultLogger();
     };
 }
 

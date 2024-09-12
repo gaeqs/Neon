@@ -5,6 +5,7 @@
 #ifndef IMGUILOGOUTPUT_H
 #define IMGUILOGOUTPUT_H
 
+#include <vector>
 #include <neon/logging/LogOutput.h>
 #include <neon/structure/IdentifiableWrapper.h>
 #include <neon/util/component/LogComponent.h>
@@ -18,7 +19,8 @@ namespace neon {
 
         ~ImGuiLogOutput() override;
 
-        void print(const Message& message, const MessageGroup* group) override;
+        void print(const Message& message,
+                   const std::vector<const MessageGroup*>& groups) override;
     };
 }
 

@@ -4,8 +4,8 @@
 
 #include "STDLogOutput.h"
 
-#include <iostream>
 #include <filesystem>
+#include <ranges>
 
 #include "Message.h"
 
@@ -73,12 +73,15 @@ namespace neon {
     };
 
     void STDLogOutput::print(const Message& message,
-                             const MessageGroup* group) {
+                             const std::vector<const MessageGroup*>& groups) {
         printLocation(message.sourceLocation);
-        if (group != nullptr) {
-            for (auto& prefix: group->prefix) {
-                printPart(prefix);
+        for (auto* group: groups | std::ranges::views::reverse) {
+            for (auto& part: group->prefix) {
+                printPart(part);
             }
+        }
+        if (!groups.empty()) {
+            std::cout << " ";
         }
         for (const auto& part: message.parts) {
             printPart(part);

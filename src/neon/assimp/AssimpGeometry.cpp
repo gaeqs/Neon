@@ -2,7 +2,6 @@
 // Created by gaelr on 26/01/2023.
 //
 
-#include <iostream>
 #include "AssimpGeometry.h"
 
 namespace assimp_geometry {

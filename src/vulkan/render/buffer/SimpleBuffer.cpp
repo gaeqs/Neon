@@ -8,7 +8,6 @@
 
 #include <vulkan/util/VKUtil.h>
 #include <vulkan/AbstractVKApplication.h>
-#include <iostream>
 
 namespace neon::vulkan {
     std::optional<std::shared_ptr<BufferMap<char>>> SimpleBuffer::rawMap(

@@ -30,12 +30,12 @@ namespace neon {
     }
 
     MessageBuilder& MessageBuilder::group(std::string group) {
-        _group = std::move(group);
+        _groups.push_back(std::move(group));
         return *this;
     }
 
-    MessageBuilder& MessageBuilder::removeGroup() {
-        _group = nullptr;
+    MessageBuilder& MessageBuilder::removeGroups() {
+        _groups.clear();
         return *this;
     }
 
@@ -106,7 +106,7 @@ namespace neon {
         Message message(location);
         message.parts = _builtMessages;
         message.timePoint = std::chrono::system_clock::now();
-        message.group = _group;
+        message.groups = _groups;
         return message;
     }
 
@@ -120,26 +120,28 @@ namespace neon {
         _stack.emplace_back();
     }
 
-    void MessageGroupBuilder::push() {
+    MessageGroupBuilder& MessageGroupBuilder::push() {
         _stack.emplace_back();
+        return *this;
     }
 
-    bool MessageGroupBuilder::pop() {
+    MessageGroupBuilder& MessageGroupBuilder::pop() {
         if (_stack.size() < 2) {
             _stack[0].clear();
             _effectAmount = 0;
         }
         _effectAmount -= _stack.back().size();
         _stack.pop_back();
-        return true;
+        return *this;
     }
 
-    void MessageGroupBuilder::effect(TextEffect effect) {
+    MessageGroupBuilder& MessageGroupBuilder::effect(TextEffect effect) {
         _stack.back().push_back(effect);
         ++_effectAmount;
+        return *this;
     }
 
-    void MessageGroupBuilder::print(std::string message) {
+    MessageGroupBuilder& MessageGroupBuilder::print(std::string message) {
         MessagePart part;
         part.text = std::move(message);
         part.effects.reserve(_effectAmount);
@@ -151,9 +153,10 @@ namespace neon {
             );
         }
         _builtMessages.push_back(std::move(part));
+        return *this;
     }
 
-    void MessageGroupBuilder::print(std::string message, TextEffect effect) {
+    MessageGroupBuilder& MessageGroupBuilder::print(std::string message, TextEffect effect) {
         MessagePart part;
         part.text = std::move(message);
         part.effects.reserve(_effectAmount);
@@ -166,15 +169,18 @@ namespace neon {
             part.effects.push_back(effect);
         }
         _builtMessages.push_back(std::move(part));
+        return *this;
     }
 
-    void MessageGroupBuilder::println(const std::string& message) {
+    MessageGroupBuilder& MessageGroupBuilder::println(const std::string& message) {
         print(message + "\n");
+        return *this;
     }
 
-    void MessageGroupBuilder::println(const std::string& message,
+    MessageGroupBuilder& MessageGroupBuilder::println(const std::string& message,
                                       TextEffect effect) {
         print(message + "\n", effect);
+        return *this;
     }
 
     MessageGroup MessageGroupBuilder::build(std::string name) const {

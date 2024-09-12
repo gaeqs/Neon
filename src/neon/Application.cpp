@@ -16,9 +16,10 @@ namespace neon {
         implementation) : _implementation(std::move(implementation)),
                           _room(nullptr),
                           _lastCursorPosition(0.0, 0.0),
-                          _commandManager(this) {}
+                          _commandManager(this),
+                          _logger(true, true, true) {}
 
-    Application::~Application() {}
+    Application::~Application() = default;
 
     void Application::init() {
         _implementation->init(this);

@@ -44,8 +44,7 @@ namespace neon::vulkan {
                 _buffers.emplace_back();
                 _data.emplace_back();
                 ++textureAmount;
-            }
-            else {
+            } else {
                 std::vector<std::shared_ptr<Buffer>> buffers;
                 _buffers.push_back(std::make_shared<StagingBuffer>(
                     _vkApplication,
@@ -185,7 +184,8 @@ namespace neon::vulkan {
                         memcpy(optional.value()->raw(), data.data(),
                                data.size());
                     } else {
-                        std::cout << "Optional has no value" << std::endl;
+                        _vkApplication->getApplication()->getLogger()
+                                .error("Optional has no value.");
                     }
                 }
                 break;
@@ -204,8 +204,7 @@ namespace neon::vulkan {
                         imageInfo.imageView = impl.getImageView();
                         imageInfo.sampler = impl.getSampler();
                         imageInfo.imageLayout = impl.getLayout();
-                    }
-                    else {
+                    } else {
                         imageInfo.imageView = VK_NULL_HANDLE;
                         imageInfo.sampler = VK_NULL_HANDLE;
                         imageInfo.imageLayout =

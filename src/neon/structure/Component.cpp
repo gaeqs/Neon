@@ -4,11 +4,8 @@
 
 #include "Component.h"
 
-#include <iostream>
-
 #include <neon/structure/GameObject.h>
 #include <neon/structure/Room.h>
-#include <neon/structure/collection/AssetCollection.h>
 
 namespace neon {
     uint64_t COMPONENT_ID_GENERATOR = 1;

@@ -29,7 +29,7 @@ namespace neon {
                 _modelTargetId = result.getResult();
             }
             else {
-                std::cerr << result.getError() << std::endl;
+                error(result.getError());
             }
         }
     }
@@ -65,7 +65,9 @@ namespace neon {
                 _modelTargetId = result.getResult();
             }
             else {
-                std::cerr << result.getError() << std::endl;
+                getLogger().error(MessageBuilder()
+                    .print("Error creating a render instance: ")
+                    .print(result.getError()));
                 _modelTargetId = {};
             }
         }

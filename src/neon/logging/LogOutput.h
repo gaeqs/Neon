@@ -4,6 +4,8 @@
 
 #ifndef LOGOUTPUT_H
 #define LOGOUTPUT_H
+
+#include <vector>
 #include <neon/structure/Identifiable.h>
 
 
@@ -22,7 +24,7 @@ namespace neon {
         [[nodiscard]] uint64_t getId() const override;
 
         virtual void print(const Message& message,
-                           const MessageGroup* group) = 0;
+                           const std::vector<const MessageGroup*>& group) = 0;
     };
 }
 
