@@ -80,6 +80,14 @@ namespace neon::vulkan {
         auto entry = map.find(threadId);
         if (entry != map.end()) {
             entry->second.amount++;
+            Logger::defaultLogger()->debug(MessageBuilder()
+             .group("vulkan")
+             .print("Queue already found: ")
+             .print(familyIndex)
+             .print(":")
+             .print(entry->second.index)
+             .print(" Thread id: ")
+             .print(threadId));
             return {
                 this,
                 entry->second.queue,
@@ -101,7 +109,12 @@ namespace neon::vulkan {
         vkGetDeviceQueue(_device, familyIndex, index, &queue);
 
         map[threadId] = UsedQueue(index, queue, 1);
-
+        Logger::defaultLogger()->debug(MessageBuilder()
+                   .group("vulkan")
+                   .print("Queue created: ")
+                   .print(familyIndex)
+                   .print(":")
+                   .print(index));
         return {this, queue, familyIndex, index};
     }
 
@@ -126,6 +139,12 @@ namespace neon::vulkan {
                 auto entry = map.find(threadId);
                 if (entry != map.end()) {
                     entry->second.amount++;
+                    Logger::defaultLogger()->debug(MessageBuilder()
+                        .group("vulkan")
+                        .print("Queue already found: ")
+                        .print(familyIndex)
+                        .print(":")
+                        .print(entry->second.index));
                     return {
                         this,
                         entry->second.queue,
@@ -138,6 +157,13 @@ namespace neon::vulkan {
                 if (!queues.empty()) {
                     uint32_t index = queues.back();
                     queues.pop_back();
+
+                    Logger::defaultLogger()->debug(MessageBuilder()
+                           .group("vulkan")
+                           .print("Queue created: ")
+                           .print(familyIndex)
+                           .print(":")
+                           .print(index));
 
                     VkQueue queue;
                     vkGetDeviceQueue(_device, familyIndex, index, &queue);
@@ -198,7 +224,17 @@ namespace neon::vulkan {
         available.erase(pos);
 
         VkQueue queue;
-        vkGetDeviceQueue(_device, index, index, &queue);
+        vkGetDeviceQueue(_device, family, index, &queue);
+
+        Logger::defaultLogger()->debug(MessageBuilder()
+            .group("vulkan")
+            .print("Queue ")
+            .print(family)
+            .print(":")
+            .print(index)
+            .print(" (")
+            .print(std::format("{:#x}", reinterpret_cast<uint64_t>(queue)))
+            .print(") has been added to the used list."));
 
         map[thread] = UsedQueue(index, queue, 1);
         return true;

@@ -24,6 +24,7 @@
 //
 
 #include <neon/io/KeyboardEvent.h>
+#include <vulkan/vulkan_core.h>
 #ifdef USE_QT
 
 #include "QTApplication.h"
@@ -268,7 +269,31 @@ void neon::vulkan::QTApplication::initResources() {
         _presentQueues
     );
 
-    _device->getQueueProvider()->markUsed(std::this_thread::get_id(), 0, 0);
+    _application->getLogger().debug(MessageBuilder()
+        .print("Family: ")
+        .print(graphicsQueueFamilyIndex()));
+
+    // Fetch queue index:
+    size_t family = graphicsQueueFamilyIndex();
+    VkQueue queue = graphicsQueue();
+    VkQueue fetchedQueue;
+    size_t index = 0;
+    do {
+        vkGetDeviceQueue(_device->getRaw(), family, index, &fetchedQueue);
+        ++index;
+    } while(queue != fetchedQueue);
+    --index;
+
+    _application->getLogger().debug(MessageBuilder()
+        .print("Index: ")
+        .print(index));
+
+
+    _device->getQueueProvider()->markUsed(
+        std::this_thread::get_id(),
+        graphicsQueueFamilyIndex(),
+        index
+    );
 
     initImGui();
     if (_onInit) {
