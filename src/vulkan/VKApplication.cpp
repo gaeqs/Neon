@@ -150,7 +150,6 @@ namespace neon::vulkan {
             .print("]", TextEffect::foreground4bits(6))
             .build("vulkan"));
 
-        glfwInitHint(GLFW_PLATFORM, GLFW_PLATFORM_X11);
         if (!glfwInit()) {
             const char* error;
             glfwGetError(&error);

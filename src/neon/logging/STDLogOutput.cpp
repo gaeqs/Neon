@@ -15,7 +15,7 @@ namespace neon {
 
 
         auto path = std::filesystem::path(location.file_name());
-        std::string file = path.filename();
+        std::string file = path.filename().string();
         std::string line = std::to_string(location.line());
 
         for (auto part: _locationMessage.parts) {
