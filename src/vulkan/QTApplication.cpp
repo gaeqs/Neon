@@ -23,20 +23,19 @@
 // Created by grial on 7/06/23.
 //
 
+#include <neon/io/KeyboardEvent.h>
+#include <vulkan/vulkan_core.h>
 #ifdef USE_QT
 
 #include "QTApplication.h"
 
-#include <iostream>
 #include <utility>
 
-#include <engine/structure/Room.h>
+#include <neon/structure/Room.h>
 
-#include <QMouseEvent>
 #include <QWheelEvent>
 #include <QSurface>
 #include <QVulkanFunctions>
-#include <engine/io/KeyboardEvent.h>
 
 #include <vulkan/vulkan.h>
 #include <vulkan/vulkan_core.h>
@@ -51,8 +50,21 @@ namespace {
                      VkDebugReportObjectTypeEXT objectType, uint64_t object,
                      size_t location, int32_t messageCode,
                      const char* pLayerPrefix, const char* pMessage) {
-        std::cerr << pMessage << std::endl;
-        return false;
+        auto log = neon::Logger::defaultLogger();
+        auto message = neon::MessageBuilder()
+                .group("vulkan")
+                .print(pMessage);
+
+        if (flags & (VK_DEBUG_REPORT_WARNING_BIT_EXT |
+                     VK_DEBUG_REPORT_PERFORMANCE_WARNING_BIT_EXT))
+            log->warning(message);
+        else if (flags & VK_DEBUG_REPORT_ERROR_BIT_EXT)
+            log->error(message);
+        else if (flags & VK_DEBUG_REPORT_DEBUG_BIT_EXT)
+            log->debug(message);
+        else log->info(message);
+
+        return true;
     }
 }
 
@@ -67,8 +79,7 @@ neon::vulkan::QTApplication::QTApplication()
       _lastFrameProcessTime(0.0f),
       _swapChainCount(0),
       _recording(false),
-      _imGuiPool(VK_NULL_HANDLE) {
-}
+      _imGuiPool(VK_NULL_HANDLE) {}
 
 void neon::vulkan::QTApplication::init(neon::Application* application) {
     _application = application;
@@ -155,7 +166,7 @@ neon::CommandPool* neon::vulkan::QTApplication::getCommandPool() const {
             _commandPool = std::make_unique<CommandPool>(
                 getApplication(),
                 pool,
-                graphicsQueue()
+                graphicsQueueFamilyIndex()
             );
         }
     }
@@ -164,7 +175,8 @@ neon::CommandPool* neon::vulkan::QTApplication::getCommandPool() const {
 }
 
 VkSwapchainKHR neon::vulkan::QTApplication::getSwapChain() const {
-    std::cerr << "QTApplication doesn't expose a swap chain!" << std::endl;
+    _application->getLogger().error(
+        "QTApplication doesn't expose a swap chain!");
     return nullptr;
 }
 
@@ -242,28 +254,10 @@ void neon::vulkan::QTApplication::preInitResources() {
         [queueCreateInfos](const VkQueueFamilyProperties* prop,
                            uint32_t amount,
                            QVector<VkDeviceQueueCreateInfo>& vec) {
-            auto def = vec.front();
-            std::cout << "DEFAULT INFO: " << std::endl;
-            std::cout << " - Family infex:" << def.queueFamilyIndex <<
-                    std::endl;
-            std::cout << " - Queue count:" << def.queueCount << std::endl;
-            std::cout << " - Queue priorities:" << *def.pQueuePriorities <<
-                    std::endl;
-
-            def = queueCreateInfos.front();
-
-            std::cout << "REMPLACE INFO: " << std::endl;
-            std::cout << " - Family infex:" << def.queueFamilyIndex <<
-                    std::endl;
-            std::cout << " - Queue count:" << def.queueCount << std::endl;
-            std::cout << " - Queue priorities:" << *def.pQueuePriorities <<
-                    std::endl;
-
-
-            /* vec.clear();
-             for (auto& info : queueCreateInfos) {
-                 vec.push_back(info);
-             }*/
+            vec.clear();
+            for (auto& info: queueCreateInfos) {
+                vec.push_back(info);
+            }
         }
     );
 }
@@ -275,7 +269,31 @@ void neon::vulkan::QTApplication::initResources() {
         _presentQueues
     );
 
-    _device->getQueueProvider()->markUsed(std::this_thread::get_id(), 0, 0);
+    _application->getLogger().debug(MessageBuilder()
+        .print("Family: ")
+        .print(graphicsQueueFamilyIndex()));
+
+    // Fetch queue index:
+    size_t family = graphicsQueueFamilyIndex();
+    VkQueue queue = graphicsQueue();
+    VkQueue fetchedQueue;
+    size_t index = 0;
+    do {
+        vkGetDeviceQueue(_device->getRaw(), family, index, &fetchedQueue);
+        ++index;
+    } while(queue != fetchedQueue);
+    --index;
+
+    _application->getLogger().debug(MessageBuilder()
+        .print("Index: ")
+        .print(index));
+
+
+    _device->getQueueProvider()->markUsed(
+        std::this_thread::get_id(),
+        graphicsQueueFamilyIndex(),
+        index
+    );
 
     initImGui();
     if (_onInit) {
@@ -287,11 +305,9 @@ void neon::vulkan::QTApplication::initSwapChainResources() {
     ++_swapChainCount;
 }
 
-void neon::vulkan::QTApplication::releaseSwapChainResources() {
-}
+void neon::vulkan::QTApplication::releaseSwapChainResources() {}
 
-void neon::vulkan::QTApplication::releaseResources() {
-}
+void neon::vulkan::QTApplication::releaseResources() {}
 
 void neon::vulkan::QTApplication::startNextFrame() {
     _recording = true;
@@ -307,11 +323,9 @@ void neon::vulkan::QTApplication::startNextFrame() {
     _recording = false;
 }
 
-void neon::vulkan::QTApplication::physicalDeviceLost() {
-}
+void neon::vulkan::QTApplication::physicalDeviceLost() {}
 
-void neon::vulkan::QTApplication::logicalDeviceLost() {
-}
+void neon::vulkan::QTApplication::logicalDeviceLost() {}
 
 QVulkanWindowRenderer* neon::vulkan::QTApplication::createRenderer() {
     return this;

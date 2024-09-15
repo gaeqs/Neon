@@ -6,28 +6,23 @@
 
 namespace neon {
     CommandBuffer::CommandBuffer(CommandBuffer&& move) noexcept
-        : _implementation(std::move(move._implementation)) {
-    }
+        : _implementation(std::move(move._implementation)) {}
 
     CommandBuffer::CommandBuffer(Application* application,
                                  bool primary)
-        : _implementation(application, primary) {
-    }
+        : _implementation(application, primary) {}
 
 
 #ifdef USE_VULKAN
 
-    CommandBuffer::CommandBuffer(Application* application, VkCommandPool pool,
-                                 VkQueue queue,
+    CommandBuffer::CommandBuffer(const vulkan::VKCommandPool& pool,
                                  bool primary)
-        : _implementation(application, pool, queue, primary) {
-    }
+        : _implementation(pool, primary) {}
 
     CommandBuffer::CommandBuffer(Application* application,
                                  VkCommandBuffer commandBuffer,
                                  VkQueue queue)
-        : _implementation(application, commandBuffer, queue) {
-    }
+        : _implementation(application, commandBuffer, queue) {}
 
 #endif
 

@@ -43,8 +43,7 @@ namespace neon::vulkan {
 
             if (size == 0) {
                 _instancingBuffers.push_back(nullptr);
-            }
-            else {
+            } else {
                 _instancingBuffers.push_back(std::make_unique<StagingBuffer>(
                     dynamic_cast<AbstractVKApplication*>(
                         application->getImplementation()),
@@ -110,21 +109,29 @@ namespace neon::vulkan {
 
     void VKModel::uploadDataRaw(uint32_t id, size_t index, const void* raw) {
         if (_instancingStructSizes.size() < index) {
-            std::cerr << "[VULKAN MODEL] Cannot upload instance data. Index "
-                    << index << " is not defined!" << std::endl;
+            _application->getLogger().error(MessageBuilder()
+                .group("vulkan")
+                .print("Cannot upload instance data. Index ")
+                .print(index)
+                .print(" is not defined!"));
             return;
         }
 
         if (_instancingStructSizes[index] == 0) {
-            std::cerr << "[VULKAN MODEL] Cannot upload instance data. Index "
-                    << index << " size is 0!" << std::endl;
+            _application->getLogger().error(MessageBuilder()
+                .group("vulkan")
+                .print("Cannot upload instance data. Index ")
+                .print(index)
+                .print(" size is 0!"));
             return;
         }
 
         if (id >= _positions.size()) {
-            std::cerr << "[VULKAN MODEL] Cannot upload instance data. "
-                    << "Invalid id " << id << "!"
-                    << std::endl;
+            _application->getLogger().error(MessageBuilder()
+                .group("vulkan")
+                .print("Cannot upload instance data. Invalid id ")
+                .print(id)
+                .print("!"));
             return;
         }
 
@@ -159,8 +166,7 @@ namespace neon::vulkan {
     void VKModel::draw(const Material* material,
                        const ShaderUniformBuffer* modelBuffer) const {
         auto sp = std::shared_ptr<Material>(const_cast<Material*>(material),
-                                            [](Material*) {
-                                            });
+                                            [](Material*) {});
         if (_positions.empty()) return;
         for (const auto& mesh: _meshes) {
             if (!mesh->getMaterials().contains(sp)) continue;

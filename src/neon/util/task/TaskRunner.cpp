@@ -4,7 +4,7 @@
 
 #include "TaskRunner.h"
 
-#include <iostream>
+#include <neon/logging/Logger.h>
 
 namespace neon {
     TaskRunner::TaskRunner(): _stop(false) {
@@ -12,17 +12,17 @@ namespace neon {
                            1u;
         _workers.reserve(threads);
 
-        for(uint32_t i = 0; i < threads; ++i) {
+        for (uint32_t i = 0; i < threads; ++i) {
             _workers.emplace_back([this] {
                 std::function<void()> task;
-                while(true) {
+                while (true) {
                     {
                         std::unique_lock lock(_mutex);
                         _pendingTasksCondition.wait(lock, [this] {
                             return !_pendingTasks.empty() || _stop;
                         });
 
-                        if(_stop && _pendingTasks.empty()) return;
+                        if (_stop && _pendingTasks.empty()) return;
 
                         task = std::move(_pendingTasks.front());
                         _pendingTasks.pop();
@@ -38,20 +38,20 @@ namespace neon {
     }
 
     void TaskRunner::shutdown() {
-        if(_stop) return;
+        if (_stop) return;
         //
         {
             std::unique_lock lock(_mutex);
             _stop = true;
         }
         _pendingTasksCondition.notify_all();
-        for(auto& worker: _workers) {
+        for (auto& worker: _workers) {
             worker.join();
         }
     }
 
     void TaskRunner::flushMainThreadTasks() {
-        if(_stop) return;
+        if (_stop) return;
         //
         {
             std::unique_lock lock(_coroutineMutex);
@@ -62,8 +62,8 @@ namespace neon {
                 }
             );
 
-            for(auto& coroutine: _coroutines) {
-                if(coroutine->isReady()) {
+            for (auto& coroutine: _coroutines) {
+                if (coroutine->isReady()) {
                     coroutine->launch();
                 }
             }
@@ -71,13 +71,14 @@ namespace neon {
 
         std::unique_lock lock(_mainThreadMutex);
 
-        while(!_mainThreadTasks.empty()) {
+        while (!_mainThreadTasks.empty()) {
             try {
                 _mainThreadTasks.back()();
-            } catch(std::exception& ex) {
-                std::cerr <<
-                        "Error while executing task: " << ex.what() << "." <<
-                        std::endl;
+            } catch (std::exception& ex) {
+                Logger::defaultLogger()->error(MessageBuilder()
+                    .print("Error while executing task: ")
+                    .print(ex.what(), TextEffect::foreground4bits(1))
+                    .print("."));
             }
             _mainThreadTasks.pop_back();
         }

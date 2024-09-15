@@ -68,8 +68,7 @@ namespace neon::vulkan {
             CommandBuffer* internalBuffer = nullptr;
             if (createInfo.commandBuffer != nullptr) {
                 buffer = createInfo.commandBuffer;
-            }
-            else {
+            } else {
                 holder = application->getCommandManager().fetchCommandPool();
                 internalBuffer = holder.getPool().beginCommandBuffer(true);
                 buffer = internalBuffer;
@@ -135,7 +134,8 @@ namespace neon::vulkan {
             static_cast<float>(createInfo.image.mipmaps),
             properties.limits.maxSamplerAnisotropy);
 
-        if (vkCreateSampler(_vkApplication->getDevice()->getRaw(), &samplerInfo, nullptr,
+        if (vkCreateSampler(_vkApplication->getDevice()->getRaw(), &samplerInfo,
+                            nullptr,
                             &_sampler) != VK_SUCCESS) {
             throw std::runtime_error("Failed to create texture sampler!");
         }
@@ -174,19 +174,24 @@ namespace neon::vulkan {
             static_cast<float>(_mipmapLevels),
             properties.limits.maxSamplerAnisotropy);
 
-        if (vkCreateSampler(_vkApplication->getDevice()->getRaw(), &samplerInfo, nullptr,
+        if (vkCreateSampler(_vkApplication->getDevice()->getRaw(), &samplerInfo,
+                            nullptr,
                             &_sampler) != VK_SUCCESS) {
             throw std::runtime_error("Failed to create texture sampler!");
         }
     }
 
     VKTexture::~VKTexture() {
-        vkDestroySampler(_vkApplication->getDevice()->getRaw(), _sampler, nullptr);
+        vkDestroySampler(_vkApplication->getDevice()->getRaw(), _sampler,
+                         nullptr);
         if (!_external) {
-            vkDestroyImageView(_vkApplication->getDevice()->getRaw(), _imageView,
+            vkDestroyImageView(_vkApplication->getDevice()->getRaw(),
+                               _imageView,
                                nullptr);
-            vkDestroyImage(_vkApplication->getDevice()->getRaw(), _image, nullptr);
-            vkFreeMemory(_vkApplication->getDevice()->getRaw(), _imageMemory, nullptr);
+            vkDestroyImage(_vkApplication->getDevice()->getRaw(), _image,
+                           nullptr);
+            vkFreeMemory(_vkApplication->getDevice()->getRaw(), _imageMemory,
+                         nullptr);
         }
     }
 
@@ -228,7 +233,10 @@ namespace neon::vulkan {
 
     void VKTexture::makeInternal() {
         if (!_external) {
-            std::cerr << "Image is already internal!" << std::endl;
+            _application->getLogger()
+                    .warning(MessageBuilder()
+                        .group("vulkan")
+                        .print("Image is already internal!"));
             return;
         }
         _external = false;
@@ -238,8 +246,10 @@ namespace neon::vulkan {
         int32_t width, int32_t height,
         VkImage image, VkDeviceMemory memory, VkImageView imageView) {
         if (!_external) {
-            std::cerr << "The image view of an internal texture cannot"
-                    "be changed!" << std::endl;
+            _application->getLogger().error(MessageBuilder()
+                .group("vulkan")
+                .print("The image view of an internal"
+                    " texture cannot be changed!"));
             return;
         }
 
@@ -257,15 +267,20 @@ namespace neon::vulkan {
     void VKTexture::updateData(const void* data, int32_t width, int32_t height,
                                int32_t depth, TextureFormat format) {
         if (_external) {
-            std::cerr << "Couldn't update data of a texture"
-                    " with an external handler" << std::endl;
+            _application->getLogger().error(MessageBuilder()
+                .group("vulkan")
+                .print("Couldn't update data of a texture"
+                    " with an external handler"));
             return;
         }
 
         if (_stagingBuffer == nullptr) {
-            std::cerr << "Couldn't update data of a texture"
-                    " staging buffer is not found because"
-                    "the texture was external" << std::endl;
+            _application->getLogger()
+                    .error(MessageBuilder()
+                        .group("vulkan")
+                        .print("Couldn't update data of a texture"
+                            " staging buffer is not found because"
+                            "the texture was external"));
             return;
         }
 

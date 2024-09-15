@@ -5,7 +5,6 @@
 #include "VKApplication.h"
 
 #include <stdexcept>
-#include <iostream>
 #include <cstring>
 #include <algorithm>
 #include <utility>
@@ -63,22 +62,21 @@ namespace neon::vulkan {
         VkDebugUtilsMessageTypeFlagsEXT messageType,
         const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
         void* pUserData) {
+        auto* app = static_cast<Application*>(pUserData);
         if (messageSeverity >=
             VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT) {
-            std::cerr << "[VULKAN ERROR]: " << pCallbackData->pMessage
-                    << std::endl;
-            std::cerr << "------------------------------" << std::endl;
-        }
-        else if (messageSeverity >=
-                 VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT) {
-            std::cerr << "[VULKAN WARNING]: " << pCallbackData->pMessage
-                    << std::endl;
-            std::cerr << "------------------------------" << std::endl;
-        }
-        else {
-            std::cout << "[VULKAN DEBUG]: " << pCallbackData->pMessage
-                    << std::endl;
-            std::cout << "------------------------------" << std::endl;
+            app->getLogger().error(MessageBuilder()
+                .group("vulkan")
+                .print(pCallbackData->pMessage));
+        } else if (messageSeverity >=
+                   VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT) {
+            app->getLogger().warning(MessageBuilder()
+                .group("vulkan")
+                .print(pCallbackData->pMessage));
+        } else {
+            app->getLogger().debug(MessageBuilder()
+                .group("vulkan")
+                .print(pCallbackData->pMessage));
         }
 
         return VK_FALSE;
@@ -94,8 +92,7 @@ namespace neon::vulkan {
             instance, "vkCreateDebugUtilsMessengerEXT");
         if (func != nullptr) {
             return func(instance, pCreateInfo, pAllocator, pDebugMessenger);
-        }
-        else {
+        } else {
             return VK_ERROR_EXTENSION_NOT_PRESENT;
         }
     }
@@ -141,12 +138,18 @@ namespace neon::vulkan {
                                                  _currentFrame(0),
                                                  _imageIndex(0),
                                                  _imGuiPool(VK_NULL_HANDLE),
-                                                 _currentFrameInformation() {
-    }
+                                                 _currentFrameInformation() {}
 
     void VKApplication::init(neon::Application* application) {
         _application = application;
-        glfwInitHint(GLFW_PLATFORM, GLFW_PLATFORM_X11);
+
+        // Add vulkan log group
+        _application->getLogger().addGroup(MessageGroupBuilder()
+            .print("[", TextEffect::foreground4bits(6))
+            .print("VULKAN", TextEffect::foreground4bits(14))
+            .print("]", TextEffect::foreground4bits(6))
+            .build("vulkan"));
+
         if (!glfwInit()) {
             const char* error;
             glfwGetError(&error);
@@ -189,8 +192,7 @@ namespace neon::vulkan {
     void VKApplication::lockMouse(bool lock) {
         if (lock) {
             glfwSetInputMode(_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-        }
-        else {
+        } else {
             glfwSetInputMode(_window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
         }
     }
@@ -234,8 +236,7 @@ namespace neon::vulkan {
                 ++frames;
             }
             finishLoop();
-        }
-        catch (const std::exception& exception) {
+        } catch (const std::exception& exception) {
             return {exception.what()};
         }
 
@@ -315,8 +316,7 @@ namespace neon::vulkan {
                 render->checkFrameBufferRecreationConditions();
             }
             return false;
-        }
-        else if (result != VK_SUCCESS) {
+        } else if (result != VK_SUCCESS) {
             throw std::runtime_error("Failed to acquire swap chain image!");
         } {
             DEBUG_PROFILE_ID(profiler, beginCB, "Begin Command Buffer");
@@ -409,8 +409,7 @@ namespace neon::vulkan {
         if (ENABLE_VALIDATION_LAYERS) {
             createInfo.enabledLayerCount = VALIDATION_LAYERS.size();
             createInfo.ppEnabledLayerNames = VALIDATION_LAYERS.data();
-        }
-        else {
+        } else {
             createInfo.enabledLayerCount = 0;
         }
 
@@ -424,8 +423,13 @@ namespace neon::vulkan {
         std::vector<VkExtensionProperties> instanceExtensions(extensionCount);
         vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount,
                                                instanceExtensions.data());
-        for (const auto& item: instanceExtensions) {
-            std::cout << item.extensionName << std::endl;
+
+        _application->getLogger().debug("Supported extensions:");
+        for (const auto& [extensionName, specVersion]: instanceExtensions) {
+            _application->getLogger().debug(MessageBuilder()
+                .print(extensionName)
+                .print(" ")
+                .print(specVersion, TextEffect::foreground4bits(2)));
         }
     }
 
@@ -479,7 +483,7 @@ namespace neon::vulkan {
                 VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT |
                 VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
         createInfo.pfnUserCallback = debugCallback;
-        createInfo.pUserData = nullptr; // Optional
+        createInfo.pUserData = _application; // Optional
 
         if (createDebugUtilsMessengerEXT(_instance, &createInfo, nullptr,
                                          &_debugMessenger) != VK_SUCCESS) {
@@ -527,12 +531,12 @@ namespace neon::vulkan {
             throw std::runtime_error(
                 "Failed to find GPUs with Vulkan support!");
         }
-        else {
-            std::cout << "Selected physical device: ";
-            VkPhysicalDeviceProperties deviceProperties;
-            vkGetPhysicalDeviceProperties(_physicalDevice, &deviceProperties);
-            std::cout << deviceProperties.deviceName << std::endl;
-        }
+
+        VkPhysicalDeviceProperties deviceProperties;
+        vkGetPhysicalDeviceProperties(_physicalDevice, &deviceProperties);
+        _application->getLogger().debug(MessageBuilder()
+            .print("Selected physical device: ")
+            .print(deviceProperties.deviceName));
     }
 
     bool
@@ -624,8 +628,7 @@ namespace neon::vulkan {
             createInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
             createInfo.queueFamilyIndexCount = 2;
             createInfo.pQueueFamilyIndices = queueFamilyIndices;
-        }
-        else {
+        } else {
             createInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
             createInfo.queueFamilyIndexCount = 1;
             createInfo.pQueueFamilyIndices = queueFamilyIndices;
@@ -736,8 +739,7 @@ namespace neon::vulkan {
             std::numeric_limits<uint32_t>::max()) {
             // Fixed mode
             return capabilities.currentExtent;
-        }
-        else {
+        } else {
             // Bounds mode
             int width, height;
             glfwGetFramebufferSize(_window, &width, &height);

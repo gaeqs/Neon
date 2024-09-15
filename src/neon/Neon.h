@@ -19,6 +19,13 @@
 #include <neon/io/MouseButtonEvent.h>
 #include <neon/io/ScrollEvent.h>
 
+#include <neon/logging/TextEffect.h>
+#include <neon/logging/Message.h>
+#include <neon/logging/Logger.h>
+#include <neon/logging/LogOutput.h>
+#include <neon/logging/STDLogOutput.h>
+#include <neon/logging/ImGuiLogOutput.h>
+
 #include <neon/render/buffer/CommandBuffer.h>
 #include <neon/render/buffer/CommandManager.h>
 #include <neon/render/buffer/CommandPool.h>

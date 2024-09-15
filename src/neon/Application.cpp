@@ -16,15 +16,10 @@ namespace neon {
         implementation) : _implementation(std::move(implementation)),
                           _room(nullptr),
                           _lastCursorPosition(0.0, 0.0),
-                          _profiler(),
                           _commandManager(this),
-                          _assets(),
-                          _render(),
-                          _forcedViewport() {
-    }
+                          _logger(true, true, true) {}
 
-    Application::~Application() {
-    }
+    Application::~Application() = default;
 
     void Application::init() {
         _implementation->init(this);
@@ -46,7 +41,9 @@ namespace neon {
         return _profiler;
     }
 
-    Profiler& Application::getProfiler() { return _profiler; }
+    Profiler& Application::getProfiler() {
+        return _profiler;
+    }
 
     const CommandManager& Application::getCommandManager() const {
         return _commandManager;
@@ -62,6 +59,14 @@ namespace neon {
 
     TaskRunner& Application::getTaskRunner() {
         return _taskRunner;
+    }
+
+    const Logger& Application::getLogger() const {
+        return _logger;
+    }
+
+    Logger& Application::getLogger() {
+        return _logger;
     }
 
     const AssetCollection& Application::getAssets() const {

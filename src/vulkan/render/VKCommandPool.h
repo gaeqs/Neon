@@ -9,7 +9,6 @@
 
 #include <vulkan/vulkan.h>
 #include <vulkan/queue/VKQueueFamily.h>
-#include <vulkan/queue/VKQueueProvider.h>
 
 namespace neon {
     class CommandBuffer;
@@ -23,9 +22,8 @@ namespace neon::vulkan {
         Application* _application;
         AbstractVKApplication* _vkApplication;
         VkCommandPool _raw;
+        uint32_t _queueFamilyIndex;
 
-        VKQueueHolder _queue;
-        VkQueue _externalQueue;
         bool _external;
 
     public:
@@ -39,13 +37,15 @@ namespace neon::vulkan {
 
         explicit VKCommandPool(Application* application,
                                VkCommandPool external,
-                               VkQueue externalQueue);
+                               uint32_t externalQueueFamilyIndex);
 
         ~VKCommandPool();
 
-        [[nodiscard]] VkCommandPool raw() const;
+        [[nodiscard]] AbstractVKApplication* getVkApplication() const;
 
-        [[nodiscard]] VkQueue getQueue() const;
+        [[nodiscard]] uint32_t getQueueFamilyIndex() const;
+
+        [[nodiscard]] VkCommandPool raw() const;
 
         [[nodiscard]] std::unique_ptr<CommandBuffer> newCommandBuffer(
             bool primary) const;

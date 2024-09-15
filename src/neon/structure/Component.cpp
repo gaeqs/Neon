@@ -4,20 +4,16 @@
 
 #include "Component.h"
 
-#include <iostream>
-
 #include <neon/structure/GameObject.h>
 #include <neon/structure/Room.h>
-#include <neon/structure/collection/AssetCollection.h>
 
 namespace neon {
     uint64_t COMPONENT_ID_GENERATOR = 1;
 
     Component::Component() :
-            _id(COMPONENT_ID_GENERATOR++),
-            _enabled(true),
-            _gameObject(nullptr) {
-    }
+        _id(COMPONENT_ID_GENERATOR++),
+        _enabled(true),
+        _gameObject(nullptr) {}
 
     uint64_t Component::getId() const {
         return _id;
@@ -45,37 +41,25 @@ namespace neon {
         getRoom()->destroyComponentLater(this);
     }
 
-    void Component::onConstruction() {
+    void Component::onConstruction() {}
 
-    }
+    void Component::onStart() {}
 
-    void Component::onStart() {
+    void Component::onUpdate(float deltaTime) {}
 
-    }
+    void Component::onLateUpdate(float deltaTime) {}
 
-    void Component::onUpdate(float deltaTime) {
-    }
+    void Component::onPreDraw() {}
 
-    void Component::onLateUpdate(float deltaTime) {
-    }
+    void Component::onKey(const KeyboardEvent& event) {}
 
-    void Component::onPreDraw() {
-    }
+    void Component::onMouseButton(const neon::MouseButtonEvent& event) {}
 
-    void Component::onKey(const KeyboardEvent& event) {
-    }
+    void Component::onCursorMove(const CursorMoveEvent& event) {}
 
-    void Component::onMouseButton(const neon::MouseButtonEvent& event) {
-    }
+    void Component::onScroll(const ScrollEvent& event) {}
 
-    void Component::onCursorMove(const CursorMoveEvent& event) {
-    }
-
-    void Component::onScroll(const ScrollEvent& event) {
-    }
-
-    void Component::drawEditor() {
-    }
+    void Component::drawEditor() {}
 
     Application* Component::getApplication() const {
         return getRoom()->getApplication();
@@ -87,5 +71,29 @@ namespace neon {
 
     TaskRunner& Component::getTaskRunner() const {
         return getRoom()->getApplication()->getTaskRunner();
+    }
+
+    Logger& Component::getLogger() const {
+        return getRoom()->getApplication()->getLogger();
+    }
+
+    void Component::info(const std::string& message) const {
+        getLogger().info(message);
+    }
+
+    void Component::done(const std::string& message) const {
+        getLogger().done(message);
+    }
+
+    void Component::debug(const std::string& message) const {
+        getLogger().debug(message);
+    }
+
+    auto Component::warning(const std::string& message) -> void {
+        getLogger().warning(message);
+    }
+
+    auto Component::error(const std::string& message) -> void {
+        getLogger().error(message);
     }
 }

@@ -11,11 +11,11 @@
 #include <vulkan/vulkan.h>
 
 #include <imgui_impl_vulkan.h>
-#include <engine/Application.h>
+#include <neon/Application.h>
 
 #include <vulkan/util/VKUtil.h>
 
-#include "engine/render/CommandBuffer.h"
+#include <neon/render/buffer/CommandBuffer.h>
 
 neon::vulkan::VKQTSwapChainFrameBuffer::VKQTSwapChainFrameBuffer(
     Application* application) : _qtApplication(dynamic_cast<QTApplication*>(
@@ -23,9 +23,6 @@ neon::vulkan::VKQTSwapChainFrameBuffer::VKQTSwapChainFrameBuffer(
                                 _renderPass(application,
                                             _qtApplication->
                                             defaultRenderPass()) {
-    auto* app = dynamic_cast<vulkan::QTApplication*>(
-        application->getImplementation());
-
     ImGui_ImplVulkan_InitInfo init_info = {};
     init_info.Instance = _qtApplication->getInstance();
     init_info.PhysicalDevice = _qtApplication->getPhysicalDevice();

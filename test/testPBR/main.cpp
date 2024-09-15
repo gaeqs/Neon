@@ -17,6 +17,7 @@
 #include <neon/util/DeferredUtils.h>
 #include <neon/util/ModelUtils.h>
 #include <neon/assimp/AssimpLoader.h>
+#include <neon/util/component/LogComponent.h>
 
 #include "TestVertex.h"
 #include "GlobalParametersUpdaterComponent.h"
@@ -201,8 +202,12 @@ std::shared_ptr<Texture> computeIrradiance(
         app,
         std::vector<neon::FrameBufferTextureCreateInfo>{testInfo},
         false,
-        [](const auto& _) { return false; },
-        [](const auto& _) { return std::make_pair(1024, 1024); });
+        [](const auto& _) {
+            return false;
+        },
+        [](const auto& _) {
+            return std::make_pair(1024, 1024);
+        });
 
 
     auto irradianceShader = createShader(app,
@@ -615,6 +620,7 @@ std::shared_ptr<Room> getTestRoom(Application* application) {
     parameterUpdater->newComponent<LockMouseComponent>(cameraMovement);
     parameterUpdater->newComponent<DockSpaceComponent>();
     parameterUpdater->newComponent<ViewportComponent>();
+    parameterUpdater->newComponent<LogComponent>();
     auto goExplorer = parameterUpdater->newComponent<
         GameObjectExplorerComponent>();
     parameterUpdater->newComponent<SceneTreeComponent>(goExplorer);
@@ -670,8 +676,7 @@ int main() {
         std::cout << "[APPLICATION]\tApplication closed. "
                 << loopResult.getResult() << " frames generated."
                 << std::endl;
-    }
-    else {
+    } else {
         std::cout << "[APPLICATION]\tUnexpected game loop error: "
                 << loopResult.getError()
                 << std::endl;

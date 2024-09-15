@@ -6,8 +6,10 @@
 #define NEON_VKCOMMANDBUFFER_H
 
 #include <vector>
-
 #include <vulkan/vulkan.h>
+#include <vulkan/queue/VKQueueProvider.h>
+
+#include <vulkan/render/VKCommandPool.h>
 
 namespace neon {
     class Application;
@@ -25,6 +27,7 @@ namespace neon::vulkan {
     class VKCommandBuffer {
         AbstractVKApplication* _vkApplication;
         VkCommandPool _pool;
+        VKQueueHolder _queueHolder;
         VkQueue _queue;
         VkCommandBuffer _commandBuffer;
 
@@ -51,10 +54,7 @@ namespace neon::vulkan {
 
         VKCommandBuffer(Application* application, bool primary);
 
-        VKCommandBuffer(Application* application,
-                        VkCommandPool pool,
-                        VkQueue queue,
-                        bool primary);
+        VKCommandBuffer(const VKCommandPool& pool, bool primary);
 
         VKCommandBuffer(Application* application,
                         VkCommandBuffer commandBuffer,

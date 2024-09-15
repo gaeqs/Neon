@@ -3,7 +3,6 @@
 //
 
 #include "SPIRVCompiler.h"
-#include <iostream>
 
 namespace neon::vulkan {
 

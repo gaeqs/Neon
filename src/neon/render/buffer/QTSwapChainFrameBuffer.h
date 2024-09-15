@@ -8,7 +8,7 @@
 
 #ifdef USE_QT
 
-#include <engine/render/FrameBuffer.h>
+#include <neon/render/buffer/FrameBuffer.h>
 
 #ifdef USE_VULKAN
 
