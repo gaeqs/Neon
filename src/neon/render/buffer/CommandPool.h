@@ -43,7 +43,7 @@ namespace neon {
 
         CommandPool(Application* application,
                     VkCommandPool pool,
-                    VkQueue queue);
+                    uint32_t queueFamilyIndex);
 
 #endif
 

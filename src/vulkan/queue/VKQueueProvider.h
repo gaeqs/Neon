@@ -48,7 +48,7 @@ namespace neon::vulkan {
 
         [[nodiscard]] VkDevice getDevice() const;
 
-        [[nodiscard]] VKQueueFamilyCollection getFamilies() const;
+        [[nodiscard]] const VKQueueFamilyCollection& getFamilies() const;
 
         VKQueueHolder fetchQueue(uint32_t familyIndex);
 

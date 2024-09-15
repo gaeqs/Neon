@@ -166,7 +166,7 @@ neon::CommandPool* neon::vulkan::QTApplication::getCommandPool() const {
             _commandPool = std::make_unique<CommandPool>(
                 getApplication(),
                 pool,
-                graphicsQueue()
+                graphicsQueueFamilyIndex()
             );
         }
     }

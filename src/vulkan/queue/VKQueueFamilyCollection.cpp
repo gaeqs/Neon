@@ -5,6 +5,7 @@
 #include "VKQueueFamilyCollection.h"
 
 #include <cstdint>
+#include <neon/logging/Logger.h>
 
 namespace neon::vulkan {
     VKQueueFamilyCollection::VKQueueFamilyCollection(VkPhysicalDevice device,
@@ -51,7 +52,7 @@ namespace neon::vulkan {
     std::optional<const VKQueueFamily*> VKQueueFamilyCollection::
     getCompatibleQueueFamily(
         const VKQueueFamily::Capabilities& capabilities) const {
-        for (auto family: _families) {
+        for (auto& family: _families) {
             if (family.getCapabilities().isCompatible(capabilities)) {
                 return {&family};
             }

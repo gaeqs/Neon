@@ -8,6 +8,7 @@
 #ifdef USE_VULKAN
 
 #include <vulkan/render/VKCommandBuffer.h>
+#include <vulkan/render/VKCommandPool.h>
 
 #endif
 
@@ -32,10 +33,7 @@ namespace neon {
 
 #ifdef USE_VULKAN
 
-        CommandBuffer(Application* application,
-                      VkCommandPool pool,
-                      VkQueue queue,
-                      bool primary);
+        CommandBuffer(const vulkan::VKCommandPool& pool, bool primary);
 
         CommandBuffer(Application* application,
                       VkCommandBuffer commandBuffer,

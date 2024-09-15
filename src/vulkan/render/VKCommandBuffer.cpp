@@ -36,12 +36,15 @@ namespace neon::vulkan {
           _external(false) {
         auto& pool = _vkApplication->getCommandPool()->getImplementation();
         _pool = pool.raw();
-        _queue = pool.getQueue();
 
-        if (_queue == nullptr) {
+        _queueHolder = _vkApplication->getDevice()
+                ->getQueueProvider()->fetchQueue(pool.getQueueFamilyIndex());
+        if (!_queueHolder.isValid()) {
             _vkApplication->getApplication()->getLogger().error(
                 "Queue is null!");
         }
+
+        _queue = _queueHolder.getQueue();
 
         VkCommandBufferAllocateInfo info{};
         info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
@@ -56,27 +59,26 @@ namespace neon::vulkan {
         }
     }
 
-    VKCommandBuffer::VKCommandBuffer(Application* application,
-                                     VkCommandPool pool,
-                                     VkQueue queue,
-                                     bool primary)
-        : _vkApplication(dynamic_cast<AbstractVKApplication*>(
-              application->getImplementation())),
-          _pool(pool),
-          _queue(queue),
+    VKCommandBuffer::VKCommandBuffer(const VKCommandPool& pool, bool primary)
+        : _vkApplication(pool.getVkApplication()),
+          _pool(pool.raw()),
           _commandBuffer(VK_NULL_HANDLE),
           _status(VKCommandBufferStatus::READY),
-          _fences(),
-          _freedFences(),
           _external(false) {
-        if (_queue == nullptr) {
+
+        _queueHolder = _vkApplication->getDevice()
+                ->getQueueProvider()->fetchQueue(pool.getQueueFamilyIndex());
+        if (!_queueHolder.isValid()) {
             _vkApplication->getApplication()->getLogger().error(
                 "Queue is null!");
         }
 
+        _queue = _queueHolder.getQueue();
+
+
         VkCommandBufferAllocateInfo info{};
         info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-        info.commandPool = pool;
+        info.commandPool = _pool;
         info.level = primary
                          ? VK_COMMAND_BUFFER_LEVEL_PRIMARY
                          : VK_COMMAND_BUFFER_LEVEL_SECONDARY;

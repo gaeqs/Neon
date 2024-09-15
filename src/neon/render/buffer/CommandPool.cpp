@@ -34,8 +34,8 @@ namespace neon {
 
     CommandPool::CommandPool(Application* application,
                              VkCommandPool pool,
-                             VkQueue queue)
-        : _implementation(application, pool, queue) {
+                             uint32_t queueFamilyIndex)
+        : _implementation(application, pool, queueFamilyIndex) {
     }
 
 #endif

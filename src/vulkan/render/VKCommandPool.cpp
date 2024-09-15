@@ -13,8 +13,7 @@ namespace neon::vulkan {
         : _application(move._application),
           _vkApplication(move._vkApplication),
           _raw(move._raw),
-          _queue(std::move(move._queue)),
-          _externalQueue(move._externalQueue),
+          _queueFamilyIndex(move._queueFamilyIndex),
           _external(move._external) {
         move._raw = VK_NULL_HANDLE;
     }
@@ -27,26 +26,24 @@ namespace neon::vulkan {
               application->getImplementation())),
           _raw(),
           _external(false) {
-        _queue = _vkApplication->getDevice()->getQueueProvider()
-                ->fetchCompatibleQueue(capabilities);
+        auto optional = _vkApplication->getDevice()->getQueueProvider()
+                ->getFamilies().getCompatibleQueueFamily(capabilities);
 
-        if (!_queue.isValid()) {
+        if (!optional.has_value()) {
             std::stringstream ss;
             ss << "No queue family found!" << std::endl;
             ss << " - Graphics: " << capabilities.graphics << std::endl;
             ss << " - Present: " << capabilities.present << std::endl;
             ss << " - Transfer: " << capabilities.transfer << std::endl;
-            ss << "Queue: " << std::endl;
-            ss << " - Family: " << _queue.getFamily() << std::endl;
-            ss << " - Index: " << _queue.getIndex() << std::endl;
-            ss << " - Valid: " << _queue.isValid() << std::endl;
+            _application->getLogger().error(ss.str());
             throw std::runtime_error(ss.str());
         }
+        _queueFamilyIndex = optional.value()->getIndex();
 
         VkCommandPoolCreateInfo poolInfo{};
         poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
         poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-        poolInfo.queueFamilyIndex = _queue.getFamily();
+        poolInfo.queueFamilyIndex = _queueFamilyIndex;
 
         if (vkCreateCommandPool(_vkApplication->getDevice()->getRaw(),
                                 &poolInfo,
@@ -58,14 +55,13 @@ namespace neon::vulkan {
     VKCommandPool::VKCommandPool(
         Application* application,
         VkCommandPool external,
-        VkQueue externalQueue)
+        uint32_t externalQueueFamilyIndex)
         : _application(application),
           _vkApplication(dynamic_cast<AbstractVKApplication*>(
               application->getImplementation())),
           _raw(external),
-          _externalQueue(externalQueue),
-          _external(true) {
-    }
+          _queueFamilyIndex(externalQueueFamilyIndex),
+          _external(true) {}
 
     VKCommandPool::~VKCommandPool() {
         if (_raw != VK_NULL_HANDLE && !_external) {
@@ -77,22 +73,21 @@ namespace neon::vulkan {
         }
     }
 
+    AbstractVKApplication* VKCommandPool::getVkApplication() const {
+        return _vkApplication;
+    }
+
+    uint32_t VKCommandPool::getQueueFamilyIndex() const {
+        return _queueFamilyIndex;
+    }
+
     VkCommandPool VKCommandPool::raw() const {
         return _raw;
     }
 
-    VkQueue VKCommandPool::getQueue() const {
-        return _external ? _externalQueue : _queue.getQueue();
-    }
-
     std::unique_ptr<CommandBuffer> VKCommandPool::newCommandBuffer(
         bool primary) const {
-        return std::make_unique<CommandBuffer>(
-            _application,
-            _raw,
-            getQueue(),
-            primary
-        );
+        return std::make_unique<CommandBuffer>(*this, primary);
     }
 
     VKCommandPool& VKCommandPool::operator=(VKCommandPool&& move) noexcept {
