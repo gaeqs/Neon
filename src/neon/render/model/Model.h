@@ -11,6 +11,7 @@
 #include <neon/structure/Asset.h>
 #include <neon/render/model/Mesh.h>
 #include <neon/render/model/ModelCreateInfo.h>
+#include <neon/render/model/InstanceData.h>
 
 #ifdef USE_VULKAN
 
@@ -41,11 +42,12 @@ namespace neon {
 #endif
 
     private:
-        Implementation _implementation;
         std::vector<std::shared_ptr<Mesh>> _meshes;
         std::unique_ptr<ShaderUniformBuffer> _uniformBuffer;
-
+        std::unique_ptr<InstanceData> _instanceData;
         bool _shouldAutoFlush;
+
+        Implementation _implementation;
 
     public:
         Model(const Model& other) = delete;
@@ -64,20 +66,13 @@ namespace neon {
          * Returns the implementation of the model.
          * @return the implementation.
          */
-        [[nodiscard]] Model::Implementation& getImplementation();
+        [[nodiscard]] Implementation& getImplementation();
 
         /**
          * Returns the implementation of the model.
          * @return the implementation.
          */
-        [[nodiscard]] const Model::Implementation& getImplementation() const;
-
-        /**
-         * Returns the type of the structure used for instancing data,
-         * @return the type.
-         */
-        [[nodiscard]] const std::vector<std::type_index>&
-        getInstancingStructTypes() const;
+        [[nodiscard]] const Implementation& getImplementation() const;
 
         /**
          * Returns the uniform buffer that contains the global data
@@ -86,61 +81,7 @@ namespace neon {
          */
         const std::unique_ptr<ShaderUniformBuffer>& getUniformBuffer() const;
 
-        /**
-         * Creates an instance of this model.
-         * @return the identifier of the instance or the
-         * error if something went wrong.
-         */
-        [[nodiscard]] Result<uint32_t*, std::string> createInstance();
-
-        /**
-         * Deletes an instance of this model.
-         * @param id the idetifier of the model to delete.
-         * @return whether the operation was successful.
-         */
-        bool freeInstance(uint32_t id);
-
-        /**
-         * Returns the amount of instances inside this model.
-         * @return the amount of instances.
-         */
-        [[nodiscard]] size_t getInstanceAmount() const;
-
-        /**
-         * Sets the instancing data of an instance buffer.
-         * @tparam InstanceData the type of the instance data.
-         * @param id the identifier of the instance.
-         * @param index the index of the instance buffer.
-         * @param data the data to upload.
-         */
-        template<class InstanceData>
-        void uploadData(uint32_t id, size_t index, const InstanceData& data) {
-            _implementation.uploadData(id, index, data);
-        }
-
-        template<class InstanceData>
-        const InstanceData* fetchData(uint32_t id, size_t index) const {
-            return _implementation.fetchData<InstanceData>(id, index);
-        }
-
-        /**
-         * Sets the instancing data of an instance buffer.
-         * @param id the identifier of the instance.
-         * @param index the index of the buffer,
-         * @param raw the data to upload.
-         */
-        void uploadDataRaw(uint32_t id, size_t index, const void* raw);
-
-        /**
-         * Uploads the instancing data to the GPU.
-         * <p>
-         * This method is invoked automatically
-         * before the room is rendered if shouldAutoFlush() is true.
-         * <p>
-         * You can provide this method an external command buffer.
-         * This allows you to upload the model data asynchonously.
-         */
-        void flush(const CommandBuffer* commandBuffer = nullptr);
+        [[nodiscard]] InstanceData* getInstanceData() const;
 
         /**
          * Whether the renderer should call Model::flush() before rendering.
@@ -180,13 +121,13 @@ namespace neon {
          * @param index the index.
          * @return the mesh.
          */
-        [[nodiscard]] Mesh* getMesh(uint32_t index);
+        [[nodiscard]] Mesh* getMesh(uint32_t index) const;
 
         /**
          * Adds the given material to all meshes inside this model.
          * @param material the material.
          */
-        void addMaterial(const std::shared_ptr<Material>& material);
+        void addMaterial(const std::shared_ptr<Material>& material) const;
 
         /**
          * Calls the draw calls for the meshes that

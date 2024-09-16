@@ -2,15 +2,17 @@
 // Created by gaelr on 9/15/2024.
 //
 
-#ifndef BASICINSTANCEDATA_H
-#define BASICINSTANCEDATA_H
+#ifndef CONCURRENTINSTANCEDATA_H
+#define CONCURRENTINSTANCEDATA_H
+
+#include <mutex>
 
 #include <neon/render/model/InstanceData.h>
 #include <neon/util/Range.h>
 
 #ifdef USE_VULKAN
 
-#include <vulkan/render/model/VKBasicInstanceData.h>
+#include <vulkan/render/model/VKConcurrentInstanceData.h>
 
 #endif
 
@@ -20,13 +22,13 @@ namespace neon {
     struct ModelCreateInfo;
 
     /**
-     * Basic InstanceData implementation.
+     * Concurrent InstanceData implementation.
      * This implementation is not thread-safe.
      */
-    class BasicInstanceData : public InstanceData {
+    class ConcurrentInstanceData : public InstanceData {
     public:
 #ifdef USE_VULKAN
-        using Implementation = vulkan::VKBasicInstanceData;
+        using Implementation = vulkan::VKConcurrentInstanceData;
 #endif
 
     private:
@@ -41,14 +43,16 @@ namespace neon {
         std::vector<uint32_t*> _positions;
         std::vector<std::type_index> _types;
         std::vector<InstancingSlot> _slots;
+        std::vector<std::mutex> _mutex;
+        mutable std::mutex _positionMutex;
 
         Implementation _implementation;
 
     public:
-        BasicInstanceData(Application* application,
-                          const ModelCreateInfo& info);
+        ConcurrentInstanceData(Application* application,
+                               const ModelCreateInfo& info);
 
-        ~BasicInstanceData() override;
+        ~ConcurrentInstanceData() override;
 
         [[nodiscard]] const std::vector<std::type_index>&
         getInstancingStructTypes() const override;
@@ -76,4 +80,4 @@ namespace neon {
 }
 
 
-#endif //BASICINSTANCEDATA_H
+#endif //CONCURRENTINSTANCEDATA_H

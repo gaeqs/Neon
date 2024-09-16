@@ -14,21 +14,17 @@
 #include <utility>
 
 namespace neon {
-    GraphicComponent::GraphicComponent() : _model(),
-                                           _modelTargetId(),
-                                           _firstPreDrawExecuted(false) {
-    }
+    GraphicComponent::GraphicComponent(): _firstPreDrawExecuted(false) {}
 
     GraphicComponent::GraphicComponent(
-        std::shared_ptr<Model> model) : _model(std::move(model)),
-                                        _modelTargetId(),
-                                        _firstPreDrawExecuted(false) {
+        std::shared_ptr<Model> model)
+        : _model(std::move(model)),
+          _firstPreDrawExecuted(false) {
         if (_model != nullptr) {
-            auto result = _model->createInstance();
+            auto result = _model->getInstanceData()->createInstance();
             if (result.isOk()) {
                 _modelTargetId = result.getResult();
-            }
-            else {
+            } else {
                 error(result.getError());
             }
         }
@@ -46,7 +42,7 @@ namespace neon {
         if (model == _model) return;
         if (_model != nullptr) {
             if (_modelTargetId.has_value()) {
-                _model->freeInstance(*_modelTargetId.value());
+                _model->getInstanceData()->freeInstance(_modelTargetId.value());
             }
             if (_firstPreDrawExecuted) {
                 getRoom()->unmarkUsingModel(model.get());
@@ -60,11 +56,10 @@ namespace neon {
                 getRoom()->markUsingModel(model.get());
             }
 
-            auto result = _model->createInstance();
+            auto result = _model->getInstanceData()->createInstance();
             if (result.isOk()) {
                 _modelTargetId = result.getResult();
-            }
-            else {
+            } else {
                 getLogger().error(MessageBuilder()
                     .print("Error creating a render instance: ")
                     .print(result.getError()));
@@ -83,7 +78,7 @@ namespace neon {
 
         if (!_modelTargetId.has_value()) return;
 
-        auto& types = _model->getInstancingStructTypes();
+        auto& types = _model->getInstanceData()->getInstancingStructTypes();
 
         const DefaultInstancingData data{
             getGameObject()->getTransform().getModel(),
@@ -104,8 +99,7 @@ namespace neon {
 
         if (_model) {
             ImGui::Text("Using model %s", _model->getName().c_str());
-        }
-        else {
+        } else {
             ImGui::Text("This GraphicComponent is not using any model.");
         }
 

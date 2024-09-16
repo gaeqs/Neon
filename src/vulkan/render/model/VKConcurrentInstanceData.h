@@ -2,8 +2,8 @@
 // Created by gaelr on 9/15/2024.
 //
 
-#ifndef VKBASICINSTANCEDATA_H
-#define VKBASICINSTANCEDATA_H
+#ifndef VKCONCURRENTINSTANCEDATA_H
+#define VKCONCURRENTINSTANCEDATA_H
 
 #include <vector>
 #include <vulkan/render/buffer/Buffer.h>
@@ -21,12 +21,12 @@ namespace neon {
 namespace neon::vulkan {
     class AbstractVKApplication;
 
-    class VKBasicInstanceData : public VKInstanceData {
+    class VKConcurrentInstanceData : public VKInstanceData {
         AbstractVKApplication* _vkApplication;
         std::vector<std::unique_ptr<Buffer>> _buffers;
 
     public:
-        VKBasicInstanceData(Application* application,
+        VKConcurrentInstanceData(Application* application,
                             const ModelCreateInfo& info);
 
         [[nodiscard]] const std::vector<std::unique_ptr<Buffer>>&
@@ -40,4 +40,4 @@ namespace neon::vulkan {
     };
 }
 
-#endif //VKBASICINSTANCEDATA_H
+#endif //VKCONCURRENTINSTANCEDATA_H

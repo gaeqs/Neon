@@ -41,7 +41,7 @@ namespace neon {
         if (_stop) return;
         //
         {
-            std::unique_lock lock(_mutex);
+            std::lock_guard lock(_mutex);
             _stop = true;
         }
         _pendingTasksCondition.notify_all();
@@ -54,7 +54,7 @@ namespace neon {
         if (_stop) return;
         //
         {
-            std::unique_lock lock(_coroutineMutex);
+            std::lock_guard lock(_coroutineMutex);
             std::erase_if(
                 _coroutines,
                 [](const auto& it) {
@@ -69,7 +69,7 @@ namespace neon {
             }
         }
 
-        std::unique_lock lock(_mainThreadMutex);
+        std::lock_guard lock(_mainThreadMutex);
 
         while (!_mainThreadTasks.empty()) {
             try {

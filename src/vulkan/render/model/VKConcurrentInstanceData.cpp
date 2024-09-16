@@ -2,7 +2,7 @@
 // Created by gaelr on 9/15/2024.
 //
 
-#include "VKBasicInstanceData.h"
+#include "VKConcurrentInstanceData.h"
 
 #include <neon/Application.h>
 #include <neon/render/buffer/CommandBuffer.h>
@@ -10,7 +10,7 @@
 #include <vulkan/AbstractVKApplication.h>
 
 namespace neon::vulkan {
-    VKBasicInstanceData::VKBasicInstanceData(Application* application,
+    VKConcurrentInstanceData::VKConcurrentInstanceData(Application* application,
                                              const ModelCreateInfo& info)
         : _vkApplication(dynamic_cast<AbstractVKApplication*>(
             application->getImplementation())) {
@@ -30,11 +30,11 @@ namespace neon::vulkan {
     }
 
     const std::vector<std::unique_ptr<Buffer>>&
-    VKBasicInstanceData::getBuffers() const {
+    VKConcurrentInstanceData::getBuffers() const {
         return _buffers;
     }
 
-    void VKBasicInstanceData::flush(const CommandBuffer* command,
+    void VKConcurrentInstanceData::flush(const CommandBuffer* command,
                                     size_t index,
                                     size_t instanceSize,
                                     void* data,

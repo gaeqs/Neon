@@ -129,7 +129,7 @@ namespace neon {
             DEBUG_PROFILE(p, models);
             for (const auto& [model, amount]: _usedModels) {
                 if (model->shouldAutoFlush()) {
-                    model->flush();
+                    model->getInstanceData()->flush();
                 }
                 if (model->getUniformBuffer() != nullptr) {
                     model->getUniformBuffer()->prepareForFrame(cb);

@@ -10,14 +10,18 @@
 #include <utility>
 #include <vector>
 #include <optional>
+#include <memory>
 
 #include <rush/rush.h>
 
 #include <cmrc/cmrc.hpp>
 
+#include <neon/Application.h>
 #include <neon/structure/collection/AssetCollection.h>
 #include <neon/render/model/InputDescription.h>
 #include <neon/render/model/DefaultInstancingData.h>
+#include <neon/render/model/BasicInstanceData.h>
+#include <neon/render/model/ModelCreateInfo.h>
 #include <neon/render/shader/MaterialCreateInfo.h>
 
 namespace neon {
@@ -83,8 +87,7 @@ namespace neon::assimp_loader {
                      size_t structSize_) : parseFunction(
                                                std::move(parseFunction_)),
                                            description(std::move(description_)),
-                                           structSize(structSize_) {
-        }
+                                           structSize(structSize_) {}
 
         template<typename Vertex>
         static VertexParser fromTemplate() {
@@ -109,21 +112,20 @@ namespace neon::assimp_loader {
         }
     };
 
-    struct InstanceData {
+    struct AssimpInstanceData {
         InputDescription description;
         std::type_index type;
         size_t size;
 
-        InstanceData(InputDescription description_,
-                     const std::type_index& type_,
-                     size_t size_) : description(std::move(description_)),
-                                     type(type_),
-                                     size(size_) {
-        }
+        AssimpInstanceData(InputDescription description_,
+                           const std::type_index& type_,
+                           size_t size_) : description(std::move(description_)),
+                                           type(type_),
+                                           size(size_) {}
 
         template<typename Instance>
-        static InstanceData fromTemplate() {
-            return InstanceData(
+        static AssimpInstanceData fromTemplate() {
+            return AssimpInstanceData(
                 Instance::getInstancingDescription(),
                 typeid(Instance),
                 sizeof(Instance)
@@ -167,7 +169,7 @@ namespace neon::assimp_loader {
          * The information about the instance structures
          * the model will use.
          */
-        std::vector<InstanceData> instanceDatas;
+        std::vector<AssimpInstanceData> instanceDatas;
 
         /**
          * Whether materials should be loaded.
@@ -216,18 +218,23 @@ namespace neon::assimp_loader {
         */
         bool loadLocalModel = false;
 
+        std::function<std::unique_ptr<InstanceData>(
+            Application*, const ModelCreateInfo& info)> instanceDataProvider
+                = [](Application* app, const ModelCreateInfo& info) {
+            return std::make_unique<BasicInstanceData>(app, info);
+        };
+
     private:
         LoaderInfo(Application* application_,
                    std::string name_,
                    MaterialCreateInfo materialCreateInfo_,
                    VertexParser vertexParser_,
-                   std::vector<InstanceData> instanceData_)
+                   std::vector<AssimpInstanceData> instanceData_)
             : application(application_),
               name(std::move(name_)),
               materialCreateInfo(std::move(materialCreateInfo_)),
               vertexParser(std::move(vertexParser_)),
-              instanceDatas(std::move(instanceData_)) {
-        }
+              instanceDatas(std::move(instanceData_)) {}
 
     public:
         template<class Vertex, class Instance = DefaultInstancingData>
@@ -239,7 +246,19 @@ namespace neon::assimp_loader {
                 std::move(name),
                 materialCreateInfo,
                 VertexParser::fromTemplate<Vertex>(),
-                {InstanceData::fromTemplate<Instance>()}
+                {AssimpInstanceData::fromTemplate<Instance>()}
+            };
+        }
+
+        /**
+         * Defines a provider that provides the given InstanceData to the model.
+         * @tparam IData de InstanceData to provide.
+         */
+        template<typename IData>
+        void defineInstanceProvider() {
+            instanceDataProvider = [](Application* app,
+                                      const ModelCreateInfo& info) {
+                return std::make_unique<IData>(app, info);
             };
         }
     };

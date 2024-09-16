@@ -83,7 +83,7 @@ namespace neon {
 
     void LogComponent::onPreDraw() {
         if (ImGui::Begin("Log")) {
-            std::unique_lock lock(_mutex);
+            std::lock_guard lock(_mutex);
             ImGuiListClipper clipper;
             clipper.Begin(static_cast<int>(_messages.size()));
 
@@ -121,7 +121,7 @@ namespace neon {
     void LogComponent::
     addMessage(const Message& message,
                const std::vector<const MessageGroup*>& groups) {
-        std::unique_lock lock(_mutex);
+        std::lock_guard lock(_mutex);
 
         std::vector<MessageGroup> g;
         g.reserve(groups.size());

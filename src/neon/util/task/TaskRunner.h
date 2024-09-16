@@ -68,7 +68,7 @@ namespace neon {
          * If this task has already finished, this method does nothing.
          */
         void wait() {
-            std::unique_lock lock(_valueMutex);
+            std::lock_guard lock(_valueMutex);
             if(_finished || _cancelled) return;
             _valueCondition.wait(lock);
         }
@@ -78,7 +78,7 @@ namespace neon {
          * @param result the result.
          */
         void setResult(Result&& result) {
-            std::unique_lock lock(_valueMutex);
+            std::lock_guard lock(_valueMutex);
             if(_finished || _cancelled) return;
             _result = std::move(result);
             _finished = true;
@@ -92,7 +92,7 @@ namespace neon {
          * but it will stop the assignment of the result.
          */
         void cancel() {
-            std::unique_lock lock(_valueMutex);
+            std::lock_guard lock(_valueMutex);
             if(_finished | _cancelled) return;
             _cancelled = true;
             _valueCondition.notify_all();
@@ -171,7 +171,7 @@ namespace neon {
          * but it will stop the assignment of the result.
          */
         void cancel() {
-            std::unique_lock lock(_valueMutex);
+            std::lock_guard lock(_valueMutex);
             if(_finished | _cancelled) return;
             _cancelled = true;
             _valueCondition.notify_all();
@@ -181,7 +181,7 @@ namespace neon {
          * Marks this task as finished.
          */
         void finish() {
-            std::unique_lock lock(_valueMutex);
+            std::lock_guard lock(_valueMutex);
             if(_finished | _cancelled) return;
             _finished = true;
             _valueCondition.notify_all();
@@ -264,7 +264,7 @@ namespace neon {
                     std::make_unique<Coroutine>(
                         std::forward<Coroutine&&>(coroutine));
 
-            std::unique_lock lock(_coroutineMutex);
+            std::lock_guard lock(_coroutineMutex);
             _coroutines.push_back(std::move(ptr));
         }
 
@@ -304,7 +304,7 @@ namespace neon {
                 }
             };
 
-            std::unique_lock lock(_mainThreadMutex);
+            std::lock_guard lock(_mainThreadMutex);
             _mainThreadTasks.push_back(std::move(run));
 
             return task;
@@ -346,7 +346,7 @@ namespace neon {
                 }
             };
 
-            std::unique_lock lock(_mutex);
+            std::lock_guard lock(_mutex);
             _pendingTasks.push(std::move(run));
             _pendingTasksCondition.notify_one();
 
