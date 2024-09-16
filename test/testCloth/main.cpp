@@ -4,15 +4,15 @@
 
 #include <neon/Neon.h>
 
-#include <util/component/CameraMovementComponent.h>
-#include <util/component/DebugOverlayComponent.h>
-#include <util/component/DockSpaceComponent.h>
-#include <util/component/ViewportComponent.h>
-#include <util/component/SceneTreeComponent.h>
-#include <util/component/GameObjectExplorerComponent.h>
-#include <util/DeferredUtils.h>
+#include <neon/util/component/CameraMovementComponent.h>
+#include <neon/util/component/DebugOverlayComponent.h>
+#include <neon/util/component/DockSpaceComponent.h>
+#include <neon/util/component/ViewportComponent.h>
+#include <neon/util/component/SceneTreeComponent.h>
+#include <neon/util/component/GameObjectExplorerComponent.h>
+#include <neon/util/DeferredUtils.h>
 
-#include <assimp/AssimpLoader.h>
+#include <neon/assimp/AssimpLoader.h>
 
 #include "Cloth.h"
 #include "TestVertex.h"

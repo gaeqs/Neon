@@ -7,7 +7,7 @@
 
 #include <neon/Neon.h>
 
-#include <util/component/CameraMovementComponent.h>
+#include <neon/util/component/CameraMovementComponent.h>
 
 class LockMouseComponent : public neon::Component {
 

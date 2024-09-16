@@ -14,7 +14,6 @@
 #include <neon/util/DeferredUtils.h>
 
 #include <neon/assimp/AssimpLoader.h>
-#include <bits/random.h>
 
 #include "DebugRenderComponent.h"
 #include "TestVertex.h"
@@ -251,7 +250,7 @@ void loadModels(Application* application, Room* room,
         contents.emplace_back(triangles[i], i);
     }
 
-    rush::StaticTree<size_t, rush::Triangle<float>, 3, float, 10, 5> tree(
+    rush::StaticTree<size_t, rush::Triangle<float>, 3, float, 10, 2> tree(
         treeBounds, contents);
 
 
@@ -260,7 +259,7 @@ void loadModels(Application* application, Room* room,
     auto debug = box->newComponent<DebugRenderComponent>(
         target, room);
 
-    box->newComponent<OctreeRaycastView<size_t, rush::Triangle<float>, 10, 5>>(
+    box->newComponent<OctreeRaycastView<size_t, rush::Triangle<float>, 10, 2>>(
         debug,
         lineMaterial,
         std::move(tree));
@@ -374,7 +373,7 @@ std::shared_ptr<Room> getTestRoom(Application* application) {
 
     auto content = generateDummyElements();
 
-    rush::StaticTree<size_t, rush::Sphere<3, float>, 3, float, 10, 5> tree(
+    rush::StaticTree<size_t, rush::Sphere<3, float>, 3, float, 10, 2> tree(
         treeBounds, content);
 
     for (const auto& c: content) {
@@ -386,7 +385,7 @@ std::shared_ptr<Room> getTestRoom(Application* application) {
     }
 
 
-    box->newComponent<OctreeRaycastView<size_t, rush::Sphere<3, float>, 10, 5>>(
+    box->newComponent<OctreeRaycastView<size_t, rush::Sphere<3, float>, 10, 2>>(
         debug,
         material,
         std::move(tree));

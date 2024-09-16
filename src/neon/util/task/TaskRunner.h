@@ -68,7 +68,7 @@ namespace neon {
          * If this task has already finished, this method does nothing.
          */
         void wait() {
-            std::lock_guard lock(_valueMutex);
+            std::unique_lock lock(_valueMutex);
             if(_finished || _cancelled) return;
             _valueCondition.wait(lock);
         }

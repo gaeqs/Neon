@@ -33,8 +33,8 @@ class DebugRenderComponent : public neon::Component {
 
     std::shared_ptr<neon::FrameBuffer> _target;
     std::shared_ptr<neon::Model> _model;
-    std::vector<uint32_t*> _frontInstances;
-    std::vector<uint32_t*> _backInstances;
+    std::vector<neon::InstanceData::Instance> _frontInstances;
+    std::vector<neon::InstanceData::Instance> _backInstances;
 
 
     std::shared_ptr<neon::Material>
@@ -116,13 +116,13 @@ public:
     void drawElement(const rush::Vec3f& position,
                      const rush::Vec4f& color,
                      float radius) {
-        uint32_t* instance;
+        neon::InstanceData::Instance instance;
         if (!_frontInstances.empty()) {
             instance = _frontInstances.back();
             _frontInstances.pop_back();
         }
         else {
-            auto result = _model->createInstance();
+            auto result = _model->getInstanceData()->createInstance();
             if (!result.isOk()) {
                 std::cerr << result.getError() << std::endl;
                 return;
@@ -131,8 +131,8 @@ public:
         }
 
         _backInstances.push_back(instance);
-        _model->uploadData<Instance>(
-            *instance,
+        _model->getInstanceData()->uploadData<Instance>(
+            instance,
             0,
             Instance(position, color, radius)
         );
@@ -141,21 +141,21 @@ public:
     void drawPermanent(const rush::Vec3f& position,
                        const rush::Vec4f& color,
                        float radius) {
-        uint32_t* instance;
+        neon::InstanceData::Instance instance;
         if (!_frontInstances.empty()) {
             instance = _frontInstances.back();
             _frontInstances.pop_back();
         }
         else {
-            auto result = _model->createInstance();
+            auto result = _model->getInstanceData()->createInstance();
             if (!result.isOk()) {
                 std::cerr << result.getError() << std::endl;
                 return;
             }
             instance = result.getResult();
         }
-        _model->uploadData<Instance>(
-            *instance,
+        _model->getInstanceData()->uploadData<Instance>(
+            instance,
             0,
             Instance(position, color, radius)
         );
@@ -164,8 +164,8 @@ public:
 
     void onPreDraw() override {
         std::swap(_frontInstances, _backInstances);
-        for (const uint32_t* instance: _backInstances) {
-            _model->freeInstance(*instance);
+        for (const neon::InstanceData::Instance& instance: _backInstances) {
+            _model->getInstanceData()->freeInstance(instance);
         }
         _backInstances.clear();
     }
