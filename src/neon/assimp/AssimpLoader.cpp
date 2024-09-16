@@ -113,7 +113,7 @@ namespace neon::assimp_loader {
             auto mInfo = info.materialCreateInfo;
             mInfo.descriptions.vertex.push_back(info.vertexParser.description);
 
-            for (auto iData : info.instanceDatas) {
+            for (auto iData: info.instanceDatas) {
                 mInfo.descriptions.instance.push_back(iData.description);
             }
 
@@ -358,9 +358,10 @@ namespace neon::assimp_loader {
         std::map<aiTexture*, Tex> loadedTextures;
 
         ModelCreateInfo modelInfo;
+        modelInfo.instanceDataProvider = info.instanceDataProvider;
         modelInfo.meshes.reserve(scene->mNumMeshes);
 
-        for (auto iData : info.instanceDatas) {
+        for (auto iData: info.instanceDatas) {
             modelInfo.instanceTypes.push_back(iData.type);
             modelInfo.instanceSizes.push_back(iData.size);
         }

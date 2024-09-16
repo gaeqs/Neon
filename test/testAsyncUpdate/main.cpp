@@ -452,6 +452,8 @@ void loadModels(Application* application, Room* room,
     auto sansLoaderInfo = assimp_loader::LoaderInfo::create<TestVertex>(
         application, "Sans", sansMaterialInfo);
 
+    sansLoaderInfo.defineInstanceProvider<ConcurrentInstanceData>();
+
     auto sansResult = assimp_loader::load(R"(resource/Sans)", "Sans.obj",
                                           sansLoaderInfo);
 

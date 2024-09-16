@@ -11,7 +11,7 @@ namespace neon::vulkan {
         }
 
         std::thread::id threadId = std::this_thread::get_id();
-        std::unique_lock lock(_mutexes[family]);
+        std::lock_guard lock(_mutexes[family]);
 
         // Check if the thread is using a queue of the same family
         auto& map = _usedQueues[family];
@@ -106,7 +106,7 @@ namespace neon::vulkan {
         while (true) {
             for (auto& family: families) {
                 uint32_t familyIndex = family->getIndex();
-                std::unique_lock queueLock(_mutexes[familyIndex]);
+                std::lock_guard queueLock(_mutexes[familyIndex]);
 
                 // Check if the thread is using a queue of the same family
                 auto& map = _usedQueues[familyIndex];
@@ -143,7 +143,7 @@ namespace neon::vulkan {
             return false;
         }
 
-        std::unique_lock lock(_mutexes[family]);
+        std::lock_guard lock(_mutexes[family]);
 
         auto& map = _usedQueues[family];
         auto entry = map.find(thread);

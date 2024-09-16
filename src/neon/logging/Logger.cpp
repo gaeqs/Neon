@@ -48,7 +48,7 @@ namespace neon {
     }
 
     void Logger::addOutput(std::unique_ptr<LogOutput>&& output) {
-        std::unique_lock lock(_mutex);
+        std::lock_guard lock(_mutex);
         _outputs.push_back(std::move(output));
     }
 
@@ -57,17 +57,17 @@ namespace neon {
     }
 
     void Logger::addGroup(MessageGroup&& group) {
-        std::unique_lock lock(_mutex);
+        std::lock_guard lock(_mutex);
         _groups[group.name] = std::move(group);
     }
 
     bool Logger::removeGroup(const std::string& group) {
-        std::unique_lock lock(_mutex);
+        std::lock_guard lock(_mutex);
         return _groups.erase(group) > 0;
     }
 
     bool Logger::removeOutput(uint64_t id) {
-        std::unique_lock lock(_mutex);
+        std::lock_guard lock(_mutex);
         return std::erase_if(
             _outputs,
             [id](const std::unique_ptr<LogOutput>& output) {
@@ -77,7 +77,7 @@ namespace neon {
     }
 
     void Logger::print(const Message& message) const {
-        std::unique_lock lock(_mutex);
+        std::lock_guard lock(_mutex);
 
         std::vector<const MessageGroup*> groups;
         for (auto& name: message.groups) {

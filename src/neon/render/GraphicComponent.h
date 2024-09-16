@@ -14,14 +14,12 @@
 
 namespace neon {
     class GraphicComponent final : public Component {
-
         std::shared_ptr<Model> _model;
-        std::optional<uint32_t*> _modelTargetId;
+        std::optional<InstanceData::Instance> _modelTargetId;
 
         bool _firstPreDrawExecuted;
 
     public:
-
         GraphicComponent();
 
         explicit GraphicComponent(std::shared_ptr<Model> model);
@@ -35,15 +33,16 @@ namespace neon {
         template<class InstanceData>
         void uploadData(size_t index, const InstanceData& data) {
             if (_modelTargetId.has_value()) {
-                _model->uploadData(*_modelTargetId.value(), index, data);
+                _model->getInstanceData()->
+                        uploadData(_modelTargetId.value(), index, data);
             }
         }
 
         void onPreDraw() final;
 
         void drawEditor() final;
-
     };
+
     REGISTER_COMPONENT(GraphicComponent, "Graphic Component")
 }
 

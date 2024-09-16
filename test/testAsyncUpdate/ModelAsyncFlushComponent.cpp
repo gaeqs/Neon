@@ -10,6 +10,6 @@ ModelAsyncFlushComponent::ModelAsyncFlushComponent(
 void ModelAsyncFlushComponent::onPreDraw() {
     _task = getTaskRunner().executeAsync([model = _model, task = _task] {
         if (task != nullptr) task->wait();
-        model->flush();
+        model->getInstanceData()->flush();
     });
 }

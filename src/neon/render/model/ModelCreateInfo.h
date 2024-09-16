@@ -28,10 +28,10 @@
 
 #include <cstdint>
 #include <memory>
-#include <string>
 #include <vector>
 
 #include <neon/render/model/DefaultInstancingData.h>
+#include <neon/render/model/BasicInstanceData.h>
 #include <neon/render/model/Mesh.h>
 
 namespace neon {
@@ -85,6 +85,18 @@ namespace neon {
          */
         std::vector<size_t> instanceSizes = {sizeof(DefaultInstancingData)};
 
+        /**
+         * The function that provides the InstanceData of the model.
+         * <p>
+         * It is recommended to use defineInstanceProvider() to
+         * change this parameter.
+         */
+        std::function<std::unique_ptr<InstanceData>(
+            Application*, const ModelCreateInfo& info)> instanceDataProvider
+                = [](Application* app, const ModelCreateInfo& info) {
+            return std::make_unique<BasicInstanceData>(app, info);
+        };
+
         template<typename... Types>
         void defineInstanceType() {
             instanceTypes.clear();
@@ -93,6 +105,18 @@ namespace neon {
                 instanceTypes.emplace_back(typeid(Types));
                 instanceSizes.push_back(sizeof(Types));
             }(), ...);
+        }
+
+        /**
+         * Defines a provider that provides the given InstanceData to the model.
+         * @tparam IData de InstanceData to provide.
+         */
+        template<typename IData>
+        void defineInstanceProvider() {
+            instanceDataProvider = [](Application* app,
+                                      const ModelCreateInfo& info) {
+                return std::make_unique<IData>(app, info);
+            };
         }
     };
 }

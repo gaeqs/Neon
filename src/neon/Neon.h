@@ -42,6 +42,9 @@
 
 #include <neon/render/model/DefaultInstancingData.h>
 #include <neon/render/model/InputDescription.h>
+#include <neon/render/model/InstanceData.h>
+#include <neon/render/model/BasicInstanceData.h>
+#include <neon/render/model/ConcurrentInstanceData.h>
 #include <neon/render/model/Mesh.h>
 #include <neon/render/model/Model.h>
 

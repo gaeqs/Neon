@@ -175,7 +175,6 @@ void sansLoadThread(Application* application,
     }
 
     auto sansModel = sansResult.model;
-    sansModel->flush(buffer);
 
     buffer->end();
     buffer->submit();

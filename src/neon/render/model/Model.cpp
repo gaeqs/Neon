@@ -11,9 +11,10 @@ namespace neon {
                  const std::string& name,
                  const ModelCreateInfo& info)
         : Asset(typeid(Model), name),
-          _implementation(application, info),
           _meshes(info.meshes),
-          _shouldAutoFlush(info.shouldAutoFlush) {
+          _instanceData(info.instanceDataProvider(application, info)),
+          _shouldAutoFlush(info.shouldAutoFlush),
+          _implementation(application, info, _instanceData.get()) {
         if (info.uniformDescriptor != nullptr) {
             _uniformBuffer = std::make_unique<ShaderUniformBuffer>(
                 name, info.uniformDescriptor);
@@ -29,34 +30,13 @@ namespace neon {
         return _implementation;
     }
 
-    const std::vector<std::type_index>&
-    Model::getInstancingStructTypes() const {
-        return _implementation.getInstancingStructTypes();
-    }
-
     const std::unique_ptr<ShaderUniformBuffer>&
     Model::getUniformBuffer() const {
         return _uniformBuffer;
     }
 
-    Result<uint32_t*, std::string> Model::createInstance() {
-        return _implementation.createInstance();
-    }
-
-    bool Model::freeInstance(uint32_t id) {
-        return _implementation.freeInstance(id);
-    }
-
-    size_t Model::getInstanceAmount() const {
-        return _implementation.getInstanceAmount();
-    }
-
-    void Model::uploadDataRaw(uint32_t id, size_t index, const void* raw) {
-        _implementation.uploadDataRaw(id, index, raw);
-    }
-
-    void Model::flush(const CommandBuffer* commandBuffer) {
-        _implementation.flush(commandBuffer);
+    InstanceData* Model::getInstanceData() const {
+        return _instanceData.get();
     }
 
     bool Model::shouldAutoFlush() const {
@@ -75,11 +55,11 @@ namespace neon {
         return _meshes.size();
     }
 
-    Mesh* Model::getMesh(uint32_t index) {
+    Mesh* Model::getMesh(uint32_t index) const {
         return _meshes.at(index).get();
     }
 
-    void Model::addMaterial(const std::shared_ptr<Material>& material) {
+    void Model::addMaterial(const std::shared_ptr<Material>& material) const {
         for (const auto& mesh: _meshes) {
             mesh->getMaterials().insert(material);
         }
