@@ -1,7 +1,7 @@
 #version 450
 
 layout (location = 0) in vec3 vertex;
-layout (location = 4) in mat4 model;
+layout (location = 1) in mat4 model;
 
 layout (binding = 0) uniform Matrices
 {

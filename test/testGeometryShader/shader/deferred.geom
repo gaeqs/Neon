@@ -1,6 +1,6 @@
 #version 460
 
-const int INVOCATIONS = 32;
+const int INVOCATIONS = 10;
 
 layout(points, invocations = INVOCATIONS) in;
 layout(triangle_strip, max_vertices = 256) out;
@@ -23,7 +23,7 @@ void emit(vec4 pos) {
 
 void strip(vec4 start, float x1, float x2) {
     const float PI2 = 6.28318530718;
-    const int ITERATIONS = 64;
+    const int ITERATIONS = 15;
     for (int i = 0; i < ITERATIONS; ++i) {
         float fi = float(i);
         float fir = fi * PI2 / (ITERATIONS - 1);

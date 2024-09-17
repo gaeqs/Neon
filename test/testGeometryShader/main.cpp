@@ -2,6 +2,7 @@
 #include <memory>
 #include <vector>
 #include <filesystem>
+#include <random>
 
 #include <neon/Neon.h>
 #include <neon/util/component/CameraMovementComponent.h>
@@ -28,6 +29,26 @@ constexpr float HEIGHT = 600;
 CMRC_DECLARE(shaders);
 
 using namespace neon;
+
+
+std::vector<rush::Vec3f> randomPoints(size_t amount) {
+    std::vector<rush::Vec3f> vec;
+    vec.reserve(amount);
+
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_real_distribution<> distr(-10.0, 10.0);
+
+    for (size_t i = 0; i < amount; ++i) {
+        vec.emplace_back(
+            distr(gen),
+            distr(gen),
+            distr(gen)
+        );
+    }
+
+    return vec;
+}
 
 /**
  * Creates a shader program.
@@ -188,7 +209,7 @@ void loadModels(Application* application, Room* room,
         room,
         "points",
         material,
-        {{0.0f, 0.0f, 0.0f}}
+        randomPoints(10000)
     );
 
     auto object = room->newGameObject();
