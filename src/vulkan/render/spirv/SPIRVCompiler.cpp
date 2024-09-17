@@ -4,20 +4,25 @@
 
 #include "SPIRVCompiler.h"
 
-namespace neon::vulkan {
+#include "glslang/Public/ResourceLimits.h"
 
+namespace neon::vulkan {
     constexpr int DEFAULT_VERSION = 450;
 
     static bool GLSLANG_INITIALIZED = false;
 
-    TBuiltInResource SPIRVCompiler::generateDefaultResources() {
-        TBuiltInResource resources{};
+    TBuiltInResource SPIRVCompiler::generateDefaultResources(
+        VkPhysicalDevice device) {
+        VkPhysicalDeviceProperties vulkan;
+        auto& limits = vulkan.limits;
+        vkGetPhysicalDeviceProperties(device, &vulkan);
 
+        TBuiltInResource resources{};
         resources.maxLights = 32;
-        resources.maxClipPlanes = 6;
+        resources.maxClipPlanes = static_cast<int>(limits.maxClipDistances);
         resources.maxTextureUnits = 32;
         resources.maxTextureCoords = 32;
-        resources.maxVertexAttribs = 64;
+        resources.maxVertexAttribs = static_cast<int>(limits.maxVertexInputAttributes);
         resources.maxVertexUniformComponents = 4096;
         resources.maxVaryingFloats = 64;
         resources.maxVertexTextureImageUnits = 32;
@@ -33,12 +38,12 @@ namespace neon::vulkan {
         resources.minProgramTexelOffset = -8;
         resources.maxProgramTexelOffset = 7;
         resources.maxClipDistances = 8;
-        resources.maxComputeWorkGroupCountX = 65535;
-        resources.maxComputeWorkGroupCountY = 65535;
-        resources.maxComputeWorkGroupCountZ = 65535;
-        resources.maxComputeWorkGroupSizeX = 1024;
-        resources.maxComputeWorkGroupSizeY = 1024;
-        resources.maxComputeWorkGroupSizeZ = 64;
+        resources.maxComputeWorkGroupCountX = static_cast<int>(limits.maxComputeWorkGroupCount[0]);
+        resources.maxComputeWorkGroupCountY = static_cast<int>(limits.maxComputeWorkGroupCount[1]);
+        resources.maxComputeWorkGroupCountZ = static_cast<int>(limits.maxComputeWorkGroupCount[2]);
+        resources.maxComputeWorkGroupSizeX = static_cast<int>(limits.maxComputeWorkGroupSize[0]);
+        resources.maxComputeWorkGroupSizeY = static_cast<int>(limits.maxComputeWorkGroupSize[1]);
+        resources.maxComputeWorkGroupSizeZ = static_cast<int>(limits.maxComputeWorkGroupSize[2]);
         resources.maxComputeUniformComponents = 1024;
         resources.maxComputeTextureImageUnits = 16;
         resources.maxComputeImageUniforms = 8;
@@ -46,9 +51,9 @@ namespace neon::vulkan {
         resources.maxComputeAtomicCounterBuffers = 1;
         resources.maxVaryingComponents = 60;
         resources.maxVertexOutputComponents = 64;
-        resources.maxGeometryInputComponents = 64;
-        resources.maxGeometryOutputComponents = 128;
-        resources.maxFragmentInputComponents = 128;
+        resources.maxGeometryInputComponents =  static_cast<int>(limits.maxGeometryInputComponents);
+        resources.maxGeometryOutputComponents =  static_cast<int>(limits.maxGeometryOutputComponents);
+        resources.maxFragmentInputComponents =  static_cast<int>(limits.maxFragmentInputComponents);
         resources.maxImageUnits = 8;
         resources.maxCombinedImageUnitsAndFragmentOutputs = 8;
         resources.maxCombinedShaderOutputResources = 8;
@@ -60,8 +65,8 @@ namespace neon::vulkan {
         resources.maxFragmentImageUniforms = 8;
         resources.maxCombinedImageUniforms = 8;
         resources.maxGeometryTextureImageUnits = 16;
-        resources.maxGeometryOutputVertices = 256;
-        resources.maxGeometryTotalOutputComponents = 1024;
+        resources.maxGeometryOutputVertices = static_cast<int>(limits.maxGeometryOutputVertices);
+        resources.maxGeometryTotalOutputComponents = static_cast<int>(limits.maxGeometryTotalOutputComponents);
         resources.maxGeometryUniformComponents = 1024;
         resources.maxGeometryVaryingComponents = 64;
         resources.maxTessControlInputComponents = 128;
@@ -76,7 +81,7 @@ namespace neon::vulkan {
         resources.maxTessPatchComponents = 120;
         resources.maxPatchVertices = 32;
         resources.maxTessGenLevel = 64;
-        resources.maxViewports = 16;
+        resources.maxViewports = static_cast<int>(limits.maxViewports);
         resources.maxVertexAtomicCounters = 0;
         resources.maxTessControlAtomicCounters = 0;
         resources.maxTessEvaluationAtomicCounters = 0;
@@ -155,11 +160,11 @@ namespace neon::vulkan {
         }
     }
 
-    SPIRVCompiler::SPIRVCompiler() :
-            _compiled(false),
-            _shaders(),
-            _program(),
-            _resources(generateDefaultResources()) {
+    SPIRVCompiler::SPIRVCompiler(VkPhysicalDevice device) :
+        _compiled(false),
+        _shaders(),
+        _program(),
+        _resources(generateDefaultResources(device)) {
         if (!GLSLANG_INITIALIZED) {
             glslang::InitializeProcess();
             GLSLANG_INITIALIZED = true;
@@ -179,7 +184,7 @@ namespace neon::vulkan {
         auto* shader = new glslang::TShader(language);
 
         auto messages = static_cast<EShMessages>(
-                EShMsgSpvRules | EShMsgVulkanRules);
+            EShMsgSpvRules | EShMsgVulkanRules);
 
         const char* value = source.data();
         shader->setStrings(&value, 1);
@@ -203,7 +208,7 @@ namespace neon::vulkan {
 
     std::optional<std::string> SPIRVCompiler::compile() {
         auto messages = static_cast<EShMessages>(
-                EShMsgSpvRules | EShMsgVulkanRules);
+            EShMsgSpvRules | EShMsgVulkanRules);
         if (!_program.link(messages)) {
             std::string infoLog(_program.getInfoLog());
             std::string infoDebugLog(_program.getInfoDebugLog());
@@ -237,12 +242,12 @@ namespace neon::vulkan {
             auto& reflection = _program.getUniformBlock(i);
             if (reflection.getBinding() == -1) {
                 auto current = VKShaderUniformBlock{
-                        reflection.name,
-                        static_cast<uint32_t>(i),
-                        static_cast<uint32_t>(reflection.getBinding()),
-                        static_cast<uint32_t>(reflection.size),
-                        reflection.stages,
-                        reflection.stages
+                    reflection.name,
+                    static_cast<uint32_t>(i),
+                    static_cast<uint32_t>(reflection.getBinding()),
+                    static_cast<uint32_t>(reflection.size),
+                    reflection.stages,
+                    reflection.stages
                 };
 
                 sizes.emplace(reflection.name, current);
@@ -270,10 +275,10 @@ namespace neon::vulkan {
             if (!validIndices.contains(reflection.index)) continue;
 
             auto current = VKShaderUniform{
-                    reflection.name,
-                    static_cast<uint32_t>(reflection.index),
-                    static_cast<uint32_t>(reflection.offset),
-                    reflection.stages
+                reflection.name,
+                static_cast<uint32_t>(reflection.index),
+                static_cast<uint32_t>(reflection.offset),
+                reflection.stages
             };
 
             uniforms.emplace(reflection.name, current);
@@ -294,9 +299,9 @@ namespace neon::vulkan {
                 continue;
 
             auto current = VKShaderSampler{
-                    reflection.name,
-                    static_cast<uint32_t>(reflection.getBinding()),
-                    reflection.stages
+                reflection.name,
+                static_cast<uint32_t>(reflection.getBinding()),
+                reflection.stages
             };
 
             uniforms.emplace(reflection.name, current);

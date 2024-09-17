@@ -546,6 +546,20 @@ namespace neon::vulkan {
         vkGetPhysicalDeviceProperties(device, &deviceProperties);
         auto families = VKQueueFamilyCollection(device, _surface);
 
+
+        _application->getLogger().debug(MessageBuilder()
+            .print("Max geometry output vertcies: ")
+            .print(deviceProperties.limits.maxGeometryOutputVertices));
+        _application->getLogger().debug(MessageBuilder()
+            .print("Max geometry output components: ")
+            .print(deviceProperties.limits.maxGeometryOutputComponents));
+        _application->getLogger().debug(MessageBuilder()
+            .print("Max geometry output components (total): ")
+            .print(deviceProperties.limits.maxGeometryTotalOutputComponents));
+        _application->getLogger().debug(MessageBuilder()
+            .print("Max geometry invocations: ")
+            .print(deviceProperties.limits.maxGeometryShaderInvocations));
+
         bool hasGraphics = false;
         bool hasPresent = false;
 

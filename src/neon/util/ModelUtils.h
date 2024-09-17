@@ -14,6 +14,38 @@
 
 namespace neon::model_utils {
     template<class Vertex>
+    std::shared_ptr<Model> createModel(
+        Room* room,
+        const std::string& name,
+        std::shared_ptr<Material> material,
+        const std::vector<Vertex>& vertices) {
+        auto mesh = std::make_shared<Mesh>(
+            room->getApplication(),
+            "mesh", material
+        );
+
+        std::vector<uint32_t> indices;
+        indices.reserve(vertices.size());
+        for (uint32_t i = 0; i < vertices.size(); ++i) {
+            indices.push_back(i);
+        }
+
+        mesh->uploadVertices(vertices);
+        mesh->uploadIndices(indices);
+
+        ModelCreateInfo info;
+        info.meshes.push_back(std::move(mesh));
+
+        auto model = std::make_shared<Model>(
+            room->getApplication(),
+            name,
+            info
+        );
+
+        return model;
+    }
+
+    template<class Vertex>
     std::shared_ptr<Model> createCubeModel(
         Room* room,
         std::shared_ptr<Material> material) {

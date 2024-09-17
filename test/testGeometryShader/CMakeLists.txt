@@ -13,20 +13,11 @@ cmrc_add_resource_library(
         shaders_geometry_shader
         NAMESPACE shaders
         WHENCE shader
-        shader/default.vert
-        shader/default.frag
         shader/deferred.vert
         shader/deferred.geom
         shader/deferred.frag
-        shader/deferred_parallax.frag
         shader/screen.vert
         shader/screen.frag
-        shader/directional_light.vert
-        shader/directional_light.frag
-        shader/point_light.vert
-        shader/point_light.frag
-        shader/flash_light.vert
-        shader/flash_light.frag
 )
 
 cmrc_add_resource_library(

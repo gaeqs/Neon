@@ -19,7 +19,7 @@
 namespace neon::vulkan {
     class SPIRVCompiler {
 
-        static TBuiltInResource generateDefaultResources();
+        static TBuiltInResource generateDefaultResources(VkPhysicalDevice device);
 
         static EShLanguage getLanguage(const VkShaderStageFlagBits& shaderType);
 
@@ -30,7 +30,7 @@ namespace neon::vulkan {
 
     public:
 
-        SPIRVCompiler();
+        SPIRVCompiler(VkPhysicalDevice device);
 
         ~SPIRVCompiler();
 

@@ -98,27 +98,13 @@ std::shared_ptr<FrameBuffer> initRender(Room* room) {
     auto render = std::make_shared<Render>(app, "default", globalDescriptor);
     app->setRender(render);
 
-    auto directionalShader = createShader(app,
-                                          "directional_light",
-                                          "directional_light.vert",
-                                          "directional_light.frag");
-    auto pointShader = createShader(app,
-                                    "point_light",
-                                    "point_light.vert",
-                                    "point_light.frag");
-    auto flashShader = createShader(app,
-                                    "flash_light",
-                                    "flash_light.vert",
-                                    "flash_light.frag");
     auto screenShader = createShader(app,
                                      "screen",
                                      "screen.vert",
                                      "screen.frag");
 
     std::vector<FrameBufferTextureCreateInfo> frameBufferFormats = {
-        TextureFormat::R8G8B8A8,
-        TextureFormat::R16FG16F, // NORMAL XY
-        TextureFormat::R16FG16F // NORMAL Z / SPECULAR
+        TextureFormat::R8G8B8A8
     };
 
     auto fpFrameBuffer = std::make_shared<SimpleFrameBuffer>(
@@ -126,16 +112,6 @@ std::shared_ptr<FrameBuffer> initRender(Room* room) {
 
     render->addRenderPass(std::make_shared<DefaultRenderPassStrategy>(
         fpFrameBuffer));
-
-    auto albedo = deferred_utils::createLightSystem(
-        room,
-        render.get(),
-        fpFrameBuffer->getTextures(),
-        TextureFormat::R8G8B8A8,
-        directionalShader,
-        pointShader,
-        flashShader
-    );
 
     std::vector<FrameBufferTextureCreateInfo> screenFormats =
             {TextureFormat::R8G8B8A8};
@@ -145,9 +121,8 @@ std::shared_ptr<FrameBuffer> initRender(Room* room) {
         screenFrameBuffer));
 
     auto textures = fpFrameBuffer->getTextures();
-    textures[0] = albedo;
 
-    std::shared_ptr<Material> screenMaterial = Material::create(
+    std::shared_ptr screenMaterial = Material::create(
         room->getApplication(), "Screen Model",
         screenFrameBuffer, screenShader,
         deferred_utils::DeferredVertex::getDescription(),
@@ -177,7 +152,7 @@ std::shared_ptr<FrameBuffer> initRender(Room* room) {
 
 void loadModels(Application* application, Room* room,
                 const std::shared_ptr<FrameBuffer>& target) {
-    std::shared_ptr<ShaderUniformDescriptor> materialDescriptor =
+    std::shared_ptr materialDescriptor =
             ShaderUniformDescriptor::ofImages(application, "default", 2);
 
     auto shader = createShader(application,
@@ -203,18 +178,23 @@ void loadModels(Application* application, Room* room,
     cubeMaterialInfo.descriptions.instance.push_back(
         DefaultInstancingData::getInstancingDescription());
     cubeMaterialInfo.topology = PrimitiveTopology::POINT_LIST;
+    cubeMaterialInfo.rasterizer.polygonMode = PolygonMode::LINE;
+    cubeMaterialInfo.rasterizer.cullMode = CullMode::NONE;
 
     auto material = std::make_shared<Material>(application, "pointMaterial",
                                                cubeMaterialInfo);
 
-    auto cubeModel = model_utils::createCubeModel<TestVertex>(
-        room, material);
+    auto model = model_utils::createModel<rush::Vec3f>(
+        room,
+        "points",
+        material,
+        {{0.0f, 0.0f, 0.0f}}
+    );
 
-    auto cube = room->newGameObject();
-    cube->newComponent<GraphicComponent>(cubeModel);
-    cube->newComponent<ConstantRotationComponent>();
-    cube->getTransform().setPosition(rush::Vec3f(0.0f, 10.0f, -10.0f));
-    cube->setName("Cube");
+    auto object = room->newGameObject();
+    object->newComponent<GraphicComponent>(model);
+    object->getTransform().setPosition(rush::Vec3f(0.0f, 10.0f, -10.0f));
+    object->setName("Object");
 }
 
 std::shared_ptr<Texture> loadSkybox(Room* room) {
@@ -259,31 +239,6 @@ std::shared_ptr<Room> getTestRoom(Application* application) {
     parameterUpdater->newComponent<SceneTreeComponent>(goExplorer);
     parameterUpdater->newComponent<DebugOverlayComponent>(false, 100);
     parameterUpdater->newComponent<LogComponent>();
-
-    auto directionalLight = room->newGameObject();
-    directionalLight->newComponent<DirectionalLight>();
-    directionalLight->getTransform().lookAt(rush::Vec3f(0.45f, -0.6f, 0.65f));
-    directionalLight->setName("Directional light");
-
-    auto pointLightGO = room->newGameObject();
-    auto pointLight = pointLightGO->newComponent<PointLight>();
-    pointLightGO->getTransform().setPosition({5.0f, 7.0f, 5.0f});
-    pointLightGO->setName("Point light");
-    pointLight->setDiffuseColor({1.0f, 0.0f, 0.0f});
-    pointLight->setConstantAttenuation(0.01f);
-    pointLight->setLinearAttenuation(0.2);
-    pointLight->setQuadraticAttenuation(0.1);
-
-    auto flashLightGO = room->newGameObject();
-    auto flashLight = flashLightGO->newComponent<FlashLight>();
-    flashLightGO->getTransform().setPosition({10.0f, 7.0f, 10.0f});
-    flashLightGO->getTransform().rotate(rush::Vec3f(1.0f, 0.0f, 0.0f), 1.0f);
-    flashLightGO->setName("Flash light");
-    flashLight->setDiffuseColor({0.0f, 1.0f, 0.0f});
-    flashLight->setConstantAttenuation(0.01f);
-    flashLight->setLinearAttenuation(0.2);
-    flashLight->setQuadraticAttenuation(0.1);
-
 
     loadModels(application, room.get(), fpFrameBuffer);
 

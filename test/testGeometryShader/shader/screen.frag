@@ -6,9 +6,7 @@ layout (location = 1) in vec2 fragPosition;
 layout (set = 0, binding = 1) uniform samplerCube skybox;
 
 layout (set = 1, binding = 0) uniform sampler2D diffuseTexture;
-layout (set = 1, binding = 1) uniform sampler2D normalTexture;
-layout (set = 1, binding = 2) uniform sampler2D normalZTexture;
-layout (set = 1, binding = 3) uniform sampler2D depthTexture;
+layout (set = 1, binding = 1) uniform sampler2D depthTexture;
 
 layout (location = 0) out vec4 color;
 
@@ -34,10 +32,6 @@ void main() {
         color = texture(skybox, inverseView * position);
     } else {
         vec4 albedo = texture(diffuseTexture, fragTexCoords);
-        //vec2 normalXY = texture(normalTexture, fragTexCoords).xy;
-        //float normalZ = texture(normalZTexture, fragTexCoords).x;
-        //vec3 normal = inverseView * vec3(normalXY, normalZ);
-
         color = albedo; //vec4(normal, 1.0f);
     }
 }

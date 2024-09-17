@@ -49,7 +49,7 @@ namespace neon::vulkan {
         const std::unordered_map<ShaderType, std::string>& raw) {
         deleteShaders();
 
-        SPIRVCompiler compiler;
+        SPIRVCompiler compiler(_vkApplication->getPhysicalDevice());
 
         for (const auto& [type, code]: raw) {
             auto error = compiler.addShader(getStage(type), code);
