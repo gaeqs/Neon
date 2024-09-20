@@ -23,6 +23,11 @@
 #include "neon/render/shader/MaterialCreateInfo.h"
 #include "neon/render/shader/ShaderUniformBinding.h"
 
+
+#ifdef USE_VULKAN
+#include <vulkan/util/component/VulkanInfoCompontent.h>
+#endif
+
 constexpr float WIDTH = 800;
 constexpr float HEIGHT = 600;
 
@@ -260,6 +265,10 @@ std::shared_ptr<Room> getTestRoom(Application* application) {
     parameterUpdater->newComponent<SceneTreeComponent>(goExplorer);
     parameterUpdater->newComponent<DebugOverlayComponent>(false, 100);
     parameterUpdater->newComponent<LogComponent>();
+
+#ifdef USE_VULKAN
+    parameterUpdater->newComponent<vulkan::VulkanInfoCompontent>();
+#endif
 
     loadModels(application, room.get(), fpFrameBuffer);
 

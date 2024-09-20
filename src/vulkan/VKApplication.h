@@ -22,7 +22,6 @@
 #include <vulkan/device/VKDevice.h>
 
 
-
 namespace neon {
     class Room;
 }
@@ -56,6 +55,7 @@ namespace neon::vulkan {
         VkInstance _instance;
         VkDebugUtilsMessengerEXT _debugMessenger;
         VkPhysicalDevice _physicalDevice;
+        VKPhysicalDeviceFeatures _physicalDeviceFeatures;
 
         VKDevice* _device;
         VKQueueHolder _graphicQueue;
@@ -179,6 +179,9 @@ namespace neon::vulkan {
         [[nodiscard]] VkInstance getInstance() const override;
 
         [[nodiscard]] VkPhysicalDevice getPhysicalDevice() const override;
+
+        [[nodiscard]] const VKPhysicalDeviceFeatures&
+        getPhysicalDeviceFeatures() const override;
 
         [[nodiscard]] VKDevice* getDevice() const override;
 

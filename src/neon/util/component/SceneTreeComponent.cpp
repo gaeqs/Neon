@@ -29,7 +29,6 @@ namespace neon {
             if (children.empty()) flags |= ImGuiTreeNodeFlags_Leaf;
             if (selected) flags |= ImGuiTreeNodeFlags_Selected;
 
-            auto id = obj.getId();
             if (ImGui::TreeNodeEx(obj.raw(), flags, "%s",
                                   obj->getName().c_str())) {
                 mouseClickConsumed |= recursiveTreePopulation(children);

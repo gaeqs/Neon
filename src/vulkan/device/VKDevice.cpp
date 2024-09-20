@@ -6,11 +6,13 @@
 
 #include <vector>
 #include <stdexcept>
+#include <neon/logging/Logger.h>
 
 namespace neon::vulkan {
     namespace {
         const std::vector<const char*> DEVICE_EXTENSIONS = {
             VK_KHR_SWAPCHAIN_EXTENSION_NAME,
+            VK_KHR_MAINTENANCE_4_EXTENSION_NAME
             //VK_KHR_SEPARATE_DEPTH_STENCIL_LAYOUTS_EXTENSION_NAME
         };
     }
@@ -21,10 +23,10 @@ namespace neon::vulkan {
         : _raw(raw),
           _queueProvider(std::make_unique<VKQueueProvider>(
               raw, families, presentQueues)),
-          _external(true) {
-    }
+          _external(true) {}
 
     VKDevice::VKDevice(VkPhysicalDevice physicalDevice,
+                       VKPhysicalDeviceFeatures& features,
                        const VKQueueFamilyCollection& families)
         : _external(false) {
         std::vector<float> priorities;
@@ -51,26 +53,19 @@ namespace neon::vulkan {
             presentQueues[family.getIndex()] = family.getCount();
         }
 
-        VkPhysicalDeviceFeatures deviceFeatures{};
-        deviceFeatures.samplerAnisotropy = VK_TRUE;
-        deviceFeatures.geometryShader = VK_TRUE;
-        deviceFeatures.wideLines = VK_TRUE;
 
-
-        VkPhysicalDeviceVulkan12Features vulkan12Features{};
-        vulkan12Features.sType =
-                VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES;
-        vulkan12Features.separateDepthStencilLayouts = VK_TRUE;
-
+        const VkPhysicalDeviceFeatures2& f = features.getFeatures();
         VkDeviceCreateInfo createInfo{};
         createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+        createInfo.flags = 0;
         createInfo.queueCreateInfoCount = queueCreateInfos.size();
         createInfo.pQueueCreateInfos = queueCreateInfos.data();
-        createInfo.pEnabledFeatures = &deviceFeatures;
+        createInfo.pEnabledFeatures = nullptr;
         createInfo.enabledExtensionCount = DEVICE_EXTENSIONS.size();
         createInfo.ppEnabledExtensionNames = DEVICE_EXTENSIONS.data();
         createInfo.enabledLayerCount = 0;
-        createInfo.pNext = &vulkan12Features;
+        createInfo.pNext = &f;
+
         if (vkCreateDevice(physicalDevice, &createInfo, nullptr, &_raw) !=
             VK_SUCCESS) {
             throw std::runtime_error("Failed to create logical device!");

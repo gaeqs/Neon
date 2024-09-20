@@ -9,6 +9,8 @@
 
 #include <vulkan/queue/VKQueueFamilyCollection.h>
 #include <vulkan/queue/VKQueueProvider.h>
+#include <vulkan/device/VKPhysicalDeviceFeatures.h>
+
 
 namespace neon::vulkan {
     class VKDevice {
@@ -22,6 +24,7 @@ namespace neon::vulkan {
                  const std::vector<uint32_t>& presentQueues);
 
         VKDevice(VkPhysicalDevice physicalDevice,
+                 VKPhysicalDeviceFeatures& features,
                  const VKQueueFamilyCollection& families);
 
         ~VKDevice();

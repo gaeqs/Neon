@@ -7,10 +7,10 @@
 
 #include <neon/Application.h>
 #include <neon/render/buffer/CommandPool.h>
-
 #include <vulkan/vulkan.h>
-
 #include <vulkan/device/VKDevice.h>
+#include <vulkan/device/VKPhysicalDeviceFeatures.h>
+
 
 namespace neon {
     class Application;
@@ -26,6 +26,9 @@ namespace neon::vulkan {
         [[nodiscard]] virtual VKDevice* getDevice() const = 0;
 
         [[nodiscard]] virtual VkPhysicalDevice getPhysicalDevice() const = 0;
+
+        [[nodiscard]] virtual const VKPhysicalDeviceFeatures&
+        getPhysicalDeviceFeatures() const = 0;
 
         [[nodiscard]] virtual VkQueue getGraphicsQueue() = 0;
 

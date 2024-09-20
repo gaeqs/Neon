@@ -121,6 +121,7 @@ namespace neon::vulkan {
                                                      VK_NULL_HANDLE),
                                                  _physicalDevice(
                                                      VK_NULL_HANDLE),
+                                                 _physicalDeviceFeatures(),
                                                  _device(nullptr),
                                                  _graphicQueue(),
                                                  _presentQueue(),
@@ -537,6 +538,8 @@ namespace neon::vulkan {
         _application->getLogger().debug(MessageBuilder()
             .print("Selected physical device: ")
             .print(deviceProperties.deviceName));
+
+        _physicalDeviceFeatures = VKPhysicalDeviceFeatures(_physicalDevice);
     }
 
     bool
@@ -545,20 +548,6 @@ namespace neon::vulkan {
         VkPhysicalDeviceProperties deviceProperties;
         vkGetPhysicalDeviceProperties(device, &deviceProperties);
         auto families = VKQueueFamilyCollection(device, _surface);
-
-
-        _application->getLogger().debug(MessageBuilder()
-            .print("Max geometry output vertcies: ")
-            .print(deviceProperties.limits.maxGeometryOutputVertices));
-        _application->getLogger().debug(MessageBuilder()
-            .print("Max geometry output components: ")
-            .print(deviceProperties.limits.maxGeometryOutputComponents));
-        _application->getLogger().debug(MessageBuilder()
-            .print("Max geometry output components (total): ")
-            .print(deviceProperties.limits.maxGeometryTotalOutputComponents));
-        _application->getLogger().debug(MessageBuilder()
-            .print("Max geometry invocations: ")
-            .print(deviceProperties.limits.maxGeometryShaderInvocations));
 
         bool hasGraphics = false;
         bool hasPresent = false;
@@ -594,14 +583,12 @@ namespace neon::vulkan {
         return (!onlyDiscrete || deviceProperties.deviceType ==
                 VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU) &&
                hasGraphics && hasPresent && requiredExtensions.empty() &&
-               swapChainAdequate && supportedFeatures.samplerAnisotropy
-               && supportedFeatures.geometryShader
-               && supportedFeatures.wideLines;
+               swapChainAdequate;
     }
 
     void VKApplication::createLogicalDevice() {
         auto families = VKQueueFamilyCollection(_physicalDevice, _surface);
-        _device = new VKDevice(_physicalDevice, families);
+        _device = new VKDevice(_physicalDevice, _physicalDeviceFeatures, families);
         _graphicQueue = _device->getQueueProvider()->fetchCompatibleQueue(
             VKQueueFamily::Capabilities::withGraphics()
         );
@@ -900,6 +887,11 @@ namespace neon::vulkan {
 
     VkPhysicalDevice VKApplication::getPhysicalDevice() const {
         return _physicalDevice;
+    }
+
+    const VKPhysicalDeviceFeatures& VKApplication::
+    getPhysicalDeviceFeatures() const {
+        return _physicalDeviceFeatures;
     }
 
     VKDevice* VKApplication::getDevice() const {
