@@ -14,7 +14,6 @@
 namespace neon::vulkan {
     class VulkanInfoCompontent : public Component {
         VkPhysicalDeviceProperties _properties;
-        std::vector<VkExtensionProperties> _extensions;
         const VKPhysicalDeviceFeatures* _features;
 
         static void tooltip(const char* desc);

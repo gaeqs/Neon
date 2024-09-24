@@ -5,7 +5,7 @@
 #include "VKMesh.h"
 
 #include <cstring>
-#include <neon/Application.h>
+#include <neon/structure/Application.h>
 #include <vulkan/VKApplication.h>
 
 namespace neon::vulkan {

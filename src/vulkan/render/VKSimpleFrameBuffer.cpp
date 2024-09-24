@@ -35,7 +35,7 @@ namespace neon::vulkan {
             info.layers = createInfo.layers;
             auto [image, memory] = vulkan_util::createImage(
                     _vkApplication->getDevice()->getRaw(),
-                    _vkApplication->getPhysicalDevice(),
+                    _vkApplication->getPhysicalDevice().getRaw(),
                     info,
                     createInfo.imageView.viewType
             );
@@ -61,7 +61,7 @@ namespace neon::vulkan {
                            TextureUsage::SAMPLING};
             auto [image, memory] = vulkan_util::createImage(
                     _vkApplication->getDevice()->getRaw(),
-                    _vkApplication->getPhysicalDevice(),
+                    _vkApplication->getPhysicalDevice().getRaw(),
                     info,
                     TextureViewType::NORMAL_2D,
                     _vkApplication->getDepthImageFormat() // Overrides info's format.

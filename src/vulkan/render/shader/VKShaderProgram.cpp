@@ -4,7 +4,7 @@
 
 #include "VKShaderProgram.h"
 
-#include <neon/Application.h>
+#include <neon/structure/Application.h>
 #include <vulkan/VKShaderUniform.h>
 #include <vulkan/render/spirv/SPIRVCompiler.h>
 
@@ -49,7 +49,7 @@ namespace neon::vulkan {
         const std::unordered_map<ShaderType, std::string>& raw) {
         deleteShaders();
 
-        SPIRVCompiler compiler(_vkApplication->getPhysicalDevice());
+        SPIRVCompiler compiler(_vkApplication->getPhysicalDevice().getRaw());
 
         for (const auto& [type, code]: raw) {
             auto error = compiler.addShader(getStage(type), code);

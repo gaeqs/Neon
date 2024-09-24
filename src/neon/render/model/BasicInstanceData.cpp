@@ -4,7 +4,7 @@
 
 #include "BasicInstanceData.h"
 
-#include <neon/Application.h>
+#include <neon/structure/Application.h>
 #include <neon/render/model/ModelCreateInfo.h>
 
 namespace neon {

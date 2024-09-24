@@ -16,15 +16,17 @@ namespace neon::vulkan {
     class VKDevice {
         VkDevice _raw;
         std::unique_ptr<VKQueueProvider> _queueProvider;
+        VKPhysicalDeviceFeatures _enabledFeatures;
         bool _external;
 
     public:
         VKDevice(VkDevice raw,
                  const VKQueueFamilyCollection& families,
+                 const VKPhysicalDeviceFeatures& features,
                  const std::vector<uint32_t>& presentQueues);
 
         VKDevice(VkPhysicalDevice physicalDevice,
-                 VKPhysicalDeviceFeatures& features,
+                 const VKPhysicalDeviceFeatures& features,
                  const VKQueueFamilyCollection& families);
 
         ~VKDevice();
@@ -32,6 +34,8 @@ namespace neon::vulkan {
         [[nodiscard]] VkDevice getRaw() const;
 
         [[nodiscard]] VKQueueProvider* getQueueProvider() const;
+
+        [[nodiscard]] const VKPhysicalDeviceFeatures& getEnabledFeatures() const;
     };
 }
 

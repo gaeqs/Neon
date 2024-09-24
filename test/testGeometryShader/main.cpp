@@ -278,8 +278,30 @@ std::shared_ptr<Room> getTestRoom(Application* application) {
 int main() {
     std::srand(std::time(nullptr));
 
-    Application application(std::make_unique<vulkan::VKApplication>(
-        "Neon", WIDTH, HEIGHT));
+    vulkan::VKApplicationCreateInfo info;
+    info.name = "Neon";
+    info.windowSize = {WIDTH, HEIGHT};
+    info.vSync = false;
+    info.defaultExtensionInclusion = vulkan::InclusionMode::EXCLUDE_ALL;
+    info.defaultFeatureInclusion = vulkan::InclusionMode::EXCLUDE_ALL;
+    info.featuresConfigurator = [](const auto& device,
+                                   vulkan::VKPhysicalDeviceFeatures& features) {
+        vulkan::VKApplicationCreateInfo::
+                defaultFeaturesConfigurer(device, features);
+        features.basicFeatures.geometryShader = true;
+        features.basicFeatures.fillModeNonSolid = true;
+        features.basicFeatures.samplerAnisotropy = true;
+    };
+
+    info.extraFeatures.emplace_back(
+        VkPhysicalDeviceMeshShaderFeaturesEXT(
+            VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MESH_SHADER_FEATURES_EXT
+        )
+    );
+
+    info.enableValidationLayers = true;
+
+    Application application(std::make_unique<vulkan::VKApplication>(info));
 
     application.init();
     application.setRoom(getTestRoom(&application));

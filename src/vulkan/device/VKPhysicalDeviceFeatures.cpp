@@ -7,96 +7,136 @@
 #include <neon/logging/Logger.h>
 
 namespace neon::vulkan {
+    VKFeatureHolder::VKFeatureHolder(const char* data, size_t size)
+        : size(size), raw(new char[size]) {
+        memcpy(raw, data, size);
+    }
+
+    VKFeatureHolder::VKFeatureHolder(const VKFeatureHolder& other)
+        : size(other.size), raw(new char[size]) {
+        memcpy(raw, other.raw, size);
+    }
+
+    VKFeatureHolder::~VKFeatureHolder() {
+        delete[] raw;
+    }
+
+    VKFeatureHolder& VKFeatureHolder::operator=(const VKFeatureHolder& other) {
+        delete[] raw;
+        size = other.size;
+        raw = new char[size];
+        memcpy(raw, other.raw, size);
+        return *this;
+    }
+
+    VKDefaultExtension* VKFeatureHolder::asDefaultExtensions() {
+        return reinterpret_cast<VKDefaultExtension*>(raw);
+    }
+
+    const VKDefaultExtension* VKFeatureHolder::asDefaultExtensions() const {
+        return reinterpret_cast<const VKDefaultExtension*>(raw);
+    }
+
     VKPhysicalDeviceFeatures::VKPhysicalDeviceFeatures(
         const VKPhysicalDeviceFeatures& other)
-        : _features(other._features),
-          _vulkan11Features(other._vulkan11Features),
-          _vulkan12Features(other._vulkan12Features),
-          _vulkan13Features(other._vulkan13Features),
-          _meshShaderFeature(other._meshShaderFeature) {
-        _features.pNext = &_vulkan11Features;
-        _vulkan11Features.pNext = &_vulkan12Features;
-        _vulkan12Features.pNext = &_vulkan13Features;
-        _vulkan13Features.pNext = &_meshShaderFeature;
-        _meshShaderFeature.pNext = nullptr;
-        Logger::defaultLogger()->debug("CALL");
-    }
+        : basicFeatures(other.basicFeatures),
+          features(other.features),
+          extensions(other.extensions) {
+        features.emplace_back(VkPhysicalDeviceVulkan11Features(
+            VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_1_FEATURES));
+        features.emplace_back(VkPhysicalDeviceVulkan12Features(
+            VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES));
+        features.emplace_back(VkPhysicalDeviceVulkan13Features(
+            VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES));
 
-    VKPhysicalDeviceFeatures::VKPhysicalDeviceFeatures() {}
+        reweave();
+    }
 
     VKPhysicalDeviceFeatures::VKPhysicalDeviceFeatures(
-        VkPhysicalDevice device) {
-        _features.pNext = &_vulkan11Features;
-        _vulkan11Features.pNext = &_vulkan12Features;
-        _vulkan12Features.pNext = &_vulkan13Features;
-        _vulkan13Features.pNext = &_meshShaderFeature;
-        _meshShaderFeature.pNext = nullptr;
-        vkGetPhysicalDeviceFeatures2(device, &_features);
+        VkPhysicalDevice device,
+        const std::vector<VKFeatureHolder>& extraFeatures) {
+        VkPhysicalDeviceFeatures2 f{};
+        f.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
+
+        features.emplace_back(VkPhysicalDeviceVulkan11Features(
+            VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_1_FEATURES));
+        features.emplace_back(VkPhysicalDeviceVulkan12Features(
+            VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES));
+        features.emplace_back(VkPhysicalDeviceVulkan13Features(
+            VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES));
+
+        features.insert(
+            features.end(),
+            extraFeatures.begin(),
+            extraFeatures.end()
+        );
+
+        reweave();
+        f.pNext = features.empty() ? nullptr : features[0].raw;
+
+
+        vkGetPhysicalDeviceFeatures2(device, &f);
+
+        basicFeatures = f.features;
+
+        uint32_t extensionCount;
+        vkEnumerateDeviceExtensionProperties(
+            device,
+            nullptr,
+            &extensionCount,
+            nullptr
+        );
+
+        std::vector<VkExtensionProperties> rawExtensions(extensionCount);
+
+        vkEnumerateDeviceExtensionProperties(
+            device,
+            nullptr,
+            &extensionCount,
+            rawExtensions.data()
+        );
+
+        extensions.reserve(extensionCount);
+        for (auto& [name, _]: rawExtensions) {
+            extensions.emplace_back(name);
+        }
     }
 
-    const VkPhysicalDeviceFeatures2&
-    VKPhysicalDeviceFeatures::getFeatures() const {
-        return _features;
+    bool VKPhysicalDeviceFeatures::hasExtension(
+        const std::string& extension) const {
+        const auto it = std::find(
+            extensions.cbegin(),
+            extensions.cend(),
+            extension
+        );
+        return it != extensions.cend();
     }
 
-    VkPhysicalDeviceFeatures2& VKPhysicalDeviceFeatures::getFeatures() {
-        return _features;
-    }
+    VkPhysicalDeviceFeatures2 VKPhysicalDeviceFeatures::toFeatures2() const {
+        VkPhysicalDeviceFeatures2 f;
+        f.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
+        f.features = basicFeatures;
 
-    const VkPhysicalDeviceVulkan11Features&
-    VKPhysicalDeviceFeatures::getVulkan11Features() const {
-        return _vulkan11Features;
-    }
-
-    VkPhysicalDeviceVulkan11Features&
-    VKPhysicalDeviceFeatures::getVulkan11Features() {
-        return _vulkan11Features;
-    }
-
-    const VkPhysicalDeviceVulkan12Features&
-    VKPhysicalDeviceFeatures::getVulkan12Features() const {
-        return _vulkan12Features;
-    }
-
-    VkPhysicalDeviceVulkan12Features&
-    VKPhysicalDeviceFeatures::getVulkan12Features() {
-        return _vulkan12Features;
-    }
-
-    const VkPhysicalDeviceVulkan13Features&
-    VKPhysicalDeviceFeatures::getVulkan13Features() const {
-        return _vulkan13Features;
-    }
-
-    VkPhysicalDeviceVulkan13Features&
-    VKPhysicalDeviceFeatures::getVulkan13Features() {
-        return _vulkan13Features;
-    }
-
-    const VkPhysicalDeviceMeshShaderFeaturesEXT&
-    VKPhysicalDeviceFeatures::getMeshShaderFeature() const {
-        return _meshShaderFeature;
-    }
-
-    VkPhysicalDeviceMeshShaderFeaturesEXT&
-    VKPhysicalDeviceFeatures::getMeshShaderFeature() {
-        return _meshShaderFeature;
+        f.pNext = features.empty() ? nullptr : features[0].raw;
+        return f;
     }
 
     VKPhysicalDeviceFeatures& VKPhysicalDeviceFeatures::operator=(
-        const VKPhysicalDeviceFeatures& other) {
-        _features = other._features;
-        _vulkan11Features = other._vulkan11Features;
-        _vulkan12Features = other._vulkan12Features;
-        _vulkan13Features = other._vulkan13Features;
-        _meshShaderFeature = other._meshShaderFeature;
-
-        _features.pNext = &_vulkan11Features;
-        _vulkan11Features.pNext = &_vulkan12Features;
-        _vulkan12Features.pNext = &_vulkan13Features;
-        _vulkan13Features.pNext = &_meshShaderFeature;
-        _meshShaderFeature.pNext = nullptr;
-
+        const VKPhysicalDeviceFeatures& o) {
+        basicFeatures = o.basicFeatures;
+        features = o.features;
+        extensions = o.extensions;
+        reweave();
         return *this;
+    }
+
+    void VKPhysicalDeviceFeatures::reweave() {
+        if (!features.empty()) {
+            for (size_t i = 0; i < features.size() - 1; ++i) {
+                features[i].asDefaultExtensions()->pNext = features[i + 1].raw;
+            }
+            features[features.size() - 1].asDefaultExtensions()->pNext =
+                    nullptr;
+        }
     }
 }

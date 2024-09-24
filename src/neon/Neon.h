@@ -76,7 +76,7 @@
 #include <neon/structure/Identifiable.h>
 #include <neon/structure/IdentifiableWrapper.h>
 #include <neon/structure/Room.h>
-
-#include <neon/Application.h>
+#include <neon/structure/Application.h>
+#include <neon/structure/ApplicationCreateInfo.h>
 
 #endif //RVTRACKING_ENGINE_H

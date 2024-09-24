@@ -4,7 +4,7 @@
 
 #include "VKModel.h"
 
-#include <neon/Application.h>
+#include <neon/structure/Application.h>
 #include <neon/render/Render.h>
 #include <neon/render/shader/Material.h>
 #include <neon/render/buffer/CommandBuffer.h>

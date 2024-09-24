@@ -8,7 +8,7 @@
 
 #include <imgui.h>
 #include <ranges>
-#include <neon/Application.h>
+#include <neon/structure/Application.h>
 #include <neon/logging/ImGuiLogOutput.h>
 #include <neon/logging/Logger.h>
 #include <neon/util/task/Coroutine.h>

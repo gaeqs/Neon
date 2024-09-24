@@ -5,62 +5,89 @@
 #ifndef VKPHYSICALDEVICEFEATURES_H
 #define VKPHYSICALDEVICEFEATURES_H
 
+#include <optional>
+#include <string>
+#include <vector>
 #include <vulkan/vulkan.h>
 
 namespace neon::vulkan {
-    class VKPhysicalDeviceFeatures {
-        VkPhysicalDeviceFeatures2 _features = {
-            VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2
-        };
-        VkPhysicalDeviceVulkan11Features _vulkan11Features = {
-            VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_1_FEATURES
-        };
-        VkPhysicalDeviceVulkan12Features _vulkan12Features = {
-            VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES
-        };
-        VkPhysicalDeviceVulkan13Features _vulkan13Features = {
-            VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES
-        };
-        VkPhysicalDeviceMeshShaderFeaturesEXT _meshShaderFeature = {
-            VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MESH_SHADER_FEATURES_EXT
-        };
+    struct VKDefaultExtension {
+        VkStructureType sType;
+        const void* pNext;
+    };
 
-    public:
+    struct VKFeatureHolder {
+        size_t size;
+        char* raw;
+
+        VKFeatureHolder(const char* data, size_t size);
+
+        template<typename T>
+        explicit VKFeatureHolder(const T& t) :
+            VKFeatureHolder(reinterpret_cast<const char*>(&t), sizeof(T)) {}
+
+        VKFeatureHolder(const VKFeatureHolder& other);
+
+        ~VKFeatureHolder();
+
+        VKFeatureHolder& operator=(const VKFeatureHolder& other);
+
+        [[nodiscard]] VKDefaultExtension* asDefaultExtensions();
+
+        [[nodiscard]] const VKDefaultExtension* asDefaultExtensions() const;
+
+        template<typename Feature>
+        [[nodiscard]] Feature* asFeature() {
+            return reinterpret_cast<Feature*>(raw);
+        }
+
+        template<typename Feature>
+        [[nodiscard]] const Feature* asFeature() const {
+            return reinterpret_cast<const Feature*>(raw);
+        }
+    };
+
+    struct VKPhysicalDeviceFeatures {
+        VkPhysicalDeviceFeatures basicFeatures = {};
+        std::vector<VKFeatureHolder> features;
+        std::vector<std::string> extensions;
+
         VKPhysicalDeviceFeatures(const VKPhysicalDeviceFeatures& other);
 
-        VKPhysicalDeviceFeatures();
+        VKPhysicalDeviceFeatures() = default;
 
-        explicit VKPhysicalDeviceFeatures(VkPhysicalDevice device);
+        explicit VKPhysicalDeviceFeatures(
+            VkPhysicalDevice device,
+            const std::vector<VKFeatureHolder>& extraFeatures = {});
 
-        [[nodiscard]] const VkPhysicalDeviceFeatures2& getFeatures() const;
+        [[nodiscard]] bool hasExtension(const std::string& extension) const;
 
-        [[nodiscard]] VkPhysicalDeviceFeatures2& getFeatures();
+        [[nodiscard]] VkPhysicalDeviceFeatures2 toFeatures2() const;
 
-        [[nodiscard]] const VkPhysicalDeviceVulkan11Features&
-        getVulkan11Features() const;
+        VKPhysicalDeviceFeatures& operator=(const VKPhysicalDeviceFeatures& o);
 
-        [[nodiscard]] VkPhysicalDeviceVulkan11Features&
-        getVulkan11Features();
+        template<typename Feature>
+        std::optional<Feature*> findFeature(VkStructureType sType) {
+            for (auto& feature: features) {
+                if (feature.asDefaultExtensions()->sType == sType) {
+                    return {feature.asFeature<Feature>()};
+                }
+            }
+            return {};
+        }
 
-        [[nodiscard]] const VkPhysicalDeviceVulkan12Features&
-        getVulkan12Features() const;
+        template<typename Feature>
+        std::optional<const Feature*> findFeature(VkStructureType sType) const {
+            for (auto& feature: features) {
+                if (feature.asDefaultExtensions()->sType == sType) {
+                    return {feature.asFeature<Feature>()};
+                }
+            }
+            return {};
+        }
 
-        [[nodiscard]] VkPhysicalDeviceVulkan12Features&
-        getVulkan12Features();
-
-        [[nodiscard]] const VkPhysicalDeviceVulkan13Features&
-        getVulkan13Features() const;
-
-        [[nodiscard]] VkPhysicalDeviceVulkan13Features&
-        getVulkan13Features();
-
-        [[nodiscard]] const VkPhysicalDeviceMeshShaderFeaturesEXT&
-        getMeshShaderFeature() const;
-
-        [[nodiscard]] VkPhysicalDeviceMeshShaderFeaturesEXT&
-        getMeshShaderFeature();
-
-        VKPhysicalDeviceFeatures& operator=(const VKPhysicalDeviceFeatures& other);
+    private:
+        void reweave();
     };
 }
 

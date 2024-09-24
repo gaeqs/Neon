@@ -22,6 +22,8 @@
 #include <neon/logging/Logger.h>
 #include <neon/util/task/TaskRunner.h>
 
+#include <neon/structure/ApplicationCreateInfo.h>
+
 
 namespace neon {
     class Room;
@@ -39,6 +41,8 @@ namespace neon {
         virtual ~ApplicationImplementation() = default;
 
         virtual void init(Application* application) = 0;
+
+        virtual const ApplicationCreateInfo& getCreationInfo() const = 0;
 
         [[nodiscard]] virtual rush::Vec2i getWindowSize() const = 0;
 

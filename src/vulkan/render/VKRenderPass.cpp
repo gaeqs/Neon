@@ -6,7 +6,7 @@
 
 #include <stdexcept>
 
-#include <neon/Application.h>
+#include <neon/structure/Application.h>
 
 #include <vulkan/render/VKFrameBuffer.h>
 #include <vulkan/AbstractVKApplication.h>

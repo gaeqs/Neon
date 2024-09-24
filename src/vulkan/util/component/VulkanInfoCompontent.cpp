@@ -5,7 +5,7 @@
 #include "VulkanInfoCompontent.h"
 
 #include <imgui_internal.h>
-#include <neon/Application.h>
+#include <neon/structure/Application.h>
 #include <vulkan/VKApplication.h>
 
 void neon::vulkan::VulkanInfoCompontent::tooltip(const char* desc) {
@@ -86,7 +86,6 @@ void neon::vulkan::VulkanInfoCompontent::printProperty(const char* title,
 
 void neon::vulkan::VulkanInfoCompontent::printPropertyBool(const char* title,
     VkBool32 value) {
-
     ImGuiWindow* window = ImGui::GetCurrentWindow();
     ImGui::Text(title);
     ImGui::SameLine(300 + window->DC.Indent.x);
@@ -385,17 +384,16 @@ void neon::vulkan::VulkanInfoCompontent::physicalDeviceLimits() const {
 }
 
 void neon::vulkan::VulkanInfoCompontent::physicalDeviceExtensions() const {
-    for (const auto& [name, version]: _extensions) {
-        ImGui::Text(name);
-        ImGui::SameLine(400);
-        ImGui::Text("%u", version);
+    for (size_t i = 0; i < _features->extensions.size(); ++i) {
+        if (i != 0) ImGui::SameLine(400);
+        ImGui::Text(_features->extensions[i].c_str());
     }
 }
 
 void neon::vulkan::VulkanInfoCompontent::physicalDeviceFeatures() const {
     if (ImGui::CollapsingHeader("Vulkan 1.0")) {
         ImGui::TreePush("");
-        const auto& f = _features->getFeatures().features;
+        const auto& f = _features->basicFeatures;
         printPropertyBool("Robust Buffer Access", f.robustBufferAccess);
         printPropertyBool("Full Draw Index Uint32", f.fullDrawIndexUint32);
         printPropertyBool("Image Cube Array", f.imageCubeArray);
@@ -479,142 +477,182 @@ void neon::vulkan::VulkanInfoCompontent::physicalDeviceFeatures() const {
 
     if (ImGui::CollapsingHeader("Vulkan 1.1")) {
         ImGui::TreePush("");
-        const auto& f = _features->getVulkan11Features();
-        printPropertyBool("Storage Buffer 16 Bit Access",
-                          f.storageBuffer16BitAccess);
-        printPropertyBool("Uniform/Storage Buffer 16 Bit Access",
-                          f.uniformAndStorageBuffer16BitAccess);
-        printPropertyBool("Storage Push Constant 16", f.storagePushConstant16);
-        printPropertyBool("Storage Input Output 16", f.storageInputOutput16);
-        printPropertyBool("Multiview", f.multiview);
-        printPropertyBool("Multiview Geometry Shader",
-                          f.multiviewGeometryShader);
-        printPropertyBool("Multiview Tessellation Shader",
-                          f.multiviewTessellationShader);
-        printPropertyBool("Variable Pointers Storage Buffer",
-                          f.variablePointersStorageBuffer);
-        printPropertyBool("Variable Pointers", f.variablePointers);
-        printPropertyBool("Protected Memory", f.protectedMemory);
-        printPropertyBool("Sampler Ycbcr Conversion", f.samplerYcbcrConversion);
-        printPropertyBool("Shader Draw Parameters", f.shaderDrawParameters);
+        const auto& o = _features->
+                findFeature<VkPhysicalDeviceVulkan11Features>(
+                    VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_1_FEATURES);
+        if (o.has_value()) {
+            auto* f = o.value();
+            printPropertyBool("Storage Buffer 16 Bit Access",
+                              f->storageBuffer16BitAccess);
+            printPropertyBool("Uniform/Storage Buffer 16 Bit Access",
+                              f->uniformAndStorageBuffer16BitAccess);
+            printPropertyBool("Storage Push Constant 16",
+                              f->storagePushConstant16);
+            printPropertyBool("Storage Input Output 16",
+                              f->storageInputOutput16);
+            printPropertyBool("Multiview", f->multiview);
+            printPropertyBool("Multiview Geometry Shader",
+                              f->multiviewGeometryShader);
+            printPropertyBool("Multiview Tessellation Shader",
+                              f->multiviewTessellationShader);
+            printPropertyBool("Variable Pointers Storage Buffer",
+                              f->variablePointersStorageBuffer);
+            printPropertyBool("Variable Pointers", f->variablePointers);
+            printPropertyBool("Protected Memory", f->protectedMemory);
+            printPropertyBool("Sampler Ycbcr Conversion",
+                              f->samplerYcbcrConversion);
+            printPropertyBool("Shader Draw Parameters",
+                              f->shaderDrawParameters);
+        }
         ImGui::TreePop();
     }
 
     if (ImGui::CollapsingHeader("Vulkan 1.2")) {
         ImGui::TreePush("");
-        const auto& f = _features->getVulkan12Features();
-        printPropertyBool("Sampler Mirror Clamp To Edge",
-                          f.samplerMirrorClampToEdge);
-        printPropertyBool("Draw Indirect Count", f.drawIndirectCount);
-        printPropertyBool("Storage Buffer 8 Bit Access",
-                          f.storageBuffer8BitAccess);
-        printPropertyBool("Uniform/Storage Buffer 8 Bit Access",
-                          f.uniformAndStorageBuffer8BitAccess);
-        printPropertyBool("Storage Push Constant 8", f.storagePushConstant8);
-        printPropertyBool("Shader Buffer Int64 Atomics",
-                          f.shaderBufferInt64Atomics);
-        printPropertyBool("Shader Shared Int64 Atomics",
-                          f.shaderSharedInt64Atomics);
-        printPropertyBool("Shader Float16", f.shaderFloat16);
-        printPropertyBool("Shader Int8", f.shaderInt8);
-        printPropertyBool("Descriptor Indexing", f.descriptorIndexing);
-        printPropertyBool("Shader Input Att. Array Dyn. Indexing",
-                          f.shaderInputAttachmentArrayDynamicIndexing);
-        printPropertyBool("S. Uniform Texel Buffer Array Dyn. Ind.",
-                          f.shaderUniformTexelBufferArrayDynamicIndexing);
-        printPropertyBool("S. Storage Texel Buffer Array Dyn. Ind.",
-                          f.shaderStorageTexelBufferArrayDynamicIndexing);
-        printPropertyBool("S. Uniform Buffer Array Non Uniform Ind.",
-                          f.shaderUniformBufferArrayNonUniformIndexing);
-        printPropertyBool("S. Sampled Image Array Non Uniform Ind.",
-                          f.shaderSampledImageArrayNonUniformIndexing);
-        printPropertyBool("S. Sorage Buffer Array Non Uniform Ind.",
-                          f.shaderStorageBufferArrayNonUniformIndexing);
-        printPropertyBool("S. Sorage Image Array Non Uniform Ind.",
-                          f.shaderStorageImageArrayNonUniformIndexing);
-        printPropertyBool("S. Input Attach. Array Non Uniform Ind.",
-                          f.shaderInputAttachmentArrayNonUniformIndexing);
-        printPropertyBool("S. Uniform Texel B. Array Non Un. Ind.",
-                          f.shaderUniformTexelBufferArrayNonUniformIndexing);
-        printPropertyBool("S. Storage Texel B. Array Non Un. Ind.",
-                          f.shaderStorageTexelBufferArrayNonUniformIndexing);
-        printPropertyBool("Desc. Bind. Uniform B. Up. After Bind",
-                          f.descriptorBindingUniformBufferUpdateAfterBind);
-        printPropertyBool("Desc. Bind. Sampled Img. Up. After Bind",
-                          f.descriptorBindingSampledImageUpdateAfterBind);
-        printPropertyBool("Desc. Bind. Storage Img. Up. After Bind",
-                          f.descriptorBindingStorageImageUpdateAfterBind);
-        printPropertyBool("Desc. Bind. Storage Buf. Up. After Bind",
-                          f.descriptorBindingStorageBufferUpdateAfterBind);
-        printPropertyBool("Desc. Bind. U. Texel Buf. Up. After Bind",
-                          f.descriptorBindingUniformTexelBufferUpdateAfterBind);
-        printPropertyBool("Desc. Bind. S. Texel Buf. Up. After Bind",
-                          f.descriptorBindingStorageTexelBufferUpdateAfterBind);
-        printPropertyBool("Desc. Binding Upate Unused While Pending",
-                          f.descriptorBindingUpdateUnusedWhilePending);
-        printPropertyBool("Desc. Binding Partially Bound",
-                          f.descriptorBindingPartiallyBound);
-        printPropertyBool("Desc. Binding Variable Descriptor Count",
-                          f.descriptorBindingVariableDescriptorCount);
-        printPropertyBool("Runtime Descriptor Array", f.runtimeDescriptorArray);
-        printPropertyBool("Sampler Filter Minmax", f.samplerFilterMinmax);
-        printPropertyBool("Scalar Block Layout", f.scalarBlockLayout);
-        printPropertyBool("Imageless Framebuffer", f.imagelessFramebuffer);
-        printPropertyBool("Uniform Buffer Standard Layout",
-                          f.uniformBufferStandardLayout);
-        printPropertyBool("Shader Subgroup Extended Types",
-                          f.shaderSubgroupExtendedTypes);
-        printPropertyBool("Separated Depth Stencil Layouts",
-                          f.separateDepthStencilLayouts);
-        printPropertyBool("Host Query Reset", f.hostQueryReset);
-        printPropertyBool("Timeline Semaphore", f.timelineSemaphore);
-        printPropertyBool("Buffer Device Address", f.bufferDeviceAddress);
-        printPropertyBool("Buffer Device Address Capture Replay",
-                          f.bufferDeviceAddressCaptureReplay);
-        printPropertyBool("Buffer Device Address Multi Device",
-                          f.bufferDeviceAddressMultiDevice);
-        printPropertyBool("Vulkan Memory Model", f.vulkanMemoryModel);
-        printPropertyBool("Vulkan Memory Model Device Scope",
-                          f.vulkanMemoryModelDeviceScope);
-        printPropertyBool("Vulkan Mem. Model Avail. Visib. Chains",
-                          f.vulkanMemoryModelAvailabilityVisibilityChains);
-        printPropertyBool("Shader Output Viewport Index",
-                          f.shaderOutputViewportIndex);
-        printPropertyBool("Shader Output Layer", f.shaderOutputLayer);
-        printPropertyBool("Subgroup Broadcast Dynamic ID",
-                          f.subgroupBroadcastDynamicId);
+        const auto& o = _features->
+                findFeature<VkPhysicalDeviceVulkan12Features>(
+                    VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES);
+        if (o.has_value()) {
+            auto* f = o.value();
+            printPropertyBool("Sampler Mirror Clamp To Edge",
+                              f->samplerMirrorClampToEdge);
+            printPropertyBool("Draw Indirect Count", f->drawIndirectCount);
+            printPropertyBool("Storage Buffer 8 Bit Access",
+                              f->storageBuffer8BitAccess);
+            printPropertyBool("Uniform/Storage Buffer 8 Bit Access",
+                              f->uniformAndStorageBuffer8BitAccess);
+            printPropertyBool("Storage Push Constant 8",
+                              f->storagePushConstant8);
+            printPropertyBool("Shader Buffer Int64 Atomics",
+                              f->shaderBufferInt64Atomics);
+            printPropertyBool("Shader Shared Int64 Atomics",
+                              f->shaderSharedInt64Atomics);
+            printPropertyBool("Shader Float16", f->shaderFloat16);
+            printPropertyBool("Shader Int8", f->shaderInt8);
+            printPropertyBool("Descriptor Indexing", f->descriptorIndexing);
+            printPropertyBool("Shader Input Att. Array Dyn. Indexing",
+                              f->shaderInputAttachmentArrayDynamicIndexing);
+            printPropertyBool("S. Uniform Texel Buffer Array Dyn. Ind.",
+                              f->shaderUniformTexelBufferArrayDynamicIndexing);
+            printPropertyBool("S. Storage Texel Buffer Array Dyn. Ind.",
+                              f->shaderStorageTexelBufferArrayDynamicIndexing);
+            printPropertyBool("S. Uniform Buffer Array Non Uniform Ind.",
+                              f->shaderUniformBufferArrayNonUniformIndexing);
+            printPropertyBool("S. Sampled Image Array Non Uniform Ind.",
+                              f->shaderSampledImageArrayNonUniformIndexing);
+            printPropertyBool("S. Sorage Buffer Array Non Uniform Ind.",
+                              f->shaderStorageBufferArrayNonUniformIndexing);
+            printPropertyBool("S. Sorage Image Array Non Uniform Ind.",
+                              f->shaderStorageImageArrayNonUniformIndexing);
+            printPropertyBool("S. Input Attach. Array Non Uniform Ind.",
+                              f->shaderInputAttachmentArrayNonUniformIndexing);
+            printPropertyBool("S. Uniform Texel B. Array Non Un. Ind.",
+                              f->
+                              shaderUniformTexelBufferArrayNonUniformIndexing);
+            printPropertyBool("S. Storage Texel B. Array Non Un. Ind.",
+                              f->
+                              shaderStorageTexelBufferArrayNonUniformIndexing);
+            printPropertyBool("Desc. Bind. Uniform B. Up. After Bind",
+                              f->descriptorBindingUniformBufferUpdateAfterBind);
+            printPropertyBool("Desc. Bind. Sampled Img. Up. After Bind",
+                              f->descriptorBindingSampledImageUpdateAfterBind);
+            printPropertyBool("Desc. Bind. Storage Img. Up. After Bind",
+                              f->descriptorBindingStorageImageUpdateAfterBind);
+            printPropertyBool("Desc. Bind. Storage Buf-> Up. After Bind",
+                              f->descriptorBindingStorageBufferUpdateAfterBind);
+            printPropertyBool("Desc. Bind. U. Texel Buf-> Up. After Bind",
+                              f->
+                              descriptorBindingUniformTexelBufferUpdateAfterBind);
+            printPropertyBool("Desc. Bind. S. Texel Buf-> Up. After Bind",
+                              f->
+                              descriptorBindingStorageTexelBufferUpdateAfterBind);
+            printPropertyBool("Desc. Binding Upate Unused While Pending",
+                              f->descriptorBindingUpdateUnusedWhilePending);
+            printPropertyBool("Desc. Binding Partially Bound",
+                              f->descriptorBindingPartiallyBound);
+            printPropertyBool("Desc. Binding Variable Descriptor Count",
+                              f->descriptorBindingVariableDescriptorCount);
+            printPropertyBool("Runtime Descriptor Array",
+                              f->runtimeDescriptorArray);
+            printPropertyBool("Sampler Filter Minmax", f->samplerFilterMinmax);
+            printPropertyBool("Scalar Block Layout", f->scalarBlockLayout);
+            printPropertyBool("Imageless Framebuffer", f->imagelessFramebuffer);
+            printPropertyBool("Uniform Buffer Standard Layout",
+                              f->uniformBufferStandardLayout);
+            printPropertyBool("Shader Subgroup Extended Types",
+                              f->shaderSubgroupExtendedTypes);
+            printPropertyBool("Separated Depth Stencil Layouts",
+                              f->separateDepthStencilLayouts);
+            printPropertyBool("Host Query Reset", f->hostQueryReset);
+            printPropertyBool("Timeline Semaphore", f->timelineSemaphore);
+            printPropertyBool("Buffer Device Address", f->bufferDeviceAddress);
+            printPropertyBool("Buffer Device Address Capture Replay",
+                              f->bufferDeviceAddressCaptureReplay);
+            printPropertyBool("Buffer Device Address Multi Device",
+                              f->bufferDeviceAddressMultiDevice);
+            printPropertyBool("Vulkan Memory Model", f->vulkanMemoryModel);
+            printPropertyBool("Vulkan Memory Model Device Scope",
+                              f->vulkanMemoryModelDeviceScope);
+            printPropertyBool("Vulkan Mem. Model Avail. Visib. Chains",
+                              f->vulkanMemoryModelAvailabilityVisibilityChains);
+            printPropertyBool("Shader Output Viewport Index",
+                              f->shaderOutputViewportIndex);
+            printPropertyBool("Shader Output Layer", f->shaderOutputLayer);
+            printPropertyBool("Subgroup Broadcast Dynamic ID",
+                              f->subgroupBroadcastDynamicId);
+        }
         ImGui::TreePop();
     }
 
     if (ImGui::CollapsingHeader("Vulkan 1.3")) {
         ImGui::TreePush("");
-        const auto& f = _features->getVulkan13Features();
-        printPropertyBool("Robust Image Access", f.robustImageAccess);
-        printPropertyBool("Inline Uniform Block", f.inlineUniformBlock);
-        printPropertyBool("Descriptor Binding Inline\nUniform Block Update After Bind", f.descriptorBindingInlineUniformBlockUpdateAfterBind);
-        printPropertyBool("Pipeline Creation Cache Control", f.pipelineCreationCacheControl);
-        printPropertyBool("Private Data", f.privateData);
-        printPropertyBool("Shader Demote To Helper Invocation", f.shaderDemoteToHelperInvocation);
-        printPropertyBool("Shader Terminate Invocation", f.shaderTerminateInvocation);
-        printPropertyBool("Subgroup Size Control", f.subgroupSizeControl);
-        printPropertyBool("Compute Full Subgroups", f.computeFullSubgroups);
-        printPropertyBool("Synchronization 2", f.synchronization2);
-        printPropertyBool("Texture Compression ASTC_HDR", f.textureCompressionASTC_HDR);
-        printPropertyBool("Shader Zero Initialize Workgroup Memory", f.shaderZeroInitializeWorkgroupMemory);
-        printPropertyBool("Dynamic Rendering", f.dynamicRendering);
-        printPropertyBool("Shader Integer Dot Product", f.shaderIntegerDotProduct);
-        printPropertyBool("Maintenance 4", f.maintenance4);
+        const auto& o = _features->
+                findFeature<VkPhysicalDeviceVulkan13Features>(
+                    VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES);
+        if (o.has_value()) {
+            auto* f = o.value();
+            printPropertyBool("Robust Image Access", f->robustImageAccess);
+            printPropertyBool("Inline Uniform Block", f->inlineUniformBlock);
+            printPropertyBool(
+                "Descriptor Binding Inline\nUniform Block Update After Bind",
+                f->descriptorBindingInlineUniformBlockUpdateAfterBind);
+            printPropertyBool("Pipeline Creation Cache Control",
+                              f->pipelineCreationCacheControl);
+            printPropertyBool("Private Data", f->privateData);
+            printPropertyBool("Shader Demote To Helper Invocation",
+                              f->shaderDemoteToHelperInvocation);
+            printPropertyBool("Shader Terminate Invocation",
+                              f->shaderTerminateInvocation);
+            printPropertyBool("Subgroup Size Control", f->subgroupSizeControl);
+            printPropertyBool("Compute Full Subgroups",
+                              f->computeFullSubgroups);
+            printPropertyBool("Synchronization 2", f->synchronization2);
+            printPropertyBool("Texture Compression ASTC_HDR",
+                              f->textureCompressionASTC_HDR);
+            printPropertyBool("Shader Zero Initialize Workgroup Memory",
+                              f->shaderZeroInitializeWorkgroupMemory);
+            printPropertyBool("Dynamic Rendering", f->dynamicRendering);
+            printPropertyBool("Shader Integer Dot Product",
+                              f->shaderIntegerDotProduct);
+            printPropertyBool("Maintenance 4", f->maintenance4);
+        }
         ImGui::TreePop();
     }
 
     if (ImGui::CollapsingHeader("Mesh Shader")) {
         ImGui::TreePush("");
-        const auto& f = _features->getMeshShaderFeature();
-        printPropertyBool("Task Shader", f.taskShader);
-        printPropertyBool("Mesh Shader", f.meshShader);
-        printPropertyBool("Multiview Mesh Shader", f.multiviewMeshShader);
-        printPropertyBool("Primitive Fragment Shading\nRate Mesh Shader", f.primitiveFragmentShadingRateMeshShader);
-        printPropertyBool("Mesh Shader Queries", f.meshShaderQueries);
+        const auto& o = _features->
+                findFeature<VkPhysicalDeviceMeshShaderFeaturesEXT>(
+                    VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MESH_SHADER_FEATURES_EXT);
+        if (o.has_value()) {
+            auto* f = o.value();
+            printPropertyBool("Task Shader", f->taskShader);
+            printPropertyBool("Mesh Shader", f->meshShader);
+            printPropertyBool("Multiview Mesh Shader", f->multiviewMeshShader);
+            printPropertyBool("Primitive Fragment Shading\nRate Mesh Shader",
+                              f->primitiveFragmentShadingRateMeshShader);
+            printPropertyBool("Mesh Shader Queries", f->meshShaderQueries);
+        }
         ImGui::TreePop();
     }
 }
@@ -623,19 +661,7 @@ void neon::vulkan::VulkanInfoCompontent::onStart() {
     auto application = dynamic_cast<VKApplication*>(
         getApplication()->getImplementation());
 
-    VkPhysicalDevice device = application->getPhysicalDevice();
-    vkGetPhysicalDeviceProperties(device, &_properties);
-
-
-    uint32_t amount;
-    vkEnumerateDeviceExtensionProperties(device, nullptr,
-                                         &amount, nullptr);
-
-    _extensions.resize(amount);
-    vkEnumerateDeviceExtensionProperties(device, nullptr,
-                                         &amount, _extensions.data());
-
-    _features = &application->getPhysicalDeviceFeatures();
+    _features = &application->getDevice()->getEnabledFeatures();
 }
 
 void neon::vulkan::VulkanInfoCompontent::onPreDraw() {

@@ -6,7 +6,7 @@
 
 #include <ranges>
 
-#include <neon/Application.h>
+#include <neon/structure/Application.h>
 
 #include <vulkan/AbstractVKApplication.h>
 #include <neon/render/buffer/CommandPool.h>

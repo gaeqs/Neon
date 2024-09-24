@@ -16,7 +16,7 @@
 
 #include <cmrc/cmrc.hpp>
 
-#include <neon/Application.h>
+#include <neon/structure/Application.h>
 #include <neon/structure/collection/AssetCollection.h>
 #include <neon/render/model/InputDescription.h>
 #include <neon/render/model/DefaultInstancingData.h>

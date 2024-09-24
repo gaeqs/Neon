@@ -4,7 +4,7 @@
 
 #include "SimpleFrameBuffer.h"
 
-#include <neon/Application.h>
+#include <neon/structure/Application.h>
 
 #include <utility>
 

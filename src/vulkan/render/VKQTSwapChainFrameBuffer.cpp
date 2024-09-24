@@ -11,7 +11,7 @@
 #include <vulkan/vulkan.h>
 
 #include <imgui_impl_vulkan.h>
-#include <neon/Application.h>
+#include <neon/structure/Application.h>
 
 #include <vulkan/util/VKUtil.h>
 

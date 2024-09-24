@@ -55,7 +55,7 @@ namespace neon::vulkan {
 
         auto pair = vulkan_util::createImage(
                 _vkApplication->getDevice()->getRaw(),
-                _vkApplication->getPhysicalDevice(),
+                _vkApplication->getPhysicalDevice().getRaw(),
                 info,
                 TextureViewType::NORMAL_2D,
                 _vkApplication->getDepthImageFormat()
@@ -169,7 +169,7 @@ namespace neon::vulkan {
 
         ImGui_ImplVulkan_InitInfo init_info = {};
         init_info.Instance = _vkApplication->getInstance();
-        init_info.PhysicalDevice = _vkApplication->getPhysicalDevice();
+        init_info.PhysicalDevice = _vkApplication->getPhysicalDevice().getRaw();
         init_info.Device = _vkApplication->getDevice()->getRaw();
         init_info.Queue = _vkApplication->getGraphicsQueue();
         init_info.DescriptorPool = _vkApplication->getImGuiPool();
