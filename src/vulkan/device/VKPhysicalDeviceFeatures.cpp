@@ -4,6 +4,7 @@
 
 #include "VKPhysicalDeviceFeatures.h"
 
+#include <cstring>
 #include <neon/logging/Logger.h>
 
 namespace neon::vulkan {
