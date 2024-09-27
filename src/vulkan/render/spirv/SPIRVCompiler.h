@@ -14,12 +14,13 @@
 #include <SPIRV/GlslangToSpv.h>
 
 #include <neon/util/Result.h>
+#include <vulkan/device/VKPhysicalDevice.h>
 #include <vulkan/VKShaderUniform.h>
 
 namespace neon::vulkan {
     class SPIRVCompiler {
-
-        static TBuiltInResource generateDefaultResources(VkPhysicalDevice device);
+        static TBuiltInResource generateDefaultResources(
+            const VKPhysicalDevice& device);
 
         static EShLanguage getLanguage(const VkShaderStageFlagBits& shaderType);
 
@@ -29,8 +30,7 @@ namespace neon::vulkan {
         TBuiltInResource _resources;
 
     public:
-
-        SPIRVCompiler(VkPhysicalDevice device);
+        SPIRVCompiler(const VKPhysicalDevice& device);
 
         ~SPIRVCompiler();
 
@@ -51,7 +51,6 @@ namespace neon::vulkan {
 
         [[nodiscard]] std::unordered_map<std::string, VKShaderSampler>
         getSamplers() const;
-
     };
 }
 

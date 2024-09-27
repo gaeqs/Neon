@@ -214,7 +214,6 @@ void loadModels(Application* application, Room* room,
                                    "deferred.mesh",
                                    "deferred.frag");
 
-    // CUBE
     std::vector<ShaderUniformBinding> cubeMaterialBindings;
 
     std::shared_ptr<ShaderUniformDescriptor> cubeMaterialDescriptor;
@@ -237,11 +236,15 @@ void loadModels(Application* application, Room* room,
     auto material = std::make_shared<Material>(application, "pointMaterial",
                                                cubeMaterialInfo);
 
+    ModelCreateInfo modelInfo;
+    modelInfo.pipeline.type = PipelineType::MESH;
+
     auto model = model_utils::createModel<rush::Vec3f>(
         room,
         "points",
         material,
-        randomPoints(10000)
+        randomPoints(10000),
+        modelInfo
     );
 
     auto object = room->newGameObject();

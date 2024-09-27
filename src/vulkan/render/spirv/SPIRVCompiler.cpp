@@ -12,17 +12,24 @@ namespace neon::vulkan {
     static bool GLSLANG_INITIALIZED = false;
 
     TBuiltInResource SPIRVCompiler::generateDefaultResources(
-        VkPhysicalDevice device) {
-        VkPhysicalDeviceProperties vulkan;
-        auto& limits = vulkan.limits;
-        vkGetPhysicalDeviceProperties(device, &vulkan);
+        const VKPhysicalDevice& device) {
+        auto& limits = device.getProperties().limits;
+
+        VkPhysicalDeviceMeshShaderPropertiesEXT meshProp = {};
+        meshProp.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MESH_SHADER_PROPERTIES_EXT;
+        meshProp.pNext = nullptr;
+        VkPhysicalDeviceProperties2 properties2 = {};
+        properties2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2;
+        properties2.pNext = &meshProp;
+        vkGetPhysicalDeviceProperties2(device.getRaw(), &properties2);
 
         TBuiltInResource resources{};
         resources.maxLights = 32;
         resources.maxClipPlanes = static_cast<int>(limits.maxClipDistances);
         resources.maxTextureUnits = 32;
         resources.maxTextureCoords = 32;
-        resources.maxVertexAttribs = static_cast<int>(limits.maxVertexInputAttributes);
+        resources.maxVertexAttribs = static_cast<int>(limits.
+            maxVertexInputAttributes);
         resources.maxVertexUniformComponents = 4096;
         resources.maxVaryingFloats = 64;
         resources.maxVertexTextureImageUnits = 32;
@@ -38,12 +45,18 @@ namespace neon::vulkan {
         resources.minProgramTexelOffset = -8;
         resources.maxProgramTexelOffset = 7;
         resources.maxClipDistances = 8;
-        resources.maxComputeWorkGroupCountX = static_cast<int>(limits.maxComputeWorkGroupCount[0]);
-        resources.maxComputeWorkGroupCountY = static_cast<int>(limits.maxComputeWorkGroupCount[1]);
-        resources.maxComputeWorkGroupCountZ = static_cast<int>(limits.maxComputeWorkGroupCount[2]);
-        resources.maxComputeWorkGroupSizeX = static_cast<int>(limits.maxComputeWorkGroupSize[0]);
-        resources.maxComputeWorkGroupSizeY = static_cast<int>(limits.maxComputeWorkGroupSize[1]);
-        resources.maxComputeWorkGroupSizeZ = static_cast<int>(limits.maxComputeWorkGroupSize[2]);
+        resources.maxComputeWorkGroupCountX = static_cast<int>(limits.
+            maxComputeWorkGroupCount[0]);
+        resources.maxComputeWorkGroupCountY = static_cast<int>(limits.
+            maxComputeWorkGroupCount[1]);
+        resources.maxComputeWorkGroupCountZ = static_cast<int>(limits.
+            maxComputeWorkGroupCount[2]);
+        resources.maxComputeWorkGroupSizeX = static_cast<int>(limits.
+            maxComputeWorkGroupSize[0]);
+        resources.maxComputeWorkGroupSizeY = static_cast<int>(limits.
+            maxComputeWorkGroupSize[1]);
+        resources.maxComputeWorkGroupSizeZ = static_cast<int>(limits.
+            maxComputeWorkGroupSize[2]);
         resources.maxComputeUniformComponents = 1024;
         resources.maxComputeTextureImageUnits = 16;
         resources.maxComputeImageUniforms = 8;
@@ -51,9 +64,12 @@ namespace neon::vulkan {
         resources.maxComputeAtomicCounterBuffers = 1;
         resources.maxVaryingComponents = 60;
         resources.maxVertexOutputComponents = 64;
-        resources.maxGeometryInputComponents =  static_cast<int>(limits.maxGeometryInputComponents);
-        resources.maxGeometryOutputComponents =  static_cast<int>(limits.maxGeometryOutputComponents);
-        resources.maxFragmentInputComponents =  static_cast<int>(limits.maxFragmentInputComponents);
+        resources.maxGeometryInputComponents = static_cast<int>(limits.
+            maxGeometryInputComponents);
+        resources.maxGeometryOutputComponents = static_cast<int>(limits.
+            maxGeometryOutputComponents);
+        resources.maxFragmentInputComponents = static_cast<int>(limits.
+            maxFragmentInputComponents);
         resources.maxImageUnits = 8;
         resources.maxCombinedImageUnitsAndFragmentOutputs = 8;
         resources.maxCombinedShaderOutputResources = 8;
@@ -65,8 +81,10 @@ namespace neon::vulkan {
         resources.maxFragmentImageUniforms = 8;
         resources.maxCombinedImageUniforms = 8;
         resources.maxGeometryTextureImageUnits = 16;
-        resources.maxGeometryOutputVertices = static_cast<int>(limits.maxGeometryOutputVertices);
-        resources.maxGeometryTotalOutputComponents = static_cast<int>(limits.maxGeometryTotalOutputComponents);
+        resources.maxGeometryOutputVertices = static_cast<int>(limits.
+            maxGeometryOutputVertices);
+        resources.maxGeometryTotalOutputComponents = static_cast<int>(limits.
+            maxGeometryTotalOutputComponents);
         resources.maxGeometryUniformComponents = 1024;
         resources.maxGeometryVaryingComponents = 64;
         resources.maxTessControlInputComponents = 128;
@@ -101,15 +119,26 @@ namespace neon::vulkan {
         resources.maxCullDistances = 8;
         resources.maxCombinedClipAndCullDistances = 8;
         resources.maxSamples = 4;
-        resources.maxMeshOutputVerticesNV = 256;
-        resources.maxMeshOutputPrimitivesNV = 512;
-        resources.maxMeshWorkGroupSizeX_NV = 32;
-        resources.maxMeshWorkGroupSizeY_NV = 1;
-        resources.maxMeshWorkGroupSizeZ_NV = 1;
-        resources.maxTaskWorkGroupSizeX_NV = 32;
-        resources.maxTaskWorkGroupSizeY_NV = 1;
-        resources.maxTaskWorkGroupSizeZ_NV = 1;
-        resources.maxMeshViewCountNV = 4;
+
+        resources.maxMeshOutputVerticesNV = meshProp.maxMeshOutputVertices;
+        resources.maxMeshOutputPrimitivesNV = meshProp.maxMeshOutputPrimitives;
+        resources.maxMeshWorkGroupSizeX_NV = meshProp.maxMeshWorkGroupSize[0];
+        resources.maxMeshWorkGroupSizeY_NV = meshProp.maxMeshWorkGroupSize[1];
+        resources.maxMeshWorkGroupSizeZ_NV = meshProp.maxMeshWorkGroupSize[2];
+        resources.maxTaskWorkGroupSizeX_NV = meshProp.maxTaskWorkGroupSize[0];
+        resources.maxTaskWorkGroupSizeY_NV = meshProp.maxTaskWorkGroupSize[1];
+        resources.maxTaskWorkGroupSizeZ_NV = meshProp.maxTaskWorkGroupSize[2];
+        resources.maxMeshViewCountNV = meshProp.maxMeshMultiviewViewCount;
+
+        resources.maxMeshOutputVerticesEXT = meshProp.maxMeshOutputVertices;
+        resources.maxMeshOutputPrimitivesEXT = meshProp.maxMeshOutputPrimitives;
+        resources.maxMeshWorkGroupSizeX_EXT = meshProp.maxMeshWorkGroupSize[0];
+        resources.maxMeshWorkGroupSizeY_EXT = meshProp.maxMeshWorkGroupSize[1];
+        resources.maxMeshWorkGroupSizeZ_EXT = meshProp.maxMeshWorkGroupSize[2];
+        resources.maxTaskWorkGroupSizeX_EXT = meshProp.maxTaskWorkGroupSize[0];
+        resources.maxTaskWorkGroupSizeY_EXT = meshProp.maxTaskWorkGroupSize[1];
+        resources.maxTaskWorkGroupSizeZ_EXT = meshProp.maxTaskWorkGroupSize[2];
+        resources.maxMeshViewCountEXT = meshProp.maxMeshMultiviewViewCount;
 
         resources.limits.nonInductiveForLoops = true;
         resources.limits.whileLoops = true;
@@ -160,12 +189,9 @@ namespace neon::vulkan {
         }
     }
 
-    SPIRVCompiler::SPIRVCompiler(VkPhysicalDevice device) :
+    SPIRVCompiler::SPIRVCompiler(const VKPhysicalDevice& device) :
         _compiled(false),
-        _shaders(),
-        _program(),
         _resources(generateDefaultResources(device)) {
-
         if (!GLSLANG_INITIALIZED) {
             glslang::InitializeProcess();
             GLSLANG_INITIALIZED = true;
@@ -193,8 +219,8 @@ namespace neon::vulkan {
         shader->setEnvInput(glslang::EShSourceGlsl, language,
                             glslang::EShClientVulkan, DEFAULT_VERSION);
         shader->setEnvClient(glslang::EShClientVulkan,
-                             glslang::EShTargetVulkan_1_3);
-        shader->setEnvTarget(glslang::EShTargetSpv, glslang::EShTargetSpv_1_0);
+                             glslang::EShTargetVulkan_1_2);
+        shader->setEnvTarget(glslang::EShTargetSpv, glslang::EShTargetSpv_1_5);
 
         if (!shader->parse(&_resources, DEFAULT_VERSION, false, messages)) {
             std::string infoLog(shader->getInfoLog());
