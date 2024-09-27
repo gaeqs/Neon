@@ -165,6 +165,7 @@ namespace neon::vulkan {
         _shaders(),
         _program(),
         _resources(generateDefaultResources(device)) {
+
         if (!GLSLANG_INITIALIZED) {
             glslang::InitializeProcess();
             GLSLANG_INITIALIZED = true;
@@ -192,7 +193,7 @@ namespace neon::vulkan {
         shader->setEnvInput(glslang::EShSourceGlsl, language,
                             glslang::EShClientVulkan, DEFAULT_VERSION);
         shader->setEnvClient(glslang::EShClientVulkan,
-                             glslang::EShTargetVulkan_1_1);
+                             glslang::EShTargetVulkan_1_3);
         shader->setEnvTarget(glslang::EShTargetSpv, glslang::EShTargetSpv_1_0);
 
         if (!shader->parse(&_resources, DEFAULT_VERSION, false, messages)) {

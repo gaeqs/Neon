@@ -1,0 +1,24 @@
+#version 460
+#extension VK_EXT_mesh_shader: require
+
+layout (local_size_x = 1) in;
+layout (triangles) out;
+layout (max_vertices = 4, max_primitives = 2) out;
+
+out gl_MeshPerVertexNV {
+    vec4 gl_Position;
+} gl_MeshVerticesNV[];
+
+void main()
+{
+
+    SetMeshOutputsEXT(4, 2);
+
+    gl_MeshVerticesEXT[0].gl_Position = vec4(-1.0, -1.0, 0.0, 1.0); // Upper Left
+    gl_MeshVerticesEXT[1].gl_Position = vec4(1.0, -1.0, 0.0, 1.0); // Upper Right
+    gl_MeshVerticesEXT[2].gl_Position = vec4(-1.0, 1.0, 0.0, 1.0); // Bottom Left
+    gl_MeshVerticesEXT[3].gl_Position = vec4(1.0, 1.0, 0.0, 1.0); // Bottom Right
+    gl_PrimitiveTriangleIndicesEXT[0] = uvec3(0, 1, 2);
+    gl_PrimitiveTriangleIndicesEXT[1] = uvec3(2, 1, 3);
+}
+    

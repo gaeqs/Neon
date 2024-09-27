@@ -47,6 +47,7 @@
 #include <neon/render/model/ConcurrentInstanceData.h>
 #include <neon/render/model/Mesh.h>
 #include <neon/render/model/Model.h>
+#include <neon/render/model/Pipeline.h>
 
 #include <neon/render/shader/Material.h>
 #include <neon/render/shader/MaterialCreateInfo.h>

@@ -6,11 +6,11 @@
 #define NEON_VKMESH_H
 
 #include <cstdint>
-#include <type_traits>
 #include <vector>
 #include <unordered_set>
 #include <optional>
 #include <memory>
+#include <neon/render/model/Pipeline.h>
 
 #include <vulkan/vulkan.h>
 
@@ -157,6 +157,7 @@ namespace neon::vulkan {
             VkCommandBuffer commandBuffer,
             const std::vector<std::unique_ptr<Buffer>>& instancingBuffers,
             uint32_t instancingElements,
+            const Pipeline& pipeline,
             const ShaderUniformBuffer* globalBuffer,
             const ShaderUniformBuffer* modelBuffer);
     };

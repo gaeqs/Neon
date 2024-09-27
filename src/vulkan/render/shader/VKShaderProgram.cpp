@@ -19,6 +19,10 @@ namespace neon::vulkan {
                 return VK_SHADER_STAGE_GEOMETRY_BIT;
             case ShaderType::FRAGMENT:
                 return VK_SHADER_STAGE_FRAGMENT_BIT;
+            case ShaderType::TASK:
+                return VK_SHADER_STAGE_TASK_BIT_EXT;
+            case ShaderType::MESH:
+                return VK_SHADER_STAGE_MESH_BIT_EXT;
             default:
                 return VK_SHADER_STAGE_ALL;
         }

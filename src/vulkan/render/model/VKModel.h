@@ -29,6 +29,7 @@ namespace neon::vulkan {
         Application* _application;
         std::vector<VKMesh*> _meshes;
         InstanceData* _instanceData;
+        Pipeline _pipeline;
 
         static std::vector<Mesh::Implementation*> getMeshImplementations(
             const std::vector<std::shared_ptr<Mesh>>& meshes);

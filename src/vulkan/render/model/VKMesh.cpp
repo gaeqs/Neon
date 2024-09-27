@@ -22,8 +22,7 @@ namespace neon::vulkan {
           _modifiableVertices(
               modifiableVertices),
           _modifiableIndices(
-              modifiableIndices) {
-    }
+              modifiableIndices) {}
 
     const std::unordered_set<std::shared_ptr<Material>>&
     VKMesh::getMaterials() const {
@@ -35,6 +34,7 @@ namespace neon::vulkan {
         VkCommandBuffer commandBuffer,
         const std::vector<std::unique_ptr<Buffer>>& instancingBuffers,
         uint32_t instancingElements,
+        const Pipeline& pipeline,
         const ShaderUniformBuffer* globalBuffer,
         const ShaderUniformBuffer* modelBuffer) {
         constexpr size_t MAX_BUFFERS = 32;
@@ -95,14 +95,30 @@ namespace neon::vulkan {
             modelBuffer->getImplementation().bind(commandBuffer, layout);
         }
 
-        vkCmdDrawIndexed(
-            commandBuffer,
-            _indexAmount,
-            instancingElements,
-            0,
-            0,
-            0
-        );
+
+        rush::Vec3i dimensions = pipeline.callsConfigurator(instancingElements);
+
+        if (pipeline.type == PipelineType::VERTEX) {
+            vkCmdDrawIndexed(
+                commandBuffer,
+                _indexAmount,
+                dimensions.x() * dimensions.y() * dimensions.z(),
+                0,
+                0,
+                0
+            );
+        } else if (pipeline.type == PipelineType::MESH) {
+            auto func = (PFN_vkCmdDrawMeshTasksEXT)vkGetInstanceProcAddr(
+                _vkApplication->getInstance(), "vkCmdDrawMeshTasksEXT");
+            if (func != nullptr) {
+                func(
+                    commandBuffer,
+                    dimensions.x(),
+                    dimensions.y(),
+                    dimensions.z()
+                );
+            }
+        }
     }
 
     bool VKMesh::setVertices(size_t index,
