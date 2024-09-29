@@ -4,7 +4,8 @@
 
 #include "SPIRVCompiler.h"
 
-#include "glslang/Public/ResourceLimits.h"
+#include "glslang/Include/Types.h"
+#include "SPIRV/GlslangToSpv.h"
 
 namespace neon::vulkan {
     constexpr int DEFAULT_VERSION = 450;
@@ -16,7 +17,8 @@ namespace neon::vulkan {
         auto& limits = device.getProperties().limits;
 
         VkPhysicalDeviceMeshShaderPropertiesEXT meshProp = {};
-        meshProp.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MESH_SHADER_PROPERTIES_EXT;
+        meshProp.sType =
+                VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MESH_SHADER_PROPERTIES_EXT;
         meshProp.pNext = nullptr;
         VkPhysicalDeviceProperties2 properties2 = {};
         properties2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2;
@@ -267,18 +269,26 @@ namespace neon::vulkan {
 
         for (int i = 0; i < _program.getNumUniformBlocks(); ++i) {
             auto& reflection = _program.getUniformBlock(i);
-            if (reflection.getBinding() == -1) {
-                auto current = VKShaderUniformBlock{
-                    reflection.name,
-                    static_cast<uint32_t>(i),
-                    static_cast<uint32_t>(reflection.getBinding()),
-                    static_cast<uint32_t>(reflection.size),
-                    reflection.stages,
-                    reflection.stages
-                };
 
-                sizes.emplace(reflection.name, current);
-            }
+            auto& qualifier = reflection.getType()->getQualifier();
+
+            std::optional<uint32_t> set;
+            std::optional<uint32_t> binding;
+
+            if (qualifier.hasSet()) set = qualifier.layoutSet;
+            if (qualifier.hasBinding()) binding = qualifier.layoutBinding;
+
+            auto current = VKShaderUniformBlock{
+                reflection.name,
+                static_cast<uint32_t>(i),
+                set,
+                binding,
+                static_cast<uint32_t>(reflection.size),
+                reflection.stages,
+                static_cast<uint32_t>(reflection.numMembers),
+            };
+
+            sizes.emplace(reflection.name, current);
         }
 
         return sizes;
@@ -312,6 +322,11 @@ namespace neon::vulkan {
         }
 
         return uniforms;
+    }
+
+    std::unordered_map<std::string, VKShaderUniform> SPIRVCompiler::
+    getBuffers() const {
+        return {};
     }
 
     std::unordered_map<std::string, VKShaderSampler>

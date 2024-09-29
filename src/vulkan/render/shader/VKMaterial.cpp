@@ -211,27 +211,27 @@ namespace neon::vulkan {
         auto& blocks = _material->getShader()
                 ->getImplementation().getUniformBlocks();
 
-        if (blocks.empty()) {
-            pipelineLayoutInfo.pushConstantRangeCount = 0;
-            pipelineLayoutInfo.pPushConstantRanges = nullptr;
-        }
-        else {
+        std::vector<VkPushConstantRange> pushConstants;
+
+        VkPushConstantRange range;
+        range.offset = 0;
+        range.size = 0;
+        range.stageFlags = 0;
+
+        for (const auto& [name, block]: blocks) {
+            if (block.binding.has_value()) continue;
             VkPushConstantRange range;
             range.offset = 0;
-            range.size = 0;
-            range.stageFlags = 0;
-
-            for (const auto& [name, block]: blocks) {
-                range.size = std::max(range.size, block.size);
-                range.stageFlags |= block.stages;
-            }
-
-            _pushConstants.resize(range.size, 0);
-            _pushConstantStages = range.stageFlags;
-
-            pipelineLayoutInfo.pushConstantRangeCount = 1;
-            pipelineLayoutInfo.pPushConstantRanges = &range;
+            range.size = block.size;
+            range.stageFlags = block.stages;
+            pushConstants.push_back(range);
         }
+
+        _pushConstants.resize(pushConstants.size(), 0);
+        //TODO _pushConstantStages = range.stageFlags;
+
+        pipelineLayoutInfo.pushConstantRangeCount = pushConstants.size();
+        pipelineLayoutInfo.pPushConstantRanges = pushConstants.data();
 
         if (vkCreatePipelineLayout(_vkApplication->getDevice()->getRaw(),
                                    &pipelineLayoutInfo, nullptr,
@@ -259,7 +259,8 @@ namespace neon::vulkan {
         pipelineInfo.subpass = 0;
 
         if (vkCreateGraphicsPipelines(
-                _vkApplication->getDevice()->getRaw(), VK_NULL_HANDLE, 1, &pipelineInfo,
+                _vkApplication->getDevice()->getRaw(), VK_NULL_HANDLE, 1,
+                &pipelineInfo,
                 nullptr, &_pipeline) != VK_SUCCESS) {
             throw std::runtime_error("Failed to create graphics pipeline!");
         }

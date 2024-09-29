@@ -125,6 +125,17 @@ std::shared_ptr<ShaderProgram> createMeshShader(Application* application,
         throw std::runtime_error(result.value());
     }
 
+    auto* l = Logger::defaultLogger();
+    l->debug(MessageBuilder().print("Shader: ").print(name));
+    l->debug(MessageBuilder().print("- Uniforms: ").print(shader->getImplementation().getUniforms().size()));
+    l->debug(MessageBuilder().print("- Uniform blocks: ").print(shader->getImplementation().getUniformBlocks().size()));
+
+    for (auto& [name, block] : shader->getImplementation().getUniformBlocks()) {
+        l->debug(MessageBuilder().print("  - Name: ").print(name));
+        l->debug(MessageBuilder().print("    - Set: ").print(block.set.value_or(-1)));
+        l->debug(MessageBuilder().print("    - Binding: ").print(block.binding.value_or(-1)));
+    }
+
     return shader;
 }
 

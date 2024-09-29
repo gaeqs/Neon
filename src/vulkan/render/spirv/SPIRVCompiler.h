@@ -11,7 +11,7 @@
 #include <unordered_map>
 
 #include <vulkan/vulkan.h>
-#include <SPIRV/GlslangToSpv.h>
+#include <glslang/Public/ShaderLang.h>
 
 #include <neon/util/Result.h>
 #include <vulkan/device/VKPhysicalDevice.h>
@@ -48,6 +48,9 @@ namespace neon::vulkan {
 
         [[nodiscard]] std::unordered_map<std::string, VKShaderUniform>
         getUniforms() const;
+
+        [[nodiscard]] std::unordered_map<std::string, VKShaderUniform>
+        getBuffers() const;
 
         [[nodiscard]] std::unordered_map<std::string, VKShaderSampler>
         getSamplers() const;
