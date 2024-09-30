@@ -360,7 +360,7 @@ namespace neon::assimp_loader {
         if (!info.loadGPUModel) {
             // Local mode only.
             if (!info.loadLocalModel) return {{}, nullptr, nullptr};
-            auto local = std::unique_ptr<LocalModel>();
+            auto local = std::make_unique<LocalModel>();
             for (size_t i = 0; i < scene->mNumMeshes; ++i) {
                 auto* mesh = scene->mMeshes[i];
                 local->meshes.push_back(loadLocalMesh(mesh, info.flipNormals));

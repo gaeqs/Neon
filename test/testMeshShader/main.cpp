@@ -234,6 +234,8 @@ void loadModels(Application* application, Room* room,
 
     auto zeppeliLoaderInfo = assimp_loader::LoaderInfo::create<TestVertex>(
         application, "Zeppeli", MaterialCreateInfo(nullptr, nullptr));
+    zeppeliLoaderInfo.loadGPUModel = false;
+    zeppeliLoaderInfo.loadLocalModel = true;
     zeppeliLoaderInfo.flipWindingOrder = true;
     zeppeliLoaderInfo.flipNormals = true;
 
@@ -252,8 +254,8 @@ void loadModels(Application* application, Room* room,
 
     std::vector<rush::Vec3f> vertices;
 
-    for (auto& mesh : localModel->meshes) {
-        for (uint32_t index : mesh.indices) {
+    for (auto& mesh: localModel->meshes) {
+        for (uint32_t index: mesh.indices) {
             vertices.push_back(mesh.vertices[index].position);
         }
     }
@@ -271,7 +273,10 @@ void loadModels(Application* application, Room* room,
 
 
     std::vector<ShaderUniformBinding> modelBindings = {
-        {UniformBindingType::STORAGE_BUFFER, sizeInBytes},
+        {
+            UniformBindingType::STORAGE_BUFFER,
+            static_cast<uint32_t>(sizeInBytes)
+        },
     };
 
     auto modelDescriptor = std::make_shared<ShaderUniformDescriptor>(
@@ -304,7 +309,7 @@ void loadModels(Application* application, Room* room,
         modelInfo
     );
 
-    model->getUniformBuffer()->uploadData(0, )
+    model->getUniformBuffer()->uploadData(0, vertices.data(), sizeInBytes);
 
     auto object = room->newGameObject();
     object->newComponent<GraphicComponent>(model);
