@@ -32,7 +32,8 @@ namespace neon::vulkan {
 
         _textures.resize(bindings.size());
 
-        uint32_t bufferAmount = 0;
+        uint32_t uniformAmount = 0;
+        uint32_t storageAmount = 0;
         uint32_t textureAmount = 0;
 
         for (const auto& binding: bindings) {
@@ -40,30 +41,54 @@ namespace neon::vulkan {
                                   false);
             _types.emplace_back(binding.type);
 
-            if (binding.type == UniformBindingType::IMAGE) {
-                _buffers.emplace_back();
-                _data.emplace_back();
-                ++textureAmount;
-            } else {
-                std::vector<std::shared_ptr<Buffer>> buffers;
-                _buffers.push_back(std::make_shared<StagingBuffer>(
-                    _vkApplication,
-                    VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
-                    binding.size));
-                _data.emplace_back(binding.size, 0);
-                ++bufferAmount;
+            switch (binding.type) {
+                case UniformBindingType::UNIFORM_BUFFER: {
+                    std::vector<std::shared_ptr<Buffer>> buffers;
+                    _buffers.push_back(std::make_shared<StagingBuffer>(
+                        _vkApplication,
+                        VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+                        binding.size));
+                    _data.emplace_back(binding.size, 0);
+                    ++uniformAmount;
+                    break;
+                }
+                case UniformBindingType::STORAGE_BUFFER: {
+                    std::vector<std::shared_ptr<Buffer>> buffers;
+                    _buffers.push_back(std::make_shared<StagingBuffer>(
+                        _vkApplication,
+                        VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
+                        binding.size));
+                    _data.emplace_back(binding.size, 0);
+                    ++storageAmount;
+                    break;
+                }
+                case UniformBindingType::IMAGE: {
+                    _buffers.emplace_back();
+                    _data.emplace_back();
+                    ++textureAmount;
+                    break;
+                }
             }
         }
 
         std::vector<VkDescriptorPoolSize> pools;
 
-        if (bufferAmount > 0) {
+        if (uniformAmount > 0) {
             pools.push_back({
                 VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-                bufferAmount *
+                uniformAmount *
                 _vkApplication->getMaxFramesInFlight()
             });
         }
+
+        if (storageAmount > 0) {
+            pools.push_back({
+                VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+                uniformAmount *
+                _vkApplication->getMaxFramesInFlight()
+            });
+        }
+
         if (textureAmount > 0) {
             pools.push_back({
                 VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
@@ -108,7 +133,8 @@ namespace neon::vulkan {
                  ++bindingIndex) {
                 auto& binding = bindings[bindingIndex];
 
-                if (binding.type == UniformBindingType::BUFFER) {
+                if (binding.type == UniformBindingType::UNIFORM_BUFFER ||
+                    binding.type == UniformBindingType::STORAGE_BUFFER) {
                     VkDescriptorBufferInfo bufferInfo{};
                     bufferInfo.buffer = _buffers[bindingIndex]->getRaw();
                     bufferInfo.offset = 0;
@@ -122,7 +148,9 @@ namespace neon::vulkan {
                     descriptorWrite.dstArrayElement = 0;
 
                     descriptorWrite.descriptorType =
-                            VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+                            binding.type == UniformBindingType::UNIFORM_BUFFER
+                                ? VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER
+                                : VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
                     descriptorWrite.descriptorCount = 1;
                     descriptorWrite.pBufferInfo = &bufferInfo;
 
@@ -151,7 +179,7 @@ namespace neon::vulkan {
                                            const void* data,
                                            size_t size) {
         if (index >= _types.size()) return;
-        if (_types[index] != UniformBindingType::BUFFER) return;
+        if (_types[index] != UniformBindingType::UNIFORM_BUFFER) return;
         auto& vector = _data[index];
         auto finalSize = std::min(size, vector.size());
         memcpy(vector.data(), data, finalSize);
@@ -174,7 +202,8 @@ namespace neon::vulkan {
             auto& updated = _updated[index];
 
             switch (_types[index]) {
-                case UniformBindingType::BUFFER: {
+                case UniformBindingType::STORAGE_BUFFER:
+                case UniformBindingType::UNIFORM_BUFFER: {
                     if (updated[frame] == 1) continue;
                     std::fill(updated.begin(), updated.end(), 1);
 

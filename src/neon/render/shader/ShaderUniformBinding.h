@@ -8,9 +8,9 @@
 #include <cstdint>
 
 namespace neon {
-
     enum class UniformBindingType {
-        BUFFER,
+        UNIFORM_BUFFER,
+        STORAGE_BUFFER,
         IMAGE
     };
 
@@ -19,23 +19,33 @@ namespace neon {
         uint32_t size;
 
         ShaderUniformBinding(UniformBindingType type_, uint32_t size_)
-                : type(type_), size(size_) {}
+            : type(type_), size(size_) {}
 
         /**
          * Creates a ShaderUniformBinding representing an image.
          * @return the ShaderUniformBinding.
          */
-        inline static ShaderUniformBinding image() {
+        static ShaderUniformBinding image() {
             return {UniformBindingType::IMAGE, 0};
         }
 
         /**
-         * Creates a ShaderUniformBinding representing a buffer.
-         * @param the size of the buffer.
+         * Creates a ShaderUniformBinding representing a uniform buffer.
+         * @param size_ the size of the buffer.
          * @return the ShaderUniformBinding.
          */
-        inline static ShaderUniformBinding buffer(uint32_t size_) {
-            return {UniformBindingType::BUFFER, size_};
+        static ShaderUniformBinding uniformBuffer(uint32_t size_) {
+            return {UniformBindingType::UNIFORM_BUFFER, size_};
+        }
+
+        /**
+         *
+         * Creates a ShaderUniformBinding representing a storage buffer.
+         * @param size_ the size of the buffer.
+         * @return the ShaderUniformBinding.
+         */
+        static ShaderUniformBinding storageBuffer(uint32_t size_) {
+            return {UniformBindingType::STORAGE_BUFFER, size_};
         }
     };
 }

@@ -127,13 +127,20 @@ std::shared_ptr<ShaderProgram> createMeshShader(Application* application,
 
     auto* l = Logger::defaultLogger();
     l->debug(MessageBuilder().print("Shader: ").print(name));
-    l->debug(MessageBuilder().print("- Uniforms: ").print(shader->getImplementation().getUniforms().size()));
-    l->debug(MessageBuilder().print("- Uniform blocks: ").print(shader->getImplementation().getUniformBlocks().size()));
+    l->debug(MessageBuilder().print("- Uniform blocks: ").print(
+        shader->getImplementation().getUniformBlocks().size()));
+    l->debug(
+        MessageBuilder().print("- Uniform samplers: ").print(
+            shader->getUniformSamplers().size()));
 
-    for (auto& [name, block] : shader->getImplementation().getUniformBlocks()) {
+    for (auto& block: shader->getImplementation().getUniformBlocks()) {
         l->debug(MessageBuilder().print("  - Name: ").print(name));
-        l->debug(MessageBuilder().print("    - Set: ").print(block.set.value_or(-1)));
-        l->debug(MessageBuilder().print("    - Binding: ").print(block.binding.value_or(-1)));
+        l->debug(
+            MessageBuilder().print("    - Set: ").print(
+                block.set.value_or(-1)));
+        l->debug(
+            MessageBuilder().print("    - Binding: ").print(
+                block.binding.value_or(-1)));
     }
 
     return shader;
@@ -147,7 +154,7 @@ std::shared_ptr<FrameBuffer> initRender(Room* room) {
     // In this application, we have a buffer of global parameters
     // and a skybox.
     std::vector<ShaderUniformBinding> globalBindings = {
-        {UniformBindingType::BUFFER, sizeof(Matrices)},
+        {UniformBindingType::UNIFORM_BUFFER, sizeof(Matrices)},
         {UniformBindingType::IMAGE, 0}
     };
 
@@ -225,6 +232,34 @@ void loadModels(Application* application, Room* room,
                                    "deferred.mesh",
                                    "deferred.frag");
 
+    auto zeppeliLoaderInfo = assimp_loader::LoaderInfo::create<TestVertex>(
+        application, "Zeppeli", MaterialCreateInfo(nullptr, nullptr));
+    zeppeliLoaderInfo.flipWindingOrder = true;
+    zeppeliLoaderInfo.flipNormals = true;
+
+    auto zeppeliResult = assimp_loader::load(R"(resource/Zeppeli)",
+                                             "William.obj", zeppeliLoaderInfo);
+
+    if (zeppeliResult.error.has_value()) {
+        application->getLogger().error(
+            MessageBuilder()
+            .print("Couldn't load Zeppeli model! ")
+            .print(std::filesystem::current_path()));
+        exit(1);
+    }
+
+    auto& localModel = zeppeliResult.localModel;
+
+    std::vector<rush::Vec3f> vertices;
+
+    for (auto& mesh : localModel->meshes) {
+        for (uint32_t index : mesh.indices) {
+            vertices.push_back(mesh.vertices[index].position);
+        }
+    }
+
+    size_t sizeInBytes = vertices.size() * sizeof(rush::Vec3f);
+
     std::vector<ShaderUniformBinding> cubeMaterialBindings;
 
     std::shared_ptr<ShaderUniformDescriptor> cubeMaterialDescriptor;
@@ -233,6 +268,15 @@ void loadModels(Application* application, Room* room,
         "pointMaterialDescriptor",
         cubeMaterialBindings
     );
+
+
+    std::vector<ShaderUniformBinding> modelBindings = {
+        {UniformBindingType::STORAGE_BUFFER, sizeInBytes},
+    };
+
+    auto modelDescriptor = std::make_shared<ShaderUniformDescriptor>(
+        application, "model", modelBindings);
+
 
     MaterialCreateInfo cubeMaterialInfo(target, shader);
     cubeMaterialInfo.descriptions.uniform = materialDescriptor;
@@ -243,11 +287,13 @@ void loadModels(Application* application, Room* room,
     cubeMaterialInfo.topology = PrimitiveTopology::POINT_LIST;
     cubeMaterialInfo.rasterizer.polygonMode = PolygonMode::LINE;
     cubeMaterialInfo.rasterizer.cullMode = CullMode::NONE;
+    cubeMaterialInfo.descriptions.extraUniforms.push_back(modelDescriptor);
 
     auto material = std::make_shared<Material>(application, "pointMaterial",
                                                cubeMaterialInfo);
 
     ModelCreateInfo modelInfo;
+    modelInfo.uniformDescriptor = modelDescriptor;
     modelInfo.pipeline.type = PipelineType::MESH;
 
     auto model = model_utils::createModel<rush::Vec3f>(
@@ -257,6 +303,8 @@ void loadModels(Application* application, Room* room,
         randomPoints(10000),
         modelInfo
     );
+
+    model->getUniformBuffer()->uploadData(0, )
 
     auto object = room->newGameObject();
     object->newComponent<GraphicComponent>(model);

@@ -4,6 +4,8 @@
 
 #include "SPIRVCompiler.h"
 
+#include <neon/render/texture/TextureCreateInfo.h>
+
 #include "glslang/Include/Types.h"
 #include "SPIRV/GlslangToSpv.h"
 
@@ -263,92 +265,96 @@ namespace neon::vulkan {
         return {result};
     }
 
-    [[nodiscard]] std::unordered_map<std::string, VKShaderUniformBlock>
+    [[nodiscard]] std::vector<ShaderUniformBlock>
     SPIRVCompiler::getUniformBlocks() const {
-        std::unordered_map<std::string, VKShaderUniformBlock> sizes;
+        std::vector<ShaderUniformBlock> blocks;
+
+        std::cout << "Buffers: " << _program.getNumBufferBlocks() << std::endl;
+        std::cout << "Uniforms: " << _program.getNumUniformBlocks() << std::endl;
+        std::cout << "In: " << _program.getNumPipeInputs() << std::endl;
+        std::cout << "Out: " << _program.getNumPipeOutputs() << std::endl;
+
+        for (int i = 0; i < _program.getNumPipeInputs(); ++i) {
+            auto& it = _program.getPipeInput(i);
+            std::cout << " - " << it.name << std::endl;
+        }
+
+        for (int i = 0; i < _program.getNumPipeOutputs(); ++i) {
+            auto& it = _program.getPipeOutput(i);
+            std::cout << " - " << it.name << std::endl;
+        }
 
         for (int i = 0; i < _program.getNumUniformBlocks(); ++i) {
             auto& reflection = _program.getUniformBlock(i);
+            auto* type = reflection.getType();
+
+            if (!type->isStruct()) continue;
+
+            auto& qualifier = type->getQualifier();
+            auto* structure = type->getStruct();
+
+            ShaderUniformBlock block;
+            block.name = reflection.name;
+            if (qualifier.hasSet()) block.set = qualifier.layoutSet;
+            if (qualifier.hasBinding()) block.binding = qualifier.layoutBinding;
+            block.stages = reflection.stages;
+            block.sizeInBytes = reflection.size;
+            block.offset = reflection.offset;
+            block.memberNames.reserve(reflection.numMembers);
+
+            for (size_t m = 0; m < reflection.numMembers; ++m) {
+                auto& name = structure->at(m).type->getFieldName();
+                block.memberNames.emplace_back(name);
+            }
+
+            blocks.emplace_back(block);
+        }
+
+        return blocks;
+    }
+
+    std::vector<ShaderUniformSampler>
+    SPIRVCompiler::getSamplers() const {
+        std::vector<ShaderUniformSampler> samplers;
+        for (int i = 0; i < _program.getNumUniformVariables(); ++i) {
+            auto& reflection = _program.getUniform(i);
+            auto* type = reflection.getType();
+
+            if (type->getBasicType() != glslang::TBasicType::EbtSampler)
+                continue;
 
             auto& qualifier = reflection.getType()->getQualifier();
 
-            std::optional<uint32_t> set;
-            std::optional<uint32_t> binding;
+            ShaderUniformSampler block;
+            block.name = reflection.name;
+            if (qualifier.hasSet()) block.set = qualifier.layoutSet;
+            if (qualifier.hasBinding()) block.binding = qualifier.layoutBinding;
+            block.stages = reflection.stages;
 
-            if (qualifier.hasSet()) set = qualifier.layoutSet;
-            if (qualifier.hasBinding()) binding = qualifier.layoutBinding;
-
-            auto current = VKShaderUniformBlock{
-                reflection.name,
-                static_cast<uint32_t>(i),
-                set,
-                binding,
-                static_cast<uint32_t>(reflection.size),
-                reflection.stages,
-                static_cast<uint32_t>(reflection.numMembers),
-            };
-
-            sizes.emplace(reflection.name, current);
-        }
-
-        return sizes;
-    }
-
-    std::unordered_map<std::string, VKShaderUniform>
-    SPIRVCompiler::getUniforms() const {
-        std::unordered_set<uint32_t> validIndices;
-
-        for (int i = 0; i < _program.getNumUniformBlocks(); ++i) {
-            if (_program.getUniformBlockBinding(i) == -1) {
-                validIndices.insert(i);
+            switch (type->getSampler().dim) {
+                case glslang::Esd1D:
+                    block.type = TextureViewType::NORMAL_1D;
+                    break;
+                case glslang::Esd2D:
+                    block.type = TextureViewType::NORMAL_2D;
+                    break;
+                case glslang::Esd3D:
+                    block.type = TextureViewType::NORMAL_3D;
+                    break;
+                case glslang::EsdCube:
+                    block.type = TextureViewType::CUBE;
+                    break;
+                case glslang::EsdRect:
+                    block.type = TextureViewType::ARRAY_1D;
+                    break;
+                default:
+                    block.type = TextureViewType::NORMAL_2D;
+                    break;
             }
+
+            samplers.emplace_back(block);
         }
 
-        std::unordered_map<std::string, VKShaderUniform> uniforms;
-        uniforms.reserve(_program.getNumUniformVariables());
-        for (int i = 0; i < _program.getNumUniformVariables(); ++i) {
-            auto& reflection = _program.getUniform(i);
-
-            if (!validIndices.contains(reflection.index)) continue;
-
-            auto current = VKShaderUniform{
-                reflection.name,
-                static_cast<uint32_t>(reflection.index),
-                static_cast<uint32_t>(reflection.offset),
-                reflection.stages
-            };
-
-            uniforms.emplace(reflection.name, current);
-        }
-
-        return uniforms;
-    }
-
-    std::unordered_map<std::string, VKShaderUniform> SPIRVCompiler::
-    getBuffers() const {
-        return {};
-    }
-
-    std::unordered_map<std::string, VKShaderSampler>
-    SPIRVCompiler::getSamplers() const {
-        std::unordered_map<std::string, VKShaderSampler> uniforms;
-        uniforms.reserve(_program.getNumUniformVariables());
-        for (int i = 0; i < _program.getNumUniformVariables(); ++i) {
-            auto& reflection = _program.getUniform(i);
-
-            if (reflection.getType()->getBasicType() !=
-                glslang::TBasicType::EbtSampler)
-                continue;
-
-            auto current = VKShaderSampler{
-                reflection.name,
-                static_cast<uint32_t>(reflection.getBinding()),
-                reflection.stages
-            };
-
-            uniforms.emplace(reflection.name, current);
-        }
-
-        return uniforms;
+        return samplers;
     }
 }

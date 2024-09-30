@@ -218,6 +218,8 @@ namespace neon::assimp_loader {
         */
         bool loadLocalModel = false;
 
+        bool loadGPUModel = true;
+
         std::function<std::unique_ptr<InstanceData>(
             Application*, const ModelCreateInfo& info)> instanceDataProvider
                 = [](Application* app, const ModelCreateInfo& info) {

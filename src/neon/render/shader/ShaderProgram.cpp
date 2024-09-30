@@ -7,14 +7,10 @@
 #include <utility>
 
 namespace neon {
-
     ShaderProgram::ShaderProgram(Application* application, std::string name) :
-            Asset(typeid(ShaderProgram), std::move(name)),
-            _compiled(false),
-            _rawShaders(),
-            _implementation(application) {
-
-    }
+        Asset(typeid(ShaderProgram), std::move(name)),
+        _compiled(false),
+        _implementation(application) {}
 
     const ShaderProgram::Implementation&
     ShaderProgram::getImplementation() const {
@@ -41,6 +37,16 @@ namespace neon {
         return _implementation.compile(_rawShaders);
     }
 
+    const std::vector<ShaderUniformBlock>&
+    ShaderProgram::getUniformBlocks() const {
+        return _implementation.getUniformBlocks();
+    }
+
+    const std::vector<ShaderUniformSampler>&
+    ShaderProgram::getUniformSamplers() const {
+        return _implementation.getUniformSamplers();
+    }
+
     Result<std::shared_ptr<ShaderProgram>, std::string>
     ShaderProgram::createShader(Application* app, std::string name,
                                 std::string vert, std::string frag) {
@@ -56,7 +62,7 @@ namespace neon {
         return shader;
     }
 
-    neon::Result<std::shared_ptr<ShaderProgram>, std::string>
+    Result<std::shared_ptr<ShaderProgram>, std::string>
     ShaderProgram::createShader(Application* app, std::string name,
                                 cmrc::file vert, cmrc::file frag) {
         return createShader(app, std::move(name),

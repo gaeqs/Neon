@@ -14,8 +14,10 @@
 
 #include <neon/structure/Asset.h>
 #include <neon/render/shader/ShaderType.h>
+#include <neon/render/shader/ShaderUniform.h>
 
 #include <neon/util/Result.h>
+
 
 #ifdef USE_VULKAN
 
@@ -41,8 +43,8 @@ namespace neon {
      * create an compile a shader program in one line.
      */
     class ShaderProgram : public Asset {
-
-        template<class T> friend
+        template<class T>
+        friend
         class IdentifiableWrapper;
 
     public:
@@ -51,13 +53,11 @@ namespace neon {
 #endif
 
     private:
-
         bool _compiled;
         std::unordered_map<ShaderType, std::string> _rawShaders;
         Implementation _implementation;
 
     public:
-
         ShaderProgram(const ShaderProgram& other) = delete;
 
         /**
@@ -114,6 +114,10 @@ namespace neon {
          */
         std::optional<std::string> compile();
 
+        const std::vector<ShaderUniformBlock>& getUniformBlocks() const;
+
+        const std::vector<ShaderUniformSampler>& getUniformSamplers() const;
+
         // region Util static methods
 
         /**
@@ -128,6 +132,7 @@ namespace neon {
          * @return the program or a compilation error.
          */
         static neon::Result<std::shared_ptr<ShaderProgram>, std::string>
+
         createShader(Application* app, std::string name,
                      std::string vert, std::string frag);
 
@@ -147,8 +152,6 @@ namespace neon {
                      cmrc::file vert, cmrc::file frag);
 
         // endregion
-
-
     };
 }
 

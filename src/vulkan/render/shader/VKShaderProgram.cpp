@@ -5,7 +5,6 @@
 #include "VKShaderProgram.h"
 
 #include <neon/structure/Application.h>
-#include <vulkan/VKShaderUniform.h>
 #include <vulkan/render/spirv/SPIRVCompiler.h>
 
 #include <vulkan/AbstractVKApplication.h>
@@ -41,8 +40,7 @@ namespace neon::vulkan {
 
     VKShaderProgram::VKShaderProgram(Application* application) : _vkApplication(
         dynamic_cast<AbstractVKApplication*>(
-            application->getImplementation())) {
-    }
+            application->getImplementation())) {}
 
     VKShaderProgram::~VKShaderProgram() {
         deleteShaders();
@@ -97,7 +95,6 @@ namespace neon::vulkan {
         }
 
         _uniformBlocks = compiler.getUniformBlocks();
-        _uniforms = compiler.getUniforms();
         _samplers = compiler.getSamplers();
 
         return {};
@@ -108,18 +105,13 @@ namespace neon::vulkan {
         return _shaders;
     }
 
-    const std::unordered_map<std::string, VKShaderUniform>&
-    VKShaderProgram::getUniforms() const {
-        return _uniforms;
-    }
-
-    const std::unordered_map<std::string, VKShaderUniformBlock>&
-    VKShaderProgram::getUniformBlocks() const {
+    const std::vector<ShaderUniformBlock>& VKShaderProgram::
+    getUniformBlocks() const {
         return _uniformBlocks;
     }
 
-    const std::unordered_map<std::string, VKShaderSampler>&
-    VKShaderProgram::getSamplers() const {
+    const std::vector<ShaderUniformSampler>&
+    VKShaderProgram::getUniformSamplers() const {
         return _samplers;
     }
 }

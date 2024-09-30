@@ -53,6 +53,7 @@
 #include <neon/render/shader/MaterialCreateInfo.h>
 #include <neon/render/shader/ShaderProgram.h>
 #include <neon/render/shader/ShaderType.h>
+#include <neon/render/shader/ShaderUniform.h>
 #include <neon/render/shader/ShaderUniformBinding.h>
 #include <neon/render/shader/ShaderUniformBuffer.h>
 #include <neon/render/shader/ShaderUniformDescriptor.h>
