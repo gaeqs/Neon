@@ -14,6 +14,9 @@
 namespace neon::vulkan {
     class VulkanInfoCompontent : public Component {
         VkPhysicalDeviceProperties _properties;
+        VkPhysicalDeviceMeshShaderPropertiesEXT _meshShaderProperties{
+            VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MESH_SHADER_PROPERTIES_EXT
+        };
         const VKPhysicalDeviceFeatures* _features;
 
         static void tooltip(const char* desc);
@@ -42,6 +45,10 @@ namespace neon::vulkan {
         void physicalDeviceProperties() const;
 
         void physicalDeviceLimits() const;
+
+        void defaultPhysicalDeviceLimits() const;
+
+        void meshShaderPhysicalDeviceLimits() const;
 
         void physicalDeviceExtensions() const;
 

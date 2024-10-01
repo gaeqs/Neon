@@ -13,6 +13,7 @@
 #include <neon/util/DeferredUtils.h>
 #include <neon/util/ModelUtils.h>
 #include <neon/assimp/AssimpLoader.h>
+#include <vulkan/util/component/VulkanInfoCompontent.h>
 
 #include "TestVertex.h"
 #include "GlobalParametersUpdaterComponent.h"
@@ -351,6 +352,7 @@ std::shared_ptr<Room> getTestRoom(Application* application) {
     parameterUpdater->newComponent<SceneTreeComponent>(goExplorer);
     parameterUpdater->newComponent<DebugOverlayComponent>(false, 100);
     parameterUpdater->newComponent<LogComponent>();
+    parameterUpdater->newComponent<vulkan::VulkanInfoCompontent>();
 
     auto directionalLight = room->newGameObject();
     directionalLight->newComponent<DirectionalLight>();

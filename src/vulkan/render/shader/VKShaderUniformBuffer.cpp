@@ -84,7 +84,7 @@ namespace neon::vulkan {
         if (storageAmount > 0) {
             pools.push_back({
                 VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
-                uniformAmount *
+                storageAmount *
                 _vkApplication->getMaxFramesInFlight()
             });
         }
@@ -179,7 +179,8 @@ namespace neon::vulkan {
                                            const void* data,
                                            size_t size) {
         if (index >= _types.size()) return;
-        if (_types[index] != UniformBindingType::UNIFORM_BUFFER) return;
+        if (_types[index] != UniformBindingType::UNIFORM_BUFFER &&
+            _types[index] != UniformBindingType::STORAGE_BUFFER) return;
         auto& vector = _data[index];
         auto finalSize = std::min(size, vector.size());
         memcpy(vector.data(), data, finalSize);

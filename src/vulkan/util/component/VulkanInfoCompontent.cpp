@@ -145,6 +145,19 @@ void neon::vulkan::VulkanInfoCompontent::physicalDeviceProperties() const {
 }
 
 void neon::vulkan::VulkanInfoCompontent::physicalDeviceLimits() const {
+    if (ImGui::CollapsingHeader("Vulkan")) {
+        ImGui::TreePush("");
+        defaultPhysicalDeviceLimits();
+        ImGui::TreePop();
+    }
+    if (ImGui::CollapsingHeader("Mesh shaders")) {
+        ImGui::TreePush("");
+        meshShaderPhysicalDeviceLimits();
+        ImGui::TreePop();
+    }
+}
+
+void neon::vulkan::VulkanInfoCompontent::defaultPhysicalDeviceLimits() const {
     auto& l = _properties.limits;
     printProperty("Max Image Dimensions",
                   std::format("{} * {} * {}",
@@ -381,6 +394,60 @@ void neon::vulkan::VulkanInfoCompontent::physicalDeviceLimits() const {
                   l.optimalBufferCopyOffsetAlignment);
     printProperty("  Copy Row Pitch Alighnment",
                   l.optimalBufferCopyRowPitchAlignment);
+}
+
+
+void
+neon::vulkan::VulkanInfoCompontent::meshShaderPhysicalDeviceLimits() const {
+    auto& l = _meshShaderProperties;
+
+    ImGui::Text("Task Work Group:");
+    printProperty("  Max Total Count", l.maxTaskWorkGroupTotalCount);
+    printProperty("  Max Count",
+                  std::format("{} * {} * {}",
+                              l.maxTaskWorkGroupCount[0],
+                              l.maxTaskWorkGroupCount[1],
+                              l.maxTaskWorkGroupCount[2]
+                  )
+    );
+    printProperty("  Max Invocations", l.maxTaskWorkGroupInvocations);
+
+    ImGui::NewLine();
+    printProperty("Max Task Payload Size", l.maxTaskPayloadSize);
+    printProperty("Max Task Shared Memory Size", l.maxTaskSharedMemorySize);
+    printProperty("Max Task Payload And Shared Memory Size",
+                  l.maxTaskPayloadAndSharedMemorySize);
+
+    ImGui::Text("Mesh Work Group:");
+    printProperty("  Max Total Count", l.maxMeshWorkGroupTotalCount);
+    printProperty("  Max Count",
+                  std::format("{} * {} * {}",
+                              l.maxMeshWorkGroupCount[0],
+                              l.maxMeshWorkGroupCount[1],
+                              l.maxMeshWorkGroupCount[2]
+                  )
+    );
+    printProperty("  Max Invocations", l.maxMeshWorkGroupInvocations);
+
+    ImGui::NewLine();
+    printProperty("Max Mesh Shared Memory Size", l.maxMeshSharedMemorySize);
+    printProperty("Max Mesh Payload And Shared Memory Size",
+                  l.maxMeshPayloadAndSharedMemorySize);
+    printProperty("Max Mesh Output Memory Size", l.maxMeshOutputMemorySize);
+    printProperty("Max Mesh Payload and Output Memory Size", l.maxMeshPayloadAndOutputMemorySize);
+    printProperty("Max Mesh Output Components", l.maxMeshOutputComponents);
+    printProperty("Max Mesh Output Vertices", l.maxMeshOutputVertices);
+    printProperty("Max Mesh Output Primitives", l.maxMeshOutputPrimitives);
+    printProperty("Max Mesh Output Layers", l.maxMeshOutputLayers);
+    printProperty("Max Mesh Multiview View Count", l.maxMeshMultiviewViewCount);
+    printProperty("Max Mesh Output Per Vertex Granularity", l.meshOutputPerVertexGranularity);
+    printProperty("Max Mesh Output Per Primitive Granularity", l.meshOutputPerPrimitiveGranularity);
+    printProperty("Max Preferred Task Work Group Invocations", l.maxPreferredTaskWorkGroupInvocations);
+    printProperty("Max Preferred Mesh Work Group Invocations", l.maxPreferredMeshWorkGroupInvocations);
+    printPropertyBool("Prefers Local Invocation Vertex Output", l.prefersLocalInvocationVertexOutput);
+    printPropertyBool("Prefers Local Invocation Primitive Output", l.prefersLocalInvocationPrimitiveOutput);
+    printPropertyBool("Prefers Compact Vertex Output", l.prefersCompactVertexOutput);
+    printPropertyBool("Prefers Compact Primitive Output", l.prefersCompactPrimitiveOutput);
 }
 
 void neon::vulkan::VulkanInfoCompontent::physicalDeviceExtensions() const {
@@ -661,7 +728,14 @@ void neon::vulkan::VulkanInfoCompontent::onStart() {
     auto application = dynamic_cast<VKApplication*>(
         getApplication()->getImplementation());
 
+    _properties = application->getPhysicalDevice().getProperties();
     _features = &application->getDevice()->getEnabledFeatures();
+
+    VkPhysicalDeviceProperties2 prop;
+    prop.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2;
+    prop.pNext = &_meshShaderProperties;
+    vkGetPhysicalDeviceProperties2(application->getPhysicalDevice().getRaw(),
+                                   &prop);
 }
 
 void neon::vulkan::VulkanInfoCompontent::onPreDraw() {

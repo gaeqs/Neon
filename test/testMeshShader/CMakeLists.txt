@@ -14,6 +14,7 @@ cmrc_add_resource_library(
         NAMESPACE shaders
         WHENCE shader
         shader/deferred.mesh
+        shader/deferred.task
         shader/deferred.frag
         shader/screen.vert
         shader/screen.frag

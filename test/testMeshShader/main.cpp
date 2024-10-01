@@ -228,7 +228,7 @@ void loadModels(Application* application, Room* room,
 
     auto shader = createMeshShader(application,
                                    "deferred",
-                                   "",
+                                   "deferred.task",
                                    "deferred.mesh",
                                    "deferred.frag");
 
@@ -236,11 +236,11 @@ void loadModels(Application* application, Room* room,
         application, "Zeppeli", MaterialCreateInfo(nullptr, nullptr));
     zeppeliLoaderInfo.loadGPUModel = false;
     zeppeliLoaderInfo.loadLocalModel = true;
-    zeppeliLoaderInfo.flipWindingOrder = true;
-    zeppeliLoaderInfo.flipNormals = true;
+    zeppeliLoaderInfo.flipWindingOrder = false;
+    zeppeliLoaderInfo.flipNormals = false;
 
-    auto zeppeliResult = assimp_loader::load(R"(resource/Zeppeli)",
-                                             "William.obj", zeppeliLoaderInfo);
+    auto zeppeliResult = assimp_loader::load(R"(resource/Sans)",
+                                             "Sans.obj", zeppeliLoaderInfo);
 
     if (zeppeliResult.error.has_value()) {
         application->getLogger().error(
@@ -252,15 +252,15 @@ void loadModels(Application* application, Room* room,
 
     auto& localModel = zeppeliResult.localModel;
 
-    std::vector<rush::Vec3f> vertices;
+    std::vector<rush::Vec4f> vertices;
 
     for (auto& mesh: localModel->meshes) {
         for (uint32_t index: mesh.indices) {
-            vertices.push_back(mesh.vertices[index].position);
+            vertices.emplace_back(mesh.vertices[index].position, 1.0f);
         }
     }
 
-    size_t sizeInBytes = vertices.size() * sizeof(rush::Vec3f);
+    size_t sizeInBytes = vertices.size() * sizeof(rush::Vec4f);
 
     std::vector<ShaderUniformBinding> cubeMaterialBindings;
 
@@ -272,11 +272,9 @@ void loadModels(Application* application, Room* room,
     );
 
 
-    std::vector<ShaderUniformBinding> modelBindings = {
-        {
-            UniformBindingType::STORAGE_BUFFER,
-            static_cast<uint32_t>(sizeInBytes)
-        },
+    std::vector modelBindings = {
+        ShaderUniformBinding::storageBuffer(static_cast<uint32_t>(sizeInBytes)),
+        ShaderUniformBinding::uniformBuffer(sizeof(int))
     };
 
     auto modelDescriptor = std::make_shared<ShaderUniformDescriptor>(
@@ -310,6 +308,11 @@ void loadModels(Application* application, Room* room,
     );
 
     model->getUniformBuffer()->uploadData(0, vertices.data(), sizeInBytes);
+    model->getUniformBuffer()->prepareForFrame(nullptr);
+
+    int verticesAmount = static_cast<int>(vertices.size());
+    model->getUniformBuffer()->uploadData(1, verticesAmount);
+
 
     auto object = room->newGameObject();
     object->newComponent<GraphicComponent>(model);
@@ -395,6 +398,7 @@ int main() {
 
         auto* mesh = features.findFeature<MeshFeature>(MESH_FEATURE).value();
         mesh->meshShader = true;
+        mesh->taskShader = true;
 
         features.extensions.emplace_back(VK_EXT_MESH_SHADER_EXTENSION_NAME);
     };
