@@ -8,12 +8,16 @@
 #include <neon/render/model/InputDescription.h>
 
 struct TestVertex {
-    rush::Vec3f position;
+    rush::Vec4f position;
+    rush::Vec4f normal;
+    rush::Vec4f tangent;
+    rush::Vec2f uv;
+    rush::Vec2f blank;
 
     static neon::InputDescription getDescription() {
         neon::InputDescription description(
-                sizeof(TestVertex),
-                neon::InputRate::VERTEX
+            sizeof(TestVertex),
+            neon::InputRate::VERTEX
         );
         description.addAttribute(3, 0);
 
@@ -21,12 +25,14 @@ struct TestVertex {
     }
 
     static TestVertex fromAssimp(
-            const rush::Vec3f& position,
-            const rush::Vec3f& normal,
-            const rush::Vec3f& tangent,
-            const rush::Vec4f& color,
-            const rush::Vec2f& texCoords) {
-        return {position};
+        const rush::Vec3f& position,
+        const rush::Vec3f& normal,
+        const rush::Vec3f& tangent,
+        const rush::Vec4f& color,
+        const rush::Vec2f& texCoords) {
+        return {
+            {position, 1.0f}, {normal, 1.0f}, {tangent, 1.0f}, texCoords
+        };
     }
 };
 

@@ -1,20 +1,10 @@
 #version 460
 #extension GL_EXT_mesh_shader: enable
 
+const int PRIMITIVES = 32;
+const int VERTICES = PRIMITIVES * 3;
+
 layout (local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-
-layout (set = 0, binding = 0) uniform Matrices
-{
-    mat4 view;
-    mat4 viewProjection;
-    mat4 inverseProjection;
-    float near;
-    float far;
-};
-
-layout(std430, set = 2, binding = 0) buffer Data {
-    vec4 vertices[];
-};
 
 layout(set = 2, binding = 1) uniform Properties {
     int verticesAmount;
@@ -24,10 +14,10 @@ void main()
 {
     int primitives = verticesAmount / 3;// Always multiple of 3.
 
-    int groups = primitives / 32;// Each mesh shader generates 32 primitives
-    int remainder = primitives % 32;
+    int groups = primitives / PRIMITIVES; // Each mesh shader generates 32 primitives
+    int remainder = primitives % PRIMITIVES;
     if (remainder > 0) ++groups;
 
-    EmitMeshTasksEXT(groups, 0, 0);
+    EmitMeshTasksEXT(groups, 1, 1);
 }
     

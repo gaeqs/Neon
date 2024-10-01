@@ -2,13 +2,13 @@
 #extension GL_EXT_mesh_shader: enable
 
 const int PRIMITIVES = 32;
+const int VERTICES = PRIMITIVES * 3;
 
 layout (local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 layout (triangles) out;
-layout (max_vertices = PRIMITIVES * 3, max_primitives = PRIMITIVES) out;
+layout (max_vertices = VERTICES + PRIMITIVES, max_primitives = PRIMITIVES * 3) out;
 
-layout (set = 0, binding = 0) uniform Matrices
-{
+layout (set = 0, binding = 0) uniform Matrices {
     mat4 view;
     mat4 viewProjection;
     mat4 inverseProjection;
@@ -16,33 +16,79 @@ layout (set = 0, binding = 0) uniform Matrices
     float far;
 };
 
+struct Vertex {
+    vec4 position;
+    vec4 normal;
+    vec4 tangent;
+    vec2 uv;
+    vec2 blank;
+};
+
 layout(std430, set = 2, binding = 0) buffer Data {
-    vec4 vertices[];
+    Vertex vertices[];
 };
 
 layout(set = 2, binding = 1) uniform Properties {
     int verticesAmount;
 };
 
-void main()
-{
+layout(location = 0) out vec3 outPosition[];
+layout(location = 1) out vec2 outTexCoords[];
+layout(location = 2) out mat3 outTBN[];
+layout(location = 5) out mat3 outInverseTBN[];
 
-    uint start = gl_WorkGroupID.x * PRIMITIVES * 3;
-    uint end = min(start + PRIMITIVES, verticesAmount);
+void pushVertex(uint i, Vertex vertex) {
+    gl_MeshVerticesEXT[i].gl_Position = viewProjection * vertex.position;
+    outPosition[i] = vertex.position.xyz;
+    outTexCoords[i] = vertex.uv;
+
+    vec3 n = mat3(view) * vertex.normal.xyz;
+    vec3 t = mat3(view) * vertex.tangent.xyz;
+    t = normalize(t - dot(t, n) * n);
+    vec3 b = cross(n, t);
+
+    outTBN[i] = mat3(t, b, n);
+    outInverseTBN[i] = transpose(mat3(t, b, n));
+}
+
+void main() {
+
+    uint start = gl_WorkGroupID.x * VERTICES;
+    uint end = min(start + VERTICES, verticesAmount);
 
     uint verticesToProcess = end - start;
     uint primitivesToProcess = verticesToProcess / 3;
 
-    SetMeshOutputsEXT(verticesToProcess, primitivesToProcess);
+    uint outputVertices = verticesToProcess + primitivesToProcess;
+    uint outputPrimitives = primitivesToProcess * 3;
 
-    for (int i = 0; i < verticesToProcess; ++i) {
-        gl_MeshVerticesEXT[i].gl_Position = viewProjection * vertices[start + i];
-    }
+    SetMeshOutputsEXT(outputVertices, outputPrimitives);
 
     int n = 0;
-    for (int i = 0; i < primitivesToProcess; ++i) {
-        gl_PrimitiveTriangleIndicesEXT[i] = uvec3(n, n + 1, n + 2);
-        n += 3;
+    int p = 0;
+    for (int i = 0; i < verticesToProcess; i += 3) {
+        // Per triangle, generate three subtriangles
+        Vertex vecA = vertices[start + i];
+        Vertex vecB = vertices[start + i + 1];
+        Vertex vecC = vertices[start + i + 2];
+
+        Vertex center;
+        center.position = (vecA.position + vecB.position + vecC.position) / 3.0f
+        + vertices[start + i].normal * 0.06f;
+        center.normal = vecA.normal;
+        center.tangent = vecA.tangent;
+        center.uv = (vecA.uv + vecB.uv + vecC.uv) / 3.0f;
+
+        pushVertex(n, vecA);
+        pushVertex(n + 1, vecB);
+        pushVertex(n + 2, vecC);
+        pushVertex(n + 3, center);
+
+        gl_PrimitiveTriangleIndicesEXT[p++] = uvec3(n, n + 1, n + 3);
+        gl_PrimitiveTriangleIndicesEXT[p++] = uvec3(n, n + 2, n + 3);
+        gl_PrimitiveTriangleIndicesEXT[p++] = uvec3(n + 1, n + 2, n + 3);
+
+        n += 4;
     }
 }
     

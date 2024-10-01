@@ -302,7 +302,7 @@ namespace neon::vulkan {
             block.offset = reflection.offset;
             block.memberNames.reserve(reflection.numMembers);
 
-            for (size_t m = 0; m < reflection.numMembers; ++m) {
+            for (size_t m = 0; m < structure->size(); ++m) {
                 auto& name = structure->at(m).type->getFieldName();
                 block.memberNames.emplace_back(name);
             }

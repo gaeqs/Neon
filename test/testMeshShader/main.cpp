@@ -134,7 +134,7 @@ std::shared_ptr<ShaderProgram> createMeshShader(Application* application,
             shader->getUniformSamplers().size()));
 
     for (auto& block: shader->getImplementation().getUniformBlocks()) {
-        l->debug(MessageBuilder().print("  - Name: ").print(name));
+        l->debug(MessageBuilder().print("  - Name: ").print(block.name));
         l->debug(
             MessageBuilder().print("    - Set: ").print(
                 block.set.value_or(-1)));
@@ -175,7 +175,9 @@ std::shared_ptr<FrameBuffer> initRender(Room* room) {
                                      "screen.frag");
 
     std::vector<FrameBufferTextureCreateInfo> frameBufferFormats = {
-        TextureFormat::R8G8B8A8
+        TextureFormat::R8G8B8A8,
+        TextureFormat::R16FG16F, // NORMAL XY
+        TextureFormat::R16FG16F // NORMAL Z / SPECULAR
     };
 
     auto fpFrameBuffer = std::make_shared<SimpleFrameBuffer>(
@@ -191,7 +193,9 @@ std::shared_ptr<FrameBuffer> initRender(Room* room) {
     render->addRenderPass(std::make_shared<DefaultRenderPassStrategy>(
         screenFrameBuffer));
 
-    auto textures = fpFrameBuffer->getTextures();
+    std::vector<std::shared_ptr<Texture>> textures;
+    textures.push_back(fpFrameBuffer->getTextures()[0]);
+    textures.push_back(fpFrameBuffer->getTextures()[3]);
 
     std::shared_ptr screenMaterial = Material::create(
         room->getApplication(), "Screen Model",
@@ -239,6 +243,21 @@ void loadModels(Application* application, Room* room,
     zeppeliLoaderInfo.flipWindingOrder = false;
     zeppeliLoaderInfo.flipNormals = false;
 
+    TextureCreateInfo info;
+    info.imageView.viewType = TextureViewType::NORMAL_2D;
+
+    std::shared_ptr diffuse = Texture::createTextureFromFile(
+        application,
+        "Diffuse",
+        "resource/Sans/diffuse.png",
+        info);
+
+    std::shared_ptr normal = Texture::createTextureFromFile(
+        application,
+        "Normal",
+        "resource/Sans/normal.png",
+        info);
+
     auto zeppeliResult = assimp_loader::load(R"(resource/Sans)",
                                              "Sans.obj", zeppeliLoaderInfo);
 
@@ -252,15 +271,20 @@ void loadModels(Application* application, Room* room,
 
     auto& localModel = zeppeliResult.localModel;
 
-    std::vector<rush::Vec4f> vertices;
+    std::vector<TestVertex> vertices;
 
     for (auto& mesh: localModel->meshes) {
         for (uint32_t index: mesh.indices) {
-            vertices.emplace_back(mesh.vertices[index].position, 1.0f);
+            vertices.emplace_back(
+                rush::Vec4f(mesh.vertices[index].position, 1.0f),
+                rush::Vec4f(mesh.vertices[index].normal, 0.0f),
+                rush::Vec4f(mesh.vertices[index].tangent, 1.0f),
+                mesh.vertices[index].textureCoordinates
+            );
         }
     }
 
-    size_t sizeInBytes = vertices.size() * sizeof(rush::Vec4f);
+    size_t sizeInBytes = vertices.size() * sizeof(TestVertex);
 
     std::vector<ShaderUniformBinding> cubeMaterialBindings;
 
@@ -274,7 +298,9 @@ void loadModels(Application* application, Room* room,
 
     std::vector modelBindings = {
         ShaderUniformBinding::storageBuffer(static_cast<uint32_t>(sizeInBytes)),
-        ShaderUniformBinding::uniformBuffer(sizeof(int))
+        ShaderUniformBinding::uniformBuffer(sizeof(int)),
+        ShaderUniformBinding::image(),
+        ShaderUniformBinding::image()
     };
 
     auto modelDescriptor = std::make_shared<ShaderUniformDescriptor>(
@@ -283,12 +309,8 @@ void loadModels(Application* application, Room* room,
 
     MaterialCreateInfo cubeMaterialInfo(target, shader);
     cubeMaterialInfo.descriptions.uniform = materialDescriptor;
-    cubeMaterialInfo.descriptions.vertex.
-            push_back(TestVertex::getDescription());
-    cubeMaterialInfo.descriptions.instance.push_back(
-        DefaultInstancingData::getInstancingDescription());
     cubeMaterialInfo.topology = PrimitiveTopology::POINT_LIST;
-    cubeMaterialInfo.rasterizer.polygonMode = PolygonMode::LINE;
+    cubeMaterialInfo.rasterizer.polygonMode = PolygonMode::FILL;
     cubeMaterialInfo.rasterizer.cullMode = CullMode::NONE;
     cubeMaterialInfo.descriptions.extraUniforms.push_back(modelDescriptor);
 
@@ -307,11 +329,13 @@ void loadModels(Application* application, Room* room,
         modelInfo
     );
 
-    model->getUniformBuffer()->uploadData(0, vertices.data(), sizeInBytes);
-    model->getUniformBuffer()->prepareForFrame(nullptr);
-
     int verticesAmount = static_cast<int>(vertices.size());
+
+    model->getUniformBuffer()->uploadData(0, vertices.data(), sizeInBytes);
     model->getUniformBuffer()->uploadData(1, verticesAmount);
+    model->getUniformBuffer()->setTexture(2, diffuse);
+    model->getUniformBuffer()->setTexture(3, normal);
+    model->getUniformBuffer()->prepareForFrame(nullptr);
 
 
     auto object = room->newGameObject();
@@ -382,7 +406,7 @@ int main() {
     vulkan::VKApplicationCreateInfo info;
     info.name = "Neon";
     info.windowSize = {WIDTH, HEIGHT};
-    info.vSync = true;
+    info.vSync = false;
     info.defaultExtensionInclusion = vulkan::InclusionMode::EXCLUDE_ALL;
     info.defaultFeatureInclusion = vulkan::InclusionMode::EXCLUDE_ALL;
 
