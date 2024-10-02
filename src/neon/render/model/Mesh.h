@@ -33,7 +33,6 @@ namespace neon {
 
     private:
         Implementation _implementation;
-        std::unordered_set<std::shared_ptr<Material>> _materials;
 
     public:
         Mesh(const Mesh& other) = delete;
@@ -60,7 +59,7 @@ namespace neon {
          */
         Mesh(Application* application,
              const std::string& name,
-             std::unordered_set<std::shared_ptr<Material>> materials,
+             const std::unordered_set<std::shared_ptr<Material>>& materials,
              bool modifiableVertices = false,
              bool modifiableIndices = false);
 

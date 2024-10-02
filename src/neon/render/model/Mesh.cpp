@@ -17,26 +17,27 @@ namespace neon {
         : Drawable(typeid(Mesh), name),
           _implementation(
               application,
-              _materials,
+              getMaterials(),
               modifiableVertices,
               modifiableIndices) {
         if (material != nullptr) {
-            _materials.insert(std::move(material));
+            getMaterials().insert(std::move(material));
         }
     }
 
     Mesh::Mesh(Application* application,
                const std::string& name,
-               std::unordered_set<std::shared_ptr<Material>> materials,
+               const std::unordered_set<std::shared_ptr<Material>>& materials,
                bool modifiableVertices,
                bool modifiableIndices)
         : Drawable(typeid(Mesh), name),
           _implementation(
               application,
-              _materials,
+              getMaterials(),
               modifiableVertices,
-              modifiableIndices),
-          _materials(std::move(materials)) {}
+              modifiableIndices) {
+        getMaterials().insert(materials.begin(), materials.end());
+    }
 
 
     Mesh::Implementation& Mesh::getImplementation() {
