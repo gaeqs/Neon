@@ -10,6 +10,10 @@
 #include <neon/render/shader/ShaderUniformBuffer.h>
 #include <vulkan/vulkan.h>
 
+namespace neon {
+    class Model;
+}
+
 namespace neon::vulkan {
     class VKDrawable {
     public:
@@ -18,10 +22,8 @@ namespace neon::vulkan {
         virtual void draw(
             const Material* material,
             VkCommandBuffer commandBuffer,
-            const std::vector<std::unique_ptr<Buffer>>& instancingBuffers,
-            uint32_t instancingElements,
-            const ShaderUniformBuffer* globalBuffer,
-            const ShaderUniformBuffer* modelBuffer) = 0;
+            const Model& model,
+            const ShaderUniformBuffer* globalBuffer) = 0;
     };
 }
 

@@ -304,7 +304,7 @@ namespace neon::assimp_loader {
         }
 
         void loadMeshes(const aiScene* scene,
-                        std::vector<std::shared_ptr<Mesh>>& meshes,
+                        std::vector<std::shared_ptr<Drawable>>& meshes,
                         const std::vector<Mat>& materials,
                         const LoaderInfo& info,
                         const std::unique_ptr<LocalModel>& localModel) {
@@ -374,7 +374,7 @@ namespace neon::assimp_loader {
 
         ModelCreateInfo modelInfo;
         modelInfo.instanceDataProvider = info.instanceDataProvider;
-        modelInfo.meshes.reserve(scene->mNumMeshes);
+        modelInfo.drawables.reserve(scene->mNumMeshes);
 
         for (auto iData: info.instanceDatas) {
             modelInfo.instanceTypes.push_back(iData.type);
@@ -392,7 +392,7 @@ namespace neon::assimp_loader {
         std::unique_ptr<LocalModel> local = info.loadLocalModel
                                                 ? std::make_unique<LocalModel>()
                                                 : nullptr;
-        loadMeshes(scene, modelInfo.meshes, materials, info, local);
+        loadMeshes(scene, modelInfo.drawables, materials, info, local);
 
 
         auto model = std::make_shared<Model>(

@@ -8,6 +8,7 @@
 #include <neon/render/buffer/CommandBuffer.h>
 #include <neon/render/model/ModelCreateInfo.h>
 #include <vulkan/AbstractVKApplication.h>
+#include <vulkan/render/buffer/StagingBuffer.h>
 
 namespace neon::vulkan {
     VKConcurrentInstanceData::VKConcurrentInstanceData(Application* application,

@@ -15,11 +15,7 @@ namespace neon {
                bool modifiableVertices,
                bool modifiableIndices)
         : Drawable(typeid(Mesh), name),
-          _implementation(
-              application,
-              getMaterials(),
-              modifiableVertices,
-              modifiableIndices) {
+          _implementation(application, modifiableVertices, modifiableIndices) {
         if (material != nullptr) {
             getMaterials().insert(std::move(material));
         }
@@ -31,11 +27,7 @@ namespace neon {
                bool modifiableVertices,
                bool modifiableIndices)
         : Drawable(typeid(Mesh), name),
-          _implementation(
-              application,
-              getMaterials(),
-              modifiableVertices,
-              modifiableIndices) {
+          _implementation(application, modifiableVertices, modifiableIndices) {
         getMaterials().insert(materials.begin(), materials.end());
     }
 

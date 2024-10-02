@@ -76,7 +76,7 @@ class OctreeView : public neon::Component {
 
     void generateModel() {
         neon::ModelCreateInfo info;
-        info.meshes.push_back(std::make_unique<neon::Mesh>(
+        info.drawables.push_back(std::make_unique<neon::Mesh>(
             getApplication(),
             "octree",
             _material,
@@ -93,8 +93,8 @@ class OctreeView : public neon::Component {
             addBox(vertices, indices, box, depth);
         }
 
-        info.meshes[0]->uploadVertices(vertices);
-        info.meshes[0]->uploadIndices(indices);
+        info.drawables[0]->uploadVertices(vertices);
+        info.drawables[0]->uploadIndices(indices);
         info.maximumInstances = 1;
 
         _model = std::make_shared<neon::Model>(getApplication(), "line", info);

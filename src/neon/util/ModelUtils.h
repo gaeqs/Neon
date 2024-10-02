@@ -34,7 +34,7 @@ namespace neon::model_utils {
         mesh->uploadVertices(vertices);
         mesh->uploadIndices(indices);
 
-        info.meshes.push_back(std::move(mesh));
+        info.drawables.push_back(std::move(mesh));
 
         auto model = std::make_shared<Model>(
             room->getApplication(),
@@ -202,7 +202,7 @@ namespace neon::model_utils {
         mesh->uploadIndices(CUBE_TRIANGLE_INDEX);
 
         ModelCreateInfo info;
-        info.meshes.push_back(std::move(mesh));
+        info.drawables.push_back(std::move(mesh));
 
         auto model = std::make_shared<Model>(
             room->getApplication(),

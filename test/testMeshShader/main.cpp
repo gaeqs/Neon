@@ -320,13 +320,12 @@ void loadModels(Application* application, Room* room,
     ModelCreateInfo modelInfo;
     modelInfo.uniformDescriptor = modelDescriptor;
 
-    auto model = model_utils::createModel<rush::Vec3f>(
-        room,
-        "points",
-        material,
-        randomPoints(10000),
-        modelInfo
-    );
+    auto mesh = std::make_shared<MeshShaderDrawable>(
+        application, "Mesh", material);
+
+    modelInfo.drawables.push_back(mesh);
+
+    auto model = std::make_shared<Model>(application, "Model", modelInfo);
 
     int verticesAmount = static_cast<int>(vertices.size());
 

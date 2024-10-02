@@ -32,7 +32,7 @@
 
 #include <neon/render/model/DefaultInstancingData.h>
 #include <neon/render/model/BasicInstanceData.h>
-#include <neon/render/model/Mesh.h>
+#include <neon/render/model/Drawable.h>
 
 namespace neon {
     /**
@@ -45,7 +45,7 @@ namespace neon {
         /**
          * The meshes of the model.
          */
-        std::vector<std::shared_ptr<Mesh>> meshes = {};
+        std::vector<std::shared_ptr<Drawable>> drawables = {};
 
         /**
          * THe maximum amount of instances the model can hold.

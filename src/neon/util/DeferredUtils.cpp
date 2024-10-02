@@ -18,6 +18,7 @@
 #include <neon/render/light/FlashLight.h>
 #include <neon/render/light/PointLight.h>
 #include <neon/render/light/LightSystem.h>
+#include <neon/render/model/Mesh.h>
 
 namespace neon::deferred_utils {
     std::shared_ptr<Model> createScreenModel(Application* application,
@@ -40,7 +41,7 @@ namespace neon::deferred_utils {
         mesh->uploadVertices(vertices);
         mesh->uploadIndices(indices);
 
-        info.meshes.push_back(std::move(mesh));
+        info.drawables.push_back(std::move(mesh));
         return std::make_shared<Model>(application, name, info);
     }
 
