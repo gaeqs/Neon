@@ -17,7 +17,7 @@ namespace neon {
     }
 
     Asset::Asset(std::type_index type, std::string name) :
-            _identifier({type, std::move(name)}) {
+            _identifier({std::move(type), std::move(name)}) {
     }
 
     const AssetIdentifier& Asset::getIdentifier() const {

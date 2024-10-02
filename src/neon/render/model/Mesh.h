@@ -10,8 +10,7 @@
 #include <string>
 
 #include <neon/render/shader/Material.h>
-#include <neon/render/shader/ShaderUniformBuffer.h>
-#include <neon/structure/Asset.h>
+#include <neon/render/model/Drawable.h>
 
 #ifdef USE_VULKAN
 
@@ -26,7 +25,7 @@ namespace neon {
      * Represents a set of vertices and indices
      * used by models to render an object.
      */
-    class Mesh : public Asset {
+    class Mesh : public Drawable {
     public:
 #ifdef USE_VULKAN
         using Implementation = vulkan::VKMesh;
@@ -69,13 +68,13 @@ namespace neon {
          * Returns the implementation of the mesh.
          * @return the implementation.
          */
-        [[nodiscard]] Implementation& getImplementation();
+        [[nodiscard]] Implementation& getImplementation() override;
 
         /**
          * Returns the implementation of the mesh.
          * @return the implementation.
          */
-        [[nodiscard]] const Implementation& getImplementation() const;
+        [[nodiscard]] const Implementation& getImplementation() const override;
 
         /**
          * Creates new buffers and uploads all the given
@@ -84,7 +83,7 @@ namespace neon {
          * will be lost.
          *
          * You can give several vectors with different types
-         * to this funcion. Each given vector will create
+         * to this function. Each given vector will create
          * a different buffer that can be accessed individually.
          *
          * @tparam Types the types of the data to upload.
@@ -193,29 +192,6 @@ namespace neon {
         [[nodiscard]] bool
         setIndices(const std::vector<uint32_t>& indices,
                    CommandBuffer* cmd = nullptr) const;
-
-        /**
-         * Returns the materials of the mesh.
-         * @return the materials.
-         */
-        [[nodiscard]] const std::unordered_set<std::shared_ptr<Material>>&
-        getMaterials() const;
-
-        /**
-         * Returns the materials of the mesh.
-         * You can modify this vector to add new materials.
-         * @return the materials.
-         */
-        [[nodiscard]] std::unordered_set<std::shared_ptr<Material>>&
-        getMaterials();
-
-        /**
-         * Sets the material of the mesh.
-         * This method overrides all materials inside
-         * this mesh.
-         * @param material the material.
-         */
-        void setMaterial(const std::shared_ptr<Material>& material);
     };
 }
 

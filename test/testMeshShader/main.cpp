@@ -319,7 +319,6 @@ void loadModels(Application* application, Room* room,
 
     ModelCreateInfo modelInfo;
     modelInfo.uniformDescriptor = modelDescriptor;
-    modelInfo.pipeline.type = PipelineType::MESH;
 
     auto model = model_utils::createModel<rush::Vec3f>(
         room,

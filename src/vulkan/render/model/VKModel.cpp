@@ -27,8 +27,7 @@ namespace neon::vulkan {
                      InstanceData* instanceData)
         : _application(application),
           _meshes(getMeshImplementations(info.meshes)),
-          _instanceData(instanceData),
-          _pipeline(info.pipeline) {}
+          _instanceData(instanceData) {}
 
     void VKModel::draw(const Material* material,
                        const ShaderUniformBuffer* modelBuffer) const {
@@ -47,7 +46,6 @@ namespace neon::vulkan {
                 ->getImplementation().getCommandBuffer(),
                 _instanceData->getImplementation().getBuffers(),
                 _instanceData->getInstanceAmount(),
-                _pipeline,
                 &_application->getRender()->getGlobalUniformBuffer(),
                 modelBuffer);
         }
@@ -68,7 +66,6 @@ namespace neon::vulkan {
                 buffer,
                 _instanceData->getImplementation().getBuffers(),
                 _instanceData->getInstanceAmount(),
-                _pipeline,
                 &_application->getRender()->getGlobalUniformBuffer(),
                 modelBuffer);
         }

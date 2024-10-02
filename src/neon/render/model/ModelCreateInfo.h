@@ -33,7 +33,6 @@
 #include <neon/render/model/DefaultInstancingData.h>
 #include <neon/render/model/BasicInstanceData.h>
 #include <neon/render/model/Mesh.h>
-#include <neon/render/model/Pipeline.h>
 
 namespace neon {
     /**
@@ -52,9 +51,6 @@ namespace neon {
          * THe maximum amount of instances the model can hold.
          */
         uint32_t maximumInstances = DEFAULT_MAXIMUM_INSTANCES;
-
-
-        Pipeline pipeline = {};
 
         /**
          * The optional uniform, descriptor of the model.

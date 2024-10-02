@@ -10,7 +10,6 @@
 #include <unordered_set>
 #include <optional>
 #include <memory>
-#include <neon/render/model/Pipeline.h>
 
 #include <vulkan/vulkan.h>
 
@@ -19,6 +18,8 @@
 
 #include <vulkan/render/buffer/SimpleBuffer.h>
 #include <vulkan/render/buffer/StagingBuffer.h>
+
+#include "VKDrawable.h"
 
 namespace neon {
     class Application;
@@ -29,7 +30,7 @@ namespace neon::vulkan {
 
     class VKShaderProgram;
 
-    class VKMesh {
+    class VKMesh : public VKDrawable {
         AbstractVKApplication* _vkApplication;
         std::unordered_set<std::shared_ptr<Material>>& _materials;
 
@@ -157,9 +158,8 @@ namespace neon::vulkan {
             VkCommandBuffer commandBuffer,
             const std::vector<std::unique_ptr<Buffer>>& instancingBuffers,
             uint32_t instancingElements,
-            const Pipeline& pipeline,
             const ShaderUniformBuffer* globalBuffer,
-            const ShaderUniformBuffer* modelBuffer);
+            const ShaderUniformBuffer* modelBuffer) override;
     };
 }
 
