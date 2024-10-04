@@ -44,11 +44,11 @@ namespace neon::vulkan {
 
         void physicalDeviceProperties() const;
 
-        void physicalDeviceLimits() const;
+        void physicalDeviceExternalProperties() const;
 
         void defaultPhysicalDeviceLimits() const;
 
-        void meshShaderPhysicalDeviceLimits() const;
+        void meshShaderPhysicalDeviceProperties() const;
 
         void physicalDeviceExtensions() const;
 

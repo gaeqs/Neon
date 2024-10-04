@@ -126,7 +126,7 @@ void neon::vulkan::VulkanInfoCompontent::physicalDeviceProperties() const {
 
     if (ImGui::CollapsingHeader("Limits")) {
         ImGui::TreePush("");
-        physicalDeviceLimits();
+        defaultPhysicalDeviceLimits();
         ImGui::TreePop();
     }
 
@@ -142,17 +142,18 @@ void neon::vulkan::VulkanInfoCompontent::physicalDeviceProperties() const {
         physicalDeviceFeatures();
         ImGui::TreePop();
     }
-}
 
-void neon::vulkan::VulkanInfoCompontent::physicalDeviceLimits() const {
-    if (ImGui::CollapsingHeader("Vulkan")) {
+    if (ImGui::CollapsingHeader("External properties")) {
         ImGui::TreePush("");
-        defaultPhysicalDeviceLimits();
+        physicalDeviceExternalProperties();
         ImGui::TreePop();
     }
+}
+
+void neon::vulkan::VulkanInfoCompontent::physicalDeviceExternalProperties() const {
     if (ImGui::CollapsingHeader("Mesh shaders")) {
         ImGui::TreePush("");
-        meshShaderPhysicalDeviceLimits();
+        meshShaderPhysicalDeviceProperties();
         ImGui::TreePop();
     }
 }
@@ -398,7 +399,7 @@ void neon::vulkan::VulkanInfoCompontent::defaultPhysicalDeviceLimits() const {
 
 
 void
-neon::vulkan::VulkanInfoCompontent::meshShaderPhysicalDeviceLimits() const {
+neon::vulkan::VulkanInfoCompontent::meshShaderPhysicalDeviceProperties() const {
     auto& l = _meshShaderProperties;
 
     ImGui::Text("Task Work Group:");
@@ -451,9 +452,8 @@ neon::vulkan::VulkanInfoCompontent::meshShaderPhysicalDeviceLimits() const {
 }
 
 void neon::vulkan::VulkanInfoCompontent::physicalDeviceExtensions() const {
-    for (size_t i = 0; i < _features->extensions.size(); ++i) {
-        if (i != 0) ImGui::SameLine(400);
-        ImGui::Text(_features->extensions[i].c_str());
+    for (auto extension : _features->extensions) {
+        ImGui::Text(extension.c_str());
     }
 }
 
