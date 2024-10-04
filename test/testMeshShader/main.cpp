@@ -35,26 +35,6 @@ CMRC_DECLARE(shaders);
 
 using namespace neon;
 
-
-std::vector<rush::Vec3f> randomPoints(size_t amount) {
-    std::vector<rush::Vec3f> vec;
-    vec.reserve(amount);
-
-    std::random_device rd;
-    std::mt19937 gen(rd());
-    std::uniform_real_distribution<> distr(-10.0, 10.0);
-
-    for (size_t i = 0; i < amount; ++i) {
-        vec.emplace_back(
-            distr(gen),
-            distr(gen),
-            distr(gen)
-        );
-    }
-
-    return vec;
-}
-
 /**
  * Creates a shader program.
  * @param room the application.
@@ -123,24 +103,6 @@ std::shared_ptr<ShaderProgram> createMeshShader(Application* application,
     if (result.has_value()) {
         application->getLogger().error(result.value());
         throw std::runtime_error(result.value());
-    }
-
-    auto* l = Logger::defaultLogger();
-    l->debug(MessageBuilder().print("Shader: ").print(name));
-    l->debug(MessageBuilder().print("- Uniform blocks: ").print(
-        shader->getImplementation().getUniformBlocks().size()));
-    l->debug(
-        MessageBuilder().print("- Uniform samplers: ").print(
-            shader->getUniformSamplers().size()));
-
-    for (auto& block: shader->getImplementation().getUniformBlocks()) {
-        l->debug(MessageBuilder().print("  - Name: ").print(block.name));
-        l->debug(
-            MessageBuilder().print("    - Set: ").print(
-                block.set.value_or(-1)));
-        l->debug(
-            MessageBuilder().print("    - Binding: ").print(
-                block.binding.value_or(-1)));
     }
 
     return shader;
@@ -257,12 +219,12 @@ void loadModels(Application* application, Room* room,
                                    "deferred.mesh",
                                    "deferred.frag");
 
-    auto zeppeliLoaderInfo = assimp_loader::LoaderInfo::create<TestVertex>(
+    auto modelLoaderInfo = assimp_loader::LoaderInfo::create<TestVertex>(
         application, "Zeppeli", MaterialCreateInfo(nullptr, nullptr));
-    zeppeliLoaderInfo.loadGPUModel = false;
-    zeppeliLoaderInfo.loadLocalModel = true;
-    zeppeliLoaderInfo.flipWindingOrder = false;
-    zeppeliLoaderInfo.flipNormals = false;
+    modelLoaderInfo.loadGPUModel = false;
+    modelLoaderInfo.loadLocalModel = true;
+    modelLoaderInfo.flipWindingOrder = false;
+    modelLoaderInfo.flipNormals = false;
 
     TextureCreateInfo info;
     info.imageView.viewType = TextureViewType::NORMAL_2D;
@@ -279,18 +241,17 @@ void loadModels(Application* application, Room* room,
         "resource/Sans/normal.png",
         info);
 
-    auto zeppeliResult = assimp_loader::load(R"(resource/Sans)",
-                                             "Sans.obj", zeppeliLoaderInfo);
+    auto modelResult = load(R"(resource/Sans)", "Sans.obj", modelLoaderInfo);
 
-    if (zeppeliResult.error.has_value()) {
+    if (modelResult.error.has_value()) {
         application->getLogger().error(
             MessageBuilder()
-            .print("Couldn't load Zeppeli model! ")
+            .print("Couldn't load model! ")
             .print(std::filesystem::current_path()));
         exit(1);
     }
 
-    auto& localModel = zeppeliResult.localModel;
+    auto& localModel = modelResult.localModel;
 
     std::vector<TestVertex> vertices;
 
@@ -306,8 +267,6 @@ void loadModels(Application* application, Room* room,
     }
 
     size_t sizeInBytes = vertices.size() * sizeof(TestVertex);
-    application->getLogger().debug(
-        MessageBuilder().print("Sans vertices: ").print(vertices.size()));
 
     std::vector<ShaderUniformBinding> cubeMaterialBindings;
 
