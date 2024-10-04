@@ -1,4 +1,4 @@
-# Neon - A _C++20_ graphic engine
+# Neon - A _C++20_ graphics engine
 
 ![Image JAMS](https://i.imgur.com/KfW2WhA.png)
 
