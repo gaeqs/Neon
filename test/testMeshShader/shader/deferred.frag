@@ -6,8 +6,8 @@ layout(location = 2) in mat3 TBN;
 layout(location = 5) in mat3 inverseTBN;
 
 
-layout(set = 2, binding = 2) uniform sampler2D diffuseTexture;
-layout(set = 2, binding = 3) uniform sampler2D normalTexture;
+layout(set = 2, binding = 3) uniform sampler2D diffuseTexture;
+layout(set = 2, binding = 4) uniform sampler2D normalTexture;
 
 layout(location = 0) out vec4 color;
 layout(location = 1) out vec2 normalXY;

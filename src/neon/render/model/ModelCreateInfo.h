@@ -92,8 +92,9 @@ namespace neon {
          * change this parameter.
          */
         std::function<std::unique_ptr<InstanceData>(
-            Application*, const ModelCreateInfo& info)> instanceDataProvider
-                = [](Application* app, const ModelCreateInfo& info) {
+            Application*, const ModelCreateInfo& info, Model* model)>
+        instanceDataProvider
+                = [](Application* app, const ModelCreateInfo& info, Model*) {
             return std::make_unique<BasicInstanceData>(app, info);
         };
 

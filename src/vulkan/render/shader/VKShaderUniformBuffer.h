@@ -22,13 +22,11 @@ namespace neon {
 }
 
 namespace neon::vulkan {
-
     class AbstractVKApplication;
 
     class Buffer;
 
     class VKShaderUniformBuffer {
-
         AbstractVKApplication* _vkApplication;
         VkDescriptorPool _descriptorPool;
 
@@ -42,15 +40,19 @@ namespace neon::vulkan {
         uint32_t _bindingPoint; // In vulkan this is the "set" parameter.
 
     public:
-
         explicit VKShaderUniformBuffer(
-                const std::shared_ptr<ShaderUniformDescriptor>& descriptor);
+            const std::shared_ptr<ShaderUniformDescriptor>& descriptor);
 
         ~VKShaderUniformBuffer();
 
         void setBindingPoint(uint32_t point);
 
-        void uploadData(uint32_t index, const void* data, size_t size);
+        void uploadData(uint32_t index, const void* data,
+                        size_t size, size_t offset);
+
+        void* fetchData(uint32_t index);
+
+        const void* fetchData(uint32_t index) const;
 
         void setTexture(uint32_t index, std::shared_ptr<Texture> texture);
 

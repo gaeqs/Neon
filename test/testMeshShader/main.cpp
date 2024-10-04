@@ -169,6 +169,18 @@ std::shared_ptr<FrameBuffer> initRender(Room* room) {
     auto render = std::make_shared<Render>(app, "default", globalDescriptor);
     app->setRender(render);
 
+    auto directionalShader = createShader(app,
+                                          "directional_light",
+                                          "directional_light.vert",
+                                          "directional_light.frag");
+    auto pointShader = createShader(app,
+                                    "point_light",
+                                    "point_light.vert",
+                                    "point_light.frag");
+    auto flashShader = createShader(app,
+                                    "flash_light",
+                                    "flash_light.vert",
+                                    "flash_light.frag");
     auto screenShader = createShader(app,
                                      "screen",
                                      "screen.vert",
@@ -186,6 +198,16 @@ std::shared_ptr<FrameBuffer> initRender(Room* room) {
     render->addRenderPass(std::make_shared<DefaultRenderPassStrategy>(
         fpFrameBuffer));
 
+    auto albedo = deferred_utils::createLightSystem(
+        room,
+        render.get(),
+        fpFrameBuffer->getTextures(),
+        TextureFormat::R8G8B8A8,
+        directionalShader,
+        pointShader,
+        flashShader
+    );
+
     std::vector<FrameBufferTextureCreateInfo> screenFormats =
             {TextureFormat::R8G8B8A8};
     auto screenFrameBuffer = std::make_shared<SimpleFrameBuffer>(
@@ -193,9 +215,8 @@ std::shared_ptr<FrameBuffer> initRender(Room* room) {
     render->addRenderPass(std::make_shared<DefaultRenderPassStrategy>(
         screenFrameBuffer));
 
-    std::vector<std::shared_ptr<Texture>> textures;
-    textures.push_back(fpFrameBuffer->getTextures()[0]);
-    textures.push_back(fpFrameBuffer->getTextures()[3]);
+    auto textures = fpFrameBuffer->getTextures();
+    textures[0] = albedo;
 
     std::shared_ptr screenMaterial = Material::create(
         room->getApplication(), "Screen Model",
@@ -285,6 +306,8 @@ void loadModels(Application* application, Room* room,
     }
 
     size_t sizeInBytes = vertices.size() * sizeof(TestVertex);
+    application->getLogger().debug(
+        MessageBuilder().print("Sans vertices: ").print(vertices.size()));
 
     std::vector<ShaderUniformBinding> cubeMaterialBindings;
 
@@ -295,9 +318,13 @@ void loadModels(Application* application, Room* room,
         cubeMaterialBindings
     );
 
+    uint32_t instanceBufferSize =
+            ModelCreateInfo::DEFAULT_MAXIMUM_INSTANCES * sizeof(
+                DefaultInstancingData);
 
     std::vector modelBindings = {
         ShaderUniformBinding::storageBuffer(static_cast<uint32_t>(sizeInBytes)),
+        ShaderUniformBinding::storageBuffer(instanceBufferSize),
         ShaderUniformBinding::uniformBuffer(sizeof(int)),
         ShaderUniformBinding::image(),
         ShaderUniformBinding::image()
@@ -320,8 +347,32 @@ void loadModels(Application* application, Room* room,
     ModelCreateInfo modelInfo;
     modelInfo.uniformDescriptor = modelDescriptor;
 
+    modelInfo.instanceDataProvider = [](Application* app,
+                                        const ModelCreateInfo& info,
+                                        const Model* model) {
+        std::vector indices = {
+            StorageBufferInstanceData::Slot(
+                sizeof(DefaultInstancingData),
+                sizeof(DefaultInstancingData),
+                1,
+                model->getUniformBuffer().get()
+            )
+        };
+        return std::make_unique<StorageBufferInstanceData>(
+            app,
+            info,
+            indices
+        );
+    };
+
     auto mesh = std::make_shared<MeshShaderDrawable>(
         application, "Mesh", material);
+
+    mesh->setGroupsSupplier([](const Model& model) {
+        return rush::Vec<3, uint32_t>(
+            1, model.getInstanceData()->getInstanceAmount(), 1
+        );
+    });
 
     modelInfo.drawables.push_back(mesh);
 
@@ -330,16 +381,21 @@ void loadModels(Application* application, Room* room,
     int verticesAmount = static_cast<int>(vertices.size());
 
     model->getUniformBuffer()->uploadData(0, vertices.data(), sizeInBytes);
-    model->getUniformBuffer()->uploadData(1, verticesAmount);
-    model->getUniformBuffer()->setTexture(2, diffuse);
-    model->getUniformBuffer()->setTexture(3, normal);
+    model->getUniformBuffer()->uploadData(2, verticesAmount);
+    model->getUniformBuffer()->setTexture(3, diffuse);
+    model->getUniformBuffer()->setTexture(4, normal);
     model->getUniformBuffer()->prepareForFrame(nullptr);
 
 
-    auto object = room->newGameObject();
-    object->newComponent<GraphicComponent>(model);
-    object->getTransform().setPosition(rush::Vec3f(0.0f, 10.0f, -10.0f));
-    object->setName("Object");
+    for (int x = 0; x < 30; ++x) {
+        for (int y = 0; y < 30; ++y) {
+            auto object = room->newGameObject();
+            object->newComponent<GraphicComponent>(model);
+            object->newComponent<ConstantRotationComponent>();
+            object->getTransform().setPosition(rush::Vec3f(x * 3, 0, y * 3));
+            object->setName("Object");
+        }
+    }
 }
 
 std::shared_ptr<Texture> loadSkybox(Room* room) {
@@ -388,6 +444,31 @@ std::shared_ptr<Room> getTestRoom(Application* application) {
 #ifdef USE_VULKAN
     parameterUpdater->newComponent<vulkan::VulkanInfoCompontent>();
 #endif
+
+    auto directionalLight = room->newGameObject();
+    directionalLight->newComponent<DirectionalLight>();
+    directionalLight->getTransform().lookAt(rush::Vec3f(0.45f, -0.6f, 0.65f));
+    directionalLight->setName("Directional light");
+
+    auto pointLightGO = room->newGameObject();
+    auto pointLight = pointLightGO->newComponent<PointLight>();
+    pointLightGO->getTransform().setPosition({5.0f, 7.0f, 5.0f});
+    pointLightGO->setName("Point light");
+    pointLight->setDiffuseColor({1.0f, 0.0f, 0.0f});
+    pointLight->setConstantAttenuation(0.01f);
+    pointLight->setLinearAttenuation(0.2);
+    pointLight->setQuadraticAttenuation(0.1);
+
+    auto flashLightGO = room->newGameObject();
+    auto flashLight = flashLightGO->newComponent<FlashLight>();
+    flashLightGO->getTransform().setPosition({10.0f, 7.0f, 10.0f});
+    flashLightGO->getTransform().rotate(rush::Vec3f(1.0f, 0.0f, 0.0f), 1.0f);
+    flashLightGO->setName("Flash light");
+    flashLight->setDiffuseColor({0.0f, 1.0f, 0.0f});
+    flashLight->setConstantAttenuation(0.01f);
+    flashLight->setLinearAttenuation(0.2);
+    flashLight->setQuadraticAttenuation(0.1);
+
 
     loadModels(application, room.get(), fpFrameBuffer);
 

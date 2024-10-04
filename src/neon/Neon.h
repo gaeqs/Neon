@@ -45,6 +45,7 @@
 #include <neon/render/model/InstanceData.h>
 #include <neon/render/model/BasicInstanceData.h>
 #include <neon/render/model/ConcurrentInstanceData.h>
+#include <neon/render/model/StorageBufferInstanceData.h>
 #include <neon/render/model/Mesh.h>
 #include <neon/render/model/MeshShaderDrawable.h>
 #include <neon/render/model/Model.h>

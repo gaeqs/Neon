@@ -12,7 +12,6 @@ namespace neon {
                  const ModelCreateInfo& info)
         : Asset(typeid(Model), name),
           _meshes(info.drawables),
-          _instanceData(info.instanceDataProvider(application, info)),
           _shouldAutoFlush(info.shouldAutoFlush),
           _implementation(application, this) {
         if (info.uniformDescriptor != nullptr) {
@@ -20,6 +19,8 @@ namespace neon {
                 name, info.uniformDescriptor);
             _uniformBuffer->setBindingPoint(2);
         }
+
+        _instanceData = info.instanceDataProvider(application, info, this);
     }
 
     Model::Implementation& Model::getImplementation() {

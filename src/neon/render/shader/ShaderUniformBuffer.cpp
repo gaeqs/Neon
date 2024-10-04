@@ -7,32 +7,40 @@
 #include <utility>
 
 namespace neon {
-
     ShaderUniformBuffer::ShaderUniformBuffer(
-            std::string name,
-            const std::shared_ptr<ShaderUniformDescriptor>& descriptor) :
-            Asset(typeid(ShaderUniformBuffer), std::move(name)),
-            _descriptor(descriptor),
-            _implementation(descriptor) {
-    }
+        std::string name,
+        const std::shared_ptr<ShaderUniformDescriptor>& descriptor) :
+        Asset(typeid(ShaderUniformBuffer), std::move(name)),
+        _descriptor(descriptor),
+        _implementation(descriptor) {}
 
     void ShaderUniformBuffer::setBindingPoint(uint32_t point) {
         _implementation.setBindingPoint(point);
     }
 
     void ShaderUniformBuffer::uploadData(uint32_t index,
-                                         const void* data, size_t size) {
-        _implementation.uploadData(index, data, size);
+                                         const void* data,
+                                         size_t size,
+                                         size_t offset) {
+        _implementation.uploadData(index, data, size, offset);
+    }
+
+    void* ShaderUniformBuffer::fetchData(uint32_t index) {
+        return _implementation.fetchData(index);
+    }
+
+    const void* ShaderUniformBuffer::fetchData(uint32_t index) const {
+        return _implementation.fetchData(index);
     }
 
     void ShaderUniformBuffer::setTexture(
-            uint32_t index,
-            std::shared_ptr<Texture> texture) {
+        uint32_t index,
+        std::shared_ptr<Texture> texture) {
         _implementation.setTexture(index, std::move(texture));
     }
 
     void ShaderUniformBuffer::prepareForFrame(
-            const CommandBuffer* commandBuffer) {
+        const CommandBuffer* commandBuffer) {
         _implementation.prepareForFrame(commandBuffer);
     }
 
@@ -51,5 +59,3 @@ namespace neon {
         return _descriptor;
     }
 }
-
-

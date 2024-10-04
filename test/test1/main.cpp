@@ -390,6 +390,7 @@ int main() {
     vulkan::VKApplicationCreateInfo info;
     info.name = "Neon";
     info.windowSize = {WIDTH, HEIGHT};
+    info.vSync = false;
 
     info.featuresConfigurator = [](const auto& d, auto& f) {
         vulkan::VKApplicationCreateInfo::defaultFeaturesConfigurer(d, f);

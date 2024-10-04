@@ -221,8 +221,8 @@ namespace neon::assimp_loader {
         bool loadGPUModel = true;
 
         std::function<std::unique_ptr<InstanceData>(
-            Application*, const ModelCreateInfo& info)> instanceDataProvider
-                = [](Application* app, const ModelCreateInfo& info) {
+            Application*, const ModelCreateInfo&, Model*)> instanceDataProvider
+                = [](Application* app, const ModelCreateInfo& info, Model*) {
             return std::make_unique<BasicInstanceData>(app, info);
         };
 

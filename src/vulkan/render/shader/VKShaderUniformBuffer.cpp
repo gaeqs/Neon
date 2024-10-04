@@ -177,14 +177,33 @@ namespace neon::vulkan {
 
     void VKShaderUniformBuffer::uploadData(uint32_t index,
                                            const void* data,
-                                           size_t size) {
+                                           size_t size,
+                                           size_t offset) {
         if (index >= _types.size()) return;
         if (_types[index] != UniformBindingType::UNIFORM_BUFFER &&
-            _types[index] != UniformBindingType::STORAGE_BUFFER) return;
+            _types[index] != UniformBindingType::STORAGE_BUFFER)
+            return;
         auto& vector = _data[index];
         auto finalSize = std::min(size, vector.size());
-        memcpy(vector.data(), data, finalSize);
+        memcpy(vector.data() + offset, data, finalSize);
         std::fill(_updated[index].begin(), _updated[index].end(), 0);
+    }
+
+    void* VKShaderUniformBuffer::fetchData(uint32_t index) {
+        if (index >= _types.size()) return nullptr;
+        if (_types[index] != UniformBindingType::UNIFORM_BUFFER &&
+            _types[index] != UniformBindingType::STORAGE_BUFFER)
+            return nullptr;
+        std::fill(_updated[index].begin(), _updated[index].end(), 0);
+        return _data[index].data();
+    }
+
+    const void* VKShaderUniformBuffer::fetchData(uint32_t index) const {
+        if (index >= _types.size()) return nullptr;
+        if (_types[index] != UniformBindingType::UNIFORM_BUFFER &&
+            _types[index] != UniformBindingType::STORAGE_BUFFER)
+            return nullptr;
+        return _data[index].data();
     }
 
     void VKShaderUniformBuffer::setTexture(
