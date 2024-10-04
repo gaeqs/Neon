@@ -2,7 +2,7 @@
 
 ![Image JAMS](https://i.imgur.com/KfW2WhA.png)
 
-_Neon_ is a _C++20_ multiplatform graphic engine
+_Neon_ is a _C++20_ multiplatform graphics engine
 easy to integrate in graphic applications.
 
 _Neon_ takes advantage of several C++20 features, such as concepts,
