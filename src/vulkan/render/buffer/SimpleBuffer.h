@@ -83,7 +83,7 @@ namespace neon::vulkan {
             return _pointer != nullptr;
         }
 
-        SimpleBufferMap& operator=(SimpleBufferMap&& other) const noexcept {
+        SimpleBufferMap& operator=(SimpleBufferMap&& other) noexcept {
             _device = other._device;
             _memory = other._memory;
             _pointer = other._pointer;
