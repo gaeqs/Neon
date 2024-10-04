@@ -5,38 +5,27 @@
 #include "VKMesh.h"
 
 #include <cstring>
-#include <neon/Application.h>
+#include <neon/render/model/Model.h>
+#include <neon/structure/Application.h>
 #include <vulkan/VKApplication.h>
 
 namespace neon::vulkan {
     VKMesh::VKMesh(
         Application* application,
-        std::unordered_set<std::shared_ptr<Material>>& materials,
         bool modifiableVertices,
         bool modifiableIndices)
         : _vkApplication(
               dynamic_cast<AbstractVKApplication*>(application->
                   getImplementation())),
-          _materials(materials),
           _indexAmount(0),
-          _modifiableVertices(
-              modifiableVertices),
-          _modifiableIndices(
-              modifiableIndices) {
-    }
-
-    const std::unordered_set<std::shared_ptr<Material>>&
-    VKMesh::getMaterials() const {
-        return _materials;
-    }
+          _modifiableVertices(modifiableVertices),
+          _modifiableIndices(modifiableIndices) {}
 
     void VKMesh::draw(
         const Material* material,
         VkCommandBuffer commandBuffer,
-        const std::vector<std::unique_ptr<Buffer>>& instancingBuffers,
-        uint32_t instancingElements,
-        const ShaderUniformBuffer* globalBuffer,
-        const ShaderUniformBuffer* modelBuffer) {
+        const Model& model,
+        const ShaderUniformBuffer* globalBuffer) {
         constexpr size_t MAX_BUFFERS = 32;
 
         if (_vertexBuffers.empty()) return;
@@ -51,6 +40,8 @@ namespace neon::vulkan {
             offsets[i] = 0;
         }
 
+        auto& instancingBuffers = model.getInstanceData()->getImplementation().
+                getBuffers();
 
         for (size_t j = 0;
              j < instancingBuffers.size() && i < MAX_BUFFERS;
@@ -67,6 +58,7 @@ namespace neon::vulkan {
             buffers,
             offsets
         );
+
         vkCmdBindIndexBuffer(
             commandBuffer,
             _indexBuffer.value()->getRaw(),
@@ -91,6 +83,7 @@ namespace neon::vulkan {
                     ->getImplementation().bind(commandBuffer, layout);
         }
 
+        auto& modelBuffer = model.getUniformBuffer();
         if (modelBuffer != nullptr) {
             modelBuffer->getImplementation().bind(commandBuffer, layout);
         }
@@ -98,7 +91,7 @@ namespace neon::vulkan {
         vkCmdDrawIndexed(
             commandBuffer,
             _indexAmount,
-            instancingElements,
+            model.getInstanceData()->getInstanceAmount(),
             0,
             0,
             0

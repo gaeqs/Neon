@@ -1,0 +1,113 @@
+#version 460
+#extension GL_EXT_mesh_shader: enable
+
+const uint PRIMITIVES = 1;
+const uint VERTICES = PRIMITIVES * 3;
+const uint GROUP_SIZE = 32;
+
+const uint OUTPUT_PRIMITIVES_PER_THREAD = PRIMITIVES;
+const uint OUTPUT_VERTICES_PER_THREAD = VERTICES;
+
+const uint OUTPUT_PRIMITIVES = OUTPUT_PRIMITIVES_PER_THREAD * GROUP_SIZE;
+const uint OUTPUT_VERTICES = OUTPUT_VERTICES_PER_THREAD * GROUP_SIZE;
+
+layout (local_size_x = GROUP_SIZE, local_size_y = 1, local_size_z = 1) in;
+layout (triangles) out;
+layout (max_vertices = OUTPUT_VERTICES, max_primitives = OUTPUT_PRIMITIVES) out;
+
+layout (set = 0, binding = 0) uniform Matrices {
+    mat4 view;
+    mat4 viewProjection;
+    mat4 inverseProjection;
+    float near;
+    float far;
+};
+
+struct Vertex {
+    vec4 position;
+    vec4 normal;
+    vec4 tangent;
+    vec2 uv;
+    vec2 blank;
+};
+
+struct Instance {
+    mat4 model;
+    mat4 normal;
+};
+
+layout(std430, set = 2, binding = 0) buffer Data {
+    Vertex vertices[];
+};
+
+layout(std430, set = 2, binding = 1) buffer Instances {
+    Instance instances[];
+};
+
+layout(set = 2, binding = 2) uniform Properties {
+    int verticesAmount;
+};
+
+struct TaskData {
+    uint instance;
+};
+
+taskPayloadSharedEXT TaskData td;
+
+layout(location = 0) out vec3 outPosition[];
+layout(location = 1) out vec2 outTexCoords[];
+layout(location = 2) out mat3 outTBN[];
+layout(location = 5) out mat3 outInverseTBN[];
+
+void pushVertex(uint i, Vertex vertex) {
+    Instance ins = instances[td.instance];
+    gl_MeshVerticesEXT[i].gl_Position = viewProjection * ins.model * vertex.position;
+    outPosition[i] = vertex.position.xyz;
+    outTexCoords[i] = vertex.uv;
+
+    vec3 n = mat3(view) * mat3(ins.model) * vertex.normal.xyz;
+    vec3 t = mat3(view) * mat3(ins.model) * vertex.tangent.xyz;
+    t = normalize(t - dot(t, n) * n);
+    vec3 b = cross(n, t);
+
+    outTBN[i] = mat3(t, b , n);
+    outInverseTBN[i] = transpose(mat3(t, b, n));
+}
+
+void main() {
+    uint invocationId = gl_WorkGroupID.x * GROUP_SIZE + gl_LocalInvocationID.x;
+
+    uint start = invocationId * VERTICES;
+    uint end = min(start + VERTICES, verticesAmount);
+
+    uint verticesToProcess = end - start;
+    if (start > end) return;
+
+    if (gl_LocalInvocationID.x == 0) {
+        uint globalEnd = min(start + VERTICES * GROUP_SIZE, verticesAmount);
+        uint globalVerticesToProcess = globalEnd - start;
+        uint globalPrimitivesToProcess = globalVerticesToProcess / 3;
+
+        uint outputVertices = globalPrimitivesToProcess * 3;
+        uint outputPrimitives = globalPrimitivesToProcess;
+        SetMeshOutputsEXT(outputVertices, outputPrimitives);
+    }
+
+    uint v = gl_LocalInvocationID.x * OUTPUT_VERTICES_PER_THREAD;
+    uint p = gl_LocalInvocationID.x * OUTPUT_PRIMITIVES_PER_THREAD;
+    for (uint i = 0; i < verticesToProcess; i += 3) {
+        // Per triangle, generate three subtriangles
+        Vertex vecA = vertices[start + i];
+        Vertex vecB = vertices[start + i + 1];
+        Vertex vecC = vertices[start + i + 2];
+
+        pushVertex(v, vecA);
+        pushVertex(v + 1, vecB);
+        pushVertex(v + 2, vecC);
+
+        gl_PrimitiveTriangleIndicesEXT[p++] = uvec3(v, v + 1, v + 2);
+
+        v += 3;
+    }
+}
+    

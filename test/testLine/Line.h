@@ -23,7 +23,7 @@ class Box : public neon::Component {
 
     void generateModel() {
         neon::ModelCreateInfo info;
-        info.meshes.push_back(std::make_unique<neon::Mesh>(
+        info.drawables.push_back(std::make_unique<neon::Mesh>(
                 getApplication(),
                 "line",
                 _material,
@@ -52,8 +52,8 @@ class Box : public neon::Component {
         indices.push_back(_samples - 1);
 
 
-        info.meshes[0]->uploadVertices(vertices);
-        info.meshes[0]->uploadIndices(indices);
+        info.drawables[0]->uploadVertices(vertices);
+        info.drawables[0]->uploadIndices(indices);
         info.maximumInstances = 1;
 
         _model = std::make_shared<neon::Model>(getApplication(), "line", info);

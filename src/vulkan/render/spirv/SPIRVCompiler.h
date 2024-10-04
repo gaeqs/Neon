@@ -8,18 +8,18 @@
 #include <vector>
 #include <string>
 #include <optional>
-#include <unordered_map>
 
 #include <vulkan/vulkan.h>
-#include <SPIRV/GlslangToSpv.h>
+#include <glslang/Public/ShaderLang.h>
+#include <neon/render/shader/ShaderUniform.h>
 
 #include <neon/util/Result.h>
-#include <vulkan/VKShaderUniform.h>
+#include <vulkan/device/VKPhysicalDevice.h>
 
 namespace neon::vulkan {
     class SPIRVCompiler {
-
-        static TBuiltInResource generateDefaultResources();
+        static TBuiltInResource generateDefaultResources(
+            const VKPhysicalDevice& device);
 
         static EShLanguage getLanguage(const VkShaderStageFlagBits& shaderType);
 
@@ -29,8 +29,7 @@ namespace neon::vulkan {
         TBuiltInResource _resources;
 
     public:
-
-        SPIRVCompiler();
+        SPIRVCompiler(const VKPhysicalDevice& device);
 
         ~SPIRVCompiler();
 
@@ -43,15 +42,14 @@ namespace neon::vulkan {
         Result<std::vector<uint32_t>, std::string>
         getStage(const VkShaderStageFlagBits& shaderType);
 
-        [[nodiscard]] std::unordered_map<std::string, VKShaderUniformBlock>
+        [[nodiscard]] std::vector<ShaderUniformBlock>
         getUniformBlocks() const;
 
-        [[nodiscard]] std::unordered_map<std::string, VKShaderUniform>
-        getUniforms() const;
+        //[[nodiscard]] std::unordered_map<std::string, VKShaderUniform>
+        //getBuffers() const;
 
-        [[nodiscard]] std::unordered_map<std::string, VKShaderSampler>
+        [[nodiscard]] std::vector<ShaderUniformSampler>
         getSamplers() const;
-
     };
 }
 

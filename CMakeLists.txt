@@ -42,13 +42,13 @@ endif ()
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/lib/stb)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/lib/stb/src)
 
-# GLSLANG
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/lib/glslang)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/lib/glslang)
-
 # SPIRV-TOOLS
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/lib/spirv-headers)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/lib/spirv-tools)
+
+# GLSLANG
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/lib/glslang)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/lib/glslang)
 
 # RUSH
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/lib/Rush)

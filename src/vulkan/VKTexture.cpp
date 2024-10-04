@@ -4,7 +4,7 @@
 
 #include "VKTexture.h"
 
-#include <neon/Application.h>
+#include <neon/structure/Application.h>
 #include <neon/structure/Room.h>
 
 #include <vulkan/util/VKUtil.h>
@@ -54,7 +54,7 @@ namespace neon::vulkan {
 
         auto pair = vulkan_util::createImage(
             _vkApplication->getDevice()->getRaw(),
-            _vkApplication->getPhysicalDevice(),
+            _vkApplication->getPhysicalDevice().getRaw(),
             createInfo.image,
             createInfo.imageView.viewType);
 
@@ -124,7 +124,7 @@ namespace neon::vulkan {
 
         VkPhysicalDeviceProperties properties{};
         vkGetPhysicalDeviceProperties(
-            _vkApplication->getPhysicalDevice(),
+            _vkApplication->getPhysicalDevice().getRaw(),
             &properties
         );
 
@@ -165,7 +165,7 @@ namespace neon::vulkan {
         _externalDirtyFlag(1) {
         VkPhysicalDeviceProperties properties{};
         vkGetPhysicalDeviceProperties(
-            _vkApplication->getPhysicalDevice(),
+            _vkApplication->getPhysicalDevice().getRaw(),
             &properties
         );
 

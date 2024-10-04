@@ -12,20 +12,21 @@ namespace neon::vulkan {
         switch (type) {
             case UniformBindingType::IMAGE:
                 return VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-            case UniformBindingType::BUFFER:
+            case UniformBindingType::STORAGE_BUFFER:
+                return VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+            case UniformBindingType::UNIFORM_BUFFER:
             default:
                 return VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
         }
     }
 
     VKShaderUniformDescriptor::VKShaderUniformDescriptor(
-            Application* application,
-            const std::vector<ShaderUniformBinding>& bindings) :
-            _vkApplication(dynamic_cast<AbstractVKApplication*>(
-                                   application->getImplementation())),
-            _bindings(bindings),
-            _descriptorSetLayout(VK_NULL_HANDLE) {
-
+        Application* application,
+        const std::vector<ShaderUniformBinding>& bindings) :
+        _vkApplication(dynamic_cast<AbstractVKApplication*>(
+            application->getImplementation())),
+        _bindings(bindings),
+        _descriptorSetLayout(VK_NULL_HANDLE) {
         std::vector<VkDescriptorSetLayoutBinding> layoutBindings;
         layoutBindings.reserve(bindings.size());
 

@@ -45,13 +45,16 @@
 #include <neon/render/model/InstanceData.h>
 #include <neon/render/model/BasicInstanceData.h>
 #include <neon/render/model/ConcurrentInstanceData.h>
+#include <neon/render/model/StorageBufferInstanceData.h>
 #include <neon/render/model/Mesh.h>
+#include <neon/render/model/MeshShaderDrawable.h>
 #include <neon/render/model/Model.h>
 
 #include <neon/render/shader/Material.h>
 #include <neon/render/shader/MaterialCreateInfo.h>
 #include <neon/render/shader/ShaderProgram.h>
 #include <neon/render/shader/ShaderType.h>
+#include <neon/render/shader/ShaderUniform.h>
 #include <neon/render/shader/ShaderUniformBinding.h>
 #include <neon/render/shader/ShaderUniformBuffer.h>
 #include <neon/render/shader/ShaderUniformDescriptor.h>
@@ -76,7 +79,7 @@
 #include <neon/structure/Identifiable.h>
 #include <neon/structure/IdentifiableWrapper.h>
 #include <neon/structure/Room.h>
-
-#include <neon/Application.h>
+#include <neon/structure/Application.h>
+#include <neon/structure/ApplicationCreateInfo.h>
 
 #endif //RVTRACKING_ENGINE_H

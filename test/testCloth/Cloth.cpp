@@ -56,15 +56,15 @@ void Cloth::generateModel() {
     }
 
     neon::ModelCreateInfo info;
-    info.meshes.push_back(std::make_unique<neon::Mesh>(
+    info.drawables.push_back(std::make_unique<neon::Mesh>(
         getApplication(),
         "cloth",
         _material,
         true,
         false
     ));
-    info.meshes[0]->uploadVertices(_vertices);
-    info.meshes[0]->uploadIndices(indices);
+    info.drawables[0]->uploadVertices(_vertices);
+    info.drawables[0]->uploadIndices(indices);
     info.maximumInstances = 1;
 
     _model = std::make_shared<neon::Model>(getApplication(), "cloth", info);

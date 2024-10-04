@@ -13,7 +13,7 @@
 #include <vulkan/vulkan.h>
 
 #include <neon/render/shader/ShaderType.h>
-#include <vulkan/VKShaderUniform.h>
+#include <neon/render/shader/ShaderUniform.h>
 
 namespace neon {
     class Application;
@@ -23,20 +23,17 @@ namespace neon::vulkan {
     class AbstractVKApplication;
 
     class VKShaderProgram {
-
         static VkShaderStageFlagBits getStage(ShaderType type);
 
         AbstractVKApplication* _vkApplication;
         std::vector<VkPipelineShaderStageCreateInfo> _shaders;
 
-        std::unordered_map<std::string, VKShaderUniformBlock> _uniformBlocks;
-        std::unordered_map<std::string, VKShaderUniform> _uniforms;
-        std::unordered_map<std::string, VKShaderSampler> _samplers;
+        std::vector<ShaderUniformBlock> _uniformBlocks;
+        std::vector<ShaderUniformSampler> _samplers;
 
         void deleteShaders();
 
     public:
-
         VKShaderProgram(const VKShaderProgram& other) = delete;
 
         explicit VKShaderProgram(Application* application);
@@ -49,14 +46,11 @@ namespace neon::vulkan {
         [[nodiscard]] const std::vector<VkPipelineShaderStageCreateInfo>&
         getShaders() const;
 
-        [[nodiscard]] const std::unordered_map<std::string, VKShaderUniform>&
-        getUniforms() const;
-
-        [[nodiscard]] const std::unordered_map<std::string, VKShaderUniformBlock>&
+        [[nodiscard]] const std::vector<ShaderUniformBlock>&
         getUniformBlocks() const;
 
-        [[nodiscard]] const std::unordered_map<std::string, VKShaderSampler>&
-        getSamplers() const;
+        [[nodiscard]] const std::vector<ShaderUniformSampler>&
+        getUniformSamplers() const;
     };
 }
 

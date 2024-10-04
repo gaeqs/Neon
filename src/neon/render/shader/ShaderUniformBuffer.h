@@ -21,25 +21,21 @@ namespace neon {
     class CommandBuffer;
 
     class ShaderUniformBuffer : public Asset {
-
     public:
-
 #ifdef USE_VULKAN
         using Implementation = vulkan::VKShaderUniformBuffer;
 #endif
 
     private:
-
         std::shared_ptr<ShaderUniformDescriptor> _descriptor;
         Implementation _implementation;
 
     public:
-
         ShaderUniformBuffer(const ShaderUniformBuffer& other) = delete;
 
         ShaderUniformBuffer(
-                std::string name,
-                const std::shared_ptr<ShaderUniformDescriptor>& descriptor);
+            std::string name,
+            const std::shared_ptr<ShaderUniformDescriptor>& descriptor);
 
         [[nodiscard]] const Implementation& getImplementation() const;
 
@@ -50,7 +46,12 @@ namespace neon {
 
         void setBindingPoint(uint32_t point);
 
-        void uploadData(uint32_t index, const void* data, size_t size);
+        void uploadData(uint32_t index, const void* data,
+                        size_t size, size_t offset = 0);
+
+        void* fetchData(uint32_t index);
+
+        const void* fetchData(uint32_t index) const;
 
         void setTexture(uint32_t index, std::shared_ptr<Texture> texture);
 
@@ -60,7 +61,6 @@ namespace neon {
         }
 
         void prepareForFrame(const CommandBuffer* commandBuffer);
-
     };
 }
 

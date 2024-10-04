@@ -4,7 +4,7 @@
 
 #include "VKRender.h"
 
-#include <neon/Application.h>
+#include <neon/structure/Application.h>
 #include <neon/render/shader/Material.h>
 
 #include <vulkan/render/VKFrameBuffer.h>

@@ -23,25 +23,32 @@ namespace neon::vulkan {
 
     template<class T>
     class SimpleBufferMap : public BufferMap<T> {
-
         VkDevice _device;
         VkDeviceMemory _memory;
 
         T* _pointer;
 
     public:
-
         SimpleBufferMap(const SimpleBufferMap& other) = delete;
+
+        SimpleBufferMap(SimpleBufferMap&& other) noexcept :
+            _device(other._device),
+            _memory(other._memory),
+            _pointer(other._pointer) {
+            other._pointer = nullptr;
+        }
+
+        SimpleBufferMap() = default;
 
         SimpleBufferMap(VkDevice device, VkDeviceMemory memory,
                         Range<uint32_t> range) :
-                BufferMap<T>(),
-                _device(device),
-                _memory(memory),
-                _pointer(nullptr) {
+            BufferMap<T>(),
+            _device(device),
+            _memory(memory),
+            _pointer(nullptr) {
             auto result = simple_buffer::mapMemory(
-                    device, memory, range.getFrom(), range.size(),
-                    0, (void**) &_pointer);
+                device, memory, range.getFrom(), range.size(),
+                0, (void**)&_pointer);
             if (result != VK_SUCCESS) {
                 throw std::runtime_error("Couldn't map buffer! Result: "
                                          + std::to_string(result));
@@ -72,10 +79,20 @@ namespace neon::vulkan {
             _pointer = nullptr;
         }
 
+        bool isValid() override {
+            return _pointer != nullptr;
+        }
+
+        SimpleBufferMap& operator=(SimpleBufferMap&& other) const noexcept {
+            _device = other._device;
+            _memory = other._memory;
+            _pointer = other._pointer;
+            other._pointer = nullptr;
+            return *this;
+        }
     };
 
     class SimpleBuffer : public Buffer {
-
         size_t _size;
 
         AbstractVKApplication* _application;
@@ -85,23 +102,21 @@ namespace neon::vulkan {
         bool _modifiable;
 
         std::optional<std::shared_ptr<BufferMap<char>>> rawMap(
-                const CommandBuffer* commandBuffer = nullptr) override;
+            const CommandBuffer* commandBuffer = nullptr) override;
 
         std::optional<std::shared_ptr<BufferMap<char>>> rawMap(
-                Range<uint32_t> range,
-                const CommandBuffer* commandBuffer = nullptr) override;
+            Range<uint32_t> range,
+            const CommandBuffer* commandBuffer = nullptr) override;
 
     public:
-
         SimpleBuffer(const SimpleBuffer& other) = delete;
 
         template<class T>
         SimpleBuffer(AbstractVKApplication* application,
                      VkBufferUsageFlags usage, VkMemoryPropertyFlags properties,
                      const std::vector<T>& data):
-                SimpleBuffer(application, usage, properties, data.data(),
-                             data.size() * sizeof(T)) {
-        }
+            SimpleBuffer(application, usage, properties, data.data(),
+                         data.size() * sizeof(T)) {}
 
         SimpleBuffer(AbstractVKApplication* application,
                      VkBufferUsageFlags usage, VkMemoryPropertyFlags properties,

@@ -6,10 +6,9 @@
 #define NEON_MODEL_H
 
 #include <string>
-#include <typeindex>
 
 #include <neon/structure/Asset.h>
-#include <neon/render/model/Mesh.h>
+#include <neon/render/model/Drawable.h>
 #include <neon/render/model/ModelCreateInfo.h>
 #include <neon/render/model/InstanceData.h>
 
@@ -42,7 +41,7 @@ namespace neon {
 #endif
 
     private:
-        std::vector<std::shared_ptr<Mesh>> _meshes;
+        std::vector<std::shared_ptr<Drawable>> _meshes;
         std::unique_ptr<ShaderUniformBuffer> _uniformBuffer;
         std::unique_ptr<InstanceData> _instanceData;
         bool _shouldAutoFlush;
@@ -107,7 +106,7 @@ namespace neon {
          * Returns the list containing all meshes inside this model.
          * @return the meshes.
          */
-        [[nodiscard]] const std::vector<std::shared_ptr<Mesh>>&
+        [[nodiscard]] const std::vector<std::shared_ptr<Drawable>>&
         getMeshes() const;
 
         /**
@@ -121,7 +120,7 @@ namespace neon {
          * @param index the index.
          * @return the mesh.
          */
-        [[nodiscard]] Mesh* getMesh(uint32_t index) const;
+        [[nodiscard]] Drawable* getMesh(uint32_t index) const;
 
         /**
          * Adds the given material to all meshes inside this model.

@@ -110,35 +110,28 @@ namespace neon::vulkan {
         }
     }
 
-    VKApplication::VKApplication(std::string name, float width,
-                                 float height) : _application(nullptr),
-                                                 _window(nullptr),
-                                                 _name(std::move(name)),
-                                                 _width(width),
-                                                 _height(height),
-                                                 _instance(VK_NULL_HANDLE),
-                                                 _debugMessenger(
-                                                     VK_NULL_HANDLE),
-                                                 _physicalDevice(
-                                                     VK_NULL_HANDLE),
-                                                 _device(nullptr),
-                                                 _graphicQueue(),
-                                                 _presentQueue(),
-                                                 _surface(VK_NULL_HANDLE),
-                                                 _surfaceFormat(),
-                                                 _swapChain(VK_NULL_HANDLE),
-                                                 _swapChainImageFormat(),
-                                                 _swapChainExtent(),
-                                                 _swapChainCount(0),
-                                                 _depthImageFormat(),
-                                                 _commandPool(),
-                                                 _recording(false),
-                                                 _imageAvailableSemaphores(),
-                                                 _renderFinishedSemaphores(),
-                                                 _currentFrame(0),
-                                                 _imageIndex(0),
-                                                 _imGuiPool(VK_NULL_HANDLE),
-                                                 _currentFrameInformation() {}
+    VKApplication::VKApplication(const VKApplicationCreateInfo& info)
+        : _createInfo(info),
+          _application(nullptr),
+          _window(nullptr),
+          _name(info.name),
+          _width(info.windowSize.x()),
+          _height(info.windowSize.y()),
+          _instance(VK_NULL_HANDLE),
+          _debugMessenger(VK_NULL_HANDLE),
+          _physicalDevice(),
+          _device(nullptr),
+          _surface(VK_NULL_HANDLE),
+          _surfaceFormat(),
+          _swapChain(VK_NULL_HANDLE),
+          _swapChainImageFormat(),
+          _swapChainExtent(),
+          _swapChainCount(0),
+          _depthImageFormat(),
+          _recording(false),
+          _currentFrame(0),
+          _imageIndex(0),
+          _imGuiPool(VK_NULL_HANDLE) {}
 
     void VKApplication::init(neon::Application* application) {
         _application = application;
@@ -179,6 +172,10 @@ namespace neon::vulkan {
 
     rush::Vec2i VKApplication::getWindowSize() const {
         return {_width, _height};
+    }
+
+    const ApplicationCreateInfo& VKApplication::getCreationInfo() const {
+        return _createInfo;
     }
 
     FrameInformation VKApplication::getCurrentFrameInformation() const {
@@ -383,7 +380,7 @@ namespace neon::vulkan {
     }
 
     void VKApplication::createInstance() {
-        if (ENABLE_VALIDATION_LAYERS && !checkValidationLayerSupport()) {
+        if (_createInfo.enableValidationLayers && !checkValidationLayerSupport()) {
             throw std::runtime_error(
                 "Validation layer required but not available!");
         }
@@ -406,7 +403,7 @@ namespace neon::vulkan {
 
         createInfo.enabledLayerCount = 0;
 
-        if (ENABLE_VALIDATION_LAYERS) {
+        if (_createInfo.enableValidationLayers) {
             createInfo.enabledLayerCount = VALIDATION_LAYERS.size();
             createInfo.ppEnabledLayerNames = VALIDATION_LAYERS.data();
         } else {
@@ -460,7 +457,7 @@ namespace neon::vulkan {
                                             glfwExtensions +
                                             glfwExtensionCount);
 
-        if (ENABLE_VALIDATION_LAYERS) {
+        if (_createInfo.enableValidationLayers) {
             extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
         }
 
@@ -468,7 +465,7 @@ namespace neon::vulkan {
     }
 
     void VKApplication::setupDebugMessenger() {
-        if (!ENABLE_VALIDATION_LAYERS) return;
+        if (!_createInfo.enableValidationLayers) return;
 
         VkDebugUtilsMessengerCreateInfoEXT createInfo{};
         createInfo.sType =
@@ -499,7 +496,6 @@ namespace neon::vulkan {
     }
 
     void VKApplication::pickPhysicalDevice() {
-        _physicalDevice = VK_NULL_HANDLE;
         uint32_t deviceCount = 0;
         vkEnumeratePhysicalDevices(_instance, &deviceCount, nullptr);
 
@@ -508,86 +504,65 @@ namespace neon::vulkan {
                 "Failed to find GPUs with Vulkan support!");
         }
 
-        std::vector<VkPhysicalDevice> devices(deviceCount);
-        vkEnumeratePhysicalDevices(_instance, &deviceCount, devices.data());
+        std::vector<VkPhysicalDevice> rawDevices(deviceCount);
+        vkEnumeratePhysicalDevices(_instance, &deviceCount, rawDevices.data());
 
-        for (const auto& device: devices) {
-            if (isDeviceSuitable(device, true)) {
-                _physicalDevice = device;
-                break;
+        std::vector<VKPhysicalDevice> devices;
+        devices.reserve(deviceCount);
+
+        for (auto device: rawDevices) {
+            devices.emplace_back(device, _surface, _createInfo.extraFeatures);
+        }
+
+        std::erase_if(devices, [this](const VKPhysicalDevice& device) {
+            return !_createInfo.deviceFilter(device);
+        });
+
+        if (devices.empty()) {
+            throw std::runtime_error("No GPUs found after filtering!");
+        }
+
+        size_t maxIndex = 0;
+        size_t maxValue = _createInfo.deviceSorter(devices[0]);
+
+        for (size_t i = 1; i < devices.size(); ++i) {
+            size_t value = _createInfo.deviceSorter(devices[i]);
+            if (value > maxValue) {
+                maxValue = value;
+                maxIndex = i;
             }
         }
 
-        if (_physicalDevice == VK_NULL_HANDLE) {
-            for (const auto& device: devices) {
-                if (isDeviceSuitable(device, false)) {
-                    _physicalDevice = device;
-                    break;
-                }
-            }
-        }
+        _physicalDevice = devices[maxIndex];
 
-        if (_physicalDevice == VK_NULL_HANDLE) {
-            throw std::runtime_error(
-                "Failed to find GPUs with Vulkan support!");
-        }
-
-        VkPhysicalDeviceProperties deviceProperties;
-        vkGetPhysicalDeviceProperties(_physicalDevice, &deviceProperties);
         _application->getLogger().debug(MessageBuilder()
             .print("Selected physical device: ")
-            .print(deviceProperties.deviceName));
-    }
-
-    bool
-    VKApplication::isDeviceSuitable(VkPhysicalDevice device,
-                                    bool onlyDiscrete) {
-        VkPhysicalDeviceProperties deviceProperties;
-        vkGetPhysicalDeviceProperties(device, &deviceProperties);
-        auto families = VKQueueFamilyCollection(device, _surface);
-
-        bool hasGraphics = false;
-        bool hasPresent = false;
-
-        for (auto& family: families.getFamilies()) {
-            hasGraphics |= family.getCapabilities().graphics;
-            hasPresent |= family.getCapabilities().present;
-        }
-
-        // extensions
-        uint32_t extensionCount;
-
-        vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount,
-                                             nullptr);
-        std::vector<VkExtensionProperties> extensions(extensionCount);
-        vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount,
-                                             extensions.data());
-
-        auto requiredExtensions = std::unordered_set<std::string>(
-            DEVICE_EXTENSIONS.begin(), DEVICE_EXTENSIONS.end());
-        for (const auto& item: extensions) {
-            requiredExtensions.erase(item.extensionName);
-        }
-
-        VKSwapChainSupportDetails swapChainSupport = querySwapChainSupport(
-            device);
-        bool swapChainAdequate = !swapChainSupport.formats.empty() &&
-                                 !swapChainSupport.presentModes.empty();
-
-        VkPhysicalDeviceFeatures supportedFeatures;
-        vkGetPhysicalDeviceFeatures(device, &supportedFeatures);
-
-        return (!onlyDiscrete || deviceProperties.deviceType ==
-                VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU) &&
-               hasGraphics && hasPresent && requiredExtensions.empty() &&
-               swapChainAdequate && supportedFeatures.samplerAnisotropy
-               && supportedFeatures.geometryShader
-               && supportedFeatures.wideLines;
+            .print(_physicalDevice.getProperties().deviceName));
     }
 
     void VKApplication::createLogicalDevice() {
-        auto families = VKQueueFamilyCollection(_physicalDevice, _surface);
-        _device = new VKDevice(_physicalDevice, families);
+        bool allFeatures = _createInfo.defaultFeatureInclusion ==
+                           InclusionMode::INCLUDE_ALL;
+
+        VKPhysicalDeviceFeatures features;
+        if (allFeatures) {
+            features = _physicalDevice.getFeatures();
+        } else {
+            features = VKPhysicalDeviceFeatures();
+            features.features = _createInfo.extraFeatures;
+        }
+
+        if (_createInfo.defaultExtensionInclusion !=
+            InclusionMode::INCLUDE_ALL) {
+            features.extensions.clear();
+        }
+
+        if (_createInfo.featuresConfigurator != nullptr) {
+            _createInfo.featuresConfigurator(_physicalDevice, features);
+        }
+
+        auto& families = _physicalDevice.getFamilyCollection();
+        _device = new VKDevice(_physicalDevice.getRaw(), features, families);
         _graphicQueue = _device->getQueueProvider()->fetchCompatibleQueue(
             VKQueueFamily::Capabilities::withGraphics()
         );
@@ -597,7 +572,7 @@ namespace neon::vulkan {
     }
 
     void VKApplication::createSwapChain() {
-        auto support = querySwapChainSupport(_physicalDevice);
+        VKSwapChainSupportDetails support(_physicalDevice.getRaw(), _surface);
         auto format = chooseSwapSurfaceFormat(support.formats);
         auto presentMode = chooseSwapPresentMode(support.presentModes);
         auto extent = chooseSwapExtent(support.capabilities);
@@ -665,7 +640,7 @@ namespace neon::vulkan {
         _swapChainExtent = extent;
 
         auto depthFormat = vulkan_util::findSupportedFormat(
-            _physicalDevice,
+            _physicalDevice.getRaw(),
             {
                 VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT,
                 VK_FORMAT_D24_UNORM_S8_UINT
@@ -681,35 +656,6 @@ namespace neon::vulkan {
         ++_swapChainCount;
     }
 
-    VKSwapChainSupportDetails
-    VKApplication::querySwapChainSupport(VkPhysicalDevice device) {
-        VKSwapChainSupportDetails details{};
-        uint32_t formatCount;
-        uint32_t presentModeCount;
-
-        vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, _surface,
-                                                  &details.capabilities);
-
-        vkGetPhysicalDeviceSurfaceFormatsKHR(device, _surface, &formatCount,
-                                             nullptr);
-        if (formatCount != 0) {
-            details.formats.resize(formatCount);
-            vkGetPhysicalDeviceSurfaceFormatsKHR(device, _surface, &formatCount,
-                                                 details.formats.data());
-        }
-
-        vkGetPhysicalDeviceSurfacePresentModesKHR(device, _surface,
-                                                  &presentModeCount, nullptr);
-        if (presentModeCount != 0) {
-            details.presentModes.resize(presentModeCount);
-            vkGetPhysicalDeviceSurfacePresentModesKHR(device, _surface,
-                &presentModeCount,
-                details.presentModes.data());
-        }
-
-        return details;
-    }
-
     VkSurfaceFormatKHR VKApplication::chooseSwapSurfaceFormat(
         const std::vector<VkSurfaceFormatKHR>& availableFormats) {
         for (const auto& format: availableFormats) {
@@ -723,8 +669,12 @@ namespace neon::vulkan {
 
     VkPresentModeKHR VKApplication::chooseSwapPresentMode(
         const std::vector<VkPresentModeKHR>& availableModes) {
+        auto requiredMode = _createInfo.vSync
+                                ? VK_PRESENT_MODE_FIFO_KHR
+                                : VK_PRESENT_MODE_IMMEDIATE_KHR;
+
         for (const auto& mode: availableModes) {
-            if (mode == VK_PRESENT_MODE_FIFO_KHR) {
+            if (mode == requiredMode) {
                 return mode;
             }
         }
@@ -859,7 +809,7 @@ namespace neon::vulkan {
         delete _device;
         vkDestroySurfaceKHR(_instance, _surface, nullptr);
 
-        if (ENABLE_VALIDATION_LAYERS) {
+        if (_createInfo.enableValidationLayers) {
             destroyDebugUtilsMessengerEXT(_instance, _debugMessenger, nullptr);
         }
 
@@ -884,7 +834,7 @@ namespace neon::vulkan {
         return _instance;
     }
 
-    VkPhysicalDevice VKApplication::getPhysicalDevice() const {
+    const VKPhysicalDevice& VKApplication::getPhysicalDevice() const {
         return _physicalDevice;
     }
 

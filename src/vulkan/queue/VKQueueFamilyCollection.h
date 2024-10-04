@@ -15,6 +15,8 @@ namespace neon::vulkan {
         std::vector<VKQueueFamily> _families;
 
     public:
+        VKQueueFamilyCollection() = default;
+
         VKQueueFamilyCollection(VkPhysicalDevice device, VkSurfaceKHR surface);
 
         VKQueueFamilyCollection(

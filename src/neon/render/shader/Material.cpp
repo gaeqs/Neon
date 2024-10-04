@@ -90,7 +90,7 @@ namespace neon {
         const std::vector<std::shared_ptr<Texture>>& textures) {
         std::vector<ShaderUniformBinding> bindings;
         for (const auto& [data, size]: buffers) {
-            bindings.push_back(ShaderUniformBinding::buffer(size));
+            bindings.push_back(ShaderUniformBinding::uniformBuffer(size));
         }
         for (const auto& texture: textures) {
             bindings.push_back(ShaderUniformBinding::image());

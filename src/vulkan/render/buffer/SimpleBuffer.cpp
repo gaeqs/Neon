@@ -66,7 +66,7 @@ namespace neon::vulkan {
         allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
         allocInfo.allocationSize = requirements.size;
         allocInfo.memoryTypeIndex = vulkan_util::findMemoryType(
-                _application->getPhysicalDevice(),
+                _application->getPhysicalDevice().getRaw(),
                 requirements.memoryTypeBits,
                 properties
         );

@@ -8,25 +8,21 @@
 #include <stdexcept>
 
 namespace neon::vulkan {
-    namespace {
-        const std::vector<const char*> DEVICE_EXTENSIONS = {
-            VK_KHR_SWAPCHAIN_EXTENSION_NAME,
-            //VK_KHR_SEPARATE_DEPTH_STENCIL_LAYOUTS_EXTENSION_NAME
-        };
-    }
-
     VKDevice::VKDevice(VkDevice raw,
                        const VKQueueFamilyCollection& families,
+                       const VKPhysicalDeviceFeatures& features,
                        const std::vector<uint32_t>& presentQueues)
         : _raw(raw),
           _queueProvider(std::make_unique<VKQueueProvider>(
               raw, families, presentQueues)),
-          _external(true) {
-    }
+          _enabledFeatures(features),
+          _external(true) {}
 
     VKDevice::VKDevice(VkPhysicalDevice physicalDevice,
+                       const VKPhysicalDeviceFeatures& features,
                        const VKQueueFamilyCollection& families)
-        : _external(false) {
+        : _enabledFeatures(features),
+          _external(false) {
         std::vector<float> priorities;
         uint32_t maxQueues = 0;
         for (auto family: families.getFamilies()) {
@@ -51,26 +47,25 @@ namespace neon::vulkan {
             presentQueues[family.getIndex()] = family.getCount();
         }
 
-        VkPhysicalDeviceFeatures deviceFeatures{};
-        deviceFeatures.samplerAnisotropy = VK_TRUE;
-        deviceFeatures.geometryShader = VK_TRUE;
-        deviceFeatures.wideLines = VK_TRUE;
+        std::vector<const char*> rawExtensions;
+        rawExtensions.reserve(_enabledFeatures.extensions.size());
 
+        for (const auto& extension: _enabledFeatures.extensions) {
+            rawExtensions.emplace_back(extension.c_str());
+        }
 
-        VkPhysicalDeviceVulkan12Features vulkan12Features{};
-        vulkan12Features.sType =
-                VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES;
-        vulkan12Features.separateDepthStencilLayouts = VK_TRUE;
-
+        VkPhysicalDeviceFeatures2 f = _enabledFeatures.toFeatures2();
         VkDeviceCreateInfo createInfo{};
         createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+        createInfo.flags = 0;
         createInfo.queueCreateInfoCount = queueCreateInfos.size();
         createInfo.pQueueCreateInfos = queueCreateInfos.data();
-        createInfo.pEnabledFeatures = &deviceFeatures;
-        createInfo.enabledExtensionCount = DEVICE_EXTENSIONS.size();
-        createInfo.ppEnabledExtensionNames = DEVICE_EXTENSIONS.data();
+        createInfo.pEnabledFeatures = nullptr;
+        createInfo.enabledExtensionCount = rawExtensions.size();
+        createInfo.ppEnabledExtensionNames = rawExtensions.data();
         createInfo.enabledLayerCount = 0;
-        createInfo.pNext = &vulkan12Features;
+        createInfo.pNext = &f;
+
         if (vkCreateDevice(physicalDevice, &createInfo, nullptr, &_raw) !=
             VK_SUCCESS) {
             throw std::runtime_error("Failed to create logical device!");
@@ -95,5 +90,9 @@ namespace neon::vulkan {
 
     VKQueueProvider* VKDevice::getQueueProvider() const {
         return _queueProvider.get();
+    }
+
+    const VKPhysicalDeviceFeatures& VKDevice::getEnabledFeatures() const {
+        return _enabledFeatures;
     }
 }

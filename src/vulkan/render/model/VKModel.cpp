@@ -4,70 +4,50 @@
 
 #include "VKModel.h"
 
-#include <neon/Application.h>
+#include <neon/structure/Application.h>
 #include <neon/render/Render.h>
 #include <neon/render/shader/Material.h>
 #include <neon/render/buffer/CommandBuffer.h>
+#include <neon/render/model/Model.h>
 
 namespace neon::vulkan {
-    std::vector<Mesh::Implementation*> VKModel::getMeshImplementations(
-        const std::vector<std::shared_ptr<Mesh>>& meshes) {
-        std::vector<Mesh::Implementation*> vector;
-        vector.reserve(meshes.size());
-
-        for (auto& item: meshes) {
-            vector.push_back(&item->getImplementation());
-        }
-
-        return vector;
-    }
-
-    VKModel::VKModel(Application* application,
-                     const ModelCreateInfo& info,
-                     InstanceData* instanceData)
+    VKModel::VKModel(Application* application, Model* model)
         : _application(application),
-          _meshes(getMeshImplementations(info.meshes)),
-          _instanceData(instanceData) {}
+          _model(model) {}
 
-    void VKModel::draw(const Material* material,
-                       const ShaderUniformBuffer* modelBuffer) const {
+    void VKModel::draw(const Material* material) const {
         auto sp = std::shared_ptr<Material>(const_cast<Material*>(material),
                                             [](Material*) {});
 
-        if (_instanceData->getInstanceAmount() == 0) return;
-        for (const auto& mesh: _meshes) {
+        if (_model->getInstanceData()->getInstanceAmount() == 0) return;
+        for (const auto& mesh: _model->getMeshes()) {
             if (!mesh->getMaterials().contains(sp)) continue;
             auto* vk = dynamic_cast<AbstractVKApplication*>(
                 _application->getImplementation());
 
-            mesh->draw(
+            mesh->getImplementation().draw(
                 material,
                 vk->getCurrentCommandBuffer()
                 ->getImplementation().getCommandBuffer(),
-                _instanceData->getImplementation().getBuffers(),
-                _instanceData->getInstanceAmount(),
-                &_application->getRender()->getGlobalUniformBuffer(),
-                modelBuffer);
+                *_model,
+                &_application->getRender()->getGlobalUniformBuffer());
         }
     }
 
     void VKModel::drawOutside(const Material* material,
-                              const ShaderUniformBuffer* modelBuffer,
                               const CommandBuffer* commandBuffer) const {
-        if (_instanceData->getInstanceAmount() == 0) return;
+        if (_model->getInstanceData()->getInstanceAmount() == 0) return;
 
         auto buffer = commandBuffer->getImplementation().getCommandBuffer();
 
         vulkan_util::beginRenderPass(buffer, material->getTarget(), true);
 
-        for (const auto& mesh: _meshes) {
-            mesh->draw(
+        for (const auto& mesh: _model->getMeshes()) {
+            mesh->getImplementation().draw(
                 material,
                 buffer,
-                _instanceData->getImplementation().getBuffers(),
-                _instanceData->getInstanceAmount(),
-                &_application->getRender()->getGlobalUniformBuffer(),
-                modelBuffer);
+                *_model,
+                &_application->getRender()->getGlobalUniformBuffer());
         }
 
         vkCmdEndRenderPass(buffer);

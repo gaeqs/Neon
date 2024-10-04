@@ -6,7 +6,6 @@
 #define NEON_VKMESH_H
 
 #include <cstdint>
-#include <type_traits>
 #include <vector>
 #include <unordered_set>
 #include <optional>
@@ -20,6 +19,8 @@
 #include <vulkan/render/buffer/SimpleBuffer.h>
 #include <vulkan/render/buffer/StagingBuffer.h>
 
+#include "VKDrawable.h"
+
 namespace neon {
     class Application;
 }
@@ -29,9 +30,8 @@ namespace neon::vulkan {
 
     class VKShaderProgram;
 
-    class VKMesh {
+    class VKMesh : public VKDrawable {
         AbstractVKApplication* _vkApplication;
-        std::unordered_set<std::shared_ptr<Material>>& _materials;
 
         std::vector<std::unique_ptr<Buffer>> _vertexBuffers;
         std::vector<size_t> _vertexSizes;
@@ -47,10 +47,8 @@ namespace neon::vulkan {
         VKMesh(const VKMesh& other) = delete;
 
         VKMesh(Application* application,
-               std::unordered_set<std::shared_ptr<Material>>& materials,
                bool modifiableVertices,
-               bool modifiableIndices
-        );
+               bool modifiableIndices);
 
         template<typename... Types>
         void uploadVertices(const std::vector<Types>&... data) {
@@ -68,8 +66,7 @@ namespace neon::vulkan {
                     );
                     _vertexSizes.push_back(data.size() * sizeof(Types));
                 }(), ...);
-            }
-            else {
+            } else {
                 ([&] {
                     _vertexBuffers.push_back(
                         std::make_unique<SimpleBuffer>(
@@ -90,8 +87,7 @@ namespace neon::vulkan {
                     _vkApplication,
                     VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
                     indices);
-            }
-            else {
+            } else {
                 _indexBuffer = std::make_unique<SimpleBuffer>(
                     _vkApplication,
                     VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
@@ -129,7 +125,6 @@ namespace neon::vulkan {
         bool setVertices(size_t index,
                          const std::vector<Vertex>& vertices,
                          CommandBuffer* cmd = nullptr) const {
-
             return setVertices(
                 index,
                 vertices.data(),
@@ -149,16 +144,11 @@ namespace neon::vulkan {
         bool setIndices(const std::vector<uint32_t>& indices,
                         CommandBuffer* cmd = nullptr) const;
 
-        [[nodiscard]] const std::unordered_set<std::shared_ptr<Material>>&
-        getMaterials() const;
-
         void draw(
             const Material* material,
             VkCommandBuffer commandBuffer,
-            const std::vector<std::unique_ptr<Buffer>>& instancingBuffers,
-            uint32_t instancingElements,
-            const ShaderUniformBuffer* globalBuffer,
-            const ShaderUniformBuffer* modelBuffer);
+            const Model& model,
+            const ShaderUniformBuffer* globalBuffer) override;
     };
 }
 

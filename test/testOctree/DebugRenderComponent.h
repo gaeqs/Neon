@@ -75,7 +75,7 @@ class DebugRenderComponent : public neon::Component {
         auto material = createMaterial(room);
 
         neon::ModelCreateInfo info;
-        info.meshes.push_back(std::make_unique<neon::Mesh>(
+        info.drawables.push_back(std::make_unique<neon::Mesh>(
             room->getApplication(),
             "debug",
             material,
@@ -90,8 +90,8 @@ class DebugRenderComponent : public neon::Component {
             0, 1, 2, 1, 3, 2
         };
 
-        info.meshes[0]->uploadVertices(vertices);
-        info.meshes[0]->uploadIndices(indices);
+        info.drawables[0]->uploadVertices(vertices);
+        info.drawables[0]->uploadIndices(indices);
 
         info.defineInstanceType<Instance>();
 

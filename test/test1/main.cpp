@@ -13,6 +13,7 @@
 #include <neon/util/DeferredUtils.h>
 #include <neon/util/ModelUtils.h>
 #include <neon/assimp/AssimpLoader.h>
+#include <vulkan/util/component/VulkanInfoCompontent.h>
 
 #include "TestVertex.h"
 #include "GlobalParametersUpdaterComponent.h"
@@ -62,7 +63,7 @@ std::shared_ptr<FrameBuffer> initRender(Room* room) {
     // In this application, we have a buffer of global parameters
     // and a skybox.
     std::vector<ShaderUniformBinding> globalBindings = {
-        {UniformBindingType::BUFFER, sizeof(Matrices)},
+        {UniformBindingType::UNIFORM_BUFFER, sizeof(Matrices)},
         {UniformBindingType::IMAGE, 0}
     };
 
@@ -351,6 +352,7 @@ std::shared_ptr<Room> getTestRoom(Application* application) {
     parameterUpdater->newComponent<SceneTreeComponent>(goExplorer);
     parameterUpdater->newComponent<DebugOverlayComponent>(false, 100);
     parameterUpdater->newComponent<LogComponent>();
+    parameterUpdater->newComponent<vulkan::VulkanInfoCompontent>();
 
     auto directionalLight = room->newGameObject();
     directionalLight->newComponent<DirectionalLight>();
@@ -385,8 +387,17 @@ std::shared_ptr<Room> getTestRoom(Application* application) {
 int main() {
     std::srand(std::time(nullptr));
 
-    Application application(std::make_unique<vulkan::VKApplication>(
-        "Neon", WIDTH, HEIGHT));
+    vulkan::VKApplicationCreateInfo info;
+    info.name = "Neon";
+    info.windowSize = {WIDTH, HEIGHT};
+    info.vSync = false;
+
+    info.featuresConfigurator = [](const auto& d, auto& f) {
+        vulkan::VKApplicationCreateInfo::defaultFeaturesConfigurer(d, f);
+        f.basicFeatures.samplerAnisotropy = true;
+    };
+
+    Application application(std::make_unique<vulkan::VKApplication>(info));
 
     application.init();
     application.setRoom(getTestRoom(&application));

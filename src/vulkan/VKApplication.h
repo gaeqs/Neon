@@ -13,14 +13,14 @@
 #include <GLFW/glfw3.h>
 
 #include <neon/render/buffer/CommandBuffer.h>
-#include <neon/Application.h>
+#include <neon/structure/Application.h>
 #include <neon/util/profile/Profiler.h>
 
 #include <vulkan/vulkan.h>
 #include <vulkan/AbstractVKApplication.h>
 #include <vulkan/VKSwapChainSupportDetails.h>
 #include <vulkan/device/VKDevice.h>
-
+#include <vulkan/VKApplicationCreateInfo.h>
 
 
 namespace neon {
@@ -35,16 +35,7 @@ namespace neon::vulkan {
             "VK_LAYER_KHRONOS_validation"
         };
 
-#ifdef NDEBUG
-        static constexpr bool ENABLE_VALIDATION_LAYERS = false;
-#else
-        static constexpr bool ENABLE_VALIDATION_LAYERS = true;
-#endif
-
-        const std::vector<const char*> DEVICE_EXTENSIONS = {
-            VK_KHR_SWAPCHAIN_EXTENSION_NAME,
-            //VK_KHR_SEPARATE_DEPTH_STENCIL_LAYOUTS_EXTENSION_NAME
-        };
+        VKApplicationCreateInfo _createInfo;
 
         Application* _application;
 
@@ -55,7 +46,7 @@ namespace neon::vulkan {
 
         VkInstance _instance;
         VkDebugUtilsMessengerEXT _debugMessenger;
-        VkPhysicalDevice _physicalDevice;
+        VKPhysicalDevice _physicalDevice;
 
         VKDevice* _device;
         VKQueueHolder _graphicQueue;
@@ -103,14 +94,9 @@ namespace neon::vulkan {
 
         void pickPhysicalDevice();
 
-        bool isDeviceSuitable(VkPhysicalDevice device, bool onlyDiscrete);
-
         void createLogicalDevice();
 
         void createSwapChain();
-
-        VKSwapChainSupportDetails
-        querySwapChainSupport(VkPhysicalDevice device);
 
         VkSurfaceFormatKHR chooseSwapSurfaceFormat(
             const std::vector<VkSurfaceFormatKHR>& availableFormats);
@@ -137,13 +123,15 @@ namespace neon::vulkan {
     public:
         VKApplication(const VKApplication& other) = delete;
 
-        VKApplication(std::string name, float width, float height);
+        explicit VKApplication(const VKApplicationCreateInfo& info);
 
         ~VKApplication() override;
 
         void init(neon::Application* application) override;
 
         [[nodiscard]] rush::Vec2i getWindowSize() const override;
+
+        const ApplicationCreateInfo& getCreationInfo() const override;
 
         [[nodiscard]] FrameInformation
         getCurrentFrameInformation() const override;
@@ -178,7 +166,7 @@ namespace neon::vulkan {
 
         [[nodiscard]] VkInstance getInstance() const override;
 
-        [[nodiscard]] VkPhysicalDevice getPhysicalDevice() const override;
+        [[nodiscard]] const VKPhysicalDevice& getPhysicalDevice() const override;
 
         [[nodiscard]] VKDevice* getDevice() const override;
 
@@ -186,7 +174,7 @@ namespace neon::vulkan {
 
         [[nodiscard]] VkSurfaceKHR getSurface() const;
 
-        [[nodiscard]] VkSwapchainKHR getSwapChain() const;
+        [[nodiscard]] VkSwapchainKHR getSwapChain() const override;
 
         [[nodiscard]] VkFormat getSwapChainImageFormat() const override;
 

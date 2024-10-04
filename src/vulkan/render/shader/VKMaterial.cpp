@@ -211,27 +211,30 @@ namespace neon::vulkan {
         auto& blocks = _material->getShader()
                 ->getImplementation().getUniformBlocks();
 
-        if (blocks.empty()) {
-            pipelineLayoutInfo.pushConstantRangeCount = 0;
-            pipelineLayoutInfo.pPushConstantRanges = nullptr;
-        }
-        else {
+        std::vector<VkPushConstantRange> pushConstants;
+
+        VkPushConstantRange range;
+        range.offset = 0;
+        range.size = 0;
+        range.stageFlags = 0;
+
+        uint32_t pushStages = 0;
+        for (const auto& block: blocks) {
+            if (block.binding.has_value()) continue;
+            if (!block.offset.has_value()) return;
             VkPushConstantRange range;
-            range.offset = 0;
-            range.size = 0;
-            range.stageFlags = 0;
-
-            for (const auto& [name, block]: blocks) {
-                range.size = std::max(range.size, block.size);
-                range.stageFlags |= block.stages;
-            }
-
-            _pushConstants.resize(range.size, 0);
-            _pushConstantStages = range.stageFlags;
-
-            pipelineLayoutInfo.pushConstantRangeCount = 1;
-            pipelineLayoutInfo.pPushConstantRanges = &range;
+            range.offset = block.offset.value();
+            range.size = block.sizeInBytes;
+            range.stageFlags = block.stages;
+            pushStages |= block.stages;
+            pushConstants.push_back(range);
         }
+
+        _pushConstants.resize(pushConstants.size(), 0);
+        _pushConstantStages = pushStages;
+
+        pipelineLayoutInfo.pushConstantRangeCount = pushConstants.size();
+        pipelineLayoutInfo.pPushConstantRanges = pushConstants.data();
 
         if (vkCreatePipelineLayout(_vkApplication->getDevice()->getRaw(),
                                    &pipelineLayoutInfo, nullptr,
@@ -259,7 +262,8 @@ namespace neon::vulkan {
         pipelineInfo.subpass = 0;
 
         if (vkCreateGraphicsPipelines(
-                _vkApplication->getDevice()->getRaw(), VK_NULL_HANDLE, 1, &pipelineInfo,
+                _vkApplication->getDevice()->getRaw(), VK_NULL_HANDLE, 1,
+                &pipelineInfo,
                 nullptr, &_pipeline) != VK_SUCCESS) {
             throw std::runtime_error("Failed to create graphics pipeline!");
         }
@@ -287,16 +291,23 @@ namespace neon::vulkan {
 
     void VKMaterial::pushConstant(
         const std::string& name, const void* data, uint32_t size) {
-        auto& uniforms = _material->getShader()->getImplementation()
-                .getUniforms();
-        auto uniformIt = uniforms.find(name);
+        auto& uniforms = _material->getShader()->getUniformBlocks();
+
+        auto uniformIt =
+                std::find_if(uniforms.begin(), uniforms.end(),
+                             [&name](const ShaderUniformBlock& block) {
+                                 return block.name == name;
+                             });
+
         if (uniformIt == uniforms.end()) return;
-        auto& uniform = uniformIt->second;
+        auto& uniform = *uniformIt;
+
+        if (!uniform.offset.has_value()) return;
 
         // Clamp
         if (uniform.offset >= _pushConstants.size()) return;
 
-        uint32_t from = uniform.offset;
+        uint32_t from = uniform.offset.value();
         uint32_t to = std::min(from + size, static_cast<uint32_t>(
                                    _pushConstants.size()));
         memcpy(_pushConstants.data() + from, data, to - from);
@@ -317,13 +328,20 @@ namespace neon::vulkan {
     void VKMaterial::setTexture(const std::string& name,
                                 std::shared_ptr<Texture> texture) {
         if (_material->getUniformBuffer() == nullptr) return;
-        auto& samplers = _material->getShader()->getImplementation()
-                .getSamplers();
-        auto samplerIt = samplers.find(name);
-        if (samplerIt == samplers.end()) return;
+        auto& samplers = _material->getShader()->getUniformSamplers();
 
-        _material->getUniformBuffer()->setTexture(
-            samplerIt->second.binding,
-            std::move(texture));
+        auto samplerIt =
+                std::find_if(samplers.begin(), samplers.end(),
+                             [&name](const ShaderUniformSampler& block) {
+                                 return block.name == name;
+                             });
+
+        if (samplerIt == samplers.end()) return;
+        if (samplerIt->binding.has_value()) {
+            _material->getUniformBuffer()->setTexture(
+                samplerIt->binding.value(),
+                std::move(texture)
+            );
+        }
     }
 }

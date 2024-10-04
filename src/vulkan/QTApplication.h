@@ -48,6 +48,7 @@ namespace neon::vulkan {
         std::unique_ptr<VKQueueFamilyCollection> _queueFamilies;
         std::vector<float> _queuePriorities;
         std::vector<uint32_t> _presentQueues;
+        VKPhysicalDevice _physicalDevice;
         std::unique_ptr<VKDevice> _device;
 
         mutable std::unique_ptr<CommandPool> _commandPool;
@@ -90,7 +91,7 @@ namespace neon::vulkan {
 
         [[nodiscard]] VKDevice* getDevice() const override;
 
-        [[nodiscard]] VkPhysicalDevice getPhysicalDevice() const override;
+        [[nodiscard]] const VKPhysicalDevice& getPhysicalDevice() const override;
 
         [[nodiscard]] VkFormat getSwapChainImageFormat() const override;
 

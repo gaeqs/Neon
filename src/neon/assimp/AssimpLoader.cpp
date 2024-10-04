@@ -225,22 +225,12 @@ namespace neon::assimp_loader {
             }
         }
 
-        std::shared_ptr<Mesh>
-        loadMesh(const aiMesh* mesh,
-                 const Mat& material,
-                 const LoaderInfo& info,
-                 const std::unique_ptr<LocalModel>& localModel) {
-            std::vector<char> dataArray;
-            dataArray.reserve(mesh->mNumVertices
-                              * info.vertexParser.structSize);
+        LocalMesh loadLocalMesh(const aiMesh* mesh, bool flipNormals) {
+            LocalMesh local;
+            local.vertices.reserve(mesh->mNumVertices);
+            local.indices.reserve(mesh->mNumFaces * 3);
 
             auto tangents = assimp_geometry::calculateTangents(mesh);
-
-            LocalMesh* localMesh = nullptr;
-            if (localModel != nullptr) {
-                localMesh = &localModel->meshes.emplace_back();
-                localMesh->vertices.reserve(mesh->mNumAnimMeshes);
-            }
 
             for (int i = 0; i < mesh->mNumVertices; ++i) {
                 auto aP = mesh->mVertices[i];
@@ -251,7 +241,7 @@ namespace neon::assimp_loader {
                 auto aT = mesh->mTextureCoords[0][i];
 
 
-                if (info.flipNormals) {
+                if (flipNormals) {
                     aN = -aN;
                 }
 
@@ -263,24 +253,34 @@ namespace neon::assimp_loader {
                     rush::Vec2f(aT.x, aT.y)
                 };
 
-                if (localMesh != nullptr) {
-                    localMesh->vertices.push_back(parserData);
-                }
-
-                info.vertexParser.parseFunction(parserData, dataArray);
+                local.vertices.push_back(parserData);
             }
-
-            std::vector<uint32_t> temp;
-            std::vector<uint32_t>& indices = localMesh == nullptr
-                                                 ? temp
-                                                 : localMesh->indices;
-            indices.reserve(mesh->mNumFaces * 3);
 
             for (int i = 0; i < mesh->mNumFaces; ++i) {
                 auto face = mesh->mFaces[i];
-                indices.push_back(face.mIndices[0]);
-                indices.push_back(face.mIndices[1]);
-                indices.push_back(face.mIndices[2]);
+                local.indices.push_back(face.mIndices[0]);
+                local.indices.push_back(face.mIndices[1]);
+                local.indices.push_back(face.mIndices[2]);
+            }
+
+            return local;
+        }
+
+        std::shared_ptr<Mesh>
+        loadMesh(const aiMesh* mesh,
+                 const Mat& material,
+                 const LoaderInfo& info,
+                 const std::unique_ptr<LocalModel>& localModel) {
+            std::vector<char> dataArray;
+            dataArray.reserve(mesh->mNumVertices
+                              * info.vertexParser.structSize);
+
+            auto tangents = assimp_geometry::calculateTangents(mesh);
+
+            LocalMesh local = loadLocalMesh(mesh, info.flipNormals);
+
+            for (auto& vertex: local.vertices) {
+                info.vertexParser.parseFunction(vertex, dataArray);
             }
 
             auto result = std::make_shared<Mesh>(
@@ -294,13 +294,17 @@ namespace neon::assimp_loader {
                         .store(result, info.assetStorageMode);
             }
             result->uploadVertices(dataArray);
-            result->uploadIndices(indices);
+            result->uploadIndices(local.indices);
+
+            if (localModel) {
+                localModel->meshes.push_back(std::move(local));
+            }
 
             return result;
         }
 
         void loadMeshes(const aiScene* scene,
-                        std::vector<std::shared_ptr<Mesh>>& meshes,
+                        std::vector<std::shared_ptr<Drawable>>& meshes,
                         const std::vector<Mat>& materials,
                         const LoaderInfo& info,
                         const std::unique_ptr<LocalModel>& localModel) {
@@ -353,13 +357,24 @@ namespace neon::assimp_loader {
                 const LoaderInfo& info) {
         if (!scene) return {LoadError::INVALID_SCENE};
 
+        if (!info.loadGPUModel) {
+            // Local mode only.
+            if (!info.loadLocalModel) return {{}, nullptr, nullptr};
+            auto local = std::make_unique<LocalModel>();
+            for (size_t i = 0; i < scene->mNumMeshes; ++i) {
+                auto* mesh = scene->mMeshes[i];
+                local->meshes.push_back(loadLocalMesh(mesh, info.flipNormals));
+            }
+            return {{}, nullptr, std::move(local)};
+        }
+
         // Init collections
         std::map<std::string, Tex> textures;
         std::map<aiTexture*, Tex> loadedTextures;
 
         ModelCreateInfo modelInfo;
         modelInfo.instanceDataProvider = info.instanceDataProvider;
-        modelInfo.meshes.reserve(scene->mNumMeshes);
+        modelInfo.drawables.reserve(scene->mNumMeshes);
 
         for (auto iData: info.instanceDatas) {
             modelInfo.instanceTypes.push_back(iData.type);
@@ -377,7 +392,7 @@ namespace neon::assimp_loader {
         std::unique_ptr<LocalModel> local = info.loadLocalModel
                                                 ? std::make_unique<LocalModel>()
                                                 : nullptr;
-        loadMeshes(scene, modelInfo.meshes, materials, info, local);
+        loadMeshes(scene, modelInfo.drawables, materials, info, local);
 
 
         auto model = std::make_shared<Model>(

@@ -9,7 +9,7 @@
 
 #include <neon/structure/GameObject.h>
 #include <neon/structure/Component.h>
-#include <neon/Application.h>
+#include <neon/structure/Application.h>
 #include <neon/render/GraphicComponent.h>
 
 namespace neon {

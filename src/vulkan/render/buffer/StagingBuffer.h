@@ -14,7 +14,6 @@
 #include <neon/render/buffer/CommandBuffer.h>
 
 #include <vulkan/util/VKUtil.h>
-#include <vulkan/render/buffer/SimpleBuffer.h>
 #include <vulkan/AbstractVKApplication.h>
 
 namespace neon::vulkan {
@@ -37,6 +36,18 @@ namespace neon::vulkan {
 
     public:
         StagingBufferMap(const StagingBufferMap& other) = delete;
+
+        StagingBufferMap(StagingBufferMap&& other) noexcept :
+            _poolHolder(std::move(other._poolHolder)),
+            _externalCommandBuffer(other._externalCommandBuffer),
+            _internalCommandBuffer(other._internalCommandBuffer),
+            _stagingBuffer(std::move(other._stagingBuffer)),
+            _deviceBuffer(other._deviceBuffer),
+            _map(std::move(other._map)),
+            _range(other._range),
+            _disposed(other._disposed) {
+            other._disposed = true;
+        }
 
         StagingBufferMap(Application* application,
                          const CommandBuffer* commandBuffer,
@@ -137,6 +148,10 @@ namespace neon::vulkan {
 
         void dispose() override {
             disposeStagingBuffer();
+        }
+
+        bool isValid() override {
+            return !_disposed;
         }
     };
 

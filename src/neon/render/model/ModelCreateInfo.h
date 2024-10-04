@@ -32,7 +32,7 @@
 
 #include <neon/render/model/DefaultInstancingData.h>
 #include <neon/render/model/BasicInstanceData.h>
-#include <neon/render/model/Mesh.h>
+#include <neon/render/model/Drawable.h>
 
 namespace neon {
     /**
@@ -45,7 +45,7 @@ namespace neon {
         /**
          * The meshes of the model.
          */
-        std::vector<std::shared_ptr<Mesh>> meshes = {};
+        std::vector<std::shared_ptr<Drawable>> drawables = {};
 
         /**
          * THe maximum amount of instances the model can hold.
@@ -92,8 +92,9 @@ namespace neon {
          * change this parameter.
          */
         std::function<std::unique_ptr<InstanceData>(
-            Application*, const ModelCreateInfo& info)> instanceDataProvider
-                = [](Application* app, const ModelCreateInfo& info) {
+            Application*, const ModelCreateInfo& info, Model* model)>
+        instanceDataProvider
+                = [](Application* app, const ModelCreateInfo& info, Model*) {
             return std::make_unique<BasicInstanceData>(app, info);
         };
 

@@ -1,0 +1,35 @@
+#version 460
+#extension GL_EXT_mesh_shader: enable
+
+const uint PRIMITIVES = 1;
+const uint VERTICES = PRIMITIVES * 3;
+
+const uint MESH_SHADER_GROUP_SIZE = 32;
+
+layout (local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+
+layout(set = 2, binding = 2) uniform Properties {
+    int verticesAmount;
+};
+
+struct TaskData {
+    uint instance;
+};
+
+taskPayloadSharedEXT TaskData td;
+
+void main()
+{
+    td.instance = gl_WorkGroupID.y;
+
+    uint primitivesPerMeshShader = PRIMITIVES * MESH_SHADER_GROUP_SIZE;
+
+    uint primitives = verticesAmount / 3;// Always multiple of 3.
+
+    uint groups = primitives / primitivesPerMeshShader;// Each mesh shader generates 32 primitives
+    uint remainder = primitives % primitivesPerMeshShader;
+    if (remainder > 0) ++groups;
+
+    EmitMeshTasksEXT(groups, 1, 1);
+}
+    

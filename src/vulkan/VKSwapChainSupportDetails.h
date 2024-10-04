@@ -13,6 +13,11 @@ namespace neon::vulkan {
         VkSurfaceCapabilitiesKHR capabilities;
         std::vector<VkSurfaceFormatKHR> formats;
         std::vector<VkPresentModeKHR> presentModes;
+
+        VKSwapChainSupportDetails() = default;
+
+        VKSwapChainSupportDetails(VkPhysicalDevice device,
+                                  VkSurfaceKHR surface);
     };
 }
 

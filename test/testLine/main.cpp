@@ -61,8 +61,8 @@ std::shared_ptr<FrameBuffer> initRender(Room* room) {
     // In this application, we have a buffer of global parameters
     // and a skybox.
     std::vector<ShaderUniformBinding> globalBindings = {
-        {UniformBindingType::BUFFER, sizeof(Matrices)},
-        {UniformBindingType::BUFFER, sizeof(Timestamp)},
+        {UniformBindingType::UNIFORM_BUFFER, sizeof(Matrices)},
+        {UniformBindingType::UNIFORM_BUFFER, sizeof(Timestamp)},
         {UniformBindingType::IMAGE, 0}
     };
 
@@ -250,8 +250,17 @@ std::shared_ptr<Room> getTestRoom(Application* application) {
 int main() {
     std::srand(std::time(nullptr));
 
-    Application application(std::make_unique<vulkan::VKApplication>(
-        "Neon", WIDTH, HEIGHT));
+    vulkan::VKApplicationCreateInfo info;
+    info.name = "Neon";
+    info.windowSize = {WIDTH, HEIGHT};
+
+    info.featuresConfigurator = [](const auto& d, auto& f) {
+        vulkan::VKApplicationCreateInfo::defaultFeaturesConfigurer(d, f);
+        f.basicFeatures.samplerAnisotropy = true;
+        f.basicFeatures.wideLines = true;
+    };
+
+    Application application(std::make_unique<vulkan::VKApplication>(info));
 
     application.init();
     application.setRoom(getTestRoom(&application));

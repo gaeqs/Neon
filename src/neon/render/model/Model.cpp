@@ -11,15 +11,16 @@ namespace neon {
                  const std::string& name,
                  const ModelCreateInfo& info)
         : Asset(typeid(Model), name),
-          _meshes(info.meshes),
-          _instanceData(info.instanceDataProvider(application, info)),
+          _meshes(info.drawables),
           _shouldAutoFlush(info.shouldAutoFlush),
-          _implementation(application, info, _instanceData.get()) {
+          _implementation(application, this) {
         if (info.uniformDescriptor != nullptr) {
             _uniformBuffer = std::make_unique<ShaderUniformBuffer>(
                 name, info.uniformDescriptor);
             _uniformBuffer->setBindingPoint(2);
         }
+
+        _instanceData = info.instanceDataProvider(application, info, this);
     }
 
     Model::Implementation& Model::getImplementation() {
@@ -47,7 +48,7 @@ namespace neon {
         _shouldAutoFlush = autoFlush;
     }
 
-    const std::vector<std::shared_ptr<Mesh>>& Model::getMeshes() const {
+    const std::vector<std::shared_ptr<Drawable>>& Model::getMeshes() const {
         return _meshes;
     }
 
@@ -55,7 +56,7 @@ namespace neon {
         return _meshes.size();
     }
 
-    Mesh* Model::getMesh(uint32_t index) const {
+    Drawable* Model::getMesh(uint32_t index) const {
         return _meshes.at(index).get();
     }
 
@@ -66,12 +67,11 @@ namespace neon {
     }
 
     void Model::draw(const Material* material) const {
-        _implementation.draw(material, _uniformBuffer.get());
+        _implementation.draw(material);
     }
 
     void Model::drawOutside(const Material* material,
                             const CommandBuffer* commandBuffer) const {
-        _implementation.drawOutside(material,
-                                    _uniformBuffer.get(), commandBuffer);
+        _implementation.drawOutside(material, commandBuffer);
     }
 }

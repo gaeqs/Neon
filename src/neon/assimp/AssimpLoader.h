@@ -16,7 +16,7 @@
 
 #include <cmrc/cmrc.hpp>
 
-#include <neon/Application.h>
+#include <neon/structure/Application.h>
 #include <neon/structure/collection/AssetCollection.h>
 #include <neon/render/model/InputDescription.h>
 #include <neon/render/model/DefaultInstancingData.h>
@@ -218,9 +218,11 @@ namespace neon::assimp_loader {
         */
         bool loadLocalModel = false;
 
+        bool loadGPUModel = true;
+
         std::function<std::unique_ptr<InstanceData>(
-            Application*, const ModelCreateInfo& info)> instanceDataProvider
-                = [](Application* app, const ModelCreateInfo& info) {
+            Application*, const ModelCreateInfo&, Model*)> instanceDataProvider
+                = [](Application* app, const ModelCreateInfo& info, Model*) {
             return std::make_unique<BasicInstanceData>(app, info);
         };
 

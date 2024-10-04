@@ -147,8 +147,9 @@ neon::vulkan::VKDevice* neon::vulkan::QTApplication::getDevice() const {
     return _device.get();
 }
 
-VkPhysicalDevice neon::vulkan::QTApplication::getPhysicalDevice() const {
-    return physicalDevice();
+const neon::vulkan::VKPhysicalDevice&
+neon::vulkan::QTApplication::getPhysicalDevice() const {
+    return _physicalDevice;
 }
 
 VkFormat neon::vulkan::QTApplication::getSwapChainImageFormat() const {
@@ -263,9 +264,11 @@ void neon::vulkan::QTApplication::preInitResources() {
 }
 
 void neon::vulkan::QTApplication::initResources() {
+    _physicalDevice = VKPhysicalDevice(physicalDevice(), nullptr);
     _device = std::make_unique<VKDevice>(
         device(),
         *_queueFamilies,
+        _physicalDevice.getFeatures(),
         _presentQueues
     );
 
@@ -281,7 +284,7 @@ void neon::vulkan::QTApplication::initResources() {
     do {
         vkGetDeviceQueue(_device->getRaw(), family, index, &fetchedQueue);
         ++index;
-    } while(queue != fetchedQueue);
+    } while (queue != fetchedQueue);
     --index;
 
     _application->getLogger().debug(MessageBuilder()
