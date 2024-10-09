@@ -404,7 +404,7 @@ std::shared_ptr<FrameBuffer> initRender(
     screenModelGO->newComponent<GraphicComponent>(screenModel);
 
     auto swapFrameBuffer = std::make_shared<SwapChainFrameBuffer>(
-        room, false);
+        app, false);
 
     render->addRenderPass(
         std::make_shared<DefaultRenderPassStrategy>(swapFrameBuffer));

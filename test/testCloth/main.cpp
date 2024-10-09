@@ -144,7 +144,7 @@ std::shared_ptr<FrameBuffer> initRender(Room* room) {
     // Then, it will render its UI.
     // If you don't use ImGUI, you don't have to
     // split the screen render in two frame buffers.
-    auto swapFrameBuffer = std::make_shared<SwapChainFrameBuffer>(room, false);
+    auto swapFrameBuffer = std::make_shared<SwapChainFrameBuffer>(app, false);
     render->addRenderPass(std::make_shared<DefaultRenderPassStrategy>(
         swapFrameBuffer));
 
