@@ -115,8 +115,6 @@ namespace neon {
 
         void preDraw();
 
-        void draw();
-
 
         //endregion
 

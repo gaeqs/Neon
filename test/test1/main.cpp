@@ -147,7 +147,7 @@ std::shared_ptr<FrameBuffer> initRender(Room* room) {
     screenModelGO->newComponent<GraphicComponent>(screenModel);
 
     auto swapFrameBuffer = std::make_shared<SwapChainFrameBuffer>(
-        room, false);
+        app, false);
 
     render->addRenderPass(std::make_shared<DefaultRenderPassStrategy>(
         swapFrameBuffer));
@@ -394,6 +394,7 @@ int main() {
 
     info.featuresConfigurator = [](const auto& d, auto& f) {
         vulkan::VKApplicationCreateInfo::defaultFeaturesConfigurer(d, f);
+        f.basicFeatures.samplerAnisotropy = true;
         f.basicFeatures.samplerAnisotropy = true;
     };
 

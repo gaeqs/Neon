@@ -18,12 +18,12 @@ namespace neon {
     Render::Render(Application* application,
                    std::string name,
                    const std::shared_ptr<ShaderUniformDescriptor>& descriptor) :
-            Asset(typeid(Render), std::move(name)),
-            _implementation(application),
-            _application(application),
-            _strategies(),
-            _globalUniformDescriptor(descriptor),
-            _globalUniformBuffer(name, descriptor) {
+        Asset(typeid(Render), std::move(name)),
+        _implementation(application),
+        _application(application),
+        _strategies(),
+        _globalUniformDescriptor(descriptor),
+        _globalUniformBuffer(name, descriptor) {
         _globalUniformBuffer.setBindingPoint(0);
     }
 
@@ -36,7 +36,7 @@ namespace neon {
     }
 
     void Render::addRenderPass(
-            const std::shared_ptr<RenderPassStrategy>& strategy) {
+        const std::shared_ptr<RenderPassStrategy>& strategy) {
         _strategies.push_back(strategy);
     }
 
@@ -54,14 +54,16 @@ namespace neon {
         };
 
         std::priority_queue<std::shared_ptr<Material>,
-                std::vector<std::shared_ptr<Material>>, CustomLess> queue;
+            std::vector<std::shared_ptr<Material>>, CustomLess> queue;
 
         std::unordered_set<std::shared_ptr<Material>> materials;
-        for (const auto& [model, _]: room->usedModels()) {
-            for (int i = 0; i < model->getMeshesAmount(); ++i) {
-                const auto& mesh = model->getMesh(i);
-                for (const auto& material: mesh->getMaterials()) {
-                    materials.insert(material);
+        if (room != nullptr) {
+            for (const auto& [model, _]: room->usedModels()) {
+                for (int i = 0; i < model->getMeshesAmount(); ++i) {
+                    const auto& mesh = model->getMesh(i);
+                    for (const auto& material: mesh->getMaterials()) {
+                        materials.insert(material);
+                    }
                 }
             }
         }

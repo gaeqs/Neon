@@ -11,10 +11,9 @@
 #include <neon/render/shader/Material.h>
 
 namespace neon {
-
     DefaultRenderPassStrategy::DefaultRenderPassStrategy(
-            const std::shared_ptr<FrameBuffer>& frameBuffer)
-            : _frameBuffer(frameBuffer) {}
+        const std::shared_ptr<FrameBuffer>& frameBuffer)
+        : _frameBuffer(frameBuffer) {}
 
     const std::shared_ptr<FrameBuffer>&
     DefaultRenderPassStrategy::getFrameBuffer() const {
@@ -22,14 +21,16 @@ namespace neon {
     }
 
     void DefaultRenderPassStrategy::render(
-            Room* room,
-            const Render* render,
-            const std::vector<std::shared_ptr<Material>>& materials) const {
+        Room* room,
+        const Render* render,
+        const std::vector<std::shared_ptr<Material>>& materials) const {
         render->beginRenderPass(_frameBuffer);
-        for (const auto& material: materials) {
-            if (material->getTarget() != _frameBuffer) continue;
-            for (const auto& [model, amount]: room->usedModels()) {
-                model->draw(material.get());
+        if (room != nullptr) {
+            for (const auto& material: materials) {
+                if (material->getTarget() != _frameBuffer) continue;
+                for (const auto& [model, amount]: room->usedModels()) {
+                    model->draw(material.get());
+                }
             }
         }
         render->endRenderPass();

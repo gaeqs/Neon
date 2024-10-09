@@ -158,11 +158,6 @@ namespace neon {
         }
     }
 
-    void Room::draw() {
-        DEBUG_PROFILE(getApplication()->getProfiler(), draw);
-        _application->getRender()->render(this);
-    }
-
     const std::unordered_map<Model*, uint32_t>& Room::usedModels() const {
         return _usedModels;
     }

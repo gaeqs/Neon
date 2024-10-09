@@ -15,7 +15,7 @@
 
 namespace neon {
 
-    class Room;
+    class Application;
 
     class SwapChainFrameBuffer : public FrameBuffer {
 
@@ -31,7 +31,7 @@ namespace neon {
 
     public:
 
-        SwapChainFrameBuffer(Room* room, bool depth);
+        SwapChainFrameBuffer(Application* application, bool depth);
 
         ~SwapChainFrameBuffer() override = default;
 

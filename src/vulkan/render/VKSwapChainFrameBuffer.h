@@ -11,7 +11,7 @@
 #include <vulkan/render/VKRenderPass.h>
 
 namespace neon {
-    class Room;
+    class Application;
 }
 
 namespace neon::vulkan {
@@ -49,7 +49,7 @@ namespace neon::vulkan {
 
     public:
 
-        VKSwapChainFrameBuffer(Room* room, bool depth);
+        VKSwapChainFrameBuffer(Application* application, bool depth);
 
         ~VKSwapChainFrameBuffer() override;
 

@@ -68,6 +68,7 @@ namespace neon::vulkan {
             app->getLogger().error(MessageBuilder()
                 .group("vulkan")
                 .print(pCallbackData->pMessage));
+            return VK_FALSE;
         } else if (messageSeverity >=
                    VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT) {
             app->getLogger().warning(MessageBuilder()
@@ -253,8 +254,15 @@ namespace neon::vulkan {
             if (room != nullptr) {
                 room->update(_currentFrameInformation.currentDeltaTime);
                 room->preDraw();
-                room->draw();
-            } {
+
+            }
+
+            {
+                DEBUG_PROFILE(getApplication()->getProfiler(), draw);
+                _application->getRender()->render(room);
+            }
+
+            {
                 DEBUG_PROFILE(_application->getProfiler(), endDraw);
                 endDraw(_application->getProfiler());
             }
@@ -679,7 +687,7 @@ namespace neon::vulkan {
             }
         }
 
-        return VK_PRESENT_MODE_IMMEDIATE_KHR;
+        return availableModes[0];
     }
 
     VkExtent2D

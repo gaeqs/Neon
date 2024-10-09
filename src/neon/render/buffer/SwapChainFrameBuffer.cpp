@@ -6,11 +6,8 @@
 
 namespace neon {
     SwapChainFrameBuffer::SwapChainFrameBuffer(
-            Room* room, bool depth) :
-            FrameBuffer(),
-            _implementation(room, depth) {
-
-    }
+        Application* application, bool depth) :
+        _implementation(application, depth) {}
 
     bool SwapChainFrameBuffer::requiresRecreation() {
         return _implementation.requiresRecreation();
