@@ -314,14 +314,14 @@ void loadModels(Application* application, Room* room,
                 sizeof(DefaultInstancingData),
                 sizeof(DefaultInstancingData),
                 1,
-                model->getUniformBuffer().get()
+                model->getUniformBuffer()
             )
         };
-        return std::make_unique<StorageBufferInstanceData>(
+        return std::vector<InstanceData*>{new StorageBufferInstanceData(
             app,
             info,
             indices
-        );
+        )};
     };
 
     auto mesh = std::make_shared<MeshShaderDrawable>(
@@ -329,7 +329,7 @@ void loadModels(Application* application, Room* room,
 
     mesh->setGroupsSupplier([](const Model& model) {
         return rush::Vec<3, uint32_t>(
-            1, model.getInstanceData()->getInstanceAmount(), 1
+            1, model.getInstanceData(0)->getInstanceAmount(), 1
         );
     });
 

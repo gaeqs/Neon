@@ -25,8 +25,7 @@ namespace neon {
                                            _gameObjects(),
                                            _components(),
 
-                                           _usedModels() {
-    }
+                                           _usedModels() {}
 
     Room::~Room() {
         for (auto& item: _gameObjects) {
@@ -129,7 +128,9 @@ namespace neon {
             DEBUG_PROFILE(p, models);
             for (const auto& [model, amount]: _usedModels) {
                 if (model->shouldAutoFlush()) {
-                    model->getInstanceData()->flush();
+                    for (auto& instanceData: model->getInstanceDatas()) {
+                        instanceData->flush();
+                    }
                 }
                 if (model->getUniformBuffer() != nullptr) {
                     model->getUniformBuffer()->prepareForFrame(cb);
@@ -144,7 +145,7 @@ namespace neon {
 
             for (const auto& [model, amount]: _usedModels) {
                 for (int i = 0; i < model->getMeshesAmount(); ++i) {
-                    for (const auto& mat: model->getMesh(i)->getMaterials()) {
+                    for (const auto& mat: model->getDrawable(i)->getMaterials()) {
                         materials.insert(mat.get());
                     }
                 }
@@ -171,8 +172,7 @@ namespace neon {
         if (it == _usedModels.end()) return;
         if (it->second <= 1) {
             _usedModels.erase(model);
-        }
-        else {
+        } else {
             --it->second;
         }
     }

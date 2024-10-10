@@ -52,7 +52,7 @@ void neon::vulkan::VKMeshShaderDrawable::draw(
                 ->getImplementation().bind(commandBuffer, layout);
     }
 
-    auto& modelBuffer = model.getUniformBuffer();
+    auto* modelBuffer = model.getUniformBuffer();
     if (modelBuffer != nullptr) {
         modelBuffer->getImplementation().bind(commandBuffer, layout);
     }

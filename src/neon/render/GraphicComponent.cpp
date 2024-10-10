@@ -21,7 +21,7 @@ namespace neon {
         : _model(std::move(model)),
           _firstPreDrawExecuted(false) {
         if (_model != nullptr) {
-            auto result = _model->getInstanceData()->createInstance();
+            auto result = _model->getInstanceData(0)->createInstance();
             if (result.isOk()) {
                 _modelTargetId = result.getResult();
             } else {
@@ -42,7 +42,7 @@ namespace neon {
         if (model == _model) return;
         if (_model != nullptr) {
             if (_modelTargetId.has_value()) {
-                _model->getInstanceData()->freeInstance(_modelTargetId.value());
+                _model->getInstanceData(0)->freeInstance(_modelTargetId.value());
             }
             if (_firstPreDrawExecuted) {
                 getRoom()->unmarkUsingModel(model.get());
@@ -56,7 +56,7 @@ namespace neon {
                 getRoom()->markUsingModel(model.get());
             }
 
-            auto result = _model->getInstanceData()->createInstance();
+            auto result = _model->getInstanceData(0)->createInstance();
             if (result.isOk()) {
                 _modelTargetId = result.getResult();
             } else {
@@ -78,7 +78,7 @@ namespace neon {
 
         if (!_modelTargetId.has_value()) return;
 
-        auto& types = _model->getInstanceData()->getInstancingStructTypes();
+        auto& types = _model->getInstanceData(0)->getInstancingStructTypes();
 
         const DefaultInstancingData data{
             getGameObject()->getTransform().getModel(),

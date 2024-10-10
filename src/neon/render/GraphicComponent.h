@@ -24,7 +24,7 @@ namespace neon {
 
         explicit GraphicComponent(std::shared_ptr<Model> model);
 
-        ~GraphicComponent() final;
+        ~GraphicComponent() override;
 
         [[nodiscard]] const std::shared_ptr<Model>& getModel() const;
 
@@ -33,14 +33,14 @@ namespace neon {
         template<class InstanceData>
         void uploadData(size_t index, const InstanceData& data) {
             if (_modelTargetId.has_value()) {
-                _model->getInstanceData()->
+                _model->getInstanceData(0)->
                         uploadData(_modelTargetId.value(), index, data);
             }
         }
 
-        void onPreDraw() final;
+        void onPreDraw() override;
 
-        void drawEditor() final;
+        void drawEditor() override;
     };
 
     REGISTER_COMPONENT(GraphicComponent, "Graphic Component")

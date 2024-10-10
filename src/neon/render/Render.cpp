@@ -21,7 +21,6 @@ namespace neon {
         Asset(typeid(Render), std::move(name)),
         _implementation(application),
         _application(application),
-        _strategies(),
         _globalUniformDescriptor(descriptor),
         _globalUniformBuffer(name, descriptor) {
         _globalUniformBuffer.setBindingPoint(0);
@@ -60,7 +59,7 @@ namespace neon {
         if (room != nullptr) {
             for (const auto& [model, _]: room->usedModels()) {
                 for (int i = 0; i < model->getMeshesAmount(); ++i) {
-                    const auto& mesh = model->getMesh(i);
+                    const auto& mesh = model->getDrawable(i);
                     for (const auto& material: mesh->getMaterials()) {
                         materials.insert(material);
                     }
