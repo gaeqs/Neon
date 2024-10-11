@@ -40,15 +40,15 @@ namespace neon::vulkan {
             offsets[i] = 0;
         }
 
-        auto& instancingBuffers = model.getInstanceData()->getImplementation().
-                getBuffers();
-
-        for (size_t j = 0;
-             j < instancingBuffers.size() && i < MAX_BUFFERS;
-             ++j, ++i) {
-            auto& buffer = instancingBuffers[j];
-            buffers[i] = buffer == nullptr ? VK_NULL_HANDLE : buffer->getRaw();
-            offsets[i] = 0;
+        size_t instances = model.getInstanceDatas().empty() ? 1 : model.getInstanceData(0)->getInstanceAmount();
+        for (auto& data: model.getInstanceDatas()) {
+            auto& instancingBuffers = data->getImplementation().getBuffers();
+            for (size_t j = 0; j < instancingBuffers.size() && i < MAX_BUFFERS; ++j, ++i) {
+                auto& buffer = instancingBuffers[j];
+                buffers[i] = buffer == nullptr ? VK_NULL_HANDLE : buffer->getRaw();
+                offsets[i] = 0;
+            }
+            instances = std::min(instances, data->getInstanceAmount());
         }
 
         vkCmdBindVertexBuffers(
@@ -83,7 +83,7 @@ namespace neon::vulkan {
                     ->getImplementation().bind(commandBuffer, layout);
         }
 
-        auto& modelBuffer = model.getUniformBuffer();
+        auto* modelBuffer = model.getUniformBuffer();
         if (modelBuffer != nullptr) {
             modelBuffer->getImplementation().bind(commandBuffer, layout);
         }
@@ -91,7 +91,7 @@ namespace neon::vulkan {
         vkCmdDrawIndexed(
             commandBuffer,
             _indexAmount,
-            model.getInstanceData()->getInstanceAmount(),
+            instances,
             0,
             0,
             0

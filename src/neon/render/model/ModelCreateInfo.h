@@ -90,12 +90,15 @@ namespace neon {
          * <p>
          * It is recommended to use defineInstanceProvider() to
          * change this parameter.
+         * <p>
+         * The created instance datas will be managed by the model,
+         * no manual deletions are required.
          */
-        std::function<std::unique_ptr<InstanceData>(
+        std::function<std::vector<InstanceData*>(
             Application*, const ModelCreateInfo& info, Model* model)>
         instanceDataProvider
                 = [](Application* app, const ModelCreateInfo& info, Model*) {
-            return std::make_unique<BasicInstanceData>(app, info);
+            return std::vector<InstanceData*>{new BasicInstanceData(app, info)};
         };
 
         template<typename... Types>
@@ -114,9 +117,8 @@ namespace neon {
          */
         template<typename IData>
         void defineInstanceProvider() {
-            instanceDataProvider = [](Application* app,
-                                      const ModelCreateInfo& info) {
-                return std::make_unique<IData>(app, info);
+            instanceDataProvider = [](Application* app, const ModelCreateInfo& info, Model*) {
+                return std::vector<InstanceData*>{new IData(app, info)};
             };
         }
     };

@@ -20,7 +20,12 @@ namespace neon {
             _uniformBuffer->setBindingPoint(2);
         }
 
-        _instanceData = info.instanceDataProvider(application, info, this);
+        auto datas = info.instanceDataProvider(application, info, this);
+
+        _instanceDatas.reserve(datas.size());
+        for (auto data: datas) {
+            _instanceDatas.emplace_back(data);
+        }
     }
 
     Model::Implementation& Model::getImplementation() {
@@ -31,13 +36,18 @@ namespace neon {
         return _implementation;
     }
 
-    const std::unique_ptr<ShaderUniformBuffer>&
+    ShaderUniformBuffer*
     Model::getUniformBuffer() const {
-        return _uniformBuffer;
+        return _uniformBuffer.get();
     }
 
-    InstanceData* Model::getInstanceData() const {
-        return _instanceData.get();
+    const std::vector<std::unique_ptr<InstanceData>>& Model::getInstanceDatas() const {
+        return _instanceDatas;
+    }
+
+    InstanceData* Model::getInstanceData(size_t index) const {
+        if (index >= _instanceDatas.size()) return nullptr;
+        return _instanceDatas[index].get();
     }
 
     bool Model::shouldAutoFlush() const {
@@ -56,7 +66,7 @@ namespace neon {
         return _meshes.size();
     }
 
-    Drawable* Model::getMesh(uint32_t index) const {
+    Drawable* Model::getDrawable(uint32_t index) const {
         return _meshes.at(index).get();
     }
 

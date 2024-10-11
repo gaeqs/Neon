@@ -19,7 +19,6 @@ namespace neon::vulkan {
         auto sp = std::shared_ptr<Material>(const_cast<Material*>(material),
                                             [](Material*) {});
 
-        if (_model->getInstanceData()->getInstanceAmount() == 0) return;
         for (const auto& mesh: _model->getMeshes()) {
             if (!mesh->getMaterials().contains(sp)) continue;
             auto* vk = dynamic_cast<AbstractVKApplication*>(
@@ -36,8 +35,6 @@ namespace neon::vulkan {
 
     void VKModel::drawOutside(const Material* material,
                               const CommandBuffer* commandBuffer) const {
-        if (_model->getInstanceData()->getInstanceAmount() == 0) return;
-
         auto buffer = commandBuffer->getImplementation().getCommandBuffer();
 
         vulkan_util::beginRenderPass(buffer, material->getTarget(), true);

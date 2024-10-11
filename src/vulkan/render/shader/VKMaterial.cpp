@@ -175,14 +175,10 @@ namespace neon::vulkan {
             createInfo.blending.logicOperation);
         colorBlending.attachmentCount = blendAttachments.size();
         colorBlending.pAttachments = blendAttachments.data();
-        colorBlending.blendConstants[0] = createInfo.blending.blendingConstants[
-            0];
-        colorBlending.blendConstants[1] = createInfo.blending.blendingConstants[
-            1];
-        colorBlending.blendConstants[2] = createInfo.blending.blendingConstants[
-            2];
-        colorBlending.blendConstants[3] = createInfo.blending.blendingConstants[
-            3];
+        colorBlending.blendConstants[0] = createInfo.blending.blendingConstants[0];
+        colorBlending.blendConstants[1] = createInfo.blending.blendingConstants[1];
+        colorBlending.blendConstants[2] = createInfo.blending.blendingConstants[2];
+        colorBlending.blendConstants[3] = createInfo.blending.blendingConstants[3];
 
         std::vector<VkDescriptorSetLayout> uniformInfos;
         uniformInfos.reserve(2 + createInfo.descriptions.extraUniforms.size());
@@ -195,6 +191,9 @@ namespace neon::vulkan {
                 ->getDescriptor()
                 ->getImplementation()
                 .getDescriptorSetLayout());
+        } else {
+            // Let's duplicate the uniform info to make all extra uniforms start with the set 2.
+            uniformInfos.push_back(uniformInfos.front());
         }
 
         for (const auto& descriptor: createInfo.descriptions.extraUniforms) {

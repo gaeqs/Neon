@@ -43,7 +43,7 @@ namespace neon {
     private:
         std::vector<std::shared_ptr<Drawable>> _meshes;
         std::unique_ptr<ShaderUniformBuffer> _uniformBuffer;
-        std::unique_ptr<InstanceData> _instanceData;
+        std::vector<std::unique_ptr<InstanceData>> _instanceDatas;
         bool _shouldAutoFlush;
 
         Implementation _implementation;
@@ -78,9 +78,18 @@ namespace neon {
          * of this model.
          * @return the uniform buffer.
          */
-        const std::unique_ptr<ShaderUniformBuffer>& getUniformBuffer() const;
+        [[nodiscard]] ShaderUniformBuffer* getUniformBuffer() const;
 
-        [[nodiscard]] InstanceData* getInstanceData() const;
+        /**
+        * Returns the list of instance datas present in this model.
+        */
+        [[nodiscard]] const std::vector<std::unique_ptr<InstanceData>>& getInstanceDatas() const;
+
+        /**
+        * Returns the instance data present at the given index.
+        * This method return nullptr if the instance data doesn't exist.
+        */
+        [[nodiscard]] InstanceData* getInstanceData(size_t index) const;
 
         /**
          * Whether the renderer should call Model::flush() before rendering.
@@ -120,7 +129,7 @@ namespace neon {
          * @param index the index.
          * @return the mesh.
          */
-        [[nodiscard]] Drawable* getMesh(uint32_t index) const;
+        [[nodiscard]] Drawable* getDrawable(uint32_t index) const;
 
         /**
          * Adds the given material to all meshes inside this model.

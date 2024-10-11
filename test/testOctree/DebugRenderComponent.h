@@ -75,13 +75,6 @@ class DebugRenderComponent : public neon::Component {
         auto material = createMaterial(room);
 
         neon::ModelCreateInfo info;
-        info.drawables.push_back(std::make_unique<neon::Mesh>(
-            room->getApplication(),
-            "debug",
-            material,
-            false,
-            false
-        ));
         info.maximumInstances = 2000000;
 
         std::vector<float> vertices{0.0f, 1.0f, 2.0f, 3.0f};
@@ -90,8 +83,19 @@ class DebugRenderComponent : public neon::Component {
             0, 1, 2, 1, 3, 2
         };
 
-        info.drawables[0]->uploadVertices(vertices);
-        info.drawables[0]->uploadIndices(indices);
+
+        auto mesh = std::make_unique<neon::Mesh>(
+            room->getApplication(),
+            "debug",
+            material,
+            false,
+            false
+        );
+
+        mesh->uploadVertices(vertices);
+        mesh->uploadIndices(indices);
+
+        info.drawables.push_back(std::move(mesh));
 
         info.defineInstanceType<Instance>();
 
@@ -120,9 +124,8 @@ public:
         if (!_frontInstances.empty()) {
             instance = _frontInstances.back();
             _frontInstances.pop_back();
-        }
-        else {
-            auto result = _model->getInstanceData()->createInstance();
+        } else {
+            auto result = _model->getInstanceData(0)->createInstance();
             if (!result.isOk()) {
                 std::cerr << result.getError() << std::endl;
                 return;
@@ -131,7 +134,7 @@ public:
         }
 
         _backInstances.push_back(instance);
-        _model->getInstanceData()->uploadData<Instance>(
+        _model->getInstanceData(0)->uploadData<Instance>(
             instance,
             0,
             Instance(position, color, radius)
@@ -145,16 +148,15 @@ public:
         if (!_frontInstances.empty()) {
             instance = _frontInstances.back();
             _frontInstances.pop_back();
-        }
-        else {
-            auto result = _model->getInstanceData()->createInstance();
+        } else {
+            auto result = _model->getInstanceData(0)->createInstance();
             if (!result.isOk()) {
                 std::cerr << result.getError() << std::endl;
                 return;
             }
             instance = result.getResult();
         }
-        _model->getInstanceData()->uploadData<Instance>(
+        _model->getInstanceData(0)->uploadData<Instance>(
             instance,
             0,
             Instance(position, color, radius)
@@ -165,7 +167,7 @@ public:
     void onPreDraw() override {
         std::swap(_frontInstances, _backInstances);
         for (const neon::InstanceData::Instance& instance: _backInstances) {
-            _model->getInstanceData()->freeInstance(instance);
+            _model->getInstanceData(0)->freeInstance(instance);
         }
         _backInstances.clear();
     }

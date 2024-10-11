@@ -220,10 +220,10 @@ namespace neon::assimp_loader {
 
         bool loadGPUModel = true;
 
-        std::function<std::unique_ptr<InstanceData>(
-            Application*, const ModelCreateInfo&, Model*)> instanceDataProvider
+        std::function<std::vector<InstanceData*>(
+            Application*, const ModelCreateInfo& info, Model* model)> instanceDataProvider
                 = [](Application* app, const ModelCreateInfo& info, Model*) {
-            return std::make_unique<BasicInstanceData>(app, info);
+            return std::vector<InstanceData*>{new BasicInstanceData(app, info)};
         };
 
     private:
@@ -258,9 +258,8 @@ namespace neon::assimp_loader {
          */
         template<typename IData>
         void defineInstanceProvider() {
-            instanceDataProvider = [](Application* app,
-                                      const ModelCreateInfo& info) {
-                return std::make_unique<IData>(app, info);
+            instanceDataProvider = [](Application* app, const ModelCreateInfo& info, Model*) {
+                return std::vector<InstanceData*>{new IData(app, info)};
             };
         }
     };

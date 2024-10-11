@@ -81,13 +81,6 @@ class OctreeRaycastView : public neon::Component {
 
     void generateModel() {
         neon::ModelCreateInfo info;
-        info.drawables.push_back(std::make_unique<neon::Mesh>(
-            getApplication(),
-            "octree",
-            _material,
-            false,
-            false
-        ));
 
 
         // Generate vertices
@@ -98,8 +91,19 @@ class OctreeRaycastView : public neon::Component {
             addBox(vertices, indices, box, depth);
         }
 
-        info.drawables[0]->uploadVertices(vertices);
-        info.drawables[0]->uploadIndices(indices);
+        auto mesh = std::make_unique<neon::Mesh>(
+            getApplication(),
+            "octree",
+            _material,
+            false,
+            false
+        );
+
+        mesh->uploadVertices(vertices);
+        mesh->uploadIndices(indices);
+
+        info.drawables.push_back(std::move(mesh));
+
         info.maximumInstances = 1;
 
         _model = std::make_shared<neon::Model>(getApplication(), "line", info);

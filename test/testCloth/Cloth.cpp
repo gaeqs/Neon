@@ -24,8 +24,8 @@ void Cloth::generateModel() {
     auto w = static_cast<float>(_width);
     auto h = static_cast<float>(_height);
 
-    for(float x = 0; x < w; x += 1.0f) {
-        for(float z = 0; z < h; z += 1.0f) {
+    for (float x = 0; x < w; x += 1.0f) {
+        for (float z = 0; z < h; z += 1.0f) {
             _vertices.push_back(TestVertex{
                 rush::Vec3f(x, 0.0f, z),
                 rush::Vec3f(0.0f, 1.0f, 0.0f),
@@ -39,8 +39,8 @@ void Cloth::generateModel() {
     std::vector<uint32_t> indices;
     indices.reserve((_width - 1) * (_height - 1) * 2);
 
-    for(uint32_t x = 0; x < _width - 1; ++x) {
-        for(uint32_t z = 0; z < _height - 1; ++z) {
+    for (uint32_t x = 0; x < _width - 1; ++x) {
+        for (uint32_t z = 0; z < _height - 1; ++z) {
             uint32_t v0 = x + z * _width;
             uint32_t v1 = x + 1 + z * _width;
             uint32_t v2 = x + (z + 1) * _width;
@@ -55,16 +55,20 @@ void Cloth::generateModel() {
         }
     }
 
-    neon::ModelCreateInfo info;
-    info.drawables.push_back(std::make_unique<neon::Mesh>(
+    auto mesh = std::make_unique<neon::Mesh>(
         getApplication(),
         "cloth",
         _material,
         true,
         false
-    ));
-    info.drawables[0]->uploadVertices(_vertices);
-    info.drawables[0]->uploadIndices(indices);
+    );
+
+    mesh->uploadVertices(_vertices);
+    mesh->uploadIndices(indices);
+
+    neon::ModelCreateInfo info;
+    info.drawables.push_back(std::move(mesh));
+
     info.maximumInstances = 1;
 
     _model = std::make_shared<neon::Model>(getApplication(), "cloth", info);
@@ -103,7 +107,7 @@ void Cloth::onPreDraw() {
     _modifiedVertices.resize(_vertices.size());
 
     uint32_t i = 0;
-    for(const auto& node: _massSpring->getNodes()) {
+    for (const auto& node: _massSpring->getNodes()) {
         TestVertex vertex = _vertices[i];
 
         auto& pos = node.getPositionVector();
@@ -113,5 +117,5 @@ void Cloth::onPreDraw() {
         ++i;
     }
 
-    _model->getMesh(0)->setVertices(0, _modifiedVertices);
+    reinterpret_cast<neon::Mesh*>(_model->getDrawable(0))->setVertices(0, _modifiedVertices);
 }
