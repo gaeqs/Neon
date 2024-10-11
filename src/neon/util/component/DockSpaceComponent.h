@@ -9,12 +9,14 @@
 
 namespace neon {
     class DockSpaceComponent : public Component {
+        int dockFlags;
 
     public:
+        explicit DockSpaceComponent(bool topBar = false);
 
         void onUpdate(float deltaTime) override;
-
     };
+
     REGISTER_COMPONENT(DockSpaceComponent, "Dock Space")
 }
 
