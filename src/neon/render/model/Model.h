@@ -80,8 +80,15 @@ namespace neon {
          */
         [[nodiscard]] ShaderUniformBuffer* getUniformBuffer() const;
 
+        /**
+        * Returns the list of instance datas present in this model.
+        */
         [[nodiscard]] const std::vector<std::unique_ptr<InstanceData>>& getInstanceDatas() const;
 
+        /**
+        * Returns the instance data present at the given index.
+        * This method return nullptr if the instance data doesn't exist.
+        */
         [[nodiscard]] InstanceData* getInstanceData(size_t index) const;
 
         /**

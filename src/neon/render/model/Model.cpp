@@ -46,7 +46,8 @@ namespace neon {
     }
 
     InstanceData* Model::getInstanceData(size_t index) const {
-        return _instanceDatas.at(index).get();
+        if (index >= _instanceDatas.size()) return nullptr;
+        return _instanceDatas[index].get();
     }
 
     bool Model::shouldAutoFlush() const {
