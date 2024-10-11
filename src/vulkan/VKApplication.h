@@ -129,6 +129,8 @@ namespace neon::vulkan {
 
         void init(neon::Application* application) override;
 
+        GLFWwindow* getWindow() const;
+
         [[nodiscard]] rush::Vec2i getWindowSize() const override;
 
         const ApplicationCreateInfo& getCreationInfo() const override;

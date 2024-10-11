@@ -143,7 +143,7 @@ namespace neon::vulkan {
             .print("VULKAN", TextEffect::foreground4bits(14))
             .print("]", TextEffect::foreground4bits(6))
             .build("vulkan"));
-        glfwInitHint(GLFW_PLATFORM, GLFW_PLATFORM_X11);
+        //glfwInitHint(GLFW_PLATFORM, GLFW_PLATFORM_X11);
 
         if (!glfwInit()) {
             const char* error;
@@ -170,6 +170,10 @@ namespace neon::vulkan {
         glfwSetScrollCallback(_window, scroll_callback);
 
         postWindowCreation();
+    }
+
+    GLFWwindow* VKApplication::getWindow() const {
+        return _window;
     }
 
     rush::Vec2i VKApplication::getWindowSize() const {
@@ -255,15 +259,10 @@ namespace neon::vulkan {
             if (room != nullptr) {
                 room->update(_currentFrameInformation.currentDeltaTime);
                 room->preDraw();
-
-            }
-
-            {
+            } {
                 DEBUG_PROFILE(getApplication()->getProfiler(), draw);
                 _application->getRender()->render(room);
-            }
-
-            {
+            } {
                 DEBUG_PROFILE(_application->getProfiler(), endDraw);
                 endDraw(_application->getProfiler());
             }
