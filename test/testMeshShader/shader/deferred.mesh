@@ -79,9 +79,9 @@ void main() {
 
     uint start = invocationId * VERTICES;
     uint end = min(start + VERTICES, verticesAmount);
+    if (start >= end) return;
 
     uint verticesToProcess = end - start;
-    if (start > end) return;
 
     if (gl_LocalInvocationID.x == 0) {
         uint globalEnd = min(start + VERTICES * GROUP_SIZE, verticesAmount);
