@@ -7,6 +7,26 @@
 namespace neon {
     File::File() : _data(nullptr), _size(0), _autoFree(false) {}
 
+    File::File(File&& other) noexcept
+        : _data(other._data),
+          _size(other._size),
+          _autoFree(other._autoFree) {
+        other._data = nullptr;
+        other._size = 0;
+        other._autoFree = false;
+    }
+
+    File& File::operator=(File&& other) noexcept {
+        if (this == &other) return *this;
+        _data = other._data;
+        _size = other._size;
+        _autoFree = other._autoFree;
+        other._data = nullptr;
+        other._size = 0;
+        other._autoFree = false;
+        return *this;
+    }
+
     File::File(const char* data, size_t size, bool autoFree)
         : _data(data),
           _size(size),
@@ -16,6 +36,10 @@ namespace neon {
         if (_autoFree && _data != nullptr) {
             delete _data;
         }
+    }
+
+    bool File::isValid() const {
+        return _data != nullptr;
     }
 
     const char* File::getData() const {

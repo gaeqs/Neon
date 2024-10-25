@@ -5,8 +5,8 @@
 #ifndef FILESYSTEM_H
 #define FILESYSTEM_H
 
-#include <memory>
 #include <filesystem>
+#include <optional>
 #include <neon/filesystem/File.h>
 
 namespace neon {
@@ -14,7 +14,7 @@ namespace neon {
     public:
         virtual ~FileSystem() = default;
 
-        virtual std::unique_ptr<File> readFile(std::filesystem::path path) = 0;
+        virtual std::optional<File> readFile(std::filesystem::path path) = 0;
 
         virtual bool exists(std::filesystem::path path) = 0;
     };

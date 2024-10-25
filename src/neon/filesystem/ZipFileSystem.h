@@ -18,7 +18,7 @@ namespace neon {
 
         ~ZipFileSystem() override;
 
-        std::unique_ptr<File> readFile(std::filesystem::path path) override;
+        std::optional<File> readFile(std::filesystem::path path) override;
 
         bool exists(std::filesystem::path path) override;
     };

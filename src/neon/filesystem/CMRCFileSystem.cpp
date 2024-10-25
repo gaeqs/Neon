@@ -11,11 +11,11 @@ namespace neon {
     CMRCFileSystem::CMRCFileSystem(cmrc::embedded_filesystem filesystem)
         : _filesystem(filesystem) {}
 
-    std::unique_ptr<File> CMRCFileSystem::readFile(std::filesystem::path path) {
-        if (!exists(path)) return nullptr;
+    std::optional<File> CMRCFileSystem::readFile(std::filesystem::path path) {
+        if (!exists(path)) return {};
         auto file = _filesystem.open(path.string());
 
-        return std::make_unique<File>(file.begin(), file.size(), false);
+        return File(file.begin(), file.size(), false);
     }
 
     bool CMRCFileSystem::exists(std::filesystem::path path) {

@@ -11,9 +11,9 @@ namespace neon {
     DirectoryFileSystem::DirectoryFileSystem(std::filesystem::path root)
         : _root(std::move(root)) {}
 
-    std::unique_ptr<File> DirectoryFileSystem::readFile(std::filesystem::path path) {
+    std::optional<File> DirectoryFileSystem::readFile(std::filesystem::path path) {
         auto result = _root / path;
-        if (!std::filesystem::exists(result) || is_directory(result)) return nullptr;
+        if (!std::filesystem::exists(result) || is_directory(result)) return {};
 
         std::ifstream file(result, std::ios::binary | std::ios::ate);
         std::ifstream::pos_type pos = file.tellg();
@@ -23,7 +23,7 @@ namespace neon {
         file.seekg(0, std::ios::beg);
         file.read(data, pos);
 
-        return std::make_unique<File>(data, static_cast<size_t>(pos));;
+        return File(data, pos);
     }
 
     bool DirectoryFileSystem::exists(std::filesystem::path path) {

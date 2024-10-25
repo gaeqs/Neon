@@ -25,6 +25,8 @@
 #include <neon/io/MouseButtonEvent.h>
 #include <neon/io/ScrollEvent.h>
 
+#include <neon/loader/AssetLoader.h>
+
 #include <neon/logging/TextEffect.h>
 #include <neon/logging/Message.h>
 #include <neon/logging/Logger.h>

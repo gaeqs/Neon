@@ -16,9 +16,17 @@ namespace neon {
     public:
         File();
 
+        File(const File& other) = delete;
+
+        File(File&& other) noexcept;
+
+        File& operator=(File&& other) noexcept;
+
         File(const char* data, size_t size, bool autoFree = true);
 
         ~File();
+
+        [[nodiscard]] bool isValid() const;
 
         [[nodiscard]] const char* getData() const;
 

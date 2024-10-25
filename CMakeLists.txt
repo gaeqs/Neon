@@ -30,6 +30,7 @@ project(neon)
 
 find_package(glfw3 CONFIG REQUIRED)
 find_package(assimp CONFIG REQUIRED)
+find_package(nlohmann_json REQUIRED)
 find_package(Vulkan REQUIRED)
 
 # Try extracting VulkanSDK path from ${Vulkan_INCLUDE_DIRS}
@@ -70,7 +71,7 @@ endif ()
 
 list(APPEND LIBRARIES glfw ${GLFW_LIBRARIES})
 list(APPEND LIBRARIES ${VULKAN_LIB_LIST})
-list(APPEND LIBRARIES SPIRV glslang libzippp)
+list(APPEND LIBRARIES SPIRV glslang libzippp nlohmann_json::nlohmann_json)
 list(APPEND LIBRARIES IMGUI IMPLOT)
 list(APPEND LIBRARIES rush)
 
