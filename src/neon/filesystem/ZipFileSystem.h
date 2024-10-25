@@ -7,14 +7,14 @@
 
 #include <neon/filesystem/FileSystem.h>
 
-#include <zip.h>
+#include <libzippp.h>
 
 namespace neon {
     class ZipFileSystem : public FileSystem {
-        zip_t* _zip;
+        std::unique_ptr<libzippp::ZipArchive> _zip;
 
     public:
-        ZipFileSystem(std::filesystem::path file);
+        ZipFileSystem(const std::filesystem::path& file);
 
         ~ZipFileSystem() override;
 

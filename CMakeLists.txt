@@ -31,7 +31,6 @@ project(neon)
 find_package(glfw3 CONFIG REQUIRED)
 find_package(assimp CONFIG REQUIRED)
 find_package(Vulkan REQUIRED)
-find_package(libzip REQUIRED)
 
 # Try extracting VulkanSDK path from ${Vulkan_INCLUDE_DIRS}
 if (NOT ${Vulkan_INCLUDE_DIRS} STREQUAL "")
@@ -51,6 +50,10 @@ add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/lib/spirv-tools)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/lib/glslang)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/lib/glslang)
 
+# Libzippp
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/lib/libzippp)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/lib/libzippp/src)
+
 # RUSH
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/lib/Rush)
 
@@ -67,7 +70,7 @@ endif ()
 
 list(APPEND LIBRARIES glfw ${GLFW_LIBRARIES})
 list(APPEND LIBRARIES ${VULKAN_LIB_LIST})
-list(APPEND LIBRARIES SPIRV glslang libzip::zip)
+list(APPEND LIBRARIES SPIRV glslang libzippp)
 list(APPEND LIBRARIES IMGUI IMPLOT)
 list(APPEND LIBRARIES rush)
 

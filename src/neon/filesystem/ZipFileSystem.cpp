@@ -6,20 +6,23 @@
 
 #include <neon/logging/Logger.h>
 
-neon::ZipFileSystem::ZipFileSystem(std::filesystem::path file) {
-    int err;
-    _zip = zip_open(file.c_str(), 0, &err);
-    if (_zip == nullptr) {
-        zip_error error{};
-        zip_error_init_with_code(&error, err);
-        neon::Logger::error(MessageBuilder()
-            .print("Cannot open zip file: ")
-            .print(file)
-            .print(" (")
-            .print(zip_error_strerror(&error)));
-        zip_error_fini(&error);
-        return;
-    }
+neon::ZipFileSystem::ZipFileSystem(const std::filesystem::path& file) {
+    _zip = std::make_unique<libzippp::ZipArchive>(file.string());
+    if (!_zip->open()) return;
+}
 
-    zip_get_num_entries()
+neon::ZipFileSystem::~ZipFileSystem() {
+    if (!_zip->isOpen()) return;
+    _zip->close();
+}
+
+std::unique_ptr<neon::File> neon::ZipFileSystem::readFile(std::filesystem::path path) {
+    auto file = _zip->getEntry(path.string());
+    if (file.isNull() || !file.isFile()) return nullptr;
+    return std::make_unique<File>(static_cast<char*>(file.readAsBinary()), file.getSize());
+}
+
+bool neon::ZipFileSystem::exists(std::filesystem::path path) {
+    auto file = _zip->getEntry(path.string());
+    return !file.isNull() && file.isFile();
 }
