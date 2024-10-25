@@ -10,6 +10,12 @@
 #include <neon/assimp/AssimpMaterialParameters.h>
 #include <neon/assimp/AssimpNewIOSystem.h>
 
+#include <neon/filesystem/File.h>
+#include <neon/filesystem/FileSystem.h>
+#include <neon/filesystem/DirectoryFileSystem.h>
+#include <neon/filesystem/CMRCFileSystem.h>
+#include <neon/filesystem/ZipFileSystem.h>
+
 #include <neon/geometry/Camera.h>
 #include <neon/geometry/Frustum.h>
 #include <neon/geometry/Transform.h>
