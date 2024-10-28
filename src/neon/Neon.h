@@ -26,6 +26,9 @@
 #include <neon/io/ScrollEvent.h>
 
 #include <neon/loader/AssetLoader.h>
+#include <neon/loader/AssetLoaderCollection.h>
+#include <neon/loader/ShaderProgramLoader.h>
+#include <neon/loader/MaterialLoader.h>
 
 #include <neon/logging/TextEffect.h>
 #include <neon/logging/Message.h>

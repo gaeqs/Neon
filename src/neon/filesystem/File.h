@@ -5,7 +5,9 @@
 #ifndef FILE_H
 #define FILE_H
 
+#include <optional>
 #include <cstddef>
+#include <nlohmann/json.hpp>
 
 namespace neon {
     class File {
@@ -31,6 +33,8 @@ namespace neon {
         [[nodiscard]] const char* getData() const;
 
         [[nodiscard]] size_t getSize() const;
+
+        [[nodiscard]] std::optional<nlohmann::json> toJson() const;
     };
 }
 

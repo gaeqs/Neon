@@ -49,4 +49,10 @@ namespace neon {
     size_t File::getSize() const {
         return _size;
     }
+
+    std::optional<nlohmann::json> File::toJson() const {
+        auto json = nlohmann::json::parse(_data, _data + _size, nullptr, false);
+        if(json.is_discarded()) return {};
+        return json;
+    }
 }

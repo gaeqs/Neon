@@ -4,20 +4,55 @@
 
 #ifndef RESOURCELOADER_H
 #define RESOURCELOADER_H
-#include <neon/filesystem/FileSystem.h>
-#include <neon/structure/Application.h>
-#include <neon/structure/collection/AssetCollection.h>
+
+#include <memory>
+#include <utility>
+#include <nlohmann/json.hpp>
 
 namespace neon {
-    class AssetLoader {
-        Application* _application;
-        FileSystem* _fileSystem;
-        AssetCollection* _assetCollection;
+    class Application;
+    class FileSystem;
+    class AssetCollection;
+    class AssetLoaderCollection;
 
+    class AbstractAssetLoader {
     public:
-        AssetLoader(Application* application, FileSystem* fileSystem, AssetCollection* assetCollection);
+        virtual ~AbstractAssetLoader() = default;
+    };
 
-        void loadAsset(std::filesystem::path path);
+    struct AssetLoaderContext {
+        Application* application;
+        FileSystem* fileSystem;
+        AssetLoaderCollection* loaders;
+        AssetCollection* collection;
+
+        AssetLoaderContext(
+            Application* app,
+            FileSystem* fileSystem = nullptr,
+            AssetLoaderCollection* loaders = nullptr,
+            AssetCollection* collection = nullptr);
+    };
+
+    template<typename AssetType>
+    class AssetLoader : public AbstractAssetLoader {
+    public:
+        ~AssetLoader() override = default;
+
+        virtual std::shared_ptr<AssetType> loadAsset(
+            nlohmann::json json,
+            AssetLoaderContext context
+        ) = 0;
+    };
+
+    template<typename Type, typename Loader>
+    concept WellStructuredLoader = requires(Loader l) {
+        {
+            l.loadAsset(
+                std::declval<nlohmann::json>(),
+                std::declval<AssetLoaderContext>()
+            )
+        } -> std::convertible_to<std::shared_ptr<Type>>;
+        requires std::derived_from<Loader, AssetLoader<Type>>;
     };
 }
 

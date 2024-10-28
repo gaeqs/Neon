@@ -4,8 +4,6 @@
 
 #include "CMRCFileSystem.h"
 
-#include <pango/pango-utils.h>
-
 
 namespace neon {
     CMRCFileSystem::CMRCFileSystem(cmrc::embedded_filesystem filesystem)

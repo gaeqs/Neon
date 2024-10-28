@@ -5,21 +5,17 @@
 #include "AssetLoader.h"
 
 #include <nlohmann/json.hpp>
+#include <utility>
+
+#include "AssetLoaderCollection.h"
 
 namespace neon {
-    AssetLoader::AssetLoader(Application* application, FileSystem* fileSystem, AssetCollection* assetCollection)
-        : _application(application), _fileSystem(fileSystem), _assetCollection(assetCollection) {}
-
-    void AssetLoader::loadAsset(std::filesystem::path path) {
-        if (_fileSystem == nullptr) return;
-
-        auto file = _fileSystem->readFile(path);
-        if (!file.has_value()) return;
-
-        std::stringstream ss()
-
-        nlohmann::json json = nlohmann::json::parse(
-10
-        );
-    }
+    AssetLoaderContext::AssetLoaderContext(
+        Application* app,
+        FileSystem* fs,
+        AssetLoaderCollection* lc,
+        AssetCollection* c) : application(app),
+                              fileSystem(fs),
+                              loaders(lc),
+                              collection(c) {}
 }

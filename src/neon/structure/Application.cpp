@@ -15,6 +15,7 @@ namespace neon {
         std::unique_ptr<ApplicationImplementation>
         implementation) : _implementation(std::move(implementation)),
                           _room(nullptr),
+                          _assetLoaders(true),
                           _lastCursorPosition(0.0, 0.0),
                           _commandManager(this),
                           _logger(true, true, true) {}
@@ -75,6 +76,14 @@ namespace neon {
 
     AssetCollection& Application::getAssets() {
         return _assets;
+    }
+
+    const AssetLoaderCollection& Application::getAssetLoaders() const {
+        return _assetLoaders;
+    }
+
+    AssetLoaderCollection& Application::getAssetLoaders() {
+        return _assetLoaders;
     }
 
     int32_t Application::getWidth() const {
