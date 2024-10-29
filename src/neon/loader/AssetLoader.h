@@ -22,12 +22,14 @@ namespace neon {
 
     struct AssetLoaderContext {
         Application* application;
+        std::optional<std::filesystem::path> path;
         FileSystem* fileSystem;
         AssetLoaderCollection* loaders;
         AssetCollection* collection;
 
         AssetLoaderContext(
             Application* app,
+            std::filesystem::path* path = nullptr,
             FileSystem* fileSystem = nullptr,
             AssetLoaderCollection* loaders = nullptr,
             AssetCollection* collection = nullptr);

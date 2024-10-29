@@ -32,6 +32,8 @@ namespace neon {
 
         explicit CommandManager(Application* application);
 
+        ~CommandManager() = default;
+
         CommandPoolHolder fetchCommandPool();
 
         void disposeAll();

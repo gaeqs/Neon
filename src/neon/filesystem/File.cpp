@@ -55,4 +55,8 @@ namespace neon {
         if(json.is_discarded()) return {};
         return json;
     }
+
+    std::string File::toString() const {
+        return std::string(_data, _size);
+    }
 }

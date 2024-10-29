@@ -4,18 +4,20 @@
 
 #include "AssetLoader.h"
 
-#include <nlohmann/json.hpp>
-#include <utility>
+#include <neon/structure/Application.h>
 
-#include "AssetLoaderCollection.h"
+#include <nlohmann/json.hpp>
 
 namespace neon {
     AssetLoaderContext::AssetLoaderContext(
         Application* app,
+        std::filesystem::path* p,
         FileSystem* fs,
         AssetLoaderCollection* lc,
-        AssetCollection* c) : application(app),
-                              fileSystem(fs),
-                              loaders(lc),
-                              collection(c) {}
+        AssetCollection* c)
+        : application(app),
+          path(p == nullptr ? std::optional<std::filesystem::path>() : *p),
+          fileSystem(fs),
+          loaders(lc == nullptr ? &app->getAssetLoaders() : lc),
+          collection(c == nullptr ? &app->getAssets() : c) {}
 }
