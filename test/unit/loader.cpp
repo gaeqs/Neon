@@ -7,6 +7,7 @@
 #include <neon/filesystem/CMRCFileSystem.h>
 #include <neon/loader/AssetLoader.h>
 #include <neon/loader/AssetLoaderCollection.h>
+#include <neon/loader/AssetLoaderHelpers.h>
 #include <neon/render/model/Model.h>
 #include <nlohmann/json.hpp>
 
@@ -35,7 +36,7 @@ TEST_CASE("Load test") {
 TEST_CASE("Load incorrect") {
     neon::CMRCFileSystem fileSystem(cmrc::resources::get_filesystem());
 
-    REQUIRE(fileSystem.exists("test.txt"));
+    REQUIRE(fileSystem.exists("/a/../test.txt"));
 
     auto file = fileSystem.readFile("test.txt");
 
@@ -68,4 +69,32 @@ TEST_CASE("Loader collection") {
 
     auto modelLoader = collection.getLoaderFor<neon::Model>();
     REQUIRE(modelLoader.has_value());
+}
+
+TEST_CASE("Load shader") {
+    neon::vulkan::VKApplicationCreateInfo info;
+    info.name = "Neon";
+    info.windowSize = {800, 600};
+
+    neon::Application application(std::make_unique<neon::vulkan::VKApplication>(info));
+    application.init();
+
+    neon::CMRCFileSystem fileSystem(cmrc::resources::get_filesystem());
+    neon::AssetLoaderContext context(&application, nullptr, &fileSystem);
+
+    auto shader = neon::loadAssetFromFile<neon::ShaderProgram>("shader.json", context);
+    REQUIRE(shader != nullptr);
+
+
+
+
+    application.getLogger().debug(neon::MessageBuilder()
+        .print("Shader loaded?: ")
+        .print(shader != nullptr));
+    application.getLogger().debug(neon::MessageBuilder()
+        .print("Shader identifier: ")
+        .print(shader->getIdentifier().name));
+
+    auto* impl = dynamic_cast<neon::vulkan::VKApplication*>(application.getImplementation());
+    impl->finishLoop();
 }

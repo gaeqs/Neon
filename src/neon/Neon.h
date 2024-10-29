@@ -27,6 +27,7 @@
 
 #include <neon/loader/AssetLoader.h>
 #include <neon/loader/AssetLoaderCollection.h>
+#include <neon/loader/AssetLoaderHelpers.h>
 #include <neon/loader/ShaderProgramLoader.h>
 #include <neon/loader/MaterialLoader.h>
 

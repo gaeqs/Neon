@@ -800,11 +800,13 @@ namespace neon::vulkan {
     VKApplication::~VKApplication() {
         auto raw = _device->getRaw();
         vkDestroyDescriptorPool(raw, _imGuiPool, nullptr);
-        ImGui_ImplVulkan_Shutdown();
-        ImGui_ImplGlfw_Shutdown();
+        if (ImGui::GetIO().BackendRendererUserData != nullptr) {
+            ImGui_ImplVulkan_Shutdown();
+            ImGui_ImplGlfw_Shutdown();
 
-        ImPlot::DestroyContext();
-        ImGui::DestroyContext();
+            ImPlot::DestroyContext();
+            ImGui::DestroyContext();
+        }
 
         for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
             vkDestroySemaphore(raw, _imageAvailableSemaphores[i], nullptr);

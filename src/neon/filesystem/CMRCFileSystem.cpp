@@ -11,12 +11,12 @@ namespace neon {
 
     std::optional<File> CMRCFileSystem::readFile(std::filesystem::path path) {
         if (!exists(path)) return {};
-        auto file = _filesystem.open(path.string());
+        auto file = _filesystem.open(path.lexically_normal().string());
 
         return File(file.begin(), file.size(), false);
     }
 
     bool CMRCFileSystem::exists(std::filesystem::path path) {
-        return _filesystem.is_file(path.string());
+        return _filesystem.is_file(path.lexically_normal().string());
     }
 }

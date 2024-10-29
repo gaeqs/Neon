@@ -1,0 +1,9 @@
+{
+  "name": "Test Shader",
+  "vertex": {
+    "file": "default.vert"
+  },
+  "fragment": {
+    "file": "default.frag"
+  }
+}

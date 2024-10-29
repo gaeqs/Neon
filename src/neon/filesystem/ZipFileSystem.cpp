@@ -18,13 +18,13 @@ namespace neon {
     }
 
     std::optional<File> ZipFileSystem::readFile(std::filesystem::path path) {
-        auto file = _zip->getEntry(path.string());
+        auto file = _zip->getEntry(path.lexically_normal().string());
         if (file.isNull() || !file.isFile()) return {};
         return File(static_cast<char*>(file.readAsBinary()), file.getSize());
     }
 
     bool ZipFileSystem::exists(std::filesystem::path path) {
-        auto file = _zip->getEntry(path.string());
+        auto file = _zip->getEntry(path.lexically_normal().string());
         return !file.isNull() && file.isFile();
     }
 }

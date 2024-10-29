@@ -35,6 +35,8 @@ namespace neon {
         [[nodiscard]] size_t getSize() const;
 
         [[nodiscard]] std::optional<nlohmann::json> toJson() const;
+
+        [[nodiscard]] std::string toString() const;
     };
 }
 
