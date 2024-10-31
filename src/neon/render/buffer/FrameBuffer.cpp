@@ -5,10 +5,9 @@
 #include "FrameBuffer.h"
 
 namespace neon {
-
-    FrameBuffer::FrameBuffer() : _clearColors(), _depthClear(1.0f, 0) {
-
-    }
+    FrameBuffer::FrameBuffer(std::string name)
+        : Asset(typeid(FrameBuffer), std::move(name)),
+          _depthClear(1.0f, 0) {}
 
     std::optional<rush::Vec4f>
     FrameBuffer::getClearColor(uint32_t index) const {
@@ -28,5 +27,4 @@ namespace neon {
     void FrameBuffer::setDepthClearColor(float depth, uint32_t stencil) {
         _depthClear = {depth, stencil};
     }
-
 }

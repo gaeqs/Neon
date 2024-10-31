@@ -4,6 +4,8 @@
 
 #include "AssetCollection.h"
 
+#include <ranges>
+
 namespace neon {
 
     std::optional<std::shared_ptr<Asset>>
@@ -44,8 +46,8 @@ namespace neon {
     }
 
     void AssetCollection::flushExpiredReferences() {
-        for (auto& item: _assets) {
-            std::erase_if(item.second, [](const auto& it) {
+        for (auto& val: _assets | std::views::values) {
+            std::erase_if(val, [](const auto& it) {
                 auto const& [key, value] = it;
                 return value.expired();
             });

@@ -1,5 +1,6 @@
 {
   "name": "Test Shader",
+  "save": true,
   "vertex": {
     "file": "default.vert"
   },

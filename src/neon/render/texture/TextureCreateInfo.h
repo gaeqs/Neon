@@ -7,9 +7,11 @@
 #define NEON_TEXTURECREATEINFO_H
 
 #include <cstdint>
+#include <optional>
+#include <string>
+#include <vector>
 
 namespace neon {
-
     class CommandBuffer;
 
     enum class TextureFormat {
@@ -30,7 +32,6 @@ namespace neon {
         R16FG16FB16FA16F,
         DEPTH24STENCIL8
     };
-
 
     enum class TextureFilter {
         NEAREST,
@@ -304,6 +305,29 @@ namespace neon {
          */
         const CommandBuffer* commandBuffer = nullptr;
     };
+
+
+    namespace serialization {
+        std::optional<TextureFormat> toTextureFormat(std::string s);
+
+        std::optional<TextureFilter> toTextureFilter(std::string s);
+
+        std::optional<AddressMode> toAddressMode(std::string s);
+
+        std::optional<TextureDimensions> toTextureDimension(std::string s);
+
+        std::optional<TextureUsage> toTextureUsage(std::string s);
+
+        std::optional<TextureViewType> toTextureViewType(std::string s);
+
+        std::optional<SamplesPerTexel> toSamplesPerTexel(std::string s);
+
+        std::optional<Tiling> toTiling(std::string s);
+
+        std::optional<TextureComponentSwizzle> toTextureComponentSwizzle(std::string s);
+
+        std::optional<MipmapMode> toMipmapMode(std::string s);
+    }
 }
 
 #endif //NEON_TEXTURECREATEINFO_H

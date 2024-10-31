@@ -10,7 +10,7 @@
 
 namespace neon {
     bool SimpleFrameBuffer::defaultRecreationCondition(
-            const SimpleFrameBuffer* fb) {
+        const SimpleFrameBuffer* fb) {
         auto vp = fb->_application->getViewport();
         if (vp.x() == 0 || vp.y() == 0) return false;
         return vp.x() != fb->getWidth() || vp.y() != fb->getHeight();
@@ -23,32 +23,33 @@ namespace neon {
     }
 
     SimpleFrameBuffer::SimpleFrameBuffer(
-            Application* application,
-            const std::vector<FrameBufferTextureCreateInfo>& textureInfos,
-            bool depth,
-            Condition condition,
-            const Parameters& parameters) :
-            _application(application),
-            _implementation(application, textureInfos,
-                            parameters(application), depth),
-            _recreationCondition(std::move(condition)),
-            _recreationParameters(parameters) {
-
-    }
+        Application* application,
+        std::string name,
+        const std::vector<FrameBufferTextureCreateInfo>& textureInfos,
+        bool depth,
+        Condition condition,
+        const Parameters& parameters)
+        : FrameBuffer(std::move(name)),
+          _application(application),
+          _implementation(application, textureInfos,
+                          parameters(application), depth),
+          _recreationCondition(std::move(condition)),
+          _recreationParameters(parameters) {}
 
     SimpleFrameBuffer::SimpleFrameBuffer(
-            Application* application,
-            const std::vector<FrameBufferTextureCreateInfo>& textureInfos,
-            std::shared_ptr<Texture> depthTexture,
-            Condition condition,
-            const Parameters& parameters) :
-            _application(application),
-            _implementation(application, textureInfos,
-                            parameters(application),
-                            std::move(depthTexture)),
-            _recreationCondition(std::move(condition)),
-            _recreationParameters(parameters) {
-    }
+        Application* application,
+        std::string name,
+        const std::vector<FrameBufferTextureCreateInfo>& textureInfos,
+        std::shared_ptr<Texture> depthTexture,
+        Condition condition,
+        const Parameters& parameters)
+        : FrameBuffer(std::move(name)),
+          _application(application),
+          _implementation(application, textureInfos,
+                          parameters(application),
+                          std::move(depthTexture)),
+          _recreationCondition(std::move(condition)),
+          _recreationParameters(parameters) {}
 
     bool SimpleFrameBuffer::requiresRecreation() {
         return _recreationCondition(this);
@@ -90,7 +91,7 @@ namespace neon {
     }
 
     void SimpleFrameBuffer::setRecreationCondition(
-            const Condition& recreationCondition) {
+        const Condition& recreationCondition) {
         _recreationCondition = recreationCondition;
     }
 
@@ -100,7 +101,7 @@ namespace neon {
     }
 
     void SimpleFrameBuffer::setRecreationParameters(
-            const Parameters& recreationParameters) {
+        const Parameters& recreationParameters) {
         _recreationParameters = recreationParameters;
     }
 }

@@ -63,7 +63,7 @@ namespace neon::deferred_utils {
         std::shared_ptr<Model> flashModel = nullptr;
 
         auto frameBuffer = std::make_shared<SimpleFrameBuffer>(
-            room->getApplication(), outputFormatVector, false);
+            room->getApplication(), "deferred", outputFormatVector, false);
         render->addRenderPass(
             std::make_shared<DefaultRenderPassStrategy>(frameBuffer));
 

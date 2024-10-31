@@ -8,6 +8,7 @@
 #include <neon/loader/AssetLoader.h>
 #include <neon/loader/AssetLoaderCollection.h>
 #include <neon/loader/AssetLoaderHelpers.h>
+#include <neon/render/buffer/SimpleFrameBuffer.h>
 #include <neon/render/model/Model.h>
 #include <nlohmann/json.hpp>
 
@@ -37,7 +38,6 @@ TEST_CASE("Load incorrect") {
     neon::CMRCFileSystem fileSystem(cmrc::resources::get_filesystem());
 
     REQUIRE(fileSystem.exists("/a/../test.txt"));
-
     auto file = fileSystem.readFile("test.txt");
 
     REQUIRE(file.has_value());
@@ -57,7 +57,8 @@ public:
         return *this;
     }
 
-    std::shared_ptr<neon::Model> loadAsset(nlohmann::json json, neon::AssetLoaderContext context) override {
+    std::shared_ptr<neon::Model>
+    loadAsset(std::string name, nlohmann::json json, neon::AssetLoaderContext context) override {
         return nullptr;
     }
 };
@@ -85,7 +86,7 @@ TEST_CASE("Load shader") {
     auto shader = neon::loadAssetFromFile<neon::ShaderProgram>("shader.json", context);
     REQUIRE(shader != nullptr);
 
-
+    REQUIRE(context.collection->get(shader->getIdentifier()).has_value());
 
 
     application.getLogger().debug(neon::MessageBuilder()
@@ -94,6 +95,44 @@ TEST_CASE("Load shader") {
     application.getLogger().debug(neon::MessageBuilder()
         .print("Shader identifier: ")
         .print(shader->getIdentifier().name));
+
+    auto* impl = dynamic_cast<neon::vulkan::VKApplication*>(application.getImplementation());
+    impl->finishLoop();
+}
+
+
+TEST_CASE("Load material") {
+    neon::vulkan::VKApplicationCreateInfo info;
+    info.name = "Neon";
+    info.windowSize = {800, 600};
+
+    neon::Application application(std::make_unique<neon::vulkan::VKApplication>(info));
+    application.init();
+
+    neon::CMRCFileSystem fileSystem(cmrc::resources::get_filesystem());
+    neon::AssetLoaderContext context(&application, nullptr, &fileSystem);
+
+    std::shared_ptr<neon::SimpleFrameBuffer> fb = std::make_shared<neon::SimpleFrameBuffer>(
+        &application,
+        "frame_buffer",
+        std::vector<neon::FrameBufferTextureCreateInfo>(),
+        true
+    );
+
+    application.getAssets().store(fb, neon::AssetStorageMode::PERMANENT);
+
+    auto material = neon::loadAssetFromFile<neon::Material>("material.json", context);
+    REQUIRE(material != nullptr);
+
+    REQUIRE(context.collection->get(material->getIdentifier()).has_value());
+    REQUIRE(material->getTarget() == fb);
+
+    application.getLogger().debug(neon::MessageBuilder()
+        .print("Material loaded?: ")
+        .print(material != nullptr));
+    application.getLogger().debug(neon::MessageBuilder()
+        .print("Material identifier: ")
+        .print(material->getIdentifier().name));
 
     auto* impl = dynamic_cast<neon::vulkan::VKApplication*>(application.getImplementation());
     impl->finishLoop();

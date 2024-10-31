@@ -44,6 +44,7 @@ namespace neon {
         defaultRecreationParameters(Application*);
 
         SimpleFrameBuffer(Application* application,
+                          std::string name,
                           const std::vector<FrameBufferTextureCreateInfo>&
                           textureInfos,
                           bool depth,
@@ -52,6 +53,7 @@ namespace neon {
                                   defaultRecreationParameters);
 
         SimpleFrameBuffer(Application* application,
+                          std::string name,
                           const std::vector<FrameBufferTextureCreateInfo>&
                           textureInfos,
                           std::shared_ptr<Texture> depthTexture,

@@ -41,6 +41,7 @@ namespace neon {
         ~AssetLoader() override = default;
 
         virtual std::shared_ptr<AssetType> loadAsset(
+            std::string name,
             nlohmann::json json,
             AssetLoaderContext context
         ) = 0;
@@ -50,6 +51,7 @@ namespace neon {
     concept WellStructuredLoader = requires(Loader l) {
         {
             l.loadAsset(
+                std::declval<std::string>(),
                 std::declval<nlohmann::json>(),
                 std::declval<AssetLoaderContext>()
             )

@@ -101,8 +101,8 @@ std::shared_ptr<FrameBuffer> initRender(Room* room) {
         TextureFormat::R16FG16F // NORMAL Z / SPECULAR
     };
 
-    auto fpFrameBuffer = std::make_shared<SimpleFrameBuffer>(
-        app, frameBufferFormats, true);
+    auto fpFrameBuffer = std::make_shared<SimpleFrameBuffer>(app, "frame_buffer", frameBufferFormats, true);
+    app->getAssets().store(fpFrameBuffer, AssetStorageMode::PERMANENT);
 
     render->addRenderPass(std::make_shared<DefaultRenderPassStrategy>(
         fpFrameBuffer));
@@ -120,7 +120,7 @@ std::shared_ptr<FrameBuffer> initRender(Room* room) {
     std::vector<FrameBufferTextureCreateInfo> screenFormats =
             {TextureFormat::R8G8B8A8};
     auto screenFrameBuffer = std::make_shared<SimpleFrameBuffer>(
-        app, screenFormats, false);
+        app, "screen_frame_buffer", screenFormats, false);
     render->addRenderPass(std::make_shared<DefaultRenderPassStrategy>(
         screenFrameBuffer));
 
@@ -146,8 +146,7 @@ std::shared_ptr<FrameBuffer> initRender(Room* room) {
     screenModelGO->setName("Screen Model");
     screenModelGO->newComponent<GraphicComponent>(screenModel);
 
-    auto swapFrameBuffer = std::make_shared<SwapChainFrameBuffer>(
-        app, false);
+    auto swapFrameBuffer = std::make_shared<SwapChainFrameBuffer>(app, "swap_chain_frame_buffer", false);
 
     render->addRenderPass(std::make_shared<DefaultRenderPassStrategy>(
         swapFrameBuffer));
@@ -218,6 +217,8 @@ void loadModels(Application* application, Room* room,
                 const std::shared_ptr<FrameBuffer>& target) {
     std::shared_ptr<ShaderUniformDescriptor> materialDescriptor =
             ShaderUniformDescriptor::ofImages(application, "default", 2);
+
+    application->getAssets().store(materialDescriptor, AssetStorageMode::PERMANENT);
 
     auto shader = createShader(application,
                                "deferred", "deferred.vert", "deferred.frag");

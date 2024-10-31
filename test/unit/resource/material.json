@@ -1,0 +1,27 @@
+{
+  "name": "Test Shader",
+  "save": true,
+  "shader": "shader.json",
+  "frame_buffer": "A:frame_buffer",
+  "descriptions": {
+    "vertex": {
+      "stride": 12,
+      "attributes": {
+        "size_in_floats": 3,
+        "offset_in_bytes": 0
+      }
+    },
+    "instance": {
+      "stride": 4,
+      "attributes": [
+        {
+          "size_in_floats": 1,
+          "offset_in_bytes": 0
+        }
+      ]
+    }
+  },
+  "rasterizer": {
+    "polygon_mode": "fill_rectangle_nvidia"
+  }
+}

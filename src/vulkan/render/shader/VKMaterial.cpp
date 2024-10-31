@@ -182,23 +182,32 @@ namespace neon::vulkan {
 
         std::vector<VkDescriptorSetLayout> uniformInfos;
         uniformInfos.reserve(2 + createInfo.descriptions.extraUniforms.size());
-        uniformInfos.push_back(
-            application->getRender()
-            ->getGlobalUniformDescriptor()
-            ->getImplementation().getDescriptorSetLayout());
+
+        size_t i = 0;
+        if (auto& render = application->getRender(); render != nullptr) {
+            uniformInfos.push_back(
+                render->getGlobalUniformDescriptor()
+                ->getImplementation().getDescriptorSetLayout());
+            ++i;
+        }
         if (material->getUniformBuffer() != nullptr) {
             uniformInfos.push_back(material->getUniformBuffer()
                 ->getDescriptor()
                 ->getImplementation()
                 .getDescriptorSetLayout());
-        } else {
-            // Let's duplicate the uniform info to make all extra uniforms start with the set 2.
-            uniformInfos.push_back(uniformInfos.front());
+            ++i;
         }
 
         for (const auto& descriptor: createInfo.descriptions.extraUniforms) {
             uniformInfos.push_back(descriptor->getImplementation()
                 .getDescriptorSetLayout());
+        }
+
+        if(!uniformInfos.empty()) {
+            while(i < 2) {
+                uniformInfos.insert(uniformInfos.begin(), uniformInfos.front());
+                ++i;
+            }
         }
 
         VkPipelineLayoutCreateInfo pipelineLayoutInfo{};

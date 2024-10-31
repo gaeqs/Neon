@@ -15,7 +15,10 @@ namespace neon {
 
         ~ShaderProgramLoader() override = default;
 
-        std::shared_ptr<ShaderProgram> loadAsset(nlohmann::json json, AssetLoaderContext context) override;
+        std::shared_ptr<ShaderProgram> loadAsset(
+            std::string name,
+            nlohmann::json json,
+            AssetLoaderContext context) override;
     };
 }
 

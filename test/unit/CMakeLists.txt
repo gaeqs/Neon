@@ -16,6 +16,7 @@ cmrc_add_resource_library(
         resource/shader.json
         resource/default.vert
         resource/default.frag
+        resource/material.json
 )
 
 target_link_libraries(neon-tests PUBLIC neon Catch2::Catch2WithMain resources_unit)

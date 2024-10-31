@@ -7,7 +7,7 @@
 
 #include <vector>
 #include <memory>
-#include <neon/structure/IdentifiableWrapper.h>
+#include <neon/structure/Asset.h>
 
 #ifdef USE_VULKAN
 
@@ -21,21 +21,18 @@
 #endif
 
 namespace neon {
-
     class Texture;
 
-    class FrameBuffer {
-
+    class FrameBuffer : public Asset {
         std::unordered_map<uint32_t, rush::Vec4f> _clearColors;
         std::pair<float, uint32_t> _depthClear;
 
     public:
-
 #ifdef USE_VULKAN
         using Implementation = vulkan::VKFrameBuffer;
 #endif
 
-        FrameBuffer();
+        FrameBuffer(std::string name);
 
         FrameBuffer(const FrameBuffer& other) = delete;
 

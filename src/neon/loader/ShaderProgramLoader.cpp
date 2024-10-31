@@ -8,14 +8,13 @@
 #include <neon/structure/Application.h>
 
 namespace neon {
-    std::shared_ptr<ShaderProgram> ShaderProgramLoader::loadAsset(nlohmann::json json, AssetLoaderContext context) {
+    std::shared_ptr<ShaderProgram> ShaderProgramLoader::loadAsset(std::string name,
+                                                                  nlohmann::json json,
+                                                                  AssetLoaderContext context) {
         constexpr std::array TYPES = {
             ShaderType::VERTEX, ShaderType::FRAGMENT, ShaderType::GEOMETRY, ShaderType::TASK, ShaderType::MESH
         };
         constexpr std::array NAMES = {"vertex", "fragment", "geometry", "task", "mesh"};
-
-        nlohmann::json name = json["name"];
-        if (!name.is_string()) return nullptr;
 
         std::shared_ptr<ShaderProgram> shader = std::make_shared<ShaderProgram>(context.application, name);
 

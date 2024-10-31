@@ -51,7 +51,8 @@ namespace neon {
         } else {
             s += 'm';
         }
-        std::cout << s << part.text << "\033[0m"; // Reset to default
+        std::cout  << part.text ; // Reset to default
+        //std::cout << s << part.text << "\033[0m"; // Reset to default
     }
 
     STDLogOutput::~STDLogOutput() = default;

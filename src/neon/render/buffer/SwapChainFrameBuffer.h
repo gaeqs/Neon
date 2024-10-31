@@ -31,7 +31,7 @@ namespace neon {
 
     public:
 
-        SwapChainFrameBuffer(Application* application, bool depth);
+        SwapChainFrameBuffer(Application* application, std::string name, bool depth);
 
         ~SwapChainFrameBuffer() override = default;
 
