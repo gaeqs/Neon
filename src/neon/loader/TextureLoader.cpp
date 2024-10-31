@@ -47,8 +47,17 @@ namespace neon {
     }
 
     void TextureLoader::loadSampler(nlohmann::json& json, SamplerCreateInfo& info) {
-        info.magnificationFilter = serialization::toTextureFilter(json["magnification_filter"]).value_or(info.magnificationFilter);
-        info.minificationFilter = serialization::toTextureFilter(json["minification_filter"]).value_or(info.minificationFilter);
+        info.magnificationFilter = serialization::toTextureFilter(json["magnification_filter"]).value_or(
+            info.magnificationFilter);
+        info.minificationFilter = serialization::toTextureFilter(json["minification_filter"]).value_or(
+            info.minificationFilter);
+        info.uAddressMode = serialization::toAddressMode(json["u_address_mode"]).value_or(info.uAddressMode);
+        info.vAddressMode = serialization::toAddressMode(json["v_address_mode"]).value_or(info.vAddressMode);
+        info.wAddressMode = serialization::toAddressMode(json["w_address_mode"]).value_or(info.wAddressMode);
+        info.anisotropy = json.value("anisotropic", info.anisotropy);
+        info.maxAnisotropy = json.value("max_anisotropy", info.maxAnisotropy);
+        info.normalizedCoordinates = json.value("normalized_coordinates", info.normalizedCoordinates);
+        info.mipmapMode = serialization::toMipmapMode(json["mipmap_mode"]).value_or(info.mipmapMode);
     }
 
     std::shared_ptr<Texture>
@@ -83,7 +92,8 @@ namespace neon {
         TextureCreateInfo info;
         loadImage(json["image"], info.image);
         loadImageView(json["image_view"], info.imageView);
+        loadSampler(json["sampler"], info.sampler);
 
-        std::shared_ptr<Texture> texture = std::make_shared<Texture>(context.application, name, )
+        return Texture::createTextureFromFile(context.application, name, datas, sizes, info);
     }
 }
