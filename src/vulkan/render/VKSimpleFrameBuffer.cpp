@@ -16,8 +16,7 @@
 
 namespace neon::vulkan {
     void VKSimpleFrameBuffer::createImages(
-            std::shared_ptr<Texture> overrideDepth) {
-
+        std::shared_ptr<Texture> overrideDepth) {
         _images.clear();
         _memories.clear();
         _imageViews.clear();
@@ -34,18 +33,18 @@ namespace neon::vulkan {
             info.format = createInfo.format;
             info.layers = createInfo.layers;
             auto [image, memory] = vulkan_util::createImage(
-                    _vkApplication->getDevice()->getRaw(),
-                    _vkApplication->getPhysicalDevice().getRaw(),
-                    info,
-                    createInfo.imageView.viewType
+                _vkApplication->getDevice()->getRaw(),
+                _vkApplication->getPhysicalDevice().getRaw(),
+                info,
+                createInfo.imageView.viewType
             );
 
             auto view = vulkan_util::createImageView(
-                    _vkApplication->getDevice()->getRaw(),
-                    image,
-                    conversions::vkFormat(info.format),
-                    VK_IMAGE_ASPECT_COLOR_BIT,
-                    createInfo.imageView
+                _vkApplication->getDevice()->getRaw(),
+                image,
+                conversions::vkFormat(info.format),
+                VK_IMAGE_ASPECT_COLOR_BIT,
+                createInfo.imageView
             );
 
             _images.push_back(image);
@@ -57,22 +56,24 @@ namespace neon::vulkan {
         // Add depth texture
         if (!_depth) return;
         if (overrideDepth == nullptr) {
-            info.usages = {TextureUsage::DEPTH_STENCIL_ATTACHMENT,
-                           TextureUsage::SAMPLING};
+            info.usages = {
+                TextureUsage::DEPTH_STENCIL_ATTACHMENT,
+                TextureUsage::SAMPLING
+            };
             auto [image, memory] = vulkan_util::createImage(
-                    _vkApplication->getDevice()->getRaw(),
-                    _vkApplication->getPhysicalDevice().getRaw(),
-                    info,
-                    TextureViewType::NORMAL_2D,
-                    _vkApplication->getDepthImageFormat() // Overrides info's format.
+                _vkApplication->getDevice()->getRaw(),
+                _vkApplication->getPhysicalDevice().getRaw(),
+                info,
+                TextureViewType::NORMAL_2D,
+                _vkApplication->getDepthImageFormat() // Overrides info's format.
             );
 
             auto view = vulkan_util::createImageView(
-                    _vkApplication->getDevice()->getRaw(),
-                    image,
-                    _vkApplication->getDepthImageFormat(),
-                    VK_IMAGE_ASPECT_DEPTH_BIT,
-                    ImageViewCreateInfo()
+                _vkApplication->getDevice()->getRaw(),
+                image,
+                _vkApplication->getDepthImageFormat(),
+                VK_IMAGE_ASPECT_DEPTH_BIT,
+                ImageViewCreateInfo()
             );
 
             _images.push_back(image);
@@ -86,11 +87,9 @@ namespace neon::vulkan {
             _imageViews.push_back(impl.getImageView());
             _layouts.push_back(VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL);
         }
-
     }
 
     void VKSimpleFrameBuffer::createFrameBuffer() {
-
         uint32_t layers = 1;
         if (!_createInfos.empty()) {
             layers = _createInfos[0].layers;
@@ -113,7 +112,7 @@ namespace neon::vulkan {
                 &framebufferInfo,
                 nullptr,
                 &_frameBuffer
-        ) != VK_SUCCESS) {
+            ) != VK_SUCCESS) {
             throw std::runtime_error("Failed to create framebuffer!");
         }
     }
@@ -127,7 +126,7 @@ namespace neon::vulkan {
             }
         }
         std::fill(_imGuiDescriptors.begin(), _imGuiDescriptors.end(),
-                  (VkDescriptorSet) VK_NULL_HANDLE);
+                  (VkDescriptorSet)VK_NULL_HANDLE);
 
         vkDestroyFramebuffer(d, _frameBuffer, nullptr);
     }
@@ -148,27 +147,27 @@ namespace neon::vulkan {
     }
 
     VKSimpleFrameBuffer::VKSimpleFrameBuffer(
-            Application* application,
-            const std::vector<FrameBufferTextureCreateInfo>& textureInfos,
-            std::pair<uint32_t, uint32_t> extent,
-            bool depth) :
-            VKFrameBuffer(),
-            _vkApplication(dynamic_cast<AbstractVKApplication*>(
-                                   application->getImplementation())),
-            _frameBuffer(VK_NULL_HANDLE),
-            _images(),
-            _memories(),
-            _imageViews(),
-            _layouts(),
-            _textures(),
-            _imGuiDescriptors(),
-            _createInfos(textureInfos),
-            _extent({extent.first, extent.second}),
-            _renderPass(application,
-                        conversions::vkFormat(textureInfos), depth, false,
-                        _vkApplication->getDepthImageFormat()),
-            _depth(depth) {
-
+        Application* application,
+        const std::vector<FrameBufferTextureCreateInfo>& textureInfos,
+        std::pair<uint32_t, uint32_t> extent,
+        bool depth,
+        std::optional<std::string> depthName)
+        : VKFrameBuffer(),
+          _vkApplication(dynamic_cast<AbstractVKApplication*>(
+              application->getImplementation())),
+          _frameBuffer(VK_NULL_HANDLE),
+          _images(),
+          _memories(),
+          _imageViews(),
+          _layouts(),
+          _textures(),
+          _imGuiDescriptors(),
+          _createInfos(textureInfos),
+          _extent({extent.first, extent.second}),
+          _renderPass(application,
+                      conversions::vkFormat(textureInfos), depth, false,
+                      _vkApplication->getDepthImageFormat()),
+          _depth(depth) {
         _imGuiDescriptors.resize(textureInfos.size(), VK_NULL_HANDLE);
 
         createImages(nullptr);
@@ -177,17 +176,17 @@ namespace neon::vulkan {
         uint32_t i = 0;
         for (const auto& info: textureInfos) {
             auto texture = std::make_shared<Texture>(
-                    application,
-                    std::to_string(i),
-                    _images[i],
-                    _memories[i],
-                    _imageViews[i],
-                    _layouts[i],
-                    static_cast<int32_t>(_extent.width),
-                    static_cast<int32_t>(_extent.height),
-                    1,
-                    info.format,
-                    info.sampler
+                application,
+                info.name.value_or(std::to_string(i)),
+                _images[i],
+                _memories[i],
+                _imageViews[i],
+                _layouts[i],
+                static_cast<int32_t>(_extent.width),
+                static_cast<int32_t>(_extent.height),
+                1,
+                info.format,
+                info.sampler
             );
             ++i;
 
@@ -196,24 +195,23 @@ namespace neon::vulkan {
 
         // Create depth texture
         if (depth) {
-
             SamplerCreateInfo info;
             info.anisotropy = false;
             info.minificationFilter = TextureFilter::NEAREST;
             info.magnificationFilter = TextureFilter::NEAREST;
 
             auto texture = std::make_shared<Texture>(
-                    application,
-                    std::to_string(i),
-                    _images[i],
-                    _memories[i],
-                    _imageViews[i],
-                    _layouts[i],
-                    static_cast<int32_t>(_extent.width),
-                    static_cast<int32_t>(_extent.height),
-                    1,
-                    TextureFormat::DEPTH24STENCIL8,
-                    info
+                application,
+                depthName.value_or(std::to_string(i)),
+                _images[i],
+                _memories[i],
+                _imageViews[i],
+                _layouts[i],
+                static_cast<int32_t>(_extent.width),
+                static_cast<int32_t>(_extent.height),
+                1,
+                TextureFormat::DEPTH24STENCIL8,
+                info
             );
 
             _textures.push_back(texture);
@@ -221,28 +219,27 @@ namespace neon::vulkan {
     }
 
     VKSimpleFrameBuffer::VKSimpleFrameBuffer(
-            Application* application,
-            const std::vector<FrameBufferTextureCreateInfo>& textureInfos,
-            std::pair<uint32_t, uint32_t> extent,
-            std::shared_ptr<Texture> depthTexture) :
-            VKFrameBuffer(),
-            _vkApplication(dynamic_cast<AbstractVKApplication*>(
-                                   application->getImplementation())),
-            _frameBuffer(VK_NULL_HANDLE),
-            _images(),
-            _memories(),
-            _imageViews(),
-            _layouts(),
-            _textures(),
-            _imGuiDescriptors(),
-            _createInfos(textureInfos),
-            _extent({extent.first, extent.second}),
-            _renderPass(application,
-                        conversions::vkFormat(textureInfos),
-                        depthTexture != nullptr, false,
-                        _vkApplication->getDepthImageFormat()),
-            _depth(depthTexture != nullptr) {
-
+        Application* application,
+        const std::vector<FrameBufferTextureCreateInfo>& textureInfos,
+        std::pair<uint32_t, uint32_t> extent,
+        std::shared_ptr<Texture> depthTexture) :
+        VKFrameBuffer(),
+        _vkApplication(dynamic_cast<AbstractVKApplication*>(
+            application->getImplementation())),
+        _frameBuffer(VK_NULL_HANDLE),
+        _images(),
+        _memories(),
+        _imageViews(),
+        _layouts(),
+        _textures(),
+        _imGuiDescriptors(),
+        _createInfos(textureInfos),
+        _extent({extent.first, extent.second}),
+        _renderPass(application,
+                    conversions::vkFormat(textureInfos),
+                    depthTexture != nullptr, false,
+                    _vkApplication->getDepthImageFormat()),
+        _depth(depthTexture != nullptr) {
         _imGuiDescriptors.resize(textureInfos.size(), VK_NULL_HANDLE);
 
         createImages(depthTexture);
@@ -256,17 +253,17 @@ namespace neon::vulkan {
         uint32_t i = 0;
         for (const auto& info: textureInfos) {
             auto texture = std::make_shared<Texture>(
-                    application,
-                    std::to_string(i),
-                    _images[i],
-                    _memories[i],
-                    _imageViews[i],
-                    _layouts[i],
-                    static_cast<int32_t>(_extent.width),
-                    static_cast<int32_t>(_extent.height),
-                    1,
-                    info.format,
-                    info.sampler
+                application,
+                info.name.value_or(std::to_string(i)),
+                _images[i],
+                _memories[i],
+                _imageViews[i],
+                _layouts[i],
+                static_cast<int32_t>(_extent.width),
+                static_cast<int32_t>(_extent.height),
+                1,
+                info.format,
+                info.sampler
             );
             ++i;
 
@@ -309,11 +306,11 @@ namespace neon::vulkan {
         // Refresh the textures
         for (uint32_t i = 0; i < _textures.size(); ++i) {
             _textures[i]->getImplementation().changeExternalImageView(
-                    static_cast<int32_t>(_extent.width),
-                    static_cast<int32_t>(_extent.height),
-                    _images[i],
-                    _memories[i],
-                    _imageViews[i]
+                static_cast<int32_t>(_extent.width),
+                static_cast<int32_t>(_extent.height),
+                _images[i],
+                _memories[i],
+                _imageViews[i]
             );
         }
     }
@@ -351,9 +348,9 @@ namespace neon::vulkan {
         if (_imGuiDescriptors[index] == VK_NULL_HANDLE) {
             auto& texture = _textures[index];
             _imGuiDescriptors[index] = ImGui_ImplVulkan_AddTexture(
-                    texture->getImplementation().getSampler(),
-                    texture->getImplementation().getImageView(),
-                    VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+                texture->getImplementation().getSampler(),
+                texture->getImplementation().getImageView(),
+                VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
             );
         }
 

@@ -10,32 +10,32 @@ set(
         ConstantRotationComponent.h)
 
 cmrc_add_resource_library(
-        shaders
-        NAMESPACE shaders
-        WHENCE shader
-        shader/default.vert
-        shader/default.frag
-        shader/deferred.vert
-        shader/deferred.frag
-        shader/deferred_parallax.frag
-        shader/screen.vert
-        shader/screen.frag
-        shader/directional_light.vert
-        shader/directional_light.frag
-        shader/point_light.vert
-        shader/point_light.frag
-        shader/flash_light.vert
-        shader/flash_light.frag
-)
-
-cmrc_add_resource_library(
-        resources
+        test1_resources
         NAMESPACE resources
-        WHENCE resource
-        resource/test.png
+        WHENCE resources
+        resources/default.vert
+        resources/default.frag
+        resources/deferred.vert
+        resources/deferred.frag
+        resources/deferred_parallax.frag
+        resources/screen.vert
+        resources/screen.frag
+        resources/directional_light.vert
+        resources/directional_light.frag
+        resources/point_light.vert
+        resources/point_light.frag
+        resources/flash_light.vert
+        resources/flash_light.frag
+        resources/texture/skybox/skybox.json
+        resources/texture/skybox/right.jpg
+        resources/texture/skybox/left.jpg
+        resources/texture/skybox/top.jpg
+        resources/texture/skybox/bottom.jpg
+        resources/texture/skybox/front.jpg
+        resources/texture/skybox/back.jpg
 )
 
 add_executable(test1 ${TEST_SOURCES})
 set_target_properties(test1 PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${TEST_DIRECTORY})
-target_link_libraries(test1 neon shaders resources)
+target_link_libraries(test1 neon test1_resources)
 add_dependencies(test1 neon_tests)

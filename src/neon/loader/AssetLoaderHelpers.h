@@ -67,7 +67,7 @@ namespace neon {
         return nullptr;
     }
 
-    std::optional<File> getFile(const std::filesystem::path& path, AssetLoaderContext context) {
+    inline std::optional<File> getFile(const std::filesystem::path& path, AssetLoaderContext context) {
         if (context.fileSystem == nullptr || context.loaders == nullptr) return {};
         context.path = context.path.has_value() ? context.path.value().parent_path() / path : path;
         return context.fileSystem->readFile(context.path.value());

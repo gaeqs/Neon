@@ -10,16 +10,16 @@
 
 namespace neon {
     class TextureLoader : public AssetLoader<Texture> {
+    public:
+        ~TextureLoader() override = default;
+
+        std::shared_ptr<Texture> loadAsset(std::string name, nlohmann::json json, AssetLoaderContext context) override;
+
         static void loadImage(nlohmann::json& json, ImageCreateInfo& info);
 
         static void loadImageView(nlohmann::json& json, ImageViewCreateInfo& info);
 
         static void loadSampler(nlohmann::json& json, SamplerCreateInfo& info);
-
-    public:
-        ~TextureLoader() override = default;
-
-        std::shared_ptr<Texture> loadAsset(std::string name, nlohmann::json json, AssetLoaderContext context) override;
     };
 }
 

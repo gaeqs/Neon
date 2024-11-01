@@ -26,7 +26,7 @@
 constexpr float WIDTH = 800;
 constexpr float HEIGHT = 600;
 
-CMRC_DECLARE(shaders);
+CMRC_DECLARE(resources);
 
 using namespace neon;
 
@@ -42,8 +42,8 @@ std::shared_ptr<ShaderProgram> createShader(Application* application,
                                             const std::string& name,
                                             const std::string& vert,
                                             const std::string& frag) {
-    auto defaultVert = cmrc::shaders::get_filesystem().open(vert);
-    auto defaultFrag = cmrc::shaders::get_filesystem().open(frag);
+    auto defaultVert = cmrc::resources::get_filesystem().open(vert);
+    auto defaultFrag = cmrc::resources::get_filesystem().open(frag);
 
     auto result = ShaderProgram::createShader(
         application, name, defaultVert, defaultFrag);
@@ -312,21 +312,9 @@ void loadModels(Application* application, Room* room,
 }
 
 std::shared_ptr<Texture> loadSkybox(Room* room) {
-    static const std::vector<std::string> PATHS = {
-        "resource/Skybox/right.jpg",
-        "resource/Skybox/left.jpg",
-        "resource/Skybox/top.jpg",
-        "resource/Skybox/bottom.jpg",
-        "resource/Skybox/front.jpg",
-        "resource/Skybox/back.jpg",
-    };
-
-    TextureCreateInfo info;
-    info.imageView.viewType = TextureViewType::CUBE;
-    info.image.layers = 6;
-
-    return Texture::createTextureFromFiles(room->getApplication(),
-                                           "skybox", PATHS, info);
+    CMRCFileSystem fileSystem(cmrc::resources::get_filesystem());
+    AssetLoaderContext context(room->getApplication(), nullptr, &fileSystem);
+    return loadAssetFromFile<Texture>("texture/skybox/skybox.json", context);
 }
 
 std::shared_ptr<Room> getTestRoom(Application* application) {

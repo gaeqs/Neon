@@ -8,14 +8,15 @@
 
 namespace neon {
     void TextureLoader::loadImage(nlohmann::json& json, ImageCreateInfo& info) {
-        info.format = serialization::toTextureFormat(json["format"]).value_or(info.format);
-        info.dimensions = serialization::toTextureDimension(json["dimensions"]).value_or(info.dimensions);
+        if(!json.is_object()) return;
+        info.format = serialization::toTextureFormat(json.value("format", "")).value_or(info.format);
+        info.dimensions = serialization::toTextureDimension(json.value("dimensions", "")).value_or(info.dimensions);
         info.width = json.value("width", info.width);
         info.height = json.value("height", info.height);
         info.depth = json.value("depth", info.depth);
         info.layers = json.value("layers", info.layers);
-        info.tiling = serialization::toTiling(json["tiling"]).value_or(info.tiling);
-        info.samples = serialization::toSamplesPerTexel(json["samples"]).value_or(info.samples);
+        info.tiling = serialization::toTiling(json.value("tiling", "")).value_or(info.tiling);
+        info.samples = serialization::toSamplesPerTexel(json.value("samples", "")).value_or(info.samples);
         info.mipmaps = json.value("mipmaps", info.mipmaps);
 
         auto& usages = json["usages"];
@@ -35,11 +36,12 @@ namespace neon {
     }
 
     void TextureLoader::loadImageView(nlohmann::json& json, ImageViewCreateInfo& info) {
-        info.viewType = serialization::toTextureViewType(json["view_type"]).value_or(info.viewType);
-        info.rSwizzle = serialization::toTextureComponentSwizzle(json["r_swizzle"]).value_or(info.rSwizzle);
-        info.gSwizzle = serialization::toTextureComponentSwizzle(json["g_swizzle"]).value_or(info.gSwizzle);
-        info.bSwizzle = serialization::toTextureComponentSwizzle(json["b_swizzle"]).value_or(info.bSwizzle);
-        info.aSwizzle = serialization::toTextureComponentSwizzle(json["a_swizzle"]).value_or(info.aSwizzle);
+        if(!json.is_object()) return;
+        info.viewType = serialization::toTextureViewType(json.value("view_type", "")).value_or(info.viewType);
+        info.rSwizzle = serialization::toTextureComponentSwizzle(json.value("r_swizzle", "")).value_or(info.rSwizzle);
+        info.gSwizzle = serialization::toTextureComponentSwizzle(json.value("g_swizzle", "")).value_or(info.gSwizzle);
+        info.bSwizzle = serialization::toTextureComponentSwizzle(json.value("b_swizzle", "")).value_or(info.bSwizzle);
+        info.aSwizzle = serialization::toTextureComponentSwizzle(json.value("a_swizzle", "")).value_or(info.aSwizzle);
         info.baseMipmapLevel = json.value("base_mipmap_level", info.baseMipmapLevel);
         info.mipmapLevelCount = json.value("mipmap_level_count", info.mipmapLevelCount);
         info.baseArrayLayerLevel = json.value("base_array_layer_level", info.baseArrayLayerLevel);
@@ -47,17 +49,18 @@ namespace neon {
     }
 
     void TextureLoader::loadSampler(nlohmann::json& json, SamplerCreateInfo& info) {
-        info.magnificationFilter = serialization::toTextureFilter(json["magnification_filter"]).value_or(
+        if(!json.is_object()) return;
+        info.magnificationFilter = serialization::toTextureFilter(json.value("magnification_filter", "")).value_or(
             info.magnificationFilter);
-        info.minificationFilter = serialization::toTextureFilter(json["minification_filter"]).value_or(
+        info.minificationFilter = serialization::toTextureFilter(json.value("minification_filter", "")).value_or(
             info.minificationFilter);
-        info.uAddressMode = serialization::toAddressMode(json["u_address_mode"]).value_or(info.uAddressMode);
-        info.vAddressMode = serialization::toAddressMode(json["v_address_mode"]).value_or(info.vAddressMode);
-        info.wAddressMode = serialization::toAddressMode(json["w_address_mode"]).value_or(info.wAddressMode);
+        info.uAddressMode = serialization::toAddressMode(json.value("u_address_mode", "")).value_or(info.uAddressMode);
+        info.vAddressMode = serialization::toAddressMode(json.value("v_address_mode", "")).value_or(info.vAddressMode);
+        info.wAddressMode = serialization::toAddressMode(json.value("w_address_mode", "")).value_or(info.wAddressMode);
         info.anisotropy = json.value("anisotropic", info.anisotropy);
         info.maxAnisotropy = json.value("max_anisotropy", info.maxAnisotropy);
         info.normalizedCoordinates = json.value("normalized_coordinates", info.normalizedCoordinates);
-        info.mipmapMode = serialization::toMipmapMode(json["mipmap_mode"]).value_or(info.mipmapMode);
+        info.mipmapMode = serialization::toMipmapMode(json.value("mipmap_mode", "")).value_or(info.mipmapMode);
     }
 
     std::shared_ptr<Texture>
@@ -83,7 +86,7 @@ namespace neon {
             if (optional.has_value()) {
                 datas.push_back(optional.value().getData());
                 sizes.push_back(optional.value().getSize());
-                files.push_back(optional.value());
+                files.push_back(std::move(optional.value()));
             }
         }
 

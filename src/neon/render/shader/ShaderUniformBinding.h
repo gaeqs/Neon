@@ -6,6 +6,8 @@
 #define NEON_SHADERUNIFORMBINDING_H
 
 #include <cstdint>
+#include <optional>
+#include <string>
 
 namespace neon {
     enum class UniformBindingType {
@@ -48,6 +50,10 @@ namespace neon {
             return {UniformBindingType::STORAGE_BUFFER, size_};
         }
     };
+
+    namespace serialization {
+        std::optional<UniformBindingType> toUniformBindingType(std::string s);
+    }
 }
 
 

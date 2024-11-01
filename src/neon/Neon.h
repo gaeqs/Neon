@@ -30,6 +30,10 @@
 #include <neon/loader/AssetLoaderHelpers.h>
 #include <neon/loader/ShaderProgramLoader.h>
 #include <neon/loader/MaterialLoader.h>
+#include <neon/loader/RenderLoader.h>
+#include <neon/loader/TextureLoader.h>
+#include <neon/loader/ShaderUniformDescriptorLoader.h>
+#include <neon/loader/RenderLoader.h>
 
 #include <neon/logging/TextEffect.h>
 #include <neon/logging/Message.h>

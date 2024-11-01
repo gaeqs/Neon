@@ -27,12 +27,12 @@ namespace neon {
         std::string name,
         const std::vector<FrameBufferTextureCreateInfo>& textureInfos,
         bool depth,
+        std::optional<std::string> depthName,
         Condition condition,
         const Parameters& parameters)
         : FrameBuffer(std::move(name)),
           _application(application),
-          _implementation(application, textureInfos,
-                          parameters(application), depth),
+          _implementation(application, textureInfos, parameters(application), depth, std::move(depthName)),
           _recreationCondition(std::move(condition)),
           _recreationParameters(parameters) {}
 
@@ -45,9 +45,7 @@ namespace neon {
         const Parameters& parameters)
         : FrameBuffer(std::move(name)),
           _application(application),
-          _implementation(application, textureInfos,
-                          parameters(application),
-                          std::move(depthTexture)),
+          _implementation(application, textureInfos, parameters(application), std::move(depthTexture)),
           _recreationCondition(std::move(condition)),
           _recreationParameters(parameters) {}
 

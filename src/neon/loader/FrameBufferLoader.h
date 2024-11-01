@@ -7,9 +7,13 @@
 
 #include <neon/loader/AssetLoader.h>
 #include <neon/render/buffer/FrameBuffer.h>
+#include <neon/render/buffer/FrameBufferTextureCreateInfo.h>
 
 namespace neon {
     class FrameBufferLoader : public AssetLoader<FrameBuffer> {
+
+        static FrameBufferTextureCreateInfo loadTexture(nlohmann::json& json);
+
     public:
         ~FrameBufferLoader() override = default;
 

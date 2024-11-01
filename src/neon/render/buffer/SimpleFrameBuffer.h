@@ -48,6 +48,7 @@ namespace neon {
                           const std::vector<FrameBufferTextureCreateInfo>&
                           textureInfos,
                           bool depth,
+                          std::optional<std::string> depthName = {},
                           Condition condition = defaultRecreationCondition,
                           const Parameters& parameters =
                                   defaultRecreationParameters);

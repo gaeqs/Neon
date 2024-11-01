@@ -57,7 +57,8 @@ namespace neon::vulkan {
         VKSimpleFrameBuffer(Application* application,
                             const std::vector<FrameBufferTextureCreateInfo>& textureInfos,
                             std::pair<uint32_t, uint32_t> extent,
-                            bool depth);
+                            bool depth,
+                            std::optional<std::string> depthName = {});
 
         VKSimpleFrameBuffer(Application* application,
                             const std::vector<FrameBufferTextureCreateInfo>& textureInfos,
