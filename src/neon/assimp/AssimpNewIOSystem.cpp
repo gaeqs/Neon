@@ -63,14 +63,22 @@ namespace neon::assimp_loader {
 
     void AssimpNewIOStream::Flush() {}
 
+    AssimpNewIOSystem::AssimpNewIOSystem(const FileSystem* fileSystem)
+        : _fileSystem(fileSystem),
+          _root({}),
+          _rootName("") {}
+
     AssimpNewIOSystem::AssimpNewIOSystem(
         const FileSystem* fileSystem, std::filesystem::path root)
         : _fileSystem(fileSystem),
           _root(std::move(root)),
-          _rootName(_root.string()) {}
+          _rootName(_root.value().string()) {}
 
     bool AssimpNewIOSystem::Exists(const char* pFile) const {
-        return _fileSystem->exists(_root / std::string(pFile));
+        if (!_root.has_value()) {
+            return _fileSystem->exists(std::string(pFile));
+        }
+        return _fileSystem->exists(_root.value() / std::string(pFile));
     }
 
     char AssimpNewIOSystem::getOsSeparator() const {
@@ -79,7 +87,8 @@ namespace neon::assimp_loader {
 
     Assimp::IOStream* AssimpNewIOSystem::Open(const char* pFile,
                                               const char* pMode) {
-        if (auto file = _fileSystem->readFile(_root / std::string(pFile)); file.has_value()) {
+        auto path = _root.has_value() ? _root.value() / std::string(pFile) : std::string(pFile);
+        if (auto file = _fileSystem->readFile(path); file.has_value()) {
             return new AssimpNewIOStream(std::move(file.value()));
         }
         return nullptr;
@@ -91,9 +100,15 @@ namespace neon::assimp_loader {
 
     bool AssimpNewIOSystem::ComparePaths(const char* one,
                                          const char* second) const {
+        if (_root.has_value()) {
+            return fs::equivalent(
+                _root.value() / std::string(one),
+                _root.value() / std::string(second)
+            );
+        }
         return fs::equivalent(
-            _root / std::string(one),
-            _root / std::string(second)
+            std::string(one),
+            std::string(second)
         );
     }
 
@@ -119,7 +134,7 @@ namespace neon::assimp_loader {
 
     bool AssimpNewIOSystem::ChangeDirectory(const std::string& path) {
         _root = fs::path(path);
-        _rootName = _root.string();
+        _rootName = _root.value().string();
         return true;
     }
 

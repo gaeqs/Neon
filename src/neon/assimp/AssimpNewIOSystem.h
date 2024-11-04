@@ -38,10 +38,12 @@ namespace neon::assimp_loader {
 
     class AssimpNewIOSystem : public Assimp::IOSystem {
         const FileSystem* _fileSystem;
-        std::filesystem::path _root;
+        std::optional<std::filesystem::path> _root;
         std::string _rootName;
 
     public:
+        explicit AssimpNewIOSystem(const FileSystem* fileSystem);
+
         AssimpNewIOSystem(const FileSystem* fileSystem, std::filesystem::path root);
 
         ~AssimpNewIOSystem() override = default;

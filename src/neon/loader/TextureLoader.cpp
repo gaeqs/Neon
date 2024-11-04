@@ -82,7 +82,7 @@ namespace neon {
 
         for (auto& data: entries) {
             if (!data.is_string()) continue;
-            auto optional = getFile(std::filesystem::path(data), context);
+            auto optional = getFile(std::filesystem::path(data.get<std::string>()), context);
             if (optional.has_value()) {
                 datas.push_back(optional.value().getData());
                 sizes.push_back(optional.value().getSize());

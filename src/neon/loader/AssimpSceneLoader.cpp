@@ -55,17 +55,34 @@ namespace neon {
         return textures;
     }
 
+    std::vector<AssimpMaterial> AssimpSceneLoader::loadMaterials(const aiScene* scene) {
+        std::vector<AssimpMaterial> materials;
+        for (size_t iMat = 0; iMat < scene->mNumMaterials; ++iMat) {
+            auto* aiMat = scene->mMaterials[iMat];
+            for(size_t iProp = 0; iProp < aiMat->mNumProperties; ++iProp) {
+                auto* aiProp = aiMat->mProperties[iProp];
+                Logger::defaultLogger()->debug(MessageBuilder()
+                    .print(aiProp->mKey.C_Str())
+                    .print(" - ")
+                    .print(aiProp->mType));
+            }
+        }
+        return materials;
+    }
+
     std::shared_ptr<AssimpScene>
     AssimpSceneLoader::loadAsset(std::string name, nlohmann::json json, AssetLoaderContext context) {
         auto file = json["file"];
         if (!file.is_string()) return nullptr;
+        std::string fileName = file.get<std::string>();
 
         Assimp::Importer importer;
-        importer.SetIOHandler(new assimp_loader::AssimpNewIOSystem(context.fileSystem, ""));
-        auto scene = importer.ReadFile(file.get<std::string>().c_str(), decodeFlags(json));
+        importer.SetIOHandler(new assimp_loader::AssimpNewIOSystem(context.fileSystem));
+
+        auto scene = importer.ReadFile(fileName, decodeFlags(json));
         if (scene == nullptr) return nullptr;
         auto textures = loadTextures(scene, name, context);
-
+        auto materials = loadMaterials(scene);
 
         return nullptr;
         //auto result = std::make_shared<AssimpScene>(name);

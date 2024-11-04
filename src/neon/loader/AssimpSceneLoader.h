@@ -20,6 +20,9 @@ namespace neon {
         static std::vector<std::shared_ptr<Texture>>
         loadTextures(const aiScene* scene, const std::string& sceneName, const AssetLoaderContext& context);
 
+        static std::vector<AssimpMaterial>
+        loadMaterials(const aiScene* scene);
+
     public:
         ~AssimpSceneLoader() override = default;
 
