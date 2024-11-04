@@ -17,9 +17,9 @@ namespace neon {
 
         ~CMRCFileSystem() override = default;
 
-        std::optional<File> readFile(std::filesystem::path path) override;
+        std::optional<File> readFile(std::filesystem::path path) const override;
 
-        bool exists(std::filesystem::path path) override;
+        bool exists(std::filesystem::path path) const override;
     };
 }
 

@@ -4,7 +4,9 @@
 
 #include <iostream>
 #include <catch2/catch_all.hpp>
+#include <neon/assimp/AssimpScene.h>
 #include <neon/filesystem/CMRCFileSystem.h>
+#include <neon/filesystem/DirectoryFileSystem.h>
 #include <neon/loader/AssetLoader.h>
 #include <neon/loader/AssetLoaderCollection.h>
 #include <neon/loader/AssetLoaderHelpers.h>
@@ -133,6 +135,23 @@ TEST_CASE("Load material") {
     application.getLogger().debug(neon::MessageBuilder()
         .print("Material identifier: ")
         .print(material->getIdentifier().name));
+
+    auto* impl = dynamic_cast<neon::vulkan::VKApplication*>(application.getImplementation());
+    impl->finishLoop();
+}
+
+TEST_CASE("Load assimp") {
+    neon::vulkan::VKApplicationCreateInfo info;
+    info.name = "Neon";
+    info.windowSize = {800, 600};
+
+    neon::Application application(std::make_unique<neon::vulkan::VKApplication>(info));
+    application.init();
+
+    neon::DirectoryFileSystem fileSystem("resource");
+    neon::AssetLoaderContext context(&application, nullptr, &fileSystem);
+
+    auto scene = neon::loadAssetFromFile<neon::AssimpScene>("sans.json", context);
 
     auto* impl = dynamic_cast<neon::vulkan::VKApplication*>(application.getImplementation());
     impl->finishLoop();

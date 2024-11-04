@@ -3,8 +3,9 @@
 //
 
 #include "RenderLoader.h"
-
 #include "AssetLoaderHelpers.h"
+
+#include <neon/render/buffer/FrameBuffer.h>
 
 namespace neon {
     std::shared_ptr<Render> RenderLoader::loadAsset(std::string name, nlohmann::json json, AssetLoaderContext context) {

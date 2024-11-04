@@ -20,6 +20,7 @@
 #include <assimp/types.h>
 #include <assimp/Importer.hpp>
 #include <assimp/IOSystem.hpp>
+#include <neon/filesystem/DirectoryFileSystem.h>
 
 #include <neon/render/shader/Material.h>
 #include <neon/render/texture/Texture.h>
@@ -337,8 +338,10 @@ namespace neon::assimp_loader {
                 const LoaderInfo& info) {
         Assimp::Importer importer;
 
+        DirectoryFileSystem fs(directory);
+
         auto previous = std::filesystem::current_path();
-        importer.SetIOHandler(new AssimpNewIOSystem(directory));
+        importer.SetIOHandler(new AssimpNewIOSystem(&fs, ""));
         auto scene = importer.ReadFile(file, decodeFlags(info));
         return load(scene, info);
     }

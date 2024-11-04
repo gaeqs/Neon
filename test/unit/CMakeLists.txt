@@ -20,5 +20,6 @@ cmrc_add_resource_library(
 )
 
 target_link_libraries(neon-tests PUBLIC neon Catch2::Catch2WithMain resources_unit)
+set_target_properties(neon-tests PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${TEST_DIRECTORY})
 
 catch_discover_tests(neon-tests)

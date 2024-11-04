@@ -14,9 +14,9 @@ namespace neon {
     public:
         virtual ~FileSystem() = default;
 
-        virtual std::optional<File> readFile(std::filesystem::path path) = 0;
+        virtual std::optional<File> readFile(std::filesystem::path path) const = 0;
 
-        virtual bool exists(std::filesystem::path path) = 0;
+        virtual bool exists(std::filesystem::path path) const = 0;
     };
 }
 

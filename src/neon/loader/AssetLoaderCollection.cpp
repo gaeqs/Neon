@@ -4,8 +4,12 @@
 
 #include "AssetLoaderCollection.h"
 
+#include <neon/assimp/AssimpScene.h>
+
+#include "AssimpSceneLoader.h"
 #include "FrameBufferLoader.h"
 #include "MaterialLoader.h"
+#include "MeshLoader.h"
 #include "RenderLoader.h"
 #include "ShaderProgramLoader.h"
 #include "ShaderUniformDescriptorLoader.h"
@@ -21,5 +25,7 @@ namespace neon {
         registerLoader<FrameBuffer, FrameBufferLoader>();
         registerLoader<ShaderUniformDescriptor, ShaderUniformDescriptorLoader>();
         registerLoader<Render, RenderLoader>();
+        registerLoader<Mesh, MeshLoader>();
+        registerLoader<AssimpScene, AssimpSceneLoader>();
     }
 }

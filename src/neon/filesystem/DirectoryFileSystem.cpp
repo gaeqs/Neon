@@ -11,7 +11,7 @@ namespace neon {
     DirectoryFileSystem::DirectoryFileSystem(std::filesystem::path root)
         : _root(std::move(root)) {}
 
-    std::optional<File> DirectoryFileSystem::readFile(std::filesystem::path path) {
+    std::optional<File> DirectoryFileSystem::readFile(std::filesystem::path path) const {
         auto result = _root / path;
         if (!std::filesystem::exists(result) || is_directory(result)) return {};
 
@@ -26,7 +26,7 @@ namespace neon {
         return File(data, pos);
     }
 
-    bool DirectoryFileSystem::exists(std::filesystem::path path) {
+    bool DirectoryFileSystem::exists(std::filesystem::path path) const {
         auto result = _root / path;
         return std::filesystem::exists(result) && !is_directory(result);
     }

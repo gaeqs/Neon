@@ -9,6 +9,7 @@
 #include <neon/assimp/AssimpLoader.h>
 #include <neon/assimp/AssimpMaterialParameters.h>
 #include <neon/assimp/AssimpNewIOSystem.h>
+#include <neon/assimp/AssimpScene.h>
 
 #include <neon/filesystem/File.h>
 #include <neon/filesystem/FileSystem.h>
@@ -34,6 +35,8 @@
 #include <neon/loader/TextureLoader.h>
 #include <neon/loader/ShaderUniformDescriptorLoader.h>
 #include <neon/loader/RenderLoader.h>
+#include <neon/loader/MeshLoader.h>
+#include <neon/loader/AssimpSceneLoader.h>
 
 #include <neon/logging/TextEffect.h>
 #include <neon/logging/Message.h>
@@ -65,6 +68,7 @@
 #include <neon/render/model/Mesh.h>
 #include <neon/render/model/MeshShaderDrawable.h>
 #include <neon/render/model/Model.h>
+#include <neon/render/model/LocalModel.h>
 
 #include <neon/render/shader/Material.h>
 #include <neon/render/shader/MaterialCreateInfo.h>
