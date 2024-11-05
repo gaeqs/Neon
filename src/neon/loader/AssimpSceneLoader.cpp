@@ -59,12 +59,47 @@ namespace neon {
         std::vector<AssimpMaterial> materials;
         for (size_t iMat = 0; iMat < scene->mNumMaterials; ++iMat) {
             auto* aiMat = scene->mMaterials[iMat];
-            for(size_t iProp = 0; iProp < aiMat->mNumProperties; ++iProp) {
+            for (size_t iProp = 0; iProp < aiMat->mNumProperties; ++iProp) {
                 auto* aiProp = aiMat->mProperties[iProp];
                 Logger::defaultLogger()->debug(MessageBuilder()
                     .print(aiProp->mKey.C_Str())
                     .print(" - ")
+                    .print(aiProp->mSemantic)
+                    .print(" - ")
+                    .print(aiProp->mIndex)
+                    .print(" - ")
+                    .print(aiProp->mDataLength)
+                    .print(" - ")
                     .print(aiProp->mType));
+
+                char* data = aiProp->mData;
+                size_t length = aiProp->mDataLength;
+                if (aiProp->mType == aiPTI_String) {
+                    data += 4;
+                    length -= 5;
+                }
+
+                AssimpMaterialProperty prop(data, length, static_cast<AssimpMaterialPropertyType>(aiProp->mType));
+                switch (aiProp->mType) {
+                    case aiPTI_Float:
+                        Logger::defaultLogger()->debug(MessageBuilder().print(prop.asFloat()));
+                        break;
+                    case aiPTI_Double:
+                        Logger::defaultLogger()->debug(MessageBuilder().print(prop.asDouble()));
+                        break;
+                    case aiPTI_String: {
+                        Logger::defaultLogger()->debug(MessageBuilder().print(prop.asString()));
+                    }
+                    break;
+                    case aiPTI_Integer:
+                        Logger::defaultLogger()->debug(MessageBuilder().print(prop.asInteger()));
+                        break;
+                    case aiPTI_Buffer:
+                        break;
+                    case _aiPTI_Force32Bit:
+                        break;
+                    default: ;
+                }
             }
         }
         return materials;

@@ -65,8 +65,7 @@ namespace neon::assimp_loader {
 
     AssimpNewIOSystem::AssimpNewIOSystem(const FileSystem* fileSystem)
         : _fileSystem(fileSystem),
-          _root({}),
-          _rootName("") {}
+          _root({}) {}
 
     AssimpNewIOSystem::AssimpNewIOSystem(
         const FileSystem* fileSystem, std::filesystem::path root)
@@ -87,7 +86,7 @@ namespace neon::assimp_loader {
 
     Assimp::IOStream* AssimpNewIOSystem::Open(const char* pFile,
                                               const char* pMode) {
-        auto path = _root.has_value() ? _root.value() / std::string(pFile) : std::string(pFile);
+        auto path = _root.has_value() ? _root.value() / std::string(pFile) : std::filesystem::path(std::string(pFile));
         if (auto file = _fileSystem->readFile(path); file.has_value()) {
             return new AssimpNewIOStream(std::move(file.value()));
         }
