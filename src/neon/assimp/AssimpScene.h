@@ -51,6 +51,12 @@ namespace neon {
         AssimpMaterialPropertyType _type;
 
     public:
+
+        AssimpMaterialProperty(const AssimpMaterialProperty& other);
+
+
+        AssimpMaterialProperty& operator=(const AssimpMaterialProperty& other);
+
         AssimpMaterialProperty(const void* data, size_t length, AssimpMaterialPropertyType type);
 
         ~AssimpMaterialProperty();
@@ -107,6 +113,12 @@ namespace neon {
 
         [[nodiscard]] const std::shared_ptr<LocalModel>& getLocalModel() const;
     };
+
+    namespace serialization {
+
+        std::optional<AssimpMaterialTextureType> toAssimpTextureType(std::string s);
+
+    }
 }
 
 #endif //ASSIMPSCENE_H

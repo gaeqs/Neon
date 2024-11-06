@@ -47,6 +47,7 @@ namespace neon {
             auto name = "*" + std::to_string(i);
 
             TextureCreateInfo info;
+            info.commandBuffer = context.commandBuffer;
             if (texture->mHeight == 0) {
                 // Compressed texture
                 textures.push_back(Texture::createTextureFromFile(
@@ -83,13 +84,14 @@ namespace neon {
                 size_t length = aiProp->mDataLength;
                 if (aiProp->mType == aiPTI_String) {
                     data += 4;
+
                     length -= 5;
                 }
 
                 std::string key = std::string(aiProp->mKey.C_Str());
 
                 AssimpMaterialProperty prop(data, length, static_cast<AssimpMaterialPropertyType>(aiProp->mType));
-                if (key == _AI_MATKEY_TEXTURE_BASE == 0) {
+                if (key == _AI_MATKEY_TEXTURE_BASE) {
                     // Texture! We have to find it!
                     std::string name = prop.asString();
                     auto it = std::find_if(textures.begin(), textures.end(),
@@ -100,9 +102,11 @@ namespace neon {
                         matTextures[static_cast<AssimpMaterialTextureType>(aiProp->mSemantic)] = *it;
                     }
                 } else {
-                    matProperties[key] = prop;
+                    matProperties.insert({key, prop});
                 }
             }
+
+            materials.emplace_back(aiMat->GetName().C_Str(), matProperties, matTextures);
         }
         return materials;
     }
@@ -110,7 +114,7 @@ namespace neon {
     std::shared_ptr<LocalModel> AssimpSceneLoader::loadModel(std::string name, const aiScene* scene) {
         std::vector<LocalMesh> meshes;
 
-        for (size_t iMesh = scene->mNumMeshes; iMesh < scene->mNumMeshes; ++iMesh) {
+        for (size_t iMesh = 0; iMesh < scene->mNumMeshes; ++iMesh) {
             aiMesh* mesh = scene->mMeshes[iMesh];
 
 
@@ -133,7 +137,7 @@ namespace neon {
                 LocalVertex vertex;
                 if (properties.hasPosition) vertex.position = toRush(mesh->mVertices[i]);
                 if (properties.hasNormal) vertex.normal = toRush(mesh->mNormals[i]);
-                if (properties.hasTangent) vertex.tangent = toRush(mesh->mTangents[i]);
+                if (properties.hasTangent) vertex.tangent = tangents[i];
                 if (properties.hasColor) vertex.color = toRush(mesh->mColors[0][i]);
                 if (properties.hasUv) vertex.uv = toRush(mesh->mTextureCoords[0][i]);
                 vertices.push_back(vertex);

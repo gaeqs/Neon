@@ -1,0 +1,76 @@
+{
+  "name": "Sans",
+  "auto_flush": true,
+  "maximum_instances": 20000,
+  "assimp": "sans_assimp_scene.json",
+  "assimp_metadata": {
+    "materials": {
+      "material": {
+        "name": "Sans",
+        "save": true,
+        "use_present": true,
+        "frame_buffer": "A:frame_buffer",
+        "shader": "A:deferred",
+        "descriptions": {
+          "vertex": {
+            "stride": 44,
+            "attributes": [
+              {
+                "size_in_floats": 3,
+                "offset_in_bytes": 0
+              },
+              {
+                "size_in_floats": 3,
+                "offset_in_bytes": 12
+              },
+              {
+                "size_in_floats": 3,
+                "offset_in_bytes": 24
+              },
+              {
+                "size_in_floats": 2,
+                "offset_in_bytes": 36
+              }
+            ]
+          },
+          "instance": {
+            "stride": 128,
+            "attributes": [
+              {
+                "size_in_floats": 16,
+                "offset_in_bytes": 0
+              },
+              {
+                "size_in_floats": 16,
+                "offset_in_bytes": 64
+              }
+            ]
+          },
+          "uniform": {
+            "name": "Sans",
+            "bindings": [
+              {
+                "type": "image"
+              },
+              {
+                "type": "image"
+              }
+            ]
+          }
+        }
+      },
+      "textures": {
+        "diffuseTexture": "diffuse",
+        "normalTexture": "normals"
+      }
+    },
+    "meshes": {
+      "input": [
+        "position",
+        "normal",
+        "tangent",
+        "uv"
+      ]
+    }
+  }
+}

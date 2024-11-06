@@ -10,6 +10,7 @@
 #include "FrameBufferLoader.h"
 #include "MaterialLoader.h"
 #include "MeshLoader.h"
+#include "ModelLoader.h"
 #include "RenderLoader.h"
 #include "ShaderProgramLoader.h"
 #include "ShaderUniformDescriptorLoader.h"
@@ -27,5 +28,6 @@ namespace neon {
         registerLoader<Render, RenderLoader>();
         registerLoader<Mesh, MeshLoader>();
         registerLoader<AssimpScene, AssimpSceneLoader>();
+        registerLoader<Model, ModelLoader>();
     }
 }

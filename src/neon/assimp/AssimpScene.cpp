@@ -8,6 +8,23 @@
 
 
 namespace neon {
+    AssimpMaterialProperty::AssimpMaterialProperty(const AssimpMaterialProperty& other)
+    : _data(new char[other._length]),
+          _length(other._length),
+          _type(other._type) {
+        std::memcpy(_data, other._data, _length);
+    }
+
+    AssimpMaterialProperty& AssimpMaterialProperty::operator=(const AssimpMaterialProperty& other) {
+        if (this == &other) return *this;
+        _data = new char[other._length];
+        _length = other._length;
+        _type = other._type;
+        std::memcpy(_data, other._data, _length);
+
+        return *this;
+    }
+
     AssimpMaterialProperty::
     AssimpMaterialProperty(const void* data, size_t length, AssimpMaterialPropertyType type)
         : _data(new char[length]),
@@ -90,5 +107,33 @@ namespace neon {
 
     const std::shared_ptr<LocalModel>& AssimpScene::getLocalModel() const {
         return _localModel;
+    }
+
+    std::optional<AssimpMaterialTextureType> serialization::toAssimpTextureType(std::string s) {
+        static const std::unordered_map<std::string, AssimpMaterialTextureType> map = {
+            {"NONE", AssimpMaterialTextureType::NONE},
+            {"DIFFUSE", AssimpMaterialTextureType::DIFFUSE},
+            {"SPECULAR", AssimpMaterialTextureType::SPECULAR},
+            {"AMBIENT", AssimpMaterialTextureType::AMBIENT},
+            {"EMISSIVE", AssimpMaterialTextureType::EMISSIVE},
+            {"HEIGHT", AssimpMaterialTextureType::HEIGHT},
+            {"NORMALS", AssimpMaterialTextureType::NORMALS},
+            {"SHININESS", AssimpMaterialTextureType::SHININESS},
+            {"OPACITY", AssimpMaterialTextureType::OPACITY},
+            {"DISPLACEMENT", AssimpMaterialTextureType::DISPLACEMENT},
+            {"LIGHTMAP", AssimpMaterialTextureType::LIGHTMAP},
+            {"REFLECTION", AssimpMaterialTextureType::REFLECTION},
+            {"BASE_COLOR", AssimpMaterialTextureType::BASE_COLOR},
+            {"NORMAL_CAMERA", AssimpMaterialTextureType::NORMAL_CAMERA},
+            {"EMISSION_COLOR", AssimpMaterialTextureType::EMISSION_COLOR},
+        };
+
+        std::transform(s.begin(), s.end(), s.begin(), [](unsigned char c) {
+            return std::toupper(c);
+        });
+
+        auto it = map.find(s);
+        if (it != map.end()) return {it->second};
+        return {};
     }
 }

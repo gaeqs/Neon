@@ -154,27 +154,21 @@ std::shared_ptr<FrameBuffer> initRender(Room* room) {
     return fpFrameBuffer;
 }
 
-void sansLoadThread(Application* application,
-                    assimp_loader::LoaderInfo info) {
+void sansLoadThread(Application* application) {
     DEBUG_PROFILE_ID(application->getProfiler(), sans, "Sans load thread");
     auto holder = application->getCommandManager().fetchCommandPool();
     auto buffer = holder.getPool().beginCommandBuffer(true);
 
-    info.commandBuffer = buffer;
+    DirectoryFileSystem fileSystem("resource");
+    AssetLoaderContext context(application);
+    context.fileSystem = &fileSystem;
+    context.commandBuffer = buffer;
+    auto sansModel = loadAssetFromFile<Model>("sans_model.json", context);
 
-    auto sansResult = assimp_loader::load(R"(resource/Sans)",
-                                          "Sans.obj",
-                                          info);
-
-    if (sansResult.error.has_value()) {
-        application->getLogger().error(
-            MessageBuilder()
-            .print("Couldn't load Sans model! ")
-            .print(std::filesystem::current_path()));
+    if (sansModel == nullptr) {
+        application->getLogger().error("Couldn't load Sans model! ");
         exit(1);
     }
-
-    auto sansModel = sansResult.model;
 
     buffer->end();
     buffer->submit();
@@ -225,6 +219,8 @@ void loadModels(Application* application, Room* room,
     auto shaderParallax = createShader(application,
                                        "parallax", "deferred.vert",
                                        "deferred_parallax.frag");
+    application->getAssets().store(shader, AssetStorageMode::PERMANENT);
+
 
     MaterialCreateInfo sansMaterialInfo(target, shader);
     sansMaterialInfo.descriptions.uniform = materialDescriptor;
@@ -234,8 +230,7 @@ void loadModels(Application* application, Room* room,
 
     std::function func = sansLoadThread;
 
-    auto task = application->getTaskRunner().executeAsync(
-        func, application, sansLoaderInfo);
+    auto task = application->getTaskRunner().executeAsync(func, application);
 
     auto zeppeliLoaderInfo = assimp_loader::LoaderInfo::create<TestVertex>(
         application, "Zeppeli", sansMaterialInfo);

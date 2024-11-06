@@ -8,7 +8,7 @@
 
 namespace neon {
     void TextureLoader::loadImage(nlohmann::json& json, ImageCreateInfo& info) {
-        if(!json.is_object()) return;
+        if (!json.is_object()) return;
         info.format = serialization::toTextureFormat(json.value("format", "")).value_or(info.format);
         info.dimensions = serialization::toTextureDimension(json.value("dimensions", "")).value_or(info.dimensions);
         info.width = json.value("width", info.width);
@@ -36,7 +36,7 @@ namespace neon {
     }
 
     void TextureLoader::loadImageView(nlohmann::json& json, ImageViewCreateInfo& info) {
-        if(!json.is_object()) return;
+        if (!json.is_object()) return;
         info.viewType = serialization::toTextureViewType(json.value("view_type", "")).value_or(info.viewType);
         info.rSwizzle = serialization::toTextureComponentSwizzle(json.value("r_swizzle", "")).value_or(info.rSwizzle);
         info.gSwizzle = serialization::toTextureComponentSwizzle(json.value("g_swizzle", "")).value_or(info.gSwizzle);
@@ -49,7 +49,7 @@ namespace neon {
     }
 
     void TextureLoader::loadSampler(nlohmann::json& json, SamplerCreateInfo& info) {
-        if(!json.is_object()) return;
+        if (!json.is_object()) return;
         info.magnificationFilter = serialization::toTextureFilter(json.value("magnification_filter", "")).value_or(
             info.magnificationFilter);
         info.minificationFilter = serialization::toTextureFilter(json.value("minification_filter", "")).value_or(
@@ -96,6 +96,7 @@ namespace neon {
         loadImage(json["image"], info.image);
         loadImageView(json["image_view"], info.imageView);
         loadSampler(json["sampler"], info.sampler);
+        info.commandBuffer = context.commandBuffer;
 
         return Texture::createTextureFromFile(context.application, name, datas, sizes, info);
     }

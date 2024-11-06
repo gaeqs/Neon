@@ -259,10 +259,22 @@ namespace neon {
     std::shared_ptr<Material>
     MaterialLoader::loadAsset(std::string name, nlohmann::json json, AssetLoaderContext context) {
         auto frameBuffer = neon::getAsset<FrameBuffer>(json["frame_buffer"], context);
-        if (frameBuffer == nullptr) return nullptr;
+        if (frameBuffer == nullptr) {
+            Logger::defaultLogger()->warning(MessageBuilder()
+                .print("Cannot load material ")
+                .print(name)
+                .print(". Frame buffer not found."));
+            return nullptr;
+        }
 
         auto shader = neon::getAsset<ShaderProgram>(json["shader"], context);
-        if (shader == nullptr) return nullptr;
+        if (shader == nullptr) {
+            Logger::defaultLogger()->warning(MessageBuilder()
+                .print("Cannot load material ")
+                .print(name)
+                .print(". Shader not found."));
+            return nullptr;
+        }
 
         MaterialCreateInfo info(frameBuffer, shader);
 

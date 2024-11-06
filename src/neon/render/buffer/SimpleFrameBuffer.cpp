@@ -19,7 +19,7 @@ namespace neon {
     std::pair<uint32_t, uint32_t>
     SimpleFrameBuffer::defaultRecreationParameters(Application* app) {
         auto vp = app->getViewport();
-        return {vp.x(), vp.y()};
+        return {std::max(vp.x(), 1), std::max(vp.y(), 1)};
     }
 
     SimpleFrameBuffer::SimpleFrameBuffer(

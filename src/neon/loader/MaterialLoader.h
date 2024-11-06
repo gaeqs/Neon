@@ -10,6 +10,7 @@
 
 namespace neon {
     class MaterialLoader : public AssetLoader<Material> {
+    public:
         static BlendOperation parse(const nlohmann::json& name, BlendOperation def);
 
         static BlendFactor parse(const nlohmann::json& name, BlendFactor def);
@@ -33,7 +34,6 @@ namespace neon {
 
         static void loadRasterizer(nlohmann::json& json, MaterialRasterizer& rasterizer);
 
-    public:
         MaterialLoader() = default;
 
         ~MaterialLoader() override = default;

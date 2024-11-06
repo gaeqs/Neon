@@ -13,6 +13,14 @@
 #include "Model.h"
 
 namespace neon {
+    enum class LocalVertexEntry {
+        POSITION,
+        NORMAL,
+        TANGENT,
+        UV,
+        COLOR
+    };
+
     struct LocalVertex {
         rush::Vec3f position;
         rush::Vec3f normal;
@@ -39,19 +47,23 @@ namespace neon {
 
     public:
         LocalMesh(LocalVertexProperties properties,
-            std::vector<LocalVertex> data,
-            std::vector<uint32_t> indices,
-            uint32_t materialIndex);
+                  std::vector<LocalVertex> data,
+                  std::vector<uint32_t> indices,
+                  uint32_t materialIndex);
 
         [[nodiscard]] const LocalVertexProperties& getProperties() const;
 
         [[nodiscard]] std::vector<LocalVertex> getData();
 
-        [[nodiscard]] std::vector<uint32_t> getIndices();
-
         [[nodiscard]] const std::vector<LocalVertex>& getData() const;
 
+        [[nodiscard]] std::vector<uint32_t> getIndices();
+
+        [[nodiscard]] const std::vector<uint32_t> getIndices() const;
+
         [[nodiscard]] uint32_t getMaterialIndex() const;
+
+        void setMaterialIndex(uint32_t index);
     };
 
     class LocalModel : public Asset {
@@ -66,6 +78,10 @@ namespace neon {
 
         [[nodiscard]] const std::vector<LocalMesh>& getMeshes() const;
     };
+
+    namespace serialization {
+        std::optional<LocalVertexEntry> toLocalVertexEntry(std::string s);
+    }
 }
 
 

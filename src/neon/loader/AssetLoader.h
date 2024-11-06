@@ -14,6 +14,7 @@ namespace neon {
     class FileSystem;
     class AssetCollection;
     class AssetLoaderCollection;
+    class CommandBuffer;
 
     class AbstractAssetLoader {
     public:
@@ -26,13 +27,15 @@ namespace neon {
         FileSystem* fileSystem;
         AssetLoaderCollection* loaders;
         AssetCollection* collection;
+        CommandBuffer* commandBuffer;
 
         AssetLoaderContext(
             Application* app,
             std::filesystem::path* path = nullptr,
             FileSystem* fileSystem = nullptr,
             AssetLoaderCollection* loaders = nullptr,
-            AssetCollection* collection = nullptr);
+            AssetCollection* collection = nullptr,
+            CommandBuffer* commandBuffer = nullptr);
     };
 
     template<typename AssetType>

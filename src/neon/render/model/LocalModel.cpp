@@ -27,12 +27,20 @@ namespace neon {
         return _indices;
     }
 
+    const std::vector<uint32_t> LocalMesh::getIndices() const {
+        return _indices;
+    }
+
     const std::vector<LocalVertex>& LocalMesh::getData() const {
         return _data;
     }
 
     uint32_t LocalMesh::getMaterialIndex() const {
         return _materialIndex;
+    }
+
+    void LocalMesh::setMaterialIndex(uint32_t index) {
+        _materialIndex = index;
     }
 
     LocalModel::LocalModel(std::string name, std::vector<LocalMesh> meshes)
@@ -45,5 +53,23 @@ namespace neon {
 
     const std::vector<LocalMesh>& LocalModel::getMeshes() const {
         return _meshes;
+    }
+
+    std::optional<LocalVertexEntry> serialization::toLocalVertexEntry(std::string s) {
+        static const std::unordered_map<std::string, LocalVertexEntry> map = {
+            {"POSITION", LocalVertexEntry::POSITION},
+            {"NORMAL", LocalVertexEntry::NORMAL},
+            {"TANGENT", LocalVertexEntry::TANGENT},
+            {"UV", LocalVertexEntry::UV},
+            {"COLOR", LocalVertexEntry::COLOR}
+        };
+
+        std::transform(s.begin(), s.end(), s.begin(), [](unsigned char c) {
+            return std::toupper(c);
+        });
+
+        auto it = map.find(s);
+        if (it != map.end()) return {it->second};
+        return {};
     }
 }

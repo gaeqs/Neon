@@ -89,7 +89,7 @@ std::shared_ptr<FrameBuffer> initRender(Room* room) {
     // to the render as a render pass.
     // We'll use the default strategy for the rendering.
     auto fpFrameBuffer = std::make_shared<SimpleFrameBuffer>(
-        room->getApplication(), frameBufferFormats, true);
+        room->getApplication(), "frame_buffer", frameBufferFormats, true);
 
     render->addRenderPass(std::make_shared<DefaultRenderPassStrategy>(
         fpFrameBuffer));
@@ -101,7 +101,7 @@ std::shared_ptr<FrameBuffer> initRender(Room* room) {
         TextureFormat::R8G8B8A8
     };
     auto screenFrameBuffer = std::make_shared<SimpleFrameBuffer>(
-        room->getApplication(), screenFormats, false);
+        room->getApplication(), "screen", screenFormats, false);
     render->addRenderPass(std::make_shared<DefaultRenderPassStrategy>(
         screenFrameBuffer));
 
@@ -144,7 +144,7 @@ std::shared_ptr<FrameBuffer> initRender(Room* room) {
     // Then, it will render its UI.
     // If you don't use ImGUI, you don't have to
     // split the screen render in two frame buffers.
-    auto swapFrameBuffer = std::make_shared<SwapChainFrameBuffer>(app, false);
+    auto swapFrameBuffer = std::make_shared<SwapChainFrameBuffer>(app, "swap_chain", false);
     render->addRenderPass(std::make_shared<DefaultRenderPassStrategy>(
         swapFrameBuffer));
 
