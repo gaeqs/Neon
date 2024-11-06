@@ -7,7 +7,22 @@
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
+#include <neon/assimp/AssimpGeometry.h>
 #include <neon/assimp/AssimpNewIOSystem.h>
+
+namespace {
+    rush::Vec2f toRush(aiVector2D v) {
+        return {v.x, v.y};
+    }
+
+    rush::Vec3f toRush(aiVector3D v) {
+        return {v.x, v.y, v.z};
+    }
+
+    rush::Vec4f toRush(aiColor4D c) {
+        return {c.r, c.g, c.b, c.a};
+    }
+}
 
 namespace neon {
     uint32_t AssimpSceneLoader::decodeFlags(const nlohmann::json& json) {
@@ -25,13 +40,11 @@ namespace neon {
     }
 
     std::vector<std::shared_ptr<Texture>>
-    AssimpSceneLoader::loadTextures(const aiScene* scene,
-                                    const std::string& sceneName,
-                                    const AssetLoaderContext& context) {
+    AssimpSceneLoader::loadTextures(const aiScene* scene, const AssetLoaderContext& context) {
         std::vector<std::shared_ptr<Texture>> textures;
         for (size_t i = 0; i < scene->mNumTextures; ++i) {
             aiTexture* texture = scene->mTextures[i];
-            auto name = sceneName + "_" + std::to_string(i);
+            auto name = "*" + std::to_string(i);
 
             TextureCreateInfo info;
             if (texture->mHeight == 0) {
@@ -55,23 +68,17 @@ namespace neon {
         return textures;
     }
 
-    std::vector<AssimpMaterial> AssimpSceneLoader::loadMaterials(const aiScene* scene) {
+    std::vector<AssimpMaterial>
+    AssimpSceneLoader::loadMaterials(const aiScene* scene, const std::vector<std::shared_ptr<Texture>>& textures) {
         std::vector<AssimpMaterial> materials;
         for (size_t iMat = 0; iMat < scene->mNumMaterials; ++iMat) {
             auto* aiMat = scene->mMaterials[iMat];
+
+            std::unordered_map<std::string, AssimpMaterialProperty> matProperties;
+            std::unordered_map<AssimpMaterialTextureType, std::shared_ptr<Texture>> matTextures;
+
             for (size_t iProp = 0; iProp < aiMat->mNumProperties; ++iProp) {
                 auto* aiProp = aiMat->mProperties[iProp];
-                Logger::defaultLogger()->debug(MessageBuilder()
-                    .print(aiProp->mKey.C_Str())
-                    .print(" - ")
-                    .print(aiProp->mSemantic)
-                    .print(" - ")
-                    .print(aiProp->mIndex)
-                    .print(" - ")
-                    .print(aiProp->mDataLength)
-                    .print(" - ")
-                    .print(aiProp->mType));
-
                 char* data = aiProp->mData;
                 size_t length = aiProp->mDataLength;
                 if (aiProp->mType == aiPTI_String) {
@@ -79,30 +86,72 @@ namespace neon {
                     length -= 5;
                 }
 
+                std::string key = std::string(aiProp->mKey.C_Str());
+
                 AssimpMaterialProperty prop(data, length, static_cast<AssimpMaterialPropertyType>(aiProp->mType));
-                switch (aiProp->mType) {
-                    case aiPTI_Float:
-                        Logger::defaultLogger()->debug(MessageBuilder().print(prop.asFloat()));
-                        break;
-                    case aiPTI_Double:
-                        Logger::defaultLogger()->debug(MessageBuilder().print(prop.asDouble()));
-                        break;
-                    case aiPTI_String: {
-                        Logger::defaultLogger()->debug(MessageBuilder().print(prop.asString()));
+                if (key == _AI_MATKEY_TEXTURE_BASE == 0) {
+                    // Texture! We have to find it!
+                    std::string name = prop.asString();
+                    auto it = std::find_if(textures.begin(), textures.end(),
+                                           [&name](const std::shared_ptr<Texture>& texture) {
+                                               return texture->getName() == name;
+                                           });
+                    if (it != textures.end()) {
+                        matTextures[static_cast<AssimpMaterialTextureType>(aiProp->mSemantic)] = *it;
                     }
-                    break;
-                    case aiPTI_Integer:
-                        Logger::defaultLogger()->debug(MessageBuilder().print(prop.asInteger()));
-                        break;
-                    case aiPTI_Buffer:
-                        break;
-                    case _aiPTI_Force32Bit:
-                        break;
-                    default: ;
+                } else {
+                    matProperties[key] = prop;
                 }
             }
         }
         return materials;
+    }
+
+    std::shared_ptr<LocalModel> AssimpSceneLoader::loadModel(std::string name, const aiScene* scene) {
+        std::vector<LocalMesh> meshes;
+
+        for (size_t iMesh = scene->mNumMeshes; iMesh < scene->mNumMeshes; ++iMesh) {
+            aiMesh* mesh = scene->mMeshes[iMesh];
+
+
+            LocalVertexProperties properties;
+            properties.hasPosition = mesh->HasPositions();
+            properties.hasNormal = mesh->HasNormals();
+            properties.hasTangent = properties.hasNormal;
+            properties.hasColor = mesh->HasVertexColors(0);
+            properties.hasUv = mesh->HasTextureCoords(0);
+            properties.hasExtra = false;
+
+            std::vector<rush::Vec3f> tangents = properties.hasTangent
+                                                    ? assimp_geometry::calculateTangents(mesh)
+                                                    : std::vector<rush::Vec3f>();
+
+            std::vector<LocalVertex> vertices;
+            vertices.reserve(mesh->mNumVertices);
+
+            for (size_t i = 0; i < mesh->mNumVertices; ++i) {
+                LocalVertex vertex;
+                if (properties.hasPosition) vertex.position = toRush(mesh->mVertices[i]);
+                if (properties.hasNormal) vertex.normal = toRush(mesh->mNormals[i]);
+                if (properties.hasTangent) vertex.tangent = toRush(mesh->mTangents[i]);
+                if (properties.hasColor) vertex.color = toRush(mesh->mColors[0][i]);
+                if (properties.hasUv) vertex.uv = toRush(mesh->mTextureCoords[0][i]);
+                vertices.push_back(vertex);
+            }
+
+            std::vector<uint32_t> indices;
+            indices.reserve(mesh->mNumFaces * 3);
+            for (int i = 0; i < mesh->mNumFaces; ++i) {
+                auto face = mesh->mFaces[i];
+                indices.push_back(face.mIndices[0]);
+                indices.push_back(face.mIndices[1]);
+                indices.push_back(face.mIndices[2]);
+            }
+
+            meshes.emplace_back(properties, std::move(vertices), std::move(indices), mesh->mMaterialIndex);
+        }
+
+        return std::make_shared<LocalModel>(name, meshes);
     }
 
     std::shared_ptr<AssimpScene>
@@ -116,10 +165,10 @@ namespace neon {
 
         auto scene = importer.ReadFile(fileName, decodeFlags(json));
         if (scene == nullptr) return nullptr;
-        auto textures = loadTextures(scene, name, context);
-        auto materials = loadMaterials(scene);
+        auto textures = loadTextures(scene, context);
+        auto materials = loadMaterials(scene, textures);
+        auto model = loadModel(name, scene);
 
-        return nullptr;
-        //auto result = std::make_shared<AssimpScene>(name);
+        return std::make_shared<AssimpScene>(name, std::move(textures), std::move(materials), model);
     }
 }

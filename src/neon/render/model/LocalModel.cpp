@@ -6,9 +6,14 @@
 
 
 namespace neon {
-    LocalMesh::LocalMesh(LocalVertexProperties properties, std::vector<LocalVertex> data)
+    LocalMesh::LocalMesh(LocalVertexProperties properties,
+                         std::vector<LocalVertex> data,
+                         std::vector<uint32_t> indices,
+                         uint32_t materialIndex)
         : _properties(properties),
-          _data(std::move(data)) {}
+          _data(std::move(data)),
+          _indices(std::move(indices)),
+          _materialIndex(materialIndex) {}
 
     const LocalVertexProperties& LocalMesh::getProperties() const {
         return _properties;
@@ -18,8 +23,16 @@ namespace neon {
         return _data;
     }
 
+    std::vector<uint32_t> LocalMesh::getIndices() {
+        return _indices;
+    }
+
     const std::vector<LocalVertex>& LocalMesh::getData() const {
         return _data;
+    }
+
+    uint32_t LocalMesh::getMaterialIndex() const {
+        return _materialIndex;
     }
 
     LocalModel::LocalModel(std::string name, std::vector<LocalMesh> meshes)

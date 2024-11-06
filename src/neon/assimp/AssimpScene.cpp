@@ -48,8 +48,10 @@ namespace neon {
         return static_cast<char*>(_data);
     }
 
-    AssimpMaterial::AssimpMaterial(std::string name, std::unordered_map<std::string, AssimpMaterialProperty> properties)
-        : _name(std::move(name)), _properties(std::move(properties)) {}
+    AssimpMaterial::AssimpMaterial(std::string name,
+                                   std::unordered_map<std::string, AssimpMaterialProperty> properties,
+                                   std::unordered_map<AssimpMaterialTextureType, std::shared_ptr<Texture>> textures)
+        : _name(std::move(name)), _properties(std::move(properties)), _textures(std::move(textures)) {}
 
     const std::string& AssimpMaterial::getName() const {
         return _name;
@@ -57,6 +59,10 @@ namespace neon {
 
     const std::unordered_map<std::string, AssimpMaterialProperty>& AssimpMaterial::getProperties() const {
         return _properties;
+    }
+
+    const std::unordered_map<AssimpMaterialTextureType, std::shared_ptr<Texture>>& AssimpMaterial::getTextures() const {
+        return _textures;
     }
 
     std::optional<AssimpMaterialProperty> AssimpMaterial::getProperty(const std::string& name) const {

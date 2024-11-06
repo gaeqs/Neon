@@ -20,6 +20,31 @@ namespace neon {
         BUFFER = 0x5
     };
 
+    enum class AssimpMaterialTextureType {
+        NONE = 0,
+        DIFFUSE = 1,
+        SPECULAR = 2,
+        AMBIENT = 3,
+        EMISSIVE = 4,
+        HEIGHT = 5,
+        NORMALS = 6,
+        SHININESS = 7,
+        OPACITY = 8,
+        DISPLACEMENT = 9,
+        LIGHTMAP = 10,
+        REFLECTION = 11,
+        BASE_COLOR = 12,
+        NORMAL_CAMERA = 13,
+        EMISSION_COLOR = 14,
+        METALNESS = 15,
+        DIFFUSE_ROUGHNESS = 16,
+        AMBIENT_OCCLUSION = 17,
+        SHEEN = 19,
+        UNKNOWN = 18,
+        CLEARCOAT = 20,
+        TRANSMISSION = 21,
+    };
+
     class AssimpMaterialProperty {
         void* _data;
         size_t _length;
@@ -48,13 +73,19 @@ namespace neon {
     class AssimpMaterial {
         std::string _name;
         std::unordered_map<std::string, AssimpMaterialProperty> _properties;
+        std::unordered_map<AssimpMaterialTextureType, std::shared_ptr<Texture>> _textures;
 
     public:
-        AssimpMaterial(std::string name, std::unordered_map<std::string, AssimpMaterialProperty> properties);
+        AssimpMaterial(std::string name,
+                       std::unordered_map<std::string, AssimpMaterialProperty> properties,
+                       std::unordered_map<AssimpMaterialTextureType, std::shared_ptr<Texture>> textures);
 
         [[nodiscard]] const std::string& getName() const;
 
         [[nodiscard]] const std::unordered_map<std::string, AssimpMaterialProperty>& getProperties() const;
+
+        [[nodiscard]] const std::unordered_map<AssimpMaterialTextureType, std::shared_ptr<Texture>>&
+        getTextures() const;
 
         std::optional<AssimpMaterialProperty> getProperty(const std::string& name) const;
     };

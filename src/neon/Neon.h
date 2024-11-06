@@ -37,6 +37,7 @@
 #include <neon/loader/RenderLoader.h>
 #include <neon/loader/MeshLoader.h>
 #include <neon/loader/AssimpSceneLoader.h>
+#include <neon/loader/ModelLoader.h>
 
 #include <neon/logging/TextEffect.h>
 #include <neon/logging/Message.h>
