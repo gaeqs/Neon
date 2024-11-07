@@ -148,6 +148,7 @@ namespace neon {
             meshesMetadata.push_back(jsonMeshes);
         }
 
+        std::vector<std::shared_ptr<Mesh>> meshes;
         if (!meshesMetadata.empty()) {
             meshesMetadata.resize(scene->getLocalModel()->getMeshes().size(), meshesMetadata.front());
 
@@ -155,7 +156,27 @@ namespace neon {
             for (const auto& mesh: scene->getLocalModel()->getMeshes()) {
                 auto result = loadMesh(meshesMetadata[i++], mesh, materials, context);
                 if (result != nullptr) {
+                    meshes.push_back(result);
                     info.drawables.push_back(result);
+                }
+            }
+        }
+
+        // EXTRA MATERIALS
+
+        auto& jsonExtraMaterials = metadata["extra_materials"];
+        std::vector<nlohmann::json> extraMaterialsEntries;
+        if (jsonExtraMaterials.is_array()) {
+            extraMaterialsEntries = jsonExtraMaterials;
+        } else {
+            extraMaterialsEntries.push_back(jsonExtraMaterials);
+        }
+
+        for (auto& entry: extraMaterialsEntries) {
+            auto material = getAsset<Material>(entry, context);
+            if (material != nullptr) {
+                for (auto& mesh: meshes) {
+                    mesh->getMaterials().insert(material);
                 }
             }
         }

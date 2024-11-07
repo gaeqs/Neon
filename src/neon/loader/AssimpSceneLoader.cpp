@@ -162,12 +162,14 @@ namespace neon {
     AssimpSceneLoader::loadAsset(std::string name, nlohmann::json json, AssetLoaderContext context) {
         auto file = json["file"];
         if (!file.is_string()) return nullptr;
-        std::string fileName = file.get<std::string>();
+        auto relative = std::filesystem::path(file.get<std::string>());
+        auto absolute = context.path.has_value() ? context.path.value().parent_path() / relative : relative;
+
 
         Assimp::Importer importer;
         importer.SetIOHandler(new assimp_loader::AssimpNewIOSystem(context.fileSystem));
 
-        auto scene = importer.ReadFile(fileName, decodeFlags(json));
+        auto scene = importer.ReadFile(absolute, decodeFlags(json));
         if (scene == nullptr) return nullptr;
         auto textures = loadTextures(scene, context);
         auto materials = loadMaterials(scene, textures);

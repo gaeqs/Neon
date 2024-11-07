@@ -148,7 +148,7 @@ All parameters are optional.
 }
 ```
 
-All parameters are optional.
+Only the parameter `file` is required.
 
 ## Models
 
@@ -191,6 +191,9 @@ All parameters are optional.
           "color"
         ]
       }
+    ],
+    "extra_materials": [
+      "A:extra_material"
     ]
   }
 }
