@@ -15,7 +15,7 @@ namespace neon {
         FrameBufferTextureCreateInfo info;
         if (!json.is_object()) return info;
 
-        if (auto& name = json["name"]; !name.is_string()) {
+        if (auto& name = json["name"]; name.is_string()) {
             info.name = name;
         }
 

@@ -10,100 +10,150 @@
 
 namespace neon {
     BlendOperation MaterialLoader::parse(const nlohmann::json& name, BlendOperation def) {
-        static const std::array<std::string, 16> OPERATIONS = {
-            "add", "subtract", "reverse_subtract", "min", "max"
+        static const std::unordered_map<std::string, BlendOperation> map = {
+            {"ADD", BlendOperation::ADD},
+            {"SUBTRACT", BlendOperation::SUBTRACT},
+            {"REVERSE_SUBTRACT", BlendOperation::REVERSE_SUBTRACT},
+            {"MIN", BlendOperation::MIN},
+            {"MAX", BlendOperation::MAX}
         };
-        if (!name.is_string()) return def;
-        auto data = std::find(
-            OPERATIONS.begin(),
-            OPERATIONS.end(),
-            name.get<std::string>()
-        );
 
-        if (data == OPERATIONS.end()) return def;
-        return static_cast<BlendOperation>(OPERATIONS.begin() - data);
+        if(!name.is_string()) return def;
+        std::string s = name;
+
+        std::transform(s.begin(), s.end(), s.begin(), [](unsigned char c) {
+            return std::toupper(c);
+        });
+
+        auto it = map.find(s);
+        if (it != map.end()) return {it->second};
+        return def;
     }
 
     BlendFactor MaterialLoader::parse(const nlohmann::json& name, BlendFactor def) {
-        static const std::array<std::string, 19> FACTORS = {
-            "zero", "one", "src_color", "one_minus_src_color", "dst_color",
-            "one_minus_dst_color", "src_alpha", "one_minus_src_alpha", "dst_alpha",
-            "one_minus_dst_alpha", "constant_color", "one_minus_constant_color",
-            "constant_alpha", "one_minus_constant_alpha", "src_alpha_saturate",
-            "src1_color", "one_minus_src1_color", "src1_alpha", "one_minus_src1_alpha"
+        static const std::unordered_map<std::string, BlendFactor> map = {
+            {"ZERO", BlendFactor::ZERO},
+            {"ONE", BlendFactor::ONE},
+            {"SRC_COLOR", BlendFactor::SRC_COLOR},
+            {"ONE_MINUS_SRC_COLOR", BlendFactor::ONE_MINUS_SRC_COLOR},
+            {"DST_COLOR", BlendFactor::DST_COLOR},
+            {"ONE_MINUS_DST_COLOR", BlendFactor::ONE_MINUS_DST_COLOR},
+            {"SRC_ALPHA", BlendFactor::SRC_ALPHA},
+            {"ONE_MINUS_SRC_ALPHA", BlendFactor::ONE_MINUS_SRC_ALPHA},
+            {"DST_ALPHA", BlendFactor::DST_ALPHA},
+            {"ONE_MINUS_DST_ALPHA", BlendFactor::ONE_MINUS_DST_ALPHA},
+            {"CONSTANT_COLOR", BlendFactor::CONSTANT_COLOR},
+            {"ONE_MINUS_CONSTANT_COLOR", BlendFactor::ONE_MINUS_CONSTANT_COLOR},
+            {"CONSTANT_ALPHA", BlendFactor::CONSTANT_ALPHA},
+            {"ONE_MINUS_CONSTANT_ALPHA", BlendFactor::ONE_MINUS_CONSTANT_ALPHA},
+            {"SRC_ALPHA_SATURATE", BlendFactor::SRC_ALPHA_SATURATE},
+            {"SRC1_COLOR", BlendFactor::SRC1_COLOR},
+            {"ONE_MINUS_SRC1_COLOR", BlendFactor::ONE_MINUS_SRC1_COLOR},
+            {"SRC1_ALPHA", BlendFactor::SRC1_ALPHA},
+            {"ONE_MINUS_SRC1_ALPHA", BlendFactor::ONE_MINUS_SRC1_ALPHA},
         };
-        if (!name.is_string()) return def;
-        auto data = std::find(
-            FACTORS.begin(),
-            FACTORS.end(),
-            name.get<std::string>()
-        );
 
-        if (data == FACTORS.end()) return def;
-        return static_cast<BlendFactor>(FACTORS.begin() - data);
+        if(!name.is_string()) return def;
+        std::string s = name;
+
+        std::transform(s.begin(), s.end(), s.begin(), [](unsigned char c) {
+            return std::toupper(c);
+        });
+
+        auto it = map.find(s);
+        if (it != map.end()) return {it->second};
+        return def;
     }
 
     DepthCompareOperation MaterialLoader::parse(const nlohmann::json& name, DepthCompareOperation def) {
-        static const std::array<std::string, 8> OPERATIONS = {
-            "never", "less", "equal", "less_or_equal", "greater",
-            "not_equal", "greater_or_equal", "always"
+        static const std::unordered_map<std::string, DepthCompareOperation> map = {
+            {"NEVER", DepthCompareOperation::NEVER},
+            {"LESS", DepthCompareOperation::LESS},
+            {"EQUAL", DepthCompareOperation::EQUAL},
+            {"LESS_OR_EQUAL", DepthCompareOperation::LESS_OR_EQUAL},
+            {"GREATER", DepthCompareOperation::GREATER},
+            {"NOT_EQUAL", DepthCompareOperation::NOT_EQUAL},
+            {"GREATER_OR_EQUAL", DepthCompareOperation::GREATER_OR_EQUAL},
+            {"ALWAYS", DepthCompareOperation::ALWAYS},
         };
-        if (!name.is_string()) return def;
-        auto data = std::find(
-            OPERATIONS.begin(),
-            OPERATIONS.end(),
-            name.get<std::string>()
-        );
 
-        if (data == OPERATIONS.end()) return def;
-        return static_cast<DepthCompareOperation>(OPERATIONS.begin() - data);
+        if(!name.is_string()) return def;
+        std::string s = name;
+
+        std::transform(s.begin(), s.end(), s.begin(), [](unsigned char c) {
+            return std::toupper(c);
+        });
+
+        auto it = map.find(s);
+        if (it != map.end()) return {it->second};
+        return def;
     }
 
     PolygonMode MaterialLoader::parse(const nlohmann::json& name, PolygonMode def) {
-        static const std::array<std::string, 8> OPERATIONS = {
-            "fill", "line", "point", "fill_rectangle_nvidia"
+        static const std::unordered_map<std::string, PolygonMode> map = {
+            {"FILL", PolygonMode::FILL},
+            {"LINE", PolygonMode::LINE},
+            {"POINT", PolygonMode::POINT},
+            {"FILL_RECTANGLE_NVIDIA", PolygonMode::FILL_RECTANGLE_NVIDIA}
         };
-        if (!name.is_string()) return def;
-        auto data = std::find(
-            OPERATIONS.begin(),
-            OPERATIONS.end(),
-            name.get<std::string>()
-        );
 
-        if (data == OPERATIONS.end()) return def;
-        return static_cast<PolygonMode>(OPERATIONS.begin() - data);
+        if(!name.is_string()) return def;
+        std::string s = name;
+
+        std::transform(s.begin(), s.end(), s.begin(), [](unsigned char c) {
+            return std::toupper(c);
+        });
+
+        auto it = map.find(s);
+        if (it != map.end()) return {it->second};
+        return def;
     }
 
     CullMode MaterialLoader::parse(const nlohmann::json& name, CullMode def) {
-        static const std::array<std::string, 8> OPERATIONS = {
-            "none", "front", "back", "both"
+        static const std::unordered_map<std::string, CullMode> map = {
+            {"NONE", CullMode::NONE},
+            {"FRONT", CullMode::FRONT},
+            {"BACK", CullMode::BACK},
+            {"BOTH", CullMode::BOTH}
         };
-        if (!name.is_string()) return def;
-        auto data = std::find(
-            OPERATIONS.begin(),
-            OPERATIONS.end(),
-            name.get<std::string>()
-        );
 
-        if (data == OPERATIONS.end()) return def;
-        return static_cast<CullMode>(OPERATIONS.begin() - data);
+        if(!name.is_string()) return def;
+        std::string s = name;
+
+        std::transform(s.begin(), s.end(), s.begin(), [](unsigned char c) {
+            return std::toupper(c);
+        });
+
+        auto it = map.find(s);
+        if (it != map.end()) return {it->second};
+        return def;
     }
 
     PrimitiveTopology MaterialLoader::parse(const nlohmann::json& name, PrimitiveTopology def) {
-        static const std::array<std::string, 11> OPERATIONS = {
-            "point_list", "line_list", "line_strip", "triangle_list", "triangle_strip",
-            "triangle_fan", "line_list_with_adjacency", "line_strip_with_adjacency",
-            "triangle_list_with_adjacency", "triangle_strip_with_adjacency", "patch_list"
+        static const std::unordered_map<std::string, PrimitiveTopology> map = {
+            {"POINT_LIST", PrimitiveTopology::POINT_LIST},
+            {"LINE_LIST", PrimitiveTopology::LINE_LIST},
+            {"LINE_STRIP", PrimitiveTopology::LINE_STRIP},
+            {"TRIANGLE_LIST", PrimitiveTopology::TRIANGLE_LIST},
+            {"TRIANGLE_STRIP", PrimitiveTopology::TRIANGLE_STRIP},
+            {"TRIANGLE_FAN", PrimitiveTopology::TRIANGLE_FAN},
+            {"LINE_LIST_WITH_ADJACENCY", PrimitiveTopology::LINE_LIST_WITH_ADJACENCY},
+            {"LINE_STRIP_WITH_ADJACENCY", PrimitiveTopology::LINE_STRIP_WITH_ADJACENCY},
+            {"TRIANGLE_LIST_WITH_ADJACENCY", PrimitiveTopology::TRIANGLE_LIST_WITH_ADJACENCY},
+            {"TRIANGLE_STRIP_WITH_ADJACENCY", PrimitiveTopology::TRIANGLE_STRIP_WITH_ADJACENCY},
+            {"PATCH_LIST", PrimitiveTopology::PATCH_LIST}
         };
-        if (!name.is_string()) return def;
-        auto data = std::find(
-            OPERATIONS.begin(),
-            OPERATIONS.end(),
-            name.get<std::string>()
-        );
 
-        if (data == OPERATIONS.end()) return def;
-        return static_cast<PrimitiveTopology>(OPERATIONS.begin() - data);
+        if(!name.is_string()) return def;
+        std::string s = name;
+
+        std::transform(s.begin(), s.end(), s.begin(), [](unsigned char c) {
+            return std::toupper(c);
+        });
+
+        auto it = map.find(s);
+        if (it != map.end()) return {it->second};
+        return def;
     }
 
     std::vector<InputDescription> MaterialLoader::parse(nlohmann::json& data, InputRate inputRate) {
@@ -197,6 +247,7 @@ namespace neon {
         if (auto& blendingConstants = json["blending_constants"]; blendingConstants.is_array()) {
             size_t i = 0;
             for (auto entry: blendingConstants) {
+                if (i >= 4) break;
                 if (blendingConstants.is_number_float()) {
                     blending.blendingConstants[i] = entry;
                 }
@@ -284,6 +335,8 @@ namespace neon {
         loadRasterizer(json["rasterizer"], info.rasterizer);
         info.topology = parse(json["topology"], info.topology);
 
-        return std::make_shared<Material>(context.application, name, info);
+        auto material = std::make_shared<Material>(context.application, name, info);
+        material->setPriority(json.value("priority", material->getPriority()));
+        return material;
     }
 }

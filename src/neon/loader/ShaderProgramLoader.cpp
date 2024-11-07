@@ -26,7 +26,7 @@ namespace neon {
             if (file.is_string() && context.fileSystem != nullptr) {
                 // Load text from file.
                 auto relative = std::filesystem::path(file.get<std::string>());
-                auto absolute = context.path.has_value() ? context.path.value() / relative : relative;
+                auto absolute = context.path.has_value() ? context.path.value().parent_path() / relative : relative;
                 auto optional = context.fileSystem->readFile(absolute);
                 if (optional.has_value()) {
                     auto text = optional.value().toString();

@@ -25,8 +25,8 @@ namespace neon {
             if (type == UniformBindingType::IMAGE) {
                 bindings.push_back(ShaderUniformBinding::image());
             } else {
-                if (!json.contains("size")) continue;
-                bindings.emplace_back(type.value(), json["size"]);
+                if (!binding.contains("size")) continue;
+                bindings.emplace_back(type.value(), binding["size"]);
             }
         }
 
