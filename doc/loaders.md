@@ -298,6 +298,7 @@ If no sources are available, the texture won't be created.
 ```json
 {
   "type": "simple",
+  "depth": false,
   // Textures can also be an object.
   "textures": [
     {
