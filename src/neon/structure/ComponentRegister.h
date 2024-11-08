@@ -9,30 +9,39 @@
 #include <string>
 #include <unordered_set>
 #include <unordered_map>
+#include <neon/loader/AssetLoader.h>
 
 #include <neon/structure/GameObject.h>
+#include <nlohmann/json.hpp>
 
 namespace neon {
     class Component;
 
     struct ComponentRegisterEntry {
         using Creator = std::function<IdentifiableWrapper<Component>(
-                GameObject&)>;
+            GameObject&)>;
+
+        using JsonCreator = std::function<IdentifiableWrapper<Component>(
+            GameObject&, nlohmann::json, AssetLoaderContext context)>;
 
         std::type_index type;
         std::string name;
         std::optional<Creator> creator;
+        std::optional<JsonCreator> jsonCreator;
 
         ComponentRegisterEntry(
-                const std::type_index& type,
-                const std::string ame,
-                const std::optional<Creator>& creator);
+            const std::type_index& type,
+            std::string name,
+            const std::optional<Creator>& creator,
+            const std::optional<JsonCreator>& jsonCreator);
     };
 
     class ComponentRegister {
-
         using Creator = std::function<IdentifiableWrapper<Component>(
-                GameObject&)>;
+            GameObject&)>;
+
+        using JsonCreator = std::function<IdentifiableWrapper<Component>(
+            GameObject&, nlohmann::json, AssetLoaderContext context)>;
 
         std::unordered_set<std::type_index> _ids;
         std::unordered_map<std::type_index, ComponentRegisterEntry> _entries;
@@ -40,37 +49,39 @@ namespace neon {
         ComponentRegister();
 
     public:
-
         static ComponentRegister& instance() {
             static ComponentRegister instance = ComponentRegister();
             return instance;
         }
 
-        const std::unordered_set<std::type_index>& getComponents();
+        const std::unordered_set<std::type_index>& getComponents() const;
+
+        const std::unordered_map<std::type_index, ComponentRegisterEntry>& getEntries() const;
 
         std::optional<ComponentRegisterEntry>
         getEntry(const std::type_index& type);
 
-        template<class T>
-        requires std::is_base_of_v<Component, T> &&
-                 std::is_constructible<T>::value
+        std::optional<ComponentRegisterEntry> getEntry(std::string name);
+
+        template<class T> requires std::is_base_of_v<Component, T>
         void registerComponent(const std::string& name) {
-            Creator creator = [](GameObject& gameObject) {
-                return gameObject.newComponent<T>();
-            };
+            std::optional<Creator> creator = {};
+            std::optional<JsonCreator> jsonCreator = {};
+            if constexpr (std::is_constructible_v<T>) {
+                creator = [](GameObject& gameObject) {
+                    return gameObject.newComponent<T>();
+                };
+            }
+            if constexpr (std::is_constructible_v<T, nlohmann::json, AssetLoaderContext>) {
+                jsonCreator = [](GameObject& gameObject, nlohmann::json json,
+                                 AssetLoaderContext context) {
+                    return gameObject.newComponent<T>(std::move(json), context);
+                };
+            }
 
             _ids.insert(typeid(T));
-            _entries.insert({typeid(T), {typeid(T), name, creator}});
+            _entries.insert({typeid(T), {typeid(T), name, creator, jsonCreator}});
         }
-
-        template<class T>
-        requires std::is_base_of_v<Component, T> &&
-                 (!std::is_constructible<T>::value)
-        void registerComponent(const std::string& name) {
-            _ids.insert(typeid(T));
-            _entries.insert({typeid(T), {typeid(T), name, {}}});
-        }
-
     };
 }
 
