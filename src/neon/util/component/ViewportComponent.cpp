@@ -4,6 +4,7 @@
 
 #include "ViewportComponent.h"
 
+#include <imgui_internal.h>
 #include <neon/structure/Room.h>
 
 namespace neon {
@@ -15,8 +16,9 @@ namespace neon {
 
         if (defaultStrategy != nullptr) {
             _frameBuffer = std::dynamic_pointer_cast<SimpleFrameBuffer>(
-                    defaultStrategy->getFrameBuffer());
+                defaultStrategy->getFrameBuffer());
         }
+        _hovered = false;
     }
 
     void ViewportComponent::onPreDraw() {
@@ -27,6 +29,7 @@ namespace neon {
             getApplication()->forceViewport({_windowSize.x, _windowSize.y});
             if (_frameBuffer) {
                 ImGui::Image(_frameBuffer->getImGuiDescriptor(0), _windowSize);
+                _hovered = ImGui::IsItemHovered();
             }
         }
         ImGui::End();
@@ -34,8 +37,11 @@ namespace neon {
         if (_windowSize.x > 0 && _windowSize.y > 0) {
             auto& c = getRoom()->getCamera();
             c.setFrustum(c.getFrustum().withAspectRatio(
-                    _windowSize.x / _windowSize.y));
+                _windowSize.x / _windowSize.y));
         }
+    }
 
+    bool ViewportComponent::isHovered() const {
+        return _hovered;
     }
 }

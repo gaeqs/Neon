@@ -172,19 +172,17 @@ namespace neon::vulkan {
         init_info.MinImageCount = 3;
         init_info.ImageCount = 3;
         init_info.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
+        init_info.RenderPass = _renderPass.getRaw();
 
-        ImGui_ImplVulkan_Init(&init_info, _renderPass.getRaw());
+        ImGui_ImplVulkan_Init(&init_info);
 
         auto cmd = _vkApplication->getCommandPool()->beginCommandBuffer(true);
 
-        ImGui_ImplVulkan_CreateFontsTexture(cmd->getImplementation()
-            .getCommandBuffer());
+        ImGui_ImplVulkan_CreateFontsTexture();
 
         cmd->end();
         cmd->submit();
         cmd->wait();
-
-        ImGui_ImplVulkan_DestroyFontUploadObjects();
     }
 
     VKSwapChainFrameBuffer::~VKSwapChainFrameBuffer() {

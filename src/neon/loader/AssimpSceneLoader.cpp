@@ -169,7 +169,7 @@ namespace neon {
         Assimp::Importer importer;
         importer.SetIOHandler(new assimp_loader::AssimpNewIOSystem(context.fileSystem));
 
-        auto scene = importer.ReadFile(absolute, decodeFlags(json));
+        auto scene = importer.ReadFile(absolute.string(), decodeFlags(json));
         if (scene == nullptr) return nullptr;
         auto textures = loadTextures(scene, context);
         auto materials = loadMaterials(scene, textures);

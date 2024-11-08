@@ -11,17 +11,18 @@
 
 namespace neon {
     class ViewportComponent : public Component {
-
         std::shared_ptr<SimpleFrameBuffer> _frameBuffer;
         ImVec2 _windowSize;
+        bool _hovered;
 
     public:
-
         void onStart() override;
 
         void onPreDraw() override;
 
+        [[nodiscard]] bool isHovered() const;
     };
+
     REGISTER_COMPONENT(ViewportComponent, "Viewport")
 }
 
