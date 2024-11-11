@@ -82,6 +82,31 @@ namespace neon::vulkan::vulkan_util {
         copyRegion.dstOffset = destinyOffset;
         vkCmdCopyBuffer(commandBuffer,
                         source, destiny, 1, &copyRegion);
+
+        VkBufferMemoryBarrier memoryBarrier = {
+            .sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER,
+            .pNext = nullptr,
+            .srcAccessMask = VK_ACCESS_HOST_WRITE_BIT | VK_ACCESS_TRANSFER_WRITE_BIT,
+            .dstAccessMask = VK_ACCESS_SHADER_READ_BIT,
+            .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+            .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+            .buffer = destiny,
+            .offset = destinyOffset,
+            .size = size
+        };
+
+        vkCmdPipelineBarrier(
+            commandBuffer,
+            VK_PIPELINE_STAGE_HOST_BIT | VK_PIPELINE_STAGE_TRANSFER_BIT,
+            VK_PIPELINE_STAGE_ALL_COMMANDS_BIT,
+            0,
+            0,
+            nullptr,
+            1,
+            &memoryBarrier,
+            0,
+            nullptr
+        );
     }
 
     std::pair<VkImage, VkDeviceMemory>
@@ -104,8 +129,7 @@ namespace neon::vulkan::vulkan_util {
 
         if (override == VK_FORMAT_UNDEFINED) {
             imageInfo.format = vc::vkFormat(info.format);
-        }
-        else {
+        } else {
             imageInfo.format = override;
         }
 
@@ -122,8 +146,7 @@ namespace neon::vulkan::vulkan_util {
 
         if (viewType == TextureViewType::CUBE) {
             imageInfo.flags = VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT;
-        }
-        else if (viewType == TextureViewType::ARRAY_2D) {
+        } else if (viewType == TextureViewType::ARRAY_2D) {
             imageInfo.flags = VK_IMAGE_CREATE_2D_ARRAY_COMPATIBLE_BIT;
         }
 
@@ -188,26 +211,23 @@ namespace neon::vulkan::vulkan_util {
 
             sourceStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
             destinationStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
-        }
-        else if (oldLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL &&
-                 newLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL) {
+        } else if (oldLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL &&
+                   newLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL) {
             barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
             barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
 
             sourceStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
             destinationStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
-        }
-        else if (oldLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL &&
-                 newLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL) {
+        } else if (oldLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL &&
+                   newLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL) {
             barrier.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
             barrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
 
             sourceStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
             destinationStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
-        }
-        else if (oldLayout == VK_IMAGE_LAYOUT_UNDEFINED &&
-                 newLayout ==
-                 VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL) {
+        } else if (oldLayout == VK_IMAGE_LAYOUT_UNDEFINED &&
+                   newLayout ==
+                   VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL) {
             barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
 
             if (format == VK_FORMAT_D32_SFLOAT_S8_UINT ||
@@ -225,10 +245,9 @@ namespace neon::vulkan::vulkan_util {
             sourceStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
             destinationStage = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT |
                                VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
-        }
-        else if (oldLayout == VK_IMAGE_LAYOUT_UNDEFINED &&
-                 newLayout ==
-                 VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL) {
+        } else if (oldLayout == VK_IMAGE_LAYOUT_UNDEFINED &&
+                   newLayout ==
+                   VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL) {
             barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 
             barrier.srcAccessMask = 0;
@@ -240,8 +259,7 @@ namespace neon::vulkan::vulkan_util {
             sourceStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
             destinationStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT |
                                VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
-        }
-        else {
+        } else {
             throw std::invalid_argument("unsupported layout transition!");
         }
 
@@ -293,7 +311,6 @@ namespace neon::vulkan::vulkan_util {
                          uint32_t levels,
                          int32_t layers,
                          VkCommandBuffer commandBuffer) {
-
         VkImageMemoryBarrier barrier{};
         barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
         barrier.image = image;
@@ -515,8 +532,7 @@ namespace neon::vulkan::vulkan_util {
                 if (clearColor.has_value()) {
                     auto c = clearColor.value();
                     clearValues[i].color = {c.x(), c.y(), c.z(), c.w()};
-                }
-                else {
+                } else {
                     clearValues[i].color = {0.0f, 0.0f, 0.0f, 1.0f};
                 }
             }
@@ -529,8 +545,7 @@ namespace neon::vulkan::vulkan_util {
 
             renderPassInfo.clearValueCount = clearValues.size();
             renderPassInfo.pClearValues = clearValues.data();
-        }
-        else {
+        } else {
             renderPassInfo.clearValueCount = 0;
         }
 
