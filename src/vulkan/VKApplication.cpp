@@ -800,7 +800,6 @@ namespace neon::vulkan {
 
     VKApplication::~VKApplication() {
         auto raw = _device->getRaw();
-        vkDestroyDescriptorPool(raw, _imGuiPool, nullptr);
         if (ImGui::GetIO().BackendRendererUserData != nullptr) {
             ImGui_ImplVulkan_Shutdown();
         }
@@ -809,6 +808,7 @@ namespace neon::vulkan {
         ImPlot::DestroyContext();
         ImGui::DestroyContext();
 
+        vkDestroyDescriptorPool(raw, _imGuiPool, nullptr);
 
         for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
             vkDestroySemaphore(raw, _imageAvailableSemaphores[i], nullptr);

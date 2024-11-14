@@ -21,6 +21,7 @@ namespace neon::serialization {
             {"R32FG32FB32F", TextureFormat::R32FG32FB32F},
             {"R32FG32FB32FA32F", TextureFormat::R32FG32FB32FA32F},
             {"R32F", TextureFormat::R32F},
+            {"R32FG32F", TextureFormat::R32FG32F},
             {"R16FG16F", TextureFormat::R16FG16F},
             {"R16FG16FB16F", TextureFormat::R16FG16FB16F},
             {"R16FG16FB16FA16F", TextureFormat::R16FG16FB16FA16F},

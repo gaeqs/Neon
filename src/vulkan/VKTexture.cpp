@@ -19,6 +19,7 @@ namespace neon::vulkan {
         : _application(application),
           _vkApplication(dynamic_cast<AbstractVKApplication*>(
               application->getImplementation())),
+          _format(dummyInfo.image.format),
           _width(static_cast<int>(dummyInfo.image.width)),
           _height(static_cast<int>(dummyInfo.image.height)),
           _depth(static_cast<int>(dummyInfo.image.depth)),
@@ -26,7 +27,7 @@ namespace neon::vulkan {
           _layers(dummyInfo.image.layers),
           _stagingBuffer(std::make_unique<SimpleBuffer>(
               _vkApplication,
-              VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+              VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
               VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
               VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
               data,
@@ -77,7 +78,6 @@ namespace neon::vulkan {
                     getCommandBuffer();
 
             vulkan_util::transitionImageLayout(
-                _vkApplication,
                 _image,
                 vkFormat,
                 VK_IMAGE_LAYOUT_UNDEFINED,
@@ -88,11 +88,10 @@ namespace neon::vulkan {
             );
 
             vulkan_util::copyBufferToImage(
-                _vkApplication,
                 _stagingBuffer->getRaw(),
                 _image,
-                _width, _height, _depth,
-                createInfo.image.layers,
+                _width,
+                _height, _depth, createInfo.image.layers,
                 rawBuffer
             );
 
@@ -142,27 +141,29 @@ namespace neon::vulkan {
     }
 
     VKTexture::VKTexture(Application* application,
+                         TextureFormat format,
                          VkImage image,
                          VkDeviceMemory memory,
                          VkImageView imageView,
                          VkImageLayout layout,
                          uint32_t width, uint32_t height, uint32_t depth,
-                         const SamplerCreateInfo& sampler) : _vkApplication(
-            dynamic_cast<AbstractVKApplication*>(
-                application->getImplementation())),
-        _width(static_cast<int>(width)),
-        _height(static_cast<int>(height)),
-        _depth(static_cast<int>(depth)),
-        _mipmapLevels(0),
-        _layers(1),
-        _stagingBuffer(nullptr),
-        _image(image),
-        _imageMemory(memory),
-        _imageView(imageView),
-        _sampler(VK_NULL_HANDLE),
-        _layout(layout),
-        _external(true),
-        _externalDirtyFlag(1) {
+                         const SamplerCreateInfo& sampler)
+        : _application(application),
+          _vkApplication(dynamic_cast<AbstractVKApplication*>(application->getImplementation())),
+          _format(format),
+          _width(static_cast<int>(width)),
+          _height(static_cast<int>(height)),
+          _depth(static_cast<int>(depth)),
+          _mipmapLevels(0),
+          _layers(1),
+          _stagingBuffer(nullptr),
+          _image(image),
+          _imageMemory(memory),
+          _imageView(imageView),
+          _sampler(VK_NULL_HANDLE),
+          _layout(layout),
+          _external(true),
+          _externalDirtyFlag(1) {
         VkPhysicalDeviceProperties properties{};
         vkGetPhysicalDeviceProperties(
             _vkApplication->getPhysicalDevice().getRaw(),
@@ -291,6 +292,7 @@ namespace neon::vulkan {
             map.value()->dispose();
         }
 
+        _format = format;
         auto vkFormat = vc::vkFormat(format);
 
         //
@@ -302,7 +304,6 @@ namespace neon::vulkan {
                     getCommandBuffer();
 
             vulkan_util::transitionImageLayout(
-                _vkApplication,
                 _image,
                 vkFormat,
                 VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
@@ -313,7 +314,6 @@ namespace neon::vulkan {
             );
 
             vulkan_util::copyBufferToImage(
-                _vkApplication,
                 _stagingBuffer->getRaw(),
                 _image,
                 width,
@@ -324,7 +324,6 @@ namespace neon::vulkan {
             );
 
             vulkan_util::transitionImageLayout(
-                _vkApplication,
                 _image,
                 vkFormat,
                 VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
@@ -334,5 +333,61 @@ namespace neon::vulkan {
                 rawBuffer
             );
         }
+    }
+
+    void VKTexture::fetchData(void* data, rush::Vec3i offset, rush::Vec<3, uint32_t> size,
+                              uint32_t layersOffset, uint32_t layers) {
+        if (_stagingBuffer == nullptr) {
+            _stagingBuffer = std::make_unique<SimpleBuffer>(
+                _vkApplication,
+                VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+                VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
+                VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+                nullptr,
+                vc::pixelSize(_format)
+                * _width * _height * _depth * _layers
+            );
+        }
+
+        CommandPoolHolder holder = _application->getCommandManager().fetchCommandPool();
+        CommandBuffer* cmd = holder.getPool().beginCommandBuffer(true);
+
+        auto vkFormat = vc::vkFormat(_format);
+
+        vulkan_util::transitionImageLayout(
+            _image,
+            vkFormat,
+            VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+            VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+            _mipmapLevels,
+            _layers,
+            cmd->getImplementation().getCommandBuffer()
+        );
+
+        vulkan_util::copyImageToBuffer(
+            _stagingBuffer->getRaw(), _image,
+            offset, size,
+            layersOffset, layers,
+            cmd->getImplementation().getCommandBuffer()
+        );
+
+        vulkan_util::transitionImageLayout(
+            _image,
+            vkFormat,
+            VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+            VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+            _mipmapLevels,
+            _layers,
+            cmd->getImplementation().getCommandBuffer()
+        );
+
+        cmd->end();
+        cmd->submit();
+        cmd->wait();
+
+        auto map = _stagingBuffer->map<uint8_t>();
+        if (!map.has_value()) return;
+        auto bufferData = map.value()->raw();
+        memcpy(data, bufferData, size[0] * size[1] * size[2] * layers * conversions::pixelSize(_format));
     }
 }

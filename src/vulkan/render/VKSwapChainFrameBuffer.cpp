@@ -81,13 +81,12 @@ namespace neon::vulkan {
                     getCommandBuffer();
 
             vulkan_util::transitionImageLayout(
-                    _vkApplication,
-                    _depthImage,
-                    _vkApplication->getDepthImageFormat(),
-                    VK_IMAGE_LAYOUT_UNDEFINED,
-                    VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
-                    1, 1,
-                    rawBuffer
+                _depthImage,
+                _vkApplication->getDepthImageFormat(),
+                VK_IMAGE_LAYOUT_UNDEFINED,
+                VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+                1,
+                1, rawBuffer
             );
         }
     }

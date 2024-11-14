@@ -13,6 +13,7 @@
 #include <vulkan/vulkan.h>
 
 #include <neon/render/texture/TextureCreateInfo.h>
+#include <rush/vector/vec.h>
 
 namespace neon {
     struct InputDescription;
@@ -44,7 +45,6 @@ namespace neon::vulkan::vulkan_util {
         VkFormat override = VK_FORMAT_UNDEFINED);
 
     void transitionImageLayout(
-        AbstractVKApplication* application,
         VkImage image, VkFormat format,
         VkImageLayout oldLayout, VkImageLayout newLayout,
         uint32_t mipLevels,
@@ -52,9 +52,16 @@ namespace neon::vulkan::vulkan_util {
         VkCommandBuffer commandBuffer);
 
     void copyBufferToImage(
-        AbstractVKApplication* application,
         VkBuffer buffer, VkImage image,
         uint32_t width, uint32_t height, uint32_t depth,
+        uint32_t layers,
+        VkCommandBuffer commandBuffer);
+
+    void copyImageToBuffer(
+        VkBuffer buffer, VkImage image,
+        rush::Vec3i offset,
+        rush::Vec<3, uint32_t> size,
+        uint32_t layerOffset,
         uint32_t layers,
         VkCommandBuffer commandBuffer);
 

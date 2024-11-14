@@ -26,6 +26,7 @@ namespace neon {
                                             ImVec2(100000, 100000));
         if (ImGui::Begin("Viewport")) {
             _windowSize = ImGui::GetContentRegionAvail();
+            _windowOrigin = ImGui::GetCursorScreenPos();
             getApplication()->forceViewport({_windowSize.x, _windowSize.y});
             if (_frameBuffer) {
                 ImGui::Image(_frameBuffer->getImGuiDescriptor(0), _windowSize);
@@ -43,5 +44,13 @@ namespace neon {
 
     bool ViewportComponent::isHovered() const {
         return _hovered;
+    }
+
+    ImVec2 ViewportComponent::getWindowSize() const {
+        return _windowSize;
+    }
+
+    ImVec2 ViewportComponent::getWindowOrigin() const {
+        return _windowOrigin;
     }
 }

@@ -27,7 +27,7 @@ namespace neon::vulkan {
         info.depth = 1;
         info.mipmaps = 1;
         info.layers = 1;
-        info.usages = {TextureUsage::COLOR_ATTACHMENT, TextureUsage::SAMPLING};
+        info.usages = {TextureUsage::COLOR_ATTACHMENT, TextureUsage::SAMPLING, TextureUsage::TRANSFER_SOURCE};
 
         for (const auto& createInfo: _createInfos) {
             info.format = createInfo.format;

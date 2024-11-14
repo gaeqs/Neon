@@ -23,19 +23,16 @@ namespace neon {
     class Application;
 
     class Texture : public Asset {
-
     public:
 #ifdef USE_VULKAN
         using Implementation = vulkan::VKTexture;
 #endif
 
     private:
-
         Implementation _implementation;
         TextureFormat _format;
 
     public:
-
         Texture(const Texture& other) = delete;
 
         Texture(Application* application,
@@ -74,6 +71,9 @@ namespace neon {
                         int32_t width, int32_t height, int32_t depth,
                         TextureFormat format);
 
+        void fetchData(void* data, rush::Vec3i offset, rush::Vec<3, uint32_t> size,
+                       uint32_t layersOffset, uint32_t layers);
+
         // region Static methods
 
         /**
@@ -83,10 +83,10 @@ namespace neon {
          * @return a pointer to the new texture.
          */
         static std::unique_ptr<Texture> createTextureFromFile(
-                Application* application,
-                std::string name,
-                const cmrc::file& resource,
-                const TextureCreateInfo& createInfo = TextureCreateInfo());
+            Application* application,
+            std::string name,
+            const cmrc::file& resource,
+            const TextureCreateInfo& createInfo = TextureCreateInfo());
 
         /**
          * Creates a new texture from a set of resources.
@@ -102,10 +102,10 @@ namespace neon {
          * @return a pointer to the new texture.
          */
         static std::unique_ptr<Texture> createTextureFromFiles(
-                Application* application,
-                std::string name,
-                const std::vector<cmrc::file>& resources,
-                const TextureCreateInfo& createInfo = TextureCreateInfo());
+            Application* application,
+            std::string name,
+            const std::vector<cmrc::file>& resources,
+            const TextureCreateInfo& createInfo = TextureCreateInfo());
 
         /**
          * Creates a new texture from a file.
@@ -114,10 +114,10 @@ namespace neon {
          * @return a pointer to the new texture.
          */
         static std::unique_ptr<Texture> createTextureFromFile(
-                Application* application,
-                std::string name,
-                const std::string& path,
-                const TextureCreateInfo& createInfo = TextureCreateInfo());
+            Application* application,
+            std::string name,
+            const std::string& path,
+            const TextureCreateInfo& createInfo = TextureCreateInfo());
 
         /**
          * Creates a new texture from a set of files.
@@ -133,10 +133,10 @@ namespace neon {
          * @return a pointer to the new texture.
          */
         static std::unique_ptr<Texture> createTextureFromFiles(
-                Application* application,
-                std::string name,
-                const std::vector<std::string>& paths,
-                const TextureCreateInfo& createInfo = TextureCreateInfo());
+            Application* application,
+            std::string name,
+            const std::vector<std::string>& paths,
+            const TextureCreateInfo& createInfo = TextureCreateInfo());
 
         /**
          * Creates a new texture from raw data.
@@ -146,10 +146,10 @@ namespace neon {
          * @return a pointer to the new texture.
          */
         static std::unique_ptr<Texture> createTextureFromFile(
-                Application* application,
-                std::string name,
-                const void* data, uint32_t size,
-                const TextureCreateInfo& createInfo = TextureCreateInfo());
+            Application* application,
+            std::string name,
+            const void* data, uint32_t size,
+            const TextureCreateInfo& createInfo = TextureCreateInfo());
 
         /**
          * Creates a new texture from a set of raw data pointers.
@@ -166,14 +166,13 @@ namespace neon {
          * @return a pointer to the new texture.
          */
         static std::unique_ptr<Texture> createTextureFromFile(
-                Application* application,
-                std::string name,
-                const std::vector<const void*>& data,
-                const std::vector<uint32_t>& sizes,
-                const TextureCreateInfo& createInfo = TextureCreateInfo());
+            Application* application,
+            std::string name,
+            const std::vector<const void*>& data,
+            const std::vector<uint32_t>& sizes,
+            const TextureCreateInfo& createInfo = TextureCreateInfo());
 
         // endregion
-
     };
 }
 

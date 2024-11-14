@@ -177,8 +177,8 @@ namespace neon::vulkan::vulkan_util {
         return {image, memory};
     }
 
-    void transitionImageLayout(AbstractVKApplication* application,
-                               VkImage image, VkFormat format,
+    void transitionImageLayout(VkImage image,
+                               VkFormat format,
                                VkImageLayout oldLayout,
                                VkImageLayout newLayout,
                                uint32_t mipLevels,
@@ -194,7 +194,7 @@ namespace neon::vulkan::vulkan_util {
         barrier.image = image;
         barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
         barrier.subresourceRange.baseMipLevel = 0;
-        barrier.subresourceRange.levelCount = mipLevels;
+        barrier.subresourceRange.levelCount = mipLevels == 0 ? 1 : mipLevels;
         barrier.subresourceRange.baseArrayLayer = 0;
         barrier.subresourceRange.layerCount = layers;
 
@@ -225,6 +225,20 @@ namespace neon::vulkan::vulkan_util {
 
             sourceStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
             destinationStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
+        } else if (oldLayout == VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL &&
+                   newLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL) {
+            barrier.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+            barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+
+            sourceStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
+            destinationStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+        } else if (oldLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL &&
+                   newLayout == VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL) {
+            barrier.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
+            barrier.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+
+            sourceStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+            destinationStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
         } else if (oldLayout == VK_IMAGE_LAYOUT_UNDEFINED &&
                    newLayout ==
                    VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL) {
@@ -246,8 +260,7 @@ namespace neon::vulkan::vulkan_util {
             destinationStage = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT |
                                VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
         } else if (oldLayout == VK_IMAGE_LAYOUT_UNDEFINED &&
-                   newLayout ==
-                   VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL) {
+                   newLayout == VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL) {
             barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 
             barrier.srcAccessMask = 0;
@@ -271,9 +284,11 @@ namespace neon::vulkan::vulkan_util {
         );
     }
 
-    void copyBufferToImage(AbstractVKApplication* application,
-                           VkBuffer buffer, VkImage image,
-                           uint32_t width, uint32_t height, uint32_t depth,
+    void copyBufferToImage(VkBuffer buffer,
+                           VkImage image,
+                           uint32_t width,
+                           uint32_t height,
+                           uint32_t depth,
                            uint32_t layers,
                            VkCommandBuffer commandBuffer) {
         VkBufferImageCopy region{};
@@ -298,6 +313,36 @@ namespace neon::vulkan::vulkan_util {
             buffer,
             image,
             VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+            1,
+            &region
+        );
+    }
+
+    void copyImageToBuffer(VkBuffer buffer,
+                           VkImage image,
+                           rush::Vec3i offset,
+                           rush::Vec<3, uint32_t> size,
+                           uint32_t layerOffset,
+                           uint32_t layers,
+                           VkCommandBuffer commandBuffer) {
+        VkBufferImageCopy region{};
+        region.bufferOffset = 0;
+        region.bufferRowLength = 0;
+        region.bufferImageHeight = 0;
+
+        region.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        region.imageSubresource.mipLevel = 0;
+        region.imageSubresource.baseArrayLayer = layerOffset;
+        region.imageSubresource.layerCount = layers;
+
+        region.imageOffset = {offset[0], offset[1], offset[2]};
+        region.imageExtent = {size[0], size[1], size[2],};
+
+        vkCmdCopyImageToBuffer(
+            commandBuffer,
+            image,
+            VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+            buffer,
             1,
             &region
         );
