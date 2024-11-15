@@ -18,7 +18,7 @@ namespace neon {
      */
     template<class Ok, class Error>
     class Result {
-        void* _data;
+        uint8_t* _data;
         bool _valid;
 
     public:
@@ -48,6 +48,7 @@ namespace neon {
             } else {
                 std::destroy_at<Error>(static_cast<Error*>(_data));
             }
+            delete[] _data;
         }
 
         [[nodiscard]] bool isOk() const {
