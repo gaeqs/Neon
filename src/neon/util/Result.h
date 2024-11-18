@@ -5,6 +5,7 @@
 #ifndef RVTRACKING_RESULT_H
 #define RVTRACKING_RESULT_H
 
+#include <cstdint>
 #include <functional>
 
 namespace neon {
@@ -18,7 +19,7 @@ namespace neon {
      */
     template<class Ok, class Error>
     class Result {
-        uint8_t* _data;
+        void* _data;
         bool _valid;
 
     public:
@@ -48,7 +49,7 @@ namespace neon {
             } else {
                 std::destroy_at<Error>(static_cast<Error*>(_data));
             }
-            delete[] _data;
+            delete[] static_cast<uint8_t*>(_data);
         }
 
         [[nodiscard]] bool isOk() const {
