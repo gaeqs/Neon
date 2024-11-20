@@ -263,6 +263,11 @@ namespace neon::vulkan {
         if (_externalDirtyFlag == 0) {
             _externalDirtyFlag++;
         }
+
+        if (_stagingBuffer != nullptr) {
+            // Staging buffer becomes invalid because the image size has changed.
+            _stagingBuffer = nullptr;
+        }
     }
 
     void VKTexture::updateData(const void* data, int32_t width, int32_t height,
@@ -276,13 +281,14 @@ namespace neon::vulkan {
         }
 
         if (_stagingBuffer == nullptr) {
-            _application->getLogger()
-                    .error(MessageBuilder()
-                        .group("vulkan")
-                        .print("Couldn't update data of a texture"
-                            " staging buffer is not found because"
-                            "the texture was external"));
-            return;
+            _stagingBuffer = std::make_unique<SimpleBuffer>(
+                _vkApplication,
+                VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+                VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
+                VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+                nullptr,
+                vc::pixelSize(_format) * _width * _height * _depth * _layers
+            );
         }
 
         auto map = _stagingBuffer->map<char>();
@@ -344,8 +350,7 @@ namespace neon::vulkan {
                 VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
                 VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
                 nullptr,
-                vc::pixelSize(_format)
-                * _width * _height * _depth * _layers
+                vc::pixelSize(_format) * _width * _height * _depth * _layers
             );
         }
 
