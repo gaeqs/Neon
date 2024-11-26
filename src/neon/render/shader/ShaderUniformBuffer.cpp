@@ -14,10 +14,6 @@ namespace neon {
         _descriptor(descriptor),
         _implementation(descriptor) {}
 
-    void ShaderUniformBuffer::setBindingPoint(uint32_t point) {
-        _implementation.setBindingPoint(point);
-    }
-
     void ShaderUniformBuffer::uploadData(uint32_t index,
                                          const void* data,
                                          size_t size,

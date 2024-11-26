@@ -44,8 +44,6 @@ namespace neon {
         [[nodiscard]] const std::shared_ptr<ShaderUniformDescriptor>&
         getDescriptor() const;
 
-        void setBindingPoint(uint32_t point);
-
         void uploadData(uint32_t index, const void* data,
                         size_t size, size_t offset = 0);
 

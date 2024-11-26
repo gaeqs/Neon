@@ -21,8 +21,7 @@ namespace neon::vulkan {
                       _types(),
                       _updated(),
                       _data(),
-                      _textures(),
-                      _bindingPoint(0) {
+                      _textures() {
         auto& bindings = descriptor->getBindings();
 
         _buffers.reserve(bindings.size());
@@ -171,10 +170,6 @@ namespace neon::vulkan {
                                 _descriptorPool, nullptr);
     }
 
-    void VKShaderUniformBuffer::setBindingPoint(uint32_t point) {
-        _bindingPoint = point;
-    }
-
     void VKShaderUniformBuffer::uploadData(uint32_t index,
                                            const void* data,
                                            size_t size,
@@ -286,10 +281,11 @@ namespace neon::vulkan {
     }
 
     void VKShaderUniformBuffer::bind(VkCommandBuffer commandBuffer,
-                                     VkPipelineLayout layout) const {
+                                     VkPipelineLayout layout,
+                                     uint32_t bindingPoint) const {
         vkCmdBindDescriptorSets(
             commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
-            layout, _bindingPoint, 1,
+            layout, bindingPoint, 1,
             &_descriptorSets[_vkApplication->getCurrentFrame()],
             0, nullptr);
     }

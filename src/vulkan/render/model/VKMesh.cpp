@@ -76,16 +76,20 @@ namespace neon::vulkan {
 
         auto layout = mat.getPipelineLayout();
 
-        globalBuffer->getImplementation().bind(commandBuffer, layout);
+        globalBuffer->getImplementation().bind(commandBuffer, layout, 0);
 
         if (material->getUniformBuffer() != nullptr) {
             material->getUniformBuffer()
-                    ->getImplementation().bind(commandBuffer, layout);
+                    ->getImplementation().bind(commandBuffer, layout, 1);
         }
 
         auto* modelBuffer = model.getUniformBuffer();
         if (modelBuffer != nullptr) {
-            modelBuffer->getImplementation().bind(commandBuffer, layout);
+            modelBuffer->getImplementation().bind(commandBuffer, layout, 2);
+        }
+
+        for (size_t bIndex = 3; auto& buffer: model.getExtraUniformBuffers()) {
+            buffer->getImplementation().bind(commandBuffer, layout, bIndex++);
         }
 
         vkCmdDrawIndexed(

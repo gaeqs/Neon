@@ -45,8 +45,6 @@ namespace neon::vulkan {
 
         ~VKShaderUniformBuffer();
 
-        void setBindingPoint(uint32_t point);
-
         void uploadData(uint32_t index, const void* data,
                         size_t size, size_t offset);
 
@@ -58,7 +56,7 @@ namespace neon::vulkan {
 
         void prepareForFrame(const CommandBuffer* commandBuffer);
 
-        void bind(VkCommandBuffer commandBuffer, VkPipelineLayout layout) const;
+        void bind(VkCommandBuffer commandBuffer, VkPipelineLayout layout, uint32_t bindingPoint) const;
     };
 }
 

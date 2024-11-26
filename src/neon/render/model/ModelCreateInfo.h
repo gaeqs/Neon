@@ -60,6 +60,14 @@ namespace neon {
         std::shared_ptr<ShaderUniformDescriptor> uniformDescriptor = nullptr;
 
         /**
+        * Other uniform buffers that can be used by the model.
+        * The set index of these buffers start on 3
+        * (0 is reserved for the global buffer, 1 is reserved for the material buffer
+        * and 2 is reserved for the model buffer).
+        */
+        std::vector<std::shared_ptr<ShaderUniformBuffer>> extraUniformBuffers = {};
+
+        /**
         * Whether the renderer should call Model::flush() before rendering.
         *
         * Set this flag to false if you want to manage the instance data

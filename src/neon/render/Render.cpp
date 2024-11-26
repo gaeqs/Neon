@@ -23,7 +23,6 @@ namespace neon {
         _application(application),
         _globalUniformDescriptor(descriptor),
         _globalUniformBuffer(name, descriptor) {
-        _globalUniformBuffer.setBindingPoint(0);
     }
 
     const Render::Implementation& Render::getImplementation() const {

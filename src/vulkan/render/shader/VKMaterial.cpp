@@ -198,11 +198,6 @@ namespace neon::vulkan {
             ++i;
         }
 
-        for (const auto& descriptor: createInfo.descriptions.extraUniforms) {
-            uniformInfos.push_back(descriptor->getImplementation()
-                .getDescriptorSetLayout());
-        }
-
         if(!uniformInfos.empty()) {
             while(i < 2) {
                 uniformInfos.insert(uniformInfos.begin(), uniformInfos.front());
@@ -210,9 +205,13 @@ namespace neon::vulkan {
             }
         }
 
+        for (const auto& descriptor: createInfo.descriptions.extraUniforms) {
+            uniformInfos.push_back(descriptor->getImplementation()
+                .getDescriptorSetLayout());
+        }
+
         VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
-        pipelineLayoutInfo.sType =
-                VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+        pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
         pipelineLayoutInfo.setLayoutCount = uniformInfos.size();
         pipelineLayoutInfo.pSetLayouts = uniformInfos.data();
 

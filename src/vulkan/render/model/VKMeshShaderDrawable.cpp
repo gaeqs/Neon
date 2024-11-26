@@ -45,16 +45,18 @@ void neon::vulkan::VKMeshShaderDrawable::draw(
     mat.uploadConstants(commandBuffer);
 
     auto layout = mat.getPipelineLayout();
-    globalBuffer->getImplementation().bind(commandBuffer, layout);
+    globalBuffer->getImplementation().bind(commandBuffer, layout, 0);
 
     if (material->getUniformBuffer() != nullptr) {
-        material->getUniformBuffer()
-                ->getImplementation().bind(commandBuffer, layout);
+        material->getUniformBuffer()->getImplementation().bind(commandBuffer, layout, 1);
     }
 
-    auto* modelBuffer = model.getUniformBuffer();
-    if (modelBuffer != nullptr) {
-        modelBuffer->getImplementation().bind(commandBuffer, layout);
+    if (auto* modelBuffer = model.getUniformBuffer(); modelBuffer != nullptr) {
+        modelBuffer->getImplementation().bind(commandBuffer, layout, 2);
+    }
+
+    for (size_t i = 3; auto& buffer: model.getExtraUniformBuffers()) {
+        buffer->getImplementation().bind(commandBuffer, layout, i++);
     }
 
     if (funVkCmdDrawMeshTasksEXT != nullptr) {
