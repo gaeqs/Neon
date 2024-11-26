@@ -18,7 +18,7 @@ namespace neon {
             {"MAX", BlendOperation::MAX}
         };
 
-        if(!name.is_string()) return def;
+        if (!name.is_string()) return def;
         std::string s = name;
 
         std::transform(s.begin(), s.end(), s.begin(), [](unsigned char c) {
@@ -53,7 +53,7 @@ namespace neon {
             {"ONE_MINUS_SRC1_ALPHA", BlendFactor::ONE_MINUS_SRC1_ALPHA},
         };
 
-        if(!name.is_string()) return def;
+        if (!name.is_string()) return def;
         std::string s = name;
 
         std::transform(s.begin(), s.end(), s.begin(), [](unsigned char c) {
@@ -77,7 +77,7 @@ namespace neon {
             {"ALWAYS", DepthCompareOperation::ALWAYS},
         };
 
-        if(!name.is_string()) return def;
+        if (!name.is_string()) return def;
         std::string s = name;
 
         std::transform(s.begin(), s.end(), s.begin(), [](unsigned char c) {
@@ -97,7 +97,7 @@ namespace neon {
             {"FILL_RECTANGLE_NVIDIA", PolygonMode::FILL_RECTANGLE_NVIDIA}
         };
 
-        if(!name.is_string()) return def;
+        if (!name.is_string()) return def;
         std::string s = name;
 
         std::transform(s.begin(), s.end(), s.begin(), [](unsigned char c) {
@@ -117,7 +117,7 @@ namespace neon {
             {"BOTH", CullMode::BOTH}
         };
 
-        if(!name.is_string()) return def;
+        if (!name.is_string()) return def;
         std::string s = name;
 
         std::transform(s.begin(), s.end(), s.begin(), [](unsigned char c) {
@@ -144,7 +144,26 @@ namespace neon {
             {"PATCH_LIST", PrimitiveTopology::PATCH_LIST}
         };
 
-        if(!name.is_string()) return def;
+        if (!name.is_string()) return def;
+        std::string s = name;
+
+        std::transform(s.begin(), s.end(), s.begin(), [](unsigned char c) {
+            return std::toupper(c);
+        });
+
+        auto it = map.find(s);
+        if (it != map.end()) return {it->second};
+        return def;
+    }
+
+    UniformBufferLocation MaterialLoader::parse(const nlohmann::json& name, UniformBufferLocation def) {
+        static const std::unordered_map<std::string, UniformBufferLocation> map = {
+            {"GLOBAL", UniformBufferLocation::GLOBAL},
+            {"MATERIAL", UniformBufferLocation::MATERIAL},
+            {"EXTRA", UniformBufferLocation::EXTRA},
+        };
+
+        if (!name.is_string()) return def;
         std::string s = name;
 
         std::transform(s.begin(), s.end(), s.begin(), [](unsigned char c) {
@@ -205,18 +224,23 @@ namespace neon {
         descriptions.instance = parse(json["instance"], InputRate::INSTANCE);
         descriptions.uniform = getAsset<ShaderUniformDescriptor>(json["uniform"], context);
 
-        auto extra = json["extra_uniforms"];
-        if (extra.is_array()) {
+        if (auto extra = json["bindings"]; extra.is_array()) {
+            descriptions.uniformBindings.clear();
             for (auto& entry: extra) {
-                auto result = getAsset<ShaderUniformDescriptor>(entry, context);
-                if (result != nullptr) {
-                    descriptions.extraUniforms.push_back(result);
+                if (!entry.is_object()) continue;
+                auto binding = entry["binding"];
+                if (!binding.is_number_unsigned()) continue;
+                auto location = parse(entry["location"], UniformBufferLocation::GLOBAL);
+                std::shared_ptr<ShaderUniformDescriptor> desc = nullptr;
+                if (location == UniformBufferLocation::EXTRA) {
+                    auto result = getAsset<ShaderUniformDescriptor>(entry["descriptor"], context);
+                    if (result != nullptr) {
+                        desc = result;
+                    }
                 }
-            }
-        } else {
-            auto result = getAsset<ShaderUniformDescriptor>(extra, context);
-            if (result != nullptr) {
-                descriptions.extraUniforms.push_back(result);
+
+                DescriptorBinding ubb(location, desc);
+                descriptions.uniformBindings.insert({binding.get<uint8_t>(), ubb});
             }
         }
     }

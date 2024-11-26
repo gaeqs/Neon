@@ -76,20 +76,29 @@ namespace neon::vulkan {
 
         auto layout = mat.getPipelineLayout();
 
-        globalBuffer->getImplementation().bind(commandBuffer, layout, 0);
-
-        if (material->getUniformBuffer() != nullptr) {
-            material->getUniformBuffer()
-                    ->getImplementation().bind(commandBuffer, layout, 1);
-        }
-
-        auto* modelBuffer = model.getUniformBuffer();
-        if (modelBuffer != nullptr) {
-            modelBuffer->getImplementation().bind(commandBuffer, layout, 2);
-        }
-
-        for (size_t bIndex = 3; auto& buffer: model.getExtraUniformBuffers()) {
-            buffer->getImplementation().bind(commandBuffer, layout, bIndex++);
+        for (auto [binding, entry]: model.getUniformBufferBindings()) {
+            switch (entry.location) {
+                case ModelBufferLocation::GLOBAL:
+                    if (globalBuffer != nullptr) {
+                        globalBuffer->getImplementation().bind(commandBuffer, layout, binding);
+                    }
+                    break;
+                case ModelBufferLocation::MATERIAL:
+                    if (auto& buffer = material->getUniformBuffer(); buffer != nullptr) {
+                        material->getUniformBuffer()->getImplementation().bind(commandBuffer, layout, binding);
+                    }
+                    break;
+                case ModelBufferLocation::MODEL:
+                    if (auto buffer = model.getUniformBuffer(); buffer != nullptr) {
+                        material->getUniformBuffer()->getImplementation().bind(commandBuffer, layout, binding);
+                    }
+                    break;
+                case ModelBufferLocation::EXTRA:
+                    if (entry.extraBuffer != nullptr) {
+                        entry.extraBuffer->getImplementation().bind(commandBuffer, layout, binding);
+                    }
+                    break;
+            }
         }
 
         vkCmdDrawIndexed(

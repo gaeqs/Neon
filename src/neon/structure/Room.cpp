@@ -228,6 +228,12 @@ namespace neon {
                         materials.insert(mat.get());
                     }
                 }
+
+                for (auto [location, buffer]: model->getUniformBufferBindings() | std::views::values) {
+                    if (location == ModelBufferLocation::EXTRA && buffer != nullptr) {
+                        buffer->prepareForFrame(cb);
+                    }
+                }
             }
 
             for (const auto& material: materials) {

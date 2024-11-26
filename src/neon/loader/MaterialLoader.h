@@ -23,6 +23,8 @@ namespace neon {
 
         static PrimitiveTopology parse(const nlohmann::json& name, PrimitiveTopology def);
 
+        static UniformBufferLocation parse(const nlohmann::json& name, UniformBufferLocation def);
+
         static std::vector<InputDescription> parse(nlohmann::json& data, InputRate inputRate);
 
         static void loadDescriptions(nlohmann::json& json, MaterialDescriptions& descriptions,

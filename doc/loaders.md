@@ -63,7 +63,22 @@ Each stage must include a `file` or `raw` parameter. The parameter `file` has pr
     "instance": {
       // Same as vertex.
     },
-    "uniform": "A:shader_uniform_descriptor"
+    "uniform": "A:shader_uniform_descriptor",
+    "bindings": [
+      {
+        "binding": 0,
+        "location": "global"
+      },
+      {
+        "binding": 1,
+        "location": "material"
+      },
+      {
+        "binding": 2,
+        "location": "extra",
+        "descriptor": "A:another_shader_uniform_descriptor"
+      }
+    ]
   },
   "blending": {
     "logic_blending": false,
@@ -108,6 +123,11 @@ Each stage must include a `file` or `raw` parameter. The parameter `file` has pr
 ```
 
 The only required parameters are `frame_buffer` and `shader`.
+
+The parameter 'descriptor.uniform' describes the uniform buffer that will be created along with the material,
+while the parameter 'descriptor.bindings' describes the binding set the defined uniform buffers will be bound to
+when the material is used. By default, the global buffer will be bound to the set 0 and the material buffer will be
+bound to the set 1.
 
 ## Meshes
 

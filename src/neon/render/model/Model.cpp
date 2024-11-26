@@ -12,7 +12,7 @@ namespace neon {
                  const ModelCreateInfo& info)
         : Asset(typeid(Model), name),
           _meshes(info.drawables),
-          _extraUniformBuffers(info.extraUniformBuffers),
+          _bufferBindings(info.uniformBufferBindings),
           _shouldAutoFlush(info.shouldAutoFlush),
           _implementation(application, this) {
         if (info.uniformDescriptor != nullptr) {
@@ -40,12 +40,12 @@ namespace neon {
         return _uniformBuffer.get();
     }
 
-    std::vector<std::shared_ptr<ShaderUniformBuffer>>& Model::getExtraUniformBuffers() {
-        return _extraUniformBuffers;
+    std::unordered_map<uint32_t, ModelBufferBinding>& Model::getUniformBufferBindings() {
+        return _bufferBindings;
     }
 
-    const std::vector<std::shared_ptr<ShaderUniformBuffer>>& Model::getExtraUniformBuffers() const {
-        return _extraUniformBuffers;
+    const std::unordered_map<uint32_t, ModelBufferBinding>& Model::getUniformBufferBindings() const {
+        return _bufferBindings;
     }
 
     const std::vector<std::unique_ptr<InstanceData>>& Model::getInstanceDatas() const {
