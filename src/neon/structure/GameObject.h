@@ -228,8 +228,8 @@ namespace neon {
         requires std::is_base_of_v<Component, T>
         [[nodiscard]] IdentifiableWrapper<T> findComponent() {
             for (const auto &item: _components) {
-                if (dynamic_cast<T *>(item.raw())) {
-                    return item;
+                if (auto t = dynamic_cast<T *>(item.raw())) {
+                    return t;
                 }
             }
             return nullptr;
