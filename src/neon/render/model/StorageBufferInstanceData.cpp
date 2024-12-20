@@ -19,6 +19,16 @@ namespace neon {
           _types(info.instanceTypes),
           _slots(std::move(slots)) {}
 
+    StorageBufferInstanceData::StorageBufferInstanceData(
+        Application* application,
+        uint32_t maximumInstances,
+        std::vector<std::type_index> types,
+        std::vector<Slot> slots)
+        : _application(application),
+          _maximumInstances(maximumInstances),
+          _types(std::move(types)),
+          _slots(std::move(slots)) {}
+
     StorageBufferInstanceData::~StorageBufferInstanceData() {
         for (auto* position: _positions) {
             delete position;

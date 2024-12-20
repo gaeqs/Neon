@@ -40,6 +40,11 @@ namespace neon {
                                   const ModelCreateInfo& info,
                                   std::vector<Slot> slots);
 
+        StorageBufferInstanceData(Application* application,
+                                  uint32_t maximumInstances,
+                                  std::vector<std::type_index> types,
+                                  std::vector<Slot> slots);
+
         ~StorageBufferInstanceData() override;
 
         [[nodiscard]] const std::vector<std::type_index>&
