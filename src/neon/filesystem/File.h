@@ -37,6 +37,8 @@ namespace neon {
         [[nodiscard]] std::optional<nlohmann::json> toJson() const;
 
         [[nodiscard]] std::string toString() const;
+
+        [[nodiscard]] std::vector<std::string> readLines() const;
     };
 }
 

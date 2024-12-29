@@ -52,11 +52,21 @@ namespace neon {
 
     std::optional<nlohmann::json> File::toJson() const {
         auto json = nlohmann::json::parse(_data, _data + _size, nullptr, false);
-        if(json.is_discarded()) return {};
+        if (json.is_discarded()) return {};
         return json;
     }
 
     std::string File::toString() const {
         return std::string(_data, _size);
+    }
+
+    std::vector<std::string> File::readLines() const {
+        std::vector<std::string> lines;
+        std::istringstream f(toString());
+        std::string line;
+        while (std::getline(f, line)) {
+            lines.push_back(line);
+        }
+        return lines;
     }
 }

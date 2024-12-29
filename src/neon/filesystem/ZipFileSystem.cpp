@@ -20,7 +20,8 @@ namespace neon {
     std::optional<File> ZipFileSystem::readFile(std::filesystem::path path) const {
         auto file = _zip->getEntry(path.lexically_normal().string());
         if (file.isNull() || !file.isFile()) return {};
-        return File(static_cast<char*>(file.readAsBinary()), file.getSize());
+        libzippp_uint8* data = file.readAsBinary();
+        return File(reinterpret_cast<const char*>(data), file.getSize());
     }
 
     bool ZipFileSystem::exists(std::filesystem::path path) const {
