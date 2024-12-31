@@ -7,8 +7,6 @@
 
 #include <bitset>
 #include <functional>
-#include <memory>
-#include <cstring>
 
 namespace neon {
     constexpr size_t DEFAULT_CLUSTER_SIZE = 256;
@@ -24,20 +22,22 @@ namespace neon {
         [[nodiscard]] virtual size_t capacity() const = 0;
 
         virtual void forEachRaw(std::function<void(void*)> function) = 0;
+
+        virtual bool erase(const void* value) = 0;
     };
 
 
-    template<class Collection>
+    template<class CollectionPtr>
     class ClusteredLinkedCollectorIterator {
-        Collection* _collection;
+        CollectionPtr _collection;
         size_t _index;
 
     public:
         using iterator_category = std::forward_iterator_tag;
         using difference_type = std::ptrdiff_t;
-        using value_type = typename Collection::ValueType;
+        using value_type = typename std::remove_pointer_t<CollectionPtr>::ValueType;
 
-        ClusteredLinkedCollectorIterator(Collection* collection, size_t index)
+        ClusteredLinkedCollectorIterator(CollectionPtr collection, size_t index)
             : _collection(collection), _index(index) {
             while (_collection != nullptr && !_collection->_occupied[_index]) {
                 ++_index;
@@ -61,8 +61,20 @@ namespace neon {
             return _collection->rawPointer(_index);
         }
 
+        CollectionPtr getCollection() const {
+            return _collection;
+        }
+
+        size_t getIndex() const {
+            return _index;
+        }
+
+        operator ClusteredLinkedCollectorIterator<const std::remove_pointer_t<CollectionPtr>*>() {
+            return ClusteredLinkedCollectorIterator<const std::remove_pointer_t<CollectionPtr>*>(_collection, _index);
+        }
+
         // Prefix increment
-        ClusteredLinkedCollectorIterator<Collection>& operator++() {
+        ClusteredLinkedCollectorIterator<CollectionPtr>& operator++() {
             do {
                 ++_index;
                 if (_index >= _collection->capacity()) {
@@ -75,108 +87,54 @@ namespace neon {
         }
 
         // Postfix increment
-        ClusteredLinkedCollectorIterator<Collection> operator++(int) {
-            ClusteredLinkedCollectorIterator<Collection> tmp = *this;
+        ClusteredLinkedCollectorIterator<CollectionPtr> operator++(int) {
+            ClusteredLinkedCollectorIterator<CollectionPtr> tmp = *this;
             ++(*this);
             return tmp;
         }
 
         bool
         operator==(
-            const ClusteredLinkedCollectorIterator<Collection>& b) const {
+            const ClusteredLinkedCollectorIterator<CollectionPtr>& b) const {
             return _collection == b._collection && _index == b._index;
         };
 
         bool
         operator!=(
-            const ClusteredLinkedCollectorIterator<Collection>& b) const {
+            const ClusteredLinkedCollectorIterator<CollectionPtr>& b) const {
             return _collection != b._collection || _index != b._index;
         };
     };
 
-    template<class Collection>
-    class ConstClusteredLinkedCollectorIterator {
-        const Collection* _collection;
-        size_t _index;
-
-    public:
-        using iterator_category = std::forward_iterator_tag;
-        using difference_type = std::ptrdiff_t;
-        using value_type = typename Collection::ValueType;
-
-        ConstClusteredLinkedCollectorIterator(const Collection* collection,
-                                              size_t index)
-            : _collection(collection), _index(index) {
-            while (_collection != nullptr && !_collection->_occupied[_index]) {
-                ++_index;
-                if (_index >= _collection->capacity()) {
-                    _index = 0;
-                    _collection = _collection->_next;
-                }
-            }
-        }
-
-
-        const value_type& operator*() const {
-            return _collection->rawPointer(_index)[0];
-        }
-
-        const value_type* operator->() const {
-            return _collection->rawPointer(_index);
-        }
-
-        const value_type* raw() const {
-            return _collection->rawPointer(_index);
-        }
-
-        // Prefix increment
-        ConstClusteredLinkedCollectorIterator<Collection>& operator++() {
-            do {
-                ++_index;
-                if (_index >= _collection->capacity()) {
-                    _index = 0;
-                    _collection = _collection->_next;
-                }
-            } while (_collection != nullptr && !_collection->_occupied[_index]);
-
-            return *this;
-        }
-
-        // Postfix increment
-        ConstClusteredLinkedCollectorIterator<Collection> operator++(int) {
-            ConstClusteredLinkedCollectorIterator<Collection> tmp = *this;
-            ++(*this);
-            return tmp;
-        }
-
-        bool
-        operator==(
-            const ConstClusteredLinkedCollectorIterator<Collection>& b) const {
-            return _collection == b._collection && _index == b._index;
-        };
-
-        bool
-        operator!=(
-            const ConstClusteredLinkedCollectorIterator<Collection>& b) const {
-            return _collection != b._collection || _index != b._index;
-        };
-    };
-
+    /**
+    * This class implements a specialized collection that ensures elements remain
+    * at fixed memory locations once inserted.
+    * This eliminates any risk of element movement,
+    * making it ideal for scenarios where you need to maintain stable
+    * pointers to elements without concern for relocation.
+    * <p>
+    * Features:
+    * <p>
+    * Stable Pointers: the memory addresses of elements remain consistent,
+    * providing safety and reliability when storing references or pointers.
+    * <p>
+    * Spatial Locality: the collection strives to store elements in contiguous memory blocks,
+    * optimizing cache usage and improving performance by leveraging spatial locality.
+    */
     template<class T, size_t Size = DEFAULT_CLUSTER_SIZE>
     class ClusteredLinkedCollection : public AbstractClusteredLinkedCollection {
     public:
+        friend class ClusteredLinkedCollectorIterator<ClusteredLinkedCollection<T, Size>*>;
+        friend class ClusteredLinkedCollectorIterator<const ClusteredLinkedCollection<T, Size>*>;
+
         using ValueType = T;
-        using Iterator = ClusteredLinkedCollectorIterator<ClusteredLinkedCollection<T, Size>>;
-        using ConstIterator = ConstClusteredLinkedCollectorIterator<ClusteredLinkedCollection<T, Size>>;
+        using Iterator = ClusteredLinkedCollectorIterator<ClusteredLinkedCollection<T, Size>*>;
+        using ConstIterator = ClusteredLinkedCollectorIterator<const ClusteredLinkedCollection<T, Size>*>;
 
     private:
-        friend class ClusteredLinkedCollectorIterator<ClusteredLinkedCollection<T, Size>>;
-
-        friend class ConstClusteredLinkedCollectorIterator<ClusteredLinkedCollection<T, Size>>;
-
         size_t _objectSize;
 
-        char* _data;
+        T* _data;
         std::bitset<Size> _occupied;
         size_t _localSize;
 
@@ -189,13 +147,16 @@ namespace neon {
         }
 
         T* rawPointer(size_t index) const {
-            return reinterpret_cast<T*>(_data + index * _objectSize);
+            return static_cast<T*>(_data + index);
         }
 
     public:
+        /**
+        * Creates a new empty ClusteredLinkedCollection.
+        */
         ClusteredLinkedCollection() :
             _objectSize(sizeof(T)),
-            _data(static_cast<char*>(malloc(sizeof(T) * Size))),
+            _data(static_cast<T*>(malloc(sizeof(T) * Size))),
             _occupied(),
             _localSize(0),
             _next(nullptr) {}
@@ -203,7 +164,7 @@ namespace neon {
         ~ClusteredLinkedCollection() override {
             for (size_t i = 0; i < Size; ++i) {
                 if (_occupied[i]) {
-                    T* element = reinterpret_cast<T*>(_data + i * _objectSize);
+                    T* element = _data + i;
                     std::destroy_at(element);
                 }
             }
@@ -212,9 +173,12 @@ namespace neon {
             delete _next;
         }
 
+        /**
+        * Creates a copy of the given collection.
+        */
         ClusteredLinkedCollection(const ClusteredLinkedCollection& other) :
             _objectSize(other._objectSize),
-            _data(static_cast<char*>(malloc(other._objectSize * Size))),
+            _data(static_cast<T*>(malloc(other._objectSize * Size))),
             _occupied(),
             _localSize(0),
             _next(nullptr) {
@@ -223,7 +187,9 @@ namespace neon {
             }
         }
 
-
+        /**
+        * Creates a copy of the given collection.
+        */
         ClusteredLinkedCollection& operator=(const ClusteredLinkedCollection& other) {
             if (&other == this) return *this;
             clear();
@@ -233,6 +199,9 @@ namespace neon {
             return *this;
         }
 
+        /**
+        * Moves the given collection.
+        */
         ClusteredLinkedCollection(ClusteredLinkedCollection&& other) noexcept :
             _objectSize(other._objectSize),
             _data(other._data),
@@ -240,11 +209,14 @@ namespace neon {
             _localSize(other._localSize),
             _next(other._next) {
             other._occupied.reset();
-            other._data = static_cast<char*>(malloc(other._objectSize * Size));
+            other._data = static_cast<T*>(malloc(other._objectSize * Size));
             other._localSize = 0;
             other._next = nullptr;
         }
 
+        /**
+        * Moves the given collection.
+        */
         ClusteredLinkedCollection& operator=(ClusteredLinkedCollection&& other) noexcept {
             if (&other == this) return *this;
 
@@ -255,41 +227,37 @@ namespace neon {
             _next = other._next;
 
             other._occupied.reset();
-            other._data = static_cast<char*>(malloc(other._objectSize * Size));
+            other._data = static_cast<T*>(malloc(other._objectSize * Size));
             other._localSize = 0;
             other._next = nullptr;
 
             return *this;
         }
 
+        /**
+        * @returns the amount of elements inside this collection.
+        */
         [[nodiscard]] size_t size() const override {
             return _localSize + (_next == nullptr ? 0 : _next->size());
         }
 
+        /**
+        * @returns whether this collection is empty.
+        */
         [[nodiscard]] bool empty() const override {
-            return size() == 0;
+            return _localSize == 0 && (_next == nullptr || _next->empty());
         }
 
+        /**
+        * @params returns the amount of elements this local cluster can hold without expanding.
+        */
         [[nodiscard]] size_t capacity() const override {
             return Size;
         }
 
-        Iterator begin() {
-            return Iterator(this, 0);
-        }
-
-        ConstIterator begin() const {
-            return ConstIterator(this, 0);
-        }
-
-        Iterator end() {
-            return Iterator(nullptr, 0);
-        }
-
-        ConstIterator end() const {
-            return ConstIterator(nullptr, 0);
-        }
-
+        /**
+        * Calls the given function for each element inside this collection.
+        */
         void forEachRaw(std::function<void(void*)> function) override {
             auto it = begin();
             auto itEnd = end();
@@ -300,6 +268,9 @@ namespace neon {
             }
         }
 
+        /**
+        * Calls the given function for each element inside this collection.
+        */
         void forEach(std::function<void(T*)> function) {
             auto it = begin();
             auto itEnd = end();
@@ -310,6 +281,9 @@ namespace neon {
             }
         }
 
+        /**
+        * Calls the given function for each element inside this collection.
+        */
         void forEach(std::function<void(const T*)> function) const {
             auto it = begin();
             auto itEnd = end();
@@ -320,6 +294,10 @@ namespace neon {
             }
         }
 
+        /**
+        * Inserts the given elements into this collection, creating a copy.
+        * @returns the pointer to the new copy.
+        */
         T* push(const T& t) {
             if (_localSize == Size) {
                 expand();
@@ -333,10 +311,14 @@ namespace neon {
             _occupied.flip(index);
             ++_localSize;
 
-            auto* ptr = reinterpret_cast<T*>(_data + index * _objectSize);
+            auto* ptr = _data + index;
             return std::construct_at<T>(ptr, t);
         }
 
+        /**
+        * Inserts the given elements into this collection, moving it.
+        * @returns the pointer to the moved element.
+        */
         T* push(T&& t) {
             if (_localSize == Size) {
                 expand();
@@ -350,10 +332,14 @@ namespace neon {
             _occupied.flip(index);
             ++_localSize;
 
-            auto* ptr = reinterpret_cast<T*>(_data + index * _objectSize);
+            auto* ptr = _data + index;
             return std::construct_at<T>(ptr, std::move(t));
         }
 
+        /**
+        * Creates a new element into this collection using the given parameters.
+        * @returns the pointer to the new element.
+        */
         template<class... Args>
         T* emplace(Args&&... values) {
             if (_localSize == Size) {
@@ -369,41 +355,61 @@ namespace neon {
             _occupied.flip(index);
             ++_localSize;
 
-            auto* ptr = reinterpret_cast<T*>(_data + index * _objectSize);
+            auto* ptr = _data + index;
             return std::construct_at<T>(ptr, std::forward<Args>(values)...);
         }
 
-        bool remove(const T* value) {
-            size_t position = 0;
-            bool found = false;
-
-            for (size_t i = 0; i < Size; ++i) {
-                if (_occupied[i] && rawPointer(i) == value) {
-                    position = i;
-                    found = true;
-                    break;
-                }
-            }
-
-            if (found) {
-                auto* ptr = reinterpret_cast<T*>(
-                    _data + position * _objectSize);
+        /**
+        * Erases the element at the given position.
+        * @returns whether the element has been erased.
+        */
+        bool erase(ConstIterator it) {
+            if (it.getCollection() == this) {
+                size_t position = it.getIndex();
+                if (!_occupied[position]) return false;
+                auto* ptr = _data + position;
                 _occupied.flip(position);
                 --_localSize;
                 std::destroy_at(ptr);
-                memset(ptr, 0, _objectSize);
                 return true;
             }
 
             if (_next != nullptr) {
-                return _next->remove(value);
+                return _next->erase(it);
             }
 
             return false;
         }
 
+        /**
+        * Erases the element at the given pointer.
+        * @returns whether the element has been erased.
+        */
+        bool erase(const void* value) override {
+            int64_t position = static_cast<const T*>(value) - _data;
+            if (position < 0 || position >= Size) {
+                if (_next != nullptr) {
+                    return _next->erase(value);
+                }
+                return false;
+            }
+
+            if (!_occupied[position]) {
+                return false;
+            }
+
+            _occupied.flip(position);
+            std::destroy_at(_data + position);
+
+            --_localSize;
+            return true;
+        }
+
+        /**
+        * Clears all the contents of this collection.
+        */
         void clear() {
-            for (size_t i = 0; i < Size; i += _objectSize) {
+            for (size_t i = 0; i < Size; ++i) {
                 if (_occupied[i]) {
                     std::destroy_at(_data + i);
                 }
@@ -413,6 +419,24 @@ namespace neon {
             _localSize = 0;
 
             delete _next;
+            _next = nullptr;
+        }
+
+
+        Iterator begin() {
+            return Iterator(this, 0);
+        }
+
+        ConstIterator begin() const {
+            return ConstIterator(this, 0);
+        }
+
+        Iterator end() {
+            return Iterator(nullptr, 0);
+        }
+
+        ConstIterator end() const {
+            return ConstIterator(nullptr, 0);
         }
     };
 }

@@ -59,7 +59,9 @@ namespace neon {
     }
 
     void Room::destroyGameObject(IdentifiableWrapper<GameObject> gameObject) {
-        _gameObjects.remove(gameObject.raw());
+        if (!_gameObjects.erase(gameObject.raw())) {
+            std::cerr << "Room::destroyGameObject: Game object not found" << std::endl;
+        }
     }
 
     void Room::destroyComponentLater(
