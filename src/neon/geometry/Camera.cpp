@@ -5,22 +5,20 @@
 #include "Camera.h"
 
 namespace neon {
-
     void Camera::recalculateViewMatrix() {
         _dirtyView = false;
         _view = rush::Mat4f::lookAt(_position, getForward(), getUp());
     }
 
     Camera::Camera(const Frustum& frustum) :
-            _position(),
-            _rotation(),
-            _rotationInverse(),
-            _frustum(frustum),
-            _dirtyView(false),
-            _dirtyProjection(true),
-            _view(1.0f),
-            _viewProjection(1.0f) {
-    }
+        _position(),
+        _rotation(),
+        _rotationInverse(),
+        _frustum(frustum),
+        _dirtyView(false),
+        _dirtyProjection(true),
+        _view(1.0f),
+        _viewProjection(1.0f) {}
 
     const rush::Vec3f& Camera::getPosition() const {
         return _position;
@@ -61,7 +59,6 @@ namespace neon {
             throw std::runtime_error("Rotation is not normalized ");
         }
 #endif
-
     }
 
     void Camera::setFrustum(const Frustum& frustum) {
@@ -136,5 +133,20 @@ namespace neon {
         _dirtyProjection = false;
         _viewProjection = _frustum.getProjection() * _view;
         return _viewProjection;
+    }
+
+    std::array<rush::Plane<float>, 6> Camera::getPlanes() {
+        auto& vp = getViewProjection();
+
+        rush::Vec3f columns[4] = {vp.row(0), vp.row(1), vp.row(2), vp.row(3)};
+
+        return {
+            rush::Plane(columns[3] + columns[0], vp(3, 3) + vp(3, 0)).normalized(),
+            rush::Plane(columns[3] - columns[0], vp(3, 3) - vp(3, 0)).normalized(),
+            rush::Plane(columns[3] + columns[1], vp(3, 3) + vp(3, 1)).normalized(),
+            rush::Plane(columns[3] - columns[1], vp(3, 3) - vp(3, 1)).normalized(),
+            rush::Plane(columns[2], vp(3, 2)).normalized(),
+            rush::Plane(columns[3] - columns[2], vp(3, 3) - vp(2, 3)).normalized(),
+        };
     }
 }

@@ -61,6 +61,8 @@ namespace neon {
         const rush::Mat4f& getView();
 
         const rush::Mat4f& getViewProjection();
+
+        std::array<rush::Plane<float>, 6> getPlanes();
     };
 }
 
