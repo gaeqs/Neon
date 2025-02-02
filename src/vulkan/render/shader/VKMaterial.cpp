@@ -33,7 +33,7 @@ namespace neon::vulkan {
               createInfo.target->getImplementation().getRenderPass().getRaw()) {
         std::vector<VkDynamicState> dynamicStates = {
             VK_DYNAMIC_STATE_VIEWPORT,
-            VK_DYNAMIC_STATE_SCISSOR
+            VK_DYNAMIC_STATE_SCISSOR,
         };
 
         std::vector<VkVertexInputAttributeDescription> attributes;
@@ -107,10 +107,9 @@ namespace neon::vulkan {
         rasterizer.depthBiasSlopeFactor = 0.0f; // Optional
 
         VkPipelineMultisampleStateCreateInfo multisampling{};
-        multisampling.sType =
-                VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
+        multisampling.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
         multisampling.sampleShadingEnable = VK_FALSE;
-        multisampling.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
+        multisampling.rasterizationSamples = conversions::vkSampleCountFlagBits(material->getTarget()->getSamples());
         multisampling.minSampleShading = 1.0f; // Optional
         multisampling.pSampleMask = nullptr; // Optional
         multisampling.alphaToCoverageEnable = VK_FALSE; // Optional

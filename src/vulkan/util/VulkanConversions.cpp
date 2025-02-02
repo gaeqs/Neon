@@ -154,6 +154,15 @@ vc::vkSampleCountFlagBits(const SamplesPerTexel& samples) {
     }
 }
 
+std::vector<VkSampleCountFlagBits> vc::vkSampleCountFlagBits(const std::vector<FrameBufferTextureCreateInfo>& infos) {
+    std::vector<VkSampleCountFlagBits> map;
+    map.reserve(infos.size());
+    for (const auto& item: infos) {
+        map.push_back(vkSampleCountFlagBits(item.samples));
+    }
+    return map;
+}
+
 VkImageViewType vc::vkImageViewType(const TextureViewType& viewType) {
     switch (viewType) {
         case TextureViewType::NORMAL_1D:

@@ -49,9 +49,9 @@ namespace neon {
                           textureInfos,
                           bool depth,
                           std::optional<std::string> depthName = {},
+                          SamplesPerTexel depthSamples = SamplesPerTexel::COUNT_1,
                           Condition condition = defaultRecreationCondition,
-                          const Parameters& parameters =
-                                  defaultRecreationParameters);
+                          const Parameters& parameters = defaultRecreationParameters);
 
         SimpleFrameBuffer(Application* application,
                           std::string name,
@@ -59,8 +59,7 @@ namespace neon {
                           textureInfos,
                           std::shared_ptr<Texture> depthTexture,
                           Condition condition = defaultRecreationCondition,
-                          const Parameters& parameters =
-                                  defaultRecreationParameters);
+                          const Parameters& parameters = defaultRecreationParameters);
 
         ~SimpleFrameBuffer() override = default;
 
@@ -79,6 +78,8 @@ namespace neon {
         [[nodiscard]] uint32_t getWidth() const override;
 
         [[nodiscard]] uint32_t getHeight() const override;
+
+        SamplesPerTexel getSamples() const override;
 
         [[nodiscard]] const Condition& getRecreationCondition() const;
 

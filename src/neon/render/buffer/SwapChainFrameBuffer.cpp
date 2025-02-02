@@ -6,9 +6,9 @@
 
 namespace neon {
     SwapChainFrameBuffer::SwapChainFrameBuffer(
-        Application* application, std::string name, bool depth) :
+        Application* application, std::string name, SamplesPerTexel samples, bool depth) :
         FrameBuffer(std::move(name)),
-        _implementation(application, depth) {}
+        _implementation(application, samples, depth) {}
 
     bool SwapChainFrameBuffer::requiresRecreation() {
         return _implementation.requiresRecreation();
@@ -38,5 +38,9 @@ namespace neon {
 
     uint32_t SwapChainFrameBuffer::getHeight() const {
         return _implementation.getHeight();
+    }
+
+    SamplesPerTexel SwapChainFrameBuffer::getSamples() const {
+        return _implementation.getSamples();
     }
 }

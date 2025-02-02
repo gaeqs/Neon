@@ -18,11 +18,15 @@ namespace neon::vulkan {
     class AbstractVKApplication;
 
     class VKSwapChainFrameBuffer : public VKFrameBuffer {
-
         AbstractVKApplication* _vkApplication;
+        SamplesPerTexel _samples;
 
         std::vector<VkImage> _swapChainImages;
         std::vector<VkImageView> _swapChainImageViews;
+
+        VkImage _colorImage;
+        VkDeviceMemory _colorImageMemory;
+        VkImageView _colorImageView;
 
         VkImage _depthImage;
         VkDeviceMemory _depthImageMemory;
@@ -41,6 +45,8 @@ namespace neon::vulkan {
 
         void createSwapChainImageViews();
 
+        void createColorImage();
+
         void createDepthImage();
 
         void createFrameBuffers();
@@ -48,8 +54,7 @@ namespace neon::vulkan {
         void cleanup();
 
     public:
-
-        VKSwapChainFrameBuffer(Application* application, bool depth);
+        VKSwapChainFrameBuffer(Application* application, SamplesPerTexel samples, bool depth);
 
         ~VKSwapChainFrameBuffer() override;
 
@@ -71,12 +76,13 @@ namespace neon::vulkan {
 
         [[nodiscard]] uint32_t getHeight() const override;
 
+        [[nodiscard]] SamplesPerTexel getSamples() const override;
+
         [[nodiscard]] bool renderImGui() override;
 
         [[nodiscard]] bool requiresRecreation();
 
         void recreate();
-
     };
 }
 

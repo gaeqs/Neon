@@ -48,6 +48,8 @@ namespace neon::vulkan::conversions {
 
     VkSampleCountFlagBits vkSampleCountFlagBits(const SamplesPerTexel& samples);
 
+    std::vector<VkSampleCountFlagBits> vkSampleCountFlagBits(const std::vector<FrameBufferTextureCreateInfo>& infos);
+
     VkImageViewType vkImageViewType(const TextureViewType& viewType);
 
     VkComponentSwizzle vkComponentSwizzle(const TextureComponentSwizzle& sw);

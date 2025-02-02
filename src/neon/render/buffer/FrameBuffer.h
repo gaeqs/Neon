@@ -7,6 +7,7 @@
 
 #include <vector>
 #include <memory>
+#include <neon/render/texture/TextureCreateInfo.h>
 #include <neon/structure/Asset.h>
 
 #ifdef USE_VULKAN
@@ -62,6 +63,8 @@ namespace neon {
         [[nodiscard]] virtual uint32_t getWidth() const = 0;
 
         [[nodiscard]] virtual uint32_t getHeight() const = 0;
+
+        [[nodiscard]] virtual SamplesPerTexel getSamples() const = 0;
     };
 }
 

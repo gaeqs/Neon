@@ -311,7 +311,9 @@ If no sources are available, the texture won't be created.
 
 ```json
 {
-  "type": "swap_chain"
+  "type": "swap_chain",
+  "depth": false,
+  "samples": "COUNT_1|COUNT_2|COUNT_4|COUNT_8|COUNT_16|COUNT_32|COUNT_64"
 }
 ```
 
@@ -319,6 +321,7 @@ If no sources are available, the texture won't be created.
 {
   "type": "simple",
   "depth": false,
+  "samples": "COUNT_1|COUNT_2|COUNT_4|COUNT_8|COUNT_16|COUNT_32|COUNT_64",
   // Textures can also be an object.
   "textures": [
     {

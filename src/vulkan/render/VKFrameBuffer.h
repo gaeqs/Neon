@@ -9,6 +9,7 @@
 #include <vulkan/vulkan.h>
 
 #include <vector>
+#include <neon/render/texture/TextureCreateInfo.h>
 
 namespace neon::vulkan {
     class VKRenderPass;
@@ -40,6 +41,8 @@ namespace neon::vulkan {
         [[nodiscard]] virtual uint32_t getWidth() const = 0;
 
         [[nodiscard]] virtual uint32_t getHeight() const = 0;
+
+        [[nodiscard]] virtual SamplesPerTexel getSamples() const = 0;
 
         [[nodiscard]] virtual bool renderImGui() = 0;
     };

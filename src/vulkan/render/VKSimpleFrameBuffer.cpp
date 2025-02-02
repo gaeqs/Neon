@@ -32,6 +32,7 @@ namespace neon::vulkan {
         for (const auto& createInfo: _createInfos) {
             info.format = createInfo.format;
             info.layers = createInfo.layers;
+            info.samples = createInfo.samples;
             auto [image, memory] = vulkan_util::createImage(
                 _vkApplication->getDevice()->getRaw(),
                 _vkApplication->getPhysicalDevice().getRaw(),
@@ -56,6 +57,7 @@ namespace neon::vulkan {
         // Add depth texture
         if (!_depth) return;
         if (overrideDepth == nullptr) {
+            info.samples = _depthSamples;
             info.usages = {
                 TextureUsage::DEPTH_STENCIL_ATTACHMENT,
                 TextureUsage::SAMPLING
@@ -151,23 +153,22 @@ namespace neon::vulkan {
         const std::vector<FrameBufferTextureCreateInfo>& textureInfos,
         std::pair<uint32_t, uint32_t> extent,
         bool depth,
-        std::optional<std::string> depthName)
+        std::optional<std::string> depthName,
+        SamplesPerTexel depthSamples)
         : VKFrameBuffer(),
           _vkApplication(dynamic_cast<AbstractVKApplication*>(
               application->getImplementation())),
           _frameBuffer(VK_NULL_HANDLE),
-          _images(),
-          _memories(),
-          _imageViews(),
-          _layouts(),
-          _textures(),
-          _imGuiDescriptors(),
           _createInfos(textureInfos),
           _extent({extent.first, extent.second}),
           _renderPass(application,
-                      conversions::vkFormat(textureInfos), depth, false,
-                      _vkApplication->getDepthImageFormat()),
-          _depth(depth) {
+                      conversions::vkFormat(textureInfos),
+                      conversions::vkSampleCountFlagBits(textureInfos),
+                      depth, false, false
+                      _vkApplication->getDepthImageFormat(),
+                      conversions::vkSampleCountFlagBits(depthSamples)),
+          _depth(depth),
+          _depthSamples(depthSamples) {
         _imGuiDescriptors.resize(textureInfos.size(), VK_NULL_HANDLE);
 
         createImages(nullptr);
@@ -186,6 +187,7 @@ namespace neon::vulkan {
                 static_cast<int32_t>(_extent.height),
                 1,
                 info.format,
+                info.samples,
                 info.sampler
             );
             ++i;
@@ -211,6 +213,7 @@ namespace neon::vulkan {
                 static_cast<int32_t>(_extent.height),
                 1,
                 TextureFormat::DEPTH24STENCIL8,
+                depthSamples,
                 info
             );
 
@@ -227,19 +230,18 @@ namespace neon::vulkan {
         _vkApplication(dynamic_cast<AbstractVKApplication*>(
             application->getImplementation())),
         _frameBuffer(VK_NULL_HANDLE),
-        _images(),
-        _memories(),
-        _imageViews(),
-        _layouts(),
-        _textures(),
-        _imGuiDescriptors(),
         _createInfos(textureInfos),
         _extent({extent.first, extent.second}),
         _renderPass(application,
                     conversions::vkFormat(textureInfos),
-                    depthTexture != nullptr, false,
-                    _vkApplication->getDepthImageFormat()),
-        _depth(depthTexture != nullptr) {
+                    conversions::vkSampleCountFlagBits(textureInfos),
+                    depthTexture != nullptr,
+                    false,
+                    true,
+                    conversions::vkFormat(depthTexture->getFormat()),
+                    conversions::vkSampleCountFlagBits(depthTexture->getSamples())),
+        _depth(depthTexture != nullptr),
+        _depthSamples(depthTexture != nullptr ? depthTexture->getSamples() : SamplesPerTexel::COUNT_1) {
         _imGuiDescriptors.resize(textureInfos.size(), VK_NULL_HANDLE);
 
         createImages(depthTexture);
@@ -263,6 +265,7 @@ namespace neon::vulkan {
                 static_cast<int32_t>(_extent.height),
                 1,
                 info.format,
+                info.samples,
                 info.sampler
             );
             ++i;
@@ -363,6 +366,10 @@ namespace neon::vulkan {
 
     uint32_t VKSimpleFrameBuffer::getHeight() const {
         return _extent.height;
+    }
+
+    SamplesPerTexel VKSimpleFrameBuffer::getSamples() const {
+        return _depthSamples;
     }
 
     bool VKSimpleFrameBuffer::defaultRecreationCondition() const {

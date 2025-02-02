@@ -31,7 +31,7 @@ namespace neon {
 
     public:
 
-        SwapChainFrameBuffer(Application* application, std::string name, bool depth);
+        SwapChainFrameBuffer(Application* application, std::string name, SamplesPerTexel samples, bool depth);
 
         ~SwapChainFrameBuffer() override = default;
 
@@ -50,6 +50,8 @@ namespace neon {
         [[nodiscard]] uint32_t getWidth() const override;
 
         [[nodiscard]] uint32_t getHeight() const override;
+
+        SamplesPerTexel getSamples() const override;
     };
 }
 

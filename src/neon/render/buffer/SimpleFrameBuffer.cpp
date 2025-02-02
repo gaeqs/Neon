@@ -28,11 +28,13 @@ namespace neon {
         const std::vector<FrameBufferTextureCreateInfo>& textureInfos,
         bool depth,
         std::optional<std::string> depthName,
+        SamplesPerTexel depthSamples,
         Condition condition,
         const Parameters& parameters)
         : FrameBuffer(std::move(name)),
           _application(application),
-          _implementation(application, textureInfos, parameters(application), depth, std::move(depthName)),
+          _implementation(application, textureInfos, parameters(application), depth, std::move(depthName),
+                          depthSamples),
           _recreationCondition(std::move(condition)),
           _recreationParameters(parameters) {}
 
@@ -81,6 +83,10 @@ namespace neon {
 
     uint32_t SimpleFrameBuffer::getHeight() const {
         return _implementation.getHeight();
+    }
+
+    SamplesPerTexel SimpleFrameBuffer::getSamples() const {
+        return _implementation.getSamples();
     }
 
     const SimpleFrameBuffer::Condition&

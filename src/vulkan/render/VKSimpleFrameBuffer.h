@@ -25,7 +25,6 @@ namespace neon::vulkan {
     class AbstractVKApplication;
 
     class VKSimpleFrameBuffer : public VKFrameBuffer {
-
         AbstractVKApplication* _vkApplication;
 
         VkFramebuffer _frameBuffer;
@@ -43,6 +42,7 @@ namespace neon::vulkan {
         VKRenderPass _renderPass;
 
         bool _depth;
+        SamplesPerTexel _depthSamples;
 
         void createImages(std::shared_ptr<Texture> overrideDepth);
 
@@ -53,12 +53,12 @@ namespace neon::vulkan {
         void cleanupImages();
 
     public:
-
         VKSimpleFrameBuffer(Application* application,
                             const std::vector<FrameBufferTextureCreateInfo>& textureInfos,
                             std::pair<uint32_t, uint32_t> extent,
                             bool depth,
-                            std::optional<std::string> depthName = {});
+                            std::optional<std::string> depthName = {},
+                            SamplesPerTexel depthSamples = SamplesPerTexel::COUNT_1);
 
         VKSimpleFrameBuffer(Application* application,
                             const std::vector<FrameBufferTextureCreateInfo>& textureInfos,
@@ -85,6 +85,8 @@ namespace neon::vulkan {
 
         [[nodiscard]] uint32_t getHeight() const override;
 
+        SamplesPerTexel getSamples() const override;
+
         [[nodiscard]] ImTextureID getImGuiDescriptor(uint32_t index);
 
         bool renderImGui() override;
@@ -98,7 +100,6 @@ namespace neon::vulkan {
 
         [[nodiscard]] std::pair<uint32_t, uint32_t>
         defaultRecreationParameters() const;
-
     };
 }
 

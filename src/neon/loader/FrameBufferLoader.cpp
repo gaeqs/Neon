@@ -11,7 +11,7 @@
 #include "TextureLoader.h"
 
 namespace neon {
-    FrameBufferTextureCreateInfo FrameBufferLoader::loadTexture(nlohmann::json& json) {
+    FrameBufferTextureCreateInfo FrameBufferLoader::loadTexture(nlohmann::json& json, SamplesPerTexel samples) {
         FrameBufferTextureCreateInfo info;
         if (!json.is_object()) return info;
 
@@ -19,6 +19,7 @@ namespace neon {
             info.name = name;
         }
 
+        info.samples = samples;
         info.format = serialization::toTextureFormat(json.value("format", "")).value_or(info.format);
         info.layers = json.value("layers", info.layers);
         TextureLoader::loadImageView(json["image_view"], info.imageView);
@@ -34,8 +35,11 @@ namespace neon {
 
         bool depth = json.value("depth", false);
 
+        auto samples = serialization::toSamplesPerTexel(json.value("samples", "")).value_or(
+            SamplesPerTexel::COUNT_1);
+
         if (type == "swap_chain") {
-            return std::make_shared<SwapChainFrameBuffer>(context.application, name, depth);
+            return std::make_shared<SwapChainFrameBuffer>(context.application, name, samples, depth);
         }
         if (type == "simple") {
             std::vector<AssetGeneralProperties<Texture>> props;
@@ -44,17 +48,19 @@ namespace neon {
             auto& textures = json["textures"];
             if (textures.is_object()) {
                 props.push_back(fetchGeneralProperties<Texture>(textures, context));
-                infos.push_back(loadTexture(textures));
+                infos.push_back(loadTexture(textures, samples));
             } else if (textures.is_array()) {
                 for (auto& texture: textures) {
                     props.push_back(fetchGeneralProperties<Texture>(texture, context));
-                    infos.push_back(loadTexture(texture));
+                    infos.push_back(loadTexture(texture, samples));
                 }
             }
 
-            auto depthProps = fetchGeneralProperties<Texture>(json["depth_properties"], context);
+            auto& depthJson = json["textures"];
+            auto depthProps = fetchGeneralProperties<Texture>(depthJson, context);
             auto depthName = depthProps.error.has_value() ? std::optional<std::string>{} : depthProps.name;
-            auto fb = std::make_shared<SimpleFrameBuffer>(context.application, name, infos, depth, depthName);
+
+            auto fb = std::make_shared<SimpleFrameBuffer>(context.application, name, infos, depth, depthName, samples);
 
             if (depth && !depthProps.error.has_value()) {
                 applyGeneralProperties(fb->getTextures().back(), depthProps, context);

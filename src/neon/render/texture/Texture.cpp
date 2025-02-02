@@ -19,7 +19,8 @@ namespace neon {
                      const TextureCreateInfo& createInfo) :
         Asset(typeid(Texture), std::move(name)),
         _implementation(application, data, createInfo),
-        _format(createInfo.image.format) {}
+        _format(createInfo.image.format),
+        _samples(createInfo.image.samples) {}
 
 #ifdef USE_VULKAN
 
@@ -31,11 +32,13 @@ namespace neon {
                      VkImageLayout layout,
                      uint32_t width, uint32_t height, uint32_t depth,
                      TextureFormat format,
+                     SamplesPerTexel samples,
                      const SamplerCreateInfo& createInfo) :
         Asset(typeid(Texture), std::move(name)),
         _implementation(application, format, image, memory, imageView, layout,
                         width, height, depth, createInfo),
-        _format(format) {}
+        _format(format),
+        _samples(samples) {}
 
 #endif
 
@@ -61,6 +64,10 @@ namespace neon {
 
     TextureFormat Texture::getFormat() const {
         return _format;
+    }
+
+    SamplesPerTexel Texture::getSamples() const {
+        return _samples;
     }
 
     void Texture::updateData(const char* data,

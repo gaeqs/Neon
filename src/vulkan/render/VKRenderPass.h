@@ -9,39 +9,39 @@
 #include <vulkan/vulkan.h>
 
 #include <neon/render/buffer/FrameBuffer.h>
+#include <neon/render/texture/TextureCreateInfo.h>
 
 namespace neon {
     class Application;
 }
 
 namespace neon::vulkan {
-
     class AbstractVKApplication;
 
     class VKRenderPass {
-
         AbstractVKApplication* _vkApplication;
         VkRenderPass _raw;
         bool _external;
 
     public:
-
         VKRenderPass(const VKRenderPass& other) = delete;
 
         VKRenderPass(VKRenderPass&& other) noexcept;
 
         VKRenderPass(Application* application,
                      const std::vector<VkFormat>& colorFormats,
+                     const std::vector<VkSampleCountFlagBits>& samples,
                      bool depth,
                      bool present,
-                     VkFormat depthFormat);
+                     bool resolve,
+                     VkFormat depthFormat,
+                     VkSampleCountFlagBits depthSamples);
 
         VKRenderPass(Application* application, VkRenderPass pass);
 
         ~VKRenderPass();
 
         [[nodiscard]] VkRenderPass getRaw() const;
-
     };
 }
 

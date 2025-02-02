@@ -31,6 +31,7 @@ namespace neon {
     private:
         Implementation _implementation;
         TextureFormat _format;
+        SamplesPerTexel _samples;
 
     public:
         Texture(const Texture& other) = delete;
@@ -50,6 +51,7 @@ namespace neon {
                 VkImageLayout layout,
                 uint32_t width, uint32_t height, uint32_t depth,
                 TextureFormat format,
+                SamplesPerTexel samples,
                 const SamplerCreateInfo& createInfo = SamplerCreateInfo());
 
 #endif
@@ -66,6 +68,8 @@ namespace neon {
         [[nodiscard]] uint32_t getDepth() const;
 
         [[nodiscard]] TextureFormat getFormat() const;
+
+        [[nodiscard]] SamplesPerTexel getSamples() const;
 
         void updateData(const char* data,
                         int32_t width, int32_t height, int32_t depth,

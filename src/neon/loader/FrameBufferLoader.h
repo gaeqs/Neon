@@ -12,7 +12,7 @@
 namespace neon {
     class FrameBufferLoader : public AssetLoader<FrameBuffer> {
 
-        static FrameBufferTextureCreateInfo loadTexture(nlohmann::json& json);
+        static FrameBufferTextureCreateInfo loadTexture(nlohmann::json& json, SamplesPerTexel samples);
 
     public:
         ~FrameBufferLoader() override = default;
