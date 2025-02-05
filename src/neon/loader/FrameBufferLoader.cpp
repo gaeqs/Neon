@@ -42,33 +42,49 @@ namespace neon {
             return std::make_shared<SwapChainFrameBuffer>(context.application, name, samples, depth);
         }
         if (type == "simple") {
-            std::vector<AssetGeneralProperties<Texture>> props;
+            std::vector<std::pair<AssetGeneralProperties<Texture>, AssetGeneralProperties<Texture>>> props;
             std::vector<FrameBufferTextureCreateInfo> infos;
 
             auto& textures = json["textures"];
             if (textures.is_object()) {
-                props.push_back(fetchGeneralProperties<Texture>(textures, context));
+                auto original = fetchGeneralProperties<Texture>(textures, context);
+                auto resolved = fetchGeneralProperties<Texture>(textures["resolved"], context);
+                props.emplace_back(original, resolved);
                 infos.push_back(loadTexture(textures, samples));
+
             } else if (textures.is_array()) {
                 for (auto& texture: textures) {
-                    props.push_back(fetchGeneralProperties<Texture>(texture, context));
+                    auto original = fetchGeneralProperties<Texture>(texture, context);
+                    auto resolved = fetchGeneralProperties<Texture>(texture["resolved"], context);
+                    props.emplace_back(original, resolved);
                     infos.push_back(loadTexture(texture, samples));
                 }
             }
 
-            auto& depthJson = json["textures"];
+            auto& depthJson = json["depth_properties"];
+
             auto depthProps = fetchGeneralProperties<Texture>(depthJson, context);
             auto depthName = depthProps.error.has_value() ? std::optional<std::string>{} : depthProps.name;
 
             auto fb = std::make_shared<SimpleFrameBuffer>(context.application, name, infos, depth, depthName, samples);
 
+
             if (depth && !depthProps.error.has_value()) {
-                applyGeneralProperties(fb->getTextures().back(), depthProps, context);
+                auto& output = fb->getOutputs().back();
+                applyGeneralProperties(output.texture, depthProps, context);
+                if (output.resolvedTexture != nullptr) {}
             }
 
             for (size_t i = 0; i < props.size(); ++i) {
-                if (props[i].error.has_value()) continue;
-                applyGeneralProperties(fb->getTextures()[i], props[i], context);
+                auto& output = fb->getOutputs()[i];
+                auto& prop = props[i];
+
+                if (!prop.first.error.has_value()) {
+                    applyGeneralProperties(output.texture, prop.first, context);
+                }
+                if (!prop.second.error.has_value() && output.texture != output.resolvedTexture) {
+                    applyGeneralProperties(output.texture, prop.second, context);
+                }
             }
 
             return fb;

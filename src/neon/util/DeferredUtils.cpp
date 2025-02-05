@@ -147,6 +147,6 @@ namespace neon::deferred_utils {
         go->setName("Light system");
         go->newComponent<LightSystem>(directionalModel, pointModel, flashModel);
 
-        return frameBuffer->getTextures().front();
+        return frameBuffer->getOutputs().front().resolvedTexture;
     }
 }

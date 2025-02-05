@@ -335,6 +335,12 @@ If no sources are available, the texture won't be created.
       },
       "sampler": {
         // Just like a texture.
+      },
+      "resolved": {
+        // Section only valid if the output uses MSAA.
+        // General properties are available here!
+        "name": "A resolved texture",
+        "save": true
       }
     }
   ],

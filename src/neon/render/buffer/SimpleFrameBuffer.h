@@ -72,8 +72,7 @@ namespace neon {
         [[nodiscard]] const FrameBuffer::Implementation&
         getImplementation() const override;
 
-        [[nodiscard]] std::vector<std::shared_ptr<Texture>>
-        getTextures() const override;
+        std::vector<FrameBufferOutput> getOutputs() const override;
 
         [[nodiscard]] uint32_t getWidth() const override;
 

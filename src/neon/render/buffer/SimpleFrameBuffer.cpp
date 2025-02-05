@@ -68,9 +68,8 @@ namespace neon {
         return _implementation;
     }
 
-    std::vector<std::shared_ptr<Texture>>
-    SimpleFrameBuffer::getTextures() const {
-        return _implementation.getTextures();
+    std::vector<FrameBufferOutput> SimpleFrameBuffer::getOutputs() const {
+        return _implementation.getOutputs();
     }
 
     ImTextureID SimpleFrameBuffer::getImGuiDescriptor(uint32_t index) {

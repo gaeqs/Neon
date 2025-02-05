@@ -27,8 +27,7 @@ namespace neon {
         return _implementation;
     }
 
-    std::vector<std::shared_ptr<Texture>>
-    SwapChainFrameBuffer::getTextures() const {
+    std::vector<FrameBufferOutput> SwapChainFrameBuffer::getOutputs() const {
         return {};
     }
 

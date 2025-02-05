@@ -24,6 +24,11 @@
 namespace neon {
     class Texture;
 
+    struct FrameBufferOutput {
+        std::shared_ptr<Texture> texture;
+        std::shared_ptr<Texture> resolvedTexture;
+    };
+
     class FrameBuffer : public Asset {
         std::unordered_map<uint32_t, rush::Vec4f> _clearColors;
         std::pair<float, uint32_t> _depthClear;
@@ -33,11 +38,11 @@ namespace neon {
         using Implementation = vulkan::VKFrameBuffer;
 #endif
 
-        FrameBuffer(std::string name);
+        explicit FrameBuffer(std::string name);
 
         FrameBuffer(const FrameBuffer& other) = delete;
 
-        virtual ~FrameBuffer() = default;
+        ~FrameBuffer() override = default;
 
         [[nodiscard]] std::optional<rush::Vec4f>
         getClearColor(uint32_t index) const;
@@ -54,11 +59,9 @@ namespace neon {
 
         [[nodiscard]] virtual Implementation& getImplementation() = 0;
 
-        [[nodiscard]] virtual const Implementation&
-        getImplementation() const = 0;
+        [[nodiscard]] virtual const Implementation& getImplementation() const = 0;
 
-        [[nodiscard]] virtual std::vector<std::shared_ptr<Texture>>
-        getTextures() const = 0;
+        [[nodiscard]] virtual std::vector<FrameBufferOutput> getOutputs() const = 0;
 
         [[nodiscard]] virtual uint32_t getWidth() const = 0;
 
