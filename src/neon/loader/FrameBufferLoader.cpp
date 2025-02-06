@@ -75,8 +75,9 @@ namespace neon {
                 if (output.resolvedTexture != nullptr) {}
             }
 
+            auto outputs = fb->getOutputs();
             for (size_t i = 0; i < props.size(); ++i) {
-                auto& output = fb->getOutputs()[i];
+                auto& output = outputs[i];
                 auto& prop = props[i];
 
                 if (!prop.first.error.has_value()) {

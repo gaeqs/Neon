@@ -52,7 +52,7 @@ namespace neon::vulkan {
             colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
             colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 
-            if (resolve && colorAttachment.samples != VK_SAMPLE_COUNT_1_BIT) {
+            if (resolve) {
                 colorAttachment.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
             } else {
                 if (present) {
@@ -69,7 +69,7 @@ namespace neon::vulkan {
             colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
             references.push_back(colorAttachmentRef);
 
-            if (resolve && colorAttachment.samples != VK_SAMPLE_COUNT_1_BIT) {
+            if (resolve) {
                 VkAttachmentDescription colorAttachmentResolve{};
                 colorAttachmentResolve.format = format;
                 colorAttachmentResolve.samples = VK_SAMPLE_COUNT_1_BIT;
@@ -97,7 +97,7 @@ namespace neon::vulkan {
         subpass.pResolveAttachments = present ? resolveReferences.data() : nullptr;
 
         VkAttachmentReference depthAttachmentRef{};
-        depthAttachmentRef.attachment = references.size();
+        depthAttachmentRef.attachment = attachments.size();
         depthAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
         if (depth) {
             VkAttachmentDescription depthAttachment{};

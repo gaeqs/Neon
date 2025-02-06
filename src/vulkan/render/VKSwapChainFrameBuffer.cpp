@@ -204,7 +204,7 @@ namespace neon::vulkan {
                     {conversions::vkSampleCountFlagBits(samples)},
                     depth,
                     true,
-                    true,
+                    samples != SamplesPerTexel::COUNT_1,
                     _vkApplication->getDepthImageFormat(),
                     conversions::vkSampleCountFlagBits(samples)),
         _swapChainCount(_vkApplication->getSwapChainCount()),
