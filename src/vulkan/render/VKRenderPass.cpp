@@ -94,7 +94,7 @@ namespace neon::vulkan {
         subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
         subpass.colorAttachmentCount = references.size();
         subpass.pColorAttachments = references.data();
-        subpass.pResolveAttachments = present ? resolveReferences.data() : nullptr;
+        subpass.pResolveAttachments = resolve ? resolveReferences.data() : nullptr;
 
         VkAttachmentReference depthAttachmentRef{};
         depthAttachmentRef.attachment = attachments.size();

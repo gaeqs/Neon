@@ -568,24 +568,29 @@ namespace neon::vulkan::vulkan_util {
 
         std::vector<VkClearValue> clearValues;
         if (clear) {
-            clearValues.resize(frameBuffer.getColorAttachmentAmount() +
-                               (frameBuffer.hasDepth() ? 1 : 0));
+            auto outputs = frameBuffer.getOutputs();
+            clearValues.reserve(outputs.size() * 2);
 
-            for (uint32_t i = 0; i < frameBuffer.getColorAttachmentAmount();
-                 ++i) {
-                auto clearColor = fb->getClearColor(i);
-                if (clearColor.has_value()) {
-                    auto c = clearColor.value();
-                    clearValues[i].color = {c.x(), c.y(), c.z(), c.w()};
-                } else {
-                    clearValues[i].color = {0.0f, 0.0f, 0.0f, 1.0f};
+            for (size_t i = 0; i < outputs.size(); ++i) {
+                auto& output = outputs[i];
+                VkClearValue value;
+                if (output.type == FrameBufferOutputType::COLOR || output.type == FrameBufferOutputType::SWAP) {
+                    auto clearColor = fb->getClearColor(i);
+                    if (clearColor.has_value()) {
+                        auto c = clearColor.value();
+                        value.color = {c.x(), c.y(), c.z(), c.w()};
+                    } else {
+                        value.color = {0.0f, 0.0f, 0.0f, 1.0f};
+                    }
+                } else if (output.type == FrameBufferOutputType::DEPTH) {
+                    auto [depth, stencil] = fb->getDepthClearColor();
+                    value.depthStencil = {depth, stencil};
                 }
-            }
 
-            if (frameBuffer.hasDepth()) {
-                auto c = fb->getDepthClearColor();
-                clearValues[clearValues.size() - 1].depthStencil =
-                        {c.first, c.second};
+                clearValues.push_back(value);
+                if (output.texture != output.resolvedTexture) {
+                    clearValues.push_back(value);
+                }
             }
 
             renderPassInfo.clearValueCount = clearValues.size();

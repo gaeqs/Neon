@@ -26,6 +26,7 @@ namespace neon::vulkan {
 
     struct SimpleFrameBufferImage {
         std::optional<std::string> name;
+        bool depth;
         ImageCreateInfo info;
         SamplerCreateInfo sampler;
         VkImage image;
@@ -58,6 +59,7 @@ namespace neon::vulkan {
         std::optional<std::string> _depthName;
         SamplesPerTexel _depthSamples;
         bool _hasMultisampling;
+        size_t _colorOutputs;
 
         void createImages(std::shared_ptr<Texture> overrideDepth);
 
@@ -108,7 +110,7 @@ namespace neon::vulkan {
 
         bool renderImGui() override;
 
-        [[nodiscard]] const std::vector<FrameBufferOutput>& getOutputs() const;
+        [[nodiscard]] std::vector<FrameBufferOutput> getOutputs() const override;
 
         void recreate(std::pair<uint32_t, uint32_t> size);
 

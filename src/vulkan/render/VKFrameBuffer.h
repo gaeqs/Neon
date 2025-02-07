@@ -9,6 +9,7 @@
 #include <vulkan/vulkan.h>
 
 #include <vector>
+#include <neon/render/buffer/FrameBufferOutput.h>
 #include <neon/render/texture/TextureCreateInfo.h>
 
 namespace neon::vulkan {
@@ -45,6 +46,8 @@ namespace neon::vulkan {
         [[nodiscard]] virtual SamplesPerTexel getSamples() const = 0;
 
         [[nodiscard]] virtual bool renderImGui() = 0;
+
+        [[nodiscard]] virtual std::vector<FrameBufferOutput> getOutputs() const = 0;
     };
 }
 

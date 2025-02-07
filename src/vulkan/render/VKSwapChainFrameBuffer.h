@@ -80,6 +80,8 @@ namespace neon::vulkan {
 
         [[nodiscard]] bool renderImGui() override;
 
+        [[nodiscard]] std::vector<FrameBufferOutput> getOutputs() const override;
+
         [[nodiscard]] bool requiresRecreation();
 
         void recreate();

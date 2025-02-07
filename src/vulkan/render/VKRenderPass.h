@@ -8,9 +8,6 @@
 #include <vector>
 #include <vulkan/vulkan.h>
 
-#include <neon/render/buffer/FrameBuffer.h>
-#include <neon/render/texture/TextureCreateInfo.h>
-
 namespace neon {
     class Application;
 }

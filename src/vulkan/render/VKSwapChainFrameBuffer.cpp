@@ -254,6 +254,10 @@ namespace neon::vulkan {
         return _depth;
     }
 
+    uint32_t VKSwapChainFrameBuffer::getColorAttachmentAmount() const {
+        return _samples == SamplesPerTexel::COUNT_1 ? 1 : 2;
+    }
+
     void VKSwapChainFrameBuffer::recreate() {
         cleanup();
 
@@ -268,10 +272,6 @@ namespace neon::vulkan {
 
         createFrameBuffers();
         _swapChainCount = _vkApplication->getSwapChainCount();
-    }
-
-    uint32_t VKSwapChainFrameBuffer::getColorAttachmentAmount() const {
-        return 1;
     }
 
     std::vector<VkFormat> VKSwapChainFrameBuffer::getColorFormats() const {
@@ -292,6 +292,12 @@ namespace neon::vulkan {
 
     bool VKSwapChainFrameBuffer::renderImGui() {
         return true;
+    }
+
+    std::vector<FrameBufferOutput> VKSwapChainFrameBuffer::getOutputs() const {
+        FrameBufferOutput output;
+        output.type = FrameBufferOutputType::SWAP;
+        return {output};
     }
 
     uint32_t VKSwapChainFrameBuffer::getWidth() const {

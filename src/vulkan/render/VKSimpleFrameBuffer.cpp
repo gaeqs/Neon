@@ -5,8 +5,10 @@
 #include "VKSimpleFrameBuffer.h"
 
 #include <stdexcept>
+#include <utility>
 
 #include <imgui_impl_vulkan.h>
+#include <neon/render/buffer/FrameBuffer.h>
 
 #include <neon/structure/Room.h>
 #include <neon/render/texture/Texture.h>
@@ -49,6 +51,7 @@ namespace neon::vulkan {
             SimpleFrameBufferSlot slot;
             slot.image = SimpleFrameBufferImage(
                 createInfo.name,
+                false,
                 info,
                 createInfo.sampler,
                 image,
@@ -79,6 +82,7 @@ namespace neon::vulkan {
 
                 slot.resolveImage = SimpleFrameBufferImage(
                     createInfo.name,
+                    false,
                     info,
                     createInfo.sampler,
                     resolveImage,
@@ -126,6 +130,7 @@ namespace neon::vulkan {
             SimpleFrameBufferSlot slot{
                 {
                     _depthName,
+                    true,
                     info,
                     depthSampler,
                     image,
@@ -144,6 +149,7 @@ namespace neon::vulkan {
             SimpleFrameBufferSlot slot{
                 {
                     _depthName,
+                    true,
                     info,
                     depthSampler,
                     impl.getImage(),
@@ -203,6 +209,7 @@ namespace neon::vulkan {
             ++i;
 
             FrameBufferOutput output;
+            output.type = item.image.depth ? FrameBufferOutputType::DEPTH : FrameBufferOutputType::COLOR;
 
             if (item.image.overrideTexture != nullptr) {
                 output.texture = item.image.overrideTexture;
@@ -302,9 +309,10 @@ namespace neon::vulkan {
                       _vkApplication->getDepthImageFormat(),
                       conversions::vkSampleCountFlagBits(depthSamples)),
           _depth(depth),
-          _depthName(depthName),
+          _depthName(std::move(depthName)),
           _depthSamples(depthSamples),
-          _hasMultisampling(depthSamples != SamplesPerTexel::COUNT_1) {
+          _hasMultisampling(depthSamples != SamplesPerTexel::COUNT_1),
+          _colorOutputs(textureInfos.size()) {
         createImages(nullptr);
         createFrameBuffer();
         createOutputs(application);
@@ -331,7 +339,8 @@ namespace neon::vulkan {
                     conversions::vkSampleCountFlagBits(depthTexture->getSamples())),
         _depth(depthTexture != nullptr),
         _depthName(depthTexture == nullptr ? nullptr : depthTexture->getName()),
-        _depthSamples(depthTexture != nullptr ? depthTexture->getSamples() : SamplesPerTexel::COUNT_1) {
+        _depthSamples(depthTexture != nullptr ? depthTexture->getSamples() : SamplesPerTexel::COUNT_1),
+        _colorOutputs(textureInfos.size()) {
         createImages(depthTexture);
         createFrameBuffer();
         createOutputs(application);
@@ -358,6 +367,10 @@ namespace neon::vulkan {
 
     bool VKSimpleFrameBuffer::hasDepth() const {
         return _depth;
+    }
+
+    uint32_t VKSimpleFrameBuffer::getColorAttachmentAmount() const {
+        return _colorOutputs;
     }
 
     void VKSimpleFrameBuffer::recreate(std::pair<uint32_t, uint32_t> size) {
@@ -392,10 +405,6 @@ namespace neon::vulkan {
         }
     }
 
-    uint32_t VKSimpleFrameBuffer::getColorAttachmentAmount() const {
-        return _createInfos.size();
-    }
-
     std::vector<VkFormat> VKSimpleFrameBuffer::getColorFormats() const {
         return conversions::vkFormat(_createInfos);
     }
@@ -412,7 +421,7 @@ namespace neon::vulkan {
         return _renderPass;
     }
 
-    const std::vector<FrameBufferOutput>& VKSimpleFrameBuffer::getOutputs() const {
+    std::vector<FrameBufferOutput> VKSimpleFrameBuffer::getOutputs() const {
         return _outputs;
     }
 

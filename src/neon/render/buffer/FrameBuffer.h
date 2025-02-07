@@ -6,8 +6,8 @@
 #define NEON_FRAMEBUFFER_H
 
 #include <vector>
-#include <memory>
 #include <neon/render/texture/TextureCreateInfo.h>
+#include <neon/render/buffer/FrameBufferOutput.h>
 #include <neon/structure/Asset.h>
 
 #ifdef USE_VULKAN
@@ -23,11 +23,6 @@
 
 namespace neon {
     class Texture;
-
-    struct FrameBufferOutput {
-        std::shared_ptr<Texture> texture;
-        std::shared_ptr<Texture> resolvedTexture;
-    };
 
     class FrameBuffer : public Asset {
         std::unordered_map<uint32_t, rush::Vec4f> _clearColors;
