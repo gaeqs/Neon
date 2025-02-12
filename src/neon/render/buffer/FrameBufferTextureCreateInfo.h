@@ -17,6 +17,11 @@ namespace neon {
         std::optional<std::string> name = {};
 
         /**
+        * The name of the resolved texture.
+        */
+        std::optional<std::string> resolveName = {};
+
+        /**
          * The format of the texture.
          */
         TextureFormat format = TextureFormat::R8G8B8A8;

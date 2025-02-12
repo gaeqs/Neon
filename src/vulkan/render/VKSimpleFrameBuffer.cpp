@@ -81,7 +81,7 @@ namespace neon::vulkan {
                 );
 
                 slot.resolveImage = SimpleFrameBufferImage(
-                    createInfo.name,
+                    createInfo.resolveName,
                     false,
                     info,
                     createInfo.sampler,

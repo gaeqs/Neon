@@ -8,7 +8,16 @@
 #include <neon/structure/Room.h>
 
 namespace neon {
+    ViewportComponent::ViewportComponent(): _hovered(false) {}
+
+    ViewportComponent::ViewportComponent(const std::shared_ptr<SimpleFrameBuffer>& frameBuffer)
+        : _frameBuffer(frameBuffer),
+          _hovered(false) {}
+
     void ViewportComponent::onStart() {
+        _hovered = false;
+
+        if (_frameBuffer != nullptr) return;
         auto& r = getRoom()->getApplication()->getRender();
         auto strategy = r->getStrategies()[r->getStrategyAmount() - 2];
         auto defaultStrategy = std::dynamic_pointer_cast
@@ -18,7 +27,6 @@ namespace neon {
             _frameBuffer = std::dynamic_pointer_cast<SimpleFrameBuffer>(
                 defaultStrategy->getFrameBuffer());
         }
-        _hovered = false;
     }
 
     void ViewportComponent::onPreDraw() {

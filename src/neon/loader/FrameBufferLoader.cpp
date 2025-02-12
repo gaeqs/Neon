@@ -19,6 +19,12 @@ namespace neon {
             info.name = name;
         }
 
+        if (auto& resolved = json["resolved"]; resolved.is_object()) {
+            if (auto& resolvedName = resolved["name"]; resolvedName.is_string()) {
+                info.resolveName = resolvedName;
+            }
+        }
+
         info.samples = samples;
         info.format = serialization::toTextureFormat(json.value("format", "")).value_or(info.format);
         info.layers = json.value("layers", info.layers);
@@ -51,7 +57,6 @@ namespace neon {
                 auto resolved = fetchGeneralProperties<Texture>(textures["resolved"], context);
                 props.emplace_back(original, resolved);
                 infos.push_back(loadTexture(textures, samples));
-
             } else if (textures.is_array()) {
                 for (auto& texture: textures) {
                     auto original = fetchGeneralProperties<Texture>(texture, context);
@@ -84,7 +89,7 @@ namespace neon {
                     applyGeneralProperties(output.texture, prop.first, context);
                 }
                 if (!prop.second.error.has_value() && output.texture != output.resolvedTexture) {
-                    applyGeneralProperties(output.texture, prop.second, context);
+                    applyGeneralProperties(output.resolvedTexture, prop.second, context);
                 }
             }
 

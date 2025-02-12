@@ -18,6 +18,11 @@ namespace neon {
         bool _hovered;
 
     public:
+
+        ViewportComponent();
+
+        ViewportComponent(const std::shared_ptr<SimpleFrameBuffer>& frameBuffer);
+
         void onStart() override;
 
         void onPreDraw() override;
