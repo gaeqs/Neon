@@ -56,7 +56,7 @@ namespace neon::vulkan {
                 createInfo.sampler,
                 image,
                 memory,
-                _hasMultisampling ? VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL : VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+                VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
                 view,
                 nullptr,
                 nullptr

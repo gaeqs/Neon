@@ -53,7 +53,7 @@ namespace neon::vulkan {
             colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 
             if (resolve) {
-                colorAttachment.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+                colorAttachment.finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
             } else {
                 if (present) {
                     colorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
