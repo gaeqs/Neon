@@ -21,6 +21,10 @@ namespace neon {
         _implementation.uploadData(index, data, size, offset);
     }
 
+    void ShaderUniformBuffer::clearData(uint32_t index) {
+        _implementation.clearData(index);
+    }
+
     void* ShaderUniformBuffer::fetchData(uint32_t index) {
         return _implementation.fetchData(index);
     }
@@ -38,6 +42,10 @@ namespace neon {
     void ShaderUniformBuffer::prepareForFrame(
         const CommandBuffer* commandBuffer) {
         _implementation.prepareForFrame(commandBuffer);
+    }
+
+    void ShaderUniformBuffer::transferDataFromGPU(uint32_t index) {
+        _implementation.transferDataFromGPU(index);
     }
 
     const ShaderUniformBuffer::Implementation&

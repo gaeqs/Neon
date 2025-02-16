@@ -57,8 +57,7 @@ namespace neon::vulkan {
             _stagingBuffers.push_back(std::make_shared<SimpleBuffer>(
                 _application,
                 VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-                VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
-                VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+                VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
                 sizeInBytes
             ));
         }

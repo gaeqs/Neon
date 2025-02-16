@@ -26,7 +26,7 @@ namespace neon {
                 bindings.push_back(ShaderUniformBinding::image());
             } else {
                 if (!binding.contains("size")) continue;
-                bindings.emplace_back(type.value(), binding["size"]);
+                bindings.emplace_back(type.value(), UniformBindingBufferType::STAGING, binding["size"]);
             }
         }
 
