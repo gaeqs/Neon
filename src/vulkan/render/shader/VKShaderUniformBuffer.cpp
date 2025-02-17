@@ -186,7 +186,7 @@ namespace neon::vulkan {
         auto& vector = _data[index];
         auto finalSize = std::min(size, vector.size());
         memcpy(vector.data() + offset, data, finalSize);
-        std::fill(_updated[index].begin(), _updated[index].end(), 0);
+        std::ranges::fill(_updated[index], 0);
     }
 
     void VKShaderUniformBuffer::clearData(uint32_t index) {
@@ -194,6 +194,7 @@ namespace neon::vulkan {
         if (_bindings[index].type != UniformBindingType::UNIFORM_BUFFER &&
             _bindings[index].type != UniformBindingType::STORAGE_BUFFER)
             return;
+        std::ranges::fill(_updated[index], 0);
         std::ranges::fill(_data[index], 0);
     }
 
@@ -202,7 +203,7 @@ namespace neon::vulkan {
         if (_bindings[index].type != UniformBindingType::UNIFORM_BUFFER &&
             _bindings[index].type != UniformBindingType::STORAGE_BUFFER)
             return nullptr;
-        std::fill(_updated[index].begin(), _updated[index].end(), 0);
+        std::ranges::fill(_updated[index], 0);
         return _data[index].data();
     }
 
@@ -220,7 +221,7 @@ namespace neon::vulkan {
         if (index >= _bindings.size()) return;
         if (_bindings[index].type != UniformBindingType::IMAGE) return;
         _textures[index] = std::move(texture);
-        std::fill(_updated[index].begin(), _updated[index].end(), 0);
+        std::ranges::fill(_updated[index], 0);
     }
 
     void VKShaderUniformBuffer::prepareForFrame(
