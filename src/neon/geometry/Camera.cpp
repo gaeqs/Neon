@@ -137,16 +137,57 @@ namespace neon {
 
     std::array<rush::Plane<float>, 6> Camera::getPlanes() {
         auto& vp = getViewProjection();
-
-        rush::Vec3f columns[4] = {vp.row(0), vp.row(1), vp.row(2), vp.row(3)};
-
         return {
-            rush::Plane(columns[3] + columns[0], vp(3, 3) + vp(3, 0)).normalized(),
-            rush::Plane(columns[3] - columns[0], vp(3, 3) - vp(3, 0)).normalized(),
-            rush::Plane(columns[3] + columns[1], vp(3, 3) + vp(3, 1)).normalized(),
-            rush::Plane(columns[3] - columns[1], vp(3, 3) - vp(3, 1)).normalized(),
-            rush::Plane(columns[2], vp(3, 2)).normalized(),
-            rush::Plane(columns[3] - columns[2], vp(3, 3) - vp(2, 3)).normalized(),
+            rush::Plane(
+                {
+                    vp(4, 1) + vp(1, 1),
+                    vp(4, 2) + vp(1, 2),
+                    vp(4, 3) + vp(1, 3)
+                },
+                vp(4, 4) + vp(1, 4)
+            ).normalized(),
+            rush::Plane(
+                {
+                    vp(4, 1) - vp(1, 1),
+                    vp(4, 2) - vp(1, 2),
+                    vp(4, 3) - vp(1, 3)
+                },
+                vp(4, 4) - vp(1, 4)
+            ).normalized(),
+            rush::Plane(
+                {
+                    vp(4, 1) + vp(2, 1),
+                    vp(4, 2) + vp(2, 2),
+                    vp(4, 3) + vp(2, 3)
+                },
+                vp(4, 4) + vp(2, 4)
+            ).normalized(),
+            rush::Plane(
+                {
+                    vp(4, 1) - vp(2, 1),
+                    vp(4, 2) - vp(2, 2),
+                    vp(4, 3) - vp(2, 3)
+                },
+                vp(4, 4) - vp(2, 4)
+            ).normalized(),
+
+            rush::Plane(
+                {
+                    vp(4, 1) + vp(3, 1),
+                    vp(4, 2) + vp(3, 2),
+                    vp(4, 3) + vp(3, 3)
+                },
+                vp(4, 4) + vp(3, 4)
+            ).normalized(),
+            rush::Plane(
+                {
+                    vp(4, 1) - vp(3, 1),
+                    vp(4, 2) - vp(3, 2),
+                    vp(4, 3) - vp(3, 3)
+                },
+                vp(4, 4) - vp(3, 4)
+            ).normalized(),
+
         };
     }
 }
