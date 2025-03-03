@@ -60,7 +60,7 @@ namespace neon {
         bool destroy(IdentifiableWrapper<T>& value) {
             ++_modificationId;
             _idMap.erase(value->getId());
-            return _cluster.remove(value.raw());
+            return _cluster.erase(value.raw());
         }
 
         void forEach(std::function<void(T*)> function) {

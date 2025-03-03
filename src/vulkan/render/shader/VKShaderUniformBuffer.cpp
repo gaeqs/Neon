@@ -12,52 +12,56 @@
 
 namespace neon::vulkan {
     VKShaderUniformBuffer::VKShaderUniformBuffer(
-        const std::shared_ptr<ShaderUniformDescriptor>&
-        descriptor) : _vkApplication(
-                          descriptor->getImplementation().getVkApplication()),
-                      _descriptorPool(VK_NULL_HANDLE),
-                      _buffers(),
-                      _descriptorSets(),
-                      _types(),
-                      _updated(),
-                      _data(),
-                      _textures(),
-                      _bindingPoint(0) {
-        auto& bindings = descriptor->getBindings();
+        const std::shared_ptr<ShaderUniformDescriptor>& descriptor)
+        : _vkApplication(descriptor->getImplementation().getVkApplication()),
+          _descriptorPool(VK_NULL_HANDLE) {
+        _bindings = descriptor->getBindings();
 
-        _buffers.reserve(bindings.size());
-        _types.reserve(bindings.size());
-        _data.reserve(bindings.size());
-        _updated.reserve(bindings.size());
+        _buffers.reserve(_bindings.size());
+        _data.reserve(_bindings.size());
+        _updated.reserve(_bindings.size());
 
-        _textures.resize(bindings.size());
+        _textures.resize(_bindings.size());
 
         uint32_t uniformAmount = 0;
         uint32_t storageAmount = 0;
         uint32_t textureAmount = 0;
 
-        for (const auto& binding: bindings) {
+        for (const auto& binding: _bindings) {
             _updated.emplace_back(_vkApplication->getMaxFramesInFlight(),
                                   false);
-            _types.emplace_back(binding.type);
 
             switch (binding.type) {
                 case UniformBindingType::UNIFORM_BUFFER: {
-                    std::vector<std::shared_ptr<Buffer>> buffers;
-                    _buffers.push_back(std::make_shared<StagingBuffer>(
-                        _vkApplication,
-                        VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
-                        binding.size));
+                    if (binding.bufferType == UniformBindingBufferType::STAGING) {
+                        _buffers.push_back(std::make_shared<StagingBuffer>(
+                            _vkApplication,
+                            VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+                            binding.size));
+                    } else {
+                        _buffers.push_back(std::make_shared<SimpleBuffer>(
+                            _vkApplication,
+                            VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+                            VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+                            binding.size));
+                    }
                     _data.emplace_back(binding.size, 0);
                     ++uniformAmount;
                     break;
                 }
                 case UniformBindingType::STORAGE_BUFFER: {
-                    std::vector<std::shared_ptr<Buffer>> buffers;
-                    _buffers.push_back(std::make_shared<StagingBuffer>(
-                        _vkApplication,
-                        VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
-                        binding.size));
+                    if (binding.bufferType == UniformBindingBufferType::STAGING) {
+                        _buffers.push_back(std::make_shared<StagingBuffer>(
+                            _vkApplication,
+                            VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
+                            binding.size));
+                    } else {
+                        _buffers.push_back(std::make_shared<SimpleBuffer>(
+                            _vkApplication,
+                            VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
+                            VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+                            binding.size));
+                    }
                     _data.emplace_back(binding.size, 0);
                     ++storageAmount;
                     break;
@@ -129,9 +133,9 @@ namespace neon::vulkan {
 
         for (int frame = 0; frame < _vkApplication->getMaxFramesInFlight();
              ++frame) {
-            for (int bindingIndex = 0; bindingIndex < bindings.size();
+            for (int bindingIndex = 0; bindingIndex < _bindings.size();
                  ++bindingIndex) {
-                auto& binding = bindings[bindingIndex];
+                auto& binding = _bindings[bindingIndex];
 
                 if (binding.type == UniformBindingType::UNIFORM_BUFFER ||
                     binding.type == UniformBindingType::STORAGE_BUFFER) {
@@ -171,37 +175,42 @@ namespace neon::vulkan {
                                 _descriptorPool, nullptr);
     }
 
-    void VKShaderUniformBuffer::setBindingPoint(uint32_t point) {
-        _bindingPoint = point;
-    }
-
     void VKShaderUniformBuffer::uploadData(uint32_t index,
                                            const void* data,
                                            size_t size,
                                            size_t offset) {
-        if (index >= _types.size()) return;
-        if (_types[index] != UniformBindingType::UNIFORM_BUFFER &&
-            _types[index] != UniformBindingType::STORAGE_BUFFER)
+        if (index >= _bindings.size()) return;
+        if (_bindings[index].type != UniformBindingType::UNIFORM_BUFFER &&
+            _bindings[index].type != UniformBindingType::STORAGE_BUFFER)
             return;
         auto& vector = _data[index];
         auto finalSize = std::min(size, vector.size());
         memcpy(vector.data() + offset, data, finalSize);
-        std::fill(_updated[index].begin(), _updated[index].end(), 0);
+        std::ranges::fill(_updated[index], 0);
+    }
+
+    void VKShaderUniformBuffer::clearData(uint32_t index) {
+        if (index >= _bindings.size()) return;
+        if (_bindings[index].type != UniformBindingType::UNIFORM_BUFFER &&
+            _bindings[index].type != UniformBindingType::STORAGE_BUFFER)
+            return;
+        std::ranges::fill(_updated[index], 0);
+        std::ranges::fill(_data[index], 0);
     }
 
     void* VKShaderUniformBuffer::fetchData(uint32_t index) {
-        if (index >= _types.size()) return nullptr;
-        if (_types[index] != UniformBindingType::UNIFORM_BUFFER &&
-            _types[index] != UniformBindingType::STORAGE_BUFFER)
+        if (index >= _bindings.size()) return nullptr;
+        if (_bindings[index].type != UniformBindingType::UNIFORM_BUFFER &&
+            _bindings[index].type != UniformBindingType::STORAGE_BUFFER)
             return nullptr;
-        std::fill(_updated[index].begin(), _updated[index].end(), 0);
+        std::ranges::fill(_updated[index], 0);
         return _data[index].data();
     }
 
     const void* VKShaderUniformBuffer::fetchData(uint32_t index) const {
-        if (index >= _types.size()) return nullptr;
-        if (_types[index] != UniformBindingType::UNIFORM_BUFFER &&
-            _types[index] != UniformBindingType::STORAGE_BUFFER)
+        if (index >= _bindings.size()) return nullptr;
+        if (_bindings[index].type != UniformBindingType::UNIFORM_BUFFER &&
+            _bindings[index].type != UniformBindingType::STORAGE_BUFFER)
             return nullptr;
         return _data[index].data();
     }
@@ -209,10 +218,10 @@ namespace neon::vulkan {
     void VKShaderUniformBuffer::setTexture(
         uint32_t index,
         std::shared_ptr<Texture> texture) {
-        if (index >= _types.size()) return;
-        if (_types[index] != UniformBindingType::IMAGE) return;
+        if (index >= _bindings.size()) return;
+        if (_bindings[index].type != UniformBindingType::IMAGE) return;
         _textures[index] = std::move(texture);
-        std::fill(_updated[index].begin(), _updated[index].end(), 0);
+        std::ranges::fill(_updated[index], 0);
     }
 
     void VKShaderUniformBuffer::prepareForFrame(
@@ -221,7 +230,7 @@ namespace neon::vulkan {
         for (int index = 0; index < _updated.size(); ++index) {
             auto& updated = _updated[index];
 
-            switch (_types[index]) {
+            switch (_bindings[index].type) {
                 case UniformBindingType::STORAGE_BUFFER:
                 case UniformBindingType::UNIFORM_BUFFER: {
                     if (updated[frame] == 1) continue;
@@ -285,11 +294,31 @@ namespace neon::vulkan {
         }
     }
 
+    void VKShaderUniformBuffer::transferDataFromGPU(uint32_t index) {
+        if (index >= _bindings.size()) return;
+        auto& binding = _bindings[index];
+        if (binding.type != UniformBindingType::STORAGE_BUFFER &&
+            binding.type != UniformBindingType::UNIFORM_BUFFER)
+            return;
+
+        auto& buffer = _buffers[index];
+        std::optional<std::shared_ptr<BufferMap<char>>> optional;
+        if (binding.bufferType == UniformBindingBufferType::SIMPLE) {
+            // Simple map.
+            optional = buffer->map<char>();
+        } else return;
+
+        auto& data = _data[index];
+        memcpy(data.data(), optional.value()->raw(), data.size());
+
+    }
+
     void VKShaderUniformBuffer::bind(VkCommandBuffer commandBuffer,
-                                     VkPipelineLayout layout) const {
+                                     VkPipelineLayout layout,
+                                     uint32_t bindingPoint) const {
         vkCmdBindDescriptorSets(
             commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
-            layout, _bindingPoint, 1,
+            layout, bindingPoint, 1,
             &_descriptorSets[_vkApplication->getCurrentFrame()],
             0, nullptr);
     }

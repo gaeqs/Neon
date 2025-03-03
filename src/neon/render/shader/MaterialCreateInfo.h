@@ -117,8 +117,30 @@ namespace neon {
         PATCH_LIST = 10
     };
 
-    struct MaterialDescriptions {
+    enum class UniformBufferLocation {
+        GLOBAL,
+        MATERIAL,
+        EXTRA
+    };
 
+    struct DescriptorBinding {
+        UniformBufferLocation location = UniformBufferLocation::GLOBAL;
+        std::shared_ptr<ShaderUniformDescriptor> extraDescriptor = nullptr;
+
+        static DescriptorBinding global() {
+            return DescriptorBinding(UniformBufferLocation::GLOBAL, nullptr);
+        }
+
+        static DescriptorBinding material() {
+            return DescriptorBinding(UniformBufferLocation::MATERIAL, nullptr);
+        }
+
+        static DescriptorBinding extra(std::shared_ptr<ShaderUniformDescriptor> descriptor) {
+            return DescriptorBinding(UniformBufferLocation::EXTRA, std::move(descriptor));
+        }
+    };
+
+    struct MaterialDescriptions {
         /**
          * The descriptions of the vertex buffers.
          */
@@ -135,11 +157,15 @@ namespace neon {
         std::shared_ptr<ShaderUniformDescriptor> uniform = nullptr;
 
         /**
-         * The extra uniform descriptions the material can have.
-         * This can be used, for example, by model uniforms.
+         * The locations where the uniform buffers are bound.
+         * You can add extra uniform buffer descriptors to this map.
          */
-        std::vector<std::shared_ptr<ShaderUniformDescriptor>> extraUniforms =
-                {};
+        std::unordered_map<uint8_t, DescriptorBinding> uniformBindings = {};
+
+        MaterialDescriptions() {
+            uniformBindings.insert({0, DescriptorBinding::global()});
+            uniformBindings.insert({1, DescriptorBinding::material()});
+        }
     };
 
     struct MaterialAttachmentBlending {
@@ -308,8 +334,7 @@ namespace neon {
             std::shared_ptr<FrameBuffer> target_,
             std::shared_ptr<ShaderProgram>
             shader_) : target(std::move(target_)),
-                       shader(std::move(shader_)) {
-        }
+                       shader(std::move(shader_)) {}
     };
 }
 

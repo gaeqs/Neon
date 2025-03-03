@@ -1,0 +1,88 @@
+//
+// Created by gaeqs on 3/11/24.
+//
+
+#ifndef LOCALMODEL_H
+#define LOCALMODEL_H
+
+
+#include <neon/structure/Asset.h>
+#include <rush/vector/vec.h>
+
+#include "InputDescription.h"
+#include "Model.h"
+
+namespace neon {
+    enum class LocalVertexEntry {
+        POSITION,
+        NORMAL,
+        TANGENT,
+        UV,
+        COLOR
+    };
+
+    struct LocalVertex {
+        rush::Vec3f position;
+        rush::Vec3f normal;
+        rush::Vec3f tangent;
+        rush::Vec2f uv;
+        rush::Vec4f color;
+        std::vector<float> extra;
+    };
+
+    struct LocalVertexProperties {
+        bool hasPosition = false;
+        bool hasNormal = false;
+        bool hasTangent = false;
+        bool hasUv = false;
+        bool hasColor = false;
+        bool hasExtra = false;
+    };
+
+    class LocalMesh {
+        LocalVertexProperties _properties;
+        std::vector<LocalVertex> _data;
+        std::vector<uint32_t> _indices;
+        uint32_t _materialIndex;
+
+    public:
+        LocalMesh(LocalVertexProperties properties,
+                  std::vector<LocalVertex> data,
+                  std::vector<uint32_t> indices,
+                  uint32_t materialIndex);
+
+        [[nodiscard]] const LocalVertexProperties& getProperties() const;
+
+        [[nodiscard]] std::vector<LocalVertex> getData();
+
+        [[nodiscard]] const std::vector<LocalVertex>& getData() const;
+
+        [[nodiscard]] std::vector<uint32_t> getIndices();
+
+        [[nodiscard]] const std::vector<uint32_t> getIndices() const;
+
+        [[nodiscard]] uint32_t getMaterialIndex() const;
+
+        void setMaterialIndex(uint32_t index);
+    };
+
+    class LocalModel : public Asset {
+        std::vector<LocalMesh> _meshes;
+
+    public:
+        explicit LocalModel(std::string name, std::vector<LocalMesh> meshes);
+
+        ~LocalModel() override = default;
+
+        [[nodiscard]] std::vector<LocalMesh>& getMeshes();
+
+        [[nodiscard]] const std::vector<LocalMesh>& getMeshes() const;
+    };
+
+    namespace serialization {
+        std::optional<LocalVertexEntry> toLocalVertexEntry(std::string s);
+    }
+}
+
+
+#endif //LOCALMODEL_H

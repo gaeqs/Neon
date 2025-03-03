@@ -60,8 +60,10 @@ BloomRender::BloomRender(neon::Application* application,
         mip.relativeSize = relativeSize;
         mip.frameBuffer = std::make_shared<neon::SimpleFrameBuffer>(
                 application,
+                "bloom",
                 textureInfo,
                 false,
+                std::optional<std::string>(),
                 // This will not be required. Set as default.
                 neon::SimpleFrameBuffer::defaultRecreationCondition,
                 [relativeSize](neon::Application* app) {

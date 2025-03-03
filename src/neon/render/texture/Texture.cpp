@@ -13,15 +13,14 @@
 #include <neon/structure/Room.h>
 
 namespace neon {
-
     Texture::Texture(Application* application,
                      std::string name,
                      const void* data,
                      const TextureCreateInfo& createInfo) :
-            Asset(typeid(Texture), std::move(name)),
-            _implementation(application, data, createInfo),
-            _format(createInfo.image.format) {
-    }
+        Asset(typeid(Texture), std::move(name)),
+        _implementation(application, data, createInfo),
+        _format(createInfo.image.format),
+        _samples(createInfo.image.samples) {}
 
 #ifdef USE_VULKAN
 
@@ -33,12 +32,13 @@ namespace neon {
                      VkImageLayout layout,
                      uint32_t width, uint32_t height, uint32_t depth,
                      TextureFormat format,
+                     SamplesPerTexel samples,
                      const SamplerCreateInfo& createInfo) :
-            Asset(typeid(Texture), std::move(name)),
-            _implementation(application, image, memory, imageView, layout,
-                            width, height, depth, createInfo),
-            _format(format) {
-    }
+        Asset(typeid(Texture), std::move(name)),
+        _implementation(application, format, image, memory, imageView, layout,
+                        width, height, depth, createInfo),
+        _format(format),
+        _samples(samples) {}
 
 #endif
 
@@ -66,6 +66,10 @@ namespace neon {
         return _format;
     }
 
+    SamplesPerTexel Texture::getSamples() const {
+        return _samples;
+    }
+
     void Texture::updateData(const char* data,
                              int32_t width, int32_t height, int32_t depth,
                              TextureFormat format) {
@@ -73,10 +77,10 @@ namespace neon {
     }
 
     std::unique_ptr<Texture> Texture::createTextureFromFile(
-            Application* application,
-            std::string name,
-            const cmrc::file& resource,
-            const TextureCreateInfo& createInfo) {
+        Application* application,
+        std::string name,
+        const cmrc::file& resource,
+        const TextureCreateInfo& createInfo) {
         return createTextureFromFile(application,
                                      std::move(name),
                                      resource.begin(),
@@ -85,11 +89,10 @@ namespace neon {
     }
 
     std::unique_ptr<Texture> Texture::createTextureFromFiles(
-            Application* application,
-            std::string name,
-            const std::vector<cmrc::file>& resources,
-            const TextureCreateInfo& createInfo) {
-
+        Application* application,
+        std::string name,
+        const std::vector<cmrc::file>& resources,
+        const TextureCreateInfo& createInfo) {
         std::vector<const void*> data;
         std::vector<uint32_t> sizes;
         data.reserve(resources.size());
@@ -105,10 +108,10 @@ namespace neon {
     }
 
     std::unique_ptr<Texture> Texture::createTextureFromFile(
-            Application* application,
-            std::string name,
-            const std::string& path,
-            const TextureCreateInfo& createInfo) {
+        Application* application,
+        std::string name,
+        const std::string& path,
+        const TextureCreateInfo& createInfo) {
         int32_t width, height, channels;
         auto ptr = stbi_load(path.c_str(), &width, &height, &channels, 4);
 
@@ -118,10 +121,10 @@ namespace neon {
         if (customInfo.image.depth == 0) customInfo.image.depth = 1;
 
         auto image = std::make_unique<Texture>(
-                application,
-                std::move(name),
-                (const char*) ptr,
-                customInfo
+            application,
+            std::move(name),
+            (const char*)ptr,
+            customInfo
         );
 
         stbi_image_free(ptr);
@@ -129,11 +132,10 @@ namespace neon {
     }
 
     std::unique_ptr<Texture> Texture::createTextureFromFiles(
-            Application* application,
-            std::string name,
-            const std::vector<std::string>& paths,
-            const TextureCreateInfo& createInfo) {
-
+        Application* application,
+        std::string name,
+        const std::vector<std::string>& paths,
+        const TextureCreateInfo& createInfo) {
         std::vector<int32_t> widths, heights;
         std::vector<stbi_uc*> pointers;
         widths.resize(paths.size());
@@ -173,10 +175,10 @@ namespace neon {
         if (customInfo.image.depth == 0) customInfo.image.depth = 1;
 
         auto image = std::make_unique<Texture>(
-                application,
-                std::move(name),
-                (const char*) data,
-                customInfo
+            application,
+            std::move(name),
+            (const char*)data,
+            customInfo
         );
 
         delete[] data;
@@ -185,16 +187,15 @@ namespace neon {
 
 
     std::unique_ptr<Texture> Texture::createTextureFromFile(
-            Application* application,
-            std::string name,
-            const void* data, uint32_t size,
-            const TextureCreateInfo& createInfo) {
-
+        Application* application,
+        std::string name,
+        const void* data, uint32_t size,
+        const TextureCreateInfo& createInfo) {
         int32_t width, height, channels;
         auto ptr = stbi_load_from_memory(
-                static_cast<const uint8_t*>(data),
-                static_cast<int32_t>(size),
-                &width, &height, &channels, 4);
+            static_cast<const uint8_t*>(data),
+            static_cast<int32_t>(size),
+            &width, &height, &channels, 4);
 
         TextureCreateInfo customInfo = createInfo;
         if (customInfo.image.width == 0) customInfo.image.width = width;
@@ -202,10 +203,10 @@ namespace neon {
         if (customInfo.image.depth == 0) customInfo.image.depth = 1;
 
         auto image = std::make_unique<Texture>(
-                application,
-                std::move(name),
-                (const char*) ptr,
-                customInfo
+            application,
+            std::move(name),
+            (const char*)ptr,
+            customInfo
         );
 
         stbi_image_free(ptr);
@@ -213,12 +214,11 @@ namespace neon {
     }
 
     std::unique_ptr<Texture> Texture::createTextureFromFile(
-            Application* application,
-            std::string name,
-            const std::vector<const void*>& data,
-            const std::vector<uint32_t>& sizes,
-            const TextureCreateInfo& createInfo) {
-
+        Application* application,
+        std::string name,
+        const std::vector<const void*>& data,
+        const std::vector<uint32_t>& sizes,
+        const TextureCreateInfo& createInfo) {
         std::vector<int32_t> widths, heights;
         std::vector<stbi_uc*> pointers;
         widths.resize(data.size());
@@ -230,14 +230,14 @@ namespace neon {
         for (uint32_t i = 0; i < data.size(); ++i) {
             int32_t channels;
             pointers[i] = stbi_load_from_memory(
-                    static_cast<const uint8_t*>(data[i]),
-                    static_cast<int32_t>(sizes[i]),
-                    &widths[i], &heights[i],
-                    &channels, 4);
+                static_cast<const uint8_t*>(data[i]),
+                static_cast<int32_t>(sizes[i]),
+                &widths[i], &heights[i],
+                &channels, 4);
             totalSize += widths[i] * heights[i] * 4;
             if (pointers[i] == nullptr) {
                 throw std::runtime_error(
-                        "Image " + std::to_string(i) + " is null!");
+                    "Image " + std::to_string(i) + " is null!");
             }
         }
 
@@ -261,12 +261,18 @@ namespace neon {
         if (customInfo.image.depth == 0) customInfo.image.depth = 1;
 
         auto image = std::make_unique<Texture>(
-                application,
-                std::move(name),
-                (const char*) flatData,
-                customInfo
+            application,
+            std::move(name),
+            (const char*)flatData,
+            customInfo
         );
         delete[] flatData;
         return image;
+    }
+
+    void Texture::fetchData(void* data, rush::Vec3i offset, rush::Vec<3, uint32_t> size,
+                            uint32_t layersOffset,
+                            uint32_t layers) {
+        _implementation.fetchData(data, offset, size, layersOffset, layers);
     }
 }

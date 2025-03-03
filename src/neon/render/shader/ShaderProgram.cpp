@@ -34,7 +34,9 @@ namespace neon {
 
     std::optional<std::string> ShaderProgram::compile() {
         if (_compiled) return "Shader already compiled.";
-        return _implementation.compile(_rawShaders);
+        auto result = _implementation.compile(_rawShaders);
+        if (!result.has_value()) _compiled = true;
+        return result;
     }
 
     const std::vector<ShaderUniformBlock>&

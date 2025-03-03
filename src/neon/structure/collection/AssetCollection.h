@@ -75,7 +75,7 @@ namespace neon {
          * @tparam Type the type.
          * @return the dictionary.
          */
-        template<class Type>
+        template<typename Type>
         [[nodiscard]]
         const std::unordered_map<std::string, std::weak_ptr<Asset>>&
         getAll() const {
@@ -96,7 +96,7 @@ namespace neon {
          * @param name the name of the asset.
          * @return the asset or an empty optional.
          */
-        template<class Type>
+        template<typename Type>
         [[nodiscard]] std::optional<std::shared_ptr<Type>>
         get(const std::string& name) const {
             auto itType = _assets.find(typeid(Type));

@@ -11,92 +11,86 @@
 
 namespace fs = std::filesystem;
 
-namespace {
-    std::ios_base::openmode translateOpenMode(const char* mode) {
-        std::ios_base::openmode result = std::ios_base::binary;
-        while (*mode) {
-            switch (*mode) {
-                case 'r':
-                    result |= std::ios_base::in;
-                    break;
-                case 'w':
-                    result |= std::ios_base::out | std::ios_base::trunc;
-                    break;
-                case 'a':
-                    result |= std::ios_base::out | std::ios_base::app;
-                    break;
-                case 'b':
-                    result |= std::ios_base::binary;
-                    break;
-                case '+':
-                    result |= std::ios_base::in | std::ios_base::out;
-                    break;
-                default:
-                    break;
-            }
-            ++mode;
-        }
-        return result;
-    }
-}
-
 namespace neon::assimp_loader {
-    AssimpNewIOStream::AssimpNewIOStream(std::filesystem::path path,
-                                         const char* mode)
-        : _path(path),
-          _stream(path, translateOpenMode(mode)) {
-    }
+    AssimpNewIOStream::AssimpNewIOStream(File file)
+        : _file(std::move(file)),
+          _pointer(0) {}
 
-    size_t AssimpNewIOStream::Read(void* pvBuffer,
-                                   size_t pSize, size_t pCount) {
-        _stream.read(static_cast<char*>(pvBuffer), pSize * pCount);
-        return _stream.gcount();
+    size_t AssimpNewIOStream::Read(void* pvBuffer, size_t pSize, size_t pCount) {
+        if (_file.getSize() <= _pointer) return 0;
+        size_t bytesLeft = _file.getSize() - _pointer;
+        size_t elementsLeft = bytesLeft / pSize;
+        if (elementsLeft == 0) return 0;
+        size_t elementsToRead = std::min(elementsLeft, pCount);
+        size_t bytesToRead = elementsToRead * pSize;
+
+        std::memcpy(pvBuffer, _file.getData(), bytesToRead);
+        _pointer += bytesToRead;
+
+        return elementsToRead;
     }
 
     size_t AssimpNewIOStream::Write(const void* pvBuffer,
                                     size_t pSize, size_t pCount) {
-        _stream.write(static_cast<const char*>(pvBuffer),
-            pSize * pCount);
-        return pCount;
+        return 0;
     }
 
     aiReturn AssimpNewIOStream::Seek(size_t pOffset, aiOrigin pOrigin) {
-        _stream.seekg(pOffset, static_cast<std::ios_base::seekdir>(pOrigin));
-        return aiReturn_SUCCESS;
+        switch (pOrigin) {
+            case aiOrigin_SET:
+                _pointer = pOffset;
+                break;
+            case aiOrigin_CUR:
+                _pointer += static_cast<int32_t>(pOffset);
+                break;
+            case aiOrigin_END:
+                _pointer = _file.getSize() + static_cast<int32_t>(pOffset);
+                break;
+            default:
+                break;
+        }
+        _pointer = std::min(_pointer, _file.getSize());
+        return AI_SUCCESS;
     }
 
     size_t AssimpNewIOStream::Tell() const {
-        return _stream.tellg();
+        return _pointer;
     }
 
     size_t AssimpNewIOStream::FileSize() const {
-        return fs::file_size(_path);
+        return _file.getSize();
     }
 
-    void AssimpNewIOStream::Flush() {
-        _stream.flush();
-    }
+    void AssimpNewIOStream::Flush() {}
+
+    AssimpNewIOSystem::AssimpNewIOSystem(const FileSystem* fileSystem)
+        : _fileSystem(fileSystem),
+          _root({}) {}
 
     AssimpNewIOSystem::AssimpNewIOSystem(
-        std::filesystem::path root)
-        : _root(std::move(root)),
-          _rootName(_root.string()) {
-    }
+        const FileSystem* fileSystem, std::filesystem::path root)
+        : _fileSystem(fileSystem),
+          _root(std::move(root)),
+          _rootName(_root.value().string()) {}
 
     bool AssimpNewIOSystem::Exists(const char* pFile) const {
-        auto path = _root / std::string(pFile);
-        auto abs = fs::absolute(path);
-auto exists = fs::is_regular_file(path);
-        return fs::is_regular_file(path);
+        if (!_root.has_value()) {
+            return _fileSystem->exists(std::string(pFile));
+        }
+        return _fileSystem->exists(_root.value() / std::string(pFile));
     }
 
     char AssimpNewIOSystem::getOsSeparator() const {
-        return fs::path::preferred_separator;
+        return '/';
     }
 
     Assimp::IOStream* AssimpNewIOSystem::Open(const char* pFile,
                                               const char* pMode) {
-        return new AssimpNewIOStream(_root / std::string(pFile), pMode);
+        auto path = _root.has_value() ? _root.value() / std::string(pFile) : std::filesystem::path(std::string(pFile));
+        if (auto file = _fileSystem->readFile(path); file.has_value()) {
+            return new AssimpNewIOStream(std::move(file.value()));
+        }
+        return nullptr;
     }
 
     void AssimpNewIOSystem::Close(Assimp::IOStream* pFile) {
@@ -105,9 +99,15 @@ auto exists = fs::is_regular_file(path);
 
     bool AssimpNewIOSystem::ComparePaths(const char* one,
                                          const char* second) const {
+        if (_root.has_value()) {
+            return fs::equivalent(
+                _root.value() / std::string(one),
+                _root.value() / std::string(second)
+            );
+        }
         return fs::equivalent(
-            _root / std::string(one),
-            _root / std::string(second)
+            std::string(one),
+            std::string(second)
         );
     }
 
@@ -128,18 +128,16 @@ auto exists = fs::is_regular_file(path);
     }
 
     bool AssimpNewIOSystem::CreateDirectory(const std::string& path) {
-        auto abs = _root / std::string(path);
-        return fs::create_directories(abs);
+        return false;
     }
 
     bool AssimpNewIOSystem::ChangeDirectory(const std::string& path) {
         _root = fs::path(path);
-        _rootName = _root.string();
+        _rootName = _root.value().string();
         return true;
     }
 
     bool AssimpNewIOSystem::DeleteFile(const std::string& file) {
-        auto abs = _root / std::string(file);
-        return fs::remove(abs);
+        return false;
     }
 }

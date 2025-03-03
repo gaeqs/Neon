@@ -37,7 +37,7 @@ namespace neon {
     ShaderUniformDescriptor::ofImages(Application* application,
                                       std::string name,
                                       uint32_t amount) {
-        ShaderUniformBinding binding(UniformBindingType::IMAGE, 0);
+        ShaderUniformBinding binding(UniformBindingType::IMAGE, UniformBindingBufferType::STAGING, 0);
         std::vector<ShaderUniformBinding> vector;
         vector.resize(amount, binding);
         return std::make_unique<ShaderUniformDescriptor>(

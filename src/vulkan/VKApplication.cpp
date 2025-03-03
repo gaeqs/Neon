@@ -143,8 +143,9 @@ namespace neon::vulkan {
             .print("VULKAN", TextEffect::foreground4bits(14))
             .print("]", TextEffect::foreground4bits(6))
             .build("vulkan"));
-        //glfwInitHint(GLFW_PLATFORM, GLFW_PLATFORM_X11);
-
+#ifdef __linux__
+        glfwInitHint(GLFW_PLATFORM, GLFW_PLATFORM_X11);
+#endif
         if (!glfwInit()) {
             const char* error;
             glfwGetError(&error);
@@ -799,12 +800,15 @@ namespace neon::vulkan {
 
     VKApplication::~VKApplication() {
         auto raw = _device->getRaw();
-        vkDestroyDescriptorPool(raw, _imGuiPool, nullptr);
-        ImGui_ImplVulkan_Shutdown();
-        ImGui_ImplGlfw_Shutdown();
+        if (ImGui::GetIO().BackendRendererUserData != nullptr) {
+            ImGui_ImplVulkan_Shutdown();
+        }
 
+        ImGui_ImplGlfw_Shutdown();
         ImPlot::DestroyContext();
         ImGui::DestroyContext();
+
+        vkDestroyDescriptorPool(raw, _imGuiPool, nullptr);
 
         for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
             vkDestroySemaphore(raw, _imageAvailableSemaphores[i], nullptr);

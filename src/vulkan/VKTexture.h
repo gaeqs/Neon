@@ -9,6 +9,7 @@
 #include <cstdint>
 #include <vulkan/render/buffer/SimpleBuffer.h>
 #include <neon/render/texture/TextureCreateInfo.h>
+#include <rush/vector/vec.h>
 
 namespace neon {
     class Application;
@@ -18,10 +19,10 @@ namespace neon::vulkan {
     class AbstractVKApplication;
 
     class VKTexture {
-
         Application* _application;
         AbstractVKApplication* _vkApplication;
 
+        TextureFormat _format;
         int32_t _width, _height, _depth;
         uint32_t _mipmapLevels, _layers;
         std::unique_ptr<SimpleBuffer> _stagingBuffer;
@@ -40,14 +41,13 @@ namespace neon::vulkan {
         uint32_t _externalDirtyFlag;
 
     public:
-
-
         VKTexture(const VKTexture& other) = delete;
 
         VKTexture(Application* application, const void* data,
                   const TextureCreateInfo& createInfo = TextureCreateInfo());
 
         VKTexture(Application* application,
+                  TextureFormat format,
                   VkImage image,
                   VkDeviceMemory memory,
                   VkImageView imageView,
@@ -87,9 +87,9 @@ namespace neon::vulkan {
         void makeInternal();
 
         void changeExternalImageView(
-                int32_t width, int32_t height,
-                VkImage image, VkDeviceMemory memory,
-                VkImageView imageView);
+            int32_t width, int32_t height,
+            VkImage image, VkDeviceMemory memory,
+            VkImageView imageView);
 
         void updateData(const void* data,
                         int32_t width,
@@ -97,6 +97,8 @@ namespace neon::vulkan {
                         int32_t depth,
                         TextureFormat format);
 
+        void fetchData(void* data, rush::Vec3i offset, rush::Vec<3, uint32_t> size,
+                       uint32_t layersOffset, uint32_t layers);
     };
 }
 

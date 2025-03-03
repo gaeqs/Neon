@@ -5,22 +5,20 @@
 #include "Camera.h"
 
 namespace neon {
-
     void Camera::recalculateViewMatrix() {
         _dirtyView = false;
         _view = rush::Mat4f::lookAt(_position, getForward(), getUp());
     }
 
     Camera::Camera(const Frustum& frustum) :
-            _position(),
-            _rotation(),
-            _rotationInverse(),
-            _frustum(frustum),
-            _dirtyView(false),
-            _dirtyProjection(true),
-            _view(1.0f),
-            _viewProjection(1.0f) {
-    }
+        _position(),
+        _rotation(),
+        _rotationInverse(),
+        _frustum(frustum),
+        _dirtyView(false),
+        _dirtyProjection(true),
+        _view(1.0f),
+        _viewProjection(1.0f) {}
 
     const rush::Vec3f& Camera::getPosition() const {
         return _position;
@@ -61,7 +59,6 @@ namespace neon {
             throw std::runtime_error("Rotation is not normalized ");
         }
 #endif
-
     }
 
     void Camera::setFrustum(const Frustum& frustum) {
@@ -136,5 +133,61 @@ namespace neon {
         _dirtyProjection = false;
         _viewProjection = _frustum.getProjection() * _view;
         return _viewProjection;
+    }
+
+    std::array<rush::Plane<float>, 6> Camera::getPlanes() {
+        auto& vp = getViewProjection();
+        return {
+            rush::Plane(
+                {
+                    vp(4, 1) + vp(1, 1),
+                    vp(4, 2) + vp(1, 2),
+                    vp(4, 3) + vp(1, 3)
+                },
+                vp(4, 4) + vp(1, 4)
+            ).normalized(),
+            rush::Plane(
+                {
+                    vp(4, 1) - vp(1, 1),
+                    vp(4, 2) - vp(1, 2),
+                    vp(4, 3) - vp(1, 3)
+                },
+                vp(4, 4) - vp(1, 4)
+            ).normalized(),
+            rush::Plane(
+                {
+                    vp(4, 1) + vp(2, 1),
+                    vp(4, 2) + vp(2, 2),
+                    vp(4, 3) + vp(2, 3)
+                },
+                vp(4, 4) + vp(2, 4)
+            ).normalized(),
+            rush::Plane(
+                {
+                    vp(4, 1) - vp(2, 1),
+                    vp(4, 2) - vp(2, 2),
+                    vp(4, 3) - vp(2, 3)
+                },
+                vp(4, 4) - vp(2, 4)
+            ).normalized(),
+
+            rush::Plane(
+                {
+                    vp(4, 1) + vp(3, 1),
+                    vp(4, 2) + vp(3, 2),
+                    vp(4, 3) + vp(3, 3)
+                },
+                vp(4, 4) + vp(3, 4)
+            ).normalized(),
+            rush::Plane(
+                {
+                    vp(4, 1) - vp(3, 1),
+                    vp(4, 2) - vp(3, 2),
+                    vp(4, 3) - vp(3, 3)
+                },
+                vp(4, 4) - vp(3, 4)
+            ).normalized(),
+
+        };
     }
 }

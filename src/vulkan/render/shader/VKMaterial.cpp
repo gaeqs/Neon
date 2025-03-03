@@ -33,7 +33,7 @@ namespace neon::vulkan {
               createInfo.target->getImplementation().getRenderPass().getRaw()) {
         std::vector<VkDynamicState> dynamicStates = {
             VK_DYNAMIC_STATE_VIEWPORT,
-            VK_DYNAMIC_STATE_SCISSOR
+            VK_DYNAMIC_STATE_SCISSOR,
         };
 
         std::vector<VkVertexInputAttributeDescription> attributes;
@@ -107,10 +107,9 @@ namespace neon::vulkan {
         rasterizer.depthBiasSlopeFactor = 0.0f; // Optional
 
         VkPipelineMultisampleStateCreateInfo multisampling{};
-        multisampling.sType =
-                VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
+        multisampling.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
         multisampling.sampleShadingEnable = VK_FALSE;
-        multisampling.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
+        multisampling.rasterizationSamples = conversions::vkSampleCountFlagBits(material->getTarget()->getSamples());
         multisampling.minSampleShading = 1.0f; // Optional
         multisampling.pSampleMask = nullptr; // Optional
         multisampling.alphaToCoverageEnable = VK_FALSE; // Optional
@@ -180,30 +179,71 @@ namespace neon::vulkan {
         colorBlending.blendConstants[2] = createInfo.blending.blendingConstants[2];
         colorBlending.blendConstants[3] = createInfo.blending.blendingConstants[3];
 
-        std::vector<VkDescriptorSetLayout> uniformInfos;
-        uniformInfos.reserve(2 + createInfo.descriptions.extraUniforms.size());
-        uniformInfos.push_back(
-            application->getRender()
-            ->getGlobalUniformDescriptor()
-            ->getImplementation().getDescriptorSetLayout());
-        if (material->getUniformBuffer() != nullptr) {
-            uniformInfos.push_back(material->getUniformBuffer()
-                ->getDescriptor()
-                ->getImplementation()
-                .getDescriptorSetLayout());
-        } else {
-            // Let's duplicate the uniform info to make all extra uniforms start with the set 2.
-            uniformInfos.push_back(uniformInfos.front());
+
+        // Find a correct descriptor!
+        VkDescriptorSetLayout globalDescriptor = nullptr;
+        VkDescriptorSetLayout materialDescriptor = nullptr;
+        VkDescriptorSetLayout dummyDescriptor = nullptr;
+
+        if (auto& render = application->getRender(); render != nullptr) {
+            if (auto desc = render->getGlobalUniformDescriptor(); desc != nullptr) {
+                globalDescriptor = desc->getImplementation().getDescriptorSetLayout();
+            }
         }
 
-        for (const auto& descriptor: createInfo.descriptions.extraUniforms) {
-            uniformInfos.push_back(descriptor->getImplementation()
-                .getDescriptorSetLayout());
+        if (material->getUniformBuffer() != nullptr) {
+            materialDescriptor = material->getUniformBuffer()
+                    ->getDescriptor()->getImplementation().getDescriptorSetLayout();
+        }
+
+        if (globalDescriptor != nullptr) dummyDescriptor = globalDescriptor;
+        else if (materialDescriptor != nullptr) dummyDescriptor = materialDescriptor;
+        else {
+            // Find a dummy descriptor.
+            for (const auto& [location, desc]: createInfo.descriptions.uniformBindings | std::views::values) {
+                if (location != UniformBufferLocation::EXTRA) continue;
+                if (desc == nullptr) continue;
+                dummyDescriptor = desc->getImplementation().getDescriptorSetLayout();
+                break;
+            }
+        }
+
+        std::vector<VkDescriptorSetLayout> uniformInfos;
+
+        // We can't bind anything if all the descriptors are null!
+        if (dummyDescriptor != nullptr && !createInfo.descriptions.uniformBindings.empty()) {
+            // Find the max binding location.
+            uint8_t max = 0;
+            for (const auto& binding: createInfo.descriptions.uniformBindings | std::views::keys) {
+                max = std::max(max, binding);
+            }
+
+            uniformInfos.resize(max + 1, dummyDescriptor);
+
+            for (const auto& [binding, desc]: createInfo.descriptions.uniformBindings) {
+                VkDescriptorSetLayout layout = nullptr;
+                switch (desc.location) {
+                    case UniformBufferLocation::GLOBAL:
+                        layout = globalDescriptor;
+                        break;
+                    case UniformBufferLocation::MATERIAL:
+                        layout = materialDescriptor;
+                        break;
+                    case UniformBufferLocation::EXTRA:
+                        if (desc.extraDescriptor != nullptr) {
+                            layout = desc.extraDescriptor->getImplementation().getDescriptorSetLayout();
+                        }
+                        break;
+                    default:
+                        break;
+                }
+                if (layout == nullptr) continue;
+                uniformInfos[binding] = layout;
+            }
         }
 
         VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
-        pipelineLayoutInfo.sType =
-                VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+        pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
         pipelineLayoutInfo.setLayoutCount = uniformInfos.size();
         pipelineLayoutInfo.pSetLayouts = uniformInfos.data();
 

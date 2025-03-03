@@ -10,16 +10,15 @@
 
 #include <assimp/IOSystem.hpp>
 #include <assimp/IOStream.hpp>
+#include <neon/filesystem/FileSystem.h>
 
 namespace neon::assimp_loader {
     class AssimpNewIOStream : public Assimp::IOStream {
-
-        std::filesystem::path _path;
-        mutable std::fstream _stream;
+        File _file;
+        size_t _pointer;
 
     public:
-
-        AssimpNewIOStream(std::filesystem::path path, const char* mode);
+        AssimpNewIOStream(File file);
 
         inline ~AssimpNewIOStream() override = default;
 
@@ -38,11 +37,14 @@ namespace neon::assimp_loader {
     };
 
     class AssimpNewIOSystem : public Assimp::IOSystem {
-        std::filesystem::path _root;
+        const FileSystem* _fileSystem;
+        std::optional<std::filesystem::path> _root;
         std::string _rootName;
 
     public:
-        explicit AssimpNewIOSystem(std::filesystem::path root);
+        explicit AssimpNewIOSystem(const FileSystem* fileSystem);
+
+        AssimpNewIOSystem(const FileSystem* fileSystem, std::filesystem::path root);
 
         ~AssimpNewIOSystem() override = default;
 

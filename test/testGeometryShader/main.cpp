@@ -134,7 +134,7 @@ std::shared_ptr<FrameBuffer> initRender(Room* room) {
     };
 
     auto fpFrameBuffer = std::make_shared<SimpleFrameBuffer>(
-        app, frameBufferFormats, true);
+        app, "frame_buffer", frameBufferFormats, true);
 
     render->addRenderPass(std::make_shared<DefaultRenderPassStrategy>(
         fpFrameBuffer));
@@ -142,7 +142,7 @@ std::shared_ptr<FrameBuffer> initRender(Room* room) {
     std::vector<FrameBufferTextureCreateInfo> screenFormats =
             {TextureFormat::R8G8B8A8};
     auto screenFrameBuffer = std::make_shared<SimpleFrameBuffer>(
-        app, screenFormats, false);
+        app, "screen", screenFormats, false);
     render->addRenderPass(std::make_shared<DefaultRenderPassStrategy>(
         screenFrameBuffer));
 
@@ -167,8 +167,7 @@ std::shared_ptr<FrameBuffer> initRender(Room* room) {
     screenModelGO->setName("Screen Model");
     screenModelGO->newComponent<GraphicComponent>(screenModel);
 
-    auto swapFrameBuffer = std::make_shared<SwapChainFrameBuffer>(
-        app, false);
+    auto swapFrameBuffer = std::make_shared<SwapChainFrameBuffer>(app, "swap_chain", false);
 
     render->addRenderPass(std::make_shared<DefaultRenderPassStrategy>(
         swapFrameBuffer));

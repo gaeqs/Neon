@@ -44,20 +44,22 @@ namespace neon {
         defaultRecreationParameters(Application*);
 
         SimpleFrameBuffer(Application* application,
+                          std::string name,
                           const std::vector<FrameBufferTextureCreateInfo>&
                           textureInfos,
                           bool depth,
+                          std::optional<std::string> depthName = {},
+                          SamplesPerTexel depthSamples = SamplesPerTexel::COUNT_1,
                           Condition condition = defaultRecreationCondition,
-                          const Parameters& parameters =
-                                  defaultRecreationParameters);
+                          const Parameters& parameters = defaultRecreationParameters);
 
         SimpleFrameBuffer(Application* application,
+                          std::string name,
                           const std::vector<FrameBufferTextureCreateInfo>&
                           textureInfos,
                           std::shared_ptr<Texture> depthTexture,
                           Condition condition = defaultRecreationCondition,
-                          const Parameters& parameters =
-                                  defaultRecreationParameters);
+                          const Parameters& parameters = defaultRecreationParameters);
 
         ~SimpleFrameBuffer() override = default;
 
@@ -70,12 +72,13 @@ namespace neon {
         [[nodiscard]] const FrameBuffer::Implementation&
         getImplementation() const override;
 
-        [[nodiscard]] std::vector<std::shared_ptr<Texture>>
-        getTextures() const override;
+        std::vector<FrameBufferOutput> getOutputs() const override;
 
         [[nodiscard]] uint32_t getWidth() const override;
 
         [[nodiscard]] uint32_t getHeight() const override;
+
+        SamplesPerTexel getSamples() const override;
 
         [[nodiscard]] const Condition& getRecreationCondition() const;
 

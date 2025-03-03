@@ -14,15 +14,15 @@ namespace neon {
         _descriptor(descriptor),
         _implementation(descriptor) {}
 
-    void ShaderUniformBuffer::setBindingPoint(uint32_t point) {
-        _implementation.setBindingPoint(point);
-    }
-
     void ShaderUniformBuffer::uploadData(uint32_t index,
                                          const void* data,
                                          size_t size,
                                          size_t offset) {
         _implementation.uploadData(index, data, size, offset);
+    }
+
+    void ShaderUniformBuffer::clearData(uint32_t index) {
+        _implementation.clearData(index);
     }
 
     void* ShaderUniformBuffer::fetchData(uint32_t index) {
@@ -42,6 +42,10 @@ namespace neon {
     void ShaderUniformBuffer::prepareForFrame(
         const CommandBuffer* commandBuffer) {
         _implementation.prepareForFrame(commandBuffer);
+    }
+
+    void ShaderUniformBuffer::transferDataFromGPU(uint32_t index) {
+        _implementation.transferDataFromGPU(index);
     }
 
     const ShaderUniformBuffer::Implementation&

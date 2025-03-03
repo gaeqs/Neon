@@ -13,21 +13,21 @@
 #include <neon/render/model/Model.h>
 
 namespace neon {
-
     ComponentCollection::ComponentCollection() :
-            _components(),
-            _notStartedComponents() {
-    }
+        _components(),
+        _notStartedComponents() {}
 
     void ComponentCollection::destroyComponent(
-            const IdentifiableWrapper<Component>& component) {
+        const IdentifiableWrapper<Component>& component) {
         auto& type = typeid(*component.raw());
         auto it = _components.find(type);
         if (it == _components.end()) return;
 
         auto collection = std::reinterpret_pointer_cast<
-                ClusteredLinkedCollection<Component>>(it->second.second);
-        collection->remove(component.raw());
+            AbstractClusteredLinkedCollection>(it->second.second);
+        if (!collection->erase(component.raw())) {
+            std::cerr << "Failed to erase component: " << typeid(Component).name() << std::endl;
+        }
     }
 
     void ComponentCollection::invokeKeyEvent(Profiler& profiler,
@@ -115,7 +115,7 @@ namespace neon {
     }
 
     void ComponentCollection::updateComponents(
-            Profiler& profiler, float deltaTime) {
+        Profiler& profiler, float deltaTime) {
         flushNotStartedComponents();
         for (const auto& [type, data]: _components) {
             if (!data.first.onUpdate) continue;
@@ -136,7 +136,7 @@ namespace neon {
     }
 
     void ComponentCollection::lateUpdateComponents(
-            Profiler& profiler, float deltaTime) {
+        Profiler& profiler, float deltaTime) {
         flushNotStartedComponents();
         for (const auto& [type, data]: _components) {
             if (!data.first.onLateUpdate) continue;

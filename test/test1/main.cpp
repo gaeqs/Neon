@@ -26,7 +26,7 @@
 constexpr float WIDTH = 800;
 constexpr float HEIGHT = 600;
 
-CMRC_DECLARE(shaders);
+CMRC_DECLARE(resources);
 
 using namespace neon;
 
@@ -42,8 +42,8 @@ std::shared_ptr<ShaderProgram> createShader(Application* application,
                                             const std::string& name,
                                             const std::string& vert,
                                             const std::string& frag) {
-    auto defaultVert = cmrc::shaders::get_filesystem().open(vert);
-    auto defaultFrag = cmrc::shaders::get_filesystem().open(frag);
+    auto defaultVert = cmrc::resources::get_filesystem().open(vert);
+    auto defaultFrag = cmrc::resources::get_filesystem().open(frag);
 
     auto result = ShaderProgram::createShader(
         application, name, defaultVert, defaultFrag);
@@ -101,8 +101,8 @@ std::shared_ptr<FrameBuffer> initRender(Room* room) {
         TextureFormat::R16FG16F // NORMAL Z / SPECULAR
     };
 
-    auto fpFrameBuffer = std::make_shared<SimpleFrameBuffer>(
-        app, frameBufferFormats, true);
+    auto fpFrameBuffer = std::make_shared<SimpleFrameBuffer>(app, "frame_buffer", frameBufferFormats, true);
+    app->getAssets().store(fpFrameBuffer, AssetStorageMode::PERMANENT);
 
     render->addRenderPass(std::make_shared<DefaultRenderPassStrategy>(
         fpFrameBuffer));
@@ -120,7 +120,7 @@ std::shared_ptr<FrameBuffer> initRender(Room* room) {
     std::vector<FrameBufferTextureCreateInfo> screenFormats =
             {TextureFormat::R8G8B8A8};
     auto screenFrameBuffer = std::make_shared<SimpleFrameBuffer>(
-        app, screenFormats, false);
+        app, "screen_frame_buffer", screenFormats, false);
     render->addRenderPass(std::make_shared<DefaultRenderPassStrategy>(
         screenFrameBuffer));
 
@@ -146,8 +146,7 @@ std::shared_ptr<FrameBuffer> initRender(Room* room) {
     screenModelGO->setName("Screen Model");
     screenModelGO->newComponent<GraphicComponent>(screenModel);
 
-    auto swapFrameBuffer = std::make_shared<SwapChainFrameBuffer>(
-        app, false);
+    auto swapFrameBuffer = std::make_shared<SwapChainFrameBuffer>(app, "swap_chain_frame_buffer", false);
 
     render->addRenderPass(std::make_shared<DefaultRenderPassStrategy>(
         swapFrameBuffer));
@@ -155,27 +154,21 @@ std::shared_ptr<FrameBuffer> initRender(Room* room) {
     return fpFrameBuffer;
 }
 
-void sansLoadThread(Application* application,
-                    assimp_loader::LoaderInfo info) {
+void sansLoadThread(Application* application) {
     DEBUG_PROFILE_ID(application->getProfiler(), sans, "Sans load thread");
     auto holder = application->getCommandManager().fetchCommandPool();
     auto buffer = holder.getPool().beginCommandBuffer(true);
 
-    info.commandBuffer = buffer;
+    DirectoryFileSystem fileSystem("resource");
+    AssetLoaderContext context(application);
+    context.fileSystem = &fileSystem;
+    context.commandBuffer = buffer;
+    auto sansModel = loadAssetFromFile<Model>("sans_model.json", context);
 
-    auto sansResult = assimp_loader::load(R"(resource/Sans)",
-                                          "Sans.obj",
-                                          info);
-
-    if (sansResult.error.has_value()) {
-        application->getLogger().error(
-            MessageBuilder()
-            .print("Couldn't load Sans model! ")
-            .print(std::filesystem::current_path()));
+    if (sansModel == nullptr) {
+        application->getLogger().error("Couldn't load Sans model! ");
         exit(1);
     }
-
-    auto sansModel = sansResult.model;
 
     buffer->end();
     buffer->submit();
@@ -219,11 +212,15 @@ void loadModels(Application* application, Room* room,
     std::shared_ptr<ShaderUniformDescriptor> materialDescriptor =
             ShaderUniformDescriptor::ofImages(application, "default", 2);
 
+    application->getAssets().store(materialDescriptor, AssetStorageMode::PERMANENT);
+
     auto shader = createShader(application,
                                "deferred", "deferred.vert", "deferred.frag");
     auto shaderParallax = createShader(application,
                                        "parallax", "deferred.vert",
                                        "deferred_parallax.frag");
+    application->getAssets().store(shader, AssetStorageMode::PERMANENT);
+
 
     MaterialCreateInfo sansMaterialInfo(target, shader);
     sansMaterialInfo.descriptions.uniform = materialDescriptor;
@@ -233,8 +230,7 @@ void loadModels(Application* application, Room* room,
 
     std::function func = sansLoadThread;
 
-    auto task = application->getTaskRunner().executeAsync(
-        func, application, sansLoaderInfo);
+    auto task = application->getTaskRunner().executeAsync(func, application);
 
     auto zeppeliLoaderInfo = assimp_loader::LoaderInfo::create<TestVertex>(
         application, "Zeppeli", sansMaterialInfo);
@@ -311,21 +307,9 @@ void loadModels(Application* application, Room* room,
 }
 
 std::shared_ptr<Texture> loadSkybox(Room* room) {
-    static const std::vector<std::string> PATHS = {
-        "resource/Skybox/right.jpg",
-        "resource/Skybox/left.jpg",
-        "resource/Skybox/top.jpg",
-        "resource/Skybox/bottom.jpg",
-        "resource/Skybox/front.jpg",
-        "resource/Skybox/back.jpg",
-    };
-
-    TextureCreateInfo info;
-    info.imageView.viewType = TextureViewType::CUBE;
-    info.image.layers = 6;
-
-    return Texture::createTextureFromFiles(room->getApplication(),
-                                           "skybox", PATHS, info);
+    CMRCFileSystem fileSystem(cmrc::resources::get_filesystem());
+    AssetLoaderContext context(room->getApplication(), nullptr, &fileSystem);
+    return loadAssetFromFile<Texture>("texture/skybox/skybox.json", context);
 }
 
 std::shared_ptr<Room> getTestRoom(Application* application) {

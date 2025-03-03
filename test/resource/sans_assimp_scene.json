@@ -1,0 +1,9 @@
+{
+  "name": "Sans",
+  "save": true,
+  "flip_uvs": true,
+  "file": "Sans/Sans.obj",
+  "textures": {
+    "name": "{NAME}"
+  }
+}

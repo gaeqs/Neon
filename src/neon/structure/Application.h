@@ -14,6 +14,7 @@
 #include <rush/rush.h>
 
 #include <neon/structure/collection/AssetCollection.h>
+#include <neon/loader/AssetLoaderCollection.h>
 #include <neon/render/FrameInformation.h>
 #include <neon/util/Result.h>
 #include <neon/util/profile/Profiler.h>
@@ -67,6 +68,7 @@ namespace neon {
         rush::Vec2d _lastCursorPosition;
         Profiler _profiler;
         AssetCollection _assets;
+        AssetLoaderCollection _assetLoaders;
         TaskRunner _taskRunner;
         CommandManager _commandManager;
         Logger _logger;
@@ -107,6 +109,10 @@ namespace neon {
         [[nodiscard]] const AssetCollection& getAssets() const;
 
         [[nodiscard]] AssetCollection& getAssets();
+
+        [[nodiscard]] const AssetLoaderCollection& getAssetLoaders() const;
+
+        [[nodiscard]] AssetLoaderCollection& getAssetLoaders();
 
         [[nodiscard]] int32_t getWidth() const;
 

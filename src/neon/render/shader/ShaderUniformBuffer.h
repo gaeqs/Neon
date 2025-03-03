@@ -33,9 +33,7 @@ namespace neon {
     public:
         ShaderUniformBuffer(const ShaderUniformBuffer& other) = delete;
 
-        ShaderUniformBuffer(
-            std::string name,
-            const std::shared_ptr<ShaderUniformDescriptor>& descriptor);
+        ShaderUniformBuffer(std::string name, const std::shared_ptr<ShaderUniformDescriptor>& descriptor);
 
         [[nodiscard]] const Implementation& getImplementation() const;
 
@@ -44,10 +42,9 @@ namespace neon {
         [[nodiscard]] const std::shared_ptr<ShaderUniformDescriptor>&
         getDescriptor() const;
 
-        void setBindingPoint(uint32_t point);
+        void uploadData(uint32_t index, const void* data, size_t size, size_t offset = 0);
 
-        void uploadData(uint32_t index, const void* data,
-                        size_t size, size_t offset = 0);
+        void clearData(uint32_t index);
 
         void* fetchData(uint32_t index);
 
@@ -61,6 +58,17 @@ namespace neon {
         }
 
         void prepareForFrame(const CommandBuffer* commandBuffer);
+
+        /**
+         * Transfers data from the GPU to the CPU for the uniform or storage buffer assigned to the given index.
+         *
+         * This function immediately updates the CPU-side copy of the buffer's contents, making the
+         * latest data available for retrieval. You can then access the updated information by calling
+         * the fetchData function.
+         *
+         * This will only work if the buffer type of the binding is UniformBindingBufferType::SIMPLE.
+         */
+        void transferDataFromGPU(uint32_t index);
     };
 }
 

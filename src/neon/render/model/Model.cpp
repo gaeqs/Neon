@@ -12,12 +12,11 @@ namespace neon {
                  const ModelCreateInfo& info)
         : Asset(typeid(Model), name),
           _meshes(info.drawables),
+          _bufferBindings(info.uniformBufferBindings),
           _shouldAutoFlush(info.shouldAutoFlush),
           _implementation(application, this) {
         if (info.uniformDescriptor != nullptr) {
-            _uniformBuffer = std::make_unique<ShaderUniformBuffer>(
-                name, info.uniformDescriptor);
-            _uniformBuffer->setBindingPoint(2);
+            _uniformBuffer = std::make_unique<ShaderUniformBuffer>(name, info.uniformDescriptor);
         }
 
         auto datas = info.instanceDataProvider(application, info, this);
@@ -39,6 +38,14 @@ namespace neon {
     ShaderUniformBuffer*
     Model::getUniformBuffer() const {
         return _uniformBuffer.get();
+    }
+
+    std::unordered_map<uint32_t, ModelBufferBinding>& Model::getUniformBufferBindings() {
+        return _bufferBindings;
+    }
+
+    const std::unordered_map<uint32_t, ModelBufferBinding>& Model::getUniformBufferBindings() const {
+        return _bufferBindings;
     }
 
     const std::vector<std::unique_ptr<InstanceData>>& Model::getInstanceDatas() const {

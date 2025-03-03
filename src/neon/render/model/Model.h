@@ -43,6 +43,7 @@ namespace neon {
     private:
         std::vector<std::shared_ptr<Drawable>> _meshes;
         std::unique_ptr<ShaderUniformBuffer> _uniformBuffer;
+        std::unordered_map<uint32_t, ModelBufferBinding> _bufferBindings;
         std::vector<std::unique_ptr<InstanceData>> _instanceDatas;
         bool _shouldAutoFlush;
 
@@ -79,6 +80,10 @@ namespace neon {
          * @return the uniform buffer.
          */
         [[nodiscard]] ShaderUniformBuffer* getUniformBuffer() const;
+
+        [[nodiscard]] std::unordered_map<uint32_t, ModelBufferBinding>& getUniformBufferBindings();
+
+        [[nodiscard]] const std::unordered_map<uint32_t, ModelBufferBinding>& getUniformBufferBindings() const;
 
         /**
         * Returns the list of instance datas present in this model.

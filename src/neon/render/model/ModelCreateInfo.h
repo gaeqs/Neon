@@ -28,13 +28,41 @@
 
 #include <cstdint>
 #include <memory>
-#include <vector>
+#include <unordered_map>
 
 #include <neon/render/model/DefaultInstancingData.h>
 #include <neon/render/model/BasicInstanceData.h>
 #include <neon/render/model/Drawable.h>
 
 namespace neon {
+    enum class ModelBufferLocation {
+        GLOBAL,
+        MATERIAL,
+        MODEL,
+        EXTRA
+    };
+
+    struct ModelBufferBinding {
+        ModelBufferLocation location = ModelBufferLocation::GLOBAL;
+        std::shared_ptr<ShaderUniformBuffer> extraBuffer = nullptr;
+
+        static ModelBufferBinding global() {
+            return ModelBufferBinding(ModelBufferLocation::GLOBAL, nullptr);
+        }
+
+        static ModelBufferBinding material() {
+            return ModelBufferBinding(ModelBufferLocation::MATERIAL, nullptr);
+        }
+
+        static ModelBufferBinding model() {
+            return ModelBufferBinding(ModelBufferLocation::MODEL, nullptr);
+        }
+
+        static ModelBufferBinding extra(std::shared_ptr<ShaderUniformBuffer> descriptor) {
+            return ModelBufferBinding(ModelBufferLocation::EXTRA, std::move(descriptor));
+        }
+    };
+
     /**
      * Information used to create a model.a gua
      * configure a model.
@@ -58,6 +86,14 @@ namespace neon {
          * model will use.
          */
         std::shared_ptr<ShaderUniformDescriptor> uniformDescriptor = nullptr;
+
+        /**
+        * Other uniform buffers that can be used by the model.
+        * The set index of these buffers start on 3
+        * (0 is reserved for the global buffer, 1 is reserved for the material buffer
+        * and 2 is reserved for the model buffer).
+        */
+        std::unordered_map<uint32_t, ModelBufferBinding> uniformBufferBindings = {};
 
         /**
         * Whether the renderer should call Model::flush() before rendering.
@@ -100,6 +136,12 @@ namespace neon {
                 = [](Application* app, const ModelCreateInfo& info, Model*) {
             return std::vector<InstanceData*>{new BasicInstanceData(app, info)};
         };
+
+        ModelCreateInfo() {
+            uniformBufferBindings.insert({0, ModelBufferBinding::global()});
+            uniformBufferBindings.insert({1, ModelBufferBinding::material()});
+            uniformBufferBindings.insert({2, ModelBufferBinding::model()});
+        }
 
         template<typename... Types>
         void defineInstanceType() {

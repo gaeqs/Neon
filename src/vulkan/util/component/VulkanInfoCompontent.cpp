@@ -739,7 +739,6 @@ void neon::vulkan::VulkanInfoCompontent::onStart() {
 }
 
 void neon::vulkan::VulkanInfoCompontent::onPreDraw() {
-    ImGui::ShowDemoWindow();
     if (ImGui::Begin("Vulkan info")) {
         if (ImGui::CollapsingHeader("Physical Device Properties")) {
             ImGui::TreePush("");

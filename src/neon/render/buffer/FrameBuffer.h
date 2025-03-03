@@ -6,8 +6,9 @@
 #define NEON_FRAMEBUFFER_H
 
 #include <vector>
-#include <memory>
-#include <neon/structure/IdentifiableWrapper.h>
+#include <neon/render/texture/TextureCreateInfo.h>
+#include <neon/render/buffer/FrameBufferOutput.h>
+#include <neon/structure/Asset.h>
 
 #ifdef USE_VULKAN
 
@@ -21,25 +22,22 @@
 #endif
 
 namespace neon {
-
     class Texture;
 
-    class FrameBuffer {
-
+    class FrameBuffer : public Asset {
         std::unordered_map<uint32_t, rush::Vec4f> _clearColors;
         std::pair<float, uint32_t> _depthClear;
 
     public:
-
 #ifdef USE_VULKAN
         using Implementation = vulkan::VKFrameBuffer;
 #endif
 
-        FrameBuffer();
+        explicit FrameBuffer(std::string name);
 
         FrameBuffer(const FrameBuffer& other) = delete;
 
-        virtual ~FrameBuffer() = default;
+        ~FrameBuffer() override = default;
 
         [[nodiscard]] std::optional<rush::Vec4f>
         getClearColor(uint32_t index) const;
@@ -56,15 +54,15 @@ namespace neon {
 
         [[nodiscard]] virtual Implementation& getImplementation() = 0;
 
-        [[nodiscard]] virtual const Implementation&
-        getImplementation() const = 0;
+        [[nodiscard]] virtual const Implementation& getImplementation() const = 0;
 
-        [[nodiscard]] virtual std::vector<std::shared_ptr<Texture>>
-        getTextures() const = 0;
+        [[nodiscard]] virtual std::vector<FrameBufferOutput> getOutputs() const = 0;
 
         [[nodiscard]] virtual uint32_t getWidth() const = 0;
 
         [[nodiscard]] virtual uint32_t getHeight() const = 0;
+
+        [[nodiscard]] virtual SamplesPerTexel getSamples() const = 0;
     };
 }
 

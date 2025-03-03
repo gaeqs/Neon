@@ -32,7 +32,7 @@ namespace neon::vulkan {
 
         std::vector<std::shared_ptr<Buffer>> _buffers;
         std::vector<VkDescriptorSet> _descriptorSets;
-        std::vector<UniformBindingType> _types;
+        std::vector<ShaderUniformBinding> _bindings;
         std::vector<std::vector<uint32_t>> _updated;
         std::vector<std::vector<char>> _data;
         std::vector<std::shared_ptr<Texture>> _textures;
@@ -45,10 +45,9 @@ namespace neon::vulkan {
 
         ~VKShaderUniformBuffer();
 
-        void setBindingPoint(uint32_t point);
+        void uploadData(uint32_t index, const void* data, size_t size, size_t offset);
 
-        void uploadData(uint32_t index, const void* data,
-                        size_t size, size_t offset);
+        void clearData(uint32_t index);
 
         void* fetchData(uint32_t index);
 
@@ -58,7 +57,9 @@ namespace neon::vulkan {
 
         void prepareForFrame(const CommandBuffer* commandBuffer);
 
-        void bind(VkCommandBuffer commandBuffer, VkPipelineLayout layout) const;
+        void transferDataFromGPU(uint32_t index);
+
+        void bind(VkCommandBuffer commandBuffer, VkPipelineLayout layout, uint32_t bindingPoint) const;
     };
 }
 

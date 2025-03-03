@@ -24,40 +24,60 @@ namespace neon {
 namespace neon::vulkan {
     class AbstractVKApplication;
 
-    class VKSimpleFrameBuffer : public VKFrameBuffer {
+    struct SimpleFrameBufferImage {
+        std::optional<std::string> name;
+        bool depth;
+        ImageCreateInfo info;
+        SamplerCreateInfo sampler;
+        VkImage image;
+        VkDeviceMemory memory;
+        VkImageLayout layout;
+        VkImageView view;
+        VkDescriptorSet imGuiDescriptor;
+        std::shared_ptr<Texture> overrideTexture;
+    };
 
+    struct SimpleFrameBufferSlot {
+        SimpleFrameBufferImage image;
+        std::optional<SimpleFrameBufferImage> resolveImage;
+    };
+
+    class VKSimpleFrameBuffer : public VKFrameBuffer {
         AbstractVKApplication* _vkApplication;
 
         VkFramebuffer _frameBuffer;
 
-        std::vector<VkImage> _images;
-        std::vector<VkDeviceMemory> _memories;
-        std::vector<VkImageView> _imageViews;
-        std::vector<VkImageLayout> _layouts;
-        std::vector<VkDescriptorSet> _imGuiDescriptors;
-        std::vector<std::shared_ptr<Texture>> _textures;
-
         std::vector<FrameBufferTextureCreateInfo> _createInfos;
+        std::vector<SimpleFrameBufferSlot> _images;
+        std::vector<FrameBufferOutput> _outputs;
+
         VkExtent2D _extent;
 
         VKRenderPass _renderPass;
 
         bool _depth;
+        std::optional<std::string> _depthName;
+        SamplesPerTexel _depthSamples;
+        bool _hasMultisampling;
+        size_t _colorOutputs;
 
         void createImages(std::shared_ptr<Texture> overrideDepth);
 
         void createFrameBuffer();
+
+        void createOutputs(Application* application);
 
         void cleanup();
 
         void cleanupImages();
 
     public:
-
         VKSimpleFrameBuffer(Application* application,
                             const std::vector<FrameBufferTextureCreateInfo>& textureInfos,
                             std::pair<uint32_t, uint32_t> extent,
-                            bool depth);
+                            bool depth,
+                            std::optional<std::string> depthName = {},
+                            SamplesPerTexel depthSamples = SamplesPerTexel::COUNT_1);
 
         VKSimpleFrameBuffer(Application* application,
                             const std::vector<FrameBufferTextureCreateInfo>& textureInfos,
@@ -84,12 +104,13 @@ namespace neon::vulkan {
 
         [[nodiscard]] uint32_t getHeight() const override;
 
+        SamplesPerTexel getSamples() const override;
+
         [[nodiscard]] ImTextureID getImGuiDescriptor(uint32_t index);
 
         bool renderImGui() override;
 
-        [[nodiscard]] const std::vector<std::shared_ptr<Texture>>&
-        getTextures() const;
+        [[nodiscard]] std::vector<FrameBufferOutput> getOutputs() const override;
 
         void recreate(std::pair<uint32_t, uint32_t> size);
 
@@ -97,7 +118,6 @@ namespace neon::vulkan {
 
         [[nodiscard]] std::pair<uint32_t, uint32_t>
         defaultRecreationParameters() const;
-
     };
 }
 

@@ -200,8 +200,10 @@ std::shared_ptr<Texture> computeIrradiance(
 
     auto testFrameBuffer = std::make_shared<neon::SimpleFrameBuffer>(
         app,
+        "test",
         std::vector<neon::FrameBufferTextureCreateInfo>{testInfo},
         false,
+        std::optional<std::string>(),
         [](const auto& _) {
             return false;
         },
@@ -304,8 +306,9 @@ std::shared_ptr<FrameBuffer> initRender(
     };
 
     auto fpFrameBuffer = std::make_shared<SimpleFrameBuffer>(app,
-        frameBufferFormats, /*depth buffer?*/
-        true);
+                                                             "frame_buffer",
+                                                             frameBufferFormats, /*depth buffer?*/
+                                                             true);
 
     render->addRenderPass(
         std::make_shared<DefaultRenderPassStrategy>(fpFrameBuffer));
@@ -323,8 +326,11 @@ std::shared_ptr<FrameBuffer> initRender(
     ssaoTextureInfo[0].sampler.minificationFilter = TextureFilter::LINEAR;
 
     auto ssaoFrameBuffer = std::make_shared<SimpleFrameBuffer>(
-        app, ssaoTextureInfo,
+        app,
+        "ssao",
+        ssaoTextureInfo,
         false,
+        std::optional<std::string>(),
         neon::SimpleFrameBuffer::defaultRecreationCondition,
         neon::SimpleFrameBuffer::defaultRecreationParameters
     );
@@ -333,8 +339,11 @@ std::shared_ptr<FrameBuffer> initRender(
         std::make_shared<DefaultRenderPassStrategy>(ssaoFrameBuffer));
 
     auto ssaoBlurFrameBuffer = std::make_shared<SimpleFrameBuffer>(
-        app, ssaoTextureInfo,
+        app,
+        "ssao_blur",
+        ssaoTextureInfo,
         false,
+        std::optional<std::string>(),
         neon::SimpleFrameBuffer::defaultRecreationCondition,
         neon::SimpleFrameBuffer::defaultRecreationParameters
     );
@@ -379,7 +388,10 @@ std::shared_ptr<FrameBuffer> initRender(
         TextureFormat::R8G8B8A8
     };
     auto screenFrameBuffer = std::make_shared<SimpleFrameBuffer>(
-        app, screenFormats, false);
+        app,
+        "screen",
+        screenFormats,
+        false);
     render->addRenderPass(
         std::make_shared<DefaultRenderPassStrategy>(screenFrameBuffer));
 
@@ -404,7 +416,10 @@ std::shared_ptr<FrameBuffer> initRender(
     screenModelGO->newComponent<GraphicComponent>(screenModel);
 
     auto swapFrameBuffer = std::make_shared<SwapChainFrameBuffer>(
-        app, false);
+        app,
+        "swap_chain",
+        false
+    );
 
     render->addRenderPass(
         std::make_shared<DefaultRenderPassStrategy>(swapFrameBuffer));

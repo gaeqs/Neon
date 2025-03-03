@@ -63,7 +63,7 @@ namespace neon::deferred_utils {
         std::shared_ptr<Model> flashModel = nullptr;
 
         auto frameBuffer = std::make_shared<SimpleFrameBuffer>(
-            room->getApplication(), outputFormatVector, false);
+            room->getApplication(), "deferred", outputFormatVector, false);
         render->addRenderPass(
             std::make_shared<DefaultRenderPassStrategy>(frameBuffer));
 
@@ -147,6 +147,6 @@ namespace neon::deferred_utils {
         go->setName("Light system");
         go->newComponent<LightSystem>(directionalModel, pointModel, flashModel);
 
-        return frameBuffer->getTextures().front();
+        return frameBuffer->getOutputs().front().resolvedTexture;
     }
 }

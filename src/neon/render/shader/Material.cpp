@@ -29,9 +29,6 @@ namespace neon {
             name, createInfo.descriptions.uniform)),
         _priority(0),
         _implementation(application, this, createInfo) {
-        if (_uniformBuffer != nullptr) {
-            _uniformBuffer->setBindingPoint(1);
-        }
     }
 
     const std::shared_ptr<ShaderProgram>& Material::getShader() const {

@@ -82,6 +82,31 @@ namespace neon::vulkan::vulkan_util {
         copyRegion.dstOffset = destinyOffset;
         vkCmdCopyBuffer(commandBuffer,
                         source, destiny, 1, &copyRegion);
+
+        VkBufferMemoryBarrier memoryBarrier = {
+            .sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER,
+            .pNext = nullptr,
+            .srcAccessMask = VK_ACCESS_HOST_WRITE_BIT | VK_ACCESS_TRANSFER_WRITE_BIT,
+            .dstAccessMask = VK_ACCESS_SHADER_READ_BIT,
+            .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+            .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+            .buffer = destiny,
+            .offset = destinyOffset,
+            .size = size
+        };
+
+        vkCmdPipelineBarrier(
+            commandBuffer,
+            VK_PIPELINE_STAGE_HOST_BIT | VK_PIPELINE_STAGE_TRANSFER_BIT,
+            VK_PIPELINE_STAGE_ALL_COMMANDS_BIT,
+            0,
+            0,
+            nullptr,
+            1,
+            &memoryBarrier,
+            0,
+            nullptr
+        );
     }
 
     std::pair<VkImage, VkDeviceMemory>
@@ -104,8 +129,7 @@ namespace neon::vulkan::vulkan_util {
 
         if (override == VK_FORMAT_UNDEFINED) {
             imageInfo.format = vc::vkFormat(info.format);
-        }
-        else {
+        } else {
             imageInfo.format = override;
         }
 
@@ -122,8 +146,7 @@ namespace neon::vulkan::vulkan_util {
 
         if (viewType == TextureViewType::CUBE) {
             imageInfo.flags = VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT;
-        }
-        else if (viewType == TextureViewType::ARRAY_2D) {
+        } else if (viewType == TextureViewType::ARRAY_2D) {
             imageInfo.flags = VK_IMAGE_CREATE_2D_ARRAY_COMPATIBLE_BIT;
         }
 
@@ -154,8 +177,8 @@ namespace neon::vulkan::vulkan_util {
         return {image, memory};
     }
 
-    void transitionImageLayout(AbstractVKApplication* application,
-                               VkImage image, VkFormat format,
+    void transitionImageLayout(VkImage image,
+                               VkFormat format,
                                VkImageLayout oldLayout,
                                VkImageLayout newLayout,
                                uint32_t mipLevels,
@@ -171,7 +194,7 @@ namespace neon::vulkan::vulkan_util {
         barrier.image = image;
         barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
         barrier.subresourceRange.baseMipLevel = 0;
-        barrier.subresourceRange.levelCount = mipLevels;
+        barrier.subresourceRange.levelCount = mipLevels == 0 ? 1 : mipLevels;
         barrier.subresourceRange.baseArrayLayer = 0;
         barrier.subresourceRange.layerCount = layers;
 
@@ -188,26 +211,37 @@ namespace neon::vulkan::vulkan_util {
 
             sourceStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
             destinationStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
-        }
-        else if (oldLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL &&
-                 newLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL) {
+        } else if (oldLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL &&
+                   newLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL) {
             barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
             barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
 
             sourceStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
             destinationStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
-        }
-        else if (oldLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL &&
-                 newLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL) {
+        } else if (oldLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL &&
+                   newLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL) {
             barrier.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
             barrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
 
             sourceStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
             destinationStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
-        }
-        else if (oldLayout == VK_IMAGE_LAYOUT_UNDEFINED &&
-                 newLayout ==
-                 VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL) {
+        } else if (oldLayout == VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL &&
+                   newLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL) {
+            barrier.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+            barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+
+            sourceStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
+            destinationStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+        } else if (oldLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL &&
+                   newLayout == VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL) {
+            barrier.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
+            barrier.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+
+            sourceStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+            destinationStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
+        } else if (oldLayout == VK_IMAGE_LAYOUT_UNDEFINED &&
+                   newLayout ==
+                   VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL) {
             barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
 
             if (format == VK_FORMAT_D32_SFLOAT_S8_UINT ||
@@ -225,10 +259,8 @@ namespace neon::vulkan::vulkan_util {
             sourceStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
             destinationStage = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT |
                                VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
-        }
-        else if (oldLayout == VK_IMAGE_LAYOUT_UNDEFINED &&
-                 newLayout ==
-                 VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL) {
+        } else if (oldLayout == VK_IMAGE_LAYOUT_UNDEFINED &&
+                   newLayout == VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL) {
             barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 
             barrier.srcAccessMask = 0;
@@ -240,8 +272,7 @@ namespace neon::vulkan::vulkan_util {
             sourceStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
             destinationStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT |
                                VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
-        }
-        else {
+        } else {
             throw std::invalid_argument("unsupported layout transition!");
         }
 
@@ -253,9 +284,11 @@ namespace neon::vulkan::vulkan_util {
         );
     }
 
-    void copyBufferToImage(AbstractVKApplication* application,
-                           VkBuffer buffer, VkImage image,
-                           uint32_t width, uint32_t height, uint32_t depth,
+    void copyBufferToImage(VkBuffer buffer,
+                           VkImage image,
+                           uint32_t width,
+                           uint32_t height,
+                           uint32_t depth,
                            uint32_t layers,
                            VkCommandBuffer commandBuffer) {
         VkBufferImageCopy region{};
@@ -285,6 +318,36 @@ namespace neon::vulkan::vulkan_util {
         );
     }
 
+    void copyImageToBuffer(VkBuffer buffer,
+                           VkImage image,
+                           rush::Vec3i offset,
+                           rush::Vec<3, uint32_t> size,
+                           uint32_t layerOffset,
+                           uint32_t layers,
+                           VkCommandBuffer commandBuffer) {
+        VkBufferImageCopy region{};
+        region.bufferOffset = 0;
+        region.bufferRowLength = 0;
+        region.bufferImageHeight = 0;
+
+        region.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        region.imageSubresource.mipLevel = 0;
+        region.imageSubresource.baseArrayLayer = layerOffset;
+        region.imageSubresource.layerCount = layers;
+
+        region.imageOffset = {offset[0], offset[1], offset[2]};
+        region.imageExtent = {size[0], size[1], size[2],};
+
+        vkCmdCopyImageToBuffer(
+            commandBuffer,
+            image,
+            VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+            buffer,
+            1,
+            &region
+        );
+    }
+
     void generateMipmaps(AbstractVKApplication* application,
                          VkImage image,
                          uint32_t width,
@@ -293,7 +356,6 @@ namespace neon::vulkan::vulkan_util {
                          uint32_t levels,
                          int32_t layers,
                          VkCommandBuffer commandBuffer) {
-
         VkImageMemoryBarrier barrier{};
         barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
         barrier.image = image;
@@ -506,31 +568,34 @@ namespace neon::vulkan::vulkan_util {
 
         std::vector<VkClearValue> clearValues;
         if (clear) {
-            clearValues.resize(frameBuffer.getColorAttachmentAmount() +
-                               (frameBuffer.hasDepth() ? 1 : 0));
+            auto outputs = frameBuffer.getOutputs();
+            clearValues.reserve(outputs.size() * 2);
 
-            for (uint32_t i = 0; i < frameBuffer.getColorAttachmentAmount();
-                 ++i) {
-                auto clearColor = fb->getClearColor(i);
-                if (clearColor.has_value()) {
-                    auto c = clearColor.value();
-                    clearValues[i].color = {c.x(), c.y(), c.z(), c.w()};
+            for (size_t i = 0; i < outputs.size(); ++i) {
+                auto& output = outputs[i];
+                VkClearValue value;
+                if (output.type == FrameBufferOutputType::COLOR || output.type == FrameBufferOutputType::SWAP) {
+                    auto clearColor = fb->getClearColor(i);
+                    if (clearColor.has_value()) {
+                        auto c = clearColor.value();
+                        value.color = {c.x(), c.y(), c.z(), c.w()};
+                    } else {
+                        value.color = {0.0f, 0.0f, 0.0f, 1.0f};
+                    }
+                } else if (output.type == FrameBufferOutputType::DEPTH) {
+                    auto [depth, stencil] = fb->getDepthClearColor();
+                    value.depthStencil = {depth, stencil};
                 }
-                else {
-                    clearValues[i].color = {0.0f, 0.0f, 0.0f, 1.0f};
-                }
-            }
 
-            if (frameBuffer.hasDepth()) {
-                auto c = fb->getDepthClearColor();
-                clearValues[clearValues.size() - 1].depthStencil =
-                        {c.first, c.second};
+                clearValues.push_back(value);
+                if (output.texture != output.resolvedTexture) {
+                    clearValues.push_back(value);
+                }
             }
 
             renderPassInfo.clearValueCount = clearValues.size();
             renderPassInfo.pClearValues = clearValues.data();
-        }
-        else {
+        } else {
             renderPassInfo.clearValueCount = 0;
         }
 

@@ -29,6 +29,7 @@ uint32_t vc::pixelSize(const TextureFormat& format) {
         case TextureFormat::R16FG16FB16F:
             return 6;
         case TextureFormat::R16FG16FB16FA16F:
+        case TextureFormat::R32FG32F:
             return 8;
         case TextureFormat::A8R8G8B8:
         case TextureFormat::B8G8R8A8:
@@ -70,6 +71,8 @@ VkFormat vc::vkFormat(const TextureFormat& format) {
             return VK_FORMAT_R32G32B32A32_SFLOAT;
         case TextureFormat::R32F:
             return VK_FORMAT_R32_SFLOAT;
+        case TextureFormat::R32FG32F:
+            return VK_FORMAT_R32G32_SFLOAT;
         case TextureFormat::R16FG16F:
             return VK_FORMAT_R16G16_SFLOAT;
         case TextureFormat::R16FG16FB16F:
@@ -149,6 +152,15 @@ vc::vkSampleCountFlagBits(const SamplesPerTexel& samples) {
         default:
             throw std::runtime_error("Conversion not found!");
     }
+}
+
+std::vector<VkSampleCountFlagBits> vc::vkSampleCountFlagBits(const std::vector<FrameBufferTextureCreateInfo>& infos) {
+    std::vector<VkSampleCountFlagBits> map;
+    map.reserve(infos.size());
+    for (const auto& item: infos) {
+        map.push_back(vkSampleCountFlagBits(item.samples));
+    }
+    return map;
 }
 
 VkImageViewType vc::vkImageViewType(const TextureViewType& viewType) {

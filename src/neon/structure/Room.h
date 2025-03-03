@@ -18,7 +18,6 @@
 #include <neon/util/ClusteredLinkedCollection.h>
 
 namespace neon {
-
     class Application;
 
     class GameObject;
@@ -36,7 +35,6 @@ namespace neon {
     class Model;
 
     class Room {
-
         Application* _application;
 
         Camera _camera;
@@ -49,7 +47,6 @@ namespace neon {
         std::unordered_set<IdentifiableWrapper<Component>> _destroyLater;
 
     public:
-
         Room(const Room& other) = delete;
 
         Room(Application* application);
@@ -77,7 +74,7 @@ namespace neon {
         void forEachGameObject(std::function<void(GameObject*)> consumer);
 
         void forEachGameObject(
-                std::function<void(const GameObject*)> consumer) const;
+            std::function<void(const GameObject*)> consumer) const;
 
         // region INTERNAL
 
@@ -99,6 +96,10 @@ namespace neon {
          */
         void unmarkUsingModel(Model* model);
 
+        size_t loadGameObjects(nlohmann::json json, AssetLoaderContext context);
+
+        size_t loadGameObjects(const std::filesystem::path& path, AssetLoaderContext context);
+
         // endregion
 
         //region EVENTS
@@ -117,7 +118,6 @@ namespace neon {
 
 
         //endregion
-
     };
 }
 

@@ -14,24 +14,19 @@
 #endif
 
 namespace neon {
-
     class Application;
 
     class SwapChainFrameBuffer : public FrameBuffer {
-
     public:
-
 #ifdef USE_VULKAN
-    using Implementation = vulkan::VKSwapChainFrameBuffer;
+        using Implementation = vulkan::VKSwapChainFrameBuffer;
 #endif
 
     private:
-
         Implementation _implementation;
 
     public:
-
-        SwapChainFrameBuffer(Application* application, bool depth);
+        SwapChainFrameBuffer(Application* application, std::string name, SamplesPerTexel samples, bool depth);
 
         ~SwapChainFrameBuffer() override = default;
 
@@ -44,12 +39,13 @@ namespace neon {
         [[nodiscard]] const FrameBuffer::Implementation&
         getImplementation() const override;
 
-        [[nodiscard]] std::vector<std::shared_ptr<Texture>>
-        getTextures() const override;
+        [[nodiscard]] std::vector<FrameBufferOutput> getOutputs() const override;
 
         [[nodiscard]] uint32_t getWidth() const override;
 
         [[nodiscard]] uint32_t getHeight() const override;
+
+        SamplesPerTexel getSamples() const override;
     };
 }
 

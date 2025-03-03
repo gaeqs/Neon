@@ -12,76 +12,108 @@
 namespace neon {
     template<class T>
     class IdentifiableWrapper {
-        friend class std::hash<IdentifiableWrapper<T>>;
-
-        T* _pointer;
-        uint64_t _id;
+        IdentifiableCounter* _counter;
 
     public:
         IdentifiableWrapper() :
-            _pointer(nullptr),
-            _id(0) {}
+            _counter(nullptr) {}
 
         IdentifiableWrapper(T* pointer) :
-            _pointer(pointer),
-            _id(_pointer == nullptr ? 0 : _pointer->_id) {
-            if (_id == 0 && _pointer != nullptr) {
-                Logger::defaultLogger()->error(
-                    "Invalid identifiable found on wrapper constructor! "
-                    "Setting pointer to null"
-                );
-                _pointer = nullptr;
+            _counter(pointer == nullptr ? nullptr : pointer->getCounter()) {
+            if (_counter == nullptr || !_counter->valid) {
+                if (pointer != nullptr) {
+                    Logger::defaultLogger()->error(
+                        "Invalid identifiable found on wrapper constructor! "
+                        "Setting pointer to null"
+                    );
+                }
+                _counter = nullptr;
+            } else {
+                ++_counter->counter;
             }
         }
 
         template<class O>
             requires std::is_base_of_v<T, O>
         IdentifiableWrapper(const IdentifiableWrapper<O>& other) :
-            _pointer(other.raw()),
-            _id(other.getId()) {}
-
-        inline uint64_t getId() const {
-            return _id;
+            _counter(other.getCounter()) {
+            if (_counter != nullptr && _counter->valid) {
+                ++_counter->counter;
+            } else {
+                _counter = nullptr;
+            }
         }
 
-        [[nodiscard]] inline bool isValid() const {
-            return _pointer != nullptr && _pointer != (void*)0xFFFFFFFFFFFFFFFF
-                   && _pointer->_id == _id;
+        ~IdentifiableWrapper() {
+            if (_counter != nullptr) {
+                --_counter->counter;
+                if (!_counter->valid && _counter->counter == 0) {
+                    delete _counter;
+                }
+            }
         }
 
-        inline T* raw() const {
-            return isValid() ? _pointer : nullptr;
+        uint64_t getId() const {
+            if (_counter == nullptr || !_counter->valid) {
+                return 0;
+            }
+            return _counter->ptr->getId();
         }
 
-        inline T* operator->() const {
-            return isValid() ? _pointer : nullptr;
+        [[nodiscard]] bool isValid() const {
+            return _counter != nullptr && _counter->valid;
         }
 
-        inline bool operator==(const std::nullptr_t other) const {
+        T* raw() const {
+            return isValid() ? dynamic_cast<T*>(_counter->ptr) : nullptr;
+        }
+
+        T* operator->() const {
+            return isValid() ? dynamic_cast<T*>(_counter->ptr) : nullptr;
+        }
+
+        bool operator==(const std::nullptr_t other) const {
             return !isValid();
         }
 
-        inline bool operator!=(const std::nullptr_t other) const {
+        bool operator!=(const std::nullptr_t other) const {
             return isValid();
         }
 
-        inline bool operator==(const IdentifiableWrapper<T>& other) const {
-            return _id == other._id;
+        bool operator==(const IdentifiableWrapper<T>& other) const {
+            return _counter == other._counter;
         }
 
-        inline bool operator!=(const IdentifiableWrapper<T>& other) const {
-            return _id != other._id;
+        bool operator!=(const IdentifiableWrapper<T>& other) const {
+            return _counter != other._counter;
         }
 
-        inline operator bool() const {
+        operator bool() const {
             return isValid();
+        }
+
+        IdentifiableCounter* getCounter() const {
+            return _counter;
         }
 
         template<class O>
             requires std::is_base_of_v<T, O>
         IdentifiableWrapper<T>& operator=(const IdentifiableWrapper<O>& other) {
-            _pointer = other.raw();
-            _id = other.getId();
+            // Delete data from the old counter
+            if (_counter != nullptr) {
+                --_counter->counter;
+                if (!_counter->valid && _counter->counter == 0) {
+                    delete _counter;
+                }
+            }
+
+            _counter = other.getCounter();
+            if (_counter != nullptr && _counter->valid) {
+                ++_counter->counter;
+            } else {
+                _counter = nullptr;
+            }
+
             return *this;
         }
     };
@@ -91,7 +123,9 @@ template<class T>
 struct std::hash<neon::IdentifiableWrapper<T>> {
     std::size_t operator()(neon::IdentifiableWrapper<T> const& s)
     const noexcept {
-        return std::hash<uint64_t>{}(s._id);
+        auto* c = s.getCounter();
+        if (c == nullptr || !c->valid) return 0;
+        return std::hash<uint64_t>{}(c->ptr->getId());
     }
 };
 

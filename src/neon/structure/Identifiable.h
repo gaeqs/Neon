@@ -8,11 +8,29 @@
 #include <cstdint>
 
 namespace neon {
-    class Identifiable {
-    public:
-        [[nodiscard]] virtual uint64_t getId() const = 0;
+    class Identifiable;
 
-        virtual ~Identifiable() = default;
+    struct IdentifiableCounter {
+        uint32_t counter;
+        bool valid;
+        Identifiable* ptr;
+    };
+
+    class Identifiable {
+        IdentifiableCounter* _counter;
+
+    public:
+        Identifiable();
+
+        Identifiable(const Identifiable& other);
+
+        Identifiable(Identifiable&& other) noexcept;
+
+        virtual ~Identifiable();
+
+        [[nodiscard]] IdentifiableCounter* getCounter() const;
+
+        [[nodiscard]] virtual uint64_t getId() const = 0;
     };
 }
 
