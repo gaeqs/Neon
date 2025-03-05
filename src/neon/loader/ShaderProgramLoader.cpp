@@ -43,7 +43,7 @@ namespace neon {
         }
 
         if (auto result = shader->compile(); result.has_value()) {
-            log.error(result.value());
+            logger.error(result.value());
             return nullptr;
         }
 

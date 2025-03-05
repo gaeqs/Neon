@@ -242,7 +242,7 @@ namespace neon::vulkan {
                         memcpy(optional.value()->raw(), data.data(),
                                data.size());
                     } else {
-                        log.error("Optional has no value.");
+                        logger.error("Optional has no value.");
                     }
                 }
                 break;

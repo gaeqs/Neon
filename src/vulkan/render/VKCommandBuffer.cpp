@@ -43,7 +43,7 @@ namespace neon::vulkan {
         _queueHolder = _vkApplication->getDevice()
                 ->getQueueProvider()->fetchQueue(pool.getQueueFamilyIndex());
         if (!_queueHolder.isValid()) {
-            log.error("Queue is null!");
+            logger.error("Queue is null!");
         }
 
         _queue = _queueHolder.getQueue();
@@ -71,7 +71,7 @@ namespace neon::vulkan {
         _queueHolder = _vkApplication->getDevice()
                 ->getQueueProvider()->fetchQueue(pool.getQueueFamilyIndex());
         if (!_queueHolder.isValid()) {
-            log.error("Queue is null!");
+            logger.error("Queue is null!");
         }
 
         _queue = _queueHolder.getQueue();
@@ -101,7 +101,7 @@ namespace neon::vulkan {
           _status(VKCommandBufferStatus::READY),
           _external(true) {
         if (_queue == nullptr) {
-            log.error("Queue is null!");
+            logger.error("Queue is null!");
         }
     }
 
@@ -126,7 +126,7 @@ namespace neon::vulkan {
                               : 0;
         VkResult result = vkBeginCommandBuffer(_commandBuffer, &beginInfo);
         if (result != VK_SUCCESS) {
-            log.error(MessageBuilder()
+            logger.error(MessageBuilder()
                 .print("Error starting command buffer ")
                 .print(_commandBuffer)
                 .print(". Return status: ")
@@ -253,7 +253,7 @@ namespace neon::vulkan {
             }
         };
 
-        log.error(MessageBuilder()
+        logger.error(MessageBuilder()
             .group("vulkan")
             .print("Invalid format buffer status. Actual: ")
             .print(getName(_status))

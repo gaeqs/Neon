@@ -39,6 +39,11 @@ TEST_CASE("Logger default groups", "[logging]") {
 }
 
 TEST_CASE("Logger operators", "[logging]") {
-    neon::log.debug("OWOWOWOWO");
-    neon::log << "Hello" << " " << "world";
+    neon::error() << "Hello" << " " << "world";
+
+    for (size_t i = 0; i < 10; ++i) {
+        neon::debug() << i;
+    }
+
+    neon::debug() << rush::Vec3f(1.0f, 3.5f, 5.0f);
 }

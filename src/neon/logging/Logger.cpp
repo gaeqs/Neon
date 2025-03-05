@@ -13,10 +13,40 @@ namespace neon {
         Logger DEFAULT_LOGGER(true, true);
     }
 
-    Logger& log = DEFAULT_LOGGER;
+    Logger& logger = DEFAULT_LOGGER;
 
-    Logger* Logger::defaultLogger() {
-        return &DEFAULT_LOGGER;
+    MessageBuilder log(const std::source_location& location) {
+        return MessageBuilder(&DEFAULT_LOGGER, location);
+    }
+
+    MessageBuilder info(const std::source_location& location) {
+        MessageBuilder b(&DEFAULT_LOGGER, location);
+        b.group("info");
+        return std::move(b);
+    }
+
+    MessageBuilder done(const std::source_location& location) {
+        MessageBuilder b(&DEFAULT_LOGGER, location);
+        b.group("done");
+        return std::move(b);
+    }
+
+    MessageBuilder warning(const std::source_location& location) {
+        MessageBuilder b(&DEFAULT_LOGGER, location);
+        b.group("warning");
+        return std::move(b);
+    }
+
+    MessageBuilder error(const std::source_location& location) {
+        MessageBuilder b(&DEFAULT_LOGGER, location);
+        b.group("error");
+        return std::move(b);
+    }
+
+    MessageBuilder debug(const std::source_location& location) {
+        MessageBuilder b(&DEFAULT_LOGGER, location);
+        b.group("debug");
+        return std::move(b);
     }
 
     void Logger::addDefaultGroups() {

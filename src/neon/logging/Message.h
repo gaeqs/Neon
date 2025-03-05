@@ -88,7 +88,6 @@ namespace neon {
         SimpleMessage prefix;
     };
 
-
     /**
      * Helper class to build a Message.
      * <p>
@@ -113,7 +112,6 @@ namespace neon {
         size_t _effectAmount;
         Logger* _logger;
         std::source_location _loggerSourceLocation;
-
 
     public:
         MessageBuilder(const MessageBuilder& other);
@@ -187,7 +185,12 @@ namespace neon {
 
         template<typename T>
         MessageBuilder& operator<<(const T& t) {
-            return print(t);
+            if constexpr (std::is_same_v<TextEffect, T>) {
+                effect(t);
+                return *this;
+            } else {
+                return print(t);
+            }
         }
     };
 

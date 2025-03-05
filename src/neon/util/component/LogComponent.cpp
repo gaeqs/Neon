@@ -56,7 +56,7 @@ namespace neon {
     }
 
     LogComponent::~LogComponent() {
-        log.removeOutput(_outputId);
+        logger.removeOutput(_outputId);
     }
 
     void LogComponent::onStart() {
@@ -78,7 +78,7 @@ namespace neon {
         auto output = std::make_unique<ImGuiLogOutput>(this);
         _outputId = output->getId();
 
-        log.addOutput(std::move(output));
+        logger.addOutput(std::move(output));
     }
 
     void LogComponent::onPreDraw() {

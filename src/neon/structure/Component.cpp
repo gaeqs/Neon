@@ -74,7 +74,7 @@ namespace neon {
     }
 
     Logger& Component::getLogger() const {
-        return log;
+        return logger;
     }
 
     void Component::info(const std::string& message) const {

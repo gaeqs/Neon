@@ -36,7 +36,7 @@ namespace neon::vulkan {
             ss << " - Graphics: " << capabilities.graphics << std::endl;
             ss << " - Present: " << capabilities.present << std::endl;
             ss << " - Transfer: " << capabilities.transfer << std::endl;
-            log.error(ss.str());
+            logger.error(ss.str());
             throw std::runtime_error(ss.str());
         }
         _queueFamilyIndex = optional.value()->getIndex();

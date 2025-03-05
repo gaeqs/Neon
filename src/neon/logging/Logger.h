@@ -297,13 +297,21 @@ namespace neon {
         }
 
         // endregion
-
-        static Logger* defaultLogger();
     };
 
-    MessageBuilder log();
+    extern Logger& logger;
 
-    extern Logger& log;
+    MessageBuilder log(const std::source_location& location = std::source_location::current());
+
+    MessageBuilder info(const std::source_location& location = std::source_location::current());
+
+    MessageBuilder done(const std::source_location& location = std::source_location::current());
+
+    MessageBuilder warning(const std::source_location& location = std::source_location::current());
+
+    MessageBuilder error(const std::source_location& location = std::source_location::current());
+
+    MessageBuilder debug(const std::source_location& location = std::source_location::current());
 }
 
 #endif //LOGGER_H

@@ -107,7 +107,7 @@ namespace neon::vulkan {
 
         void disposeStagingBuffer() {
             if (_disposed) {
-                Logger::defaultLogger()->warning(MessageBuilder()
+                logger.warning(MessageBuilder()
                     .group("vulkan")
                     .print("Buffer map already disposed"));
                 return;

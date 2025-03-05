@@ -89,7 +89,7 @@ namespace neon {
 
         AssetGeneralProperties<T> prop = fetchGeneralProperties<T>(json.value(), context);
         if (prop.error.has_value()) {
-            log.error(prop.error.value());
+            logger.error(prop.error.value());
             return nullptr;
         }
 
@@ -109,7 +109,7 @@ namespace neon {
 
         AssetGeneralProperties<T> prop = fetchGeneralProperties<T>(json, context);
         if (prop.error.has_value()) {
-            log.error(prop.error.value());
+            logger.error(prop.error.value());
             return nullptr;
         }
 
