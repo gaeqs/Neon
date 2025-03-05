@@ -37,3 +37,8 @@ TEST_CASE("Logger default groups", "[logging]") {
     logger.warning("Warning");
     logger.error("Error");
 }
+
+TEST_CASE("Logger operators", "[logging]") {
+    neon::log.debug("OWOWOWOWO");
+    neon::log << "Hello" << " " << "world";
+}

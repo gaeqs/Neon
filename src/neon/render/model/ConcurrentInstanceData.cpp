@@ -96,7 +96,7 @@ namespace neon {
                                             size_t index,
                                             const void* data) {
         if (_slots.size() < index) {
-            _application->getLogger().error(MessageBuilder()
+            log.error(MessageBuilder()
                 .group("vulkan")
                 .print("Cannot upload instance data. Index ")
                 .print(index)
@@ -110,7 +110,7 @@ namespace neon {
 
         std::lock_guard posLock(_positionMutex);
         if (id >= _positions.size()) {
-            _application->getLogger().error(MessageBuilder()
+            log.error(MessageBuilder()
                 .group("vulkan")
                 .print("Cannot upload instance data. Invalid id ")
                 .print(id)

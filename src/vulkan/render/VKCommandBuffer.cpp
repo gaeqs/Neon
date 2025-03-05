@@ -5,6 +5,9 @@
 #include "VKCommandBuffer.h"
 
 #include <ranges>
+#include <neon/logging/Logger.h>
+#include <neon/logging/Message.h>
+#include <neon/logging/TextEffect.h>
 
 #include <neon/structure/Application.h>
 
@@ -40,8 +43,7 @@ namespace neon::vulkan {
         _queueHolder = _vkApplication->getDevice()
                 ->getQueueProvider()->fetchQueue(pool.getQueueFamilyIndex());
         if (!_queueHolder.isValid()) {
-            _vkApplication->getApplication()->getLogger().error(
-                "Queue is null!");
+            log.error("Queue is null!");
         }
 
         _queue = _queueHolder.getQueue();
@@ -69,8 +71,7 @@ namespace neon::vulkan {
         _queueHolder = _vkApplication->getDevice()
                 ->getQueueProvider()->fetchQueue(pool.getQueueFamilyIndex());
         if (!_queueHolder.isValid()) {
-            _vkApplication->getApplication()->getLogger().error(
-                "Queue is null!");
+            log.error("Queue is null!");
         }
 
         _queue = _queueHolder.getQueue();
@@ -100,8 +101,7 @@ namespace neon::vulkan {
           _status(VKCommandBufferStatus::READY),
           _external(true) {
         if (_queue == nullptr) {
-            _vkApplication->getApplication()->getLogger().error(
-                "Queue is null!");
+            log.error("Queue is null!");
         }
     }
 
@@ -126,7 +126,7 @@ namespace neon::vulkan {
                               : 0;
         VkResult result = vkBeginCommandBuffer(_commandBuffer, &beginInfo);
         if (result != VK_SUCCESS) {
-            _vkApplication->getApplication()->getLogger().error(MessageBuilder()
+            log.error(MessageBuilder()
                 .print("Error starting command buffer ")
                 .print(_commandBuffer)
                 .print(". Return status: ")
@@ -253,7 +253,7 @@ namespace neon::vulkan {
             }
         };
 
-        _vkApplication->getApplication()->getLogger().error(MessageBuilder()
+        log.error(MessageBuilder()
             .group("vulkan")
             .print("Invalid format buffer status. Actual: ")
             .print(getName(_status))

@@ -9,6 +9,7 @@
 #include <neon/structure/Application.h>
 #include <neon/structure/collection/AssetCollection.h>
 #include <neon/filesystem/FileSystem.h>
+#include <neon/logging/Logger.h>
 
 namespace neon {
     template<typename T>
@@ -88,7 +89,7 @@ namespace neon {
 
         AssetGeneralProperties<T> prop = fetchGeneralProperties<T>(json.value(), context);
         if (prop.error.has_value()) {
-            context.application->getLogger().error(prop.error.value());
+            log.error(prop.error.value());
             return nullptr;
         }
 
@@ -108,7 +109,7 @@ namespace neon {
 
         AssetGeneralProperties<T> prop = fetchGeneralProperties<T>(json, context);
         if (prop.error.has_value()) {
-            context.application->getLogger().error(prop.error.value());
+            log.error(prop.error.value());
             return nullptr;
         }
 

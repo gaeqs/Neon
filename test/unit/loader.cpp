@@ -91,10 +91,10 @@ TEST_CASE("Load shader") {
     REQUIRE(context.collection->get(shader->getIdentifier()).has_value());
 
 
-    application.getLogger().debug(neon::MessageBuilder()
+    neon::log.debug(neon::MessageBuilder()
         .print("Shader loaded?: ")
         .print(shader != nullptr));
-    application.getLogger().debug(neon::MessageBuilder()
+    neon::log.debug(neon::MessageBuilder()
         .print("Shader identifier: ")
         .print(shader->getIdentifier().name));
 
@@ -129,10 +129,10 @@ TEST_CASE("Load material") {
     REQUIRE(context.collection->get(material->getIdentifier()).has_value());
     REQUIRE(material->getTarget() == fb);
 
-    application.getLogger().debug(neon::MessageBuilder()
+    neon::log.debug(neon::MessageBuilder()
         .print("Material loaded?: ")
         .print(material != nullptr));
-    application.getLogger().debug(neon::MessageBuilder()
+    neon::log.debug(neon::MessageBuilder()
         .print("Material identifier: ")
         .print(material->getIdentifier().name));
 

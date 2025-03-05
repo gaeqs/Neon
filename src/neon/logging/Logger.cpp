@@ -10,7 +10,13 @@
 
 namespace neon {
     namespace {
-        Logger* DEFAULT_LOGGER = nullptr;
+        Logger DEFAULT_LOGGER(true, true);
+    }
+
+    Logger& log = DEFAULT_LOGGER;
+
+    Logger* Logger::defaultLogger() {
+        return &DEFAULT_LOGGER;
     }
 
     void Logger::addDefaultGroups() {
@@ -34,16 +40,12 @@ namespace neon {
     }
 
     Logger::Logger(bool withDefaultGroups,
-                   bool withDefaultOutput,
-                   bool defaultLogger) {
+                   bool withDefaultOutput) {
         if (withDefaultGroups) {
             addDefaultGroups();
         }
         if (withDefaultOutput) {
             addOutput(std::make_unique<STDLogOutput>());
-        }
-        if (defaultLogger) {
-            DEFAULT_LOGGER = this;
         }
     }
 
@@ -69,11 +71,11 @@ namespace neon {
     bool Logger::removeOutput(uint64_t id) {
         std::lock_guard lock(_mutex);
         return std::erase_if(
-            _outputs,
-            [id](const std::unique_ptr<LogOutput>& output) {
-                return output->getId() == id;
-            }
-        ) > 0;
+                   _outputs,
+                   [id](const std::unique_ptr<LogOutput>& output) {
+                       return output->getId() == id;
+                   }
+               ) > 0;
     }
 
     void Logger::print(const Message& message) const {
@@ -92,46 +94,39 @@ namespace neon {
         }
     }
 
-    void Logger::print(const MessageBuilder& message,
-                       std::source_location location) const {
+    void Logger::print(const MessageBuilder& message, std::source_location location) const {
         print(message.build(location));
     }
 
-    void Logger::print(std::string message,
-                       std::source_location location) const {
+    void Logger::print(std::string message, std::source_location location) const {
         print(Message(std::move(message), location));
     }
 
-    void Logger::info(std::string message,
-                      std::source_location location) const {
+    void Logger::info(std::string message, std::source_location location) const {
         Message msg(std::move(message), location);
         msg.groups.emplace_back("info");
         print(msg);
     }
 
-    void Logger::done(std::string message,
-                      std::source_location location) const {
+    void Logger::done(std::string message, std::source_location location) const {
         Message msg(std::move(message), location);
         msg.groups.emplace_back("done");
         print(msg);
     }
 
-    void Logger::debug(std::string message,
-                       std::source_location location) const {
+    void Logger::debug(std::string message, std::source_location location) const {
         Message msg(std::move(message), location);
         msg.groups.emplace_back("debug");
         print(msg);
     }
 
-    void Logger::warning(std::string message,
-                         std::source_location location) const {
+    void Logger::warning(std::string message, std::source_location location) const {
         Message msg(std::move(message), location);
         msg.groups.emplace_back("warning");
         print(msg);
     }
 
-    void Logger::error(std::string message,
-                       std::source_location location) const {
+    void Logger::error(std::string message, std::source_location location) const {
         Message msg(std::move(message), location);
         msg.groups.emplace_back("error");
         print(msg);
@@ -162,42 +157,33 @@ namespace neon {
         print(message);
     }
 
-    void Logger::info(const MessageBuilder& message,
-                      std::source_location location) const {
+    void Logger::info(const MessageBuilder& message, std::source_location location) const {
         Message msg = message.build(location);
         msg.groups.emplace_back("info");
         print(msg);
     }
 
-    void Logger::done(const MessageBuilder& message,
-                      std::source_location location) const {
+    void Logger::done(const MessageBuilder& message, std::source_location location) const {
         Message msg = message.build(location);
         msg.groups.emplace_back("done");
         print(msg);
     }
 
-    void Logger::debug(const MessageBuilder& message,
-                       std::source_location location) const {
+    void Logger::debug(const MessageBuilder& message, std::source_location location) const {
         Message msg = message.build(location);
         msg.groups.emplace_back("debug");
         print(msg);
     }
 
-    void Logger::warning(const MessageBuilder& message,
-                         std::source_location location) const {
+    void Logger::warning(const MessageBuilder& message, std::source_location location) const {
         Message msg = message.build(location);
         msg.groups.emplace_back("warning");
         print(msg);
     }
 
-    void Logger::error(const MessageBuilder& message,
-                       std::source_location location) const {
+    void Logger::error(const MessageBuilder& message, std::source_location location) const {
         Message msg = message.build(location);
         msg.groups.emplace_back("error");
         print(msg);
-    }
-
-    Logger* Logger::defaultLogger() {
-        return DEFAULT_LOGGER;
     }
 }

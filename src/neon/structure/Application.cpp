@@ -17,8 +17,7 @@ namespace neon {
                           _room(nullptr),
                           _assetLoaders(true),
                           _lastCursorPosition(0.0, 0.0),
-                          _commandManager(this),
-                          _logger(true, true, true) {}
+                          _commandManager(this) {}
 
     Application::~Application() = default;
 
@@ -60,14 +59,6 @@ namespace neon {
 
     TaskRunner& Application::getTaskRunner() {
         return _taskRunner;
-    }
-
-    const Logger& Application::getLogger() const {
-        return _logger;
-    }
-
-    Logger& Application::getLogger() {
-        return _logger;
     }
 
     const AssetCollection& Application::getAssets() const {

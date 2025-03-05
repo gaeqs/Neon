@@ -242,8 +242,7 @@ namespace neon::vulkan {
                         memcpy(optional.value()->raw(), data.data(),
                                data.size());
                     } else {
-                        _vkApplication->getApplication()->getLogger()
-                                .error("Optional has no value.");
+                        log.error("Optional has no value.");
                     }
                 }
                 break;
