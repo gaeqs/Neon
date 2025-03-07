@@ -4,6 +4,7 @@
 
 #include "VKCommandPool.h"
 
+#include <neon/logging/Logger.h>
 #include <vulkan/AbstractVKApplication.h>
 
 #include <neon/render/buffer/CommandBuffer.h>
@@ -35,7 +36,7 @@ namespace neon::vulkan {
             ss << " - Graphics: " << capabilities.graphics << std::endl;
             ss << " - Present: " << capabilities.present << std::endl;
             ss << " - Transfer: " << capabilities.transfer << std::endl;
-            _application->getLogger().error(ss.str());
+            logger.error(ss.str());
             throw std::runtime_error(ss.str());
         }
         _queueFamilyIndex = optional.value()->getIndex();

@@ -22,7 +22,7 @@ namespace neon {
             _counter(pointer == nullptr ? nullptr : pointer->getCounter()) {
             if (_counter == nullptr || !_counter->valid) {
                 if (pointer != nullptr) {
-                    Logger::defaultLogger()->error(
+                    logger.error(
                         "Invalid identifiable found on wrapper constructor! "
                         "Setting pointer to null"
                     );

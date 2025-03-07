@@ -65,17 +65,17 @@ namespace neon::vulkan {
         auto* app = static_cast<Application*>(pUserData);
         if (messageSeverity >=
             VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT) {
-            app->getLogger().error(MessageBuilder()
+            logger.error(MessageBuilder()
                 .group("vulkan")
                 .print(pCallbackData->pMessage));
             return VK_FALSE;
         } else if (messageSeverity >=
                    VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT) {
-            app->getLogger().warning(MessageBuilder()
+            logger.warning(MessageBuilder()
                 .group("vulkan")
                 .print(pCallbackData->pMessage));
         } else {
-            app->getLogger().debug(MessageBuilder()
+            logger.debug(MessageBuilder()
                 .group("vulkan")
                 .print(pCallbackData->pMessage));
         }
@@ -138,7 +138,7 @@ namespace neon::vulkan {
         _application = application;
 
         // Add vulkan log group
-        _application->getLogger().addGroup(MessageGroupBuilder()
+        logger.addGroup(MessageGroupBuilder()
             .print("[", TextEffect::foreground4bits(6))
             .print("VULKAN", TextEffect::foreground4bits(14))
             .print("]", TextEffect::foreground4bits(6))
@@ -430,9 +430,9 @@ namespace neon::vulkan {
         vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount,
                                                instanceExtensions.data());
 
-        _application->getLogger().debug("Supported extensions:");
+        logger.debug("Supported extensions:");
         for (const auto& [extensionName, specVersion]: instanceExtensions) {
-            _application->getLogger().debug(MessageBuilder()
+            logger.debug(MessageBuilder()
                 .print(extensionName)
                 .print(" ")
                 .print(specVersion, TextEffect::foreground4bits(2)));
@@ -544,7 +544,7 @@ namespace neon::vulkan {
 
         _physicalDevice = devices[maxIndex];
 
-        _application->getLogger().debug(MessageBuilder()
+        logger.debug(MessageBuilder()
             .print("Selected physical device: ")
             .print(_physicalDevice.getProperties().deviceName));
     }

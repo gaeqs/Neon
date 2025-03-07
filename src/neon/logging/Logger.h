@@ -40,8 +40,7 @@ namespace neon {
          * Logger::defaultLogger().
          */
         explicit Logger(bool withDefaultGroups = true,
-                        bool withDefaultOutput = true,
-                        bool defaultLogger = false);
+                        bool withDefaultOutput = true);
 
         /**
          * Adds a new log output.
@@ -249,11 +248,70 @@ namespace neon {
             std::source_location location = std::source_location::current()
         ) const;
 
+        template<typename T> requires(!std::is_convertible_v<T, std::string> &&
+                                      !std::is_same_v<T, Message> && !std::is_same_v<T, MessageBuilder>)
+        void print(const T& t) {
+            std::stringstream ss;
+            ss << t;
+            print(ss.str());
+        }
+
+        template<typename T> requires(!std::is_convertible_v<T, std::string> &&
+                                      !std::is_same_v<T, Message> && !std::is_same_v<T, MessageBuilder>)
+        void info(const T& t) {
+            std::stringstream ss;
+            ss << t;
+            info(ss.str());
+        }
+
+        template<typename T> requires(!std::is_convertible_v<T, std::string> &&
+                                      !std::is_same_v<T, Message> && !std::is_same_v<T, MessageBuilder>)
+        void done(const T& t) {
+            std::stringstream ss;
+            ss << t;
+            done(ss.str());
+        }
+
+        template<typename T> requires(!std::is_convertible_v<T, std::string> &&
+                                      !std::is_same_v<T, Message> && !std::is_same_v<T, MessageBuilder>)
+        void debug(const T& t) {
+            std::stringstream ss;
+            ss << t;
+            debug(ss.str());
+        }
+
+        template<typename T> requires(!std::is_convertible_v<T, std::string> &&
+                                      !std::is_same_v<T, Message> && !std::is_same_v<T, MessageBuilder>)
+        void warning(const T& t) {
+            std::stringstream ss;
+            ss << t;
+            warning(ss.str());
+        }
+
+        template<typename T> requires(!std::is_convertible_v<T, std::string> &&
+                                      !std::is_same_v<T, Message> && !std::is_same_v<T, MessageBuilder>)
+        void error(const T& t) {
+            std::stringstream ss;
+            ss << t;
+            error(ss.str());
+        }
 
         // endregion
-
-        static Logger* defaultLogger();
     };
+
+    extern Logger& logger;
+
+    MessageBuilder log(const std::source_location& location = std::source_location::current());
+
+    MessageBuilder info(const std::source_location& location = std::source_location::current());
+
+    MessageBuilder done(const std::source_location& location = std::source_location::current());
+
+    MessageBuilder warning(const std::source_location& location = std::source_location::current());
+
+    MessageBuilder error(const std::source_location& location = std::source_location::current());
+
+    MessageBuilder debug(const std::source_location& location = std::source_location::current());
 }
 
 #endif //LOGGER_H

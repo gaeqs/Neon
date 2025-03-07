@@ -75,7 +75,7 @@ namespace neon {
             try {
                 _mainThreadTasks.back()();
             } catch (std::exception& ex) {
-                Logger::defaultLogger()->error(MessageBuilder()
+                logger.error(MessageBuilder()
                     .print("Error while executing task: ")
                     .print(ex.what(), TextEffect::foreground4bits(1))
                     .print("."));

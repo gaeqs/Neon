@@ -20,7 +20,6 @@
 #include <neon/util/profile/Profiler.h>
 
 #include <neon/render/buffer/CommandManager.h>
-#include <neon/logging/Logger.h>
 #include <neon/util/task/TaskRunner.h>
 
 #include <neon/structure/ApplicationCreateInfo.h>
@@ -71,7 +70,6 @@ namespace neon {
         AssetLoaderCollection _assetLoaders;
         TaskRunner _taskRunner;
         CommandManager _commandManager;
-        Logger _logger;
         std::shared_ptr<Render> _render;
         std::optional<rush::Vec2i> _forcedViewport;
 
@@ -101,10 +99,6 @@ namespace neon {
         [[nodiscard]] const TaskRunner& getTaskRunner() const;
 
         [[nodiscard]] TaskRunner& getTaskRunner();
-
-        [[nodiscard]] const Logger& getLogger() const;
-
-        [[nodiscard]] Logger& getLogger();
 
         [[nodiscard]] const AssetCollection& getAssets() const;
 

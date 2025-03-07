@@ -234,10 +234,7 @@ namespace neon::vulkan {
 
     void VKTexture::makeInternal() {
         if (!_external) {
-            _application->getLogger()
-                    .warning(MessageBuilder()
-                        .group("vulkan")
-                        .print("Image is already internal!"));
+            logger.warning(MessageBuilder().group("vulkan").print("Image is already internal!"));
             return;
         }
         _external = false;
@@ -247,9 +244,7 @@ namespace neon::vulkan {
         int32_t width, int32_t height,
         VkImage image, VkDeviceMemory memory, VkImageView imageView) {
         if (!_external) {
-            _application->getLogger().error(MessageBuilder()
-                .group("vulkan")
-                .print("The image view of an internal"
+            logger.error(MessageBuilder().group("vulkan").print("The image view of an internal"
                     " texture cannot be changed!"));
             return;
         }
@@ -273,7 +268,7 @@ namespace neon::vulkan {
     void VKTexture::updateData(const void* data, int32_t width, int32_t height,
                                int32_t depth, TextureFormat format) {
         if (_external) {
-            _application->getLogger().error(MessageBuilder()
+            logger.error(MessageBuilder()
                 .group("vulkan")
                 .print("Couldn't update data of a texture"
                     " with an external handler"));

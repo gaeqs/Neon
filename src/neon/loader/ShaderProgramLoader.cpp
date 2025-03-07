@@ -5,6 +5,7 @@
 #include "ShaderProgramLoader.h"
 
 #include <neon/filesystem/FileSystem.h>
+#include <neon/logging/Logger.h>
 #include <neon/structure/Application.h>
 
 namespace neon {
@@ -42,7 +43,7 @@ namespace neon {
         }
 
         if (auto result = shader->compile(); result.has_value()) {
-            context.application->getLogger().error(result.value());
+            logger.error(result.value());
             return nullptr;
         }
 

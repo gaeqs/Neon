@@ -85,7 +85,7 @@ namespace neon {
                                        size_t index,
                                        const void* data) {
         if (_slots.size() < index) {
-            _application->getLogger().error(MessageBuilder()
+           logger.error(MessageBuilder()
                 .group("vulkan")
                 .print("Cannot upload instance data. Index ")
                 .print(index)
@@ -97,7 +97,7 @@ namespace neon {
         auto& slot = _slots[index];
 
         if (slot.size == 0) {
-            _application->getLogger().error(MessageBuilder()
+            logger.error(MessageBuilder()
                 .group("vulkan")
                 .print("Cannot upload instance data. Invalid id ")
                 .print(instance.id)

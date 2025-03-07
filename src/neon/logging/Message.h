@@ -13,6 +13,8 @@
 #include "TextEffect.h"
 
 namespace neon {
+    class Logger;
+
     /**
      * Represents a part of a message.
      */
@@ -86,7 +88,6 @@ namespace neon {
         SimpleMessage prefix;
     };
 
-
     /**
      * Helper class to build a Message.
      * <p>
@@ -109,9 +110,23 @@ namespace neon {
         std::vector<MessagePart> _builtMessages;
         std::vector<std::vector<TextEffect>> _stack;
         size_t _effectAmount;
+        Logger* _logger;
+        std::source_location _loggerSourceLocation;
 
     public:
+        MessageBuilder(const MessageBuilder& other);
+
+        MessageBuilder& operator=(const MessageBuilder& other);
+
+        MessageBuilder(MessageBuilder&& other) noexcept;
+
+        MessageBuilder& operator=(MessageBuilder&& other) noexcept;
+
         MessageBuilder();
+
+        MessageBuilder(Logger* logger, const std::source_location& loggerSourceLocation);
+
+        ~MessageBuilder();
 
         MessageBuilder& group(std::string group);
 
@@ -166,6 +181,16 @@ namespace neon {
             std::stringstream ss;
             ss << t;
             return println(ss.str(), effect);
+        }
+
+        template<typename T>
+        MessageBuilder& operator<<(const T& t) {
+            if constexpr (std::is_same_v<TextEffect, T>) {
+                effect(t);
+                return *this;
+            } else {
+                return print(t);
+            }
         }
     };
 

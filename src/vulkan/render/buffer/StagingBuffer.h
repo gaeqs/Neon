@@ -12,6 +12,7 @@
 #include "SimpleBuffer.h"
 
 #include <neon/render/buffer/CommandBuffer.h>
+#include <neon/logging/Logger.h>
 
 #include <vulkan/util/VKUtil.h>
 #include <vulkan/AbstractVKApplication.h>
@@ -106,7 +107,7 @@ namespace neon::vulkan {
 
         void disposeStagingBuffer() {
             if (_disposed) {
-                Logger::defaultLogger()->warning(MessageBuilder()
+                logger.warning(MessageBuilder()
                     .group("vulkan")
                     .print("Buffer map already disposed"));
                 return;
