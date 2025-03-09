@@ -25,6 +25,7 @@ option(NEON_USE_QT "Use QT implementation" OFF)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMake")
 include(CMake/CMakeRC.cmake)
+include(FetchContent)
 
 project(neon)
 
@@ -55,8 +56,14 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/lib/glslang)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/lib/libzippp)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/lib/libzippp/src)
 
-# RUSH
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/lib/Rush)
+FetchContent_Declare(
+        rush
+        GIT_REPOSITORY https://github.com/gaeqs/Rush.git
+        GIT_TAG master
+        SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/lib/rush
+)
+
+FetchContent_MakeAvailable(rush)
 
 if (WIN32)
     list(APPEND LIBRARIES assimp::assimp)
