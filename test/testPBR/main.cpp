@@ -190,6 +190,7 @@ std::shared_ptr<Material> createSSAOBlurMaterial(
     return material;
 }
 
+
 std::shared_ptr<Texture> computeIrradiance(
     Application* app,
     const std::shared_ptr<Model>& screenModel,
@@ -204,6 +205,7 @@ std::shared_ptr<Texture> computeIrradiance(
         std::vector<neon::FrameBufferTextureCreateInfo>{testInfo},
         false,
         std::optional<std::string>(),
+        SamplesPerTexel::COUNT_1,
         [](const auto& _) {
             return false;
         },
@@ -242,7 +244,7 @@ std::shared_ptr<Texture> computeIrradiance(
     cf.submit();
 
     // We have to set the texture on the next frame.
-    return testFrameBuffer->getTextures()[0];
+    return testFrameBuffer->getOutputs()[0].resolvedTexture;
 }
 
 std::shared_ptr<FrameBuffer> initRender(
@@ -254,11 +256,11 @@ std::shared_ptr<FrameBuffer> initRender(
     // In this application, we have a buffer of global parameters
     // and two textures: a skybox and an irradiance skybox.
     std::vector<ShaderUniformBinding> globalBindings = {
-        {UniformBindingType::UNIFORM_BUFFER, sizeof(Matrices)},
-        {UniformBindingType::UNIFORM_BUFFER, sizeof(PBRParameters)},
-        {UniformBindingType::IMAGE, 0},
-        {UniformBindingType::IMAGE, 0},
-        {UniformBindingType::IMAGE, 0}
+        ShaderUniformBinding::uniformBuffer(sizeof(Matrices)),
+        ShaderUniformBinding::uniformBuffer(sizeof(PBRParameters)),
+        ShaderUniformBinding::image(),
+        ShaderUniformBinding::image(),
+        ShaderUniformBinding::image()
     };
 
     // The description of the global uniforms.
@@ -331,6 +333,7 @@ std::shared_ptr<FrameBuffer> initRender(
         ssaoTextureInfo,
         false,
         std::optional<std::string>(),
+        SamplesPerTexel::COUNT_1,
         neon::SimpleFrameBuffer::defaultRecreationCondition,
         neon::SimpleFrameBuffer::defaultRecreationParameters
     );
@@ -344,6 +347,7 @@ std::shared_ptr<FrameBuffer> initRender(
         ssaoTextureInfo,
         false,
         std::optional<std::string>(),
+        SamplesPerTexel::COUNT_1,
         neon::SimpleFrameBuffer::defaultRecreationCondition,
         neon::SimpleFrameBuffer::defaultRecreationParameters
     );
@@ -416,10 +420,7 @@ std::shared_ptr<FrameBuffer> initRender(
     screenModelGO->newComponent<GraphicComponent>(screenModel);
 
     auto swapFrameBuffer = std::make_shared<SwapChainFrameBuffer>(
-        app,
-        "swap_chain",
-        false
-    );
+       app, "swap_chain", SamplesPerTexel::COUNT_1, false);
 
     render->addRenderPass(
         std::make_shared<DefaultRenderPassStrategy>(swapFrameBuffer));
@@ -541,7 +542,7 @@ void loadModels(Application* application, Room* room,
         "resource/Cube/bricks_parallax.png");
 
     std::vector<ShaderUniformBinding> cubeMaterialBindings;
-    cubeMaterialBindings.resize(3, {UniformBindingType::IMAGE, 0});
+    cubeMaterialBindings.resize(3, ShaderUniformBinding::image());
 
     std::shared_ptr<ShaderUniformDescriptor> cubeMaterialDescriptor;
     materialDescriptor = std::make_shared<ShaderUniformDescriptor>(

@@ -48,7 +48,7 @@ std::shared_ptr<ShaderProgram> createShader(Application* application,
     auto result = ShaderProgram::createShader(
         application, name, defaultVert, defaultFrag);
     if (!result.isOk()) {
-        application->getLogger().error(result.getError());
+        error() << result.getError();
         throw std::runtime_error(result.getError());
     }
 
@@ -63,8 +63,8 @@ std::shared_ptr<FrameBuffer> initRender(Room* room) {
     // In this application, we have a buffer of global parameters
     // and a skybox.
     std::vector<ShaderUniformBinding> globalBindings = {
-        {UniformBindingType::UNIFORM_BUFFER, sizeof(Matrices)},
-        {UniformBindingType::IMAGE, 0}
+        ShaderUniformBinding::uniformBuffer(sizeof(Matrices)),
+        ShaderUniformBinding::image()
     };
 
     // The description of the global uniforms.
@@ -101,16 +101,25 @@ std::shared_ptr<FrameBuffer> initRender(Room* room) {
         TextureFormat::R16FG16F // NORMAL Z / SPECULAR
     };
 
-    auto fpFrameBuffer = std::make_shared<SimpleFrameBuffer>(app, "frame_buffer", frameBufferFormats, true);
+    auto fpFrameBuffer = std::make_shared<SimpleFrameBuffer>(
+        app, "frame_buffer", frameBufferFormats, true);
     app->getAssets().store(fpFrameBuffer, AssetStorageMode::PERMANENT);
 
     render->addRenderPass(std::make_shared<DefaultRenderPassStrategy>(
         fpFrameBuffer));
 
+    auto outputs = fpFrameBuffer->getOutputs();
+    std::vector<std::shared_ptr<Texture>> textures;
+    textures.reserve(outputs.size());
+
+    for (auto& output: outputs) {
+        textures.push_back(output.resolvedTexture);
+    }
+
     auto albedo = deferred_utils::createLightSystem(
         room,
         render.get(),
-        fpFrameBuffer->getTextures(),
+        textures,
         TextureFormat::R8G8B8A8,
         directionalShader,
         pointShader,
@@ -120,14 +129,13 @@ std::shared_ptr<FrameBuffer> initRender(Room* room) {
     std::vector<FrameBufferTextureCreateInfo> screenFormats =
             {TextureFormat::R8G8B8A8};
     auto screenFrameBuffer = std::make_shared<SimpleFrameBuffer>(
-        app, "screen_frame_buffer", screenFormats, false);
+        app, "screen", screenFormats, false);
     render->addRenderPass(std::make_shared<DefaultRenderPassStrategy>(
         screenFrameBuffer));
 
-    auto textures = fpFrameBuffer->getTextures();
     textures[0] = albedo;
 
-    std::shared_ptr<Material> screenMaterial = Material::create(
+    std::shared_ptr screenMaterial = Material::create(
         room->getApplication(), "Screen Model",
         screenFrameBuffer, screenShader,
         deferred_utils::DeferredVertex::getDescription(),
@@ -146,7 +154,8 @@ std::shared_ptr<FrameBuffer> initRender(Room* room) {
     screenModelGO->setName("Screen Model");
     screenModelGO->newComponent<GraphicComponent>(screenModel);
 
-    auto swapFrameBuffer = std::make_shared<SwapChainFrameBuffer>(app, "swap_chain_frame_buffer", false);
+    auto swapFrameBuffer = std::make_shared<SwapChainFrameBuffer>(app, "swap_chain_frame_buffer",
+                                                                  SamplesPerTexel::COUNT_1, false);
 
     render->addRenderPass(std::make_shared<DefaultRenderPassStrategy>(
         swapFrameBuffer));
@@ -166,7 +175,7 @@ void sansLoadThread(Application* application) {
     auto sansModel = loadAssetFromFile<Model>("sans_model.json", context);
 
     if (sansModel == nullptr) {
-        application->getLogger().error("Couldn't load Sans model! ");
+        error() << "Couldn't load Sans model! ";
         exit(1);
     }
 
@@ -174,7 +183,7 @@ void sansLoadThread(Application* application) {
     buffer->submit();
     buffer->wait();
 
-    application->getLogger().done("SANS UPLOADED!");
+    done() << "SANS UPLOADED!";
 
     application->getTaskRunner().executeOnMainThread(
         [application, sansModel] {
@@ -241,10 +250,7 @@ void loadModels(Application* application, Room* room,
                                              "William.obj", zeppeliLoaderInfo);
 
     if (zeppeliResult.error.has_value()) {
-        application->getLogger().error(
-            MessageBuilder()
-            .print("Couldn't load Zeppeli model! ")
-            .print(std::filesystem::current_path()));
+        error() << "Couldn't load model!";
         exit(1);
     }
 
@@ -273,7 +279,7 @@ void loadModels(Application* application, Room* room,
         "resource/Cube/bricks_parallax.png");
 
     std::vector<ShaderUniformBinding> cubeMaterialBindings;
-    cubeMaterialBindings.resize(3, {UniformBindingType::IMAGE, 0});
+    cubeMaterialBindings.resize(3, ShaderUniformBinding::image());
 
     std::shared_ptr<ShaderUniformDescriptor> cubeMaterialDescriptor;
     materialDescriptor = std::make_shared<ShaderUniformDescriptor>(
@@ -359,8 +365,8 @@ std::shared_ptr<Room> getTestRoom(Application* application) {
     flashLightGO->setName("Flash light");
     flashLight->setDiffuseColor({0.0f, 1.0f, 0.0f});
     flashLight->setConstantAttenuation(0.01f);
-    flashLight->setLinearAttenuation(0.2);
-    flashLight->setQuadraticAttenuation(0.1);
+    flashLight->setLinearAttenuation(0.2f);
+    flashLight->setQuadraticAttenuation(0.1f);
 
 
     loadModels(application, room.get(), fpFrameBuffer);
@@ -389,15 +395,16 @@ int main() {
 
     auto loopResult = application.startGameLoop();
     if (loopResult.isOk()) {
-        application.getLogger().done(MessageBuilder()
+        logger.done(MessageBuilder()
             .print("Application closed. ")
             .print(loopResult.getResult(), TextEffect::foreground4bits(2))
             .print(" frames generated."));
     } else {
-        application.getLogger().done(MessageBuilder()
+        logger.done(MessageBuilder()
             .print("Unexpected game loop error: ")
             .print(loopResult.getError(), TextEffect::foreground4bits(1)));
     }
+
 
     application.setRoom(nullptr);
 

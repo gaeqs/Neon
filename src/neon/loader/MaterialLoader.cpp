@@ -335,10 +335,13 @@ namespace neon {
     MaterialLoader::loadAsset(std::string name, nlohmann::json json, AssetLoaderContext context) {
         auto frameBuffer = neon::getAsset<FrameBuffer>(json["frame_buffer"], context);
         if (frameBuffer == nullptr) {
-            logger.warning(MessageBuilder()
-                .print("Cannot load material ")
-                .print(name)
-                .print(". Frame buffer not found."));
+            auto& fbName = json["frame_buffer"];
+            if (fbName.is_string()) {
+                warning() << "Cannot load material " << name <<
+                        ". Frame buffer " << fbName.get<std::string>() << " not found.";
+            } else {
+                warning() << "Cannot load material " << name << ". Frame buffer not found.";
+            }
             return nullptr;
         }
 

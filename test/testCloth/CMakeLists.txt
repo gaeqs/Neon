@@ -37,7 +37,7 @@ find_package(Eigen3 CONFIG REQUIRED)
 
 add_compile_definitions(EIGEN_INITIALIZE_MATRICES_BY_ZERO)
 
-add_executable(testCloth ${TEST_SOURCES})
-set_target_properties(testCloth PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${TEST_DIRECTORY})
-target_link_libraries(testCloth neon shaders_cloth Eigen3::Eigen)
-add_dependencies(testCloth neon_tests)
+add_executable(test_cloth ${TEST_SOURCES})
+set_target_properties(test_cloth PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${TEST_DIRECTORY})
+target_link_libraries(test_cloth neon shaders_cloth Eigen3::Eigen)
+add_dependencies(test_cloth neon_tests)

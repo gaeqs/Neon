@@ -48,6 +48,8 @@ namespace neon {
 
         void setDepthClearColor(float depth, uint32_t stencil);
 
+        [[nodiscard]] std::vector<std::shared_ptr<Texture>> getTextures() const;
+
         virtual bool requiresRecreation() = 0;
 
         virtual void recreate() = 0;
