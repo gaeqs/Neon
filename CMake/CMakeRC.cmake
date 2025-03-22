@@ -34,7 +34,7 @@ endif()
 
 set(_version 2.0.0)
 
-cmake_minimum_required(VERSION 3.3)
+cmake_minimum_required(VERSION 3.14)
 include(CMakeParseArguments)
 
 if(COMMAND cmrc_add_resource_library)
@@ -387,11 +387,28 @@ endif()
 file(GENERATE OUTPUT "${cmrc_hpp}" CONTENT "${hpp_content}" CONDITION ${_generate})
 
 add_library(cmrc-base INTERFACE)
-target_include_directories(cmrc-base INTERFACE "${CMRC_INCLUDE_DIR}")
+
+set_target_properties(cmrc-base PROPERTIES
+        INTERFACE_INCLUDE_DIRECTORIES "$<BUILD_INTERFACE:${CMRC_INCLUDE_DIR}>$<INSTALL_INTERFACE:cmrc>"
+)
+
 # Signal a basic C++11 feature to require C++11.
 target_compile_features(cmrc-base INTERFACE cxx_nullptr)
 set_property(TARGET cmrc-base PROPERTY INTERFACE_CXX_EXTENSIONS OFF)
 add_library(cmrc::base ALIAS cmrc-base)
+
+install(TARGETS cmrc-base
+        EXPORT cmrcTargets
+        ARCHIVE DESTINATION lib
+        LIBRARY DESTINATION lib
+        RUNTIME DESTINATION bin
+)
+
+install(EXPORT cmrcTargets
+        FILE cmrcTargets.cmake
+        NAMESPACE cmrc::
+        DESTINATION lib/cmake/cmrc
+)
 
 function(cmrc_add_resource_library name)
     set(args ALIAS NAMESPACE)

@@ -305,8 +305,6 @@ void loadModels(Application* application, Room* room,
     cubeMaterialInfo.rasterizer.cullMode = CullMode::NONE;
     cubeMaterialInfo.descriptions.uniformBindings.insert({2, DescriptorBinding::extra(modelDescriptor)});
 
-    debug() << modelDescriptor->getImplementation().getDescriptorSetLayout();
-
     auto material = std::make_shared<Material>(application, "pointMaterial",
                                                cubeMaterialInfo);
 
