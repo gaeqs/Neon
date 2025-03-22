@@ -39,7 +39,7 @@ find_package(Eigen3 CONFIG REQUIRED)
 
 add_compile_definitions(EIGEN_INITIALIZE_MATRICES_BY_ZERO)
 
-add_executable(testOctree ${TEST_SOURCES})
-set_target_properties(testOctree PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${TEST_DIRECTORY})
-target_link_libraries(testOctree neon shaders_octree Eigen3::Eigen)
-add_dependencies(testOctree neon_tests)
+add_executable(test_octree ${TEST_SOURCES})
+set_target_properties(test_octree PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${TEST_DIRECTORY})
+target_link_libraries(test_octree neon shaders_octree Eigen3::Eigen)
+add_dependencies(test_octree neon_tests)
