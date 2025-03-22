@@ -65,6 +65,7 @@ BloomRender::BloomRender(neon::Application* application,
             textureInfo,
             false,
             std::optional<std::string>(),
+            neon::SamplesPerTexel::COUNT_1,
             // This will not be required. Set as default.
             neon::SimpleFrameBuffer::defaultRecreationCondition,
             [relativeSize](neon::Application* app) {

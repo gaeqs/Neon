@@ -94,7 +94,7 @@ std::shared_ptr<ShaderProgram> createShader(Application* application,
 
     auto result = shader->compile();
     if (result.has_value()) {
-        application->getLogger().error(result.value());
+        error() << result.value();
         throw std::runtime_error(result.value());
     }
 
@@ -109,8 +109,8 @@ std::shared_ptr<FrameBuffer> initRender(Room* room) {
     // In this application, we have a buffer of global parameters
     // and a skybox.
     std::vector<ShaderUniformBinding> globalBindings = {
-        {UniformBindingType::UNIFORM_BUFFER, sizeof(Matrices)},
-        {UniformBindingType::IMAGE, 0}
+        ShaderUniformBinding::uniformBuffer(sizeof(Matrices)),
+        ShaderUniformBinding::image()
     };
 
     // The description of the global uniforms.
@@ -167,7 +167,7 @@ std::shared_ptr<FrameBuffer> initRender(Room* room) {
     screenModelGO->setName("Screen Model");
     screenModelGO->newComponent<GraphicComponent>(screenModel);
 
-    auto swapFrameBuffer = std::make_shared<SwapChainFrameBuffer>(app, "swap_chain", false);
+    auto swapFrameBuffer = std::make_shared<SwapChainFrameBuffer>(app, "swap_chain", SamplesPerTexel::COUNT_1, false);
 
     render->addRenderPass(std::make_shared<DefaultRenderPassStrategy>(
         swapFrameBuffer));
@@ -307,12 +307,12 @@ int main() {
 
     auto loopResult = application.startGameLoop();
     if (loopResult.isOk()) {
-        application.getLogger().done(MessageBuilder()
+        logger.done(MessageBuilder()
             .print("Application closed. ")
             .print(loopResult.getResult(), TextEffect::foreground4bits(2))
             .print(" frames generated."));
     } else {
-        application.getLogger().done(MessageBuilder()
+        logger.done(MessageBuilder()
             .print("Unexpected game loop error: ")
             .print(loopResult.getError(), TextEffect::foreground4bits(1)));
     }

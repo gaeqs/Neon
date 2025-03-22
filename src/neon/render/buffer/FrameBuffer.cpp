@@ -27,4 +27,16 @@ namespace neon {
     void FrameBuffer::setDepthClearColor(float depth, uint32_t stencil) {
         _depthClear = {depth, stencil};
     }
+
+    std::vector<std::shared_ptr<Texture>> FrameBuffer::getTextures() const {
+        auto outputs = getOutputs();
+        std::vector<std::shared_ptr<Texture>> textures;
+        textures.reserve(outputs.size());
+
+        for (auto& output: outputs) {
+            textures.push_back(output.resolvedTexture);
+        }
+
+        return textures;
+    }
 }

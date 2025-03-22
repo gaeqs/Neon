@@ -205,6 +205,7 @@ std::shared_ptr<Texture> computeIrradiance(
         std::vector<neon::FrameBufferTextureCreateInfo>{testInfo},
         false,
         std::optional<std::string>(),
+        SamplesPerTexel::COUNT_1,
         [](const auto& _) {
             return false;
         },
@@ -243,7 +244,7 @@ std::shared_ptr<Texture> computeIrradiance(
     cf.submit();
 
     // We have to set the texture on the next frame.
-    return testFrameBuffer->getTextures()[0];
+    return testFrameBuffer->getOutputs()[0].resolvedTexture;
 }
 
 std::shared_ptr<FrameBuffer> initRender(
@@ -255,11 +256,11 @@ std::shared_ptr<FrameBuffer> initRender(
     // In this application, we have a buffer of global parameters
     // and two textures: a skybox and an irradiance skybox.
     std::vector<ShaderUniformBinding> globalBindings = {
-        {UniformBindingType::UNIFORM_BUFFER, sizeof(Matrices)},
-        {UniformBindingType::UNIFORM_BUFFER, sizeof(PBRParameters)},
-        {UniformBindingType::IMAGE, 0},
-        {UniformBindingType::IMAGE, 0},
-        {UniformBindingType::IMAGE, 0}
+        ShaderUniformBinding::uniformBuffer(sizeof(Matrices)),
+        ShaderUniformBinding::uniformBuffer(sizeof(PBRParameters)),
+        ShaderUniformBinding::image(),
+        ShaderUniformBinding::image(),
+        ShaderUniformBinding::image()
     };
 
     // The description of the global uniforms.
@@ -307,15 +308,21 @@ std::shared_ptr<FrameBuffer> initRender(
     };
 
     auto fpFrameBuffer = std::make_shared<SimpleFrameBuffer>(app,
-        "frame_buffer",
-        frameBufferFormats, /*depth buffer?*/
-        true);
+                                                             "frame_buffer",
+                                                             frameBufferFormats, /*depth buffer?*/
+                                                             true);
 
     render->addRenderPass(
         std::make_shared<DefaultRenderPassStrategy>(fpFrameBuffer));
 
     // Out textures. You can use these in other frame buffers.
-    auto fpTextures = fpFrameBuffer->getTextures();
+   auto outputs = fpFrameBuffer->getOutputs();
+    std::vector<std::shared_ptr<Texture>> fpTextures;
+    fpTextures.reserve(outputs.size());
+
+    for (auto& output : outputs) {
+        fpTextures.push_back(output.resolvedTexture);
+    }
 
     // SSAO
 
@@ -332,6 +339,7 @@ std::shared_ptr<FrameBuffer> initRender(
         ssaoTextureInfo,
         false,
         std::optional<std::string>(),
+        SamplesPerTexel::COUNT_1,
         neon::SimpleFrameBuffer::defaultRecreationCondition,
         neon::SimpleFrameBuffer::defaultRecreationParameters
     );
@@ -345,6 +353,7 @@ std::shared_ptr<FrameBuffer> initRender(
         ssaoTextureInfo,
         false,
         std::optional<std::string>(),
+        SamplesPerTexel::COUNT_1,
         neon::SimpleFrameBuffer::defaultRecreationCondition,
         neon::SimpleFrameBuffer::defaultRecreationParameters
     );
@@ -414,7 +423,7 @@ std::shared_ptr<FrameBuffer> initRender(
     screenModelGO->newComponent<GraphicComponent>(screenModel);
 
     auto swapFrameBuffer = std::make_shared<SwapChainFrameBuffer>(
-        app, "swap_chain", false);
+        app, "swap_chain", SamplesPerTexel::COUNT_1, false);
 
     render->addRenderPass(
         std::make_shared<DefaultRenderPassStrategy>(swapFrameBuffer));
@@ -541,7 +550,7 @@ void loadModels(Application* application, Room* room,
         "resource/Cube/bricks_parallax.png");
 
     std::vector<ShaderUniformBinding> cubeMaterialBindings;
-    cubeMaterialBindings.resize(3, {UniformBindingType::IMAGE, 0});
+    cubeMaterialBindings.resize(3, ShaderUniformBinding::image());
 
     std::shared_ptr<ShaderUniformDescriptor> cubeMaterialDescriptor;
     materialDescriptor = std::make_shared<ShaderUniformDescriptor>(
@@ -677,7 +686,7 @@ std::shared_ptr<Room> getTestRoom(Application* application) {
     auto sans = application->getAssets().get<Model>("Sans");
 
     if (sans.has_value()) {
-        application->getLogger().debug("Sans found in assets");
+        debug() << "Sans found in assets";
         auto updaterGO = room->newGameObject();
         updaterGO->newComponent<ModelAsyncFlushComponent>(sans.value());
     }

@@ -52,7 +52,7 @@ cmrc_add_resource_library(
         resource/test.png
 )
 
-add_executable(testAsyncUpdate ${TEST_SOURCES})
-set_target_properties(testAsyncUpdate PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${TEST_DIRECTORY})
-target_link_libraries(testAsyncUpdate neon shaders_async_update resources_async_update)
-add_dependencies(testAsyncUpdate neon_tests)
+add_executable(test_async_update ${TEST_SOURCES})
+set_target_properties(test_async_update PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${TEST_DIRECTORY})
+target_link_libraries(test_async_update neon shaders_async_update resources_async_update)
+add_dependencies(test_async_update neon_tests)
