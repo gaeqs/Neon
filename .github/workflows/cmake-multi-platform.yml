@@ -49,8 +49,8 @@ jobs:
           libassimp-dev \
           libvulkan-dev \
           libeigen3-dev \
-          libcatch2-dev \
-          libglfw3-dev \  # Note: glfw2 is not available; using glfw3 instead.
+          catch2 \
+          libglfw3-dev \
           libglm-dev \
           nlohmann-json3-dev \
           libzip-dev
