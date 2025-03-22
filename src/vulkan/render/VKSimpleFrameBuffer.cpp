@@ -442,7 +442,7 @@ namespace neon::vulkan {
             );
         }
 
-        return target.imGuiDescriptor;
+        return reinterpret_cast<ImTextureID>(target.imGuiDescriptor);
     }
 
     uint32_t VKSimpleFrameBuffer::getWidth() const {

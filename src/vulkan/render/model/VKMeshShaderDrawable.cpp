@@ -55,12 +55,12 @@ void neon::vulkan::VKMeshShaderDrawable::draw(
             break;
             case ModelBufferLocation::MATERIAL:
                 if (auto& buffer = material->getUniformBuffer(); buffer != nullptr) {
-                    material->getUniformBuffer()->getImplementation().bind(commandBuffer, layout, binding);
+                    buffer->getImplementation().bind(commandBuffer, layout, binding);
                 }
             break;
             case ModelBufferLocation::MODEL:
                 if (auto buffer = model.getUniformBuffer(); buffer != nullptr) {
-                    material->getUniformBuffer()->getImplementation().bind(commandBuffer, layout, binding);
+                    buffer->getImplementation().bind(commandBuffer, layout, binding);
                 }
             break;
             case ModelBufferLocation::EXTRA:
