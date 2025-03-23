@@ -14,7 +14,7 @@ namespace neon::vulkan {
             const CommandBuffer* commandBuffer) {
         return std::make_shared<SimpleBufferMap<char>>(
                 _application->getDevice()->getRaw(), _vertexBufferMemory,
-                Range<uint32_t>(0, _size));
+                Range<uint32_t>(0, static_cast<uint32_t>(_size)));
     }
 
     std::optional<std::shared_ptr<BufferMap<char>>>

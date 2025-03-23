@@ -46,8 +46,9 @@ namespace neon::vulkan {
 
         if (createInfo.image.mipmaps == 0) {
             // Mipmap level not defined.
-            createInfo.image.mipmaps =
-                    std::floor(std::log2(std::max({_width, _height, _depth})));
+
+            uint32_t maxDim = std::max({_width, _height, _depth});
+            createInfo.image.mipmaps = std::bit_width(maxDim) - 1;
             _mipmapLevels = createInfo.image.mipmaps;
         }
 

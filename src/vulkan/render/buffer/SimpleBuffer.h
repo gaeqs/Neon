@@ -116,7 +116,7 @@ namespace neon::vulkan {
                      VkBufferUsageFlags usage, VkMemoryPropertyFlags properties,
                      const std::vector<T>& data):
             SimpleBuffer(application, usage, properties, data.data(),
-                         data.size() * sizeof(T)) {}
+                         static_cast<uint32_t>(data.size() * sizeof(T))) {}
 
         SimpleBuffer(AbstractVKApplication* application,
                      VkBufferUsageFlags usage, VkMemoryPropertyFlags properties,

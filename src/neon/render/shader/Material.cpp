@@ -86,10 +86,10 @@ namespace neon {
         const std::vector<std::pair<void*, size_t>>& buffers,
         const std::vector<std::shared_ptr<Texture>>& textures) {
         std::vector<ShaderUniformBinding> bindings;
-        for (const auto& [data, size]: buffers) {
-            bindings.push_back(ShaderUniformBinding::uniformBuffer(size));
+        for (const auto& size: buffers | std::views::values) {
+            bindings.push_back(ShaderUniformBinding::uniformBuffer(static_cast<uint32_t>(size)));
         }
-        for (const auto& texture: textures) {
+        for (size_t i = 0; i < textures.size(); ++i) {
             bindings.push_back(ShaderUniformBinding::image());
         }
 

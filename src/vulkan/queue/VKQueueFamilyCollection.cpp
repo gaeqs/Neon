@@ -22,7 +22,7 @@ namespace neon::vulkan {
             _families.emplace_back(
                 device,
                 surface,
-                _families.size(),
+                static_cast<uint32_t>(_families.size()),
                 properties
             );
         }
@@ -38,7 +38,7 @@ namespace neon::vulkan {
             _families.emplace_back(
                 device,
                 surface,
-                _families.size(),
+                static_cast<uint32_t>(_families.size()),
                 properties
             );
         }

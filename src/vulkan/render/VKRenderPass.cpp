@@ -65,7 +65,7 @@ namespace neon::vulkan {
             attachments.push_back(colorAttachment);
 
             VkAttachmentReference colorAttachmentRef{};
-            colorAttachmentRef.attachment = attachments.size() - 1;
+            colorAttachmentRef.attachment = static_cast<uint32_t>(attachments.size()) - 1;
             colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
             references.push_back(colorAttachmentRef);
 
@@ -84,7 +84,7 @@ namespace neon::vulkan {
                 attachments.push_back(colorAttachmentResolve);
 
                 VkAttachmentReference colorAttachmentResolveRef{};
-                colorAttachmentResolveRef.attachment = attachments.size() - 1;
+                colorAttachmentResolveRef.attachment = static_cast<uint32_t>(attachments.size()) - 1;
                 colorAttachmentResolveRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
                 resolveReferences.push_back(colorAttachmentResolveRef);
             }
@@ -92,12 +92,12 @@ namespace neon::vulkan {
 
         VkSubpassDescription subpass{};
         subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-        subpass.colorAttachmentCount = references.size();
+        subpass.colorAttachmentCount = static_cast<uint32_t>(references.size());
         subpass.pColorAttachments = references.data();
         subpass.pResolveAttachments = resolve ? resolveReferences.data() : nullptr;
 
         VkAttachmentReference depthAttachmentRef{};
-        depthAttachmentRef.attachment = attachments.size();
+        depthAttachmentRef.attachment = static_cast<uint32_t>(attachments.size());
         depthAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
         if (depth) {
             VkAttachmentDescription depthAttachment{};
@@ -115,7 +115,7 @@ namespace neon::vulkan {
 
         VkRenderPassCreateInfo renderPassInfo{};
         renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-        renderPassInfo.attachmentCount = attachments.size();
+        renderPassInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
         renderPassInfo.pAttachments = attachments.data();
         renderPassInfo.subpassCount = 1;
         renderPassInfo.pSubpasses = &subpass;

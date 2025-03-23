@@ -81,11 +81,13 @@ namespace neon {
         std::string name,
         const cmrc::file& resource,
         const TextureCreateInfo& createInfo) {
-        return createTextureFromFile(application,
-                                     std::move(name),
-                                     resource.begin(),
-                                     resource.size(),
-                                     createInfo);
+        return createTextureFromFile(
+            application,
+            std::move(name),
+            resource.begin(),
+            static_cast<uint32_t>(resource.size()),
+            createInfo
+        );
     }
 
     std::unique_ptr<Texture> Texture::createTextureFromFiles(
@@ -100,7 +102,7 @@ namespace neon {
 
         for (const auto& item: resources) {
             data.push_back(item.begin());
-            sizes.push_back(item.size());
+            sizes.push_back(static_cast<uint32_t>(item.size()));
         }
 
         return createTextureFromFile(application, std::move(name),

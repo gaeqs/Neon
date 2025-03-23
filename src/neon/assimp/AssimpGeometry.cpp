@@ -32,7 +32,7 @@ namespace assimp_geometry {
     getOtherVertices(const aiFace* face, uint32_t vertex) {
         std::vector<uint32_t> vector;
         vector.reserve(face->mNumIndices - 1);
-        for (int i = 0; i < face->mNumIndices; ++i) {
+        for (size_t i = 0; i < face->mNumIndices; ++i) {
             auto current = face->mIndices[i];
             if (current == vertex) continue;
             vector.push_back(current);

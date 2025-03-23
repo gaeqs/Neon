@@ -42,8 +42,8 @@ namespace neon::vulkan {
         for (auto& description: createInfo.descriptions.vertex) {
             auto [binding,
                 att] = vulkan_util::toVulkanDescription(
-                bindings.size(),
-                attributes.size(),
+                static_cast<uint32_t>(bindings.size()),
+                static_cast<uint32_t>(attributes.size()),
                 description
             );
 
@@ -53,8 +53,8 @@ namespace neon::vulkan {
 
         for (auto& description: createInfo.descriptions.instance) {
             auto [binding, att] = vulkan_util::toVulkanDescription(
-                bindings.size(),
-                attributes.size(),
+                static_cast<uint32_t>(bindings.size()),
+                static_cast<uint32_t>(attributes.size()),
                 description
             );
 
@@ -72,9 +72,9 @@ namespace neon::vulkan {
         VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
         vertexInputInfo.sType =
                 VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-        vertexInputInfo.vertexBindingDescriptionCount = bindings.size();
+        vertexInputInfo.vertexBindingDescriptionCount = static_cast<uint32_t>(bindings.size());
         vertexInputInfo.pVertexBindingDescriptions = bindings.data();
-        vertexInputInfo.vertexAttributeDescriptionCount = attributes.size();
+        vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(attributes.size());
         vertexInputInfo.pVertexAttributeDescriptions = attributes.data();
 
         VkPipelineInputAssemblyStateCreateInfo inputAssembly{};
@@ -172,7 +172,7 @@ namespace neon::vulkan {
         colorBlending.logicOpEnable = createInfo.blending.logicBlending;
         colorBlending.logicOp = vc::vkLogicOp(
             createInfo.blending.logicOperation);
-        colorBlending.attachmentCount = blendAttachments.size();
+        colorBlending.attachmentCount = static_cast<uint32_t>(blendAttachments.size());
         colorBlending.pAttachments = blendAttachments.data();
         colorBlending.blendConstants[0] = createInfo.blending.blendingConstants[0];
         colorBlending.blendConstants[1] = createInfo.blending.blendingConstants[1];
@@ -244,7 +244,7 @@ namespace neon::vulkan {
 
         VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
         pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-        pipelineLayoutInfo.setLayoutCount = uniformInfos.size();
+        pipelineLayoutInfo.setLayoutCount = static_cast<uint32_t>(uniformInfos.size());
         pipelineLayoutInfo.pSetLayouts = uniformInfos.data();
 
         auto& blocks = _material->getShader()
@@ -272,7 +272,7 @@ namespace neon::vulkan {
         _pushConstants.resize(pushConstants.size(), 0);
         _pushConstantStages = pushStages;
 
-        pipelineLayoutInfo.pushConstantRangeCount = pushConstants.size();
+        pipelineLayoutInfo.pushConstantRangeCount = static_cast<uint32_t>(pushConstants.size());
         pipelineLayoutInfo.pPushConstantRanges = pushConstants.data();
 
         if (vkCreatePipelineLayout(_vkApplication->getDevice()->getRaw(),
@@ -285,7 +285,7 @@ namespace neon::vulkan {
 
         VkGraphicsPipelineCreateInfo pipelineInfo{};
         pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
-        pipelineInfo.stageCount = shaders.size();
+        pipelineInfo.stageCount = static_cast<uint32_t>(shaders.size());
         pipelineInfo.pStages = shaders.data();
 
         pipelineInfo.pVertexInputState = &vertexInputInfo;
@@ -359,7 +359,7 @@ namespace neon::vulkan {
             _pipelineLayout,
             _pushConstantStages,
             0,
-            _pushConstants.size(),
+            static_cast<uint32_t>(_pushConstants.size()),
             _pushConstants.data()
         );
     }

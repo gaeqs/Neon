@@ -56,7 +56,7 @@ namespace neon {
             }
 
             ImGuiListClipper clipper;
-            clipper.Begin(_roots.size());
+            clipper.Begin(static_cast<int>(_roots.size()));
 
             while (clipper.Step()) {
                 for (int row = clipper.DisplayStart;

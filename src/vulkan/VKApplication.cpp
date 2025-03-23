@@ -380,8 +380,8 @@ namespace neon::vulkan {
     }
 
     void VKApplication::internalForceSizeValues(int32_t width, int32_t height) {
-        _width = width;
-        _height = height;
+        _width = static_cast<float>(width);
+        _height = static_cast<float>(height);
         _requiresSwapchainRecreation = true;
     }
 
@@ -404,13 +404,13 @@ namespace neon::vulkan {
         createInfo.pApplicationInfo = &applicationInfo;
 
         auto extensions = getRequiredExtensions();
-        createInfo.enabledExtensionCount = extensions.size();
+        createInfo.enabledExtensionCount = static_cast<uint32_t>(extensions.size());
         createInfo.ppEnabledExtensionNames = extensions.data();
 
         createInfo.enabledLayerCount = 0;
 
         if (_createInfo.enableValidationLayers) {
-            createInfo.enabledLayerCount = VALIDATION_LAYERS.size();
+            createInfo.enabledLayerCount = static_cast<uint32_t>(VALIDATION_LAYERS.size());
             createInfo.ppEnabledLayerNames = VALIDATION_LAYERS.data();
         } else {
             createInfo.enabledLayerCount = 0;

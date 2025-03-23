@@ -52,7 +52,7 @@ namespace neon {
             return {"Buffer is full!"};
         }
 
-        auto* id = new uint32_t(_positions.size());
+        auto* id = new uint32_t(static_cast<uint32_t>(_positions.size()));
         _positions.push_back(id);
         return Instance(id);
     }

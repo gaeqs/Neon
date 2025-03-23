@@ -46,7 +46,7 @@ namespace neon {
             return {"Buffer is full!"};
         }
 
-        auto* id = new uint32_t(_positions.size());
+        auto* id = new uint32_t(static_cast<uint32_t>(_positions.size()));
         _positions.push_back(id);
         return Instance(id);
     }
@@ -59,8 +59,7 @@ namespace neon {
 
         for (auto& slot: _slots) {
             if (slot.size == 0) continue;
-            char* data = static_cast<char*>(slot.uniformBuffer->fetchData(
-                slot.binding));
+            char* data = static_cast<char*>(slot.uniformBuffer->fetchData(static_cast<uint32_t>(slot.binding)));
             memcpy(
                 data + slot.padding * id,
                 data + slot.padding * *last,
@@ -105,10 +104,9 @@ namespace neon {
             return false;
         }
 
-        char* dst = static_cast<char*>(slot.uniformBuffer->fetchData(
-            slot.binding));
+        char* dst = static_cast<char*>(slot.uniformBuffer->fetchData(static_cast<uint32_t>(slot.binding)));
         memcpy(
-            dst + slot.padding * id,
+            dst + slot.padding * static_cast<size_t>(id),
             data,
             slot.size
         );
