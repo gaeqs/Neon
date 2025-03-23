@@ -6,8 +6,8 @@
 #include <neon/plugin/PluginLoader.h>
 
 TEST_CASE("Plugin", "[plugin]") {
-  neon::PluginLoader loader;
+    neon::PluginLoader loader;
 
-  loader.loadPluginURL("https://github.com/extism/plugins/releases/"
-                                "latest/download/count_vowels.wasm");
+    loader.loadPluginURL("https://github.com/extism/plugins/releases/"
+        "latest/download/count_vowels.wasm");
 }
