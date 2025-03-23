@@ -37,7 +37,7 @@ install(DIRECTORY ${IMGUI_DIR}/
 install(EXPORT imguiTargets
         FILE ImguiTargets.cmake
         NAMESPACE imgui::
-        DESTINATION lib/cmake/neon
+        DESTINATION lib/cmake/imgui
 )
 
 # =================== IMPLOT ===================
@@ -74,5 +74,7 @@ install(DIRECTORY ${IMPLOT_DIR}/
 install(EXPORT implotTargets
         FILE ImplotTargets.cmake
         NAMESPACE implot::
-        DESTINATION lib/cmake/neon
+        DESTINATION lib/cmake/implot
 )
+
+add_subdirectory(stb)

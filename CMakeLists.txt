@@ -113,6 +113,7 @@ list(APPEND LIBRARIES
         imgui
         implot
         rush
+        stb
 )
 
 # QT
