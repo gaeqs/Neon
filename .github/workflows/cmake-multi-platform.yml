@@ -61,7 +61,7 @@ jobs:
       if: runner.os == 'Windows'
       shell: pwsh
       run: |
-        C:\vcpkg\vcpkg.exe install assimp eigen3 catch2 glfw glm nlohmann-json libzip vulkan-headers
+        C:\vcpkg\vcpkg.exe install
 
     - name: Set reusable strings
       id: strings
