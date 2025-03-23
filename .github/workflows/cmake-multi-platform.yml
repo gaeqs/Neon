@@ -39,7 +39,9 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    - uses: actions/cache@v2
+
+    - name: Dummy cache preload
+      uses: actions/cache@v2
 
     # Install dependencies on Linux using apt-get
     - name: Install dependencies on Linux
