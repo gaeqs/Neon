@@ -54,7 +54,7 @@ jobs:
           libglm-dev \
           nlohmann-json3-dev \
           libzip-dev \
-          bzip2
+          libbz2-dev
 
     # Install dependencies on Windows using vcpkg
     - name: Install dependencies on Windows
