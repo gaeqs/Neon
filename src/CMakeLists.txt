@@ -21,6 +21,10 @@ if (NEON_USE_QT)
     target_compile_definitions(neon PUBLIC USE_QT)
 endif ()
 
+if (NEON_PLUGINS)
+    target_compile_definitions(neon PUBLIC NEON_PLUGINS)
+endif ()
+
 install(TARGETS neon
         EXPORT neonTargets
         ARCHIVE DESTINATION lib

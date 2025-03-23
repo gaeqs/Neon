@@ -3,6 +3,7 @@ set(CMAKE_CXX_STANDARD 20)
 
 option(NEON_TESTS "Enables Neon tests" OFF)
 option(NEON_USE_QT "Use QT implementation" OFF)
+option(NEON_PLUGINS "Include the plugin framework" ON)
 
 set(LIBZIPPP_INSTALL ON)
 
@@ -61,13 +62,18 @@ FetchContent_Declare(
         SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/lib/spirv_tools
 )
 
-# glslang
+# Glslang
 FetchContent_Declare(
         glslang
         GIT_REPOSITORY https://github.com/KhronosGroup/glslang.git
         GIT_TAG 68f073b19569b580ecc7ba13fa96be3ecf65a0f6
         SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/lib/glslang
 )
+set(ENABLE_GLSLANG_BINARIES OFF CACHE BOOL "" FORCE)
+set(ENABLE_HLSL OFF CACHE BOOL "" FORCE)
+set(ENABLE_SPVREMAPPER OFF CACHE BOOL "" FORCE)
+set(ENABLE_OPT OFF CACHE BOOL "" FORCE)
+set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
 
 # libzippp
 FetchContent_Declare(
@@ -76,6 +82,17 @@ FetchContent_Declare(
         GIT_TAG a6e6794bb8ebbdd180c0877a2503ad84dace3419
         SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/lib/libzippp
 )
+
+if (NEON_PLUGINS)
+    FetchContent_Declare(
+            extism_cpp
+            GIT_REPOSITORY https://github.com/gaeqs/cpp-sdk.git
+            GIT_TAG 82264495bcef3cd60c398658d07cb016705ab61b
+            SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/lib/extism_cpp
+    )
+    FetchContent_MakeAvailable(extism_cpp)
+    list(APPEND LIBRARIES extism-cpp bcrypt)
+endif ()
 
 FetchContent_MakeAvailable(imgui)
 FetchContent_MakeAvailable(implot)
@@ -89,8 +106,10 @@ list(APPEND LIBRARIES
         ${GLFW_LIBRARIES}
         Vulkan::Vulkan
         assimp::assimp
-        SPIRV
         glslang
+        glslang-default-resource-limits
+        SPIRV
+        SPIRV-Tools
         libzippp
         nlohmann_json::nlohmann_json
         imgui
