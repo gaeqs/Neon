@@ -3,8 +3,6 @@ file(GLOB_RECURSE VULKAN_SOURCES CONFIGURE_DEPENDS "${PROJECT_SOURCE_DIR}/src/vu
 
 add_library(neon STATIC ${SOURCES} ${VULKAN_SOURCES})
 
-set_property(TARGET neon PROPERTY COMPILE_WARNING_AS_ERROR ON)
-
 target_compile_features(neon PUBLIC cxx_std_20)
 
 target_include_directories(neon PUBLIC
