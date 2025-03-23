@@ -18,7 +18,7 @@ target_include_directories(imgui
         $<INSTALL_INTERFACE:include/imgui>
 )
 
-target_link_libraries(imgui PUBLIC ${VULKAN_LIB_LIST} glfw ${GLFW_LIBRARIES})
+target_link_libraries(imgui PUBLIC Vulkan::Vulkan glfw ${GLFW_LIBRARIES})
 target_compile_features(imgui PUBLIC cxx_std_20)
 
 install(TARGETS imgui

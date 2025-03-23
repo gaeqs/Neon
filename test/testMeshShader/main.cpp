@@ -422,8 +422,8 @@ std::shared_ptr<Room> getTestRoom(Application* application) {
     pointLightGO->setName("Point light");
     pointLight->setDiffuseColor({1.0f, 0.0f, 0.0f});
     pointLight->setConstantAttenuation(0.01f);
-    pointLight->setLinearAttenuation(0.2);
-    pointLight->setQuadraticAttenuation(0.1);
+    pointLight->setLinearAttenuation(0.2f);
+    pointLight->setQuadraticAttenuation(0.1f);
 
     auto flashLightGO = room->newGameObject();
     auto flashLight = flashLightGO->newComponent<FlashLight>();
@@ -432,8 +432,8 @@ std::shared_ptr<Room> getTestRoom(Application* application) {
     flashLightGO->setName("Flash light");
     flashLight->setDiffuseColor({0.0f, 1.0f, 0.0f});
     flashLight->setConstantAttenuation(0.01f);
-    flashLight->setLinearAttenuation(0.2);
-    flashLight->setQuadraticAttenuation(0.1);
+    flashLight->setLinearAttenuation(0.2f);
+    flashLight->setQuadraticAttenuation(0.1f);
 
 
     loadModels(application, room.get(), fpFrameBuffer);
