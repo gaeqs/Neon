@@ -10,7 +10,6 @@ set(LIBZIPPP_INSTALL ON)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMake")
 include(CMake/CMakeRC.cmake)
 include(FetchContent)
-include(FetchContent)
 
 project(Neon)
 
