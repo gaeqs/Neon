@@ -187,7 +187,7 @@ namespace neon::vulkan {
         VkFramebufferCreateInfo framebufferInfo{};
         framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
         framebufferInfo.renderPass = _renderPass.getRaw();
-        framebufferInfo.attachmentCount = views.size();
+        framebufferInfo.attachmentCount = static_cast<uint32_t>(views.size());
         framebufferInfo.pAttachments = views.data();
         framebufferInfo.width = _extent.width;
         framebufferInfo.height = _extent.height;
@@ -370,7 +370,7 @@ namespace neon::vulkan {
     }
 
     uint32_t VKSimpleFrameBuffer::getColorAttachmentAmount() const {
-        return _colorOutputs;
+        return static_cast<uint32_t>(_colorOutputs);
     }
 
     void VKSimpleFrameBuffer::recreate(std::pair<uint32_t, uint32_t> size) {

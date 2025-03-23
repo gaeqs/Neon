@@ -32,7 +32,7 @@ namespace neon::vulkan {
 
         for (const auto& binding: bindings) {
             VkDescriptorSetLayoutBinding uboLayoutBinding{};
-            uboLayoutBinding.binding = layoutBindings.size();
+            uboLayoutBinding.binding = static_cast<uint32_t>(layoutBindings.size());
             uboLayoutBinding.descriptorType = getType(binding.type);
             uboLayoutBinding.descriptorCount = 1;
             uboLayoutBinding.stageFlags = VK_SHADER_STAGE_ALL;
@@ -42,7 +42,7 @@ namespace neon::vulkan {
 
         VkDescriptorSetLayoutCreateInfo layoutInfo{};
         layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-        layoutInfo.bindingCount = layoutBindings.size();
+        layoutInfo.bindingCount = static_cast<uint32_t>(layoutBindings.size());
         layoutInfo.pBindings = layoutBindings.data();
 
         if (vkCreateDescriptorSetLayout(

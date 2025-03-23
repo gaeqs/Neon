@@ -143,9 +143,6 @@ namespace neon::vulkan {
             .print("VULKAN", TextEffect::foreground4bits(14))
             .print("]", TextEffect::foreground4bits(6))
             .build("vulkan"));
-#ifdef __linux__
-        glfwInitHint(GLFW_PLATFORM, GLFW_PLATFORM_X11);
-#endif
         if (!glfwInit()) {
             const char* error;
             glfwGetError(&error);
@@ -383,8 +380,8 @@ namespace neon::vulkan {
     }
 
     void VKApplication::internalForceSizeValues(int32_t width, int32_t height) {
-        _width = width;
-        _height = height;
+        _width = static_cast<float>(width);
+        _height = static_cast<float>(height);
         _requiresSwapchainRecreation = true;
     }
 
@@ -407,13 +404,13 @@ namespace neon::vulkan {
         createInfo.pApplicationInfo = &applicationInfo;
 
         auto extensions = getRequiredExtensions();
-        createInfo.enabledExtensionCount = extensions.size();
+        createInfo.enabledExtensionCount = static_cast<uint32_t>(extensions.size());
         createInfo.ppEnabledExtensionNames = extensions.data();
 
         createInfo.enabledLayerCount = 0;
 
         if (_createInfo.enableValidationLayers) {
-            createInfo.enabledLayerCount = VALIDATION_LAYERS.size();
+            createInfo.enabledLayerCount = static_cast<uint32_t>(VALIDATION_LAYERS.size());
             createInfo.ppEnabledLayerNames = VALIDATION_LAYERS.data();
         } else {
             createInfo.enabledLayerCount = 0;

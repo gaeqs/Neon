@@ -34,7 +34,7 @@ namespace neon::vulkan {
         VkBuffer buffers[MAX_BUFFERS];
         VkDeviceSize offsets[MAX_BUFFERS];
 
-        size_t i = 0;
+        uint32_t i = 0;
         for (; i < std::min(_vertexBuffers.size(), MAX_BUFFERS); ++i) {
             buffers[i] = _vertexBuffers[i]->getRaw();
             offsets[i] = 0;
@@ -103,8 +103,8 @@ namespace neon::vulkan {
 
         vkCmdDrawIndexed(
             commandBuffer,
-            _indexAmount,
-            instances,
+            static_cast<uint32_t>(_indexAmount),
+            static_cast<uint32_t>(instances),
             0,
             0,
             0
@@ -132,7 +132,7 @@ namespace neon::vulkan {
         std::vector<uint32_t> vertices;
         vertices.resize(_indexAmount);
 
-        for (int i = 0; i < _indexAmount; ++i) {
+        for (size_t i = 0; i < _indexAmount; ++i) {
             vertices.push_back(map->get()->get(i));
         }
 
@@ -144,9 +144,11 @@ namespace neon::vulkan {
         if (!_modifiableIndices) return false;
         auto map = _indexBuffer.value()->map<char>(cmd);
         if (!map.has_value()) return false;
-        memcpy(map.value()->raw(), indices.data(),
-               std::min(indices.size(), static_cast<size_t>(_indexAmount))
-               * sizeof(uint32_t));
+        memcpy(
+            map.value()->raw(),
+            indices.data(),
+            std::min(indices.size(), _indexAmount) * sizeof(uint32_t)
+        );
         return true;
     }
 }

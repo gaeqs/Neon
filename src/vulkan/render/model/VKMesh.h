@@ -37,7 +37,7 @@ namespace neon::vulkan {
         std::vector<size_t> _vertexSizes;
 
         std::optional<std::unique_ptr<Buffer>> _indexBuffer;
-        uint32_t _indexAmount;
+        size_t _indexAmount;
 
 
         bool _modifiableVertices;

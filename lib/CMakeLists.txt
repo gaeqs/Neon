@@ -18,7 +18,7 @@ target_include_directories(imgui
         $<INSTALL_INTERFACE:include/imgui>
 )
 
-target_link_libraries(imgui PUBLIC ${VULKAN_LIB_LIST} glfw ${GLFW_LIBRARIES})
+target_link_libraries(imgui PUBLIC Vulkan::Vulkan glfw ${GLFW_LIBRARIES})
 target_compile_features(imgui PUBLIC cxx_std_20)
 
 install(TARGETS imgui
@@ -37,7 +37,7 @@ install(DIRECTORY ${IMGUI_DIR}/
 install(EXPORT imguiTargets
         FILE ImguiTargets.cmake
         NAMESPACE imgui::
-        DESTINATION lib/cmake/neon
+        DESTINATION lib/cmake/imgui
 )
 
 # =================== IMPLOT ===================
@@ -74,5 +74,7 @@ install(DIRECTORY ${IMPLOT_DIR}/
 install(EXPORT implotTargets
         FILE ImplotTargets.cmake
         NAMESPACE implot::
-        DESTINATION lib/cmake/neon
+        DESTINATION lib/cmake/implot
 )
+
+add_subdirectory(stb)

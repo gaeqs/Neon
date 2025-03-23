@@ -571,7 +571,7 @@ namespace neon::vulkan::vulkan_util {
             auto outputs = frameBuffer.getOutputs();
             clearValues.reserve(outputs.size() * 2);
 
-            for (size_t i = 0; i < outputs.size(); ++i) {
+            for (uint32_t i = 0; i < outputs.size(); ++i) {
                 auto& output = outputs[i];
                 VkClearValue value;
                 if (output.type == FrameBufferOutputType::COLOR || output.type == FrameBufferOutputType::SWAP) {
@@ -593,7 +593,7 @@ namespace neon::vulkan::vulkan_util {
                 }
             }
 
-            renderPassInfo.clearValueCount = clearValues.size();
+            renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
             renderPassInfo.pClearValues = clearValues.data();
         } else {
             renderPassInfo.clearValueCount = 0;

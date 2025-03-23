@@ -67,7 +67,6 @@ namespace neon::vulkan {
           _commandBuffer(VK_NULL_HANDLE),
           _status(VKCommandBufferStatus::READY),
           _external(false) {
-
         _queueHolder = _vkApplication->getDevice()
                 ->getQueueProvider()->fetchQueue(pool.getQueueFamilyIndex());
         if (!_queueHolder.isValid()) {
@@ -190,11 +189,19 @@ namespace neon::vulkan {
 
     void VKCommandBuffer::waitForFences() {
         if (_fences.empty()) return;
-        vkWaitForFences(_vkApplication->getDevice()->getRaw(),
-                        _fences.size(), _fences.data(), VK_TRUE, UINT64_MAX);
+        vkWaitForFences(
+            _vkApplication->getDevice()->getRaw(),
+            static_cast<uint32_t>(_fences.size()),
+            _fences.data(),
+            VK_TRUE,
+            UINT64_MAX
+        );
 
-        vkResetFences(_vkApplication->getDevice()->getRaw(),
-                      _fences.size(), _fences.data());
+        vkResetFences(
+            _vkApplication->getDevice()->getRaw(),
+            static_cast<uint32_t>(_fences.size()),
+            _fences.data()
+        );
 
         for (const auto& fence: _fences) {
             _freedFences.push_back(fence);
@@ -294,8 +301,11 @@ namespace neon::vulkan {
         );
 
         if (!used) {
-            vkResetFences(_vkApplication->getDevice()->getRaw(),
-                          _fences.size(), _fences.data());
+            vkResetFences(
+                _vkApplication->getDevice()->getRaw(),
+                static_cast<uint32_t>(_fences.size()),
+                _fences.data()
+            );
             _freedFences.insert(
                 _freedFences.end(),
                 _fences.begin(),

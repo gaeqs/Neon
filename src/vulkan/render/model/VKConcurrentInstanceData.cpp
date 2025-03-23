@@ -18,7 +18,7 @@ namespace neon::vulkan {
         _buffers.reserve(info.instanceTypes.size());
 
         for (const auto& size: info.instanceSizes) {
-            uint32_t bufferSize = size * info.maximumInstances;
+            uint32_t bufferSize = static_cast<uint32_t>(size) * info.maximumInstances;
             if (size == 0) _buffers.push_back(nullptr);
             else {
                 _buffers.push_back(std::make_unique<StagingBuffer>(
@@ -44,7 +44,7 @@ namespace neon::vulkan {
         auto& buffer = _buffers[index];
         if (buffer == nullptr) return;
 
-        changeRange *= instanceSize;
+        changeRange *= static_cast<uint32_t>(instanceSize);
         auto map = buffer->map<char>(changeRange, command);
         if (!map.has_value()) return;
 

@@ -10,8 +10,6 @@
 #include <cstdint>
 #include <neon/Neon.h>
 
-#include <rush/rush.h>
-
 template<typename Curve>
 class Box : public neon::Component {
     std::shared_ptr<neon::Material> _material;

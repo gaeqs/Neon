@@ -161,8 +161,8 @@ namespace neon {
         if (ImPlot::BeginPlot(imGuiUId("Attenuation / Distance").c_str(),
                               ImVec2(-1, 200))) {
             constexpr int MAX_VALUES = 1000;
-            constexpr float STEP = 100.0F / MAX_VALUES;
-            constexpr float MIN_ATTENUATION = 0.05;
+            constexpr float STEP = 100.0f / MAX_VALUES;
+            constexpr float MIN_ATTENUATION = 0.05f;
             static float values[MAX_VALUES];
             int i = 0;
             for (; i < MAX_VALUES; ++i) {

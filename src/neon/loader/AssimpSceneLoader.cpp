@@ -145,7 +145,7 @@ namespace neon {
 
             std::vector<uint32_t> indices;
             indices.reserve(mesh->mNumFaces * 3);
-            for (int i = 0; i < mesh->mNumFaces; ++i) {
+            for (size_t i = 0; i < mesh->mNumFaces; ++i) {
                 auto face = mesh->mFaces[i];
                 indices.push_back(face.mIndices[0]);
                 indices.push_back(face.mIndices[1]);

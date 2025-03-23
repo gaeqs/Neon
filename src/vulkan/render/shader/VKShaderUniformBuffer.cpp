@@ -103,7 +103,7 @@ namespace neon::vulkan {
 
         VkDescriptorPoolCreateInfo poolInfo{};
         poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-        poolInfo.poolSizeCount = pools.size();
+        poolInfo.poolSizeCount = static_cast<uint32_t>(pools.size());
         poolInfo.pPoolSizes = pools.data();
         poolInfo.maxSets = _vkApplication->getMaxFramesInFlight();
 
@@ -131,7 +131,7 @@ namespace neon::vulkan {
             throw std::runtime_error("Failed to allocate descriptor sets!");
         }
 
-        for (int frame = 0; frame < _vkApplication->getMaxFramesInFlight();
+        for (size_t frame = 0; frame < _vkApplication->getMaxFramesInFlight();
              ++frame) {
             for (int bindingIndex = 0; bindingIndex < _bindings.size();
                  ++bindingIndex) {

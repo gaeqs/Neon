@@ -92,7 +92,7 @@ namespace neon::assimp_loader {
             std::map<std::string, Tex>& textures,
             std::map<aiTexture*, Tex>& loadedTextures,
             const LoaderInfo& info) {
-            for (int i = 0; i < scene->mNumTextures; ++i) {
+            for (size_t i = 0; i < scene->mNumTextures; ++i) {
                 auto* aiTexture = scene->mTextures[i];
                 auto name = "*" + std::to_string(i);
                 auto texture = loadTexture(aiTexture, name,
@@ -233,7 +233,7 @@ namespace neon::assimp_loader {
 
             auto tangents = assimp_geometry::calculateTangents(mesh);
 
-            for (int i = 0; i < mesh->mNumVertices; ++i) {
+            for (size_t i = 0; i < mesh->mNumVertices; ++i) {
                 auto aP = mesh->mVertices[i];
                 auto aN = mesh->mNormals[i];
                 auto aC = mesh->HasVertexColors(0)
@@ -257,7 +257,7 @@ namespace neon::assimp_loader {
                 local.vertices.push_back(parserData);
             }
 
-            for (int i = 0; i < mesh->mNumFaces; ++i) {
+            for (size_t i = 0; i < mesh->mNumFaces; ++i) {
                 auto face = mesh->mFaces[i];
                 local.indices.push_back(face.mIndices[0]);
                 local.indices.push_back(face.mIndices[1]);
@@ -309,7 +309,7 @@ namespace neon::assimp_loader {
                         const std::vector<Mat>& materials,
                         const LoaderInfo& info,
                         const std::unique_ptr<LocalModel>& localModel) {
-            for (int i = 0; i < scene->mNumMeshes; ++i) {
+            for (size_t i = 0; i < scene->mNumMeshes; ++i) {
                 auto* aiMesh = scene->mMeshes[i];
                 auto mat = materials.size() > aiMesh->mMaterialIndex
                                ? materials[aiMesh->mMaterialIndex]

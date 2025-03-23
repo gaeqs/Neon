@@ -64,9 +64,9 @@ namespace neon {
 
         void flush(const CommandBuffer* commandBuffer) override;
 
-        [[noreturn]] Implementation& getImplementation() override;
+        Implementation& getImplementation() override;
 
-        [[noreturn]] const Implementation& getImplementation() const override;
+        const Implementation& getImplementation() const override;
     };
 }
 

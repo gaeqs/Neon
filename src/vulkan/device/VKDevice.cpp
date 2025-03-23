@@ -58,10 +58,10 @@ namespace neon::vulkan {
         VkDeviceCreateInfo createInfo{};
         createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
         createInfo.flags = 0;
-        createInfo.queueCreateInfoCount = queueCreateInfos.size();
+        createInfo.queueCreateInfoCount = static_cast<uint32_t>(queueCreateInfos.size());
         createInfo.pQueueCreateInfos = queueCreateInfos.data();
         createInfo.pEnabledFeatures = nullptr;
-        createInfo.enabledExtensionCount = rawExtensions.size();
+        createInfo.enabledExtensionCount = static_cast<uint32_t>(rawExtensions.size());
         createInfo.ppEnabledExtensionNames = rawExtensions.data();
         createInfo.enabledLayerCount = 0;
         createInfo.pNext = &f;
