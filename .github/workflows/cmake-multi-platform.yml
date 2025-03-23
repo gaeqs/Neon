@@ -61,11 +61,6 @@ jobs:
       if: runner.os == 'Windows'
       shell: pwsh
       run: |
-        # Clone and bootstrap vcpkg in C:\vcpkg
-        git clone https://github.com/microsoft/vcpkg.git C:\vcpkg
-        C:\vcpkg\bootstrap-vcpkg.bat
-        # Install dependencies via vcpkg.
-        # Note: vcpkg provides glfw (version 3) by default.
         C:\vcpkg\vcpkg.exe install assimp eigen3 catch2 glfw glm nlohmann-json libzip vulkan-headers
 
     - name: Set reusable strings
