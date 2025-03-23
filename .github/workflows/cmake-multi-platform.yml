@@ -56,8 +56,7 @@ jobs:
           libzip-dev \
           libbz2-dev
 
-    - name: Prepare Vulkan SDK on Windows
-      if: runner.os != 'Windows'
+    - name: Prepare Vulkan SDK
       uses: humbletim/setup-vulkan-sdk@v1.2.1
       with:
         vulkan-query-version: 1.4.304.1
