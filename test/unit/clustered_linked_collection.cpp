@@ -110,6 +110,9 @@ TEST_CASE("Clustered linked collection find and erase 3", "[clustered_linked_col
                 return i == v1;
             }
         );
+
+        collection.erase(it1);
+
         auto it2 = std::find_if(
             collection.begin(),
             collection.end(),
@@ -117,7 +120,7 @@ TEST_CASE("Clustered linked collection find and erase 3", "[clustered_linked_col
                 return i == v2;
             }
         );
-        collection.erase(it1);
+
         collection.erase(it2);
         collection.push(v2);
         collection.push(v1);
