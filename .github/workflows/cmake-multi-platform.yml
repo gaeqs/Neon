@@ -60,7 +60,6 @@ jobs:
       uses: humbletim/install-vulkan-sdk@v1
       with:
         version: latest
-        cache: true
 
     # Install dependencies on Windows using vcpkg
     - name: Install dependencies on Windows
