@@ -8,28 +8,25 @@
 #include <memory>
 #include <chrono>
 
-namespace neon {
+namespace neon
+{
     class Profiler;
 
     class ProfileStack;
 
-    class ProfileStackRecorder {
-
+    class ProfileStackRecorder
+    {
         Profiler* _profiler;
         std::shared_ptr<ProfileStack> _stack;
         std::chrono::high_resolution_clock::time_point _start;
 
-    public:
-
+      public:
         ProfileStackRecorder(const ProfileStackRecorder& other) = delete;
 
-        ProfileStackRecorder(Profiler* profiler,
-                             std::shared_ptr<ProfileStack> stack);
+        ProfileStackRecorder(Profiler* profiler, std::shared_ptr<ProfileStack> stack);
 
         ~ProfileStackRecorder();
-
     };
-}
-
+} // namespace neon
 
 #endif //NEON_PROFILESTACKRECORDER_H

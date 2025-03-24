@@ -15,8 +15,10 @@
 #include <neon/structure/IdentifiableWrapper.h>
 #include <neon/render/model/InputDescription.h>
 
-namespace neon {
-    enum class BlendingLogicOperation {
+namespace neon
+{
+    enum class BlendingLogicOperation
+    {
         CLEAR,
         AND,
         AND_REVERSE,
@@ -35,7 +37,8 @@ namespace neon {
         SET,
     };
 
-    enum class BlendOperation {
+    enum class BlendOperation
+    {
         ADD = 0,
         SUBTRACT = 1,
         REVERSE_SUBTRACT = 2,
@@ -43,15 +46,16 @@ namespace neon {
         MAX = 4
     };
 
-    enum ColorWriteMask {
+    enum ColorWriteMask
+    {
         R = 0x1,
         G = 0x2,
         B = 0x4,
         A = 0x8
     };
 
-
-    enum class BlendFactor {
+    enum class BlendFactor
+    {
         ZERO = 0,
         ONE = 1,
         SRC_COLOR = 2,
@@ -73,7 +77,8 @@ namespace neon {
         ONE_MINUS_SRC1_ALPHA = 18,
     };
 
-    enum class DepthCompareOperation {
+    enum class DepthCompareOperation
+    {
         NEVER,
         LESS,
         EQUAL,
@@ -84,26 +89,30 @@ namespace neon {
         ALWAYS,
     };
 
-    enum class PolygonMode {
+    enum class PolygonMode
+    {
         FILL = 0,
         LINE = 1,
         POINT = 2,
         FILL_RECTANGLE_NVIDIA = 1000153000
     };
 
-    enum class CullMode {
+    enum class CullMode
+    {
         NONE = 0,
         FRONT = 1,
         BACK = 2,
         BOTH = 3
     };
 
-    enum class FrontFace {
+    enum class FrontFace
+    {
         COUNTER_CLOCKWISE = 0,
         CLOCKWISE = 1
     };
 
-    enum class PrimitiveTopology {
+    enum class PrimitiveTopology
+    {
         POINT_LIST = 0,
         LINE_LIST = 1,
         LINE_STRIP = 2,
@@ -117,30 +126,36 @@ namespace neon {
         PATCH_LIST = 10
     };
 
-    enum class UniformBufferLocation {
+    enum class UniformBufferLocation
+    {
         GLOBAL,
         MATERIAL,
         EXTRA
     };
 
-    struct DescriptorBinding {
+    struct DescriptorBinding
+    {
         UniformBufferLocation location = UniformBufferLocation::GLOBAL;
         std::shared_ptr<ShaderUniformDescriptor> extraDescriptor = nullptr;
 
-        static DescriptorBinding global() {
+        static DescriptorBinding global()
+        {
             return DescriptorBinding(UniformBufferLocation::GLOBAL, nullptr);
         }
 
-        static DescriptorBinding material() {
+        static DescriptorBinding material()
+        {
             return DescriptorBinding(UniformBufferLocation::MATERIAL, nullptr);
         }
 
-        static DescriptorBinding extra(std::shared_ptr<ShaderUniformDescriptor> descriptor) {
+        static DescriptorBinding extra(std::shared_ptr<ShaderUniformDescriptor> descriptor)
+        {
             return DescriptorBinding(UniformBufferLocation::EXTRA, std::move(descriptor));
         }
     };
 
-    struct MaterialDescriptions {
+    struct MaterialDescriptions
+    {
         /**
          * The descriptions of the vertex buffers.
          */
@@ -162,18 +177,19 @@ namespace neon {
          */
         std::unordered_map<uint8_t, DescriptorBinding> uniformBindings = {};
 
-        MaterialDescriptions() {
+        MaterialDescriptions()
+        {
             uniformBindings.insert({0, DescriptorBinding::global()});
             uniformBindings.insert({1, DescriptorBinding::material()});
         }
     };
 
-    struct MaterialAttachmentBlending {
+    struct MaterialAttachmentBlending
+    {
         /**
          * The color channels the attachment can write to.
          */
-        uint32_t writeMask = ColorWriteMask::R | ColorWriteMask::G |
-                             ColorWriteMask::B | ColorWriteMask::A;
+        uint32_t writeMask = ColorWriteMask::R | ColorWriteMask::G | ColorWriteMask::B | ColorWriteMask::A;
 
         /**
          * Whether blending is enabled for the attachment.
@@ -211,7 +227,8 @@ namespace neon {
         BlendFactor alphaDestinyBlendFactor = BlendFactor::ZERO;
     };
 
-    struct MaterialBlending {
+    struct MaterialBlending
+    {
         /**
          * Whether logic blending operations are enabled.
          */
@@ -233,7 +250,8 @@ namespace neon {
         float blendingConstants[4] = {0};
     };
 
-    struct MaterialDepthStencil {
+    struct MaterialDepthStencil
+    {
         /**
          * Whether depth test is enabled for the material.
          */
@@ -247,8 +265,7 @@ namespace neon {
         /**
          * The compare operation for the depth test.
          */
-        DepthCompareOperation depthCompareOperation =
-                DepthCompareOperation::LESS;
+        DepthCompareOperation depthCompareOperation = DepthCompareOperation::LESS;
 
         /**
          * Whether depth
@@ -266,7 +283,8 @@ namespace neon {
         float maxDepthBounds = 1.0f;
     };
 
-    struct MaterialRasterizer {
+    struct MaterialRasterizer
+    {
         /**
          * The polygon mode the rasterizer should use.
          */
@@ -290,7 +308,8 @@ namespace neon {
         FrontFace frontFace = FrontFace::COUNTER_CLOCKWISE;
     };
 
-    struct MaterialCreateInfo {
+    struct MaterialCreateInfo
+    {
         /**
          * The target framebuffer for the material.
          * This is the framebuffer where models using
@@ -330,12 +349,12 @@ namespace neon {
          */
         PrimitiveTopology topology = PrimitiveTopology::TRIANGLE_LIST;
 
-        MaterialCreateInfo(
-            std::shared_ptr<FrameBuffer> target_,
-            std::shared_ptr<ShaderProgram>
-            shader_) : target(std::move(target_)),
-                       shader(std::move(shader_)) {}
+        MaterialCreateInfo(std::shared_ptr<FrameBuffer> target_, std::shared_ptr<ShaderProgram> shader_) :
+            target(std::move(target_)),
+            shader(std::move(shader_))
+        {
+        }
     };
-}
+} // namespace neon
 
 #endif //NEON_MATERIALCREATEINFO_H

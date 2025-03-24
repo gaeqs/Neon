@@ -5,15 +5,17 @@
 #ifndef VKQUEUEFAMILY_H
 #define VKQUEUEFAMILY_H
 
-
 #include <cstdint>
 #include <vulkan/vulkan.h>
 #include <rush/rush.h>
 
-namespace neon::vulkan {
-    class VKQueueFamily {
-    public:
-        struct Capabilities {
+namespace neon::vulkan
+{
+    class VKQueueFamily
+    {
+      public:
+        struct Capabilities
+        {
             bool graphics;
             bool compute;
             bool transfer;
@@ -24,20 +26,13 @@ namespace neon::vulkan {
             bool opticalFlow;
             bool present;
 
-            explicit Capabilities(bool graphics = false,
-                                  bool compute = false,
-                                  bool transfer = false,
-                                  bool sparse_binding = false,
-                                  bool protected_memory = false,
-                                  bool video_decode = false,
-                                  bool video_encode = false,
-                                  bool optical_flow = false,
-                                  bool present = false);
+            explicit Capabilities(bool graphics = false, bool compute = false, bool transfer = false,
+                                  bool sparse_binding = false, bool protected_memory = false, bool video_decode = false,
+                                  bool video_encode = false, bool optical_flow = false, bool present = false);
 
             explicit Capabilities(VkQueueFlags flags);
 
-            [[nodiscard]] bool isCompatible(
-                const Capabilities& requirements) const;
+            [[nodiscard]] bool isCompatible(const Capabilities& requirements) const;
 
             Capabilities operator|(const Capabilities& other) const;
 
@@ -48,17 +43,15 @@ namespace neon::vulkan {
             static Capabilities withPresent();
         };
 
-    private:
+      private:
         uint32_t _index;
         uint32_t _count;
         Capabilities _capabilities;
         uint32_t _timestamp;
         rush::Vec3f _minImageGranularity;
 
-    public:
-        VKQueueFamily(VkPhysicalDevice device,
-                      VkSurfaceKHR surface,
-                      uint32_t index,
+      public:
+        VKQueueFamily(VkPhysicalDevice device, VkSurfaceKHR surface, uint32_t index,
                       const VkQueueFamilyProperties& properties);
 
         [[nodiscard]] uint32_t getIndex() const;
@@ -71,6 +64,6 @@ namespace neon::vulkan {
 
         [[nodiscard]] rush::Vec3f getMinImageGranularity() const;
     };
-}
+} // namespace neon::vulkan
 
 #endif //VKQUEUEFAMILY_H

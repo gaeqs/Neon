@@ -9,20 +9,21 @@
 
 #include <libzippp.h>
 
-namespace neon {
-    class ZipFileSystem : public FileSystem {
+namespace neon
+{
+    class ZipFileSystem : public FileSystem
+    {
         std::unique_ptr<libzippp::ZipArchive> _zip;
 
-    public:
-        ZipFileSystem(const std::filesystem::path& file);
+      public:
+        explicit ZipFileSystem(const std::filesystem::path& file);
 
         ~ZipFileSystem() override;
 
-        std::optional<File> readFile(std::filesystem::path path) const override;
+        [[nodiscard]] std::optional<File> readFile(std::filesystem::path path) const override;
 
-        bool exists(std::filesystem::path path) const override;
+        [[nodiscard]] bool exists(std::filesystem::path path) const override;
     };
-}
-
+} // namespace neon
 
 #endif //ZIPFILESYSTEM_H

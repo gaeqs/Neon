@@ -9,23 +9,25 @@
 
 #ifdef USE_VULKAN
 
-#include "vulkan/render/VKSwapChainFrameBuffer.h"
+    #include "vulkan/render/VKSwapChainFrameBuffer.h"
 
 #endif
 
-namespace neon {
+namespace neon
+{
     class Application;
 
-    class SwapChainFrameBuffer : public FrameBuffer {
-    public:
+    class SwapChainFrameBuffer : public FrameBuffer
+    {
+      public:
 #ifdef USE_VULKAN
         using Implementation = vulkan::VKSwapChainFrameBuffer;
 #endif
 
-    private:
+      private:
         Implementation _implementation;
 
-    public:
+      public:
         SwapChainFrameBuffer(Application* application, std::string name, SamplesPerTexel samples, bool depth);
 
         ~SwapChainFrameBuffer() override = default;
@@ -36,8 +38,7 @@ namespace neon {
 
         [[nodiscard]] FrameBuffer::Implementation& getImplementation() override;
 
-        [[nodiscard]] const FrameBuffer::Implementation&
-        getImplementation() const override;
+        [[nodiscard]] const FrameBuffer::Implementation& getImplementation() const override;
 
         [[nodiscard]] std::vector<FrameBufferOutput> getOutputs() const override;
 
@@ -47,7 +48,6 @@ namespace neon {
 
         SamplesPerTexel getSamples() const override;
     };
-}
-
+} // namespace neon
 
 #endif //NEON_SWAPCHAINFRAMEBUFFER_H

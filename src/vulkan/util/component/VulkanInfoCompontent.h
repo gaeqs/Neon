@@ -11,18 +11,18 @@
 #include <vulkan/vulkan.h>
 #include <vulkan/device/VKPhysicalDeviceFeatures.h>
 
-namespace neon::vulkan {
-    class VulkanInfoCompontent : public Component {
+namespace neon::vulkan
+{
+    class VulkanInfoCompontent : public Component
+    {
         VkPhysicalDeviceProperties _properties;
         VkPhysicalDeviceMeshShaderPropertiesEXT _meshShaderProperties{
-            VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MESH_SHADER_PROPERTIES_EXT
-        };
+            VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MESH_SHADER_PROPERTIES_EXT};
         const VKPhysicalDeviceFeatures* _features;
 
         static void tooltip(const char* desc);
 
-        static void printProperty(const char* title,
-                                  VkPhysicalDeviceType value);
+        static void printProperty(const char* title, VkPhysicalDeviceType value);
 
         static void printProperty(const char* title, uint32_t value);
 
@@ -54,12 +54,11 @@ namespace neon::vulkan {
 
         void physicalDeviceFeatures() const;
 
-    public:
+      public:
         void onStart() override;
 
         void onPreDraw() override;
     };
-}
-
+} // namespace neon::vulkan
 
 #endif //VULKANINFOCOMPONTENT_H

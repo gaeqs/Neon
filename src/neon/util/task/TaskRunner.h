@@ -18,7 +18,8 @@
 
 #include <neon/util/task/AbstractCoroutine.h>
 
-namespace neon {
+namespace neon
+{
     /**
      * This class hold the status information
      * about a task being executed.
@@ -28,7 +29,8 @@ namespace neon {
      * @tparam Result the result type. It may be null.
      */
     template<typename Result>
-    class Task {
+    class Task
+    {
         std::mutex _valueMutex;
         std::condition_variable _valueCondition;
 
@@ -36,20 +38,23 @@ namespace neon {
         std::atomic_bool _finished;
         std::atomic_bool _cancelled;
 
-    public :
+      public:
         /**
         * Creates a Task instance.
         */
         Task() :
             _result(),
             _finished(false),
-            _cancelled(false) {}
+            _cancelled(false)
+        {
+        }
 
         /**
          * Returns whether this task has finished.
          * @return whether this task has finished.
          */
-        [[nodiscard]] bool hasFinished() const {
+        [[nodiscard]] bool hasFinished() const
+        {
             return _finished;
         }
 
@@ -57,7 +62,8 @@ namespace neon {
          * Returns whether this task was cancelled.
          * @return whether this task was cancelled.
          */
-        [[nodiscard]] bool isCancelled() const {
+        [[nodiscard]] bool isCancelled() const
+        {
             return _cancelled;
         }
 
@@ -67,9 +73,12 @@ namespace neon {
          * <p>
          * If this task has already finished, this method does nothing.
          */
-        void wait() {
+        void wait()
+        {
             std::unique_lock lock(_valueMutex);
-            if(_finished || _cancelled) return;
+            if (_finished || _cancelled) {
+                return;
+            }
             _valueCondition.wait(lock);
         }
 
@@ -77,9 +86,12 @@ namespace neon {
          * Sets the result of the task.
          * @param result the result.
          */
-        void setResult(Result&& result) {
+        void setResult(Result&& result)
+        {
             std::lock_guard lock(_valueMutex);
-            if(_finished || _cancelled) return;
+            if (_finished || _cancelled) {
+                return;
+            }
             _result = std::move(result);
             _finished = true;
             _valueCondition.notify_all();
@@ -91,9 +103,12 @@ namespace neon {
          * function won't be able to stop the execution,
          * but it will stop the assignment of the result.
          */
-        void cancel() {
+        void cancel()
+        {
             std::lock_guard lock(_valueMutex);
-            if(_finished | _cancelled) return;
+            if (_finished | _cancelled) {
+                return;
+            }
             _cancelled = true;
             _valueCondition.notify_all();
         }
@@ -108,7 +123,8 @@ namespace neon {
          *
          * @return the rvalue.
          */
-        std::optional<Result>&& moveResult() {
+        std::optional<Result>&& moveResult()
+        {
             return std::move(_result);
         }
 
@@ -122,7 +138,8 @@ namespace neon {
          *
          * @return the reference.
          */
-        std::optional<Result>& getResult() {
+        std::optional<Result>& getResult()
+        {
             return _result;
         }
     };
@@ -135,24 +152,28 @@ namespace neon {
     * the status and the result of the represented task.
     */
     template<>
-    class Task<void> {
+    class Task<void>
+    {
         std::mutex _valueMutex;
         std::condition_variable _valueCondition;
         std::atomic_bool _finished;
         std::atomic_bool _cancelled;
 
-    public:
+      public:
         /**
          * Creates a Task instance.
          */
         Task() :
-            _finished(false) {}
+            _finished(false)
+        {
+        }
 
         /**
          * Returns whether this task has finished.
          * @return whether this task has finished.
          */
-        [[nodiscard]] bool hasFinished() const {
+        [[nodiscard]] bool hasFinished() const
+        {
             return _finished;
         }
 
@@ -160,7 +181,8 @@ namespace neon {
          * Returns whether this task was cancelled.
          * @return whether this task was cancelled.
          */
-        [[nodiscard]] bool isCancelled() const {
+        [[nodiscard]] bool isCancelled() const
+        {
             return _cancelled;
         }
 
@@ -170,9 +192,12 @@ namespace neon {
          * function won't be able to stop the execution,
          * but it will stop the assignment of the result.
          */
-        void cancel() {
+        void cancel()
+        {
             std::lock_guard lock(_valueMutex);
-            if(_finished | _cancelled) return;
+            if (_finished | _cancelled) {
+                return;
+            }
             _cancelled = true;
             _valueCondition.notify_all();
         }
@@ -180,9 +205,12 @@ namespace neon {
         /**
          * Marks this task as finished.
          */
-        void finish() {
+        void finish()
+        {
             std::lock_guard lock(_valueMutex);
-            if(_finished | _cancelled) return;
+            if (_finished | _cancelled) {
+                return;
+            }
             _finished = true;
             _valueCondition.notify_all();
         }
@@ -193,9 +221,12 @@ namespace neon {
          * <p>
          * If this task has already finished, this method does nothing.
          */
-        void wait() {
+        void wait()
+        {
             std::unique_lock lock(_valueMutex);
-            if(_finished | _cancelled) return;
+            if (_finished | _cancelled) {
+                return;
+            }
             _valueCondition.wait(lock);
         }
     };
@@ -207,7 +238,8 @@ namespace neon {
      * You may create TaskRunner instances, but it is recommended
      * to use the TaskRunner locates at the Application instance.
      */
-    class TaskRunner {
+    class TaskRunner
+    {
         std::vector<std::thread> _workers;
         std::queue<std::function<void()>> _pendingTasks;
         std::vector<std::function<void()>> _mainThreadTasks;
@@ -217,7 +249,7 @@ namespace neon {
 
         bool _stop;
 
-    public:
+      public:
         /**
          * Creates a TaskRunner.
          */
@@ -257,12 +289,13 @@ namespace neon {
          * @param coroutine the coroutine.
          */
         template<typename Coroutine>
-            requires (!std::is_reference_v<Coroutine>)
-        void launchCoroutine(Coroutine&& coroutine) {
-            if(_stop) return;
-            std::unique_ptr<AbstractCoroutine> ptr =
-                    std::make_unique<Coroutine>(
-                        std::forward<Coroutine&&>(coroutine));
+            requires(!std::is_reference_v<Coroutine>)
+        void launchCoroutine(Coroutine&& coroutine)
+        {
+            if (_stop) {
+                return;
+            }
+            std::unique_ptr<AbstractCoroutine> ptr = std::make_unique<Coroutine>(std::forward<Coroutine&&>(coroutine));
 
             std::lock_guard lock(_coroutineMutex);
             _coroutines.push_back(std::move(ptr));
@@ -279,24 +312,23 @@ namespace neon {
          * @return the task that monitors the state of the function.
          */
         template<typename Func, typename... Args>
-            auto executeOnMainThread(Func&& function,
-                              Args&&... args) -> std::shared_ptr<Task<decltype(
-                function(std::forward<Args>(args)...))>> {
+        auto executeOnMainThread(Func&& function, Args&&... args)
+            -> std::shared_ptr<Task<decltype(function(std::forward<Args>(args)...))>>
+        {
             using Return = decltype(function(std::forward<Args>(args)...));
             using Tu = std::tuple<std::decay_t<Args>...>;
-            if(_stop) return nullptr;
+            if (_stop) {
+                return nullptr;
+            }
             std::shared_ptr task = std::make_shared<Task<Return>>();
-            std::shared_ptr tuple = std::make_shared<Tu>(
-                std::forward<Args>(args)...);
+            std::shared_ptr tuple = std::make_shared<Tu>(std::forward<Args>(args)...);
 
-            std::function<void()> run = [
-                        task,
-                        function,
-                        t = std::move(tuple)
-                    ] {
-                if(task->isCancelled()) return;
+            std::function<void()> run = [task, function, t = std::move(tuple)] {
+                if (task->isCancelled()) {
+                    return;
+                }
                 Tu tu = std::move(*t);
-                if constexpr(std::is_void_v<Return>) {
+                if constexpr (std::is_void_v<Return>) {
                     function(std::move(std::get<std::decay_t<Args>>(tu))...);
                     task->finish();
                 } else {
@@ -321,24 +353,23 @@ namespace neon {
          * @return the task that monitors the state of the function.
          */
         template<typename Func, typename... Args>
-        auto executeAsync(Func&& function,
-                          Args&&... args) -> std::shared_ptr<Task<decltype(
-            function(std::forward<Args>(args)...))>> {
+        auto executeAsync(Func&& function, Args&&... args)
+            -> std::shared_ptr<Task<decltype(function(std::forward<Args>(args)...))>>
+        {
             using Return = decltype(function(std::forward<Args>(args)...));
             using Tu = std::tuple<std::decay_t<Args>...>;
-            if(_stop) return nullptr;
+            if (_stop) {
+                return nullptr;
+            }
             std::shared_ptr task = std::make_shared<Task<Return>>();
-            std::shared_ptr tuple = std::make_shared<Tu>(
-                std::forward<Args>(args)...);
+            std::shared_ptr tuple = std::make_shared<Tu>(std::forward<Args>(args)...);
 
-            std::function<void()> run = [
-                        task,
-                        function,
-                        t = std::move(tuple)
-                    ] {
-                if(task->isCancelled()) return;
+            std::function<void()> run = [task, function, t = std::move(tuple)] {
+                if (task->isCancelled()) {
+                    return;
+                }
                 Tu tu = std::move(*t);
-                if constexpr(std::is_void_v<Return>) {
+                if constexpr (std::is_void_v<Return>) {
                     function(std::move(std::get<std::decay_t<Args>>(tu))...);
                     task->finish();
                 } else {
@@ -353,6 +384,6 @@ namespace neon {
             return task;
         }
     };
-}
+} // namespace neon
 
 #endif //TASKRUNNER_H

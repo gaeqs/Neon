@@ -10,10 +10,14 @@
 #include "AssetLoaderHelpers.h"
 #include "TextureLoader.h"
 
-namespace neon {
-    FrameBufferTextureCreateInfo FrameBufferLoader::loadTexture(nlohmann::json& json, SamplesPerTexel samples) {
+namespace neon
+{
+    FrameBufferTextureCreateInfo FrameBufferLoader::loadTexture(nlohmann::json& json, SamplesPerTexel samples)
+    {
         FrameBufferTextureCreateInfo info;
-        if (!json.is_object()) return info;
+        if (!json.is_object()) {
+            return info;
+        }
 
         if (auto& name = json["name"]; name.is_string()) {
             info.name = name;
@@ -34,15 +38,17 @@ namespace neon {
         return info;
     }
 
-    std::shared_ptr<FrameBuffer>
-    FrameBufferLoader::loadAsset(std::string name, nlohmann::json json, AssetLoaderContext context) {
+    std::shared_ptr<FrameBuffer> FrameBufferLoader::loadAsset(std::string name, nlohmann::json json,
+                                                              AssetLoaderContext context)
+    {
         auto& type = json["type"];
-        if (!type.is_string()) return nullptr;
+        if (!type.is_string()) {
+            return nullptr;
+        }
 
         bool depth = json.value("depth", false);
 
-        auto samples = serialization::toSamplesPerTexel(json.value("samples", "")).value_or(
-            SamplesPerTexel::COUNT_1);
+        auto samples = serialization::toSamplesPerTexel(json.value("samples", "")).value_or(SamplesPerTexel::COUNT_1);
 
         if (type == "swap_chain") {
             return std::make_shared<SwapChainFrameBuffer>(context.application, name, samples, depth);
@@ -58,7 +64,7 @@ namespace neon {
                 props.emplace_back(original, resolved);
                 infos.push_back(loadTexture(textures, samples));
             } else if (textures.is_array()) {
-                for (auto& texture: textures) {
+                for (auto& texture : textures) {
                     auto original = fetchGeneralProperties<Texture>(texture, context);
                     auto resolved = fetchGeneralProperties<Texture>(texture["resolved"], context);
                     props.emplace_back(original, resolved);
@@ -73,11 +79,11 @@ namespace neon {
 
             auto fb = std::make_shared<SimpleFrameBuffer>(context.application, name, infos, depth, depthName, samples);
 
-
             if (depth && !depthProps.error.has_value()) {
                 auto& output = fb->getOutputs().back();
                 applyGeneralProperties(output.texture, depthProps, context);
-                if (output.resolvedTexture != nullptr) {}
+                if (output.resolvedTexture != nullptr) {
+                }
             }
 
             auto outputs = fb->getOutputs();
@@ -98,4 +104,4 @@ namespace neon {
 
         return nullptr;
     }
-}
+} // namespace neon

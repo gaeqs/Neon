@@ -8,32 +8,38 @@
 #include <neon/util/task/Coroutine.h>
 #include <neon/util/task/TaskRunner.h>
 
-
-neon::Coroutine<int> coroutine1() {
+neon::Coroutine<int> coroutine1()
+{
     co_yield neon::WaitForNextFrame();
     co_return 42;
 }
 
-neon::Coroutine<int> coroutineCancel() {
+neon::Coroutine<int> coroutineCancel()
+{
     co_yield neon::WaitForNextFrame();
 
     FAIL("Coroutine has been resumed");
     co_return 42;
 }
 
-
-struct CoroutineHolder {
+struct CoroutineHolder
+{
     int value;
 
-    explicit CoroutineHolder(int value) : value(value) {}
+    explicit CoroutineHolder(int value) :
+        value(value)
+    {
+    }
 
-    neon::Coroutine<int> coroutine() {
+    neon::Coroutine<int> coroutine()
+    {
         co_yield neon::WaitForNextFrame();
         co_return value;
     }
 };
 
-TEST_CASE("Coroutine", "[coroutine]") {
+TEST_CASE("Coroutine", "[coroutine]")
+{
     neon::TaskRunner runner;
 
     neon::Coroutine<int> coroutine = coroutine1();
@@ -56,7 +62,8 @@ TEST_CASE("Coroutine", "[coroutine]") {
     REQUIRE(task->getResult() == 42);
 }
 
-TEST_CASE("Coroutine struct", "[coroutine]") {
+TEST_CASE("Coroutine struct", "[coroutine]")
+{
     neon::TaskRunner runner;
 
     // Beware! The coroutine will continue its
@@ -83,7 +90,8 @@ TEST_CASE("Coroutine struct", "[coroutine]") {
     REQUIRE(task->getResult() == 20);
 }
 
-TEST_CASE("Coroutine cancel", "[coroutine]") {
+TEST_CASE("Coroutine cancel", "[coroutine]")
+{
     neon::TaskRunner runner;
 
     neon::Coroutine<int> coroutine = coroutineCancel();

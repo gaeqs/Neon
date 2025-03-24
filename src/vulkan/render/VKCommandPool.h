@@ -10,15 +10,18 @@
 #include <vulkan/vulkan.h>
 #include <vulkan/queue/VKQueueFamily.h>
 
-namespace neon {
+namespace neon
+{
     class CommandBuffer;
     class Application;
-}
+} // namespace neon
 
-namespace neon::vulkan {
+namespace neon::vulkan
+{
     class AbstractVKApplication;
 
-    class VKCommandPool {
+    class VKCommandPool
+    {
         Application* _application;
         AbstractVKApplication* _vkApplication;
         VkCommandPool _raw;
@@ -26,18 +29,15 @@ namespace neon::vulkan {
 
         bool _external;
 
-    public:
+      public:
         VKCommandPool(const VKCommandPool& other) = delete;
 
         VKCommandPool(VKCommandPool&& move) noexcept;
 
         explicit VKCommandPool(Application* application,
-                               VKQueueFamily::Capabilities capabilities =
-                                       VKQueueFamily::Capabilities::withGraphics());
+                               VKQueueFamily::Capabilities capabilities = VKQueueFamily::Capabilities::withGraphics());
 
-        explicit VKCommandPool(Application* application,
-                               VkCommandPool external,
-                               uint32_t externalQueueFamilyIndex);
+        explicit VKCommandPool(Application* application, VkCommandPool external, uint32_t externalQueueFamilyIndex);
 
         ~VKCommandPool();
 
@@ -47,12 +47,10 @@ namespace neon::vulkan {
 
         [[nodiscard]] VkCommandPool raw() const;
 
-        [[nodiscard]] std::unique_ptr<CommandBuffer> newCommandBuffer(
-            bool primary) const;
+        [[nodiscard]] std::unique_ptr<CommandBuffer> newCommandBuffer(bool primary) const;
 
         VKCommandPool& operator=(VKCommandPool&& move) noexcept;
     };
-}
-
+} // namespace neon::vulkan
 
 #endif //VKCOMMANDPOOL_H

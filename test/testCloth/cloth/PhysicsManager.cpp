@@ -14,15 +14,18 @@
 #include <vector>
 
 PhysicsManager::PhysicsManager(IntegrationMode mode) :
-        _mode(mode),
-        _degreesOfFreedom(0),
-        _objects(),
-        _paused(true) {
-
+    _mode(mode),
+    _degreesOfFreedom(0),
+    _objects(),
+    _paused(true)
+{
 }
 
-void PhysicsManager::onUpdate(float deltaTime) {
-    if (_paused || _degreesOfFreedom == 0) return;
+void PhysicsManager::onUpdate(float deltaTime)
+{
+    if (_paused || _degreesOfFreedom == 0) {
+        return;
+    }
 
     float time = std::min(deltaTime, 0.05f);
 
@@ -36,7 +39,8 @@ void PhysicsManager::onUpdate(float deltaTime) {
     }
 }
 
-void PhysicsManager::stepSymplectic(float deltaTime) {
+void PhysicsManager::stepSymplectic(float deltaTime)
+{
     static Eigen::VectorXf x;
     static Eigen::VectorXf v;
     static Eigen::VectorXf f;
@@ -44,8 +48,7 @@ void PhysicsManager::stepSymplectic(float deltaTime) {
     static std::vector<Eigen::Triplet<float>> massTriplets;
 
     {
-        DEBUG_PROFILE_ID(getRoom()->getApplication()->getProfiler(),
-                         sympletic_initialization,
+        DEBUG_PROFILE_ID(getRoom()->getApplication()->getProfiler(), sympletic_initialization,
                          "Symplectic initialization");
         x.resize(_degreesOfFreedom);
         v.resize(_degreesOfFreedom);
@@ -56,15 +59,12 @@ void PhysicsManager::stepSymplectic(float deltaTime) {
         v.fill(0.0f);
         f.fill(0.0f);
 
-
         massTriplets.clear();
         massTriplets.reserve(_degreesOfFreedom);
     }
     {
-        DEBUG_PROFILE_ID(getRoom()->getApplication()->getProfiler(),
-                         sympletic_fetch,
-                         "Symplectic fetch");
-        for (const auto& obj: _objects) {
+        DEBUG_PROFILE_ID(getRoom()->getApplication()->getProfiler(), sympletic_fetch, "Symplectic fetch");
+        for (const auto& obj : _objects) {
             obj->getPosition(x);
             obj->getVelocity(v);
             obj->getForce(f);
@@ -74,35 +74,30 @@ void PhysicsManager::stepSymplectic(float deltaTime) {
     }
 
     {
-        DEBUG_PROFILE_ID(getRoom()->getApplication()->getProfiler(),
-                         sympletic_fix,
-                         "Symplectic fix");
-        for (const auto& obj: _objects) {
+        DEBUG_PROFILE_ID(getRoom()->getApplication()->getProfiler(), sympletic_fix, "Symplectic fix");
+        for (const auto& obj : _objects) {
             obj->fixVector(f);
             obj->fixMatrix(massInv);
         }
     }
 
     {
-        DEBUG_PROFILE_ID(getRoom()->getApplication()->getProfiler(),
-                         sympletic_solve,
-                         "Symplectic solve");
+        DEBUG_PROFILE_ID(getRoom()->getApplication()->getProfiler(), sympletic_solve, "Symplectic solve");
         v += deltaTime * (massInv * f);
         x += deltaTime * v;
     }
 
     {
-        DEBUG_PROFILE_ID(getRoom()->getApplication()->getProfiler(),
-                         sympletic_set,
-                         "Symplectic set");
-        for (const auto& obj: _objects) {
+        DEBUG_PROFILE_ID(getRoom()->getApplication()->getProfiler(), sympletic_set, "Symplectic set");
+        for (const auto& obj : _objects) {
             obj->setPosition(x);
             obj->setVelocity(v);
         }
     }
 }
 
-void PhysicsManager::stepImplicit(float deltaTime) {
+void PhysicsManager::stepImplicit(float deltaTime)
+{
     static Eigen::VectorXf x;
     static Eigen::VectorXf v;
     static Eigen::VectorXf f;
@@ -114,8 +109,7 @@ void PhysicsManager::stepImplicit(float deltaTime) {
     static std::vector<Eigen::Triplet<float>> dTriplets;
 
     {
-        DEBUG_PROFILE_ID(getRoom()->getApplication()->getProfiler(),
-                         implicit_initialization,
+        DEBUG_PROFILE_ID(getRoom()->getApplication()->getProfiler(), implicit_initialization,
                          "Implicit initialization");
 
         x.resize(_degreesOfFreedom);
@@ -135,14 +129,11 @@ void PhysicsManager::stepImplicit(float deltaTime) {
         x.fill(0.0f);
         v.fill(0.0f);
         f.fill(0.0f);
-
     }
 
     {
-        DEBUG_PROFILE_ID(getRoom()->getApplication()->getProfiler(),
-                         implicit_fetch,
-                         "Implicit fetch");
-        for (const auto& obj: _objects) {
+        DEBUG_PROFILE_ID(getRoom()->getApplication()->getProfiler(), implicit_fetch, "Implicit fetch");
+        for (const auto& obj : _objects) {
             obj->getPosition(x);
             obj->getVelocity(v);
             obj->getForce(f);
@@ -158,27 +149,21 @@ void PhysicsManager::stepImplicit(float deltaTime) {
     Eigen::VectorXf b;
 
     {
-        DEBUG_PROFILE_ID(getRoom()->getApplication()->getProfiler(),
-                         implicit_compute_ab,
-                         "Implicit compute AB");
+        DEBUG_PROFILE_ID(getRoom()->getApplication()->getProfiler(), implicit_compute_ab, "Implicit compute AB");
         a = mass - deltaTime * d - deltaTime * deltaTime * k;
         b = (mass - deltaTime * d) * v + deltaTime * f;
     }
 
     {
-        DEBUG_PROFILE_ID(getRoom()->getApplication()->getProfiler(),
-                         implicit_fix,
-                         "Implicit fix");
-        for (const auto& obj: _objects) {
+        DEBUG_PROFILE_ID(getRoom()->getApplication()->getProfiler(), implicit_fix, "Implicit fix");
+        for (const auto& obj : _objects) {
             obj->fixVector(b);
             obj->fixMatrix(a);
         }
     }
 
     {
-        DEBUG_PROFILE_ID(getRoom()->getApplication()->getProfiler(),
-                         implicit_solve,
-                         "Implicit solve");
+        DEBUG_PROFILE_ID(getRoom()->getApplication()->getProfiler(), implicit_solve, "Implicit solve");
 
         Eigen::SimplicialLLT<Eigen::SparseMatrix<float>> solver;
 
@@ -187,25 +172,21 @@ void PhysicsManager::stepImplicit(float deltaTime) {
     }
 
     {
-        DEBUG_PROFILE_ID(getRoom()->getApplication()->getProfiler(),
-                         implicit_set,
-                         "Implicit set");
-        for (const auto& obj: _objects) {
+        DEBUG_PROFILE_ID(getRoom()->getApplication()->getProfiler(), implicit_set, "Implicit set");
+        for (const auto& obj : _objects) {
             obj->setPosition(x);
             obj->setVelocity(v);
         }
     }
 }
 
-void PhysicsManager::drawEditor() {
+void PhysicsManager::drawEditor()
+{
     if (ImGui::Button(_paused ? "Resume" : "Pause")) {
         _paused = !_paused;
     }
 
-    if (ImGui::Button(_mode == IntegrationMode::SYMPLECTIC
-                      ? "Symplectic" : "Implicit")) {
-        _mode = _mode == IntegrationMode::SYMPLECTIC
-                ? IntegrationMode::IMPLICIT
-                : IntegrationMode::SYMPLECTIC;
+    if (ImGui::Button(_mode == IntegrationMode::SYMPLECTIC ? "Symplectic" : "Implicit")) {
+        _mode = _mode == IntegrationMode::SYMPLECTIC ? IntegrationMode::IMPLICIT : IntegrationMode::SYMPLECTIC;
     }
 }

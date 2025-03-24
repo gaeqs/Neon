@@ -16,26 +16,25 @@
 
 #ifdef USE_VULKAN
 
-#include <vulkan/render/VKRender.h>
+    #include <vulkan/render/VKRender.h>
 
 #endif
 
-namespace neon {
+namespace neon
+{
 
     class Room;
 
     class Application;
 
-    class Render : public Asset {
-
-    public:
-
+    class Render : public Asset
+    {
+      public:
 #ifdef USE_VULKAN
         using Implementation = vulkan::VKRender;
 #endif
 
-    private:
-
+      private:
         Implementation _implementation;
         Application* _application;
         std::vector<std::shared_ptr<RenderPassStrategy>> _strategies;
@@ -43,13 +42,10 @@ namespace neon {
         std::shared_ptr<ShaderUniformDescriptor> _globalUniformDescriptor;
         ShaderUniformBuffer _globalUniformBuffer;
 
-    public:
-
+      public:
         Render(const Render& other) = delete;
 
-        Render(Application* application,
-               std::string name,
-               const std::shared_ptr<ShaderUniformDescriptor>& descriptor);
+        Render(Application* application, std::string name, const std::shared_ptr<ShaderUniformDescriptor>& descriptor);
 
         [[nodiscard]] const Implementation& getImplementation() const;
 
@@ -65,11 +61,9 @@ namespace neon {
 
         [[nodiscard]] size_t getStrategyAmount() const;
 
-        [[nodiscard]] const std::vector<std::shared_ptr<RenderPassStrategy>>&
-        getStrategies() const;
+        [[nodiscard]] const std::vector<std::shared_ptr<RenderPassStrategy>>& getStrategies() const;
 
-        [[nodiscard]] const std::shared_ptr<ShaderUniformDescriptor>&
-        getGlobalUniformDescriptor() const;
+        [[nodiscard]] const std::shared_ptr<ShaderUniformDescriptor>& getGlobalUniformDescriptor() const;
 
         [[nodiscard]] const ShaderUniformBuffer& getGlobalUniformBuffer() const;
 
@@ -77,13 +71,12 @@ namespace neon {
 
         // region Strategy methods
 
-        void beginRenderPass(const std::shared_ptr<FrameBuffer>& fb,
-                             bool clear = true) const;
+        void beginRenderPass(const std::shared_ptr<FrameBuffer>& fb, bool clear = true) const;
 
         void endRenderPass() const;
 
         // endregion
     };
-}
+} // namespace neon
 
 #endif //NEON_RENDER_H

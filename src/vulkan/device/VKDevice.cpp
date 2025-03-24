@@ -7,29 +7,28 @@
 #include <vector>
 #include <stdexcept>
 
-namespace neon::vulkan {
-    VKDevice::VKDevice(VkDevice raw,
-                       const VKQueueFamilyCollection& families,
-                       const VKPhysicalDeviceFeatures& features,
-                       const std::vector<uint32_t>& presentQueues)
-        : _raw(raw),
-          _queueProvider(std::make_unique<VKQueueProvider>(
-              raw, families, presentQueues)),
-          _enabledFeatures(features),
-          _external(true) {}
+namespace neon::vulkan
+{
+    VKDevice::VKDevice(VkDevice raw, const VKQueueFamilyCollection& families, const VKPhysicalDeviceFeatures& features,
+                       const std::vector<uint32_t>& presentQueues) :
+        _raw(raw),
+        _queueProvider(std::make_unique<VKQueueProvider>(raw, families, presentQueues)),
+        _enabledFeatures(features),
+        _external(true)
+    {
+    }
 
-    VKDevice::VKDevice(VkPhysicalDevice physicalDevice,
-                       const VKPhysicalDeviceFeatures& features,
-                       const VKQueueFamilyCollection& families)
-        : _enabledFeatures(features),
-          _external(false) {
+    VKDevice::VKDevice(VkPhysicalDevice physicalDevice, const VKPhysicalDeviceFeatures& features,
+                       const VKQueueFamilyCollection& families) :
+        _enabledFeatures(features),
+        _external(false)
+    {
         std::vector<float> priorities;
         uint32_t maxQueues = 0;
-        for (auto family: families.getFamilies()) {
+        for (auto family : families.getFamilies()) {
             maxQueues = std::max(family.getCount(), maxQueues);
         }
         priorities.resize(maxQueues, 1.0f);
-
 
         std::vector<uint32_t> presentQueues;
         presentQueues.resize(families.getFamilies().size());
@@ -37,7 +36,7 @@ namespace neon::vulkan {
         std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
         queueCreateInfos.reserve(families.getFamilies().size());
 
-        for (auto family: families.getFamilies()) {
+        for (auto family : families.getFamilies()) {
             VkDeviceQueueCreateInfo info{};
             info.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
             info.queueFamilyIndex = family.getIndex();
@@ -50,7 +49,7 @@ namespace neon::vulkan {
         std::vector<const char*> rawExtensions;
         rawExtensions.reserve(_enabledFeatures.extensions.size());
 
-        for (const auto& extension: _enabledFeatures.extensions) {
+        for (const auto& extension : _enabledFeatures.extensions) {
             rawExtensions.emplace_back(extension.c_str());
         }
 
@@ -66,33 +65,32 @@ namespace neon::vulkan {
         createInfo.enabledLayerCount = 0;
         createInfo.pNext = &f;
 
-        if (vkCreateDevice(physicalDevice, &createInfo, nullptr, &_raw) !=
-            VK_SUCCESS) {
+        if (vkCreateDevice(physicalDevice, &createInfo, nullptr, &_raw) != VK_SUCCESS) {
             throw std::runtime_error("Failed to create logical device!");
         }
 
-        _queueProvider = std::make_unique<VKQueueProvider>(
-            _raw,
-            families,
-            presentQueues
-        );
+        _queueProvider = std::make_unique<VKQueueProvider>(_raw, families, presentQueues);
     }
 
-    VKDevice::~VKDevice() {
+    VKDevice::~VKDevice()
+    {
         if (!_external) {
             vkDestroyDevice(_raw, nullptr);
         }
     }
 
-    VkDevice VKDevice::getRaw() const {
+    VkDevice VKDevice::getRaw() const
+    {
         return _raw;
     }
 
-    VKQueueProvider* VKDevice::getQueueProvider() const {
+    VKQueueProvider* VKDevice::getQueueProvider() const
+    {
         return _queueProvider.get();
     }
 
-    const VKPhysicalDeviceFeatures& VKDevice::getEnabledFeatures() const {
+    const VKPhysicalDeviceFeatures& VKDevice::getEnabledFeatures() const
+    {
         return _enabledFeatures;
     }
-}
+} // namespace neon::vulkan

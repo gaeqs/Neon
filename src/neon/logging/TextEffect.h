@@ -8,8 +8,10 @@
 #include <cstdint>
 #include <rush/rush.h>
 
-namespace neon {
-    enum class TextColor4Bits : uint8_t {
+namespace neon
+{
+    enum class TextColor4Bits : uint8_t
+    {
         BLACK = 0,
         RED = 1,
         GREEN = 2,
@@ -31,7 +33,8 @@ namespace neon {
     /**
      * Represents a text effect you can use on messages.
      */
-    struct TextEffect {
+    struct TextEffect
+    {
         uint8_t code;
         uint8_t metadata[4];
 
@@ -71,11 +74,9 @@ namespace neon {
 
         static TextEffect background8bits(uint8_t color);
 
-        static TextEffect foregroundRGB(uint8_t red, uint8_t green,
-                                        uint8_t blue);
+        static TextEffect foregroundRGB(uint8_t red, uint8_t green, uint8_t blue);
 
-        static TextEffect backgroundRGB(uint8_t red, uint8_t green,
-                                        uint8_t blue);
+        static TextEffect backgroundRGB(uint8_t red, uint8_t green, uint8_t blue);
 
         static TextEffect defaultForeground();
 
@@ -87,10 +88,9 @@ namespace neon {
 
         static TextEffect overlined();
 
-    private:
+      private:
         [[nodiscard]] std::optional<rush::Vec3f> toRGBFromMetadata() const;
     };
-}
-
+} // namespace neon
 
 #endif //MESSAGEMODIFIER_H

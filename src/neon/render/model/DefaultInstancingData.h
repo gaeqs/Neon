@@ -8,23 +8,22 @@
 #include <rush/rush.h>
 #include <neon/render/model/InputDescription.h>
 
-namespace neon {
-    struct DefaultInstancingData {
+namespace neon
+{
+    struct DefaultInstancingData
+    {
         rush::Mat4f model;
         rush::Mat4f normal;
 
-        static InputDescription getInstancingDescription() {
-            InputDescription description(
-                    sizeof(DefaultInstancingData),
-                    InputRate::INSTANCE
-            );
+        static InputDescription getInstancingDescription()
+        {
+            InputDescription description(sizeof(DefaultInstancingData), InputRate::INSTANCE);
             description.addAttribute(16, 0);
             description.addAttribute(16, 64);
 
             return description;
         }
-
     };
-}
+} // namespace neon
 
 #endif //NEON_DEFAULTINSTANCINGDATA_H

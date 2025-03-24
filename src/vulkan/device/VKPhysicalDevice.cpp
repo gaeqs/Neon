@@ -4,34 +4,40 @@
 
 #include "VKPhysicalDevice.h"
 
-namespace neon::vulkan {
-    VKPhysicalDevice::VKPhysicalDevice()
-        : _raw(VK_NULL_HANDLE), _properties() {}
+namespace neon::vulkan
+{
+    VKPhysicalDevice::VKPhysicalDevice() :
+        _raw(VK_NULL_HANDLE),
+        _properties()
+    {
+    }
 
-    VKPhysicalDevice::VKPhysicalDevice(
-        VkPhysicalDevice raw,
-        VkSurfaceKHR surface,
-        const std::vector<VKFeatureHolder>& extraFeatures)
-        : _raw(raw),
-          _features(raw, extraFeatures),
-          _familyCollection(raw, surface) {
+    VKPhysicalDevice::VKPhysicalDevice(VkPhysicalDevice raw, VkSurfaceKHR surface,
+                                       const std::vector<VKFeatureHolder>& extraFeatures) :
+        _raw(raw),
+        _features(raw, extraFeatures),
+        _familyCollection(raw, surface)
+    {
         vkGetPhysicalDeviceProperties(raw, &_properties);
     }
 
-    VkPhysicalDevice VKPhysicalDevice::getRaw() const {
+    VkPhysicalDevice VKPhysicalDevice::getRaw() const
+    {
         return _raw;
     }
 
-    const VkPhysicalDeviceProperties& VKPhysicalDevice::getProperties() const {
+    const VkPhysicalDeviceProperties& VKPhysicalDevice::getProperties() const
+    {
         return _properties;
     }
 
-    const VKPhysicalDeviceFeatures& VKPhysicalDevice::getFeatures() const {
+    const VKPhysicalDeviceFeatures& VKPhysicalDevice::getFeatures() const
+    {
         return _features;
     }
 
-    const VKQueueFamilyCollection&
-    VKPhysicalDevice::getFamilyCollection() const {
+    const VKQueueFamilyCollection& VKPhysicalDevice::getFamilyCollection() const
+    {
         return _familyCollection;
     }
-}
+} // namespace neon::vulkan

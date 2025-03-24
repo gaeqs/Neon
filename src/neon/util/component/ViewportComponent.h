@@ -9,16 +9,17 @@
 #include <neon/render/buffer/SimpleFrameBuffer.h>
 #include <imgui.h>
 
-namespace neon {
-    class ViewportComponent : public Component {
+namespace neon
+{
+    class ViewportComponent : public Component
+    {
         std::shared_ptr<SimpleFrameBuffer> _frameBuffer;
         ImVec2 _windowSize;
         ImVec2 _windowOrigin;
 
         bool _hovered;
 
-    public:
-
+      public:
         ViewportComponent();
 
         ViewportComponent(const std::shared_ptr<SimpleFrameBuffer>& frameBuffer);
@@ -35,6 +36,6 @@ namespace neon {
     };
 
     REGISTER_COMPONENT(ViewportComponent, "Viewport")
-}
+} // namespace neon
 
 #endif //NEON_IMGUITEST_H

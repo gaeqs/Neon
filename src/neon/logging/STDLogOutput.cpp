@@ -9,16 +9,17 @@
 
 #include "Message.h"
 
-namespace neon {
-    void STDLogOutput::printLocation(const std::source_location& location) {
+namespace neon
+{
+    void STDLogOutput::printLocation(const std::source_location& location)
+    {
         SimpleMessage message = _locationMessage;
-
 
         auto path = std::filesystem::path(location.file_name());
         std::string file = path.filename().string();
         std::string line = std::to_string(location.line());
 
-        for (auto part: _locationMessage.parts) {
+        for (auto part : _locationMessage.parts) {
             if (part.text == "{FILE}") {
                 part.text = file;
             } else if (part.text == "{LINE}") {
@@ -28,10 +29,11 @@ namespace neon {
         }
     }
 
-    void STDLogOutput::printPart(const MessagePart& part) {
+    void STDLogOutput::printPart(const MessagePart& part)
+    {
         std::string s = "\033[";
 
-        for (const auto& [code, metadata]: part.effects) {
+        for (const auto& [code, metadata] : part.effects) {
             s += std::to_string(code) + ";";
             if (code == 38 || code == 48) {
                 s += std::to_string(metadata[0]) + ";";
@@ -51,15 +53,15 @@ namespace neon {
         } else {
             s += 'm';
         }
-        std::cout  << part.text ; // Reset to default
+        std::cout << part.text; // Reset to default
         //std::cout << s << part.text << "\033[0m"; // Reset to default
     }
 
     STDLogOutput::~STDLogOutput() = default;
 
-    STDLogOutput::STDLogOutput() {
-        const TextEffect textEffect = TextEffect::foregroundRGB(
-            0xFF, 0x88, 0x88);
+    STDLogOutput::STDLogOutput()
+    {
+        const TextEffect textEffect = TextEffect::foregroundRGB(0xFF, 0x88, 0x88);
 
         MessageBuilder builder;
         builder.push();
@@ -73,20 +75,20 @@ namespace neon {
         _locationMessage = builder.buildSimple();
     };
 
-    void STDLogOutput::print(const Message& message,
-                             const std::vector<const MessageGroup*>& groups) {
+    void STDLogOutput::print(const Message& message, const std::vector<const MessageGroup*>& groups)
+    {
         printLocation(message.sourceLocation);
-        for (auto* group: groups | std::ranges::views::reverse) {
-            for (auto& part: group->prefix.parts) {
+        for (auto* group : groups | std::ranges::views::reverse) {
+            for (auto& part : group->prefix.parts) {
                 printPart(part);
             }
         }
         if (!groups.empty()) {
             std::cout << " ";
         }
-        for (const auto& part: message.parts) {
+        for (const auto& part : message.parts) {
             printPart(part);
         }
         std::cout << std::endl;
     }
-}
+} // namespace neon

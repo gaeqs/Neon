@@ -20,11 +20,12 @@
 
 #ifdef USE_VULKAN
 
-#include <vulkan/render/shader/VKMaterial.h>
+    #include <vulkan/render/shader/VKMaterial.h>
 
 #endif
 
-namespace neon {
+namespace neon
+{
     class ShaderProgram;
 
     class ShaderUniformDescriptor;
@@ -45,14 +46,13 @@ namespace neon {
      * Unlike the shader and the target, the uniform buffers and
      * images are mutable and can be changed anytime.
      */
-    class Material : public Asset {
-
-    public:
+    class Material : public Asset
+    {
+      public:
 #ifdef USE_VULKAN
         using Implementation = vulkan::VKMaterial;
 #endif
-    private:
-
+      private:
         std::shared_ptr<ShaderProgram> _shader;
         std::shared_ptr<FrameBuffer> _target;
         std::unique_ptr<ShaderUniformBuffer> _uniformBuffer;
@@ -61,8 +61,7 @@ namespace neon {
 
         Implementation _implementation;
 
-    public:
-
+      public:
         Material(const Material& other) = delete;
 
         /**
@@ -71,25 +70,21 @@ namespace neon {
          * @param name the name of this material.
          * @param createInfo the creation information of this material.
          */
-        Material(Application* application,
-                 const std::string& name,
-                 const MaterialCreateInfo& createInfo);
+        Material(Application* application, const std::string& name, const MaterialCreateInfo& createInfo);
 
         /**
          * Returns the shader program this material uses.
          * This value cannot be modified.
          * @return the shader program.
          */
-        [[nodiscard]] const std::shared_ptr<ShaderProgram>&
-        getShader() const;
+        [[nodiscard]] const std::shared_ptr<ShaderProgram>& getShader() const;
 
         /**
          * Returns the target frame buffer this material
          * will draw the meshes using it.
          * @return the target.
          */
-        [[nodiscard]] const std::shared_ptr<FrameBuffer>&
-        getTarget() const;
+        [[nodiscard]] const std::shared_ptr<FrameBuffer>& getTarget() const;
 
         /**
          * Returns the uniform buffer that contains the mutable information
@@ -98,8 +93,7 @@ namespace neon {
          * no description has been provided.
          * @return the uniform buffer.
          */
-        [[nodiscard]] const std::unique_ptr<ShaderUniformBuffer>&
-        getUniformBuffer() const;
+        [[nodiscard]] const std::unique_ptr<ShaderUniformBuffer>& getUniformBuffer() const;
 
         /**
          * Returns the uniform buffer that contains the mutable information
@@ -108,8 +102,7 @@ namespace neon {
          * no description has been provided.
          * @return the uniform buffer.
          */
-        [[nodiscard]] std::unique_ptr<ShaderUniformBuffer>&
-        getUniformBuffer();
+        [[nodiscard]] std::unique_ptr<ShaderUniformBuffer>& getUniformBuffer();
 
         /**
          * Returns the priority of the material.
@@ -153,8 +146,7 @@ namespace neon {
          * @param data the data to set.
          * @param size the size of the data array.
          */
-        void pushConstant(const std::string& name,
-                          const void* data, uint32_t size);
+        void pushConstant(const std::string& name, const void* data, uint32_t size);
 
         /**
          * Sets the value of a shader constant.
@@ -163,7 +155,8 @@ namespace neon {
          * @param value the data to set.
          */
         template<class T>
-        void pushConstant(const std::string key, const T& value) {
+        void pushConstant(const std::string key, const T& value)
+        {
             pushConstant(key, &value, sizeof(T));
         }
 
@@ -172,24 +165,19 @@ namespace neon {
          * @param name the name of the sampler.
          * @param texture the texture.
          */
-        void setTexture(const std::string& name,
-                        std::shared_ptr<Texture> texture);
+        void setTexture(const std::string& name, std::shared_ptr<Texture> texture);
 
         // region Util static methods
 
-        static std::unique_ptr<Material> create(
-                Application* application,
-                const std::string& name,
-                const std::shared_ptr<FrameBuffer>& target,
-                const std::shared_ptr<ShaderProgram>& shader,
-                const InputDescription& vertex,
-                const InputDescription& instance,
-                const std::vector<std::pair<void*, size_t>>& buffers,
-                const std::vector<std::shared_ptr<Texture>>& textures);
+        static std::unique_ptr<Material> create(Application* application, const std::string& name,
+                                                const std::shared_ptr<FrameBuffer>& target,
+                                                const std::shared_ptr<ShaderProgram>& shader,
+                                                const InputDescription& vertex, const InputDescription& instance,
+                                                const std::vector<std::pair<void*, size_t>>& buffers,
+                                                const std::vector<std::shared_ptr<Texture>>& textures);
 
         // endregion
     };
-}
-
+} // namespace neon
 
 #endif //RVTRACKING_MATERIAL_H

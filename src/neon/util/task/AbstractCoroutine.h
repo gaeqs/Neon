@@ -11,7 +11,8 @@
 * If you want an implemented Coroutine struct instead,
 * use neon::Coroutine.
 */
-struct AbstractCoroutine {
+struct AbstractCoroutine
+{
     /**
      * Destroys the coroutine.
      */

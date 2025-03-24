@@ -11,20 +11,24 @@
 
 #include <vulkan/render/VKCommandPool.h>
 
-namespace neon {
+namespace neon
+{
     class Application;
 }
 
-namespace neon::vulkan {
+namespace neon::vulkan
+{
     class AbstractVKApplication;
 
-    enum class VKCommandBufferStatus {
+    enum class VKCommandBufferStatus
+    {
         READY,
         RECORDING,
         RECORDED
     };
 
-    class VKCommandBuffer {
+    class VKCommandBuffer
+    {
         AbstractVKApplication* _vkApplication;
         VkCommandPool _pool;
         VKQueueHolder _queueHolder;
@@ -47,7 +51,7 @@ namespace neon::vulkan {
 
         void free();
 
-    public:
+      public:
         VKCommandBuffer(const VKCommandBuffer& other) = delete;
 
         VKCommandBuffer(VKCommandBuffer&& move) noexcept;
@@ -56,9 +60,7 @@ namespace neon::vulkan {
 
         VKCommandBuffer(const VKCommandPool& pool, bool primary);
 
-        VKCommandBuffer(Application* application,
-                        VkCommandBuffer commandBuffer,
-                        VkQueue queue);
+        VKCommandBuffer(Application* application, VkCommandBuffer commandBuffer, VkQueue queue);
 
         ~VKCommandBuffer();
 
@@ -70,10 +72,8 @@ namespace neon::vulkan {
 
         bool end();
 
-        bool submit(uint32_t waitSemaphoreAmount = 0,
-                    VkSemaphore* waitSemaphores = nullptr,
-                    VkPipelineStageFlags* waitStages = nullptr,
-                    uint32_t signalSemaphoreAmount = 0,
+        bool submit(uint32_t waitSemaphoreAmount = 0, VkSemaphore* waitSemaphores = nullptr,
+                    VkPipelineStageFlags* waitStages = nullptr, uint32_t signalSemaphoreAmount = 0,
                     VkSemaphore* signalSemaphores = nullptr);
 
         void reset(bool releaseResources = true);
@@ -82,7 +82,6 @@ namespace neon::vulkan {
 
         VKCommandBuffer& operator=(VKCommandBuffer&& move) noexcept;
     };
-}
-
+} // namespace neon::vulkan
 
 #endif //NEON_VKCOMMANDBUFFER_H

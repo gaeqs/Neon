@@ -8,9 +8,11 @@
 #include <neon/loader/AssetLoader.h>
 #include <neon/render/shader/Material.h>
 
-namespace neon {
-    class MaterialLoader : public AssetLoader<Material> {
-    public:
+namespace neon
+{
+    class MaterialLoader : public AssetLoader<Material>
+    {
+      public:
         static BlendOperation parse(const nlohmann::json& name, BlendOperation def);
 
         static BlendFactor parse(const nlohmann::json& name, BlendFactor def);
@@ -40,13 +42,8 @@ namespace neon {
 
         ~MaterialLoader() override = default;
 
-        std::shared_ptr<Material> loadAsset(
-            std::string name,
-            nlohmann::json json,
-            AssetLoaderContext context
-        ) override;
+        std::shared_ptr<Material> loadAsset(std::string name, nlohmann::json json, AssetLoaderContext context) override;
     };
-}
-
+} // namespace neon
 
 #endif //MATERIALASSETLOADER_H

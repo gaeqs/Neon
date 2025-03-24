@@ -11,14 +11,16 @@
 #include <vulkan/device/VKDevice.h>
 #include <vulkan/device/VKPhysicalDevice.h>
 
-
-namespace neon {
+namespace neon
+{
     class Application;
 }
 
-namespace neon::vulkan {
-    class AbstractVKApplication : public ApplicationImplementation {
-    public:
+namespace neon::vulkan
+{
+    class AbstractVKApplication : public ApplicationImplementation
+    {
+      public:
         [[nodiscard]] virtual Application* getApplication() const = 0;
 
         [[nodiscard]] virtual VkInstance getInstance() const = 0;
@@ -77,6 +79,6 @@ namespace neon::vulkan {
          */
         [[nodiscard]] virtual bool isRecordingCommandBuffer() const = 0;
     };
-}
+} // namespace neon::vulkan
 
 #endif //VISIMPL_ABSTRACTVKAPPLICATION_H

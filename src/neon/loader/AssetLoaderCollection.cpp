@@ -16,10 +16,13 @@
 #include "ShaderUniformDescriptorLoader.h"
 #include "TextureLoader.h"
 
-
-namespace neon {
-    AssetLoaderCollection::AssetLoaderCollection(bool loadDefault) {
-        if (!loadDefault) return;
+namespace neon
+{
+    AssetLoaderCollection::AssetLoaderCollection(bool loadDefault)
+    {
+        if (!loadDefault) {
+            return;
+        }
         registerLoader<Material, MaterialLoader>();
         registerLoader<ShaderProgram, ShaderProgramLoader>();
         registerLoader<Texture, TextureLoader>();
@@ -30,4 +33,4 @@ namespace neon {
         registerLoader<AssimpScene, AssimpSceneLoader>();
         registerLoader<Model, ModelLoader>();
     }
-}
+} // namespace neon

@@ -10,20 +10,20 @@
 #include <vulkan/device/VKPhysicalDeviceFeatures.h>
 #include <vulkan/queue/VKQueueFamilyCollection.h>
 
-namespace neon::vulkan {
-    class VKPhysicalDevice {
+namespace neon::vulkan
+{
+    class VKPhysicalDevice
+    {
         VkPhysicalDevice _raw;
         VkPhysicalDeviceProperties _properties;
         VKPhysicalDeviceFeatures _features;
         VKQueueFamilyCollection _familyCollection;
 
-    public:
+      public:
         VKPhysicalDevice();
 
-        VKPhysicalDevice(VkPhysicalDevice raw,
-                         VkSurfaceKHR surface,
-                         const std::vector<VKFeatureHolder>& extraFeatures =
-                                 {});
+        VKPhysicalDevice(VkPhysicalDevice raw, VkSurfaceKHR surface,
+                         const std::vector<VKFeatureHolder>& extraFeatures = {});
 
         [[nodiscard]] VkPhysicalDevice getRaw() const;
 
@@ -31,9 +31,8 @@ namespace neon::vulkan {
 
         [[nodiscard]] const VKPhysicalDeviceFeatures& getFeatures() const;
 
-        [[nodiscard]] const VKQueueFamilyCollection&
-        getFamilyCollection() const;
+        [[nodiscard]] const VKQueueFamilyCollection& getFamilyCollection() const;
     };
-}
+} // namespace neon::vulkan
 
 #endif //VKPHYSICALDEVICE_H

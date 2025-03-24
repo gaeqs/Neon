@@ -12,11 +12,12 @@
 
 #ifdef USE_VULKAN
 
-#include <vulkan/render/model/VKConcurrentInstanceData.h>
+    #include <vulkan/render/model/VKConcurrentInstanceData.h>
 
 #endif
 
-namespace neon {
+namespace neon
+{
     class Application;
     class CommandBuffer;
     struct ModelCreateInfo;
@@ -25,14 +26,16 @@ namespace neon {
      * Concurrent InstanceData implementation.
      * This implementation is not thread-safe.
      */
-    class ConcurrentInstanceData : public InstanceData {
-    public:
+    class ConcurrentInstanceData : public InstanceData
+    {
+      public:
 #ifdef USE_VULKAN
         using Implementation = vulkan::VKConcurrentInstanceData;
 #endif
 
-    private:
-        struct InstancingSlot {
+      private:
+        struct InstancingSlot
+        {
             size_t size;
             char* data;
             Range<uint32_t> changeRange;
@@ -48,14 +51,12 @@ namespace neon {
 
         Implementation _implementation;
 
-    public:
-        ConcurrentInstanceData(Application* application,
-                               const ModelCreateInfo& info);
+      public:
+        ConcurrentInstanceData(Application* application, const ModelCreateInfo& info);
 
         ~ConcurrentInstanceData() override;
 
-        [[nodiscard]] const std::vector<std::type_index>&
-        getInstancingStructTypes() const override;
+        [[nodiscard]] const std::vector<std::type_index>& getInstancingStructTypes() const override;
 
         Result<Instance, std::string> createInstance() override;
 
@@ -63,21 +64,16 @@ namespace neon {
 
         [[nodiscard]] size_t getInstanceAmount() const override;
 
-        bool uploadData(Instance instance,
-                        size_t index,
-                        const void* data) override;
+        bool uploadData(Instance instance, size_t index, const void* data) override;
 
         void flush() override;
 
         void flush(const CommandBuffer* commandBuffer) override;
 
-        [[nodiscard]] InstanceData::Implementation&
-        getImplementation() override;
+        [[nodiscard]] InstanceData::Implementation& getImplementation() override;
 
-        [[nodiscard]] const InstanceData::Implementation&
-        getImplementation() const override;
+        [[nodiscard]] const InstanceData::Implementation& getImplementation() const override;
     };
-}
-
+} // namespace neon
 
 #endif //CONCURRENTINSTANCEDATA_H

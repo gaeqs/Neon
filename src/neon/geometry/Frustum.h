@@ -9,10 +9,11 @@
 
 #include <rush/rush.h>
 
-namespace neon {
+namespace neon
+{
 
-    class Frustum {
-
+    class Frustum
+    {
         float _near;
         float _far;
         float _aspectRatio;
@@ -21,9 +22,8 @@ namespace neon {
         rush::Mat4f _projection;
         std::optional<rush::Mat4f> _inverseProjection;
 
-    public:
-
-        Frustum(float near, float far, float aspectRatio, float fovYRadians );
+      public:
+        Frustum(float near, float far, float aspectRatio, float fovYRadians);
 
         float getNear() const;
 
@@ -31,7 +31,7 @@ namespace neon {
 
         float getAspectRatio() const;
 
-        float getFovYRadians( ) const;
+        float getFovYRadians() const;
 
         const rush::Mat4f& getProjection() const;
 
@@ -45,6 +45,6 @@ namespace neon {
 
         Frustum withFov(float fovYDegrees) const;
     };
-}
+} // namespace neon
 
 #endif //RVTRACKING_FRUSTUM_H

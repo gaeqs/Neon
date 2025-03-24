@@ -12,13 +12,13 @@
 #include <neon/render/buffer/FrameBufferOutput.h>
 #include <neon/render/texture/TextureCreateInfo.h>
 
-namespace neon::vulkan {
+namespace neon::vulkan
+{
     class VKRenderPass;
 
-    class VKFrameBuffer {
-
-    public:
-
+    class VKFrameBuffer
+    {
+      public:
         VKFrameBuffer(const VKFrameBuffer& other) = delete;
 
         VKFrameBuffer() = default;
@@ -49,6 +49,6 @@ namespace neon::vulkan {
 
         [[nodiscard]] virtual std::vector<FrameBufferOutput> getOutputs() const = 0;
     };
-}
+} // namespace neon::vulkan
 
 #endif //NEON_VKFRAMEBUFFER_H

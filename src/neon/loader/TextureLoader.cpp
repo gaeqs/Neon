@@ -6,9 +6,13 @@
 
 #include "AssetLoaderHelpers.h"
 
-namespace neon {
-    void TextureLoader::loadImage(nlohmann::json& json, ImageCreateInfo& info) {
-        if (!json.is_object()) return;
+namespace neon
+{
+    void TextureLoader::loadImage(nlohmann::json& json, ImageCreateInfo& info)
+    {
+        if (!json.is_object()) {
+            return;
+        }
         info.format = serialization::toTextureFormat(json.value("format", "")).value_or(info.format);
         info.dimensions = serialization::toTextureDimension(json.value("dimensions", "")).value_or(info.dimensions);
         info.width = json.value("width", info.width);
@@ -26,7 +30,7 @@ namespace neon {
             }
         } else if (usages.is_array()) {
             std::vector<TextureUsage> result;
-            for (auto usage: usages) {
+            for (auto usage : usages) {
                 if (auto optional = serialization::toTextureUsage(usages); optional.has_value()) {
                     result.push_back(optional.value());
                 }
@@ -35,8 +39,11 @@ namespace neon {
         }
     }
 
-    void TextureLoader::loadImageView(nlohmann::json& json, ImageViewCreateInfo& info) {
-        if (!json.is_object()) return;
+    void TextureLoader::loadImageView(nlohmann::json& json, ImageViewCreateInfo& info)
+    {
+        if (!json.is_object()) {
+            return;
+        }
         info.viewType = serialization::toTextureViewType(json.value("view_type", "")).value_or(info.viewType);
         info.rSwizzle = serialization::toTextureComponentSwizzle(json.value("r_swizzle", "")).value_or(info.rSwizzle);
         info.gSwizzle = serialization::toTextureComponentSwizzle(json.value("g_swizzle", "")).value_or(info.gSwizzle);
@@ -48,12 +55,15 @@ namespace neon {
         info.arrayLayerCount = json.value("array_layer_count", info.arrayLayerCount);
     }
 
-    void TextureLoader::loadSampler(nlohmann::json& json, SamplerCreateInfo& info) {
-        if (!json.is_object()) return;
-        info.magnificationFilter = serialization::toTextureFilter(json.value("magnification_filter", "")).value_or(
-            info.magnificationFilter);
-        info.minificationFilter = serialization::toTextureFilter(json.value("minification_filter", "")).value_or(
-            info.minificationFilter);
+    void TextureLoader::loadSampler(nlohmann::json& json, SamplerCreateInfo& info)
+    {
+        if (!json.is_object()) {
+            return;
+        }
+        info.magnificationFilter =
+            serialization::toTextureFilter(json.value("magnification_filter", "")).value_or(info.magnificationFilter);
+        info.minificationFilter =
+            serialization::toTextureFilter(json.value("minification_filter", "")).value_or(info.minificationFilter);
         info.uAddressMode = serialization::toAddressMode(json.value("u_address_mode", "")).value_or(info.uAddressMode);
         info.vAddressMode = serialization::toAddressMode(json.value("v_address_mode", "")).value_or(info.vAddressMode);
         info.wAddressMode = serialization::toAddressMode(json.value("w_address_mode", "")).value_or(info.wAddressMode);
@@ -63,9 +73,11 @@ namespace neon {
         info.mipmapMode = serialization::toMipmapMode(json.value("mipmap_mode", "")).value_or(info.mipmapMode);
     }
 
-    std::shared_ptr<Texture>
-    TextureLoader::loadAsset(std::string name, nlohmann::json json, AssetLoaderContext context) {
-        if (context.fileSystem == nullptr) return nullptr;
+    std::shared_ptr<Texture> TextureLoader::loadAsset(std::string name, nlohmann::json json, AssetLoaderContext context)
+    {
+        if (context.fileSystem == nullptr) {
+            return nullptr;
+        }
 
         auto source = json["source"];
 
@@ -80,8 +92,10 @@ namespace neon {
         std::vector<const void*> datas;
         std::vector<uint32_t> sizes;
 
-        for (auto& data: entries) {
-            if (!data.is_string()) continue;
+        for (auto& data : entries) {
+            if (!data.is_string()) {
+                continue;
+            }
             auto optional = getFile(std::filesystem::path(data.get<std::string>()), context);
             if (optional.has_value()) {
                 datas.push_back(optional.value().getData());
@@ -90,7 +104,9 @@ namespace neon {
             }
         }
 
-        if (files.empty()) return nullptr;
+        if (files.empty()) {
+            return nullptr;
+        }
 
         TextureCreateInfo info;
         loadImage(json["image"], info.image);
@@ -100,4 +116,4 @@ namespace neon {
 
         return Texture::createTextureFromFile(context.application, name, datas, sizes, info);
     }
-}
+} // namespace neon

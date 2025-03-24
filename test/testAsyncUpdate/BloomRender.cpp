@@ -8,34 +8,28 @@
 
 #include <utility>
 
-BloomRender::BloomRender(neon::Application* application,
-                         std::shared_ptr<neon::ShaderProgram> downsamplingShader,
+BloomRender::BloomRender(neon::Application* application, std::shared_ptr<neon::ShaderProgram> downsamplingShader,
                          std::shared_ptr<neon::ShaderProgram> upsamplingShader,
-                         std::shared_ptr<neon::Texture> pbrTexture,
-                         const std::shared_ptr<neon::Model>& screenModel,
+                         std::shared_ptr<neon::Texture> pbrTexture, const std::shared_ptr<neon::Model>& screenModel,
                          uint32_t chainLength) :
-        _application(application),
-        _mipChain(),
-        _pbrTexture(std::move(pbrTexture)),
-        _screenModel(screenModel),
-        _extent(application->getWidth(), application->getHeight()) {
+    _application(application),
+    _mipChain(),
+    _pbrTexture(std::move(pbrTexture)),
+    _screenModel(screenModel),
+    _extent(application->getWidth(), application->getHeight())
+{
     _mipChain.reserve(chainLength);
 
-    std::vector<neon::ShaderUniformBinding> bindings{
-            neon::ShaderUniformBinding::image()
-    };
+    std::vector<neon::ShaderUniformBinding> bindings{neon::ShaderUniformBinding::image()};
 
-    auto uniformDescriptor = std::make_shared<neon::ShaderUniformDescriptor>(
-            application, "Bloom", bindings);
+    auto uniformDescriptor = std::make_shared<neon::ShaderUniformDescriptor>(application, "Bloom", bindings);
 
     neon::MaterialCreateInfo downInfo(nullptr, std::move(downsamplingShader));
-    downInfo.descriptions.vertex.push_back(neon::deferred_utils
-    ::DeferredVertex::getDescription());
+    downInfo.descriptions.vertex.push_back(neon::deferred_utils ::DeferredVertex::getDescription());
     downInfo.descriptions.uniform = uniformDescriptor;
 
     neon::MaterialCreateInfo upInfo(nullptr, std::move(upsamplingShader));
-    upInfo.descriptions.vertex.push_back(neon::deferred_utils
-    ::DeferredVertex::getDescription());
+    upInfo.descriptions.vertex.push_back(neon::deferred_utils ::DeferredVertex::getDescription());
     upInfo.descriptions.uniform = uniformDescriptor;
 
     // Enables additive blending!
@@ -45,13 +39,10 @@ BloomRender::BloomRender(neon::Application* application,
     upBlending.colorSourceBlendFactor = neon::BlendFactor::ONE;
     upInfo.blending.attachmentsBlending = {upBlending};
 
-
-    std::vector<neon::FrameBufferTextureCreateInfo> textureInfo{
-            neon::TextureFormat::R16FG16FB16FA16F};
+    std::vector<neon::FrameBufferTextureCreateInfo> textureInfo{neon::TextureFormat::R16FG16FB16FA16F};
     textureInfo[0].sampler.anisotropy = false;
     textureInfo[0].sampler.minificationFilter = neon::TextureFilter::LINEAR;
     textureInfo[0].sampler.magnificationFilter = neon::TextureFilter::LINEAR;
-
 
     for (uint32_t i = 0; i < chainLength; ++i) {
         float relativeSize = 1.0f / static_cast<float>(2 << i);
@@ -59,40 +50,23 @@ BloomRender::BloomRender(neon::Application* application,
         BloomMip mip;
         mip.relativeSize = relativeSize;
         mip.frameBuffer = std::make_shared<neon::SimpleFrameBuffer>(
-                application,
-                "bloom",
-                textureInfo,
-                false,
-                std::optional<std::string>(),
-                neon::SamplesPerTexel::COUNT_1,
-                // This will not be required. Set as default.
-                neon::SimpleFrameBuffer::defaultRecreationCondition,
-                [relativeSize](neon::Application* app) {
-                    auto vp = app->getViewport();
-                    auto w = static_cast<float>(vp.x());
-                    auto h = static_cast<float>(vp.y());
-                    return std::make_pair(
-                            static_cast<uint32_t>(w * relativeSize),
-                            static_cast<float>(h * relativeSize)
-                    );
-
-                }
-        );
+            application, "bloom", textureInfo, false, std::optional<std::string>(), neon::SamplesPerTexel::COUNT_1,
+            // This will not be required. Set as default.
+            neon::SimpleFrameBuffer::defaultRecreationCondition, [relativeSize](neon::Application* app) {
+                auto vp = app->getViewport();
+                auto w = static_cast<float>(vp.x());
+                auto h = static_cast<float>(vp.y());
+                return std::make_pair(static_cast<uint32_t>(w * relativeSize), static_cast<float>(h * relativeSize));
+            });
 
         downInfo.target = mip.frameBuffer;
         upInfo.target = mip.frameBuffer;
 
-        mip.downsamplingMaterial = std::make_shared<neon::Material>(
-                application,
-                "Bloom Downsampling Material " + std::to_string(i),
-                downInfo
-        );
+        mip.downsamplingMaterial =
+            std::make_shared<neon::Material>(application, "Bloom Downsampling Material " + std::to_string(i), downInfo);
 
-        mip.upsamplingMaterial = std::make_shared<neon::Material>(
-                application,
-                "Bloom Downsampling Material " + std::to_string(i),
-                upInfo
-        );
+        mip.upsamplingMaterial =
+            std::make_shared<neon::Material>(application, "Bloom Downsampling Material " + std::to_string(i), upInfo);
 
         screenModel->addMaterial(mip.downsamplingMaterial);
         screenModel->addMaterial(mip.upsamplingMaterial);
@@ -101,17 +75,14 @@ BloomRender::BloomRender(neon::Application* application,
     }
 }
 
-void BloomRender::render(
-        neon::Room* room,
-        const neon::Render* render,
-        const std::vector<std::shared_ptr<neon::Material>>& sortedMaterials)
-const {
-
+void BloomRender::render(neon::Room* room, const neon::Render* render,
+                         const std::vector<std::shared_ptr<neon::Material>>& sortedMaterials) const
+{
     auto* cb = room->getApplication()->getCurrentCommandBuffer();
 
     // Downsampling
     std::shared_ptr<neon::Texture> previousTexture = _pbrTexture;
-    for (const auto& mip: _mipChain) {
+    for (const auto& mip : _mipChain) {
         auto& buf = mip.downsamplingMaterial->getUniformBuffer();
         buf->setTexture(0, previousTexture);
         buf->prepareForFrame(cb);
@@ -132,23 +103,29 @@ const {
         render->endRenderPass();
         previousTexture = mip.frameBuffer->getTextures()[0];
     }
-
 }
 
-std::shared_ptr<neon::Texture> BloomRender::getBloomTexture() const {
-    if (_mipChain.empty()) return nullptr;
+std::shared_ptr<neon::Texture> BloomRender::getBloomTexture() const
+{
+    if (_mipChain.empty()) {
+        return nullptr;
+    }
     return _mipChain[0].frameBuffer->getTextures()[0];
 }
 
-bool BloomRender::requiresRecreation() {
+bool BloomRender::requiresRecreation()
+{
     auto vp = _application->getViewport();
-    if (vp.x() == 0 || vp.y() == 0) return false;
+    if (vp.x() == 0 || vp.y() == 0) {
+        return false;
+    }
     return _extent != vp;
 }
 
-void BloomRender::recreate() {
+void BloomRender::recreate()
+{
     _extent = _application->getViewport();
-    for (const auto& item: _mipChain) {
+    for (const auto& item : _mipChain) {
         item.frameBuffer->recreate();
     }
 }

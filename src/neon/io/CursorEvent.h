@@ -7,12 +7,14 @@
 
 #include <rush/rush.h>
 
-namespace neon {
+namespace neon
+{
 
-    struct CursorMoveEvent {
+    struct CursorMoveEvent
+    {
         rush::Vec2f position;
         rush::Vec2f delta;
     };
-}
+} // namespace neon
 
 #endif //NEON_CURSOREVENT_H

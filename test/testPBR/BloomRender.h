@@ -9,15 +9,16 @@
 
 #include <rush/rush.h>
 
-struct BloomMip {
+struct BloomMip
+{
     float relativeSize;
     std::shared_ptr<neon::FrameBuffer> frameBuffer;
     std::shared_ptr<neon::Material> downsamplingMaterial;
     std::shared_ptr<neon::Material> upsamplingMaterial;
 };
 
-class BloomRender : public neon::RenderPassStrategy {
-
+class BloomRender : public neon::RenderPassStrategy
+{
     neon::Application* _application;
     std::vector<BloomMip> _mipChain;
     std::shared_ptr<neon::Texture> _pbrTexture;
@@ -25,28 +26,19 @@ class BloomRender : public neon::RenderPassStrategy {
 
     rush::Vec2i _extent;
 
-public:
-
-    BloomRender(neon::Application* application,
-                std::shared_ptr<neon::ShaderProgram> downsamplingShader,
-                std::shared_ptr<neon::ShaderProgram> upsamplingShader,
-                std::shared_ptr<neon::Texture> pbrTexture,
-                const std::shared_ptr<neon::Model>& screenModel,
-                uint32_t chainLength);
+  public:
+    BloomRender(neon::Application* application, std::shared_ptr<neon::ShaderProgram> downsamplingShader,
+                std::shared_ptr<neon::ShaderProgram> upsamplingShader, std::shared_ptr<neon::Texture> pbrTexture,
+                const std::shared_ptr<neon::Model>& screenModel, uint32_t chainLength);
 
     [[nodiscard]] std::shared_ptr<neon::Texture> getBloomTexture() const;
 
-    void render(
-            neon::Room* room,
-            const neon::Render* render,
-            const std::vector<std::shared_ptr<neon::Material>>& sortedMaterials)
-    const override;
+    void render(neon::Room* room, const neon::Render* render,
+                const std::vector<std::shared_ptr<neon::Material>>& sortedMaterials) const override;
 
     bool requiresRecreation() override;
 
     void recreate() override;
-
 };
-
 
 #endif //NEON_BLOOMRENDER_H

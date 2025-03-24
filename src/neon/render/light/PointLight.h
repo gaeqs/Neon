@@ -11,10 +11,11 @@
 #include <neon/render/GraphicComponent.h>
 #include <neon/render/model/Model.h>
 
-namespace neon {
+namespace neon
+{
 
-    class PointLight : public Component {
-
+    class PointLight : public Component
+    {
         IdentifiableWrapper<GraphicComponent> _graphicComponent;
         std::shared_ptr<Model> _customModel;
 
@@ -25,9 +26,9 @@ namespace neon {
         float _quadraticAttenuation;
         float _radiance;
 
-    public:
-
-        struct Data {
+      public:
+        struct Data
+        {
             rush::Vec3f diffuseColor;
             rush::Vec3f specularColor;
             rush::Vec3f position;
@@ -35,11 +36,9 @@ namespace neon {
             float linearAttenuation;
             float quadraticAttenuation;
 
-            static InputDescription getDescription() {
-                InputDescription description(
-                        sizeof(Data),
-                        InputRate::INSTANCE
-                );
+            static InputDescription getDescription()
+            {
+                InputDescription description(sizeof(Data), InputRate::INSTANCE);
 
                 description.addAttribute(3, 0);
                 description.addAttribute(3, 12);
@@ -87,9 +86,8 @@ namespace neon {
         void onLateUpdate(float deltaTime) override;
 
         void drawEditor() override;
-
     };
     REGISTER_COMPONENT(PointLight, "Point Light")
-}
+} // namespace neon
 
 #endif //NEON_POINTLIGHT_H

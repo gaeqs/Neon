@@ -4,7 +4,7 @@
 
 #include "VKDrawable.h"
 
-
-namespace neon::vulkan {
+namespace neon::vulkan
+{
 
 }

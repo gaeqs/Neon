@@ -7,24 +7,26 @@
 
 #ifdef USE_VULKAN
 
-#include <vulkan/render/VKCommandBuffer.h>
-#include <vulkan/render/VKCommandPool.h>
+    #include <vulkan/render/VKCommandBuffer.h>
+    #include <vulkan/render/VKCommandPool.h>
 
 #endif
 
-namespace neon {
+namespace neon
+{
     class Application;
 
-    class CommandBuffer {
-    public:
+    class CommandBuffer
+    {
+      public:
 #ifdef USE_VULKAN
         using Implementation = vulkan::VKCommandBuffer;
 #endif
 
-    private:
+      private:
         Implementation _implementation;
 
-    public:
+      public:
         CommandBuffer(const CommandBuffer& other) = delete;
 
         CommandBuffer(CommandBuffer&& move) noexcept;
@@ -35,9 +37,7 @@ namespace neon {
 
         CommandBuffer(const vulkan::VKCommandPool& pool, bool primary);
 
-        CommandBuffer(Application* application,
-                      VkCommandBuffer commandBuffer,
-                      VkQueue queue);
+        CommandBuffer(Application* application, VkCommandBuffer commandBuffer, VkQueue queue);
 
 #endif
 
@@ -59,7 +59,6 @@ namespace neon {
 
         CommandBuffer& operator=(CommandBuffer&& move) noexcept;
     };
-}
-
+} // namespace neon
 
 #endif //NEON_COMMANDBUFFER_H

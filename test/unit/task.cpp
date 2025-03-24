@@ -7,7 +7,8 @@
 
 #include <neon/util/task/TaskRunner.h>
 
-TEST_CASE("Task wait", "[task]") {
+TEST_CASE("Task wait", "[task]")
+{
     neon::TaskRunner runner;
 
     std::atomic_bool finished = false;
@@ -24,7 +25,8 @@ TEST_CASE("Task wait", "[task]") {
     REQUIRE(task->hasFinished());
 }
 
-TEST_CASE("Task parameters", "[task]") {
+TEST_CASE("Task parameters", "[task]")
+{
     neon::TaskRunner runner;
 
     std::atomic_bool finished = false;
@@ -44,7 +46,6 @@ TEST_CASE("Task parameters", "[task]") {
     auto task4 = runner.executeAsync(func, std::move(test));
     REQUIRE(test.empty());
 
-
     task1->wait();
     task2->wait();
     task3->wait();
@@ -53,7 +54,8 @@ TEST_CASE("Task parameters", "[task]") {
     REQUIRE(finished);
 }
 
-TEST_CASE("Task parameters unique_ptr", "[task]") {
+TEST_CASE("Task parameters unique_ptr", "[task]")
+{
     neon::TaskRunner runner;
 
     std::atomic_bool finished1 = false;
@@ -71,7 +73,6 @@ TEST_CASE("Task parameters unique_ptr", "[task]") {
         return std::move(a);
     };
 
-
     std::unique_ptr<int> ptr = std::make_unique<int>(42);
     auto task = runner.executeAsync(func, std::move(ptr));
     task->wait();
@@ -86,7 +87,8 @@ TEST_CASE("Task parameters unique_ptr", "[task]") {
     REQUIRE(finished2);
 }
 
-TEST_CASE("TaskRunner shutdown", "[task]") {
+TEST_CASE("TaskRunner shutdown", "[task]")
+{
     neon::TaskRunner runner;
 
     std::atomic_bool finished = false;
@@ -103,7 +105,8 @@ TEST_CASE("TaskRunner shutdown", "[task]") {
     REQUIRE(finished);
 }
 
-TEST_CASE("Task return", "[task]") {
+TEST_CASE("Task return", "[task]")
+{
     neon::TaskRunner runner;
 
     std::function func = [] {
@@ -121,8 +124,8 @@ TEST_CASE("Task return", "[task]") {
     REQUIRE(result == 42);
 }
 
-
-TEST_CASE("Task return move", "[task]") {
+TEST_CASE("Task return move", "[task]")
+{
     neon::TaskRunner runner;
 
     std::function func = [] {
@@ -141,15 +144,13 @@ TEST_CASE("Task return move", "[task]") {
     REQUIRE(*ptr == 42);
 }
 
-
-TEST_CASE("Task on main thread", "[task]") {
+TEST_CASE("Task on main thread", "[task]")
+{
     neon::TaskRunner runner;
 
     std::atomic_bool finished = false;
 
-    std::function func = [&finished] {
-        finished = true;
-    };
+    std::function func = [&finished] { finished = true; };
 
     auto task = runner.executeOnMainThread(func);
 

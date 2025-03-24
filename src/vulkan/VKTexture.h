@@ -5,20 +5,22 @@
 #ifndef NEON_VKTEXTURE_H
 #define NEON_VKTEXTURE_H
 
-
 #include <cstdint>
 #include <vulkan/render/buffer/SimpleBuffer.h>
 #include <neon/render/texture/TextureCreateInfo.h>
 #include <rush/vector/vec.h>
 
-namespace neon {
+namespace neon
+{
     class Application;
 }
 
-namespace neon::vulkan {
+namespace neon::vulkan
+{
     class AbstractVKApplication;
 
-    class VKTexture {
+    class VKTexture
+    {
         Application* _application;
         AbstractVKApplication* _vkApplication;
 
@@ -40,19 +42,14 @@ namespace neon::vulkan {
         bool _external;
         uint32_t _externalDirtyFlag;
 
-    public:
+      public:
         VKTexture(const VKTexture& other) = delete;
 
         VKTexture(Application* application, const void* data,
                   const TextureCreateInfo& createInfo = TextureCreateInfo());
 
-        VKTexture(Application* application,
-                  TextureFormat format,
-                  VkImage image,
-                  VkDeviceMemory memory,
-                  VkImageView imageView,
-                  VkImageLayout layout,
-                  uint32_t width, uint32_t height, uint32_t depth,
+        VKTexture(Application* application, TextureFormat format, VkImage image, VkDeviceMemory memory,
+                  VkImageView imageView, VkImageLayout layout, uint32_t width, uint32_t height, uint32_t depth,
                   const SamplerCreateInfo& sampler = SamplerCreateInfo());
 
         ~VKTexture();
@@ -86,20 +83,14 @@ namespace neon::vulkan {
 
         void makeInternal();
 
-        void changeExternalImageView(
-            int32_t width, int32_t height,
-            VkImage image, VkDeviceMemory memory,
-            VkImageView imageView);
+        void changeExternalImageView(int32_t width, int32_t height, VkImage image, VkDeviceMemory memory,
+                                     VkImageView imageView);
 
-        void updateData(const void* data,
-                        int32_t width,
-                        int32_t height,
-                        int32_t depth,
-                        TextureFormat format);
+        void updateData(const void* data, int32_t width, int32_t height, int32_t depth, TextureFormat format);
 
-        void fetchData(void* data, rush::Vec3i offset, rush::Vec<3, uint32_t> size,
-                       uint32_t layersOffset, uint32_t layers);
+        void fetchData(void* data, rush::Vec3i offset, rush::Vec<3, uint32_t> size, uint32_t layersOffset,
+                       uint32_t layers);
     };
-}
+} // namespace neon::vulkan
 
 #endif //NEON_VKTEXTURE_H

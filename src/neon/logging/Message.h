@@ -12,13 +12,15 @@
 
 #include "TextEffect.h"
 
-namespace neon {
+namespace neon
+{
     class Logger;
 
     /**
      * Represents a part of a message.
      */
-    struct MessagePart {
+    struct MessagePart
+    {
         std::vector<TextEffect> effects;
         std::string text;
     };
@@ -37,7 +39,8 @@ namespace neon {
      * <p>
      * To create a Message in an easier way, use the class MessageBuilder.
      */
-    struct Message {
+    struct Message
+    {
         std::chrono::system_clock::time_point timePoint;
         std::source_location sourceLocation;
         std::vector<std::string> groups;
@@ -46,16 +49,13 @@ namespace neon {
         /**
          * Creates an empty message.
          */
-        explicit Message(std::source_location location =
-                std::source_location::current());
+        explicit Message(std::source_location location = std::source_location::current());
 
         /**
          * Creates a message containing only one part with the given string.
          * @param message the given string.
          */
-        explicit Message(std::string message,
-                         std::source_location location =
-                                 std::source_location::current());
+        explicit Message(std::string message, std::source_location location = std::source_location::current());
     };
 
     /**
@@ -64,7 +64,8 @@ namespace neon {
      * <p>
      * You can use it to style prefixes, suffixes or other simple messages.
      */
-    struct SimpleMessage {
+    struct SimpleMessage
+    {
         std::vector<MessagePart> parts;
 
         /**
@@ -83,7 +84,8 @@ namespace neon {
     /**
      * Represents a group that can be used to tag messages.
      */
-    struct MessageGroup {
+    struct MessageGroup
+    {
         std::string name;
         SimpleMessage prefix;
     };
@@ -105,7 +107,8 @@ namespace neon {
      * Finally, use build() to build the final Message or
      * buildSimple() to build a SimpleMessage.
      */
-    class MessageBuilder {
+    class MessageBuilder
+    {
         std::vector<std::string> _groups;
         std::vector<MessagePart> _builtMessages;
         std::vector<std::vector<TextEffect>> _stack;
@@ -113,7 +116,7 @@ namespace neon {
         Logger* _logger;
         std::source_location _loggerSourceLocation;
 
-    public:
+      public:
         MessageBuilder(const MessageBuilder& other);
 
         MessageBuilder& operator=(const MessageBuilder& other);
@@ -146,14 +149,14 @@ namespace neon {
 
         MessageBuilder& println(const std::string& message, TextEffect effect);
 
-        [[nodiscard]] Message build(std::source_location location
-                = std::source_location::current()) const;
+        [[nodiscard]] Message build(std::source_location location = std::source_location::current()) const;
 
         [[nodiscard]] SimpleMessage buildSimple() const;
 
         template<typename T>
             requires(!std::is_convertible_v<T, std::string>)
-        MessageBuilder& print(const T& t) {
+        MessageBuilder& print(const T& t)
+        {
             std::stringstream ss;
             ss << t;
             return print(ss.str());
@@ -161,7 +164,8 @@ namespace neon {
 
         template<typename T>
             requires(!std::is_convertible_v<T, std::string>)
-        MessageBuilder& print(const T& t, TextEffect effect) {
+        MessageBuilder& print(const T& t, TextEffect effect)
+        {
             std::stringstream ss;
             ss << t;
             return print(ss.str(), effect);
@@ -169,7 +173,8 @@ namespace neon {
 
         template<typename T>
             requires(!std::is_convertible_v<T, std::string>)
-        MessageBuilder& println(const T& t) {
+        MessageBuilder& println(const T& t)
+        {
             std::stringstream ss;
             ss << t;
             return println(ss.str());
@@ -177,14 +182,16 @@ namespace neon {
 
         template<typename T>
             requires(!std::is_convertible_v<T, std::string>)
-        MessageBuilder& println(const T& t, TextEffect effect) {
+        MessageBuilder& println(const T& t, TextEffect effect)
+        {
             std::stringstream ss;
             ss << t;
             return println(ss.str(), effect);
         }
 
         template<typename T>
-        MessageBuilder& operator<<(const T& t) {
+        MessageBuilder& operator<<(const T& t)
+        {
             if constexpr (std::is_same_v<TextEffect, T>) {
                 effect(t);
                 return *this;
@@ -211,12 +218,13 @@ namespace neon {
      * Finally, use build() to build the final Message or
      * buildSimple() to build a SimpleMessage.
      */
-    class MessageGroupBuilder {
+    class MessageGroupBuilder
+    {
         std::vector<MessagePart> _builtMessages;
         std::vector<std::vector<TextEffect>> _stack;
         size_t _effectAmount;
 
-    public:
+      public:
         MessageGroupBuilder();
 
         MessageGroupBuilder& push();
@@ -231,14 +239,14 @@ namespace neon {
 
         MessageGroupBuilder& println(const std::string& message);
 
-        MessageGroupBuilder& println(const std::string& message,
-                                     TextEffect effect);
+        MessageGroupBuilder& println(const std::string& message, TextEffect effect);
 
         [[nodiscard]] MessageGroup build(std::string name) const;
 
         template<typename T>
             requires(!std::is_convertible_v<T, std::string>)
-        MessageGroupBuilder& print(const T& t) {
+        MessageGroupBuilder& print(const T& t)
+        {
             std::stringstream ss;
             ss << t;
             return print(ss.str());
@@ -246,7 +254,8 @@ namespace neon {
 
         template<typename T>
             requires(!std::is_convertible_v<T, std::string>)
-        MessageGroupBuilder& print(const T& t, TextEffect effect) {
+        MessageGroupBuilder& print(const T& t, TextEffect effect)
+        {
             std::stringstream ss;
             ss << t;
             return print(ss.str(), effect);
@@ -254,7 +263,8 @@ namespace neon {
 
         template<typename T>
             requires(!std::is_convertible_v<T, std::string>)
-        MessageGroupBuilder& println(const T& t) {
+        MessageGroupBuilder& println(const T& t)
+        {
             std::stringstream ss;
             ss << t;
             return println(ss.str());
@@ -262,13 +272,13 @@ namespace neon {
 
         template<typename T>
             requires(!std::is_convertible_v<T, std::string>)
-        MessageGroupBuilder& println(const T& t, TextEffect effect) {
+        MessageGroupBuilder& println(const T& t, TextEffect effect)
+        {
             std::stringstream ss;
             ss << t;
             return println(ss.str(), effect);
         }
     };
-}
-
+} // namespace neon
 
 #endif //MESSAGE_H

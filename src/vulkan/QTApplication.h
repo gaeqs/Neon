@@ -32,7 +32,8 @@
 
 #include <vulkan/AbstractVKApplication.h>
 
-namespace neon::vulkan {
+namespace neon::vulkan
+{
 
     class QTApplication : public QVulkanWindowRenderer,
                           public QVulkanWindow,

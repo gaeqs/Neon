@@ -15,27 +15,27 @@
 #include <neon/util/profile/ProfileStackRecorder.h>
 
 #if defined NDEBUG && !defined RELEASE_DEBUG
-#define DEBUG_PROFILE(profiler,name)
-#define DEBUG_PROFILE_ID(profiler, id, name)
-#define DEBUG_PROFILE_PTR(profiler,name)
-#define DEBUG_PROFILE_ID_PTR(profiler,name)
+    #define DEBUG_PROFILE(profiler, name)
+    #define DEBUG_PROFILE_ID(profiler, id, name)
+    #define DEBUG_PROFILE_PTR(profiler, name)
+    #define DEBUG_PROFILE_ID_PTR(profiler, name)
 #else
-#define DEBUG_PROFILE(profiler, name) auto name##ProfileStack = (profiler).push(#name)
-#define DEBUG_PROFILE_ID(profiler, id, name) auto id##ProfileStack = (profiler).push(name)
-#define DEBUG_PROFILE_PTR(profiler, name) auto name##ProfileStack = (profiler)->push(#name)
-#define DEBUG_PROFILE_ID_PTR(profiler, id, name) auto id##ProfileStack = (profiler)->push(name)
+    #define DEBUG_PROFILE(profiler, name) auto name##ProfileStack = (profiler).push(#name)
+    #define DEBUG_PROFILE_ID(profiler, id, name) auto id##ProfileStack = (profiler).push(name)
+    #define DEBUG_PROFILE_PTR(profiler, name) auto name##ProfileStack = (profiler)->push(#name)
+    #define DEBUG_PROFILE_ID_PTR(profiler, id, name) auto id##ProfileStack = (profiler)->push(name)
 #endif
 
-namespace neon {
+namespace neon
+{
 
-    class Profiler {
-
+    class Profiler
+    {
         std::unordered_map<std::thread::id, std::unique_ptr<ProfileStack>> _roots;
         std::unordered_map<std::thread::id, ProfileStack*> _current;
         std::mutex _mutex;
 
-    public:
-
+      public:
         Profiler();
 
         std::unordered_map<std::thread::id, ProfileStack*> getProfiles();
@@ -45,8 +45,7 @@ namespace neon {
         ProfileStackRecorder push(const std::string& name);
 
         void pop();
-
     };
-}
+} // namespace neon
 
 #endif //NEON_PROFILER_H

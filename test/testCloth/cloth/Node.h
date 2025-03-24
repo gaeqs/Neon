@@ -13,8 +13,8 @@
 #include <Eigen/Sparse>
 #include <Eigen/Dense>
 
-class Node : public ISimulable {
-
+class Node : public ISimulable
+{
     uint32_t _dofIndex;
     float _mass;
     float _damping;
@@ -23,10 +23,8 @@ class Node : public ISimulable {
     Eigen::Vector3f _position;
     Eigen::Vector3f _velocity;
 
-public:
-
-    Node(uint32_t doFIndex, float mass, float damping, bool fixed,
-         Eigen::Vector3f  position);
+  public:
+    Node(uint32_t doFIndex, float mass, float damping, bool fixed, Eigen::Vector3f position);
 
     [[nodiscard]] uint32_t getDoFIndex() const;
 
@@ -50,20 +48,16 @@ public:
 
     void getForce(Eigen::VectorXf& vector) const override;
 
-    void getForceJacobian(
-            std::vector<Eigen::Triplet<float>>& dFdx,
-            std::vector<Eigen::Triplet<float>>& dFdv) const override;
+    void getForceJacobian(std::vector<Eigen::Triplet<float>>& dFdx,
+                          std::vector<Eigen::Triplet<float>>& dFdv) const override;
 
     void getMass(std::vector<Eigen::Triplet<float>>& mass) const override;
 
-    void getInverseMass(
-            std::vector<Eigen::Triplet<float>>& mass) const override;
+    void getInverseMass(std::vector<Eigen::Triplet<float>>& mass) const override;
 
     void fixVector(Eigen::VectorXf& vector) const override;
 
     void fixMatrix(Eigen::SparseMatrix<float>& matrix) const override;
-
 };
-
 
 #endif //NEON_NODE_H

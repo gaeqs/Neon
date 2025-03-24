@@ -14,11 +14,12 @@
 
 #ifdef USE_VULKAN
 
-#include <vulkan/render/model/VKModel.h>
+    #include <vulkan/render/model/VKModel.h>
 
 #endif
 
-namespace neon {
+namespace neon
+{
     class Application;
 
     class Material;
@@ -32,15 +33,16 @@ namespace neon {
      * A model can be represented as a collection
      * of meshes that share the same position.
      */
-    class Model : public Asset {
-    public:
+    class Model : public Asset
+    {
+      public:
         static constexpr uint32_t DEFAULT_MAXIMUM_INSTANCES = 1024 * 16;
 
 #ifdef USE_VULKAN
         using Implementation = vulkan::VKModel;
 #endif
 
-    private:
+      private:
         std::vector<std::shared_ptr<Drawable>> _meshes;
         std::unique_ptr<ShaderUniformBuffer> _uniformBuffer;
         std::unordered_map<uint32_t, ModelBufferBinding> _bufferBindings;
@@ -49,7 +51,7 @@ namespace neon {
 
         Implementation _implementation;
 
-    public:
+      public:
         Model(const Model& other) = delete;
 
         /**
@@ -58,9 +60,7 @@ namespace neon {
          * @param name the name that identifies the model.
          * @param info the information about the model.
          */
-        Model(Application* application,
-              const std::string& name,
-              const ModelCreateInfo& info);
+        Model(Application* application, const std::string& name, const ModelCreateInfo& info);
 
         /**
          * Returns the implementation of the model.
@@ -120,8 +120,7 @@ namespace neon {
          * Returns the list containing all meshes inside this model.
          * @return the meshes.
          */
-        [[nodiscard]] const std::vector<std::shared_ptr<Drawable>>&
-        getMeshes() const;
+        [[nodiscard]] const std::vector<std::shared_ptr<Drawable>>& getMeshes() const;
 
         /**
          * Return the amount of meshes this mode has.
@@ -167,9 +166,8 @@ namespace neon {
          * @param material the material.
          * @param commandBuffer the command buffer to use.
          */
-        void drawOutside(const Material* material,
-                         const CommandBuffer* commandBuffer) const;
+        void drawOutside(const Material* material, const CommandBuffer* commandBuffer) const;
     };
-}
+} // namespace neon
 
 #endif //NEON_MODEL_H

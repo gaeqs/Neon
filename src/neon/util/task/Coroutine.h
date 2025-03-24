@@ -13,14 +13,16 @@
 #include <neon/util/task/AbstractCoroutine.h>
 #include <neon/util/task/TaskRunner.h>
 
-namespace neon {
+namespace neon
+{
     /**
      * Base class use to create coroutine pauses.
      * When a coroutine co_yields an extension of this class,
      * the coroutine will suspend until isReady returns true.
      */
-    class CoroutineWaitReason {
-    public:
+    class CoroutineWaitReason
+    {
+      public:
         /**
          * Deletes this wait reason.
          */
@@ -49,7 +51,8 @@ namespace neon {
      * @tparam Return the type of the return value.
      */
     template<typename Return = void>
-    struct Coroutine : AbstractCoroutine {
+    struct Coroutine : AbstractCoroutine
+    {
         struct promise_type;
         using handle_type = std::coroutine_handle<promise_type>;
 
@@ -60,32 +63,41 @@ namespace neon {
 
             std::shared_ptr<Task<Return>> _task;
 
-            promise_type() : _task(std::make_shared<Task<Return>>()) {}
+            promise_type() :
+                _task(std::make_shared<Task<Return>>())
+            {
+            }
 
-            Coroutine get_return_object() {
+            Coroutine get_return_object()
+            {
                 return {handle_type::from_promise(*this)};
             }
 
-            std::suspend_always initial_suspend() {
+            std::suspend_always initial_suspend()
+            {
                 return {};
             }
 
-            std::suspend_always final_suspend() noexcept {
+            std::suspend_always final_suspend() noexcept
+            {
                 return {};
             }
 
-            void unhandled_exception() {
+            void unhandled_exception()
+            {
                 _exception = std::current_exception();
             }
 
             template<typename T>
-            std::suspend_always yield_value(const T& reason) {
+            std::suspend_always yield_value(const T& reason)
+            {
                 _currentWaitReason = std::make_unique<T>(reason);
                 return {};
             }
 
-            void return_value(auto value) {
-                if constexpr(!std::is_void_v<Return>) {
+            void return_value(auto value)
+            {
+                if constexpr (!std::is_void_v<Return>) {
                     _task->setResult(std::move(value));
                 }
             }
@@ -94,43 +106,57 @@ namespace neon {
         handle_type _handler;
         bool _valid;
 
-        Coroutine(handle_type h) : _handler(h), _valid(true) {}
+        Coroutine(handle_type h) :
+            _handler(h),
+            _valid(true)
+        {
+        }
 
         Coroutine(const Coroutine& other) = delete;
 
         Coroutine(Coroutine&& other) noexcept :
             _handler(other._handler),
-            _valid(other._valid) {
+            _valid(other._valid)
+        {
             other._valid = false;
         }
 
-        ~Coroutine() override {
-            if(_valid) {
+        ~Coroutine() override
+        {
+            if (_valid) {
                 _handler.destroy();
             }
         }
 
-        [[nodiscard]] bool isCancelled() const {
+        [[nodiscard]] bool isCancelled() const
+        {
             return _handler.promise()._task->isCancelled();
         }
 
-        [[nodiscard]] bool isReady() const override {
-            if(isDone()) return false;
+        [[nodiscard]] bool isReady() const override
+        {
+            if (isDone()) {
+                return false;
+            }
             auto& reason = _handler.promise()._currentWaitReason;
             return reason == nullptr || reason->isReady();
         }
 
-        [[nodiscard]] bool isDone() const override {
+        [[nodiscard]] bool isDone() const override
+        {
             return !_valid || _handler.done() || isCancelled();
         }
 
-
-        [[nodiscard]] bool isValid() const override {
+        [[nodiscard]] bool isValid() const override
+        {
             return _valid;
         }
 
-        void launch() const override {
-            if(isDone()) return;
+        void launch() const override
+        {
+            if (isDone()) {
+                return;
+            }
             _handler();
         }
 
@@ -143,12 +169,14 @@ namespace neon {
          * result of the coroutine.
          * @return the neon::Task representing this coroutine.
          */
-        const std::shared_ptr<Task<Return>>& asTask() const {
+        const std::shared_ptr<Task<Return>>& asTask() const
+        {
             return _handler.promise()._task;
         }
 
-        Coroutine& operator=(Coroutine&& other) noexcept {
-            if(_valid) {
+        Coroutine& operator=(Coroutine&& other) noexcept
+        {
+            if (_valid) {
                 _handler.destroy();
             }
 
@@ -174,7 +202,8 @@ namespace neon {
      *
      */
     template<>
-    struct Coroutine<void> : AbstractCoroutine {
+    struct Coroutine<void> : AbstractCoroutine
+    {
         struct promise_type;
         using handle_type = std::coroutine_handle<promise_type>;
 
@@ -185,31 +214,40 @@ namespace neon {
 
             std::shared_ptr<Task<void>> _task;
 
-            promise_type() : _task(std::make_shared<Task<void>>()) {}
+            promise_type() :
+                _task(std::make_shared<Task<void>>())
+            {
+            }
 
-            Coroutine get_return_object() {
+            Coroutine get_return_object()
+            {
                 return {handle_type::from_promise(*this)};
             }
 
-            std::suspend_always initial_suspend() {
+            std::suspend_always initial_suspend()
+            {
                 return {};
             }
 
-            std::suspend_always final_suspend() noexcept {
+            std::suspend_always final_suspend() noexcept
+            {
                 return {};
             }
 
-            void unhandled_exception() {
+            void unhandled_exception()
+            {
                 _exception = std::current_exception();
             }
 
             template<typename T>
-            std::suspend_always yield_value(const T& reason) {
+            std::suspend_always yield_value(const T& reason)
+            {
                 _currentWaitReason = std::make_unique<T>(reason);
                 return {};
             }
 
-            void return_void() {
+            void return_void()
+            {
                 _task->finish();
             }
         };
@@ -217,42 +255,57 @@ namespace neon {
         handle_type _handler;
         bool _valid;
 
-        Coroutine(handle_type h) : _handler(h), _valid(true) {}
+        Coroutine(handle_type h) :
+            _handler(h),
+            _valid(true)
+        {
+        }
 
         Coroutine(const Coroutine& other) = delete;
 
         Coroutine(Coroutine&& other) noexcept :
             _handler(other._handler),
-            _valid(other._valid) {
+            _valid(other._valid)
+        {
             other._valid = false;
         }
 
-        ~Coroutine() override {
-            if(_valid) {
+        ~Coroutine() override
+        {
+            if (_valid) {
                 _handler.destroy();
             }
         }
 
-        [[nodiscard]] bool isCancelled() const {
+        [[nodiscard]] bool isCancelled() const
+        {
             return _handler.promise()._task->isCancelled();
         }
 
-        [[nodiscard]] bool isReady() const override {
-            if(isDone()) return false;
+        [[nodiscard]] bool isReady() const override
+        {
+            if (isDone()) {
+                return false;
+            }
             auto& reason = _handler.promise()._currentWaitReason;
             return reason == nullptr || reason->isReady();
         }
 
-        [[nodiscard]] bool isDone() const override {
+        [[nodiscard]] bool isDone() const override
+        {
             return !_valid || _handler.done() || isCancelled();
         }
 
-        [[nodiscard]] bool isValid() const override {
+        [[nodiscard]] bool isValid() const override
+        {
             return _valid;
         }
 
-        void launch() const override {
-            if(isDone()) return;
+        void launch() const override
+        {
+            if (isDone()) {
+                return;
+            }
             _handler();
         }
 
@@ -263,12 +316,14 @@ namespace neon {
          *
          * @return the neon::Task representing this coroutine.
          */
-        const std::shared_ptr<Task<void>>& asTask() const {
+        const std::shared_ptr<Task<void>>& asTask() const
+        {
             return _handler.promise()._task;
         }
 
-        Coroutine& operator=(Coroutine&& other) noexcept {
-            if(_valid) {
+        Coroutine& operator=(Coroutine&& other) noexcept
+        {
+            if (_valid) {
                 _handler.destroy();
             }
 
@@ -282,10 +337,11 @@ namespace neon {
     /**
      * Suspends the coroutine for the given amount of seconds.
      */
-    class WaitForSeconds : public CoroutineWaitReason {
+    class WaitForSeconds : public CoroutineWaitReason
+    {
         std::chrono::system_clock::time_point _wakeUpTime;
 
-    public:
+      public:
         /**
          * Suspends the coroutine for the given amount of seconds.
          */
@@ -299,8 +355,9 @@ namespace neon {
     /**
      * Suspends the coroutine and resumes it the next frame
      */
-    class WaitForNextFrame : public CoroutineWaitReason {
-    public:
+    class WaitForNextFrame : public CoroutineWaitReason
+    {
+      public:
         /**
          * Suspends the coroutine and resumes it the next frame
          */
@@ -314,10 +371,11 @@ namespace neon {
     /**
      * Suspends the coroutine until the given predicate returns true.
      */
-    class WaitUntil : public CoroutineWaitReason {
+    class WaitUntil : public CoroutineWaitReason
+    {
         std::function<bool()> _predicate;
 
-    public:
+      public:
         /**
          * Suspends the coroutine until the given predicate returns true.
          */
@@ -331,10 +389,11 @@ namespace neon {
     /**
      * Suspends the coroutine until the given predicate returns false.
      */
-    class WaitWhile : public CoroutineWaitReason {
+    class WaitWhile : public CoroutineWaitReason
+    {
         std::function<bool()> _predicate;
 
-    public:
+      public:
         /**
          * Suspends the coroutine until the given predicate returns false.
          */
@@ -344,6 +403,6 @@ namespace neon {
 
         bool isReady() override;
     };
-}
+} // namespace neon
 
 #endif //COROUTINE_H

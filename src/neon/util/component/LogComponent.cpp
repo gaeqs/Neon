@@ -13,8 +13,10 @@
 #include <neon/logging/Logger.h>
 #include <neon/util/task/Coroutine.h>
 
-namespace neon {
-    bool LogComponent::printLocation(const std::source_location& location) {
+namespace neon
+{
+    bool LogComponent::printLocation(const std::source_location& location)
+    {
         SimpleMessage message = _locationMessage;
 
         auto path = std::filesystem::path(location.file_name());
@@ -22,24 +24,28 @@ namespace neon {
         std::string line = std::to_string(location.line());
 
         bool first = true;
-        for (auto part: _locationMessage.parts) {
+        for (auto part : _locationMessage.parts) {
             if (part.text == "{FILE}") {
                 part.text = file;
             } else if (part.text == "{LINE}") {
                 part.text = line;
             }
 
-            if (first) first = false;
-            else ImGui::SameLine(0, 0);
+            if (first) {
+                first = false;
+            } else {
+                ImGui::SameLine(0, 0);
+            }
             printPart(part);
         }
 
         return !first;
     }
 
-    void LogComponent::printPart(const MessagePart& part) {
+    void LogComponent::printPart(const MessagePart& part)
+    {
         std::optional<rush::Vec3f> color = {};
-        for (auto effect: part.effects) {
+        for (auto effect : part.effects) {
             if (auto c = effect.toRGB(); c.has_value()) {
                 color = c;
             }
@@ -55,13 +61,14 @@ namespace neon {
         }
     }
 
-    LogComponent::~LogComponent() {
+    LogComponent::~LogComponent()
+    {
         logger.removeOutput(_outputId);
     }
 
-    void LogComponent::onStart() {
-        const TextEffect textEffect = TextEffect::foregroundRGB(
-            0xFF, 0x88, 0x88);
+    void LogComponent::onStart()
+    {
+        const TextEffect textEffect = TextEffect::foregroundRGB(0xFF, 0x88, 0x88);
 
         MessageBuilder builder;
         builder.push();
@@ -74,28 +81,30 @@ namespace neon {
         builder.print("] ");
         _locationMessage = builder.buildSimple();
 
-
         auto output = std::make_unique<ImGuiLogOutput>(this);
         _outputId = output->getId();
 
         logger.addOutput(std::move(output));
     }
 
-    void LogComponent::onPreDraw() {
+    void LogComponent::onPreDraw()
+    {
         if (ImGui::Begin("Log")) {
             std::lock_guard lock(_mutex);
             ImGuiListClipper clipper;
             clipper.Begin(static_cast<int>(_messages.size()));
 
             while (clipper.Step()) {
-                for (int row = clipper.DisplayStart;
-                     row < clipper.DisplayEnd; row++) {
+                for (int row = clipper.DisplayStart; row < clipper.DisplayEnd; row++) {
                     auto& [message, groups] = _messages.at(row);
                     bool first = !printLocation(message.sourceLocation);
-                    for (auto& group: groups) {
-                        for (auto& prefix: group.prefix.parts) {
-                            if (first) first = false;
-                            else ImGui::SameLine(0, 0);
+                    for (auto& group : groups) {
+                        for (auto& prefix : group.prefix.parts) {
+                            if (first) {
+                                first = false;
+                            } else {
+                                ImGui::SameLine(0, 0);
+                            }
                             printPart(prefix);
                         }
                     }
@@ -107,9 +116,12 @@ namespace neon {
                         first = true;
                     }
 
-                    for (auto& part: message.parts) {
-                        if (first) first = false;
-                        else ImGui::SameLine(0, 0);
+                    for (auto& part : message.parts) {
+                        if (first) {
+                            first = false;
+                        } else {
+                            ImGui::SameLine(0, 0);
+                        }
                         printPart(part);
                     }
                 }
@@ -118,18 +130,17 @@ namespace neon {
         ImGui::End();
     }
 
-    void LogComponent::
-    addMessage(const Message& message,
-               const std::vector<const MessageGroup*>& groups) {
+    void LogComponent::addMessage(const Message& message, const std::vector<const MessageGroup*>& groups)
+    {
         std::lock_guard lock(_mutex);
 
         std::vector<MessageGroup> g;
         g.reserve(groups.size());
 
-        for (const auto* group: groups | std::ranges::views::reverse) {
+        for (const auto* group : groups | std::ranges::views::reverse) {
             g.emplace_back(*group);
         }
 
         _messages.emplace_back(message, g);
     }
-}
+} // namespace neon

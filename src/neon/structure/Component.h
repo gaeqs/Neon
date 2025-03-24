@@ -12,26 +12,30 @@
 #include <neon/structure/IdentifiableWrapper.h>
 #include <neon/structure/ComponentRegister.h>
 
-#define REGISTER_COMPONENT(clazz, name)                         \
-    namespace {                                                 \
-        struct _##clazz##_component_register_ {                 \
-            _##clazz##_component_register_() {                  \
-                neon::ComponentRegister::instance()             \
-                    .registerComponent< clazz >( name );        \
-            }                                                   \
-        };                                                      \
-        _##clazz##_component_register_ __##clazz##_register;    \
+#define REGISTER_COMPONENT(clazz, name)                                             \
+    namespace                                                                       \
+    {                                                                               \
+        struct _##clazz##_component_register_                                       \
+        {                                                                           \
+            _##clazz##_component_register_()                                        \
+            {                                                                       \
+                neon::ComponentRegister::instance().registerComponent<clazz>(name); \
+            }                                                                       \
+        };                                                                          \
+        _##clazz##_component_register_ __##clazz##_register;                        \
     }
-#define KEY_REGISTER_COMPONENT(key, clazz, name)                \
-        struct _##key##_component_register_ {                   \
-            _##key##_component_register_() {                    \
-                neon::ComponentRegister::instance()             \
-                    .registerComponent< clazz >( name );        \
-            }                                                   \
-        };                                                      \
-        _##key##_component_register_ __##key##_register;
+#define KEY_REGISTER_COMPONENT(key, clazz, name)                                \
+    struct _##key##_component_register_                                         \
+    {                                                                           \
+        _##key##_component_register_()                                          \
+        {                                                                       \
+            neon::ComponentRegister::instance().registerComponent<clazz>(name); \
+        }                                                                       \
+    };                                                                          \
+    _##key##_component_register_ __##key##_register;
 
-namespace neon {
+namespace neon
+{
     class Application;
     class AssetCollection;
     class TaskRunner;
@@ -46,18 +50,18 @@ namespace neon {
      * You can add or remove components from a game object
      * using the appropriated methods.
      */
-    class Component : public Identifiable {
+    class Component : public Identifiable
+    {
         friend class GameObject;
 
         template<class T>
-        friend
-        class IdentifiableWrapper;
+        friend class IdentifiableWrapper;
 
         uint64_t _id;
         bool _enabled;
         IdentifiableWrapper<GameObject> _gameObject;
 
-    public:
+      public:
         Component(const Component& component) = delete;
 
         /**
@@ -195,7 +199,8 @@ namespace neon {
          * This method is an alias of getGameObject()->getRoom().
          * @return the room.
          */
-        [[nodiscard]] inline Room* getRoom() const {
+        [[nodiscard]] inline Room* getRoom() const
+        {
             return _gameObject->getRoom();
         }
 
@@ -229,7 +234,6 @@ namespace neon {
          */
         void info(const std::string& message) const;
 
-
         /**
          * Prints a done message in the application's logger.
          * @param message the message.
@@ -254,7 +258,6 @@ namespace neon {
          */
         void error(const std::string& message);
 
-
         /**
          * Concatenates the ImGUI identifier of this component to the
          * given text.
@@ -262,13 +265,13 @@ namespace neon {
          * @param id the given text.
          * @return the concatenated string.
          */
-        [[nodiscard]] std::string imGuiUId(const std::string& id) const {
+        [[nodiscard]] std::string imGuiUId(const std::string& id) const
+        {
             return id + "##" + std::to_string(_id);
         }
 
         // endregion
     };
-}
-
+} // namespace neon
 
 #endif //NEON_COMPONENT_H

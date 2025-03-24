@@ -9,8 +9,10 @@
 
 #include <neon/structure/Component.h>
 
-namespace neon {
-    class CameraMovementComponent : public Component {
+namespace neon
+{
+    class CameraMovementComponent : public Component
+    {
         bool _w, _a, _s, _d, _shift, _space;
         float _speed;
 
@@ -21,7 +23,7 @@ namespace neon {
 
         void updatePosition(float deltaTime);
 
-    public:
+      public:
         CameraMovementComponent();
 
         void onKey(const KeyboardEvent& event) override;
@@ -36,6 +38,6 @@ namespace neon {
     };
 
     REGISTER_COMPONENT(CameraMovementComponent, "Camera Move")
-}
+} // namespace neon
 
 #endif //NEON_CAMERAMOVEMENTCOMPONENT_H

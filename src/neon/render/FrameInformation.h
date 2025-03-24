@@ -5,13 +5,14 @@
 #ifndef NEON_FRAMEINFORMATION_H
 #define NEON_FRAMEINFORMATION_H
 
-namespace neon {
-    struct FrameInformation {
+namespace neon
+{
+    struct FrameInformation
+    {
         uint32_t currentFrame = 0;
         float currentDeltaTime = 0.0f;
         float lastFrameProcessTime = 0.0f;
     };
-}
-
+} // namespace neon
 
 #endif //NEON_FRAMEINFORMATION_H

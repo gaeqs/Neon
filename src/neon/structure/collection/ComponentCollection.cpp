@@ -12,36 +12,41 @@
 #include <neon/render/GraphicComponent.h>
 #include <neon/render/model/Model.h>
 
-namespace neon {
+namespace neon
+{
     ComponentCollection::ComponentCollection() :
         _components(),
-        _notStartedComponents() {}
+        _notStartedComponents()
+    {
+    }
 
-    void ComponentCollection::destroyComponent(
-        const IdentifiableWrapper<Component>& component) {
+    void ComponentCollection::destroyComponent(const IdentifiableWrapper<Component>& component)
+    {
         auto& type = typeid(*component.raw());
         auto it = _components.find(type);
-        if (it == _components.end()) return;
+        if (it == _components.end()) {
+            return;
+        }
 
-        auto collection = std::reinterpret_pointer_cast<
-            AbstractClusteredLinkedCollection>(it->second.second);
+        auto collection = std::reinterpret_pointer_cast<AbstractClusteredLinkedCollection>(it->second.second);
         if (!collection->erase(component.raw())) {
             std::cerr << "Failed to erase component: " << typeid(Component).name() << std::endl;
         }
     }
 
-    void ComponentCollection::invokeKeyEvent(Profiler& profiler,
-                                             const KeyboardEvent& event) {
+    void ComponentCollection::invokeKeyEvent(Profiler& profiler, const KeyboardEvent& event)
+    {
         flushNotStartedComponents();
-        for (const auto& [type, data]: _components) {
-            if (!data.first.onKey) continue;
+        for (const auto& [type, data] : _components) {
+            if (!data.first.onKey) {
+                continue;
+            }
 
             auto entry = ComponentRegister::instance().getEntry(type);
             auto name = entry.has_value() ? entry->name.c_str() : type.name();
             DEBUG_PROFILE_ID(profiler, type, name);
 
-            auto ptr = std::static_pointer_cast
-                    <AbstractClusteredLinkedCollection>(data.second);
+            auto ptr = std::static_pointer_cast<AbstractClusteredLinkedCollection>(data.second);
             ptr->forEachRaw([&event](void* ptr) {
                 auto* component = reinterpret_cast<Component*>(ptr);
                 if (component->isEnabled()) {
@@ -51,18 +56,19 @@ namespace neon {
         }
     }
 
-    void ComponentCollection::invokeMouseButtonEvent(neon::Profiler& profiler,
-                                                     const MouseButtonEvent& event) {
+    void ComponentCollection::invokeMouseButtonEvent(neon::Profiler& profiler, const MouseButtonEvent& event)
+    {
         flushNotStartedComponents();
-        for (const auto& [type, data]: _components) {
-            if (!data.first.onMouseButton) continue;
+        for (const auto& [type, data] : _components) {
+            if (!data.first.onMouseButton) {
+                continue;
+            }
 
             auto entry = ComponentRegister::instance().getEntry(type);
             auto name = entry.has_value() ? entry->name.c_str() : type.name();
             DEBUG_PROFILE_ID(profiler, type, name);
 
-            auto ptr = std::static_pointer_cast
-                    <AbstractClusteredLinkedCollection>(data.second);
+            auto ptr = std::static_pointer_cast<AbstractClusteredLinkedCollection>(data.second);
             ptr->forEachRaw([&event](void* ptr) {
                 auto* component = reinterpret_cast<Component*>(ptr);
                 if (component->isEnabled()) {
@@ -72,18 +78,19 @@ namespace neon {
         }
     }
 
-    void ComponentCollection::invokeCursorMoveEvent(Profiler& profiler,
-                                                    const CursorMoveEvent& event) {
+    void ComponentCollection::invokeCursorMoveEvent(Profiler& profiler, const CursorMoveEvent& event)
+    {
         flushNotStartedComponents();
-        for (const auto& [type, data]: _components) {
-            if (!data.first.onCursorMove) continue;
+        for (const auto& [type, data] : _components) {
+            if (!data.first.onCursorMove) {
+                continue;
+            }
 
             auto entry = ComponentRegister::instance().getEntry(type);
             auto name = entry.has_value() ? entry->name.c_str() : type.name();
             DEBUG_PROFILE_ID(profiler, type, name);
 
-            auto ptr = std::static_pointer_cast
-                    <AbstractClusteredLinkedCollection>(data.second);
+            auto ptr = std::static_pointer_cast<AbstractClusteredLinkedCollection>(data.second);
             ptr->forEachRaw([&event](void* ptr) {
                 auto* component = reinterpret_cast<Component*>(ptr);
                 if (component->isEnabled()) {
@@ -93,18 +100,19 @@ namespace neon {
         }
     }
 
-    void ComponentCollection::invokeScrollEvent(Profiler& profiler,
-                                                const ScrollEvent& event) {
+    void ComponentCollection::invokeScrollEvent(Profiler& profiler, const ScrollEvent& event)
+    {
         flushNotStartedComponents();
-        for (const auto& [type, data]: _components) {
-            if (!data.first.onScroll) continue;
+        for (const auto& [type, data] : _components) {
+            if (!data.first.onScroll) {
+                continue;
+            }
 
             auto entry = ComponentRegister::instance().getEntry(type);
             auto name = entry.has_value() ? entry->name.c_str() : type.name();
             DEBUG_PROFILE_ID(profiler, type, name);
 
-            auto ptr = std::static_pointer_cast
-                    <AbstractClusteredLinkedCollection>(data.second);
+            auto ptr = std::static_pointer_cast<AbstractClusteredLinkedCollection>(data.second);
             ptr->forEachRaw([&event](void* ptr) {
                 auto* component = reinterpret_cast<Component*>(ptr);
                 if (component->isEnabled()) {
@@ -114,18 +122,19 @@ namespace neon {
         }
     }
 
-    void ComponentCollection::updateComponents(
-        Profiler& profiler, float deltaTime) {
+    void ComponentCollection::updateComponents(Profiler& profiler, float deltaTime)
+    {
         flushNotStartedComponents();
-        for (const auto& [type, data]: _components) {
-            if (!data.first.onUpdate) continue;
+        for (const auto& [type, data] : _components) {
+            if (!data.first.onUpdate) {
+                continue;
+            }
 
             auto entry = ComponentRegister::instance().getEntry(type);
             auto name = entry.has_value() ? entry->name.c_str() : type.name();
             DEBUG_PROFILE_ID(profiler, type, name);
 
-            auto ptr = std::static_pointer_cast
-                    <AbstractClusteredLinkedCollection>(data.second);
+            auto ptr = std::static_pointer_cast<AbstractClusteredLinkedCollection>(data.second);
             ptr->forEachRaw([deltaTime](void* ptr) {
                 auto* component = reinterpret_cast<Component*>(ptr);
                 if (component->isEnabled()) {
@@ -135,18 +144,19 @@ namespace neon {
         }
     }
 
-    void ComponentCollection::lateUpdateComponents(
-        Profiler& profiler, float deltaTime) {
+    void ComponentCollection::lateUpdateComponents(Profiler& profiler, float deltaTime)
+    {
         flushNotStartedComponents();
-        for (const auto& [type, data]: _components) {
-            if (!data.first.onLateUpdate) continue;
+        for (const auto& [type, data] : _components) {
+            if (!data.first.onLateUpdate) {
+                continue;
+            }
 
             auto entry = ComponentRegister::instance().getEntry(type);
             auto name = entry.has_value() ? entry->name.c_str() : type.name();
             DEBUG_PROFILE_ID(profiler, type, name);
 
-            auto ptr = std::static_pointer_cast
-                    <AbstractClusteredLinkedCollection>(data.second);
+            auto ptr = std::static_pointer_cast<AbstractClusteredLinkedCollection>(data.second);
             ptr->forEachRaw([deltaTime](void* ptr) {
                 auto* component = reinterpret_cast<Component*>(ptr);
                 if (component->isEnabled()) {
@@ -156,18 +166,19 @@ namespace neon {
         }
     }
 
-
-    void ComponentCollection::preDrawComponents(Profiler& profiler) {
+    void ComponentCollection::preDrawComponents(Profiler& profiler)
+    {
         flushNotStartedComponents();
-        for (const auto& [type, data]: _components) {
-            if (!data.first.onPreDraw) continue;
+        for (const auto& [type, data] : _components) {
+            if (!data.first.onPreDraw) {
+                continue;
+            }
 
             auto entry = ComponentRegister::instance().getEntry(type);
             auto name = entry.has_value() ? entry->name.c_str() : type.name();
             DEBUG_PROFILE_ID(profiler, type, name);
 
-            auto ptr = std::static_pointer_cast
-                    <AbstractClusteredLinkedCollection>(data.second);
+            auto ptr = std::static_pointer_cast<AbstractClusteredLinkedCollection>(data.second);
             ptr->forEachRaw([](void* ptr) {
                 auto* component = reinterpret_cast<Component*>(ptr);
                 if (component->isEnabled()) {
@@ -177,11 +188,13 @@ namespace neon {
         }
     }
 
-    void ComponentCollection::callOnConstruction(void* rawComponent) {
+    void ComponentCollection::callOnConstruction(void* rawComponent)
+    {
         reinterpret_cast<Component*>(rawComponent)->onConstruction();
     }
 
-    void ComponentCollection::flushNotStartedComponents() {
+    void ComponentCollection::flushNotStartedComponents()
+    {
         for (; !_notStartedComponents.empty(); _notStartedComponents.pop()) {
             auto ptr = _notStartedComponents.front();
 
@@ -190,4 +203,4 @@ namespace neon {
             }
         }
     }
-}
+} // namespace neon

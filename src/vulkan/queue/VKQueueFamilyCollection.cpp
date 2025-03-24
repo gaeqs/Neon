@@ -7,9 +7,10 @@
 #include <cstdint>
 #include <neon/logging/Logger.h>
 
-namespace neon::vulkan {
-    VKQueueFamilyCollection::VKQueueFamilyCollection(VkPhysicalDevice device,
-        VkSurfaceKHR surface) {
+namespace neon::vulkan
+{
+    VKQueueFamilyCollection::VKQueueFamilyCollection(VkPhysicalDevice device, VkSurfaceKHR surface)
+    {
         uint32_t count = 0;
         vkGetPhysicalDeviceQueueFamilyProperties(device, &count, nullptr);
 
@@ -18,41 +19,30 @@ namespace neon::vulkan {
         std::vector<VkQueueFamilyProperties> raw(count);
         vkGetPhysicalDeviceQueueFamilyProperties(device, &count, raw.data());
 
-        for (auto properties: raw) {
-            _families.emplace_back(
-                device,
-                surface,
-                static_cast<uint32_t>(_families.size()),
-                properties
-            );
+        for (auto properties : raw) {
+            _families.emplace_back(device, surface, static_cast<uint32_t>(_families.size()), properties);
         }
     }
 
-    VKQueueFamilyCollection::VKQueueFamilyCollection(
-        const std::vector<VkQueueFamilyProperties>& families,
-        VkPhysicalDevice device,
-        VkSurfaceKHR surface) {
+    VKQueueFamilyCollection::VKQueueFamilyCollection(const std::vector<VkQueueFamilyProperties>& families,
+                                                     VkPhysicalDevice device, VkSurfaceKHR surface)
+    {
         _families.reserve(families.size());
 
-        for (auto properties: families) {
-            _families.emplace_back(
-                device,
-                surface,
-                static_cast<uint32_t>(_families.size()),
-                properties
-            );
+        for (auto properties : families) {
+            _families.emplace_back(device, surface, static_cast<uint32_t>(_families.size()), properties);
         }
     }
 
-    const std::vector<VKQueueFamily>& VKQueueFamilyCollection::
-    getFamilies() const {
+    const std::vector<VKQueueFamily>& VKQueueFamilyCollection::getFamilies() const
+    {
         return _families;
     }
 
-    std::optional<const VKQueueFamily*> VKQueueFamilyCollection::
-    getCompatibleQueueFamily(
-        const VKQueueFamily::Capabilities& capabilities) const {
-        for (auto& family: _families) {
+    std::optional<const VKQueueFamily*> VKQueueFamilyCollection::getCompatibleQueueFamily(
+        const VKQueueFamily::Capabilities& capabilities) const
+    {
+        for (auto& family : _families) {
             if (family.getCapabilities().isCompatible(capabilities)) {
                 return {&family};
             }
@@ -60,12 +50,12 @@ namespace neon::vulkan {
         return {};
     }
 
-    std::vector<const VKQueueFamily*> VKQueueFamilyCollection::
-    getAllCompatibleQueueFamilies(
-        const VKQueueFamily::Capabilities& capabilities) const {
+    std::vector<const VKQueueFamily*> VKQueueFamilyCollection::getAllCompatibleQueueFamilies(
+        const VKQueueFamily::Capabilities& capabilities) const
+    {
         std::vector<const VKQueueFamily*> list;
 
-        for (auto family: _families) {
+        for (auto family : _families) {
             if (family.getCapabilities().isCompatible(capabilities)) {
                 list.push_back(&family);
             }
@@ -74,13 +64,13 @@ namespace neon::vulkan {
         return list;
     }
 
-    void VKQueueFamilyCollection::getAllCompatibleQueueFamilies(
-        const VKQueueFamily::Capabilities& capabilities,
-        std::vector<const VKQueueFamily*>& vector) const {
-        for (auto& family: _families) {
+    void VKQueueFamilyCollection::getAllCompatibleQueueFamilies(const VKQueueFamily::Capabilities& capabilities,
+                                                                std::vector<const VKQueueFamily*>& vector) const
+    {
+        for (auto& family : _families) {
             if (family.getCapabilities().isCompatible(capabilities)) {
                 vector.push_back(&family);
             }
         }
     }
-}
+} // namespace neon::vulkan

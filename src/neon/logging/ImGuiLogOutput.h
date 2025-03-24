@@ -10,22 +10,22 @@
 #include <neon/structure/IdentifiableWrapper.h>
 #include <neon/util/component/LogComponent.h>
 
-namespace neon {
+namespace neon
+{
     /**
      * Logger output used by a LogComponent.
      */
-    class ImGuiLogOutput : public LogOutput {
+    class ImGuiLogOutput : public LogOutput
+    {
         IdentifiableWrapper<LogComponent> _component;
 
-    public:
+      public:
         ImGuiLogOutput(IdentifiableWrapper<LogComponent> component);
 
         ~ImGuiLogOutput() override;
 
-        void print(const Message& message,
-                   const std::vector<const MessageGroup*>& groups) override;
+        void print(const Message& message, const std::vector<const MessageGroup*>& groups) override;
     };
-}
-
+} // namespace neon
 
 #endif //IMGUILOGOUTPUT_H

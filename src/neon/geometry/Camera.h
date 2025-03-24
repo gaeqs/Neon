@@ -9,10 +9,11 @@
 
 #include <neon/geometry/Frustum.h>
 
-namespace neon {
+namespace neon
+{
 
-    class Camera {
-
+    class Camera
+    {
         rush::Vec3f _position;
         rush::Quatf _rotation;
         rush::Quatf _rotationInverse;
@@ -26,8 +27,7 @@ namespace neon {
 
         void recalculateViewMatrix();
 
-    public:
-
+      public:
         Camera(const Camera& other) = delete;
 
         Camera(const Frustum& frustum);
@@ -64,7 +64,6 @@ namespace neon {
 
         std::array<rush::Plane<float>, 6> getPlanes();
     };
-}
-
+} // namespace neon
 
 #endif //RVTRACKING_CAMERA_H

@@ -7,17 +7,19 @@
 
 #include <neon/structure/Component.h>
 
-namespace neon {
-    class DockSpaceComponent : public Component {
+namespace neon
+{
+    class DockSpaceComponent : public Component
+    {
         int dockFlags;
 
-    public:
+      public:
         explicit DockSpaceComponent(bool topBar = false);
 
         void onUpdate(float deltaTime) override;
     };
 
     REGISTER_COMPONENT(DockSpaceComponent, "Dock Space")
-}
+} // namespace neon
 
 #endif //NEON_DOCKSPACECOMPONENT_H

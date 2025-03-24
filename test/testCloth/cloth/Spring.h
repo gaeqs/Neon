@@ -14,13 +14,14 @@
 
 #include "Node.h"
 
-enum class SpringType {
+enum class SpringType
+{
     STRETCH,
     BEND
 };
 
-class Spring {
-
+class Spring
+{
     uint32_t _nodeA;
     uint32_t _nodeB;
     uint32_t _nodeADoFIndex;
@@ -37,22 +38,14 @@ class Spring {
     Eigen::Vector3f _direction;
     Eigen::Vector3f _velocityBA;
 
-public:
-
-    Spring(uint32_t a, uint32_t b, SpringType type,
-           float stiffness, float damping,
-           const std::vector<Node>& nodes);
+  public:
+    Spring(uint32_t a, uint32_t b, SpringType type, float stiffness, float damping, const std::vector<Node>& nodes);
 
     void updateState(const std::vector<Node>& nodes);
 
-
     void getForce(Eigen::VectorXf& vector) const;
 
-    void getForceJacobian(
-            std::vector<Eigen::Triplet<float>>& dFdx,
-            std::vector<Eigen::Triplet<float>>& dFdv) const;
-
+    void getForceJacobian(std::vector<Eigen::Triplet<float>>& dFdx, std::vector<Eigen::Triplet<float>>& dFdv) const;
 };
-
 
 #endif //NEON_SPRING_H

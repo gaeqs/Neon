@@ -10,13 +10,16 @@
 #include <vector>
 #include <vulkan/vulkan.h>
 
-namespace neon::vulkan {
-    struct VKDefaultExtension {
+namespace neon::vulkan
+{
+    struct VKDefaultExtension
+    {
         VkStructureType sType;
         const void* pNext;
     };
 
-    struct VKFeatureHolder {
+    struct VKFeatureHolder
+    {
         size_t size;
         char* raw;
 
@@ -24,7 +27,9 @@ namespace neon::vulkan {
 
         template<typename T>
         explicit VKFeatureHolder(const T& t) :
-            VKFeatureHolder(reinterpret_cast<const char*>(&t), sizeof(T)) {}
+            VKFeatureHolder(reinterpret_cast<const char*>(&t), sizeof(T))
+        {
+        }
 
         VKFeatureHolder(const VKFeatureHolder& other);
 
@@ -37,17 +42,20 @@ namespace neon::vulkan {
         [[nodiscard]] const VKDefaultExtension* asDefaultExtensions() const;
 
         template<typename Feature>
-        [[nodiscard]] Feature* asFeature() {
+        [[nodiscard]] Feature* asFeature()
+        {
             return reinterpret_cast<Feature*>(raw);
         }
 
         template<typename Feature>
-        [[nodiscard]] const Feature* asFeature() const {
+        [[nodiscard]] const Feature* asFeature() const
+        {
             return reinterpret_cast<const Feature*>(raw);
         }
     };
 
-    struct VKPhysicalDeviceFeatures {
+    struct VKPhysicalDeviceFeatures
+    {
         VkPhysicalDeviceFeatures basicFeatures = {};
         std::vector<VKFeatureHolder> features;
         std::vector<std::string> extensions;
@@ -56,9 +64,8 @@ namespace neon::vulkan {
 
         VKPhysicalDeviceFeatures() = default;
 
-        explicit VKPhysicalDeviceFeatures(
-            VkPhysicalDevice device,
-            const std::vector<VKFeatureHolder>& extraFeatures = {});
+        explicit VKPhysicalDeviceFeatures(VkPhysicalDevice device,
+                                          const std::vector<VKFeatureHolder>& extraFeatures = {});
 
         [[nodiscard]] bool hasExtension(const std::string& extension) const;
 
@@ -67,8 +74,9 @@ namespace neon::vulkan {
         VKPhysicalDeviceFeatures& operator=(const VKPhysicalDeviceFeatures& o);
 
         template<typename Feature>
-        std::optional<Feature*> findFeature(VkStructureType sType) {
-            for (auto& feature: features) {
+        std::optional<Feature*> findFeature(VkStructureType sType)
+        {
+            for (auto& feature : features) {
                 if (feature.asDefaultExtensions()->sType == sType) {
                     return {feature.asFeature<Feature>()};
                 }
@@ -77,8 +85,9 @@ namespace neon::vulkan {
         }
 
         template<typename Feature>
-        std::optional<const Feature*> findFeature(VkStructureType sType) const {
-            for (auto& feature: features) {
+        std::optional<const Feature*> findFeature(VkStructureType sType) const
+        {
+            for (auto& feature : features) {
                 if (feature.asDefaultExtensions()->sType == sType) {
                     return {feature.asFeature<Feature>()};
                 }
@@ -86,10 +95,9 @@ namespace neon::vulkan {
             return {};
         }
 
-    private:
+      private:
         void reweave();
     };
-}
-
+} // namespace neon::vulkan
 
 #endif //VKPHYSICALDEVICEFEATURES_H

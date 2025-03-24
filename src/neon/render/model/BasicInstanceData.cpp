@@ -7,42 +7,39 @@
 #include <neon/structure/Application.h>
 #include <neon/render/model/ModelCreateInfo.h>
 
-namespace neon {
-    BasicInstanceData::BasicInstanceData(
-        Application* application,
-        const ModelCreateInfo& info)
-        : _application(application),
-          _maximumInstances(info.maximumInstances),
-          _types(info.instanceTypes),
-          _implementation(application, info) {
+namespace neon
+{
+    BasicInstanceData::BasicInstanceData(Application* application, const ModelCreateInfo& info) :
+        _application(application),
+        _maximumInstances(info.maximumInstances),
+        _types(info.instanceTypes),
+        _implementation(application, info)
+    {
         _slots.reserve(info.instanceTypes.size());
         for (size_t i = 0; i < info.instanceTypes.size(); ++i) {
             size_t size = info.instanceSizes[i];
             char* data = new char[size * _maximumInstances];
-            _slots.emplace_back(
-                size,
-                data,
-                Range<uint32_t>(0, 0)
-            );
+            _slots.emplace_back(size, data, Range<uint32_t>(0, 0));
         }
     }
 
-    BasicInstanceData::~BasicInstanceData() {
-        for (auto& [size, data, changeRange]: _slots) {
+    BasicInstanceData::~BasicInstanceData()
+    {
+        for (auto& [size, data, changeRange] : _slots) {
             delete[] data;
         }
-        for (auto* position: _positions) {
+        for (auto* position : _positions) {
             delete position;
         }
     }
 
-    const std::vector<std::type_index>& BasicInstanceData::
-    getInstancingStructTypes() const {
+    const std::vector<std::type_index>& BasicInstanceData::getInstancingStructTypes() const
+    {
         return _types;
     }
 
-    Result<InstanceData::Instance, std::string>
-    BasicInstanceData::createInstance() {
+    Result<InstanceData::Instance, std::string> BasicInstanceData::createInstance()
+    {
         if (_positions.size() >= _maximumInstances) {
             return {"Buffer is full!"};
         }
@@ -52,19 +49,18 @@ namespace neon {
         return Instance(id);
     }
 
-    bool BasicInstanceData::freeInstance(Instance instance) {
+    bool BasicInstanceData::freeInstance(Instance instance)
+    {
         const uint32_t id = *instance.id;
 
         auto* toRemove = _positions[id];
         auto* last = _positions.back();
 
-        for (auto& slot: _slots) {
-            if (slot.size == 0) continue;
-            memcpy(
-                slot.data + slot.size * id,
-                slot.data + slot.size * *last,
-                slot.size
-            );
+        for (auto& slot : _slots) {
+            if (slot.size == 0) {
+                continue;
+            }
+            memcpy(slot.data + slot.size * id, slot.data + slot.size * *last, slot.size);
             slot.changeRange += Range(id, id + 1);
         }
 
@@ -77,19 +73,19 @@ namespace neon {
         return true;
     }
 
-    size_t BasicInstanceData::getInstanceAmount() const {
+    size_t BasicInstanceData::getInstanceAmount() const
+    {
         return _positions.size();
     }
 
-    bool BasicInstanceData::uploadData(Instance instance,
-                                       size_t index,
-                                       const void* data) {
+    bool BasicInstanceData::uploadData(Instance instance, size_t index, const void* data)
+    {
         if (_slots.size() < index) {
-           logger.error(MessageBuilder()
-                .group("vulkan")
-                .print("Cannot upload instance data. Index ")
-                .print(index)
-                .print(" is not defined!"));
+            logger.error(MessageBuilder()
+                             .group("vulkan")
+                             .print("Cannot upload instance data. Index ")
+                             .print(index)
+                             .print(" is not defined!"));
             return false;
         }
 
@@ -98,49 +94,41 @@ namespace neon {
 
         if (slot.size == 0) {
             logger.error(MessageBuilder()
-                .group("vulkan")
-                .print("Cannot upload instance data. Invalid id ")
-                .print(instance.id)
-                .print("!"));
+                             .group("vulkan")
+                             .print("Cannot upload instance data. Invalid id ")
+                             .print(instance.id)
+                             .print("!"));
             return false;
         }
 
-
-        memcpy(
-            slot.data + slot.size * id,
-            data,
-            slot.size
-        );
+        memcpy(slot.data + slot.size * id, data, slot.size);
 
         slot.changeRange += Range(id, id + 1);
 
         return true;
     }
 
-    void BasicInstanceData::flush() {
+    void BasicInstanceData::flush()
+    {
         flush(nullptr);
     }
 
-    void BasicInstanceData::flush(const CommandBuffer* commandBuffer) {
+    void BasicInstanceData::flush(const CommandBuffer* commandBuffer)
+    {
         for (size_t i = 0; i < _slots.size(); ++i) {
             auto& slot = _slots[i];
-            _implementation.flush(
-                commandBuffer,
-                i,
-                slot.size,
-                slot.data,
-                slot.changeRange
-            );
+            _implementation.flush(commandBuffer, i, slot.size, slot.data, slot.changeRange);
             slot.changeRange = Range<uint32_t>(0, 0);
         }
     }
 
-    InstanceData::Implementation& BasicInstanceData::getImplementation() {
+    InstanceData::Implementation& BasicInstanceData::getImplementation()
+    {
         return _implementation;
     }
 
-    const InstanceData::Implementation& BasicInstanceData::
-    getImplementation() const {
+    const InstanceData::Implementation& BasicInstanceData::getImplementation() const
+    {
         return _implementation;
     }
-}
+} // namespace neon

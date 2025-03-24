@@ -5,17 +5,17 @@
 #ifndef RVTRACKING_TRANSFORM_H
 #define RVTRACKING_TRANSFORM_H
 
-
 #include <rush/rush.h>
 
 #include <neon/structure/IdentifiableWrapper.h>
 
-namespace neon {
+namespace neon
+{
 
     class GameObject;
 
-    class Transform {
-
+    class Transform
+    {
         uint64_t _id;
 
         rush::Vec3f _position;
@@ -33,8 +33,7 @@ namespace neon {
 
         void recalculateIfRequired();
 
-    public:
-
+      public:
         Transform(const Transform& other) = delete;
 
         explicit Transform(IdentifiableWrapper<GameObject> object);
@@ -62,9 +61,7 @@ namespace neon {
         const rush::Mat4f& getModel();
 
         const rush::Mat4f& getNormal();
-
     };
-}
-
+} // namespace neon
 
 #endif //RVTRACKING_TRANSFORM_H

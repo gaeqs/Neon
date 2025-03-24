@@ -20,8 +20,8 @@
 #include "PhysicsManager.h"
 #include "Spring.h"
 
-class MassSpring : public ISimulable {
-
+class MassSpring : public ISimulable
+{
     uint32_t _index;
 
     std::vector<Node> _nodes;
@@ -30,26 +30,16 @@ class MassSpring : public ISimulable {
     neon::IdentifiableWrapper<PhysicsManager> _manager;
     neon::IdentifiableWrapper<neon::GameObject> _gameObject;
 
-    void generateNodes(std::vector<rush::Vec3f>& positions,
-                       float mass, float dampingAlpha);
+    void generateNodes(std::vector<rush::Vec3f>& positions, float mass, float dampingAlpha);
 
-    void generateSprings(std::vector<uint32_t>& triangles,
-                         float dampingBeta,
-                         float stiffnessStretch,
+    void generateSprings(std::vector<uint32_t>& triangles, float dampingBeta, float stiffnessStretch,
                          float stiffnessBend);
 
-public:
-
-    MassSpring(uint32_t dofIndexStart,
-               neon::IdentifiableWrapper<PhysicsManager> manager,
-               neon::IdentifiableWrapper<neon::GameObject> gameObject,
-               std::vector<rush::Vec3f>& positions,
-               std::vector<uint32_t>& triangles,
-               float mass,
-               float stiffnessStretch,
-               float stiffnessBend,
-               float dampingAlpha,
-               float dampingBeta);
+  public:
+    MassSpring(uint32_t dofIndexStart, neon::IdentifiableWrapper<PhysicsManager> manager,
+               neon::IdentifiableWrapper<neon::GameObject> gameObject, std::vector<rush::Vec3f>& positions,
+               std::vector<uint32_t>& triangles, float mass, float stiffnessStretch, float stiffnessBend,
+               float dampingAlpha, float dampingBeta);
 
     [[nodiscard]] const std::vector<Node>& getNodes() const;
 
@@ -65,19 +55,16 @@ public:
 
     void getForce(Eigen::VectorXf& vector) const override;
 
-    void getForceJacobian(
-            std::vector<Eigen::Triplet<float>>& dFdx,
-            std::vector<Eigen::Triplet<float>>& dFdv) const override;
+    void getForceJacobian(std::vector<Eigen::Triplet<float>>& dFdx,
+                          std::vector<Eigen::Triplet<float>>& dFdv) const override;
 
     void getMass(std::vector<Eigen::Triplet<float>>& mass) const override;
 
-    void getInverseMass(
-            std::vector<Eigen::Triplet<float>>& mass) const override;
+    void getInverseMass(std::vector<Eigen::Triplet<float>>& mass) const override;
 
     void fixVector(Eigen::VectorXf& vector) const override;
 
     void fixMatrix(Eigen::SparseMatrix<float>& matrix) const override;
 };
-
 
 #endif //NEON_MASSSPRING_H

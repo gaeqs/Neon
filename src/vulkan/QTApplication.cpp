@@ -27,100 +27,99 @@
 #include <vulkan/vulkan_core.h>
 #ifdef USE_QT
 
-#include "QTApplication.h"
+    #include "QTApplication.h"
 
-#include <utility>
+    #include <utility>
 
-#include <neon/structure/Room.h>
+    #include <neon/structure/Room.h>
 
-#include <QWheelEvent>
-#include <QSurface>
-#include <QVulkanFunctions>
+    #include <QWheelEvent>
+    #include <QSurface>
+    #include <QVulkanFunctions>
 
-#include <vulkan/vulkan.h>
-#include <vulkan/vulkan_core.h>
+    #include <vulkan/vulkan.h>
+    #include <vulkan/vulkan_core.h>
 
-#include <imgui.h>
-#include <imgui_impl_vulkan.h>
-#include <imgui_impl_glfw.cpp>
-#include <implot.h>
+    #include <imgui.h>
+    #include <imgui_impl_vulkan.h>
+    #include <imgui_impl_glfw.cpp>
+    #include <implot.h>
 
-namespace {
-    bool debugFilter(VkDebugReportFlagsEXT flags,
-                     VkDebugReportObjectTypeEXT objectType, uint64_t object,
-                     size_t location, int32_t messageCode,
-                     const char* pLayerPrefix, const char* pMessage) {
+namespace
+{
+    bool debugFilter(VkDebugReportFlagsEXT flags, VkDebugReportObjectTypeEXT objectType, uint64_t object,
+                     size_t location, int32_t messageCode, const char* pLayerPrefix, const char* pMessage)
+    {
         auto log = neon::Logger::defaultLogger();
-        auto message = neon::MessageBuilder()
-                .group("vulkan")
-                .print(pMessage);
+        auto message = neon::MessageBuilder().group("vulkan").print(pMessage);
 
-        if (flags & (VK_DEBUG_REPORT_WARNING_BIT_EXT |
-                     VK_DEBUG_REPORT_PERFORMANCE_WARNING_BIT_EXT))
+        if (flags & (VK_DEBUG_REPORT_WARNING_BIT_EXT | VK_DEBUG_REPORT_PERFORMANCE_WARNING_BIT_EXT)) {
             log->warning(message);
-        else if (flags & VK_DEBUG_REPORT_ERROR_BIT_EXT)
+        } else if (flags & VK_DEBUG_REPORT_ERROR_BIT_EXT) {
             log->error(message);
-        else if (flags & VK_DEBUG_REPORT_DEBUG_BIT_EXT)
+        } else if (flags & VK_DEBUG_REPORT_DEBUG_BIT_EXT) {
             log->debug(message);
-        else log->info(message);
+        } else {
+            log->info(message);
+        }
 
         return true;
     }
+} // namespace
+
+neon::vulkan::QTApplication::QTApplication() :
+    _application(nullptr),
+    _queueFamilies(),
+    _commandPool(nullptr),
+    _currentFrameInformation(0, 0.016f, 0.0f),
+    _lastFrameTime(std::chrono::high_resolution_clock::now()),
+    _lastFrameProcessTime(0.0f),
+    _swapChainCount(0),
+    _recording(false),
+    _imGuiPool(VK_NULL_HANDLE)
+{
 }
 
-neon::vulkan::QTApplication::QTApplication()
-    : _application(nullptr),
-      _queueFamilies(),
-      _commandPool(nullptr),
-      _currentFrameInformation(
-          0, 0.016f, 0.0f),
-      _lastFrameTime(
-          std::chrono::high_resolution_clock::now()),
-      _lastFrameProcessTime(0.0f),
-      _swapChainCount(0),
-      _recording(false),
-      _imGuiPool(VK_NULL_HANDLE) {}
-
-void neon::vulkan::QTApplication::init(neon::Application* application) {
+void neon::vulkan::QTApplication::init(neon::Application* application)
+{
     _application = application;
 }
 
-rush::Vec2i neon::vulkan::QTApplication::getWindowSize() const {
+rush::Vec2i neon::vulkan::QTApplication::getWindowSize() const
+{
     QSize s = size();
     return {s.width(), s.height()};
 }
 
-neon::FrameInformation
-neon::vulkan::QTApplication::getCurrentFrameInformation() const {
+neon::FrameInformation neon::vulkan::QTApplication::getCurrentFrameInformation() const
+{
     return _currentFrameInformation;
 }
 
-neon::CommandBuffer*
-neon::vulkan::QTApplication::getCurrentCommandBuffer() const {
+neon::CommandBuffer* neon::vulkan::QTApplication::getCurrentCommandBuffer() const
+{
     return _currentCommandBuffer.get();
 }
 
-void neon::vulkan::QTApplication::lockMouse(bool lock) {
+void neon::vulkan::QTApplication::lockMouse(bool lock)
+{
     // TODO
 }
 
-neon::Result<uint32_t, std::string>
-neon::vulkan::QTApplication::startGameLoop() {
+neon::Result<uint32_t, std::string> neon::vulkan::QTApplication::startGameLoop()
+{
     return {"QTApplicaiton doesn't contain a GameLoop, as Qt already has one."};
 }
 
-void neon::vulkan::QTApplication::renderFrame(neon::Room* room) {
+void neon::vulkan::QTApplication::renderFrame(neon::Room* room)
+{
     auto now = std::chrono::high_resolution_clock::now();
     auto duration = now - _lastFrameTime;
     _lastFrameTime = now;
 
     float seconds = static_cast<float>(duration.count()) * 1e-9f;
 
-    _currentFrameInformation = {
-        _currentFrameInformation.currentFrame + 1,
-        seconds,
-        _lastFrameProcessTime
-    };
+    _currentFrameInformation = {_currentFrameInformation.currentFrame + 1, seconds, _lastFrameProcessTime};
 
     setupImGUIFrame();
 
@@ -139,98 +138,104 @@ void neon::vulkan::QTApplication::renderFrame(neon::Room* room) {
     _lastFrameProcessTime = static_cast<float>(processTime.count()) * 1e-9f;
 }
 
-VkInstance neon::vulkan::QTApplication::getInstance() const {
+VkInstance neon::vulkan::QTApplication::getInstance() const
+{
     return vulkanInstance()->vkInstance();
 }
 
-neon::vulkan::VKDevice* neon::vulkan::QTApplication::getDevice() const {
+neon::vulkan::VKDevice* neon::vulkan::QTApplication::getDevice() const
+{
     return _device.get();
 }
 
-const neon::vulkan::VKPhysicalDevice&
-neon::vulkan::QTApplication::getPhysicalDevice() const {
+const neon::vulkan::VKPhysicalDevice& neon::vulkan::QTApplication::getPhysicalDevice() const
+{
     return _physicalDevice;
 }
 
-VkFormat neon::vulkan::QTApplication::getSwapChainImageFormat() const {
+VkFormat neon::vulkan::QTApplication::getSwapChainImageFormat() const
+{
     return colorFormat();
 }
 
-VkFormat neon::vulkan::QTApplication::getDepthImageFormat() const {
+VkFormat neon::vulkan::QTApplication::getDepthImageFormat() const
+{
     return depthStencilFormat();
 }
 
-neon::CommandPool* neon::vulkan::QTApplication::getCommandPool() const {
+neon::CommandPool* neon::vulkan::QTApplication::getCommandPool() const
+{
     if (_commandPool == nullptr) {
         VkCommandPool pool = graphicsCommandPool();
         if (pool != VK_NULL_HANDLE) {
-            _commandPool = std::make_unique<CommandPool>(
-                getApplication(),
-                pool,
-                graphicsQueueFamilyIndex()
-            );
+            _commandPool = std::make_unique<CommandPool>(getApplication(), pool, graphicsQueueFamilyIndex());
         }
     }
 
     return _commandPool.get();
 }
 
-VkSwapchainKHR neon::vulkan::QTApplication::getSwapChain() const {
-    _application->getLogger().error(
-        "QTApplication doesn't expose a swap chain!");
+VkSwapchainKHR neon::vulkan::QTApplication::getSwapChain() const
+{
+    _application->getLogger().error("QTApplication doesn't expose a swap chain!");
     return nullptr;
 }
 
-uint32_t neon::vulkan::QTApplication::getMaxFramesInFlight() const {
+uint32_t neon::vulkan::QTApplication::getMaxFramesInFlight() const
+{
     return MAX_CONCURRENT_FRAME_COUNT;
 }
 
-uint32_t neon::vulkan::QTApplication::getCurrentFrame() const {
+uint32_t neon::vulkan::QTApplication::getCurrentFrame() const
+{
     return concurrentFrameCount();
 }
 
-uint32_t neon::vulkan::QTApplication::getCurrentSwapChainImage() const {
+uint32_t neon::vulkan::QTApplication::getCurrentSwapChainImage() const
+{
     return swapChainImageCount();
 }
 
-uint32_t neon::vulkan::QTApplication::getSwapChainCount() const {
+uint32_t neon::vulkan::QTApplication::getSwapChainCount() const
+{
     return _swapChainCount;
 }
 
-VkExtent2D neon::vulkan::QTApplication::getSwapChainExtent() const {
+VkExtent2D neon::vulkan::QTApplication::getSwapChainExtent() const
+{
     QSize s = swapChainImageSize();
-    return {
-        static_cast<uint32_t>(s.width()),
-        static_cast<uint32_t>(s.height())
-    };
+    return {static_cast<uint32_t>(s.width()), static_cast<uint32_t>(s.height())};
 }
 
-VkDescriptorPool neon::vulkan::QTApplication::getImGuiPool() const {
+VkDescriptorPool neon::vulkan::QTApplication::getImGuiPool() const
+{
     return _imGuiPool;
 }
 
-bool neon::vulkan::QTApplication::isRecordingCommandBuffer() const {
+bool neon::vulkan::QTApplication::isRecordingCommandBuffer() const
+{
     return _recording;
 }
 
-neon::Application* neon::vulkan::QTApplication::getApplication() const {
+neon::Application* neon::vulkan::QTApplication::getApplication() const
+{
     return _application;
 }
 
-VkQueue neon::vulkan::QTApplication::getGraphicsQueue() {
+VkQueue neon::vulkan::QTApplication::getGraphicsQueue()
+{
     return graphicsQueue();
 }
 
-void neon::vulkan::QTApplication::preInitResources() {
+void neon::vulkan::QTApplication::preInitResources()
+{
     vulkanInstance()->installDebugOutputFilter(debugFilter);
 
-    _queueFamilies = std::make_unique<VKQueueFamilyCollection>(
-        physicalDevice(),
-        vulkanInstance()->surfaceForWindow(this)
-    );
+    _queueFamilies =
+        std::make_unique<VKQueueFamilyCollection>(physicalDevice(), vulkanInstance()->surfaceForWindow(this));
 
     uint32_t maxQueues = 0;
-    for (auto family: _queueFamilies->getFamilies()) {
+    for (auto family : _queueFamilies->getFamilies()) {
         maxQueues = std::max(family.getCount(), maxQueues);
     }
     _queuePriorities.resize(maxQueues, 1.0f);
@@ -240,7 +245,7 @@ void neon::vulkan::QTApplication::preInitResources() {
     std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
     queueCreateInfos.reserve(_queueFamilies->getFamilies().size());
 
-    for (auto family: _queueFamilies->getFamilies()) {
+    for (auto family : _queueFamilies->getFamilies()) {
         VkDeviceQueueCreateInfo info{};
         info.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
         info.queueFamilyIndex = family.getIndex();
@@ -250,31 +255,21 @@ void neon::vulkan::QTApplication::preInitResources() {
         _presentQueues[family.getIndex()] = family.getCount();
     }
 
-
-    setQueueCreateInfoModifier(
-        [queueCreateInfos](const VkQueueFamilyProperties* prop,
-                           uint32_t amount,
-                           QVector<VkDeviceQueueCreateInfo>& vec) {
-            vec.clear();
-            for (auto& info: queueCreateInfos) {
-                vec.push_back(info);
-            }
+    setQueueCreateInfoModifier([queueCreateInfos](const VkQueueFamilyProperties* prop, uint32_t amount,
+                                                  QVector<VkDeviceQueueCreateInfo>& vec) {
+        vec.clear();
+        for (auto& info : queueCreateInfos) {
+            vec.push_back(info);
         }
-    );
+    });
 }
 
-void neon::vulkan::QTApplication::initResources() {
+void neon::vulkan::QTApplication::initResources()
+{
     _physicalDevice = VKPhysicalDevice(physicalDevice(), nullptr);
-    _device = std::make_unique<VKDevice>(
-        device(),
-        *_queueFamilies,
-        _physicalDevice.getFeatures(),
-        _presentQueues
-    );
+    _device = std::make_unique<VKDevice>(device(), *_queueFamilies, _physicalDevice.getFeatures(), _presentQueues);
 
-    _application->getLogger().debug(MessageBuilder()
-        .print("Family: ")
-        .print(graphicsQueueFamilyIndex()));
+    _application->getLogger().debug(MessageBuilder().print("Family: ").print(graphicsQueueFamilyIndex()));
 
     // Fetch queue index:
     size_t family = graphicsQueueFamilyIndex();
@@ -287,16 +282,9 @@ void neon::vulkan::QTApplication::initResources() {
     } while (queue != fetchedQueue);
     --index;
 
-    _application->getLogger().debug(MessageBuilder()
-        .print("Index: ")
-        .print(index));
+    _application->getLogger().debug(MessageBuilder().print("Index: ").print(index));
 
-
-    _device->getQueueProvider()->markUsed(
-        std::this_thread::get_id(),
-        graphicsQueueFamilyIndex(),
-        index
-    );
+    _device->getQueueProvider()->markUsed(std::this_thread::get_id(), graphicsQueueFamilyIndex(), index);
 
     initImGui();
     if (_onInit) {
@@ -304,21 +292,23 @@ void neon::vulkan::QTApplication::initResources() {
     }
 }
 
-void neon::vulkan::QTApplication::initSwapChainResources() {
+void neon::vulkan::QTApplication::initSwapChainResources()
+{
     ++_swapChainCount;
 }
 
-void neon::vulkan::QTApplication::releaseSwapChainResources() {}
+void neon::vulkan::QTApplication::releaseSwapChainResources()
+{
+}
 
-void neon::vulkan::QTApplication::releaseResources() {}
+void neon::vulkan::QTApplication::releaseResources()
+{
+}
 
-void neon::vulkan::QTApplication::startNextFrame() {
+void neon::vulkan::QTApplication::startNextFrame()
+{
     _recording = true;
-    _currentCommandBuffer = std::make_unique<CommandBuffer>(
-        _application,
-        currentCommandBuffer(),
-        graphicsQueue()
-    );
+    _currentCommandBuffer = std::make_unique<CommandBuffer>(_application, currentCommandBuffer(), graphicsQueue());
     if (_application != nullptr) {
         renderFrame(_application->getRoom().get());
     }
@@ -326,129 +316,134 @@ void neon::vulkan::QTApplication::startNextFrame() {
     _recording = false;
 }
 
-void neon::vulkan::QTApplication::physicalDeviceLost() {}
+void neon::vulkan::QTApplication::physicalDeviceLost()
+{
+}
 
-void neon::vulkan::QTApplication::logicalDeviceLost() {}
+void neon::vulkan::QTApplication::logicalDeviceLost()
+{
+}
 
-QVulkanWindowRenderer* neon::vulkan::QTApplication::createRenderer() {
+QVulkanWindowRenderer* neon::vulkan::QTApplication::createRenderer()
+{
     return this;
 }
 
-void neon::vulkan::QTApplication::setInitializationFunction(
-    std::function<void(QTApplication*)> func) {
+void neon::vulkan::QTApplication::setInitializationFunction(std::function<void(QTApplication*)> func)
+{
     _onInit = std::move(func);
 }
 
-void neon::vulkan::QTApplication::mouseMoveEvent(QMouseEvent* event) {
+void neon::vulkan::QTApplication::mouseMoveEvent(QMouseEvent* event)
+{
     _application->invokeCursorPosEvent(event->x(), event->y());
-    ImGui::GetIO().AddMousePosEvent(static_cast<float>(event->x()),
-                                    static_cast<float>(event->y()));
+    ImGui::GetIO().AddMousePosEvent(static_cast<float>(event->x()), static_cast<float>(event->y()));
 }
 
-void neon::vulkan::QTApplication::mousePressEvent(QMouseEvent* event) {
+void neon::vulkan::QTApplication::mousePressEvent(QMouseEvent* event)
+{
     auto qtMod = event->modifiers();
     int modifier = 0;
-    if (qtMod & Qt::ShiftModifier)
+    if (qtMod & Qt::ShiftModifier) {
         modifier |= (int)neon::KeyboardModifier::SHIFT;
-    if (qtMod & Qt::ControlModifier)
+    }
+    if (qtMod & Qt::ControlModifier) {
         modifier |= (int)neon::KeyboardModifier::CONTROL;
-    if (qtMod & Qt::AltModifier)
+    }
+    if (qtMod & Qt::AltModifier) {
         modifier |= (int)neon::KeyboardModifier::ALT;
-    if (qtMod & Qt::MetaModifier)
+    }
+    if (qtMod & Qt::MetaModifier) {
         modifier |= (int)neon::KeyboardModifier::SUPER;
-
+    }
 
     int glfwButton = qtToGLFWMouseButton(event->button());
 
     auto& io = ImGui::GetIO();
     io.AddMouseButtonEvent(glfwButton, true);
     if (!io.WantCaptureMouse) {
-        _application->invokeMouseButtonEvent(
-            glfwButton,
-            GLFW_PRESS,
-            modifier
-        );
+        _application->invokeMouseButtonEvent(glfwButton, GLFW_PRESS, modifier);
     }
 }
 
-void neon::vulkan::QTApplication::mouseReleaseEvent(QMouseEvent* event) {
+void neon::vulkan::QTApplication::mouseReleaseEvent(QMouseEvent* event)
+{
     auto qtMod = event->modifiers();
     int modifier = 0;
-    if (qtMod & Qt::ShiftModifier)
+    if (qtMod & Qt::ShiftModifier) {
         modifier |= (int)neon::KeyboardModifier::SHIFT;
-    if (qtMod & Qt::ControlModifier)
+    }
+    if (qtMod & Qt::ControlModifier) {
         modifier |= (int)neon::KeyboardModifier::CONTROL;
-    if (qtMod & Qt::AltModifier)
+    }
+    if (qtMod & Qt::AltModifier) {
         modifier |= (int)neon::KeyboardModifier::ALT;
-    if (qtMod & Qt::MetaModifier)
+    }
+    if (qtMod & Qt::MetaModifier) {
         modifier |= (int)neon::KeyboardModifier::SUPER;
-
+    }
 
     int glfwButton = qtToGLFWMouseButton(event->button());
 
     auto& io = ImGui::GetIO();
     io.AddMouseButtonEvent(glfwButton, false);
     if (!io.WantCaptureMouse) {
-        _application->invokeMouseButtonEvent(
-            glfwButton,
-            GLFW_RELEASE,
-            modifier
-        );
+        _application->invokeMouseButtonEvent(glfwButton, GLFW_RELEASE, modifier);
     }
 }
 
-void neon::vulkan::QTApplication::keyPressEvent(QKeyEvent* event) {
+void neon::vulkan::QTApplication::keyPressEvent(QKeyEvent* event)
+{
     auto qtMod = event->modifiers();
     int modifier = 0;
-    if (qtMod & Qt::ShiftModifier)
+    if (qtMod & Qt::ShiftModifier) {
         modifier |= (int)neon::KeyboardModifier::SHIFT;
-    if (qtMod & Qt::ControlModifier)
+    }
+    if (qtMod & Qt::ControlModifier) {
         modifier |= (int)neon::KeyboardModifier::CONTROL;
-    if (qtMod & Qt::AltModifier)
+    }
+    if (qtMod & Qt::AltModifier) {
         modifier |= (int)neon::KeyboardModifier::ALT;
-    if (qtMod & Qt::MetaModifier)
+    }
+    if (qtMod & Qt::MetaModifier) {
         modifier |= (int)neon::KeyboardModifier::SUPER;
+    }
 
     int glfwKey = qtToGLFWKey((Qt::Key)event->key());
     auto& io = ImGui::GetIO();
     io.AddKeyEvent(ImGui_ImplGlfw_KeyToImGuiKey(glfwKey), true);
     if (!io.WantCaptureKeyboard) {
-        _application->invokeKeyEvent(
-            glfwKey,
-            event->nativeScanCode(),
-            event->isAutoRepeat() ? 2 : 1,
-            modifier
-        );
+        _application->invokeKeyEvent(glfwKey, event->nativeScanCode(), event->isAutoRepeat() ? 2 : 1, modifier);
     }
 }
 
-
-void neon::vulkan::QTApplication::keyReleaseEvent(QKeyEvent* event) {
+void neon::vulkan::QTApplication::keyReleaseEvent(QKeyEvent* event)
+{
     auto qtMod = event->modifiers();
     int modifier = 0;
-    if (qtMod & Qt::ShiftModifier)
+    if (qtMod & Qt::ShiftModifier) {
         modifier |= (int)neon::KeyboardModifier::SHIFT;
-    if (qtMod & Qt::ControlModifier)
+    }
+    if (qtMod & Qt::ControlModifier) {
         modifier |= (int)neon::KeyboardModifier::CONTROL;
-    if (qtMod & Qt::AltModifier)
+    }
+    if (qtMod & Qt::AltModifier) {
         modifier |= (int)neon::KeyboardModifier::ALT;
-    if (qtMod & Qt::MetaModifier)
+    }
+    if (qtMod & Qt::MetaModifier) {
         modifier |= (int)neon::KeyboardModifier::SUPER;
+    }
 
     int glfwKey = qtToGLFWKey((Qt::Key)event->key());
     auto& io = ImGui::GetIO();
     io.AddKeyEvent(ImGui_ImplGlfw_KeyToImGuiKey(glfwKey), false);
     if (!io.WantCaptureKeyboard) {
-        _application->invokeKeyEvent(
-            glfwKey,
-            event->nativeScanCode(),
-            0,
-            modifier
-        );
+        _application->invokeKeyEvent(glfwKey, event->nativeScanCode(), 0, modifier);
     }
 }
 
-void neon::vulkan::QTApplication::wheelEvent(QWheelEvent* event) {
+void neon::vulkan::QTApplication::wheelEvent(QWheelEvent* event)
+{
     // https://doc.qt.io/qt-6/qwheelevent.html#angleDelta
     constexpr double DELTAS_PER_STEP = 120.0;
 
@@ -461,20 +456,20 @@ void neon::vulkan::QTApplication::wheelEvent(QWheelEvent* event) {
     }
 }
 
-
-void neon::vulkan::QTApplication::initImGui() {
+void neon::vulkan::QTApplication::initImGui()
+{
     VkDescriptorPoolSize pool_sizes[] = {
-        {VK_DESCRIPTOR_TYPE_SAMPLER, 1000},
+        {               VK_DESCRIPTOR_TYPE_SAMPLER, 1000},
         {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1000},
-        {VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 1000},
-        {VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1000},
-        {VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER, 1000},
-        {VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER, 1000},
-        {VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1000},
-        {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1000},
+        {         VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 1000},
+        {         VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1000},
+        {  VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER, 1000},
+        {  VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER, 1000},
+        {        VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1000},
+        {        VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1000},
         {VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1000},
         {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, 1000},
-        {VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, 1000}
+        {      VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, 1000}
     };
 
     VkDescriptorPoolCreateInfo pool_info{};
@@ -484,10 +479,8 @@ void neon::vulkan::QTApplication::initImGui() {
     pool_info.poolSizeCount = std::size(pool_sizes);
     pool_info.pPoolSizes = pool_sizes;
 
-
     auto* fun = vulkanInstance()->deviceFunctions(device());
-    if (fun->vkCreateDescriptorPool(device(), &pool_info,
-                                    nullptr, &_imGuiPool) != VK_SUCCESS) {
+    if (fun->vkCreateDescriptorPool(device(), &pool_info, nullptr, &_imGuiPool) != VK_SUCCESS) {
         throw std::runtime_error("Failed to init ImGui!");
     }
 
@@ -496,7 +489,8 @@ void neon::vulkan::QTApplication::initImGui() {
     ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 }
 
-void neon::vulkan::QTApplication::setupImGUIFrame() const {
+void neon::vulkan::QTApplication::setupImGUIFrame() const
+{
     auto size = getWindowSize().cast<float>();
 
     ImGuiIO& io = ImGui::GetIO();
@@ -508,7 +502,8 @@ void neon::vulkan::QTApplication::setupImGUIFrame() const {
     ImGui::NewFrame();
 }
 
-int32_t neon::vulkan::QTApplication::qtToGLFWKey(Qt::Key key) {
+int32_t neon::vulkan::QTApplication::qtToGLFWKey(Qt::Key key)
+{
     switch (key) {
         case Qt::Key_Space:
             return GLFW_KEY_SPACE;
@@ -737,8 +732,8 @@ int32_t neon::vulkan::QTApplication::qtToGLFWKey(Qt::Key key) {
     }
 }
 
-int32_t
-neon::vulkan::QTApplication::qtToGLFWMouseButton(Qt::MouseButton button) {
+int32_t neon::vulkan::QTApplication::qtToGLFWMouseButton(Qt::MouseButton button)
+{
     switch (button) {
         case Qt::LeftButton:
             return GLFW_MOUSE_BUTTON_1;
@@ -759,7 +754,8 @@ neon::vulkan::QTApplication::qtToGLFWMouseButton(Qt::MouseButton button) {
     }
 }
 
-neon::vulkan::QTApplication::~QTApplication() {
+neon::vulkan::QTApplication::~QTApplication()
+{
     ImPlot::DestroyContext();
     ImGui::DestroyContext();
 }

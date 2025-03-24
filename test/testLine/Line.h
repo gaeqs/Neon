@@ -11,16 +11,17 @@
 #include <neon/Neon.h>
 
 template<typename Curve>
-class Box : public neon::Component {
+class Box : public neon::Component
+{
     std::shared_ptr<neon::Material> _material;
     std::shared_ptr<neon::Model> _model;
 
     uint32_t _samples;
     Curve _curve;
 
-    void generateModel() {
+    void generateModel()
+    {
         neon::ModelCreateInfo info;
-
 
         // Generate vertices
         std::vector<TestVertex> vertices;
@@ -31,7 +32,6 @@ class Box : public neon::Component {
 
         float d = 1.0f / static_cast<float>(_samples - 1);
 
-
         for (uint32_t i = 0; i < _samples - 1; ++i) {
             float t = d * static_cast<float>(i);
             vertices.push_back(TestVertex(_curve.fetch(t), t));
@@ -41,14 +41,7 @@ class Box : public neon::Component {
         vertices.push_back(TestVertex(_curve.fetch(1.0f), 1.0f));
         indices.push_back(_samples - 1);
 
-
-        auto mesh = std::make_unique<neon::Mesh>(
-            getApplication(),
-            "line",
-            _material,
-            false,
-            false
-        );
+        auto mesh = std::make_unique<neon::Mesh>(getApplication(), "line", _material, false, false);
 
         mesh->uploadVertices(vertices);
         mesh->uploadIndices(indices);
@@ -62,18 +55,19 @@ class Box : public neon::Component {
         getGameObject()->newComponent<neon::GraphicComponent>(_model);
     }
 
-public:
-    Box(std::shared_ptr<neon::Material> material, Curve curve,
-        uint32_t samples) :
+  public:
+    Box(std::shared_ptr<neon::Material> material, Curve curve, uint32_t samples) :
         _material(material),
         _model(),
         _curve(curve),
-        _samples(samples) {}
+        _samples(samples)
+    {
+    }
 
-    void onStart() override {
+    void onStart() override
+    {
         generateModel();
     }
 };
-
 
 #endif //NEON_LINE_H

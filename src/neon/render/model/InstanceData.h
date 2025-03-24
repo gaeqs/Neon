@@ -12,11 +12,11 @@
 #include <neon/util/Result.h>
 
 #ifdef USE_VULKAN
-#include <vulkan/render/model/VKInstanceData.h>
+    #include <vulkan/render/model/VKInstanceData.h>
 #endif
 
-
-namespace neon {
+namespace neon
+{
     class CommandBuffer;
 
     /**
@@ -25,16 +25,18 @@ namespace neon {
      * instances.
      * <p>
      * This is a base class: you must provide your model
-     * an implementaiton of this class.
+     * an implementation of this class.
      * The default implementation is BasicInstanceData.
      */
-    class InstanceData {
-    public:
+    class InstanceData
+    {
+      public:
 #ifdef USE_VULKAN
         using Implementation = vulkan::VKInstanceData;
 #endif
 
-        struct Instance {
+        struct Instance
+        {
             uint32_t* id;
         };
 
@@ -44,8 +46,7 @@ namespace neon {
          * Returns the type of the structure used for instancing data,
          * @return the type.
          */
-        [[nodiscard]] virtual const std::vector<std::type_index>&
-        getInstancingStructTypes() const = 0;
+        [[nodiscard]] virtual const std::vector<std::type_index>& getInstancingStructTypes() const = 0;
 
         /**
          * Creates an instance of this model.
@@ -73,9 +74,7 @@ namespace neon {
          * @param index the index of the buffer,
          * @param data the data to upload.
          */
-        virtual bool uploadData(Instance id,
-                                size_t index,
-                                const void* data) = 0;
+        virtual bool uploadData(Instance id, size_t index, const void* data) = 0;
 
         /**
          * Uploads the instancing data to the GPU.
@@ -107,8 +106,7 @@ namespace neon {
         /**
          * @return the implentation of this structure.
          */
-        [[nodiscard]] virtual const Implementation& getImplementation()
-        const = 0;
+        [[nodiscard]] virtual const Implementation& getImplementation() const = 0;
 
         // Helper templates
 
@@ -120,10 +118,11 @@ namespace neon {
          * @param data the data to upload.
          */
         template<typename T>
-        bool uploadData(Instance id, size_t index, const T& data) {
+        bool uploadData(Instance id, size_t index, const T& data)
+        {
             return uploadData(id, index, static_cast<const void*>(&data));
         }
     };
-}
+} // namespace neon
 
 #endif //INSTANCEDATA_H

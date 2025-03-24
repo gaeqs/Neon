@@ -10,17 +10,17 @@
 #include <string>
 #include <typeindex>
 #include <unordered_map>
-#include <vector>
 
 #include <neon/structure/Asset.h>
 
-namespace neon {
+namespace neon
+{
 
     /**
      * The mode the collection will store an asset.
      */
-    enum class AssetStorageMode {
-
+    enum class AssetStorageMode
+    {
         /**
          * The collection stores a shared
          * pointer of the asset, making it
@@ -53,14 +53,12 @@ namespace neon {
      *  </li>
      * </ul>
      */
-    class AssetCollection {
-
+    class AssetCollection
+    {
         std::unordered_map<AssetIdentifier, std::shared_ptr<Asset>> _permanentAssets;
-        std::unordered_map<std::type_index,
-                std::unordered_map<std::string, std::weak_ptr<Asset>>> _assets;
+        std::unordered_map<std::type_index, std::unordered_map<std::string, std::weak_ptr<Asset>>> _assets;
 
-    public:
-
+      public:
         AssetCollection(const AssetCollection& other) = delete;
 
         AssetCollection() = default;
@@ -77,8 +75,8 @@ namespace neon {
          */
         template<typename Type>
         [[nodiscard]]
-        const std::unordered_map<std::string, std::weak_ptr<Asset>>&
-        getAll() const {
+        const std::unordered_map<std::string, std::weak_ptr<Asset>>& getAll() const
+        {
             auto it = _assets.find(typeid(Type));
             if (it == _assets.end()) {
                 static std::unordered_map<std::string, std::weak_ptr<Asset>> empty;
@@ -97,16 +95,21 @@ namespace neon {
          * @return the asset or an empty optional.
          */
         template<typename Type>
-        [[nodiscard]] std::optional<std::shared_ptr<Type>>
-        get(const std::string& name) const {
+        [[nodiscard]] std::optional<std::shared_ptr<Type>> get(const std::string& name) const
+        {
             auto itType = _assets.find(typeid(Type));
-            if (itType == _assets.end()) return {};
+            if (itType == _assets.end()) {
+                return {};
+            }
 
             auto it = itType->second.find(name);
-            if (it == itType->second.end() || it->second.expired()) return {};
+            if (it == itType->second.end() || it->second.expired()) {
+                return {};
+            }
 
-            if (auto final = std::dynamic_pointer_cast<Type>(it->second.lock()))
+            if (auto final = std::dynamic_pointer_cast<Type>(it->second.lock())) {
                 return final;
+            }
 
             return {};
         }
@@ -119,8 +122,7 @@ namespace neon {
          * @param identifier the identifier to match.
          * @return the asset or an empty optional.
          */
-        [[nodiscard]] std::optional<std::shared_ptr<Asset>>
-        get(const AssetIdentifier& identifier) const;
+        [[nodiscard]] std::optional<std::shared_ptr<Asset>> get(const AssetIdentifier& identifier) const;
 
         /**
          * Adds the given asset to the collection.
@@ -173,8 +175,7 @@ namespace neon {
          * Removes all expired weak pointers from the collection.
          */
         void flushExpiredReferences();
-
     };
-}
+} // namespace neon
 
 #endif //NEON_ASSETCOLLECTION_H

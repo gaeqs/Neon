@@ -2,7 +2,6 @@
 // Created by gaelr on 28/01/2023.
 //
 
-
 #ifndef NEON_TEXTURECREATEINFO_H
 #define NEON_TEXTURECREATEINFO_H
 
@@ -11,10 +10,12 @@
 #include <string>
 #include <vector>
 
-namespace neon {
+namespace neon
+{
     class CommandBuffer;
 
-    enum class TextureFormat {
+    enum class TextureFormat
+    {
         R8,
         R8G8,
         R8G8B8,
@@ -34,13 +35,15 @@ namespace neon {
         DEPTH24STENCIL8
     };
 
-    enum class TextureFilter {
+    enum class TextureFilter
+    {
         NEAREST,
         LINEAR,
         CUBIC
     };
 
-    enum class AddressMode {
+    enum class AddressMode
+    {
         REPEAT,
         MIRRORED_REPEAT,
         CLAMP_TO_EDGE,
@@ -48,13 +51,15 @@ namespace neon {
         MIRROR_CLAMP_TO_EDGE
     };
 
-    enum class TextureDimensions {
+    enum class TextureDimensions
+    {
         ONE,
         TWO,
         THREE
     };
 
-    enum class TextureUsage {
+    enum class TextureUsage
+    {
         TRANSFER_SOURCE = 0x00000001,
         TRANSFER_DESTINY = 0x00000002,
         SAMPLING = 0x00000004,
@@ -74,7 +79,8 @@ namespace neon {
         SAMPLE_BLOCK_MATCH = 0x00200000,
     };
 
-    enum class TextureViewType {
+    enum class TextureViewType
+    {
         NORMAL_1D,
         NORMAL_2D,
         NORMAL_3D,
@@ -84,7 +90,8 @@ namespace neon {
         CUBE_ARRAY
     };
 
-    enum class SamplesPerTexel {
+    enum class SamplesPerTexel
+    {
         COUNT_1,
         COUNT_2,
         COUNT_4,
@@ -94,13 +101,15 @@ namespace neon {
         COUNT_64,
     };
 
-    enum class Tiling {
+    enum class Tiling
+    {
         OPTIMAL,
         LINEAR,
         DRM
     };
 
-    enum class TextureComponentSwizzle {
+    enum class TextureComponentSwizzle
+    {
         IDENTITY,
         ZERO,
         ONE,
@@ -110,12 +119,14 @@ namespace neon {
         A
     };
 
-    enum class MipmapMode {
+    enum class MipmapMode
+    {
         NEAREST,
         LINEAR
     };
 
-    struct ImageCreateInfo {
+    struct ImageCreateInfo
+    {
         /**
          * The format of the texture.
          */
@@ -167,14 +178,12 @@ namespace neon {
          */
         uint32_t mipmaps = 0;
 
-        std::vector<TextureUsage> usages = {
-            TextureUsage::TRANSFER_SOURCE,
-            TextureUsage::TRANSFER_DESTINY,
-            TextureUsage::SAMPLING
-        };
+        std::vector<TextureUsage> usages = {TextureUsage::TRANSFER_SOURCE, TextureUsage::TRANSFER_DESTINY,
+                                            TextureUsage::SAMPLING};
     };
 
-    struct ImageViewCreateInfo {
+    struct ImageViewCreateInfo
+    {
         /**
          * The view mode of the texture.
          */
@@ -223,7 +232,8 @@ namespace neon {
         uint32_t arrayLayerCount = 0;
     };
 
-    struct SamplerCreateInfo {
+    struct SamplerCreateInfo
+    {
         /**
          * The filter used when there's more fragments than texels.
          */
@@ -282,7 +292,8 @@ namespace neon {
      * By default, this info is configured
      * to create an 2D albedo texture.
      */
-    struct TextureCreateInfo {
+    struct TextureCreateInfo
+    {
         /**
          * The creation information of the image itself.
          */
@@ -307,8 +318,8 @@ namespace neon {
         const CommandBuffer* commandBuffer = nullptr;
     };
 
-
-    namespace serialization {
+    namespace serialization
+    {
         std::optional<TextureFormat> toTextureFormat(std::string s);
 
         std::optional<TextureFilter> toTextureFilter(std::string s);
@@ -328,7 +339,7 @@ namespace neon {
         std::optional<TextureComponentSwizzle> toTextureComponentSwizzle(std::string s);
 
         std::optional<MipmapMode> toMipmapMode(std::string s);
-    }
-}
+    } // namespace serialization
+} // namespace neon
 
 #endif //NEON_TEXTURECREATEINFO_H

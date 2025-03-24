@@ -4,13 +4,18 @@
 
 #include "CMRCFileSystem.h"
 
+namespace neon
+{
+    CMRCFileSystem::CMRCFileSystem(cmrc::embedded_filesystem filesystem) :
+        _filesystem(filesystem)
+    {
+    }
 
-namespace neon {
-    CMRCFileSystem::CMRCFileSystem(cmrc::embedded_filesystem filesystem)
-        : _filesystem(filesystem) {}
-
-    std::optional<File> CMRCFileSystem::readFile(std::filesystem::path path) const {
-        if (!exists(path)) return {};
+    std::optional<File> CMRCFileSystem::readFile(std::filesystem::path path) const
+    {
+        if (!exists(path)) {
+            return {};
+        }
 
         auto string = path.lexically_normal().string();
         std::ranges::replace(string, '\\', '/');
@@ -19,9 +24,10 @@ namespace neon {
         return File(file.begin(), file.size(), false);
     }
 
-    bool CMRCFileSystem::exists(std::filesystem::path path) const {
+    bool CMRCFileSystem::exists(std::filesystem::path path) const
+    {
         auto string = path.lexically_normal().string();
         std::ranges::replace(string, '\\', '/');
         return _filesystem.is_file(string);
     }
-}
+} // namespace neon

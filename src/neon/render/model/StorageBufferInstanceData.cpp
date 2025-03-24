@@ -9,39 +9,40 @@
 #include <neon/structure/Application.h>
 #include <neon/render/model/ModelCreateInfo.h>
 
-namespace neon {
-    StorageBufferInstanceData::StorageBufferInstanceData(
-        Application* application,
-        const ModelCreateInfo& info,
-        std::vector<Slot> slots)
-        : _application(application),
-          _maximumInstances(info.maximumInstances),
-          _types(info.instanceTypes),
-          _slots(std::move(slots)) {}
+namespace neon
+{
+    StorageBufferInstanceData::StorageBufferInstanceData(Application* application, const ModelCreateInfo& info,
+                                                         std::vector<Slot> slots) :
+        _application(application),
+        _maximumInstances(info.maximumInstances),
+        _types(info.instanceTypes),
+        _slots(std::move(slots))
+    {
+    }
 
-    StorageBufferInstanceData::StorageBufferInstanceData(
-        Application* application,
-        uint32_t maximumInstances,
-        std::vector<std::type_index> types,
-        std::vector<Slot> slots)
-        : _application(application),
-          _maximumInstances(maximumInstances),
-          _types(std::move(types)),
-          _slots(std::move(slots)) {}
+    StorageBufferInstanceData::StorageBufferInstanceData(Application* application, uint32_t maximumInstances,
+                                                         std::vector<std::type_index> types, std::vector<Slot> slots) :
+        _application(application),
+        _maximumInstances(maximumInstances),
+        _types(std::move(types)),
+        _slots(std::move(slots))
+    {
+    }
 
-    StorageBufferInstanceData::~StorageBufferInstanceData() {
-        for (auto* position: _positions) {
+    StorageBufferInstanceData::~StorageBufferInstanceData()
+    {
+        for (auto* position : _positions) {
             delete position;
         }
     }
 
-    const std::vector<std::type_index>& StorageBufferInstanceData::
-    getInstancingStructTypes() const {
+    const std::vector<std::type_index>& StorageBufferInstanceData::getInstancingStructTypes() const
+    {
         return _types;
     }
 
-    Result<InstanceData::Instance, std::string>
-    StorageBufferInstanceData::createInstance() {
+    Result<InstanceData::Instance, std::string> StorageBufferInstanceData::createInstance()
+    {
         if (_positions.size() >= _maximumInstances) {
             return {"Buffer is full!"};
         }
@@ -51,20 +52,19 @@ namespace neon {
         return Instance(id);
     }
 
-    bool StorageBufferInstanceData::freeInstance(Instance instance) {
+    bool StorageBufferInstanceData::freeInstance(Instance instance)
+    {
         const uint32_t id = *instance.id;
 
         auto* toRemove = _positions[id];
         auto* last = _positions.back();
 
-        for (auto& slot: _slots) {
-            if (slot.size == 0) continue;
+        for (auto& slot : _slots) {
+            if (slot.size == 0) {
+                continue;
+            }
             char* data = static_cast<char*>(slot.uniformBuffer->fetchData(static_cast<uint32_t>(slot.binding)));
-            memcpy(
-                data + slot.padding * id,
-                data + slot.padding * *last,
-                slot.size
-            );
+            memcpy(data + slot.padding * id, data + slot.padding * *last, slot.size);
         }
 
         _positions[id] = last;
@@ -76,19 +76,19 @@ namespace neon {
         return true;
     }
 
-    size_t StorageBufferInstanceData::getInstanceAmount() const {
+    size_t StorageBufferInstanceData::getInstanceAmount() const
+    {
         return _positions.size();
     }
 
-    bool StorageBufferInstanceData::uploadData(Instance instance,
-                                               size_t index,
-                                               const void* data) {
+    bool StorageBufferInstanceData::uploadData(Instance instance, size_t index, const void* data)
+    {
         if (_slots.size() < index) {
             logger.error(MessageBuilder()
-                .group("vulkan")
-                .print("Cannot upload instance data. Index ")
-                .print(index)
-                .print(" is not defined!"));
+                             .group("vulkan")
+                             .print("Cannot upload instance data. Index ")
+                             .print(index)
+                             .print(" is not defined!"));
             return false;
         }
 
@@ -97,38 +97,36 @@ namespace neon {
 
         if (slot.size == 0) {
             logger.error(MessageBuilder()
-                .group("vulkan")
-                .print("Cannot upload instance data. Invalid id ")
-                .print(instance.id)
-                .print("!"));
+                             .group("vulkan")
+                             .print("Cannot upload instance data. Invalid id ")
+                             .print(instance.id)
+                             .print("!"));
             return false;
         }
 
         char* dst = static_cast<char*>(slot.uniformBuffer->fetchData(static_cast<uint32_t>(slot.binding)));
-        memcpy(
-            dst + slot.padding * static_cast<size_t>(id),
-            data,
-            slot.size
-        );
+        memcpy(dst + slot.padding * static_cast<size_t>(id), data, slot.size);
 
         return true;
     }
 
-    void StorageBufferInstanceData::flush() {
+    void StorageBufferInstanceData::flush()
+    {
         flush(nullptr);
     }
 
-    void StorageBufferInstanceData::flush(const CommandBuffer* commandBuffer) {
+    void StorageBufferInstanceData::flush(const CommandBuffer* commandBuffer)
+    {
         // No need to flush! :D
     }
 
-    InstanceData::Implementation& StorageBufferInstanceData::
-    getImplementation() {
+    InstanceData::Implementation& StorageBufferInstanceData::getImplementation()
+    {
         throw std::runtime_error("Method not implemented");
     }
 
-    const InstanceData::Implementation& StorageBufferInstanceData::
-    getImplementation() const {
+    const InstanceData::Implementation& StorageBufferInstanceData::getImplementation() const
+    {
         throw std::runtime_error("Method not implemented");
     }
-}
+} // namespace neon

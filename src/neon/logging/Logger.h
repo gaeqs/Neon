@@ -13,20 +13,22 @@
 #include <neon/logging/LogOutput.h>
 #include <neon/logging/Message.h>
 
-namespace neon {
+namespace neon
+{
     /**
      * The main class of the logging system.
      * This class allows the use to print custom messages,
      * propagating them to the registered outputs.
      */
-    class Logger {
+    class Logger
+    {
         std::vector<std::unique_ptr<LogOutput>> _outputs;
         std::unordered_map<std::string, MessageGroup> _groups;
         mutable std::mutex _mutex;
 
         void addDefaultGroups();
 
-    public:
+      public:
         Logger(const Logger& other) = delete;
 
         /**
@@ -39,8 +41,7 @@ namespace neon {
          * the default logger. If true, you can access this logger using
          * Logger::defaultLogger().
          */
-        explicit Logger(bool withDefaultGroups = true,
-                        bool withDefaultOutput = true);
+        explicit Logger(bool withDefaultGroups = true, bool withDefaultOutput = true);
 
         /**
          * Adds a new log output.
@@ -52,8 +53,7 @@ namespace neon {
         /**
          * @return the list of outputs inside this logger.
          */
-        [[nodiscard]] const std::vector<std::unique_ptr<LogOutput>>&
-        getOutputs() const;
+        [[nodiscard]] const std::vector<std::unique_ptr<LogOutput>>& getOutputs() const;
 
         /**
          * Removes the output that matches the given id.
@@ -88,70 +88,50 @@ namespace neon {
          * @param message the message.
          * @param location the location where this function has been called.
          */
-        void print(
-            const MessageBuilder& message,
-            std::source_location location = std::source_location::current()
-        ) const;
+        void print(const MessageBuilder& message,
+                   std::source_location location = std::source_location::current()) const;
 
         /**
          * Prints the given message.
          * @param message the message.
          * @param location the location where this function has been called.
          */
-        void print(
-            std::string message,
-            std::source_location location = std::source_location::current()
-        ) const;
+        void print(std::string message, std::source_location location = std::source_location::current()) const;
 
         /**
          * Prints the given message using the group log "info".
          * @param message the message.
          * @param location the location where this function has been called.
          */
-        void info(
-            std::string message,
-            std::source_location location = std::source_location::current()
-        ) const;
+        void info(std::string message, std::source_location location = std::source_location::current()) const;
 
         /**
          * Prints the given message using the group log "done".
          * @param message the message.
          * @param location the location where this function has been called.
          */
-        void done(
-            std::string message,
-            std::source_location location = std::source_location::current()
-        ) const;
+        void done(std::string message, std::source_location location = std::source_location::current()) const;
 
         /**
          * Prints the given message using the group log "debug".
          * @param message the message.
          * @param location the location where this function has been called.
          */
-        void debug(
-            std::string message,
-            std::source_location location = std::source_location::current()
-        ) const;
+        void debug(std::string message, std::source_location location = std::source_location::current()) const;
 
         /**
          * Prints the given message using the group log "warning".
          * @param message the message.
          * @param location the location where this function has been called.
          */
-        void warning(
-            std::string message,
-            std::source_location location = std::source_location::current()
-        ) const;
+        void warning(std::string message, std::source_location location = std::source_location::current()) const;
 
         /**
          * Prints the given message using the group log "error".
          * @param message the message.
          * @param location the location where this function has been called.
          */
-        void error(
-            std::string message,
-            std::source_location location = std::source_location::current()
-        ) const;
+        void error(std::string message, std::source_location location = std::source_location::current()) const;
 
         /**
          * Prints the given message using the group log "info".
@@ -199,10 +179,7 @@ namespace neon {
          * @param message the message.
          * @param location the location where this function has been called.
          */
-        void info(
-            const MessageBuilder& message,
-            std::source_location location = std::source_location::current()
-        ) const;
+        void info(const MessageBuilder& message, std::source_location location = std::source_location::current()) const;
 
         /**
          * Build and prints the given message
@@ -210,10 +187,7 @@ namespace neon {
          * @param message the message.
          * @param location the location where this function has been called.
          */
-        void done(
-            const MessageBuilder& message,
-            std::source_location location = std::source_location::current()
-        ) const;
+        void done(const MessageBuilder& message, std::source_location location = std::source_location::current()) const;
 
         /**
          * Build and prints the given message
@@ -221,10 +195,8 @@ namespace neon {
          * @param message the message.
          * @param location the location where this function has been called.
          */
-        void debug(
-            const MessageBuilder& message,
-            std::source_location location = std::source_location::current()
-        ) const;
+        void debug(const MessageBuilder& message,
+                   std::source_location location = std::source_location::current()) const;
 
         /**
          * Build and prints the given message
@@ -232,10 +204,8 @@ namespace neon {
          * @param message the message.
          * @param location the location where this function has been called.
          */
-        void warning(
-            const MessageBuilder& message,
-            std::source_location location = std::source_location::current()
-        ) const;
+        void warning(const MessageBuilder& message,
+                     std::source_location location = std::source_location::current()) const;
 
         /**
          * Build and prints the given message
@@ -243,54 +213,64 @@ namespace neon {
          * @param message the message.
          * @param location the location where this function has been called.
          */
-        void error(
-            const MessageBuilder& message,
-            std::source_location location = std::source_location::current()
-        ) const;
+        void error(const MessageBuilder& message,
+                   std::source_location location = std::source_location::current()) const;
 
-        template<typename T> requires(!std::is_convertible_v<T, std::string> &&
-                                      !std::is_same_v<T, Message> && !std::is_same_v<T, MessageBuilder>)
-        void print(const T& t) {
+        template<typename T>
+            requires(!std::is_convertible_v<T, std::string> && !std::is_same_v<T, Message> &&
+                     !std::is_same_v<T, MessageBuilder>)
+        void print(const T& t)
+        {
             std::stringstream ss;
             ss << t;
             print(ss.str());
         }
 
-        template<typename T> requires(!std::is_convertible_v<T, std::string> &&
-                                      !std::is_same_v<T, Message> && !std::is_same_v<T, MessageBuilder>)
-        void info(const T& t) {
+        template<typename T>
+            requires(!std::is_convertible_v<T, std::string> && !std::is_same_v<T, Message> &&
+                     !std::is_same_v<T, MessageBuilder>)
+        void info(const T& t)
+        {
             std::stringstream ss;
             ss << t;
             info(ss.str());
         }
 
-        template<typename T> requires(!std::is_convertible_v<T, std::string> &&
-                                      !std::is_same_v<T, Message> && !std::is_same_v<T, MessageBuilder>)
-        void done(const T& t) {
+        template<typename T>
+            requires(!std::is_convertible_v<T, std::string> && !std::is_same_v<T, Message> &&
+                     !std::is_same_v<T, MessageBuilder>)
+        void done(const T& t)
+        {
             std::stringstream ss;
             ss << t;
             done(ss.str());
         }
 
-        template<typename T> requires(!std::is_convertible_v<T, std::string> &&
-                                      !std::is_same_v<T, Message> && !std::is_same_v<T, MessageBuilder>)
-        void debug(const T& t) {
+        template<typename T>
+            requires(!std::is_convertible_v<T, std::string> && !std::is_same_v<T, Message> &&
+                     !std::is_same_v<T, MessageBuilder>)
+        void debug(const T& t)
+        {
             std::stringstream ss;
             ss << t;
             debug(ss.str());
         }
 
-        template<typename T> requires(!std::is_convertible_v<T, std::string> &&
-                                      !std::is_same_v<T, Message> && !std::is_same_v<T, MessageBuilder>)
-        void warning(const T& t) {
+        template<typename T>
+            requires(!std::is_convertible_v<T, std::string> && !std::is_same_v<T, Message> &&
+                     !std::is_same_v<T, MessageBuilder>)
+        void warning(const T& t)
+        {
             std::stringstream ss;
             ss << t;
             warning(ss.str());
         }
 
-        template<typename T> requires(!std::is_convertible_v<T, std::string> &&
-                                      !std::is_same_v<T, Message> && !std::is_same_v<T, MessageBuilder>)
-        void error(const T& t) {
+        template<typename T>
+            requires(!std::is_convertible_v<T, std::string> && !std::is_same_v<T, Message> &&
+                     !std::is_same_v<T, MessageBuilder>)
+        void error(const T& t)
+        {
             std::stringstream ss;
             ss << t;
             error(ss.str());
@@ -312,6 +292,6 @@ namespace neon {
     MessageBuilder error(const std::source_location& location = std::source_location::current());
 
     MessageBuilder debug(const std::source_location& location = std::source_location::current());
-}
+} // namespace neon
 
 #endif //LOGGER_H

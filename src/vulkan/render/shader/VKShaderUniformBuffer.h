@@ -11,7 +11,8 @@
 #include <neon/render/shader/ShaderUniformBinding.h>
 #include <vulkan/render/shader/VKShaderUniformDescriptor.h>
 
-namespace neon {
+namespace neon
+{
     class Application;
 
     class Texture;
@@ -19,14 +20,16 @@ namespace neon {
     class ShaderUniformDescriptor;
 
     class CommandBuffer;
-}
+} // namespace neon
 
-namespace neon::vulkan {
+namespace neon::vulkan
+{
     class AbstractVKApplication;
 
     class Buffer;
 
-    class VKShaderUniformBuffer {
+    class VKShaderUniformBuffer
+    {
         AbstractVKApplication* _vkApplication;
         VkDescriptorPool _descriptorPool;
 
@@ -39,9 +42,8 @@ namespace neon::vulkan {
 
         uint32_t _bindingPoint; // In vulkan this is the "set" parameter.
 
-    public:
-        explicit VKShaderUniformBuffer(
-            const std::shared_ptr<ShaderUniformDescriptor>& descriptor);
+      public:
+        explicit VKShaderUniformBuffer(const std::shared_ptr<ShaderUniformDescriptor>& descriptor);
 
         ~VKShaderUniformBuffer();
 
@@ -61,6 +63,6 @@ namespace neon::vulkan {
 
         void bind(VkCommandBuffer commandBuffer, VkPipelineLayout layout, uint32_t bindingPoint) const;
     };
-}
+} // namespace neon::vulkan
 
 #endif //NEON_VKSHADERUNIFORMBUFFER_H

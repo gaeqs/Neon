@@ -8,19 +8,18 @@
 #include <neon/loader/AssetLoader.h>
 #include <neon/render/shader/ShaderProgram.h>
 
-namespace neon {
-    class ShaderProgramLoader : public AssetLoader<ShaderProgram> {
-    public:
+namespace neon
+{
+    class ShaderProgramLoader : public AssetLoader<ShaderProgram>
+    {
+      public:
         ShaderProgramLoader() = default;
 
         ~ShaderProgramLoader() override = default;
 
-        std::shared_ptr<ShaderProgram> loadAsset(
-            std::string name,
-            nlohmann::json json,
-            AssetLoaderContext context) override;
+        std::shared_ptr<ShaderProgram> loadAsset(std::string name, nlohmann::json json,
+                                                 AssetLoaderContext context) override;
     };
-}
-
+} // namespace neon
 
 #endif //SHADERASSETLOADER_H

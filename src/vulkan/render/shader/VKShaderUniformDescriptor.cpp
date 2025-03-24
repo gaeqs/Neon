@@ -6,9 +6,10 @@
 
 #include <stdexcept>
 
-namespace neon::vulkan {
-    VkDescriptorType
-    VKShaderUniformDescriptor::getType(UniformBindingType type) {
+namespace neon::vulkan
+{
+    VkDescriptorType VKShaderUniformDescriptor::getType(UniformBindingType type)
+    {
         switch (type) {
             case UniformBindingType::IMAGE:
                 return VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
@@ -20,17 +21,16 @@ namespace neon::vulkan {
         }
     }
 
-    VKShaderUniformDescriptor::VKShaderUniformDescriptor(
-        Application* application,
-        const std::vector<ShaderUniformBinding>& bindings) :
-        _vkApplication(dynamic_cast<AbstractVKApplication*>(
-            application->getImplementation())),
+    VKShaderUniformDescriptor::VKShaderUniformDescriptor(Application* application,
+                                                         const std::vector<ShaderUniformBinding>& bindings) :
+        _vkApplication(dynamic_cast<AbstractVKApplication*>(application->getImplementation())),
         _bindings(bindings),
-        _descriptorSetLayout(VK_NULL_HANDLE) {
+        _descriptorSetLayout(VK_NULL_HANDLE)
+    {
         std::vector<VkDescriptorSetLayoutBinding> layoutBindings;
         layoutBindings.reserve(bindings.size());
 
-        for (const auto& binding: bindings) {
+        for (const auto& binding : bindings) {
             VkDescriptorSetLayoutBinding uboLayoutBinding{};
             uboLayoutBinding.binding = static_cast<uint32_t>(layoutBindings.size());
             uboLayoutBinding.descriptorType = getType(binding.type);
@@ -45,29 +45,29 @@ namespace neon::vulkan {
         layoutInfo.bindingCount = static_cast<uint32_t>(layoutBindings.size());
         layoutInfo.pBindings = layoutBindings.data();
 
-        if (vkCreateDescriptorSetLayout(
-                _vkApplication->getDevice()->getRaw(), &layoutInfo,
-                nullptr, &_descriptorSetLayout) != VK_SUCCESS) {
+        if (vkCreateDescriptorSetLayout(_vkApplication->getDevice()->getRaw(), &layoutInfo, nullptr,
+                                        &_descriptorSetLayout) != VK_SUCCESS) {
             throw std::runtime_error("Failed to create descriptor set layout!");
         }
     }
 
-    VKShaderUniformDescriptor::~VKShaderUniformDescriptor() {
-        vkDestroyDescriptorSetLayout(_vkApplication->getDevice()->getRaw(),
-                                     _descriptorSetLayout, nullptr);
+    VKShaderUniformDescriptor::~VKShaderUniformDescriptor()
+    {
+        vkDestroyDescriptorSetLayout(_vkApplication->getDevice()->getRaw(), _descriptorSetLayout, nullptr);
     }
 
-    AbstractVKApplication* VKShaderUniformDescriptor::getVkApplication() const {
+    AbstractVKApplication* VKShaderUniformDescriptor::getVkApplication() const
+    {
         return _vkApplication;
     }
 
-    VkDescriptorSetLayout
-    VKShaderUniformDescriptor::getDescriptorSetLayout() const {
+    VkDescriptorSetLayout VKShaderUniformDescriptor::getDescriptorSetLayout() const
+    {
         return _descriptorSetLayout;
     }
 
-    const std::vector<ShaderUniformBinding>&
-    VKShaderUniformDescriptor::getBindings() const {
+    const std::vector<ShaderUniformBinding>& VKShaderUniformDescriptor::getBindings() const
+    {
         return _bindings;
     }
-}
+} // namespace neon::vulkan

@@ -4,42 +4,52 @@
 
 #include "SwapChainFrameBuffer.h"
 
-namespace neon {
-    SwapChainFrameBuffer::SwapChainFrameBuffer(
-        Application* application, std::string name, SamplesPerTexel samples, bool depth) :
+namespace neon
+{
+    SwapChainFrameBuffer::SwapChainFrameBuffer(Application* application, std::string name, SamplesPerTexel samples,
+                                               bool depth) :
         FrameBuffer(std::move(name)),
-        _implementation(application, samples, depth) {}
+        _implementation(application, samples, depth)
+    {
+    }
 
-    bool SwapChainFrameBuffer::requiresRecreation() {
+    bool SwapChainFrameBuffer::requiresRecreation()
+    {
         return _implementation.requiresRecreation();
     }
 
-    void SwapChainFrameBuffer::recreate() {
+    void SwapChainFrameBuffer::recreate()
+    {
         _implementation.recreate();
     }
 
-    FrameBuffer::Implementation& SwapChainFrameBuffer::getImplementation() {
+    FrameBuffer::Implementation& SwapChainFrameBuffer::getImplementation()
+    {
         return _implementation;
     }
 
-    const FrameBuffer::Implementation&
-    SwapChainFrameBuffer::getImplementation() const {
+    const FrameBuffer::Implementation& SwapChainFrameBuffer::getImplementation() const
+    {
         return _implementation;
     }
 
-    std::vector<FrameBufferOutput> SwapChainFrameBuffer::getOutputs() const {
+    std::vector<FrameBufferOutput> SwapChainFrameBuffer::getOutputs() const
+    {
         return {};
     }
 
-    uint32_t SwapChainFrameBuffer::getWidth() const {
+    uint32_t SwapChainFrameBuffer::getWidth() const
+    {
         return _implementation.getWidth();
     }
 
-    uint32_t SwapChainFrameBuffer::getHeight() const {
+    uint32_t SwapChainFrameBuffer::getHeight() const
+    {
         return _implementation.getHeight();
     }
 
-    SamplesPerTexel SwapChainFrameBuffer::getSamples() const {
+    SamplesPerTexel SwapChainFrameBuffer::getSamples() const
+    {
         return _implementation.getSamples();
     }
-}
+} // namespace neon

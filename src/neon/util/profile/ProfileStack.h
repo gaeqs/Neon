@@ -12,9 +12,10 @@
 #include <memory>
 #include <string>
 
-namespace neon {
-    class ProfileStack {
-
+namespace neon
+{
+    class ProfileStack
+    {
         using ProfileDuration = std::chrono::duration<uint64_t, std::nano>;
 
         std::string _name;
@@ -22,8 +23,7 @@ namespace neon {
         std::deque<ProfileDuration> _durations;
         std::unordered_map<std::string, std::shared_ptr<ProfileStack>> _children;
 
-    public:
-
+      public:
         constexpr static int MAX_DURATIONS = 10;
 
         ProfileStack(std::string name, ProfileStack* parent);
@@ -35,20 +35,16 @@ namespace neon {
         [[nodiscard]] ProfileStack* getParent() const;
 
         [[nodiscard]]
-        const std::unordered_map<std::string, std::shared_ptr<ProfileStack>>&
-        getChildren() const;
+        const std::unordered_map<std::string, std::shared_ptr<ProfileStack>>& getChildren() const;
 
-        [[nodiscard]] std::optional<std::shared_ptr<ProfileStack>>
-        getChild(const std::string& name) const;
+        [[nodiscard]] std::optional<std::shared_ptr<ProfileStack>> getChild(const std::string& name) const;
 
-        [[nodiscard]] std::shared_ptr<ProfileStack>
-        getOrCreateChild(const std::string& name);
+        [[nodiscard]] std::shared_ptr<ProfileStack> getOrCreateChild(const std::string& name);
 
         [[nodiscard]] const std::deque<ProfileDuration>& getDurations() const;
 
         [[nodiscard]] ProfileDuration getAverageDuration() const;
-
     };
-}
+} // namespace neon
 
 #endif //NEON_PROFILESTACK_H

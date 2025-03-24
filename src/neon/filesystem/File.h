@@ -9,13 +9,15 @@
 #include <cstddef>
 #include <nlohmann/json.hpp>
 
-namespace neon {
-    class File {
+namespace neon
+{
+    class File
+    {
         const char* _data;
         size_t _size;
         bool _autoFree;
 
-    public:
+      public:
         File();
 
         File(const File& other) = delete;
@@ -40,7 +42,6 @@ namespace neon {
 
         [[nodiscard]] std::vector<std::string> readLines() const;
     };
-}
-
+} // namespace neon
 
 #endif //FILE_H

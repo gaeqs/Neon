@@ -4,8 +4,10 @@
 
 #include "VKQueueProvider.h"
 
-namespace neon::vulkan {
-    void VKQueueProvider::freeQueue(uint32_t family, uint32_t index) {
+namespace neon::vulkan
+{
+    void VKQueueProvider::freeQueue(uint32_t family, uint32_t index)
+    {
         if (_availableQueues.size() <= family) {
             return;
         }
@@ -28,17 +30,16 @@ namespace neon::vulkan {
         }
     }
 
-    VKQueueProvider::
-    VKQueueProvider(VkDevice device,
-                    VKQueueFamilyCollection families,
-                    const std::vector<uint32_t>& presentQueues)
-        : _device(device),
-          _families(std::move(families)),
-          _mutexes(_families.getFamilies().size()),
-          _conditions(_families.getFamilies().size()) {
+    VKQueueProvider::VKQueueProvider(VkDevice device, VKQueueFamilyCollection families,
+                                     const std::vector<uint32_t>& presentQueues) :
+        _device(device),
+        _families(std::move(families)),
+        _mutexes(_families.getFamilies().size()),
+        _conditions(_families.getFamilies().size())
+    {
         _usedQueues.resize(_families.getFamilies().size());
         _availableQueues.reserve(presentQueues.size());
-        for (uint32_t count: presentQueues) {
+        for (uint32_t count : presentQueues) {
             auto& vec = _availableQueues.emplace_back();
             vec.reserve(count);
             for (uint32_t i = 0; i < count; ++i) {
@@ -47,15 +48,18 @@ namespace neon::vulkan {
         }
     }
 
-    VkDevice VKQueueProvider::getDevice() const {
+    VkDevice VKQueueProvider::getDevice() const
+    {
         return _device;
     }
 
-    const VKQueueFamilyCollection& VKQueueProvider::getFamilies() const {
+    const VKQueueFamilyCollection& VKQueueProvider::getFamilies() const
+    {
         return _families;
     }
 
-    VKQueueHolder VKQueueProvider::fetchQueue(uint32_t familyIndex) {
+    VKQueueHolder VKQueueProvider::fetchQueue(uint32_t familyIndex)
+    {
         if (_availableQueues.size() <= familyIndex) {
             return {};
         }
@@ -68,19 +72,12 @@ namespace neon::vulkan {
         auto entry = map.find(threadId);
         if (entry != map.end()) {
             entry->second.amount++;
-            return {
-                this,
-                entry->second.queue,
-                familyIndex,
-                entry->second.index
-            };
+            return {this, entry->second.queue, familyIndex, entry->second.index};
         }
 
         auto& queues = _availableQueues[familyIndex];
 
-        _conditions[familyIndex].wait(lock, [&] {
-            return !queues.empty();
-        });
+        _conditions[familyIndex].wait(lock, [&] { return !queues.empty(); });
 
         uint32_t index = queues.back();
         queues.pop_back();
@@ -92,19 +89,23 @@ namespace neon::vulkan {
         return {this, queue, familyIndex, index};
     }
 
-    VKQueueHolder VKQueueProvider::fetchCompatibleQueue(
-        const VKQueueFamily::Capabilities& capabilities) {
+    VKQueueHolder VKQueueProvider::fetchCompatibleQueue(const VKQueueFamily::Capabilities& capabilities)
+    {
         std::vector<const VKQueueFamily*> families;
         _families.getAllCompatibleQueueFamilies(capabilities, families);
 
-        if (families.empty()) return {};
-        if (families.size() == 1) return fetchQueue(families[0]->getIndex());
+        if (families.empty()) {
+            return {};
+        }
+        if (families.size() == 1) {
+            return fetchQueue(families[0]->getIndex());
+        }
 
         std::thread::id threadId = std::this_thread::get_id();
         std::unique_lock lock(_anyMutex);
 
         while (true) {
-            for (auto& family: families) {
+            for (auto& family : families) {
                 uint32_t familyIndex = family->getIndex();
                 std::lock_guard queueLock(_mutexes[familyIndex]);
 
@@ -113,12 +114,7 @@ namespace neon::vulkan {
                 auto entry = map.find(threadId);
                 if (entry != map.end()) {
                     entry->second.amount++;
-                    return {
-                        this,
-                        entry->second.queue,
-                        familyIndex,
-                        entry->second.index
-                    };
+                    return {this, entry->second.queue, familyIndex, entry->second.index};
                 }
 
                 auto& queues = _availableQueues[familyIndex];
@@ -137,8 +133,8 @@ namespace neon::vulkan {
         }
     }
 
-    bool VKQueueProvider::markUsed(std::thread::id thread, uint32_t family,
-                                   uint32_t index) {
+    bool VKQueueProvider::markUsed(std::thread::id thread, uint32_t family, uint32_t index)
+    {
         if (_availableQueues.size() <= family) {
             return false;
         }
@@ -172,55 +168,63 @@ namespace neon::vulkan {
         return true;
     }
 
-    VKQueueHolder::VKQueueHolder()
-        : _provider(nullptr),
-          _queue(VK_NULL_HANDLE),
-          _family(0),
-          _index(0),
-          _valid(false) {}
+    VKQueueHolder::VKQueueHolder() :
+        _provider(nullptr),
+        _queue(VK_NULL_HANDLE),
+        _family(0),
+        _index(0),
+        _valid(false)
+    {
+    }
 
-    VKQueueHolder::VKQueueHolder(VKQueueProvider* provider,
-                                 VkQueue queue,
-                                 uint32_t family,
-                                 uint32_t index)
-        : _provider(provider),
-          _queue(queue),
-          _family(family),
-          _index(index),
-          _valid(true) {}
+    VKQueueHolder::VKQueueHolder(VKQueueProvider* provider, VkQueue queue, uint32_t family, uint32_t index) :
+        _provider(provider),
+        _queue(queue),
+        _family(family),
+        _index(index),
+        _valid(true)
+    {
+    }
 
-    VKQueueHolder::VKQueueHolder(VKQueueHolder&& move) noexcept
-        : _provider(move._provider),
-          _queue(move._queue),
-          _family(move._family),
-          _index(move._index),
-          _valid(move._valid) {
+    VKQueueHolder::VKQueueHolder(VKQueueHolder&& move) noexcept :
+        _provider(move._provider),
+        _queue(move._queue),
+        _family(move._family),
+        _index(move._index),
+        _valid(move._valid)
+    {
         move._valid = false;
     }
 
-    VKQueueHolder::~VKQueueHolder() {
+    VKQueueHolder::~VKQueueHolder()
+    {
         if (_valid) {
             _provider->freeQueue(_family, _index);
         }
     }
 
-    VkQueue VKQueueHolder::getQueue() const {
+    VkQueue VKQueueHolder::getQueue() const
+    {
         return _queue;
     }
 
-    uint32_t VKQueueHolder::getFamily() const {
+    uint32_t VKQueueHolder::getFamily() const
+    {
         return _family;
     }
 
-    uint32_t VKQueueHolder::getIndex() const {
+    uint32_t VKQueueHolder::getIndex() const
+    {
         return _index;
     }
 
-    bool VKQueueHolder::isValid() const {
+    bool VKQueueHolder::isValid() const
+    {
         return _valid;
     }
 
-    VKQueueHolder& VKQueueHolder::operator=(VKQueueHolder&& move) noexcept {
+    VKQueueHolder& VKQueueHolder::operator=(VKQueueHolder&& move) noexcept
+    {
         _provider = move._provider;
         _queue = move._queue;
         _family = move._family;
@@ -229,4 +233,4 @@ namespace neon::vulkan {
         move._valid = false;
         return *this;
     }
-}
+} // namespace neon::vulkan

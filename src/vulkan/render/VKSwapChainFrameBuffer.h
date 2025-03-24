@@ -10,14 +10,17 @@
 #include <vulkan/render/VKFrameBuffer.h>
 #include <vulkan/render/VKRenderPass.h>
 
-namespace neon {
+namespace neon
+{
     class Application;
 }
 
-namespace neon::vulkan {
+namespace neon::vulkan
+{
     class AbstractVKApplication;
 
-    class VKSwapChainFrameBuffer : public VKFrameBuffer {
+    class VKSwapChainFrameBuffer : public VKFrameBuffer
+    {
         AbstractVKApplication* _vkApplication;
         SamplesPerTexel _samples;
 
@@ -53,7 +56,7 @@ namespace neon::vulkan {
 
         void cleanup();
 
-    public:
+      public:
         VKSwapChainFrameBuffer(Application* application, SamplesPerTexel samples, bool depth);
 
         ~VKSwapChainFrameBuffer() override;
@@ -86,6 +89,6 @@ namespace neon::vulkan {
 
         void recreate();
     };
-}
+} // namespace neon::vulkan
 
 #endif //NEON_VKSWAPCHAINFRAMEBUFFER_H

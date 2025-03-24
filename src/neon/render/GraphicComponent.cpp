@@ -13,13 +13,17 @@
 
 #include <utility>
 
-namespace neon {
-    GraphicComponent::GraphicComponent(): _firstPreDrawExecuted(false) {}
+namespace neon
+{
+    GraphicComponent::GraphicComponent() :
+        _firstPreDrawExecuted(false)
+    {
+    }
 
-    GraphicComponent::GraphicComponent(
-        std::shared_ptr<Model> model)
-        : _model(std::move(model)),
-          _firstPreDrawExecuted(false) {
+    GraphicComponent::GraphicComponent(std::shared_ptr<Model> model) :
+        _model(std::move(model)),
+        _firstPreDrawExecuted(false)
+    {
         if (_model != nullptr) {
             auto result = _model->getInstanceData(0)->createInstance();
             if (result.isOk()) {
@@ -30,16 +34,21 @@ namespace neon {
         }
     }
 
-    GraphicComponent::~GraphicComponent() {
+    GraphicComponent::~GraphicComponent()
+    {
         setModel(nullptr);
     }
 
-    const std::shared_ptr<Model>& GraphicComponent::getModel() const {
+    const std::shared_ptr<Model>& GraphicComponent::getModel() const
+    {
         return _model;
     }
 
-    void GraphicComponent::setModel(const std::shared_ptr<Model>& model) {
-        if (model == _model) return;
+    void GraphicComponent::setModel(const std::shared_ptr<Model>& model)
+    {
+        if (model == _model) {
+            return;
+        }
         if (_model != nullptr) {
             if (_modelTargetId.has_value()) {
                 _model->getInstanceData(0)->freeInstance(_modelTargetId.value());
@@ -60,15 +69,15 @@ namespace neon {
             if (result.isOk()) {
                 _modelTargetId = result.getResult();
             } else {
-                getLogger().error(MessageBuilder()
-                    .print("Error creating a render instance: ")
-                    .print(result.getError()));
+                getLogger().error(
+                    MessageBuilder().print("Error creating a render instance: ").print(result.getError()));
                 _modelTargetId = {};
             }
         }
     }
 
-    void GraphicComponent::onPreDraw() {
+    void GraphicComponent::onPreDraw()
+    {
         if (!_firstPreDrawExecuted) {
             if (_model != nullptr) {
                 getRoom()->markUsingModel(_model.get());
@@ -76,7 +85,9 @@ namespace neon {
             _firstPreDrawExecuted = true;
         }
 
-        if (!_modelTargetId.has_value()) return;
+        if (!_modelTargetId.has_value()) {
+            return;
+        }
 
         auto& types = _model->getInstanceData(0)->getInstancingStructTypes();
 
@@ -92,7 +103,8 @@ namespace neon {
         }
     }
 
-    void GraphicComponent::drawEditor() {
+    void GraphicComponent::drawEditor()
+    {
         static ImGuiTextFilter filter;
 
         auto& models = getAssets().getAll<Model>();
@@ -111,11 +123,14 @@ namespace neon {
         if (ImGui::BeginPopup("model_change_popup")) {
             filter.Draw();
 
-            for (auto& [name, model]: models) {
-                if (model.expired()) continue;
-                if (!filter.PassFilter(name.c_str())) continue;
-                if (ImGui::Selectable(name.c_str(),
-                                      _model->getName() == name)) {
+            for (auto& [name, model] : models) {
+                if (model.expired()) {
+                    continue;
+                }
+                if (!filter.PassFilter(name.c_str())) {
+                    continue;
+                }
+                if (ImGui::Selectable(name.c_str(), _model->getName() == name)) {
                     setModel(std::dynamic_pointer_cast<Model>(model.lock()));
                 }
             }
@@ -123,4 +138,4 @@ namespace neon {
             ImGui::EndPopup();
         }
     }
-}
+} // namespace neon

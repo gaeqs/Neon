@@ -10,34 +10,32 @@
 #include <vulkan/render/model/VKInstanceData.h>
 #include <neon/util/Range.h>
 
-namespace neon {
+namespace neon
+{
     class Application;
 
     class CommandBuffer;
 
     struct ModelCreateInfo;
-}
+} // namespace neon
 
-namespace neon::vulkan {
+namespace neon::vulkan
+{
     class AbstractVKApplication;
 
-    class VKBasicInstanceData : public VKInstanceData {
+    class VKBasicInstanceData : public VKInstanceData
+    {
         AbstractVKApplication* _vkApplication;
         std::vector<std::unique_ptr<Buffer>> _buffers;
 
-    public:
-        VKBasicInstanceData(Application* application,
-                            const ModelCreateInfo& info);
+      public:
+        VKBasicInstanceData(Application* application, const ModelCreateInfo& info);
 
-        [[nodiscard]] const std::vector<std::unique_ptr<Buffer>>&
-        getBuffers() const override;
+        [[nodiscard]] const std::vector<std::unique_ptr<Buffer>>& getBuffers() const override;
 
-        void flush(const CommandBuffer* command,
-                   size_t index,
-                   size_t instanceSize,
-                   void* data,
+        void flush(const CommandBuffer* command, size_t index, size_t instanceSize, void* data,
                    Range<uint32_t> changeRange) const;
     };
-}
+} // namespace neon::vulkan
 
 #endif //VKBASICINSTANCEDATA_H

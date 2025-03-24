@@ -14,32 +14,33 @@
 #include <neon/structure/IdentifiableWrapper.h>
 #include <neon/structure/Identifiable.h>
 
-namespace neon {
+namespace neon
+{
     class Room;
 
     class Component;
 
-/**
- * Represents a object inside a scene.
- * <p>
- * Objects are represented by an identifier, a transform
- * and a collection of components.
- * <p>
- * Components define behaviours to the game object.
- * You can add or remove components from a game object
- * using the appropriated methods.
- */
-    class GameObject : public Identifiable {
-
-        template<class T> friend
-        class IdentifiableWrapper;
+    /**
+     * Represents a object inside a scene.
+     * <p>
+     * Objects are represented by an identifier, a transform
+     * and a collection of components.
+     * <p>
+     * Components define behaviours to the game object.
+     * You can add or remove components from a game object
+     * using the appropriated methods.
+     */
+    class GameObject : public Identifiable
+    {
+        template<class T>
+        friend class IdentifiableWrapper;
 
         uint64_t _id;
         std::string _name;
 
         Transform _transform;
 
-        Room *_room;
+        Room* _room;
         std::unordered_set<IdentifiableWrapper<Component>> _components;
 
         // Hierarchy
@@ -54,11 +55,10 @@ namespace neon {
          *
          * @return the collection.
          */
-        [[nodiscard]] ComponentCollection &getRoomComponents() const;
+        [[nodiscard]] ComponentCollection& getRoomComponents() const;
 
-    public:
-
-        GameObject(const GameObject &other) = delete;
+      public:
+        GameObject(const GameObject& other) = delete;
 
         /**
          * THIS METHOD SHOULD ONLY BE USED BY ROOMS!
@@ -67,7 +67,7 @@ namespace neon {
          * Creates a new game object.
          * @param room the room this game object is inside of.
          */
-        explicit GameObject(Room *room);
+        explicit GameObject(Room* room);
 
         /**
          * This game object's destructor.
@@ -92,32 +92,32 @@ namespace neon {
          *
          * @return the name.
          */
-        const std::string &getName() const;
+        const std::string& getName() const;
 
         /**
          * Sets the name of this game object.
          *
          * @param name the name.
          */
-        void setName(const std::string &name);
+        void setName(const std::string& name);
 
         /**
          * Returns the transformation of this game objet.
          * @return the transformation.
          */
-        [[nodiscard]] const Transform &getTransform() const;
+        [[nodiscard]] const Transform& getTransform() const;
 
         /**
          * Returns the transformation of this game objet.
          * @return the transformation.
          */
-        [[nodiscard]] Transform &getTransform();
+        [[nodiscard]] Transform& getTransform();
 
         /**
          * Returns the room this game object is inside of.
          * @return the room.
          */
-        [[nodiscard]] Room *getRoom() const;
+        [[nodiscard]] Room* getRoom() const;
 
         /**
          * Destroys this game object.
@@ -155,7 +155,7 @@ namespace neon {
          *
          * @param parent the parent or null.
          */
-        void setParent(const IdentifiableWrapper<GameObject> &parent);
+        void setParent(const IdentifiableWrapper<GameObject>& parent);
 
         /**
          * Returns the collection of children of this game object.
@@ -165,8 +165,7 @@ namespace neon {
          *
          * @return the collection of children.
          */
-        [[nodiscard]] const std::unordered_set<IdentifiableWrapper<GameObject>> &
-        getChildren() const;
+        [[nodiscard]] const std::unordered_set<IdentifiableWrapper<GameObject>>& getChildren() const;
 
         /**
          * Returns a collection with all components inside this
@@ -179,8 +178,7 @@ namespace neon {
          *
          * @return the components.
          */
-        [[nodiscard]] const std::unordered_set<IdentifiableWrapper<Component>> &
-        getComponents() const;
+        [[nodiscard]] const std::unordered_set<IdentifiableWrapper<Component>>& getComponents() const;
 
         /**
          * Creates a new component, attaching it to this game object.
@@ -190,13 +188,12 @@ namespace neon {
          * @return a reference pointing to the new component.
          */
         template<class T, class... Args>
-        requires std::is_base_of_v<Component, T>
-        IdentifiableWrapper<T> newComponent(Args &&... values) {
-            IdentifiableWrapper<T> component =
-                    getRoomComponents().newComponent<T>(
-                     std::forward<Args>(values)...);
+            requires std::is_base_of_v<Component, T>
+        IdentifiableWrapper<T> newComponent(Args&&... values)
+        {
+            IdentifiableWrapper<T> component = getRoomComponents().newComponent<T>(std::forward<Args>(values)...);
             component->_gameObject = this;
-            auto raw = *reinterpret_cast<IdentifiableWrapper<Component> *>(&component);
+            auto raw = *reinterpret_cast<IdentifiableWrapper<Component>*>(&component);
             _components.insert(raw);
             return component;
         }
@@ -225,10 +222,11 @@ namespace neon {
          * @return the component or null.
          */
         template<class T>
-        requires std::is_base_of_v<Component, T>
-        [[nodiscard]] IdentifiableWrapper<T> findComponent() {
-            for (const auto &item: _components) {
-                if (auto t = dynamic_cast<T *>(item.raw())) {
+            requires std::is_base_of_v<Component, T>
+        [[nodiscard]] IdentifiableWrapper<T> findComponent()
+        {
+            for (const auto& item : _components) {
+                if (auto t = dynamic_cast<T*>(item.raw())) {
                     return t;
                 }
             }
@@ -246,19 +244,18 @@ namespace neon {
          * @return the list.
          */
         template<class T>
-        requires std::is_base_of_v<Component, T>
-        [[nodiscard]] std::vector<IdentifiableWrapper<T>> findComponents() {
+            requires std::is_base_of_v<Component, T>
+        [[nodiscard]] std::vector<IdentifiableWrapper<T>> findComponents()
+        {
             std::vector<IdentifiableWrapper<T>> list;
-            for (const auto &item: _components) {
-                if (auto d = dynamic_cast<T *>(item.raw())) {
+            for (const auto& item : _components) {
+                if (auto d = dynamic_cast<T*>(item.raw())) {
                     list.push_back(d);
                 }
             }
             return list;
         }
-
     };
-}
-
+} // namespace neon
 
 #endif //RVTRACKING_GAMEOBJECT_H

@@ -12,23 +12,25 @@
 
 #ifdef USE_VULKAN
 
-#include <optional>
-#include <unordered_map>
+    #include <optional>
+    #include <unordered_map>
 
-#include <vulkan/render/VKFrameBuffer.h>
+    #include <vulkan/render/VKFrameBuffer.h>
 
-#include <rush/rush.h>
+    #include <rush/rush.h>
 
 #endif
 
-namespace neon {
+namespace neon
+{
     class Texture;
 
-    class FrameBuffer : public Asset {
+    class FrameBuffer : public Asset
+    {
         std::unordered_map<uint32_t, rush::Vec4f> _clearColors;
         std::pair<float, uint32_t> _depthClear;
 
-    public:
+      public:
 #ifdef USE_VULKAN
         using Implementation = vulkan::VKFrameBuffer;
 #endif
@@ -39,8 +41,7 @@ namespace neon {
 
         ~FrameBuffer() override = default;
 
-        [[nodiscard]] std::optional<rush::Vec4f>
-        getClearColor(uint32_t index) const;
+        [[nodiscard]] std::optional<rush::Vec4f> getClearColor(uint32_t index) const;
 
         void setClearColor(uint32_t index, rush::Vec4f color);
 
@@ -66,6 +67,6 @@ namespace neon {
 
         [[nodiscard]] virtual SamplesPerTexel getSamples() const = 0;
     };
-}
+} // namespace neon
 
 #endif //NEON_FRAMEBUFFER_H

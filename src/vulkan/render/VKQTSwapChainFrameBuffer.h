@@ -10,11 +10,13 @@
 #include <vulkan/render/VKFrameBuffer.h>
 #include <vulkan/render/VKRenderPass.h>
 
-namespace neon {
+namespace neon
+{
     class Application;
 }
 
-namespace neon::vulkan {
+namespace neon::vulkan
+{
 
     class QTApplication;
 

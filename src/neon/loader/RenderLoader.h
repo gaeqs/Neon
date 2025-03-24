@@ -8,14 +8,15 @@
 #include <neon/loader/AssetLoader.h>
 #include <neon/render/Render.h>
 
-namespace neon {
-    class RenderLoader : public AssetLoader<Render> {
-    public:
+namespace neon
+{
+    class RenderLoader : public AssetLoader<Render>
+    {
+      public:
         ~RenderLoader() override = default;
 
         std::shared_ptr<Render> loadAsset(std::string name, nlohmann::json json, AssetLoaderContext context) override;
     };
-}
-
+} // namespace neon
 
 #endif //RENDERLOADER_H

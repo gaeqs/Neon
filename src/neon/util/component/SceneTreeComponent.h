@@ -9,29 +9,26 @@
 
 #include <neon/util/component/GameObjectExplorerComponent.h>
 
-namespace neon {
-    class SceneTreeComponent : public Component {
-
+namespace neon
+{
+    class SceneTreeComponent : public Component
+    {
         static constexpr float TIME_BEFORE_POPUPLATION = 3.0f;
 
         IdentifiableWrapper<GameObjectExplorerComponent> _explorer;
         std::vector<IdentifiableWrapper<GameObject>> _roots;
         float _timeBeforePopulation;
 
-        bool recursiveTreePopulation(
-                const std::unordered_set<IdentifiableWrapper<GameObject>>& objects);
+        bool recursiveTreePopulation(const std::unordered_set<IdentifiableWrapper<GameObject>>& objects);
 
         void popuplate();
 
-    public:
-
-        SceneTreeComponent(
-                IdentifiableWrapper<GameObjectExplorerComponent> explorer);
+      public:
+        SceneTreeComponent(IdentifiableWrapper<GameObjectExplorerComponent> explorer);
 
         void onPreDraw() override;
-
     };
     REGISTER_COMPONENT(SceneTreeComponent, "Scene Tree")
-}
+} // namespace neon
 
 #endif //NEON_SCENETREECOMPONENT_H

@@ -8,19 +8,21 @@
 #include <memory>
 #include <neon/render/texture/Texture.h>
 
-namespace neon {
-    enum class FrameBufferOutputType {
+namespace neon
+{
+    enum class FrameBufferOutputType
+    {
         COLOR,
         DEPTH,
         SWAP
     };
 
-    struct FrameBufferOutput {
+    struct FrameBufferOutput
+    {
         FrameBufferOutputType type;
         std::shared_ptr<Texture> texture;
         std::shared_ptr<Texture> resolvedTexture;
     };
-}
-
+} // namespace neon
 
 #endif //FRAMEBUFFEROUTPUT_H

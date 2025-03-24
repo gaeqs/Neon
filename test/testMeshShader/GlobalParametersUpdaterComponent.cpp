@@ -6,19 +6,14 @@
 
 GlobalParametersUpdaterComponent::~GlobalParametersUpdaterComponent() = default;
 
-void GlobalParametersUpdaterComponent::onStart() {
+void GlobalParametersUpdaterComponent::onStart()
+{
 }
 
-void GlobalParametersUpdaterComponent::onUpdate(float deltaTime) {
+void GlobalParametersUpdaterComponent::onUpdate(float deltaTime)
+{
     auto& camera = getRoom()->getCamera();
-    getApplication()->getRender()
-            ->getGlobalUniformBuffer().uploadData<Matrices>(
-                    0,
-                    Matrices{
-                            camera.getView(),
-                            camera.getViewProjection(),
-                            camera.getFrustum().getInverseProjection(),
-                            camera.getFrustum().getNear(),
-                            camera.getFrustum().getFar()
-                    });
+    getApplication()->getRender()->getGlobalUniformBuffer().uploadData<Matrices>(
+        0, Matrices{camera.getView(), camera.getViewProjection(), camera.getFrustum().getInverseProjection(),
+                    camera.getFrustum().getNear(), camera.getFrustum().getFar()});
 }

@@ -10,11 +10,12 @@
 
 #if USE_VULKAN
 
-#include <vulkan/render/VKCommandPool.h>
+    #include <vulkan/render/VKCommandPool.h>
 
 #endif
 
-namespace neon {
+namespace neon
+{
 #if USE_VULKAN
     using Implementation = vulkan::VKCommandPool;
 #endif
@@ -23,7 +24,8 @@ namespace neon {
 
     class CommandBuffer;
 
-    class CommandPool {
+    class CommandPool
+    {
         Implementation _implementation;
 
         std::vector<std::unique_ptr<CommandBuffer>> _buffers;
@@ -32,7 +34,7 @@ namespace neon {
 
         void checkUsedBufferForAvailability();
 
-    public:
+      public:
         CommandPool(const CommandPool& other) = delete;
 
         CommandPool(CommandPool&& move) noexcept;
@@ -41,9 +43,7 @@ namespace neon {
 
 #ifdef USE_VULKAN
 
-        CommandPool(Application* application,
-                    VkCommandPool pool,
-                    uint32_t queueFamilyIndex);
+        CommandPool(Application* application, VkCommandPool pool, uint32_t queueFamilyIndex);
 
 #endif
 
@@ -57,7 +57,6 @@ namespace neon {
 
         CommandPool& operator=(CommandPool&& move) noexcept;
     };
-}
-
+} // namespace neon
 
 #endif //COMMANDPOOL_H

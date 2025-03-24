@@ -9,14 +9,17 @@
 #include <optional>
 #include <string>
 
-namespace neon {
-    enum class UniformBindingType {
+namespace neon
+{
+    enum class UniformBindingType
+    {
         UNIFORM_BUFFER,
         STORAGE_BUFFER,
         IMAGE
     };
 
-    enum class UniformBindingBufferType {
+    enum class UniformBindingBufferType
+    {
         /**
          * Use a staging buffer for this binding.
          *
@@ -37,19 +40,25 @@ namespace neon {
         SIMPLE
     };
 
-    struct ShaderUniformBinding {
+    struct ShaderUniformBinding
+    {
         UniformBindingType type;
         UniformBindingBufferType bufferType;
         uint32_t size;
 
-        ShaderUniformBinding(UniformBindingType type_, UniformBindingBufferType bufferType_, uint32_t size_)
-            : type(type_), bufferType(bufferType_), size(size_) {}
+        ShaderUniformBinding(UniformBindingType type_, UniformBindingBufferType bufferType_, uint32_t size_) :
+            type(type_),
+            bufferType(bufferType_),
+            size(size_)
+        {
+        }
 
         /**
          * Creates a ShaderUniformBinding representing an image.
          * @return the ShaderUniformBinding.
          */
-        static ShaderUniformBinding image() {
+        static ShaderUniformBinding image()
+        {
             return {UniformBindingType::IMAGE, UniformBindingBufferType::STAGING, 0};
         }
 
@@ -60,8 +69,8 @@ namespace neon {
          * @return the ShaderUniformBinding.
          */
         static ShaderUniformBinding uniformBuffer(
-            uint32_t size_,
-            UniformBindingBufferType bufferType_ = UniformBindingBufferType::STAGING) {
+            uint32_t size_, UniformBindingBufferType bufferType_ = UniformBindingBufferType::STAGING)
+        {
             return {UniformBindingType::UNIFORM_BUFFER, bufferType_, size_};
         }
 
@@ -74,16 +83,16 @@ namespace neon {
          * @return the ShaderUniformBinding.
          */
         static ShaderUniformBinding storageBuffer(
-            uint32_t size_,
-            UniformBindingBufferType bufferType_ = UniformBindingBufferType::STAGING) {
+            uint32_t size_, UniformBindingBufferType bufferType_ = UniformBindingBufferType::STAGING)
+        {
             return {UniformBindingType::STORAGE_BUFFER, bufferType_, size_};
         }
     };
 
-    namespace serialization {
+    namespace serialization
+    {
         std::optional<UniformBindingType> toUniformBindingType(std::string s);
     }
-}
-
+} // namespace neon
 
 #endif //NEON_SHADERUNIFORMBINDING_H

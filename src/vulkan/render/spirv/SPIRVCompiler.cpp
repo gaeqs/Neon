@@ -9,18 +9,18 @@
 #include "glslang/Include/Types.h"
 #include "SPIRV/GlslangToSpv.h"
 
-namespace neon::vulkan {
+namespace neon::vulkan
+{
     constexpr int DEFAULT_VERSION = 450;
 
     static bool GLSLANG_INITIALIZED = false;
 
-    TBuiltInResource SPIRVCompiler::generateDefaultResources(
-        const VKPhysicalDevice& device) {
+    TBuiltInResource SPIRVCompiler::generateDefaultResources(const VKPhysicalDevice& device)
+    {
         auto& limits = device.getProperties().limits;
 
         VkPhysicalDeviceMeshShaderPropertiesEXT meshProp = {};
-        meshProp.sType =
-                VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MESH_SHADER_PROPERTIES_EXT;
+        meshProp.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MESH_SHADER_PROPERTIES_EXT;
         meshProp.pNext = nullptr;
         VkPhysicalDeviceProperties2 properties2 = {};
         properties2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2;
@@ -32,8 +32,7 @@ namespace neon::vulkan {
         resources.maxClipPlanes = static_cast<int>(limits.maxClipDistances);
         resources.maxTextureUnits = 32;
         resources.maxTextureCoords = 32;
-        resources.maxVertexAttribs = static_cast<int>(limits.
-            maxVertexInputAttributes);
+        resources.maxVertexAttribs = static_cast<int>(limits.maxVertexInputAttributes);
         resources.maxVertexUniformComponents = 4096;
         resources.maxVaryingFloats = 64;
         resources.maxVertexTextureImageUnits = 32;
@@ -49,18 +48,12 @@ namespace neon::vulkan {
         resources.minProgramTexelOffset = -8;
         resources.maxProgramTexelOffset = 7;
         resources.maxClipDistances = 8;
-        resources.maxComputeWorkGroupCountX = static_cast<int>(limits.
-            maxComputeWorkGroupCount[0]);
-        resources.maxComputeWorkGroupCountY = static_cast<int>(limits.
-            maxComputeWorkGroupCount[1]);
-        resources.maxComputeWorkGroupCountZ = static_cast<int>(limits.
-            maxComputeWorkGroupCount[2]);
-        resources.maxComputeWorkGroupSizeX = static_cast<int>(limits.
-            maxComputeWorkGroupSize[0]);
-        resources.maxComputeWorkGroupSizeY = static_cast<int>(limits.
-            maxComputeWorkGroupSize[1]);
-        resources.maxComputeWorkGroupSizeZ = static_cast<int>(limits.
-            maxComputeWorkGroupSize[2]);
+        resources.maxComputeWorkGroupCountX = static_cast<int>(limits.maxComputeWorkGroupCount[0]);
+        resources.maxComputeWorkGroupCountY = static_cast<int>(limits.maxComputeWorkGroupCount[1]);
+        resources.maxComputeWorkGroupCountZ = static_cast<int>(limits.maxComputeWorkGroupCount[2]);
+        resources.maxComputeWorkGroupSizeX = static_cast<int>(limits.maxComputeWorkGroupSize[0]);
+        resources.maxComputeWorkGroupSizeY = static_cast<int>(limits.maxComputeWorkGroupSize[1]);
+        resources.maxComputeWorkGroupSizeZ = static_cast<int>(limits.maxComputeWorkGroupSize[2]);
         resources.maxComputeUniformComponents = 1024;
         resources.maxComputeTextureImageUnits = 16;
         resources.maxComputeImageUniforms = 8;
@@ -68,12 +61,9 @@ namespace neon::vulkan {
         resources.maxComputeAtomicCounterBuffers = 1;
         resources.maxVaryingComponents = 60;
         resources.maxVertexOutputComponents = 64;
-        resources.maxGeometryInputComponents = static_cast<int>(limits.
-            maxGeometryInputComponents);
-        resources.maxGeometryOutputComponents = static_cast<int>(limits.
-            maxGeometryOutputComponents);
-        resources.maxFragmentInputComponents = static_cast<int>(limits.
-            maxFragmentInputComponents);
+        resources.maxGeometryInputComponents = static_cast<int>(limits.maxGeometryInputComponents);
+        resources.maxGeometryOutputComponents = static_cast<int>(limits.maxGeometryOutputComponents);
+        resources.maxFragmentInputComponents = static_cast<int>(limits.maxFragmentInputComponents);
         resources.maxImageUnits = 8;
         resources.maxCombinedImageUnitsAndFragmentOutputs = 8;
         resources.maxCombinedShaderOutputResources = 8;
@@ -85,10 +75,8 @@ namespace neon::vulkan {
         resources.maxFragmentImageUniforms = 8;
         resources.maxCombinedImageUniforms = 8;
         resources.maxGeometryTextureImageUnits = 16;
-        resources.maxGeometryOutputVertices = static_cast<int>(limits.
-            maxGeometryOutputVertices);
-        resources.maxGeometryTotalOutputComponents = static_cast<int>(limits.
-            maxGeometryTotalOutputComponents);
+        resources.maxGeometryOutputVertices = static_cast<int>(limits.maxGeometryOutputVertices);
+        resources.maxGeometryTotalOutputComponents = static_cast<int>(limits.maxGeometryTotalOutputComponents);
         resources.maxGeometryUniformComponents = 1024;
         resources.maxGeometryVaryingComponents = 64;
         resources.maxTessControlInputComponents = 128;
@@ -157,8 +145,8 @@ namespace neon::vulkan {
         return resources;
     }
 
-    EShLanguage
-    SPIRVCompiler::getLanguage(const VkShaderStageFlagBits& shaderType) {
+    EShLanguage SPIRVCompiler::getLanguage(const VkShaderStageFlagBits& shaderType)
+    {
         switch (shaderType) {
             case VK_SHADER_STAGE_VERTEX_BIT:
                 return EShLangVertex;
@@ -195,35 +183,34 @@ namespace neon::vulkan {
 
     SPIRVCompiler::SPIRVCompiler(const VKPhysicalDevice& device) :
         _compiled(false),
-        _resources(generateDefaultResources(device)) {
+        _resources(generateDefaultResources(device))
+    {
         if (!GLSLANG_INITIALIZED) {
             glslang::InitializeProcess();
             GLSLANG_INITIALIZED = true;
         }
     }
 
-    SPIRVCompiler::~SPIRVCompiler() {
-        for (const auto& item: _shaders) {
+    SPIRVCompiler::~SPIRVCompiler()
+    {
+        for (const auto& item : _shaders) {
             delete item;
         }
     }
 
-    std::optional<std::string>
-    SPIRVCompiler::addShader(const VkShaderStageFlagBits& shaderType,
-                             const std::string& source) {
+    std::optional<std::string> SPIRVCompiler::addShader(const VkShaderStageFlagBits& shaderType,
+                                                        const std::string& source)
+    {
         auto language = getLanguage(shaderType);
         auto* shader = new glslang::TShader(language);
 
-        auto messages = static_cast<EShMessages>(
-            EShMsgSpvRules | EShMsgVulkanRules);
+        auto messages = static_cast<EShMessages>(EShMsgSpvRules | EShMsgVulkanRules);
 
         const char* value = source.data();
         shader->setStrings(&value, 1);
 
-        shader->setEnvInput(glslang::EShSourceGlsl, language,
-                            glslang::EShClientVulkan, DEFAULT_VERSION);
-        shader->setEnvClient(glslang::EShClientVulkan,
-                             glslang::EShTargetVulkan_1_2);
+        shader->setEnvInput(glslang::EShSourceGlsl, language, glslang::EShClientVulkan, DEFAULT_VERSION);
+        shader->setEnvClient(glslang::EShClientVulkan, glslang::EShTargetVulkan_1_2);
         shader->setEnvTarget(glslang::EShTargetSpv, glslang::EShTargetSpv_1_5);
 
         if (!shader->parse(&_resources, DEFAULT_VERSION, false, messages)) {
@@ -237,9 +224,9 @@ namespace neon::vulkan {
         return {};
     }
 
-    std::optional<std::string> SPIRVCompiler::compile() {
-        auto messages = static_cast<EShMessages>(
-            EShMsgSpvRules | EShMsgVulkanRules);
+    std::optional<std::string> SPIRVCompiler::compile()
+    {
+        auto messages = static_cast<EShMessages>(EShMsgSpvRules | EShMsgVulkanRules);
         if (!_program.link(messages)) {
             std::string infoLog(_program.getInfoLog());
             std::string infoDebugLog(_program.getInfoDebugLog());
@@ -253,8 +240,8 @@ namespace neon::vulkan {
         return {};
     }
 
-    Result<std::vector<uint32_t>, std::string>
-    SPIRVCompiler::getStage(const VkShaderStageFlagBits& shaderType) {
+    Result<std::vector<uint32_t>, std::string> SPIRVCompiler::getStage(const VkShaderStageFlagBits& shaderType)
+    {
         if (!_compiled) {
             return {"Shader is not compiled!"};
         }
@@ -265,8 +252,8 @@ namespace neon::vulkan {
         return {result};
     }
 
-    [[nodiscard]] std::vector<ShaderUniformBlock>
-    SPIRVCompiler::getUniformBlocks() const {
+    [[nodiscard]] std::vector<ShaderUniformBlock> SPIRVCompiler::getUniformBlocks() const
+    {
         std::vector<ShaderUniformBlock> blocks;
 
         std::cout << "Buffers: " << _program.getNumBufferBlocks() << std::endl;
@@ -288,15 +275,21 @@ namespace neon::vulkan {
             auto& reflection = _program.getUniformBlock(i);
             auto* type = reflection.getType();
 
-            if (!type->isStruct()) continue;
+            if (!type->isStruct()) {
+                continue;
+            }
 
             auto& qualifier = type->getQualifier();
             auto* structure = type->getStruct();
 
             ShaderUniformBlock block;
             block.name = reflection.name;
-            if (qualifier.hasSet()) block.set = qualifier.layoutSet;
-            if (qualifier.hasBinding()) block.binding = qualifier.layoutBinding;
+            if (qualifier.hasSet()) {
+                block.set = qualifier.layoutSet;
+            }
+            if (qualifier.hasBinding()) {
+                block.binding = qualifier.layoutBinding;
+            }
             block.stages = reflection.stages;
             block.sizeInBytes = reflection.size;
             block.offset = reflection.offset;
@@ -313,22 +306,27 @@ namespace neon::vulkan {
         return blocks;
     }
 
-    std::vector<ShaderUniformSampler>
-    SPIRVCompiler::getSamplers() const {
+    std::vector<ShaderUniformSampler> SPIRVCompiler::getSamplers() const
+    {
         std::vector<ShaderUniformSampler> samplers;
         for (int i = 0; i < _program.getNumUniformVariables(); ++i) {
             auto& reflection = _program.getUniform(i);
             auto* type = reflection.getType();
 
-            if (type->getBasicType() != glslang::TBasicType::EbtSampler)
+            if (type->getBasicType() != glslang::TBasicType::EbtSampler) {
                 continue;
+            }
 
             auto& qualifier = reflection.getType()->getQualifier();
 
             ShaderUniformSampler block;
             block.name = reflection.name;
-            if (qualifier.hasSet()) block.set = qualifier.layoutSet;
-            if (qualifier.hasBinding()) block.binding = qualifier.layoutBinding;
+            if (qualifier.hasSet()) {
+                block.set = qualifier.layoutSet;
+            }
+            if (qualifier.hasBinding()) {
+                block.binding = qualifier.layoutBinding;
+            }
             block.stages = reflection.stages;
 
             switch (type->getSampler().dim) {
@@ -357,4 +355,4 @@ namespace neon::vulkan {
 
         return samplers;
     }
-}
+} // namespace neon::vulkan

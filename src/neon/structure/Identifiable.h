@@ -7,19 +7,22 @@
 
 #include <cstdint>
 
-namespace neon {
+namespace neon
+{
     class Identifiable;
 
-    struct IdentifiableCounter {
+    struct IdentifiableCounter
+    {
         uint32_t counter;
         bool valid;
         Identifiable* ptr;
     };
 
-    class Identifiable {
+    class Identifiable
+    {
         IdentifiableCounter* _counter;
 
-    public:
+      public:
         Identifiable();
 
         Identifiable(const Identifiable& other);
@@ -32,6 +35,6 @@ namespace neon {
 
         [[nodiscard]] virtual uint64_t getId() const = 0;
     };
-}
+} // namespace neon
 
 #endif //RVTRACKING_IDENTIFIABLE_H

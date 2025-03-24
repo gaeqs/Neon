@@ -9,9 +9,10 @@
 #include <neon/structure/GameObject.h>
 #include <neon/structure/IdentifiableWrapper.h>
 
-namespace neon {
-    class GameObjectExplorerComponent : public Component {
-
+namespace neon
+{
+    class GameObjectExplorerComponent : public Component
+    {
         IdentifiableWrapper<GameObject> _target;
 
         void drawGeneralSection() const;
@@ -20,16 +21,14 @@ namespace neon {
 
         void drawComponentsSection() const;
 
-    public:
-
+      public:
         [[nodiscard]] const IdentifiableWrapper<GameObject>& getTarget() const;
 
         void setTarget(const IdentifiableWrapper<GameObject>& target);
 
         void onPreDraw() override;
-
     };
     REGISTER_COMPONENT(GameObjectExplorerComponent, "GameObject Explorer")
-}
+} // namespace neon
 
 #endif //NEON_GAMEOBJECTEXPLORERCOMPONENT_H

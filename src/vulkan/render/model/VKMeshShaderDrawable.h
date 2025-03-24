@@ -9,35 +9,32 @@
 
 #include <functional>
 
-namespace neon {
+namespace neon
+{
     class Model;
 }
 
-namespace neon::vulkan {
+namespace neon::vulkan
+{
     class AbstractVKApplication;
 
-    class VKMeshShaderDrawable : public VKDrawable {
+    class VKMeshShaderDrawable : public VKDrawable
+    {
         AbstractVKApplication* _vkApplication;
         std::function<rush::Vec<3, uint32_t>(const Model&)> _groupsSupplier;
 
-    public:
+      public:
         VKMeshShaderDrawable(const VKMeshShaderDrawable& other) = delete;
 
         explicit VKMeshShaderDrawable(Application* application);
 
         ~VKMeshShaderDrawable() override = default;
 
-        void draw(const Material* material,
-                  VkCommandBuffer commandBuffer,
-                  const Model& model,
+        void draw(const Material* material, VkCommandBuffer commandBuffer, const Model& model,
                   const ShaderUniformBuffer* globalBuffer) override;
 
-
-        void setGroupsSupplier(
-            const std::function<rush::Vec<3, uint32_t>(const Model&)>&
-            supplier);
+        void setGroupsSupplier(const std::function<rush::Vec<3, uint32_t>(const Model&)>& supplier);
     };
-}
-
+} // namespace neon::vulkan
 
 #endif //VKMESHSHADERDRAWABLE_H

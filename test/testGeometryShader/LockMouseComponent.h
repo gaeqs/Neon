@@ -13,7 +13,7 @@ class LockMouseComponent : public neon::Component {
 
     neon::IdentifiableWrapper<neon::CameraMovementComponent>
             _cameraMovementComponent;
-    bool _locked = false;
+    bool _locked;
 
     void performLock();
 

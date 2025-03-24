@@ -6,52 +6,65 @@
 
 #include <utility>
 
-namespace neon {
+namespace neon
+{
     ShaderProgram::ShaderProgram(Application* application, std::string name) :
         Asset(typeid(ShaderProgram), std::move(name)),
         _compiled(false),
-        _implementation(application) {}
+        _implementation(application)
+    {
+    }
 
-    const ShaderProgram::Implementation&
-    ShaderProgram::getImplementation() const {
+    const ShaderProgram::Implementation& ShaderProgram::getImplementation() const
+    {
         return _implementation;
     }
 
-    ShaderProgram::Implementation& ShaderProgram::getImplementation() {
+    ShaderProgram::Implementation& ShaderProgram::getImplementation()
+    {
         return _implementation;
     }
 
-    bool ShaderProgram::addShader(ShaderType type, cmrc::file resource) {
-        if (_compiled) return false;
+    bool ShaderProgram::addShader(ShaderType type, cmrc::file resource)
+    {
+        if (_compiled) {
+            return false;
+        }
         _rawShaders[type] = std::string(resource.begin(), resource.size());
         return true;
     }
 
-    bool ShaderProgram::addShader(ShaderType type, std::string resource) {
+    bool ShaderProgram::addShader(ShaderType type, std::string resource)
+    {
         _rawShaders[type] = std::move(resource);
         return true;
     }
 
-    std::optional<std::string> ShaderProgram::compile() {
-        if (_compiled) return "Shader already compiled.";
+    std::optional<std::string> ShaderProgram::compile()
+    {
+        if (_compiled) {
+            return "Shader already compiled.";
+        }
         auto result = _implementation.compile(_rawShaders);
-        if (!result.has_value()) _compiled = true;
+        if (!result.has_value()) {
+            _compiled = true;
+        }
         return result;
     }
 
-    const std::vector<ShaderUniformBlock>&
-    ShaderProgram::getUniformBlocks() const {
+    const std::vector<ShaderUniformBlock>& ShaderProgram::getUniformBlocks() const
+    {
         return _implementation.getUniformBlocks();
     }
 
-    const std::vector<ShaderUniformSampler>&
-    ShaderProgram::getUniformSamplers() const {
+    const std::vector<ShaderUniformSampler>& ShaderProgram::getUniformSamplers() const
+    {
         return _implementation.getUniformSamplers();
     }
 
-    Result<std::shared_ptr<ShaderProgram>, std::string>
-    ShaderProgram::createShader(Application* app, std::string name,
-                                std::string vert, std::string frag) {
+    Result<std::shared_ptr<ShaderProgram>, std::string> ShaderProgram::createShader(Application* app, std::string name,
+                                                                                    std::string vert, std::string frag)
+    {
         auto shader = std::make_shared<ShaderProgram>(app, std::move(name));
         shader->addShader(ShaderType::VERTEX, std::move(vert));
         shader->addShader(ShaderType::FRAGMENT, std::move(frag));
@@ -64,11 +77,10 @@ namespace neon {
         return shader;
     }
 
-    Result<std::shared_ptr<ShaderProgram>, std::string>
-    ShaderProgram::createShader(Application* app, std::string name,
-                                cmrc::file vert, cmrc::file frag) {
-        return createShader(app, std::move(name),
-                            std::string(vert.begin(), vert.size()),
+    Result<std::shared_ptr<ShaderProgram>, std::string> ShaderProgram::createShader(Application* app, std::string name,
+                                                                                    cmrc::file vert, cmrc::file frag)
+    {
+        return createShader(app, std::move(name), std::string(vert.begin(), vert.size()),
                             std::string(frag.begin(), frag.size()));
     }
-}
+} // namespace neon

@@ -9,30 +9,28 @@
 #include <neon/render/model/Drawable.h>
 
 #ifdef USE_VULKAN
-#include <vulkan/render/model/VKMeshShaderDrawable.h>
+    #include <vulkan/render/model/VKMeshShaderDrawable.h>
 #endif
 
-namespace neon {
+namespace neon
+{
     class Model;
 
-    class MeshShaderDrawable : public Drawable {
-    public:
+    class MeshShaderDrawable : public Drawable
+    {
+      public:
 #ifdef USE_VULKAN
         using Implementation = vulkan::VKMeshShaderDrawable;
 #endif
 
-    private:
+      private:
         Implementation _implementation;
 
-    public:
-        MeshShaderDrawable(Application* application,
-                           const std::string& name,
-                           std::shared_ptr<Material> material);
+      public:
+        MeshShaderDrawable(Application* application, const std::string& name, std::shared_ptr<Material> material);
 
-        MeshShaderDrawable(
-            Application* application,
-            const std::string& name,
-            const std::unordered_set<std::shared_ptr<Material>>& materials);
+        MeshShaderDrawable(Application* application, const std::string& name,
+                           const std::unordered_set<std::shared_ptr<Material>>& materials);
 
         ~MeshShaderDrawable() override = default;
 
@@ -42,10 +40,8 @@ namespace neon {
 
         void setGroups(rush::Vec<3, uint32_t> groups);
 
-        void setGroupsSupplier(
-            const std::function<rush::Vec<3, uint32_t>(const Model&)>&
-            supplier);
+        void setGroupsSupplier(const std::function<rush::Vec<3, uint32_t>(const Model&)>& supplier);
     };
-}
+} // namespace neon
 
 #endif //MESHSHADERDRAWABLE_H

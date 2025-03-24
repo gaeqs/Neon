@@ -6,8 +6,10 @@
 
 #include "CommandBuffer.h"
 
-namespace neon {
-    void CommandPool::checkUsedBufferForAvailability() {
+namespace neon
+{
+    void CommandPool::checkUsedBufferForAvailability()
+    {
         for (size_t i = _usedBuffers.size(); i > 0; --i) {
             size_t index = _usedBuffers[i - 1];
             if (!_buffers[index]->isBeingUsed()) {
@@ -18,41 +20,45 @@ namespace neon {
         }
     }
 
-    CommandPool::CommandPool(CommandPool&& move) noexcept
-        : _implementation(std::move(move._implementation)) {
+    CommandPool::CommandPool(CommandPool&& move) noexcept :
+        _implementation(std::move(move._implementation))
+    {
         _buffers = std::move(move._buffers);
         _availableBuffers = std::move(move._availableBuffers);
         _usedBuffers = std::move(move._usedBuffers);
     }
 
-    CommandPool::CommandPool(Application* application)
-        : _implementation(application) {
+    CommandPool::CommandPool(Application* application) :
+        _implementation(application)
+    {
     }
-
 
 #ifdef USE_VULKAN
 
-    CommandPool::CommandPool(Application* application,
-                             VkCommandPool pool,
-                             uint32_t queueFamilyIndex)
-        : _implementation(application, pool, queueFamilyIndex) {
+    CommandPool::CommandPool(Application* application, VkCommandPool pool, uint32_t queueFamilyIndex) :
+        _implementation(application, pool, queueFamilyIndex)
+    {
     }
 
 #endif
 
-    CommandPool::~CommandPool() {
+    CommandPool::~CommandPool()
+    {
         _buffers.clear();
     }
 
-    Implementation& CommandPool::getImplementation() {
+    Implementation& CommandPool::getImplementation()
+    {
         return _implementation;
     }
 
-    const Implementation& CommandPool::getImplementation() const {
+    const Implementation& CommandPool::getImplementation() const
+    {
         return _implementation;
     }
 
-    CommandBuffer* CommandPool::beginCommandBuffer(bool onlyOneSummit) {
+    CommandBuffer* CommandPool::beginCommandBuffer(bool onlyOneSummit)
+    {
         if (_availableBuffers.empty()) {
             checkUsedBufferForAvailability();
         }
@@ -76,7 +82,8 @@ namespace neon {
         return raw;
     }
 
-    CommandPool& CommandPool::operator=(CommandPool&& move) noexcept {
+    CommandPool& CommandPool::operator=(CommandPool&& move) noexcept
+    {
         _buffers.clear();
 
         _implementation = std::move(move._implementation);
@@ -85,4 +92,4 @@ namespace neon {
         _usedBuffers = std::move(move._usedBuffers);
         return *this;
     }
-}
+} // namespace neon

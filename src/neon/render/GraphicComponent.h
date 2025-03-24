@@ -12,14 +12,16 @@
 #include <neon/structure/Component.h>
 #include <neon/render/model/Model.h>
 
-namespace neon {
-    class GraphicComponent final : public Component {
+namespace neon
+{
+    class GraphicComponent final : public Component
+    {
         std::shared_ptr<Model> _model;
         std::optional<InstanceData::Instance> _modelTargetId;
 
         bool _firstPreDrawExecuted;
 
-    public:
+      public:
         GraphicComponent();
 
         explicit GraphicComponent(std::shared_ptr<Model> model);
@@ -31,10 +33,10 @@ namespace neon {
         void setModel(const std::shared_ptr<Model>& model);
 
         template<class InstanceData>
-        void uploadData(size_t index, const InstanceData& data) {
+        void uploadData(size_t index, const InstanceData& data)
+        {
             if (_modelTargetId.has_value()) {
-                _model->getInstanceData(0)->
-                        uploadData(_modelTargetId.value(), index, data);
+                _model->getInstanceData(0)->uploadData(_modelTargetId.value(), index, data);
             }
         }
 
@@ -44,6 +46,6 @@ namespace neon {
     };
 
     REGISTER_COMPONENT(GraphicComponent, "Graphic Component")
-}
+} // namespace neon
 
 #endif //RVTRACKING_GRAPHICCOMPONENT_H

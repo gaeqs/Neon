@@ -4,12 +4,12 @@
 
 #include "VKQueue.h"
 
-neon::vulkan::VKQueue::VKQueue(VkDevice device,
-                               uint32_t familyIndex,
-                               uint32_t queueIndex) {
+neon::vulkan::VKQueue::VKQueue(VkDevice device, uint32_t familyIndex, uint32_t queueIndex)
+{
     vkGetDeviceQueue(device, familyIndex, queueIndex, &_raw);
 }
 
-VkQueue neon::vulkan::VKQueue::getRaw() const {
+VkQueue neon::vulkan::VKQueue::getRaw() const
+{
     return _raw;
 }

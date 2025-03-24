@@ -8,15 +8,16 @@
 #include <neon/loader/AssetLoader.h>
 #include <neon/render/shader/ShaderUniformDescriptor.h>
 
-namespace neon {
-    class ShaderUniformDescriptorLoader : public AssetLoader<ShaderUniformDescriptor> {
-    public:
+namespace neon
+{
+    class ShaderUniformDescriptorLoader : public AssetLoader<ShaderUniformDescriptor>
+    {
+      public:
         ~ShaderUniformDescriptorLoader() override = default;
 
-        std::shared_ptr<ShaderUniformDescriptor>
-        loadAsset(std::string name, nlohmann::json json, AssetLoaderContext context) override;
+        std::shared_ptr<ShaderUniformDescriptor> loadAsset(std::string name, nlohmann::json json,
+                                                           AssetLoaderContext context) override;
     };
-}
-
+} // namespace neon
 
 #endif //SHADERUNIFORMDESCRIPTORLOADER_H

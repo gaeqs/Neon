@@ -13,13 +13,14 @@
 
 #include "ISimulable.h"
 
-enum class IntegrationMode {
+enum class IntegrationMode
+{
     SYMPLECTIC,
     IMPLICIT
 };
 
-class PhysicsManager : public neon::Component {
-
+class PhysicsManager : public neon::Component
+{
     IntegrationMode _mode;
 
     uint32_t _degreesOfFreedom;
@@ -32,8 +33,7 @@ class PhysicsManager : public neon::Component {
 
     void stepImplicit(float deltaTime);
 
-public:
-
+  public:
     explicit PhysicsManager(IntegrationMode mode);
 
     void onUpdate(float deltaTime) override;
@@ -41,7 +41,8 @@ public:
     void drawEditor() override;
 
     template<class Object, class... Params>
-    Object* createSimulableObject(Params&& ... values) {
+    Object* createSimulableObject(Params&&... values)
+    {
         auto ptr = std::make_unique<Object>(_degreesOfFreedom, this, values...);
 
         _degreesOfFreedom += ptr->getNumberOfDegreesOfFreedom();
@@ -49,7 +50,6 @@ public:
         _objects.emplace_back(std::move(ptr));
         return raw;
     }
-
 };
 REGISTER_COMPONENT(PhysicsManager, "Physics Manager")
 

@@ -9,18 +9,16 @@
 
 #include <nlohmann/json.hpp>
 
-namespace neon {
-    AssetLoaderContext::AssetLoaderContext(
-        Application* app,
-        std::filesystem::path* p,
-        FileSystem* fs,
-        AssetLoaderCollection* lc,
-        AssetCollection* c,
-        CommandBuffer* cb)
-        : application(app),
-          path(p == nullptr ? std::optional<std::filesystem::path>() : *p),
-          fileSystem(fs),
-          loaders(lc == nullptr ? &app->getAssetLoaders() : lc),
-          collection(c == nullptr ? &app->getAssets() : c),
-          commandBuffer(cb) {}
-}
+namespace neon
+{
+    AssetLoaderContext::AssetLoaderContext(Application* app, std::filesystem::path* p, FileSystem* fs,
+                                           AssetLoaderCollection* lc, AssetCollection* c, CommandBuffer* cb) :
+        application(app),
+        path(p == nullptr ? std::optional<std::filesystem::path>() : *p),
+        fileSystem(fs),
+        loaders(lc == nullptr ? &app->getAssetLoaders() : lc),
+        collection(c == nullptr ? &app->getAssets() : c),
+        commandBuffer(cb)
+    {
+    }
+} // namespace neon

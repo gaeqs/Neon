@@ -25,7 +25,6 @@
 #ifndef VISIMPL_MODELCREATEINFO_H
 #define VISIMPL_MODELCREATEINFO_H
 
-
 #include <cstdint>
 #include <memory>
 #include <unordered_map>
@@ -34,31 +33,38 @@
 #include <neon/render/model/BasicInstanceData.h>
 #include <neon/render/model/Drawable.h>
 
-namespace neon {
-    enum class ModelBufferLocation {
+namespace neon
+{
+    enum class ModelBufferLocation
+    {
         GLOBAL,
         MATERIAL,
         MODEL,
         EXTRA
     };
 
-    struct ModelBufferBinding {
+    struct ModelBufferBinding
+    {
         ModelBufferLocation location = ModelBufferLocation::GLOBAL;
         std::shared_ptr<ShaderUniformBuffer> extraBuffer = nullptr;
 
-        static ModelBufferBinding global() {
+        static ModelBufferBinding global()
+        {
             return ModelBufferBinding(ModelBufferLocation::GLOBAL, nullptr);
         }
 
-        static ModelBufferBinding material() {
+        static ModelBufferBinding material()
+        {
             return ModelBufferBinding(ModelBufferLocation::MATERIAL, nullptr);
         }
 
-        static ModelBufferBinding model() {
+        static ModelBufferBinding model()
+        {
             return ModelBufferBinding(ModelBufferLocation::MODEL, nullptr);
         }
 
-        static ModelBufferBinding extra(std::shared_ptr<ShaderUniformBuffer> descriptor) {
+        static ModelBufferBinding extra(std::shared_ptr<ShaderUniformBuffer> descriptor)
+        {
             return ModelBufferBinding(ModelBufferLocation::EXTRA, std::move(descriptor));
         }
     };
@@ -67,7 +73,8 @@ namespace neon {
      * Information used to create a model.a gua
      * configure a model.
      */
-    struct ModelCreateInfo {
+    struct ModelCreateInfo
+    {
         static constexpr uint32_t DEFAULT_MAXIMUM_INSTANCES = 1024 * 16;
 
         /**
@@ -109,9 +116,7 @@ namespace neon {
          * Use the method "defineInstanceType()" to change this variable.
          * Don't do it explicitly!
          */
-        std::vector<std::type_index> instanceTypes = {
-            typeid(DefaultInstancingData)
-        };
+        std::vector<std::type_index> instanceTypes = {typeid(DefaultInstancingData)};
 
         /**
          * The size in bytes of each instance.
@@ -130,27 +135,29 @@ namespace neon {
          * The created instance datas will be managed by the model,
          * no manual deletions are required.
          */
-        std::function<std::vector<InstanceData*>(
-            Application*, const ModelCreateInfo& info, Model* model)>
-        instanceDataProvider
-                = [](Application* app, const ModelCreateInfo& info, Model*) {
-            return std::vector<InstanceData*>{new BasicInstanceData(app, info)};
-        };
+        std::function<std::vector<InstanceData*>(Application*, const ModelCreateInfo& info, Model* model)>
+            instanceDataProvider = [](Application* app, const ModelCreateInfo& info, Model*) {
+                return std::vector<InstanceData*>{new BasicInstanceData(app, info)};
+            };
 
-        ModelCreateInfo() {
+        ModelCreateInfo()
+        {
             uniformBufferBindings.insert({0, ModelBufferBinding::global()});
             uniformBufferBindings.insert({1, ModelBufferBinding::material()});
             uniformBufferBindings.insert({2, ModelBufferBinding::model()});
         }
 
         template<typename... Types>
-        void defineInstanceType() {
+        void defineInstanceType()
+        {
             instanceTypes.clear();
             instanceSizes.clear();
-            ([&] {
-                instanceTypes.emplace_back(typeid(Types));
-                instanceSizes.push_back(sizeof(Types));
-            }(), ...);
+            (
+                [&] {
+                    instanceTypes.emplace_back(typeid(Types));
+                    instanceSizes.push_back(sizeof(Types));
+                }(),
+                ...);
         }
 
         /**
@@ -158,12 +165,13 @@ namespace neon {
          * @tparam IData de InstanceData to provide.
          */
         template<typename IData>
-        void defineInstanceProvider() {
+        void defineInstanceProvider()
+        {
             instanceDataProvider = [](Application* app, const ModelCreateInfo& info, Model*) {
                 return std::vector<InstanceData*>{new IData(app, info)};
             };
         }
     };
-}
+} // namespace neon
 
 #endif //VISIMPL_MODELCREATEINFO_H

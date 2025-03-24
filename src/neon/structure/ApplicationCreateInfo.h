@@ -10,7 +10,8 @@
 /**
  * Information required to create a Neon Application.
  */
-struct ApplicationCreateInfo {
+struct ApplicationCreateInfo
+{
     /**
      * The name of the application.
      */

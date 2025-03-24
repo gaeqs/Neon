@@ -13,7 +13,8 @@
 
 namespace vc = neon::vulkan::conversions;
 
-uint32_t vc::pixelSize(const TextureFormat& format) {
+uint32_t vc::pixelSize(const TextureFormat& format)
+{
     switch (format) {
         case TextureFormat::R32FG32FB32F:
             return 12;
@@ -44,7 +45,8 @@ uint32_t vc::pixelSize(const TextureFormat& format) {
     }
 }
 
-VkFormat vc::vkFormat(const TextureFormat& format) {
+VkFormat vc::vkFormat(const TextureFormat& format)
+{
     switch (format) {
         case TextureFormat::R8:
             return VK_FORMAT_R8_UNORM;
@@ -87,26 +89,28 @@ VkFormat vc::vkFormat(const TextureFormat& format) {
     }
 }
 
-std::vector<VkFormat> vc::vkFormat(const std::vector<TextureFormat>& formats) {
+std::vector<VkFormat> vc::vkFormat(const std::vector<TextureFormat>& formats)
+{
     std::vector<VkFormat> map;
     map.reserve(formats.size());
-    for (const auto& item: formats) {
+    for (const auto& item : formats) {
         map.push_back(vkFormat(item));
     }
     return map;
 }
 
-std::vector<VkFormat>
-vc::vkFormat(const std::vector<FrameBufferTextureCreateInfo>& infos) {
+std::vector<VkFormat> vc::vkFormat(const std::vector<FrameBufferTextureCreateInfo>& infos)
+{
     std::vector<VkFormat> map;
     map.reserve(infos.size());
-    for (const auto& item: infos) {
+    for (const auto& item : infos) {
         map.push_back(vkFormat(item.format));
     }
     return map;
 }
 
-VkImageTiling vc::vkImageTiling(const Tiling& tiling) {
+VkImageTiling vc::vkImageTiling(const Tiling& tiling)
+{
     switch (tiling) {
         case Tiling::OPTIMAL:
             return VK_IMAGE_TILING_OPTIMAL;
@@ -119,7 +123,8 @@ VkImageTiling vc::vkImageTiling(const Tiling& tiling) {
     }
 }
 
-VkImageType vc::vkImageType(const TextureDimensions& dimensions) {
+VkImageType vc::vkImageType(const TextureDimensions& dimensions)
+{
     switch (dimensions) {
         case TextureDimensions::ONE:
             return VK_IMAGE_TYPE_1D;
@@ -132,8 +137,8 @@ VkImageType vc::vkImageType(const TextureDimensions& dimensions) {
     }
 }
 
-VkSampleCountFlagBits
-vc::vkSampleCountFlagBits(const SamplesPerTexel& samples) {
+VkSampleCountFlagBits vc::vkSampleCountFlagBits(const SamplesPerTexel& samples)
+{
     switch (samples) {
         case SamplesPerTexel::COUNT_1:
             return VK_SAMPLE_COUNT_1_BIT;
@@ -154,16 +159,18 @@ vc::vkSampleCountFlagBits(const SamplesPerTexel& samples) {
     }
 }
 
-std::vector<VkSampleCountFlagBits> vc::vkSampleCountFlagBits(const std::vector<FrameBufferTextureCreateInfo>& infos) {
+std::vector<VkSampleCountFlagBits> vc::vkSampleCountFlagBits(const std::vector<FrameBufferTextureCreateInfo>& infos)
+{
     std::vector<VkSampleCountFlagBits> map;
     map.reserve(infos.size());
-    for (const auto& item: infos) {
+    for (const auto& item : infos) {
         map.push_back(vkSampleCountFlagBits(item.samples));
     }
     return map;
 }
 
-VkImageViewType vc::vkImageViewType(const TextureViewType& viewType) {
+VkImageViewType vc::vkImageViewType(const TextureViewType& viewType)
+{
     switch (viewType) {
         case TextureViewType::NORMAL_1D:
             return VK_IMAGE_VIEW_TYPE_1D;
@@ -184,7 +191,8 @@ VkImageViewType vc::vkImageViewType(const TextureViewType& viewType) {
     }
 }
 
-VkComponentSwizzle vc::vkComponentSwizzle(const TextureComponentSwizzle& sw) {
+VkComponentSwizzle vc::vkComponentSwizzle(const TextureComponentSwizzle& sw)
+{
     switch (sw) {
         case TextureComponentSwizzle::IDENTITY:
             return VK_COMPONENT_SWIZZLE_IDENTITY;
@@ -205,7 +213,8 @@ VkComponentSwizzle vc::vkComponentSwizzle(const TextureComponentSwizzle& sw) {
     }
 }
 
-VkFilter vc::vkFilter(const TextureFilter& filter) {
+VkFilter vc::vkFilter(const TextureFilter& filter)
+{
     switch (filter) {
         case TextureFilter::NEAREST:
             return VK_FILTER_NEAREST;
@@ -218,7 +227,8 @@ VkFilter vc::vkFilter(const TextureFilter& filter) {
     }
 }
 
-VkSamplerAddressMode vc::vkSamplerAddressMode(const AddressMode& mode) {
+VkSamplerAddressMode vc::vkSamplerAddressMode(const AddressMode& mode)
+{
     switch (mode) {
         case AddressMode::REPEAT:
             return VK_SAMPLER_ADDRESS_MODE_REPEAT;
@@ -235,7 +245,8 @@ VkSamplerAddressMode vc::vkSamplerAddressMode(const AddressMode& mode) {
     }
 }
 
-VkSamplerMipmapMode vc::vkSamplerMipmapMode(const MipmapMode& mipmapMode) {
+VkSamplerMipmapMode vc::vkSamplerMipmapMode(const MipmapMode& mipmapMode)
+{
     switch (mipmapMode) {
         case MipmapMode::NEAREST:
             return VK_SAMPLER_MIPMAP_MODE_NEAREST;
@@ -246,9 +257,8 @@ VkSamplerMipmapMode vc::vkSamplerMipmapMode(const MipmapMode& mipmapMode) {
     }
 }
 
-VkSamplerCreateInfo vc::vkSamplerCreateInfo(const SamplerCreateInfo& sampler,
-                                            float maxLod,
-                                            float deviceMaxAnisotropic) {
+VkSamplerCreateInfo vc::vkSamplerCreateInfo(const SamplerCreateInfo& sampler, float maxLod, float deviceMaxAnisotropic)
+{
     VkSamplerCreateInfo samplerInfo{};
     samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
     samplerInfo.magFilter = vc::vkFilter(sampler.magnificationFilter);
@@ -265,14 +275,13 @@ VkSamplerCreateInfo vc::vkSamplerCreateInfo(const SamplerCreateInfo& sampler,
     samplerInfo.minLod = 0.0f;
     samplerInfo.maxLod = maxLod;
 
-    samplerInfo.maxAnisotropy = sampler.maxAnisotropy < 0.0f
-                                ? deviceMaxAnisotropic
-                                : sampler.maxAnisotropy;
+    samplerInfo.maxAnisotropy = sampler.maxAnisotropy < 0.0f ? deviceMaxAnisotropic : sampler.maxAnisotropy;
 
     return samplerInfo;
 }
 
-VkCompareOp vc::vkCompareOp(const DepthCompareOperation& op) {
+VkCompareOp vc::vkCompareOp(const DepthCompareOperation& op)
+{
     switch (op) {
         case DepthCompareOperation::LESS:
             return VK_COMPARE_OP_LESS;
@@ -295,7 +304,8 @@ VkCompareOp vc::vkCompareOp(const DepthCompareOperation& op) {
     }
 }
 
-VkBlendOp vc::vkBlendOp(const BlendOperation& op) {
+VkBlendOp vc::vkBlendOp(const BlendOperation& op)
+{
     switch (op) {
         case BlendOperation::ADD:
             return VK_BLEND_OP_ADD;
@@ -312,7 +322,8 @@ VkBlendOp vc::vkBlendOp(const BlendOperation& op) {
     }
 }
 
-VkLogicOp vc::vkLogicOp(const BlendingLogicOperation& op) {
+VkLogicOp vc::vkLogicOp(const BlendingLogicOperation& op)
+{
     switch (op) {
         case BlendingLogicOperation::CLEAR:
             return VK_LOGIC_OP_CLEAR;
@@ -351,7 +362,8 @@ VkLogicOp vc::vkLogicOp(const BlendingLogicOperation& op) {
     }
 }
 
-VkBlendFactor vc::vkBlendFactor(const BlendFactor& factor) {
+VkBlendFactor vc::vkBlendFactor(const BlendFactor& factor)
+{
     switch (factor) {
         case BlendFactor::ZERO:
             return VK_BLEND_FACTOR_ZERO;
@@ -396,7 +408,8 @@ VkBlendFactor vc::vkBlendFactor(const BlendFactor& factor) {
     }
 }
 
-VkPolygonMode vc::vkPolygonMode(const PolygonMode& polygonMode) {
+VkPolygonMode vc::vkPolygonMode(const PolygonMode& polygonMode)
+{
     switch (polygonMode) {
         case PolygonMode::FILL:
             return VK_POLYGON_MODE_FILL;
@@ -411,7 +424,8 @@ VkPolygonMode vc::vkPolygonMode(const PolygonMode& polygonMode) {
     }
 }
 
-VkCullModeFlagBits vc::vkCullModeFlagBits(const CullMode& cullMode) {
+VkCullModeFlagBits vc::vkCullModeFlagBits(const CullMode& cullMode)
+{
     switch (cullMode) {
         case CullMode::NONE:
             return VK_CULL_MODE_NONE;
@@ -426,8 +440,8 @@ VkCullModeFlagBits vc::vkCullModeFlagBits(const CullMode& cullMode) {
     }
 }
 
-VkPrimitiveTopology
-vc::vkPrimitiveTopology(const neon::PrimitiveTopology& topology) {
+VkPrimitiveTopology vc::vkPrimitiveTopology(const neon::PrimitiveTopology& topology)
+{
     switch (topology) {
         case PrimitiveTopology::POINT_LIST:
             return VK_PRIMITIVE_TOPOLOGY_POINT_LIST;

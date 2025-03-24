@@ -17,7 +17,8 @@
 
 #include <neon/util/ClusteredLinkedCollection.h>
 
-namespace neon {
+namespace neon
+{
     class Application;
 
     class GameObject;
@@ -34,19 +35,19 @@ namespace neon {
 
     class Model;
 
-    class Room {
+    class Room
+    {
         Application* _application;
 
         Camera _camera;
         ClusteredLinkedCollection<GameObject> _gameObjects;
         ComponentCollection _components;
 
-
         std::unordered_map<Model*, uint32_t> _usedModels;
 
         std::unordered_set<IdentifiableWrapper<Component>> _destroyLater;
 
-    public:
+      public:
         Room(const Room& other) = delete;
 
         Room(Application* application);
@@ -73,8 +74,7 @@ namespace neon {
 
         void forEachGameObject(std::function<void(GameObject*)> consumer);
 
-        void forEachGameObject(
-            std::function<void(const GameObject*)> consumer) const;
+        void forEachGameObject(std::function<void(const GameObject*)> consumer) const;
 
         // region INTERNAL
 
@@ -116,10 +116,8 @@ namespace neon {
 
         void preDraw();
 
-
         //endregion
     };
-}
-
+} // namespace neon
 
 #endif //NEON_ROOM_H

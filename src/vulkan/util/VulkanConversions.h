@@ -10,7 +10,8 @@
 #include <vulkan/vulkan.h>
 #include <vulkan/vulkan_core.h>
 
-namespace neon {
+namespace neon
+{
     enum class TextureFormat;
     enum class Tiling;
     enum class TextureDimensions;
@@ -29,9 +30,10 @@ namespace neon {
     enum class PrimitiveTopology;
     struct SamplerCreateInfo;
     struct FrameBufferTextureCreateInfo;
-}
+} // namespace neon
 
-namespace neon::vulkan::conversions {
+namespace neon::vulkan::conversions
+{
 
     uint32_t pixelSize(const TextureFormat& format);
 
@@ -39,8 +41,7 @@ namespace neon::vulkan::conversions {
 
     std::vector<VkFormat> vkFormat(const std::vector<TextureFormat>& formats);
 
-    std::vector<VkFormat>
-    vkFormat(const std::vector<FrameBufferTextureCreateInfo>& infos);
+    std::vector<VkFormat> vkFormat(const std::vector<FrameBufferTextureCreateInfo>& infos);
 
     VkImageTiling vkImageTiling(const Tiling& tiling);
 
@@ -60,9 +61,7 @@ namespace neon::vulkan::conversions {
 
     VkSamplerMipmapMode vkSamplerMipmapMode(const MipmapMode& mipmapMode);
 
-    VkSamplerCreateInfo vkSamplerCreateInfo(const SamplerCreateInfo& sampler,
-                                            float maxLod,
-                                            float deviceMaxAnisotropic);
+    VkSamplerCreateInfo vkSamplerCreateInfo(const SamplerCreateInfo& sampler, float maxLod, float deviceMaxAnisotropic);
 
     VkCompareOp vkCompareOp(const DepthCompareOperation& op);
 
@@ -77,6 +76,6 @@ namespace neon::vulkan::conversions {
     VkCullModeFlagBits vkCullModeFlagBits(const CullMode& cullMode);
 
     VkPrimitiveTopology vkPrimitiveTopology(const PrimitiveTopology& topology);
-}
+} // namespace neon::vulkan::conversions
 
 #endif //NEON_VULKANCONVERSIONS_H

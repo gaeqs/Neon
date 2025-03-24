@@ -7,11 +7,13 @@
 
 #include <rush/rush.h>
 
-namespace neon {
+namespace neon
+{
 
-    struct ScrollEvent {
+    struct ScrollEvent
+    {
         rush::Vec2f delta;
     };
-}
+} // namespace neon
 
 #endif //NEON_SCROLLEVENT_H

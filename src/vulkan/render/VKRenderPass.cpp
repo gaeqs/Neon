@@ -12,26 +12,23 @@
 #include <vulkan/AbstractVKApplication.h>
 #include <vulkan/util/VulkanConversions.h>
 
-namespace neon::vulkan {
-    VKRenderPass::VKRenderPass(VKRenderPass&& other) noexcept:
+namespace neon::vulkan
+{
+    VKRenderPass::VKRenderPass(VKRenderPass&& other) noexcept :
         _vkApplication(other._vkApplication),
         _raw(other._raw),
-        _external(other._external) {
+        _external(other._external)
+    {
         other._raw = VK_NULL_HANDLE;
     }
 
-    VKRenderPass::VKRenderPass(Application* application,
-                               const std::vector<VkFormat>& colorFormats,
-                               const std::vector<VkSampleCountFlagBits>& samples,
-                               bool depth,
-                               bool present,
-                               bool resolve,
-                               VkFormat depthFormat,
-                               VkSampleCountFlagBits depthSamples) :
-        _vkApplication(dynamic_cast<AbstractVKApplication*>(
-            application->getImplementation())),
+    VKRenderPass::VKRenderPass(Application* application, const std::vector<VkFormat>& colorFormats,
+                               const std::vector<VkSampleCountFlagBits>& samples, bool depth, bool present,
+                               bool resolve, VkFormat depthFormat, VkSampleCountFlagBits depthSamples) :
+        _vkApplication(dynamic_cast<AbstractVKApplication*>(application->getImplementation())),
         _raw(VK_NULL_HANDLE),
-        _external(false) {
+        _external(false)
+    {
         std::vector<VkAttachmentDescription> attachments;
         attachments.reserve(colorFormats.size() * 2 + (depth ? 1 : 0));
 
@@ -42,7 +39,7 @@ namespace neon::vulkan {
         references.reserve(colorFormats.size());
 
         uint32_t sampleIndex = 0;
-        for (const auto& format: colorFormats) {
+        for (const auto& format : colorFormats) {
             VkAttachmentDescription colorAttachment{};
             colorAttachment.format = format;
             colorAttachment.samples = samples[sampleIndex++];
@@ -78,9 +75,8 @@ namespace neon::vulkan {
                 colorAttachmentResolve.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
                 colorAttachmentResolve.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
                 colorAttachmentResolve.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-                colorAttachmentResolve.finalLayout = present
-                                                         ? VK_IMAGE_LAYOUT_PRESENT_SRC_KHR
-                                                         : VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+                colorAttachmentResolve.finalLayout =
+                    present ? VK_IMAGE_LAYOUT_PRESENT_SRC_KHR : VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
                 attachments.push_back(colorAttachmentResolve);
 
                 VkAttachmentReference colorAttachmentResolveRef{};
@@ -132,41 +128,37 @@ namespace neon::vulkan {
         depthDependency.srcSubpass = VK_SUBPASS_EXTERNAL;
         depthDependency.dstSubpass = 0;
         depthDependency.srcStageMask =
-                VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT |
-                VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
+            VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
         depthDependency.srcAccessMask = 0;
         depthDependency.dstStageMask =
-                VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT |
-                VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
+            VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
         depthDependency.dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
 
         VkSubpassDependency dependencies[] = {dependency, depthDependency};
         renderPassInfo.dependencyCount = 2;
         renderPassInfo.pDependencies = dependencies;
 
-        if (vkCreateRenderPass(
-                _vkApplication->getDevice()->getRaw(),
-                &renderPassInfo,
-                nullptr,
-                &_raw
-            ) != VK_SUCCESS) {
+        if (vkCreateRenderPass(_vkApplication->getDevice()->getRaw(), &renderPassInfo, nullptr, &_raw) != VK_SUCCESS) {
             throw std::runtime_error("Failed to create render pass!");
         }
     }
 
     VKRenderPass::VKRenderPass(Application* application, VkRenderPass pass) :
-        _vkApplication(dynamic_cast<AbstractVKApplication*>(
-            application->getImplementation())),
+        _vkApplication(dynamic_cast<AbstractVKApplication*>(application->getImplementation())),
         _raw(pass),
-        _external(true) {}
+        _external(true)
+    {
+    }
 
-    VKRenderPass::~VKRenderPass() {
+    VKRenderPass::~VKRenderPass()
+    {
         if (_raw != VK_NULL_HANDLE && !_external) {
             vkDestroyRenderPass(_vkApplication->getDevice()->getRaw(), _raw, nullptr);
         }
     }
 
-    VkRenderPass VKRenderPass::getRaw() const {
+    VkRenderPass VKRenderPass::getRaw() const
+    {
         return _raw;
     }
-}
+} // namespace neon::vulkan

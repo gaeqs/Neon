@@ -2,38 +2,35 @@
 // Created by gaelr on 14/12/2022.
 //
 
-
 #ifndef NEON_QTSWAPCHAINFRAMEBUFFER_H
 #define NEON_QTSWAPCHAINFRAMEBUFFER_H
 
 #ifdef USE_QT
 
-#include <neon/render/buffer/FrameBuffer.h>
+    #include <neon/render/buffer/FrameBuffer.h>
 
-#ifdef USE_VULKAN
+    #ifdef USE_VULKAN
 
-#include "vulkan/render/VKQTSwapChainFrameBuffer.h"
+        #include "vulkan/render/VKQTSwapChainFrameBuffer.h"
 
-#endif
+    #endif
 
-namespace neon {
+namespace neon
+{
 
     class Application;
 
-    class QTSwapChainFrameBuffer : public FrameBuffer {
-
-    public:
-
-#ifdef USE_VULKAN
+    class QTSwapChainFrameBuffer : public FrameBuffer
+    {
+      public:
+    #ifdef USE_VULKAN
         using Implementation = vulkan::VKQTSwapChainFrameBuffer;
-#endif
+    #endif
 
-    private:
-
+      private:
         Implementation _implementation;
 
-    public:
-
+      public:
         explicit QTSwapChainFrameBuffer(Application* application);
 
         ~QTSwapChainFrameBuffer() override = default;
@@ -44,17 +41,15 @@ namespace neon {
 
         [[nodiscard]] FrameBuffer::Implementation& getImplementation() override;
 
-        [[nodiscard]] const FrameBuffer::Implementation&
-        getImplementation() const override;
+        [[nodiscard]] const FrameBuffer::Implementation& getImplementation() const override;
 
-        [[nodiscard]] std::vector<std::shared_ptr<Texture>>
-        getTextures() const override;
+        [[nodiscard]] std::vector<std::shared_ptr<Texture>> getTextures() const override;
 
         [[nodiscard]] uint32_t getWidth() const override;
 
         [[nodiscard]] uint32_t getHeight() const override;
     };
-}
+} // namespace neon
 
 #endif
 

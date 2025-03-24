@@ -7,16 +7,17 @@
 
 #include <vulkan/vulkan.h>
 
-namespace neon::vulkan {
-    class VKQueue {
+namespace neon::vulkan
+{
+    class VKQueue
+    {
         VkQueue _raw;
 
-    public:
+      public:
         VKQueue(VkDevice device, uint32_t familyIndex, uint32_t queueIndex);
 
         [[nodiscard]] VkQueue getRaw() const;
     };
-}
-
+} // namespace neon::vulkan
 
 #endif //VKQUEUE_H

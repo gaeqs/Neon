@@ -16,33 +16,31 @@
 #include <imgui.h>
 #include <imgui_impl_vulkan.h>
 
-namespace neon::vulkan {
+namespace neon::vulkan
+{
     VKRender::VKRender(Application* application) :
-            _vkApplication(dynamic_cast<AbstractVKApplication*>(
-                                   application->getImplementation())),
-            _drawImGui(false) {
-
+        _vkApplication(dynamic_cast<AbstractVKApplication*>(application->getImplementation())),
+        _drawImGui(false)
+    {
     }
 
-    void VKRender::render(
-            Room* room,
-            const Render* render,
-            const std::vector<std::shared_ptr<Material>>& sortedMaterials,
-            const std::vector<std::shared_ptr<RenderPassStrategy>>& strategies) const {
-        for (const auto& strategy: strategies) {
+    void VKRender::render(Room* room, const Render* render,
+                          const std::vector<std::shared_ptr<Material>>& sortedMaterials,
+                          const std::vector<std::shared_ptr<RenderPassStrategy>>& strategies) const
+    {
+        for (const auto& strategy : strategies) {
             strategy->render(room, render, sortedMaterials);
         }
     }
 
-    void VKRender::setupFrameBufferRecreation() {
+    void VKRender::setupFrameBufferRecreation()
+    {
         vkDeviceWaitIdle(_vkApplication->getDevice()->getRaw());
     }
 
-    void VKRender::beginRenderPass(
-            const std::shared_ptr<FrameBuffer>& fb, bool clear) const {
-
-        auto* cb = _vkApplication->getCurrentCommandBuffer()
-                ->getImplementation().getCommandBuffer();
+    void VKRender::beginRenderPass(const std::shared_ptr<FrameBuffer>& fb, bool clear) const
+    {
+        auto* cb = _vkApplication->getCurrentCommandBuffer()->getImplementation().getCommandBuffer();
 
         vulkan_util::beginRenderPass(cb, fb, clear);
 
@@ -50,9 +48,9 @@ namespace neon::vulkan {
         _drawImGui = frameBuffer.renderImGui();
     }
 
-    void VKRender::endRenderPass() const {
-        auto cb = _vkApplication->getCurrentCommandBuffer()
-                ->getImplementation().getCommandBuffer();
+    void VKRender::endRenderPass() const
+    {
+        auto cb = _vkApplication->getCurrentCommandBuffer()->getImplementation().getCommandBuffer();
 
         if (_drawImGui) {
             ImGui::Render();
@@ -62,4 +60,4 @@ namespace neon::vulkan {
 
         vkCmdEndRenderPass(cb);
     }
-}
+} // namespace neon::vulkan

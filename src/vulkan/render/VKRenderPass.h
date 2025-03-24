@@ -8,31 +8,29 @@
 #include <vector>
 #include <vulkan/vulkan.h>
 
-namespace neon {
+namespace neon
+{
     class Application;
 }
 
-namespace neon::vulkan {
+namespace neon::vulkan
+{
     class AbstractVKApplication;
 
-    class VKRenderPass {
+    class VKRenderPass
+    {
         AbstractVKApplication* _vkApplication;
         VkRenderPass _raw;
         bool _external;
 
-    public:
+      public:
         VKRenderPass(const VKRenderPass& other) = delete;
 
         VKRenderPass(VKRenderPass&& other) noexcept;
 
-        VKRenderPass(Application* application,
-                     const std::vector<VkFormat>& colorFormats,
-                     const std::vector<VkSampleCountFlagBits>& samples,
-                     bool depth,
-                     bool present,
-                     bool resolve,
-                     VkFormat depthFormat,
-                     VkSampleCountFlagBits depthSamples);
+        VKRenderPass(Application* application, const std::vector<VkFormat>& colorFormats,
+                     const std::vector<VkSampleCountFlagBits>& samples, bool depth, bool present, bool resolve,
+                     VkFormat depthFormat, VkSampleCountFlagBits depthSamples);
 
         VKRenderPass(Application* application, VkRenderPass pass);
 
@@ -40,6 +38,6 @@ namespace neon::vulkan {
 
         [[nodiscard]] VkRenderPass getRaw() const;
     };
-}
+} // namespace neon::vulkan
 
 #endif //NEON_VKRENDERPASS_H

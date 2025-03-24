@@ -13,19 +13,21 @@
 #include <neon/render/texture/Texture.h>
 #include <neon/render/shader/MaterialCreateInfo.h>
 
-namespace neon {
+namespace neon
+{
     class Application;
 
     class Material;
 
     class FrameBuffer;
-}
+} // namespace neon
 
-namespace neon::vulkan {
+namespace neon::vulkan
+{
     class AbstractVKApplication;
 
-    class VKMaterial {
-
+    class VKMaterial
+    {
         Material* _material;
 
         AbstractVKApplication* _vkApplication;
@@ -37,13 +39,10 @@ namespace neon::vulkan {
 
         VkRenderPass _target;
 
-    public:
-
+      public:
         VKMaterial(const VKMaterial& other) = delete;
 
-        VKMaterial(Application* application,
-                   Material* material,
-                   const MaterialCreateInfo& createInfo);
+        VKMaterial(Application* application, Material* material, const MaterialCreateInfo& createInfo);
 
         ~VKMaterial();
 
@@ -53,15 +52,12 @@ namespace neon::vulkan {
 
         [[nodiscard]] VkRenderPass getTarget() const;
 
-        void pushConstant(const std::string& name,
-                          const void* data,
-                          uint32_t size);
+        void pushConstant(const std::string& name, const void* data, uint32_t size);
 
         void uploadConstants(VkCommandBuffer buffer) const;
 
-        void setTexture(const std::string& name,
-                        std::shared_ptr<Texture> texture);
+        void setTexture(const std::string& name, std::shared_ptr<Texture> texture);
     };
-}
+} // namespace neon::vulkan
 
 #endif //NEON_VKMATERIAL_H

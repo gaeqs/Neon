@@ -5,15 +5,16 @@
 #ifndef LOCALMODEL_H
 #define LOCALMODEL_H
 
-
 #include <neon/structure/Asset.h>
 #include <rush/vector/vec.h>
 
 #include "InputDescription.h"
 #include "Model.h"
 
-namespace neon {
-    enum class LocalVertexEntry {
+namespace neon
+{
+    enum class LocalVertexEntry
+    {
         POSITION,
         NORMAL,
         TANGENT,
@@ -21,7 +22,8 @@ namespace neon {
         COLOR
     };
 
-    struct LocalVertex {
+    struct LocalVertex
+    {
         rush::Vec3f position;
         rush::Vec3f normal;
         rush::Vec3f tangent;
@@ -30,7 +32,8 @@ namespace neon {
         std::vector<float> extra;
     };
 
-    struct LocalVertexProperties {
+    struct LocalVertexProperties
+    {
         bool hasPosition = false;
         bool hasNormal = false;
         bool hasTangent = false;
@@ -39,16 +42,15 @@ namespace neon {
         bool hasExtra = false;
     };
 
-    class LocalMesh {
+    class LocalMesh
+    {
         LocalVertexProperties _properties;
         std::vector<LocalVertex> _data;
         std::vector<uint32_t> _indices;
         uint32_t _materialIndex;
 
-    public:
-        LocalMesh(LocalVertexProperties properties,
-                  std::vector<LocalVertex> data,
-                  std::vector<uint32_t> indices,
+      public:
+        LocalMesh(LocalVertexProperties properties, std::vector<LocalVertex> data, std::vector<uint32_t> indices,
                   uint32_t materialIndex);
 
         [[nodiscard]] const LocalVertexProperties& getProperties() const;
@@ -66,10 +68,11 @@ namespace neon {
         void setMaterialIndex(uint32_t index);
     };
 
-    class LocalModel : public Asset {
+    class LocalModel : public Asset
+    {
         std::vector<LocalMesh> _meshes;
 
-    public:
+      public:
         explicit LocalModel(std::string name, std::vector<LocalMesh> meshes);
 
         ~LocalModel() override = default;
@@ -79,10 +82,10 @@ namespace neon {
         [[nodiscard]] const std::vector<LocalMesh>& getMeshes() const;
     };
 
-    namespace serialization {
+    namespace serialization
+    {
         std::optional<LocalVertexEntry> toLocalVertexEntry(std::string s);
     }
-}
-
+} // namespace neon
 
 #endif //LOCALMODEL_H

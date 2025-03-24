@@ -6,17 +6,19 @@
 #define CHRONOMETER_H
 #include <chrono>
 
-namespace neon {
+namespace neon
+{
     /**
     * Small util class used to measure durations.
     * <p>
     * The start time is the time point the instance is created.
     * You can reset the start time using the method 'reset()'.
     */
-    class Chronometer {
+    class Chronometer
+    {
         std::chrono::high_resolution_clock::time_point _start;
 
-    public:
+      public:
         /**
         * Creates a chronometer.
         * The count start at the creation of the instance.
@@ -48,7 +50,6 @@ namespace neon {
         */
         void reset();
     };
-}
-
+} // namespace neon
 
 #endif //CHRONOMETER_H

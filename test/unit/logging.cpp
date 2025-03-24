@@ -11,8 +11,8 @@
 #include <neon/util/task/Coroutine.h>
 #include <neon/util/task/TaskRunner.h>
 
-
-TEST_CASE("Logger basic", "[logging]") {
+TEST_CASE("Logger basic", "[logging]")
+{
     using Effect = neon::TextEffect;
     neon::Logger logger;
 
@@ -28,7 +28,8 @@ TEST_CASE("Logger basic", "[logging]") {
     logger.print(builder.build());
 }
 
-TEST_CASE("Logger default groups", "[logging]") {
+TEST_CASE("Logger default groups", "[logging]")
+{
     neon::Logger logger;
 
     logger.info("Info");
@@ -38,7 +39,8 @@ TEST_CASE("Logger default groups", "[logging]") {
     logger.error("Error");
 }
 
-TEST_CASE("Logger operators", "[logging]") {
+TEST_CASE("Logger operators", "[logging]")
+{
     neon::error() << "Hello" << " " << "world";
 
     for (size_t i = 0; i < 10; ++i) {

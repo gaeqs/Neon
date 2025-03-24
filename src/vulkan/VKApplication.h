@@ -6,7 +6,6 @@
 #define NEON_VKAPPLICATION_H
 
 #include <vector>
-#include <memory>
 
 #define GLFW_INCLUDE_VULKAN
 
@@ -18,22 +17,21 @@
 
 #include <vulkan/vulkan.h>
 #include <vulkan/AbstractVKApplication.h>
-#include <vulkan/VKSwapChainSupportDetails.h>
 #include <vulkan/device/VKDevice.h>
 #include <vulkan/VKApplicationCreateInfo.h>
 
-
-namespace neon {
+namespace neon
+{
     class Room;
 }
 
-namespace neon::vulkan {
-    class VKApplication : public AbstractVKApplication {
+namespace neon::vulkan
+{
+    class VKApplication : public AbstractVKApplication
+    {
         static constexpr int MAX_FRAMES_IN_FLIGHT = 2;
 
-        const std::vector<const char*> VALIDATION_LAYERS = {
-            "VK_LAYER_KHRONOS_validation"
-        };
+        const std::vector<const char*> VALIDATION_LAYERS = {"VK_LAYER_KHRONOS_validation"};
 
         VKApplicationCreateInfo _createInfo;
 
@@ -71,7 +69,6 @@ namespace neon::vulkan {
         std::vector<VkSemaphore> _renderFinishedSemaphores;
         std::vector<CommandBuffer*> _assignedCommandBuffer;
 
-
         bool _requiresSwapchainRecreation;
         uint32_t _currentFrame;
         uint32_t _imageIndex;
@@ -98,15 +95,11 @@ namespace neon::vulkan {
 
         void createSwapChain();
 
-        VkSurfaceFormatKHR chooseSwapSurfaceFormat(
-            const std::vector<VkSurfaceFormatKHR>& availableFormats);
+        VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats);
 
-        VkPresentModeKHR
-        chooseSwapPresentMode(
-            const std::vector<VkPresentModeKHR>& availableModes);
+        VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availableModes);
 
-        VkExtent2D
-        chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities);
+        VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities);
 
         void createCommandPool();
 
@@ -120,7 +113,7 @@ namespace neon::vulkan {
 
         // endregion
 
-    public:
+      public:
         VKApplication(const VKApplication& other) = delete;
 
         explicit VKApplication(const VKApplicationCreateInfo& info);
@@ -135,8 +128,7 @@ namespace neon::vulkan {
 
         const ApplicationCreateInfo& getCreationInfo() const override;
 
-        [[nodiscard]] FrameInformation
-        getCurrentFrameInformation() const override;
+        [[nodiscard]] FrameInformation getCurrentFrameInformation() const override;
 
         [[nodiscard]] CommandBuffer* getCurrentCommandBuffer() const override;
 
@@ -192,6 +184,6 @@ namespace neon::vulkan {
 
         [[nodiscard]] bool isRecordingCommandBuffer() const override;
     };
-}
+} // namespace neon::vulkan
 
 #endif //NEON_VKAPPLICATION_H

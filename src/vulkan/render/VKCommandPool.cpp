@@ -9,26 +9,26 @@
 
 #include <neon/render/buffer/CommandBuffer.h>
 
-namespace neon::vulkan {
-    VKCommandPool::VKCommandPool(VKCommandPool&& move) noexcept
-        : _application(move._application),
-          _vkApplication(move._vkApplication),
-          _raw(move._raw),
-          _queueFamilyIndex(move._queueFamilyIndex),
-          _external(move._external) {
+namespace neon::vulkan
+{
+    VKCommandPool::VKCommandPool(VKCommandPool&& move) noexcept :
+        _application(move._application),
+        _vkApplication(move._vkApplication),
+        _raw(move._raw),
+        _queueFamilyIndex(move._queueFamilyIndex),
+        _external(move._external)
+    {
         move._raw = VK_NULL_HANDLE;
     }
 
-    VKCommandPool::VKCommandPool(
-        Application* application,
-        VKQueueFamily::Capabilities capabilities)
-        : _application(application),
-          _vkApplication(dynamic_cast<AbstractVKApplication*>(
-              application->getImplementation())),
-          _raw(),
-          _external(false) {
-        auto optional = _vkApplication->getDevice()->getQueueProvider()
-                ->getFamilies().getCompatibleQueueFamily(capabilities);
+    VKCommandPool::VKCommandPool(Application* application, VKQueueFamily::Capabilities capabilities) :
+        _application(application),
+        _vkApplication(dynamic_cast<AbstractVKApplication*>(application->getImplementation())),
+        _raw(),
+        _external(false)
+    {
+        auto optional =
+            _vkApplication->getDevice()->getQueueProvider()->getFamilies().getCompatibleQueueFamily(capabilities);
 
         if (!optional.has_value()) {
             std::stringstream ss;
@@ -46,59 +46,54 @@ namespace neon::vulkan {
         poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
         poolInfo.queueFamilyIndex = _queueFamilyIndex;
 
-        if (vkCreateCommandPool(_vkApplication->getDevice()->getRaw(),
-                                &poolInfo,
-                                nullptr, &_raw) != VK_SUCCESS) {
+        if (vkCreateCommandPool(_vkApplication->getDevice()->getRaw(), &poolInfo, nullptr, &_raw) != VK_SUCCESS) {
             throw std::runtime_error("Failed to create command pool!");
         }
     }
 
-    VKCommandPool::VKCommandPool(
-        Application* application,
-        VkCommandPool external,
-        uint32_t externalQueueFamilyIndex)
-        : _application(application),
-          _vkApplication(dynamic_cast<AbstractVKApplication*>(
-              application->getImplementation())),
-          _raw(external),
-          _queueFamilyIndex(externalQueueFamilyIndex),
-          _external(true) {}
+    VKCommandPool::VKCommandPool(Application* application, VkCommandPool external, uint32_t externalQueueFamilyIndex) :
+        _application(application),
+        _vkApplication(dynamic_cast<AbstractVKApplication*>(application->getImplementation())),
+        _raw(external),
+        _queueFamilyIndex(externalQueueFamilyIndex),
+        _external(true)
+    {
+    }
 
-    VKCommandPool::~VKCommandPool() {
+    VKCommandPool::~VKCommandPool()
+    {
         if (_raw != VK_NULL_HANDLE && !_external) {
-            vkDestroyCommandPool(
-                _vkApplication->getDevice()->getRaw(),
-                _raw,
-                nullptr
-            );
+            vkDestroyCommandPool(_vkApplication->getDevice()->getRaw(), _raw, nullptr);
         }
     }
 
-    AbstractVKApplication* VKCommandPool::getVkApplication() const {
+    AbstractVKApplication* VKCommandPool::getVkApplication() const
+    {
         return _vkApplication;
     }
 
-    uint32_t VKCommandPool::getQueueFamilyIndex() const {
+    uint32_t VKCommandPool::getQueueFamilyIndex() const
+    {
         return _queueFamilyIndex;
     }
 
-    VkCommandPool VKCommandPool::raw() const {
+    VkCommandPool VKCommandPool::raw() const
+    {
         return _raw;
     }
 
-    std::unique_ptr<CommandBuffer> VKCommandPool::newCommandBuffer(
-        bool primary) const {
+    std::unique_ptr<CommandBuffer> VKCommandPool::newCommandBuffer(bool primary) const
+    {
         return std::make_unique<CommandBuffer>(*this, primary);
     }
 
-    VKCommandPool& VKCommandPool::operator=(VKCommandPool&& move) noexcept {
-        if (this == &move) return *this; // SAME!
+    VKCommandPool& VKCommandPool::operator=(VKCommandPool&& move) noexcept
+    {
+        if (this == &move) {
+            return *this; // SAME!
+        }
         if (_raw != VK_NULL_HANDLE && !_external) {
-            vkDestroyCommandPool(
-                _vkApplication->getDevice()->getRaw(),
-                _raw,
-                nullptr
-            );
+            vkDestroyCommandPool(_vkApplication->getDevice()->getRaw(), _raw, nullptr);
         }
         _application = move._application;
         _vkApplication = move._vkApplication;
@@ -106,4 +101,4 @@ namespace neon::vulkan {
         move._raw = VK_NULL_HANDLE;
         return *this;
     }
-}
+} // namespace neon::vulkan

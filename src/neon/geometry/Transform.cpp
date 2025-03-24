@@ -6,85 +6,97 @@
 
 #include <neon/structure/GameObject.h>
 
-namespace neon {
+namespace neon
+{
 
     uint64_t TRANSFORM_ID_GENERATOR = 1;
 
     Transform::Transform(IdentifiableWrapper<GameObject> object) :
-            _id(TRANSFORM_ID_GENERATOR++),
-            _position(),
-            _rotation(rush::Quatf::euler({0.0f, 0.0f, 0.0f})),
-            _scale(1.0f, 1.0f, 1.0f),
-            _gameObject(object),
-            _parentIdOnLastRefresh(0),
-            _dirty(false),
-            _localModel(1.0f),
-            _model(1.0f) {
+        _id(TRANSFORM_ID_GENERATOR++),
+        _position(),
+        _rotation(rush::Quatf::euler({0.0f, 0.0f, 0.0f})),
+        _scale(1.0f, 1.0f, 1.0f),
+        _gameObject(object),
+        _parentIdOnLastRefresh(0),
+        _dirty(false),
+        _localModel(1.0f),
+        _model(1.0f)
+    {
     }
 
-    IdentifiableWrapper<GameObject> Transform::getGameObject() const {
+    IdentifiableWrapper<GameObject> Transform::getGameObject() const
+    {
         return _gameObject;
     }
 
-    const rush::Vec3f& Transform::getPosition() const {
+    const rush::Vec3f& Transform::getPosition() const
+    {
         return _position;
     }
 
-    const rush::Quatf& Transform::getRotation() const {
+    const rush::Quatf& Transform::getRotation() const
+    {
         return _rotation;
     }
 
-    const rush::Vec3f& Transform::getScale() const {
+    const rush::Vec3f& Transform::getScale() const
+    {
         return _scale;
     }
 
-    void Transform::setPosition(const rush::Vec3f& position) {
+    void Transform::setPosition(const rush::Vec3f& position)
+    {
         _dirty = true;
         _position = position;
     }
 
-    void Transform::setRotation(const rush::Quatf& rotation) {
+    void Transform::setRotation(const rush::Quatf& rotation)
+    {
         _dirty = true;
         _rotation = rotation;
     }
 
-    void Transform::setScale(const rush::Vec3f& scale) {
+    void Transform::setScale(const rush::Vec3f& scale)
+    {
         _dirty = true;
         _scale = scale;
     }
 
-
-    const rush::Vec3f& Transform::move(const rush::Vec3f& offset) {
+    const rush::Vec3f& Transform::move(const rush::Vec3f& offset)
+    {
         _dirty = true;
         _position += offset;
         return _position;
     }
 
-    const rush::Quatf& Transform::lookAt(const rush::Vec3f& direction) {
+    const rush::Quatf& Transform::lookAt(const rush::Vec3f& direction)
+    {
         _dirty = true;
         _rotation = rush::Quatf::lookAt(direction.normalized());
         return _rotation;
     }
 
-    const rush::Quatf&
-    Transform::rotate(const rush::Vec3f& direction, float angle) {
+    const rush::Quatf& Transform::rotate(const rush::Vec3f& direction, float angle)
+    {
         _dirty = true;
-        _rotation = rush::Quatf::angleAxis(angle, direction.normalized()) *
-                    _rotation;
+        _rotation = rush::Quatf::angleAxis(angle, direction.normalized()) * _rotation;
         return _rotation;
     }
 
-    const rush::Mat4f& Transform::getModel() {
+    const rush::Mat4f& Transform::getModel()
+    {
         recalculateIfRequired();
         return _model;
     }
 
-    const rush::Mat4f& Transform::getNormal() {
+    const rush::Mat4f& Transform::getNormal()
+    {
         recalculateIfRequired();
         return _normal;
     }
 
-    void Transform::recalculateIfRequired() {
+    void Transform::recalculateIfRequired()
+    {
         auto parent = _gameObject->getParent();
         if (_dirty) {
             _dirty = false;
@@ -121,4 +133,4 @@ namespace neon {
             }
         }
     }
-}
+} // namespace neon

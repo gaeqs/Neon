@@ -13,12 +13,14 @@
 
 #include <vulkan/queue/VKQueueFamilyCollection.h>
 
-namespace neon::vulkan {
+namespace neon::vulkan
+{
     class VKQueueHolder;
 
-
-    class VKQueueProvider {
-        struct UsedQueue {
+    class VKQueueProvider
+    {
+        struct UsedQueue
+        {
             uint32_t index;
             VkQueue queue;
             uint32_t amount;
@@ -38,13 +40,10 @@ namespace neon::vulkan {
         std::vector<std::vector<uint32_t>> _availableQueues;
         std::vector<std::unordered_map<std::thread::id, UsedQueue>> _usedQueues;
 
-
         void freeQueue(uint32_t family, uint32_t index);
 
-    public:
-        VKQueueProvider(VkDevice device,
-                        VKQueueFamilyCollection families,
-                        const std::vector<uint32_t>& presentQueues);
+      public:
+        VKQueueProvider(VkDevice device, VKQueueFamilyCollection families, const std::vector<uint32_t>& presentQueues);
 
         [[nodiscard]] VkDevice getDevice() const;
 
@@ -52,13 +51,13 @@ namespace neon::vulkan {
 
         VKQueueHolder fetchQueue(uint32_t familyIndex);
 
-        VKQueueHolder fetchCompatibleQueue(
-            const VKQueueFamily::Capabilities& capabilities);
+        VKQueueHolder fetchCompatibleQueue(const VKQueueFamily::Capabilities& capabilities);
 
         bool markUsed(std::thread::id thread, uint32_t family, uint32_t index);
     };
 
-    class VKQueueHolder {
+    class VKQueueHolder
+    {
         VKQueueProvider* _provider;
         VkQueue _queue;
 
@@ -66,15 +65,12 @@ namespace neon::vulkan {
         uint32_t _index;
         bool _valid;
 
-    public:
+      public:
         VKQueueHolder(const VKQueueHolder& other) = delete;
 
         VKQueueHolder();
 
-        VKQueueHolder(VKQueueProvider* provider,
-                      VkQueue queue,
-                      uint32_t family,
-                      uint32_t index);
+        VKQueueHolder(VKQueueProvider* provider, VkQueue queue, uint32_t family, uint32_t index);
 
         VKQueueHolder(VKQueueHolder&& move) noexcept;
 
@@ -90,7 +86,6 @@ namespace neon::vulkan {
 
         VKQueueHolder& operator=(VKQueueHolder&& move) noexcept;
     };
-}
-
+} // namespace neon::vulkan
 
 #endif //VKQUEUEPROVIDER_H

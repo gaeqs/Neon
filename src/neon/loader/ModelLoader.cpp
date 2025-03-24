@@ -9,8 +9,10 @@
 
 #include "AssetLoaderHelpers.h"
 
-namespace neon {
-    size_t ModelLoader::getEntrySizeInFloats(LocalVertexEntry entry) {
+namespace neon
+{
+    size_t ModelLoader::getEntrySizeInFloats(LocalVertexEntry entry)
+    {
         switch (entry) {
             case LocalVertexEntry::POSITION:
             case LocalVertexEntry::NORMAL:
@@ -25,20 +27,28 @@ namespace neon {
         }
     }
 
-    std::shared_ptr<Material> ModelLoader::loadMaterial(nlohmann::json& metadata,
-                                                        const AssimpMaterial& assimpMaterial,
-                                                        const AssetLoaderContext& context) {
+    std::shared_ptr<Material> ModelLoader::loadMaterial(nlohmann::json& metadata, const AssimpMaterial& assimpMaterial,
+                                                        const AssetLoaderContext& context)
+    {
         auto material = getAsset<Material>(metadata["material"], context);
-        if (material == nullptr) return nullptr;
+        if (material == nullptr) {
+            return nullptr;
+        }
 
         auto& textures = metadata["textures"];
         if (textures.is_object()) {
-            for (auto& [key, value]: textures.items()) {
-                if (!value.is_string()) continue;
+            for (auto& [key, value] : textures.items()) {
+                if (!value.is_string()) {
+                    continue;
+                }
                 auto type = serialization::toAssimpTextureType(value);
-                if (!type.has_value()) continue;
+                if (!type.has_value()) {
+                    continue;
+                }
                 auto texture = assimpMaterial.getTextures().find(type.value());
-                if (texture == assimpMaterial.getTextures().end()) continue;
+                if (texture == assimpMaterial.getTextures().end()) {
+                    continue;
+                }
                 material->setTexture(key, texture->second);
             }
         }
@@ -46,17 +56,17 @@ namespace neon {
         return material;
     }
 
-    std::shared_ptr<Mesh> ModelLoader::loadMesh(nlohmann::json& metadata,
-                                                const LocalMesh& localMesh,
+    std::shared_ptr<Mesh> ModelLoader::loadMesh(nlohmann::json& metadata, const LocalMesh& localMesh,
                                                 const std::vector<std::shared_ptr<Material>>& materials,
-                                                const AssetLoaderContext& context) {
+                                                const AssetLoaderContext& context)
+    {
         auto& input = metadata["input"];
 
         std::vector<LocalVertexEntry> entries;
         size_t sizeInFloats = 0;
 
         if (input.is_array()) {
-            for (auto& i: input) {
+            for (auto& i : input) {
                 if (i.is_string()) {
                     auto result = serialization::toLocalVertexEntry(i);
                     if (result.has_value()) {
@@ -70,8 +80,8 @@ namespace neon {
         size_t p = 0;
         auto buffer = std::vector<float>(sizeInFloats * localMesh.getData().size());
 
-        for (const auto& [position, normal, tangent, uv, color, extra]: localMesh.getData()) {
-            for (auto& entry: entries) {
+        for (const auto& [position, normal, tangent, uv, color, extra] : localMesh.getData()) {
+            for (auto& entry : entries) {
                 switch (entry) {
                     case LocalVertexEntry::POSITION:
                         buffer[p++] = position[0];
@@ -114,10 +124,9 @@ namespace neon {
         return mesh;
     }
 
-    void ModelLoader::applyAssimpModel(nlohmann::json& metadata,
-                                       const std::shared_ptr<AssimpScene>& scene,
-                                       ModelCreateInfo& info,
-                                       const AssetLoaderContext& context) {
+    void ModelLoader::applyAssimpModel(nlohmann::json& metadata, const std::shared_ptr<AssimpScene>& scene,
+                                       ModelCreateInfo& info, const AssetLoaderContext& context)
+    {
         // MATERIALS
         auto& jsonMaterials = metadata["materials"];
         std::vector<nlohmann::json> materialsMetadata;
@@ -133,7 +142,7 @@ namespace neon {
             materialsMetadata.resize(scene->getMaterials().size(), materialsMetadata.front());
 
             size_t i = 0;
-            for (const auto& material: scene->getMaterials()) {
+            for (const auto& material : scene->getMaterials()) {
                 materials.push_back(loadMaterial(materialsMetadata[i++], material, context));
             }
         }
@@ -153,7 +162,7 @@ namespace neon {
             meshesMetadata.resize(scene->getLocalModel()->getMeshes().size(), meshesMetadata.front());
 
             size_t i = 0;
-            for (const auto& mesh: scene->getLocalModel()->getMeshes()) {
+            for (const auto& mesh : scene->getLocalModel()->getMeshes()) {
                 auto result = loadMesh(meshesMetadata[i++], mesh, materials, context);
                 if (result != nullptr) {
                     meshes.push_back(result);
@@ -172,18 +181,18 @@ namespace neon {
             extraMaterialsEntries.push_back(jsonExtraMaterials);
         }
 
-        for (auto& entry: extraMaterialsEntries) {
+        for (auto& entry : extraMaterialsEntries) {
             auto material = getAsset<Material>(entry, context);
             if (material != nullptr) {
-                for (auto& mesh: meshes) {
+                for (auto& mesh : meshes) {
                     mesh->getMaterials().insert(material);
                 }
             }
         }
     }
 
-    std::shared_ptr<Model>
-    ModelLoader::loadAsset(std::string name, nlohmann::json json, AssetLoaderContext context) {
+    std::shared_ptr<Model> ModelLoader::loadAsset(std::string name, nlohmann::json json, AssetLoaderContext context)
+    {
         ModelCreateInfo info;
         info.maximumInstances = json.value("maximum_instances", info.maximumInstances);
         info.uniformDescriptor = getAsset<ShaderUniformDescriptor>(json["uniform_descriptor"], context);
@@ -192,7 +201,7 @@ namespace neon {
         auto& instanceTypes = json["custom_instance_sizes"];
         if (instanceTypes.is_array()) {
             std::vector<size_t> sizes;
-            for (auto& entry: instanceTypes) {
+            for (auto& entry : instanceTypes) {
                 if (entry.is_number_unsigned()) {
                     sizes.push_back(entry.get<size_t>());
                 }
@@ -200,13 +209,13 @@ namespace neon {
 
             info.instanceSizes = sizes;
             info.instanceTypes.clear();
-            for (size_t _: info.instanceSizes) {
+            for (size_t _ : info.instanceSizes) {
                 info.instanceTypes.push_back(typeid(void));
             }
         }
 
         if (auto& meshes = json["meshes"]; meshes.is_array()) {
-            for (auto& entry: meshes) {
+            for (auto& entry : meshes) {
                 if (auto mesh = getAsset<Mesh>(entry, context); mesh != nullptr) {
                     info.drawables.push_back(mesh);
                 }
@@ -220,4 +229,4 @@ namespace neon {
 
         return std::make_shared<Model>(context.application, name, info);
     }
-}
+} // namespace neon

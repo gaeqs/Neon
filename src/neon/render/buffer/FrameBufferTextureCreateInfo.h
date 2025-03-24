@@ -9,8 +9,10 @@
 #include <string>
 #include <neon/render/texture/TextureCreateInfo.h>
 
-namespace neon {
-    struct FrameBufferTextureCreateInfo {
+namespace neon
+{
+    struct FrameBufferTextureCreateInfo
+    {
         /**
         * The name of the texture.
         */
@@ -46,20 +48,21 @@ namespace neon {
          */
         SamplerCreateInfo sampler = SamplerCreateInfo();
 
-
-        FrameBufferTextureCreateInfo() {
+        FrameBufferTextureCreateInfo()
+        {
             sampler.anisotropy = false;
             sampler.minificationFilter = TextureFilter::NEAREST;
             sampler.magnificationFilter = TextureFilter::NEAREST;
         }
 
         FrameBufferTextureCreateInfo(TextureFormat format_) :
-            format(format_) {
+            format(format_)
+        {
             sampler.anisotropy = false;
             sampler.minificationFilter = TextureFilter::NEAREST;
             sampler.magnificationFilter = TextureFilter::NEAREST;
         }
     };
-}
+} // namespace neon
 
 #endif //NEON_FRAMEBUFFERTEXTURECREATEINFO_H

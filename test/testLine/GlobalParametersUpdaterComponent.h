@@ -7,7 +7,8 @@
 
 #include <neon/Neon.h>
 
-struct Matrices {
+struct Matrices
+{
     rush::Mat4f view;
     rush::Mat4f projectionView;
     rush::Mat4f inverseProjection;
@@ -15,16 +16,16 @@ struct Matrices {
     float far;
 };
 
-struct Timestamp {
+struct Timestamp
+{
     float time;
 };
 
-class GlobalParametersUpdaterComponent : public neon::Component {
-
+class GlobalParametersUpdaterComponent : public neon::Component
+{
     float _timestamp = 0.0f;
 
-public:
-
+  public:
     ~GlobalParametersUpdaterComponent() override;
 
     void onStart() override;
@@ -32,10 +33,7 @@ public:
     void onUpdate(float deltaTime) override;
 
     void drawEditor() override;
-
 };
-REGISTER_COMPONENT(GlobalParametersUpdaterComponent,
-                   "Global Parameters Updater")
-
+REGISTER_COMPONENT(GlobalParametersUpdaterComponent, "Global Parameters Updater")
 
 #endif //NEON_GLOBALPARAMETERSUPDATERCOMPONENT_H

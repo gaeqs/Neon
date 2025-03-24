@@ -7,22 +7,29 @@
 #include <cstring>
 #include <neon/logging/Logger.h>
 
-namespace neon::vulkan {
-    VKFeatureHolder::VKFeatureHolder(const char* data, size_t size)
-        : size(size), raw(new char[size]) {
+namespace neon::vulkan
+{
+    VKFeatureHolder::VKFeatureHolder(const char* data, size_t size) :
+        size(size),
+        raw(new char[size])
+    {
         memcpy(raw, data, size);
     }
 
-    VKFeatureHolder::VKFeatureHolder(const VKFeatureHolder& other)
-        : size(other.size), raw(new char[size]) {
+    VKFeatureHolder::VKFeatureHolder(const VKFeatureHolder& other) :
+        size(other.size),
+        raw(new char[size])
+    {
         memcpy(raw, other.raw, size);
     }
 
-    VKFeatureHolder::~VKFeatureHolder() {
+    VKFeatureHolder::~VKFeatureHolder()
+    {
         delete[] raw;
     }
 
-    VKFeatureHolder& VKFeatureHolder::operator=(const VKFeatureHolder& other) {
+    VKFeatureHolder& VKFeatureHolder::operator=(const VKFeatureHolder& other)
+    {
         delete[] raw;
         size = other.size;
         raw = new char[size];
@@ -30,90 +37,68 @@ namespace neon::vulkan {
         return *this;
     }
 
-    VKDefaultExtension* VKFeatureHolder::asDefaultExtensions() {
+    VKDefaultExtension* VKFeatureHolder::asDefaultExtensions()
+    {
         return reinterpret_cast<VKDefaultExtension*>(raw);
     }
 
-    const VKDefaultExtension* VKFeatureHolder::asDefaultExtensions() const {
+    const VKDefaultExtension* VKFeatureHolder::asDefaultExtensions() const
+    {
         return reinterpret_cast<const VKDefaultExtension*>(raw);
     }
 
-    VKPhysicalDeviceFeatures::VKPhysicalDeviceFeatures(
-        const VKPhysicalDeviceFeatures& other)
-        : basicFeatures(other.basicFeatures),
-          features(other.features),
-          extensions(other.extensions) {
-        features.emplace_back(VkPhysicalDeviceVulkan11Features(
-            VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_1_FEATURES));
-        features.emplace_back(VkPhysicalDeviceVulkan12Features(
-            VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES));
-        features.emplace_back(VkPhysicalDeviceVulkan13Features(
-            VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES));
+    VKPhysicalDeviceFeatures::VKPhysicalDeviceFeatures(const VKPhysicalDeviceFeatures& other) :
+        basicFeatures(other.basicFeatures),
+        features(other.features),
+        extensions(other.extensions)
+    {
+        features.emplace_back(VkPhysicalDeviceVulkan11Features(VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_1_FEATURES));
+        features.emplace_back(VkPhysicalDeviceVulkan12Features(VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES));
+        features.emplace_back(VkPhysicalDeviceVulkan13Features(VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES));
 
         reweave();
     }
 
-    VKPhysicalDeviceFeatures::VKPhysicalDeviceFeatures(
-        VkPhysicalDevice device,
-        const std::vector<VKFeatureHolder>& extraFeatures) {
+    VKPhysicalDeviceFeatures::VKPhysicalDeviceFeatures(VkPhysicalDevice device,
+                                                       const std::vector<VKFeatureHolder>& extraFeatures)
+    {
         VkPhysicalDeviceFeatures2 f{};
         f.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
 
-        features.emplace_back(VkPhysicalDeviceVulkan11Features(
-            VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_1_FEATURES));
-        features.emplace_back(VkPhysicalDeviceVulkan12Features(
-            VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES));
-        features.emplace_back(VkPhysicalDeviceVulkan13Features(
-            VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES));
+        features.emplace_back(VkPhysicalDeviceVulkan11Features(VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_1_FEATURES));
+        features.emplace_back(VkPhysicalDeviceVulkan12Features(VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES));
+        features.emplace_back(VkPhysicalDeviceVulkan13Features(VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES));
 
-        features.insert(
-            features.end(),
-            extraFeatures.begin(),
-            extraFeatures.end()
-        );
+        features.insert(features.end(), extraFeatures.begin(), extraFeatures.end());
 
         reweave();
         f.pNext = features.empty() ? nullptr : features[0].raw;
-
 
         vkGetPhysicalDeviceFeatures2(device, &f);
 
         basicFeatures = f.features;
 
         uint32_t extensionCount;
-        vkEnumerateDeviceExtensionProperties(
-            device,
-            nullptr,
-            &extensionCount,
-            nullptr
-        );
+        vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, nullptr);
 
         std::vector<VkExtensionProperties> rawExtensions(extensionCount);
 
-        vkEnumerateDeviceExtensionProperties(
-            device,
-            nullptr,
-            &extensionCount,
-            rawExtensions.data()
-        );
+        vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, rawExtensions.data());
 
         extensions.reserve(extensionCount);
-        for (auto& [name, _]: rawExtensions) {
+        for (auto& [name, _] : rawExtensions) {
             extensions.emplace_back(name);
         }
     }
 
-    bool VKPhysicalDeviceFeatures::hasExtension(
-        const std::string& extension) const {
-        const auto it = std::find(
-            extensions.cbegin(),
-            extensions.cend(),
-            extension
-        );
+    bool VKPhysicalDeviceFeatures::hasExtension(const std::string& extension) const
+    {
+        const auto it = std::find(extensions.cbegin(), extensions.cend(), extension);
         return it != extensions.cend();
     }
 
-    VkPhysicalDeviceFeatures2 VKPhysicalDeviceFeatures::toFeatures2() const {
+    VkPhysicalDeviceFeatures2 VKPhysicalDeviceFeatures::toFeatures2() const
+    {
         VkPhysicalDeviceFeatures2 f;
         f.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
         f.features = basicFeatures;
@@ -122,8 +107,8 @@ namespace neon::vulkan {
         return f;
     }
 
-    VKPhysicalDeviceFeatures& VKPhysicalDeviceFeatures::operator=(
-        const VKPhysicalDeviceFeatures& o) {
+    VKPhysicalDeviceFeatures& VKPhysicalDeviceFeatures::operator=(const VKPhysicalDeviceFeatures& o)
+    {
         basicFeatures = o.basicFeatures;
         features = o.features;
         extensions = o.extensions;
@@ -131,13 +116,13 @@ namespace neon::vulkan {
         return *this;
     }
 
-    void VKPhysicalDeviceFeatures::reweave() {
+    void VKPhysicalDeviceFeatures::reweave()
+    {
         if (!features.empty()) {
             for (size_t i = 0; i < features.size() - 1; ++i) {
                 features[i].asDefaultExtensions()->pNext = features[i + 1].raw;
             }
-            features[features.size() - 1].asDefaultExtensions()->pNext =
-                    nullptr;
+            features[features.size() - 1].asDefaultExtensions()->pNext = nullptr;
         }
     }
-}
+} // namespace neon::vulkan

@@ -7,13 +7,12 @@
 
 #include <neon/Neon.h>
 
-class ConstantRotationComponent : public neon::Component {
-
+class ConstantRotationComponent : public neon::Component
+{
     float _speed;
     rush::Vec3f _axis;
 
-public:
-
+  public:
     ConstantRotationComponent();
 
     [[nodiscard]] float getSpeed() const;
@@ -27,10 +26,7 @@ public:
     void onUpdate(float deltaTime) override;
 
     void drawEditor() override;
-
-
 };
 REGISTER_COMPONENT(ConstantRotationComponent, "Constant Rotation")
-
 
 #endif //NEON_CONSTANTROTATIONCOMPONENT_H

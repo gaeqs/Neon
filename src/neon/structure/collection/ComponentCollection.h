@@ -15,7 +15,8 @@
 #include <neon/util/ClusteredLinkedCollection.h>
 #include <neon/util/profile/Profiler.h>
 
-namespace neon {
+namespace neon
+{
 
     class Room;
 
@@ -31,21 +32,19 @@ namespace neon {
 
     struct ScrollEvent;
 
-/**
+    /**
  * This class holds all components inside a room.
  */
-    class ComponentCollection {
-
-        std::unordered_map<std::type_index,
-                std::pair<ComponentImplementedEvents, std::shared_ptr<void>>> _components;
+    class ComponentCollection
+    {
+        std::unordered_map<std::type_index, std::pair<ComponentImplementedEvents, std::shared_ptr<void>>> _components;
         std::queue<IdentifiableWrapper<Component>> _notStartedComponents;
 
         static void callOnConstruction(void* rawComponent);
 
         void flushNotStartedComponents();
 
-    public:
-
+      public:
         ComponentCollection(const ComponentCollection& other) = delete;
 
         /**
@@ -65,24 +64,19 @@ namespace neon {
          * @return a pointer to the new component.
          */
         template<class T, class... Args>
-        IdentifiableWrapper<T> newComponent(Args&& ... values) {
+        IdentifiableWrapper<T> newComponent(Args&&... values)
+        {
             auto it = _components.find(typeid(T));
 
             if (it == _components.end()) {
                 auto events = ComponentImplementedEvents::fromGeneric<T>();
                 auto pointer = std::make_shared<ClusteredLinkedCollection<T>>();
-                _components.insert(std::make_pair(
-                        std::type_index(typeid(T)),
-                        std::make_pair(
-                                events,
-                                std::static_pointer_cast<void>(pointer)
-                        )
-                ));
+                _components.insert(std::make_pair(std::type_index(typeid(T)),
+                                                  std::make_pair(events, std::static_pointer_cast<void>(pointer))));
 
                 T* component = pointer->emplace(std::forward<Args>(values)...);
                 if (events.onStart) {
-                    _notStartedComponents.push(
-                            static_cast<Component*>(component));
+                    _notStartedComponents.push(static_cast<Component*>(component));
                 }
                 if (events.onConstruction) {
                     callOnConstruction(component);
@@ -90,8 +84,7 @@ namespace neon {
                 return component;
             }
 
-            auto components = std::static_pointer_cast
-                    <ClusteredLinkedCollection<T>>(it->second.second);
+            auto components = std::static_pointer_cast<ClusteredLinkedCollection<T>>(it->second.second);
 
             T* component = components->emplace(std::forward<Args>(values)...);
             if (it->second.first.onStart) {
@@ -113,12 +106,13 @@ namespace neon {
          * @return the pointer to the collection or nullptr.
          */
         template<class T>
-        std::shared_ptr<ClusteredLinkedCollection<T>>
-        getComponentsOfType() const {
+        std::shared_ptr<ClusteredLinkedCollection<T>> getComponentsOfType() const
+        {
             auto it = _components.find(typeid(T));
-            if (it == _components.end()) return nullptr;
-            return std::reinterpret_pointer_cast<ClusteredLinkedCollection<T>>(
-                    it->second.second);
+            if (it == _components.end()) {
+                return nullptr;
+            }
+            return std::reinterpret_pointer_cast<ClusteredLinkedCollection<T>>(it->second.second);
         }
 
         /**
@@ -145,8 +139,7 @@ namespace neon {
          * <p>
          * Calls onMouseButton() on all components.
          */
-        void invokeMouseButtonEvent(Profiler& profiler,
-                                    const MouseButtonEvent& event);
+        void invokeMouseButtonEvent(Profiler& profiler, const MouseButtonEvent& event);
 
         /**
          * THIS METHOD SHOULD ONLY BE USED BY ROOMS!
@@ -154,8 +147,7 @@ namespace neon {
          * <p>
          * Calls onCursorMove() on all components.
          */
-        void
-        invokeCursorMoveEvent(Profiler& profiler, const CursorMoveEvent& event);
+        void invokeCursorMoveEvent(Profiler& profiler, const CursorMoveEvent& event);
 
         /**
          * THIS METHOD SHOULD ONLY BE USED BY ROOMS!
@@ -193,8 +185,7 @@ namespace neon {
          * @param profiler the profiler.
          */
         void preDrawComponents(Profiler& profiler);
-
     };
-}
+} // namespace neon
 
 #endif //RVTRACKING_COMPONENTCOLLECTION_H

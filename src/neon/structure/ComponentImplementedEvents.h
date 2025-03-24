@@ -7,29 +7,24 @@
 
 #include <typeindex>
 
-namespace neon {
+namespace neon
+{
 
-/**
+    /**
  * This class helps to determine which events
  * are implemented in a component.
  *
  * Not implemented events will be skipped.
  */
-    struct ComponentImplementedEvents {
-
+    struct ComponentImplementedEvents
+    {
         template<class T>
-        static inline ComponentImplementedEvents fromGeneric() {
-            return ComponentImplementedEvents(
-                    typeid(&T::onConstruction),
-                    typeid(&T::onStart),
-                    typeid(&T::onUpdate),
-                    typeid(&T::onLateUpdate),
-                    typeid(&T::onPreDraw),
-                    typeid(&T::onKey),
-                    typeid(&T::onMouseButton),
-                    typeid(&T::onCursorMove),
-                    typeid(&T::onScroll)
-            );
+        static inline ComponentImplementedEvents fromGeneric()
+        {
+            return ComponentImplementedEvents(typeid(&T::onConstruction), typeid(&T::onStart), typeid(&T::onUpdate),
+                                              typeid(&T::onLateUpdate), typeid(&T::onPreDraw), typeid(&T::onKey),
+                                              typeid(&T::onMouseButton), typeid(&T::onCursorMove),
+                                              typeid(&T::onScroll));
         }
 
         bool onConstruction;
@@ -42,19 +37,12 @@ namespace neon {
         bool onCursorMove;
         bool onScroll;
 
-        ComponentImplementedEvents(
-                std::type_index onConstructionFunction,
-                std::type_index onStartFunction,
-                std::type_index onUpdateFunction,
-                std::type_index onLateUpdateFunction,
-                std::type_index onPreDrawFunction,
-                std::type_index onKeyFunction,
-                std::type_index onMouseButtonFunction,
-                std::type_index onCursorMoveFunction,
-                std::type_index onScrollFunction);
-
+        ComponentImplementedEvents(std::type_index onConstructionFunction, std::type_index onStartFunction,
+                                   std::type_index onUpdateFunction, std::type_index onLateUpdateFunction,
+                                   std::type_index onPreDrawFunction, std::type_index onKeyFunction,
+                                   std::type_index onMouseButtonFunction, std::type_index onCursorMoveFunction,
+                                   std::type_index onScrollFunction);
     };
-}
-
+} // namespace neon
 
 #endif //NEON_COMPONENTIMPLEMENTEDEVENTS_H

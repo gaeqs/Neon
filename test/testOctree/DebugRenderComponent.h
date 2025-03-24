@@ -11,17 +11,17 @@
 
 CMRC_DECLARE(shaders);
 
-class DebugRenderComponent : public neon::Component {
-    struct Instance {
+class DebugRenderComponent : public neon::Component
+{
+    struct Instance
+    {
         rush::Vec3f position;
         rush::Vec4f color;
         float radius;
 
-        static neon::InputDescription getInstancingDescription() {
-            neon::InputDescription description(
-                sizeof(Instance),
-                neon::InputRate::INSTANCE
-            );
+        static neon::InputDescription getInstancingDescription()
+        {
+            neon::InputDescription description(sizeof(Instance), neon::InputRate::INSTANCE);
             description.addAttribute(3, 0);
             description.addAttribute(4, 12);
             description.addAttribute(1, 28);
@@ -30,27 +30,18 @@ class DebugRenderComponent : public neon::Component {
         }
     };
 
-
     std::shared_ptr<neon::FrameBuffer> _target;
     std::shared_ptr<neon::Model> _model;
     std::vector<neon::InstanceData::Instance> _frontInstances;
     std::vector<neon::InstanceData::Instance> _backInstances;
 
+    std::shared_ptr<neon::Material> createMaterial(const neon::Room* room) const
+    {
+        auto program = std::make_shared<neon::ShaderProgram>(room->getApplication(), "debug");
 
-    std::shared_ptr<neon::Material>
-    createMaterial(const neon::Room* room) const {
-        auto program = std::make_shared<neon::ShaderProgram>(
-            room->getApplication(), "debug");
+        program->addShader(neon::ShaderType::VERTEX, cmrc::shaders::get_filesystem().open("debug.vert"));
 
-        program->addShader(
-            neon::ShaderType::VERTEX,
-            cmrc::shaders::get_filesystem().open("debug.vert")
-        );
-
-        program->addShader(
-            neon::ShaderType::FRAGMENT,
-            cmrc::shaders::get_filesystem().open("debug.frag")
-        );
+        program->addShader(neon::ShaderType::FRAGMENT, cmrc::shaders::get_filesystem().open("debug.frag"));
 
         if (auto result = program->compile(); result.has_value()) {
             std::cerr << result.value() << std::endl;
@@ -63,15 +54,13 @@ class DebugRenderComponent : public neon::Component {
         desc.addAttribute(1, 0);
 
         info.descriptions.vertex.push_back(desc);
-        info.descriptions.instance.push_back(
-            Instance::getInstancingDescription());
+        info.descriptions.instance.push_back(Instance::getInstancingDescription());
 
-
-        return std::make_shared<
-            neon::Material>(room->getApplication(), "debug", info);
+        return std::make_shared<neon::Material>(room->getApplication(), "debug", info);
     }
 
-    std::shared_ptr<neon::Model> createModel(const neon::Room* room) const {
+    std::shared_ptr<neon::Model> createModel(const neon::Room* room) const
+    {
         auto material = createMaterial(room);
 
         neon::ModelCreateInfo info;
@@ -79,18 +68,9 @@ class DebugRenderComponent : public neon::Component {
 
         std::vector<float> vertices{0.0f, 1.0f, 2.0f, 3.0f};
 
-        std::vector<uint32_t> indices{
-            0, 1, 2, 1, 3, 2
-        };
+        std::vector<uint32_t> indices{0, 1, 2, 1, 3, 2};
 
-
-        auto mesh = std::make_unique<neon::Mesh>(
-            room->getApplication(),
-            "debug",
-            material,
-            false,
-            false
-        );
+        auto mesh = std::make_unique<neon::Mesh>(room->getApplication(), "debug", material, false, false);
 
         mesh->uploadVertices(vertices);
         mesh->uploadIndices(indices);
@@ -99,27 +79,26 @@ class DebugRenderComponent : public neon::Component {
 
         info.defineInstanceType<Instance>();
 
-        auto model = std::make_shared<neon::Model>(
-            room->getApplication(), "debug", info);
+        auto model = std::make_shared<neon::Model>(room->getApplication(), "debug", info);
 
         return model;
     }
 
-public:
-    explicit DebugRenderComponent(std::shared_ptr<neon::FrameBuffer> target,
-                                  neon::Room* room)
-        : _target(std::move(target)) {
+  public:
+    explicit DebugRenderComponent(std::shared_ptr<neon::FrameBuffer> target, neon::Room* room) :
+        _target(std::move(target))
+    {
         _model = createModel(room);
         room->markUsingModel(_model.get());
     }
 
-    ~DebugRenderComponent() override {
+    ~DebugRenderComponent() override
+    {
         getRoom()->unmarkUsingModel(_model.get());
     }
 
-    void drawElement(const rush::Vec3f& position,
-                     const rush::Vec4f& color,
-                     float radius) {
+    void drawElement(const rush::Vec3f& position, const rush::Vec4f& color, float radius)
+    {
         neon::InstanceData::Instance instance;
         if (!_frontInstances.empty()) {
             instance = _frontInstances.back();
@@ -134,16 +113,11 @@ public:
         }
 
         _backInstances.push_back(instance);
-        _model->getInstanceData(0)->uploadData<Instance>(
-            instance,
-            0,
-            Instance(position, color, radius)
-        );
+        _model->getInstanceData(0)->uploadData<Instance>(instance, 0, Instance(position, color, radius));
     }
 
-    void drawPermanent(const rush::Vec3f& position,
-                       const rush::Vec4f& color,
-                       float radius) {
+    void drawPermanent(const rush::Vec3f& position, const rush::Vec4f& color, float radius)
+    {
         neon::InstanceData::Instance instance;
         if (!_frontInstances.empty()) {
             instance = _frontInstances.back();
@@ -156,17 +130,13 @@ public:
             }
             instance = result.getResult();
         }
-        _model->getInstanceData(0)->uploadData<Instance>(
-            instance,
-            0,
-            Instance(position, color, radius)
-        );
+        _model->getInstanceData(0)->uploadData<Instance>(instance, 0, Instance(position, color, radius));
     }
 
-
-    void onPreDraw() override {
+    void onPreDraw() override
+    {
         std::swap(_frontInstances, _backInstances);
-        for (const neon::InstanceData::Instance& instance: _backInstances) {
+        for (const neon::InstanceData::Instance& instance : _backInstances) {
             _model->getInstanceData(0)->freeInstance(instance);
         }
         _backInstances.clear();

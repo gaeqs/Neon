@@ -15,16 +15,19 @@
 
 #include <imgui.h>
 
-namespace neon {
+namespace neon
+{
     class Application;
 
     class Texture;
-}
+} // namespace neon
 
-namespace neon::vulkan {
+namespace neon::vulkan
+{
     class AbstractVKApplication;
 
-    struct SimpleFrameBufferImage {
+    struct SimpleFrameBufferImage
+    {
         std::optional<std::string> name;
         bool depth;
         ImageCreateInfo info;
@@ -37,12 +40,14 @@ namespace neon::vulkan {
         std::shared_ptr<Texture> overrideTexture;
     };
 
-    struct SimpleFrameBufferSlot {
+    struct SimpleFrameBufferSlot
+    {
         SimpleFrameBufferImage image;
         std::optional<SimpleFrameBufferImage> resolveImage;
     };
 
-    class VKSimpleFrameBuffer : public VKFrameBuffer {
+    class VKSimpleFrameBuffer : public VKFrameBuffer
+    {
         AbstractVKApplication* _vkApplication;
 
         VkFramebuffer _frameBuffer;
@@ -71,18 +76,13 @@ namespace neon::vulkan {
 
         void cleanupImages();
 
-    public:
-        VKSimpleFrameBuffer(Application* application,
-                            const std::vector<FrameBufferTextureCreateInfo>& textureInfos,
-                            std::pair<uint32_t, uint32_t> extent,
-                            bool depth,
-                            std::optional<std::string> depthName = {},
+      public:
+        VKSimpleFrameBuffer(Application* application, const std::vector<FrameBufferTextureCreateInfo>& textureInfos,
+                            std::pair<uint32_t, uint32_t> extent, bool depth, std::optional<std::string> depthName = {},
                             SamplesPerTexel depthSamples = SamplesPerTexel::COUNT_1);
 
-        VKSimpleFrameBuffer(Application* application,
-                            const std::vector<FrameBufferTextureCreateInfo>& textureInfos,
-                            std::pair<uint32_t, uint32_t> extent,
-                            std::shared_ptr<Texture> depthTexture);
+        VKSimpleFrameBuffer(Application* application, const std::vector<FrameBufferTextureCreateInfo>& textureInfos,
+                            std::pair<uint32_t, uint32_t> extent, std::shared_ptr<Texture> depthTexture);
 
         ~VKSimpleFrameBuffer() override;
 
@@ -96,7 +96,7 @@ namespace neon::vulkan {
 
         [[nodiscard]] VkFormat getDepthFormat() const override;
 
-        [[nodiscard]] VKRenderPass const& getRenderPass() const override;
+        [[nodiscard]] const VKRenderPass& getRenderPass() const override;
 
         [[nodiscard]] VKRenderPass& getRenderPass() override;
 
@@ -116,10 +116,8 @@ namespace neon::vulkan {
 
         [[nodiscard]] bool defaultRecreationCondition() const;
 
-        [[nodiscard]] std::pair<uint32_t, uint32_t>
-        defaultRecreationParameters() const;
+        [[nodiscard]] std::pair<uint32_t, uint32_t> defaultRecreationParameters() const;
     };
-}
-
+} // namespace neon::vulkan
 
 #endif //NEON_VKSIMPLEFRAMEBUFFER_H

@@ -7,13 +7,19 @@
 #include <fstream>
 #include <utility>
 
-namespace neon {
-    DirectoryFileSystem::DirectoryFileSystem(std::filesystem::path root)
-        : _root(std::move(root)) {}
+namespace neon
+{
+    DirectoryFileSystem::DirectoryFileSystem(std::filesystem::path root) :
+        _root(std::move(root))
+    {
+    }
 
-    std::optional<File> DirectoryFileSystem::readFile(std::filesystem::path path) const {
+    std::optional<File> DirectoryFileSystem::readFile(std::filesystem::path path) const
+    {
         auto result = _root / path;
-        if (!std::filesystem::exists(result) || is_directory(result)) return {};
+        if (!std::filesystem::exists(result) || is_directory(result)) {
+            return {};
+        }
 
         std::ifstream file(result, std::ios::binary | std::ios::ate);
         std::ifstream::pos_type pos = file.tellg();
@@ -26,8 +32,9 @@ namespace neon {
         return File(data, pos);
     }
 
-    bool DirectoryFileSystem::exists(std::filesystem::path path) const {
+    bool DirectoryFileSystem::exists(std::filesystem::path path) const
+    {
         auto result = _root / path;
         return std::filesystem::exists(result) && !is_directory(result);
     }
-}
+} // namespace neon

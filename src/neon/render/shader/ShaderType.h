@@ -5,14 +5,16 @@
 #ifndef NEON_SHADERTYPE_H
 #define NEON_SHADERTYPE_H
 
-namespace neon {
-    enum class ShaderType {
+namespace neon
+{
+    enum class ShaderType
+    {
         VERTEX,
         GEOMETRY,
         FRAGMENT,
         TASK,
         MESH
     };
-}
+} // namespace neon
 
 #endif //NEON_SHADERTYPE_H

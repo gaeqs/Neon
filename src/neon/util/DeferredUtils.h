@@ -16,8 +16,8 @@
 #include <neon/render/shader/MaterialCreateInfo.h>
 #include <neon/render/model/ModelCreateInfo.h>
 
-
-namespace neon {
+namespace neon
+{
     class Application;
 
     class FrameBuffer;
@@ -31,45 +31,39 @@ namespace neon {
     class Render;
 
     class Room;
-}
+} // namespace neon
 
-namespace neon::deferred_utils {
-    struct DeferredVertex {
+namespace neon::deferred_utils
+{
+    struct DeferredVertex
+    {
         rush::Vec2f position;
 
-        static InputDescription getDescription() {
-            InputDescription description(
-                sizeof(DeferredVertex),
-                InputRate::VERTEX
-            );
+        static InputDescription getDescription()
+        {
+            InputDescription description(sizeof(DeferredVertex), InputRate::VERTEX);
             description.addAttribute(2, 0);
 
             return description;
         }
 
-        static DeferredVertex fromAssimp(
-            const rush::Vec3f& position,
-            [[maybe_unused]] const rush::Vec3f& normal,
-            [[maybe_unused]] const rush::Vec3f& tangent,
-            [[maybe_unused]] const rush::Vec4f& color,
-            [[maybe_unused]] const rush::Vec2f& texCoords) {
+        static DeferredVertex fromAssimp(const rush::Vec3f& position, [[maybe_unused]] const rush::Vec3f& normal,
+                                         [[maybe_unused]] const rush::Vec3f& tangent,
+                                         [[maybe_unused]] const rush::Vec4f& color,
+                                         [[maybe_unused]] const rush::Vec2f& texCoords)
+        {
             return {position};
         }
     };
 
-    std::shared_ptr<Model> createScreenModel(Application* application,
-                                             ModelCreateInfo info,
-                                             const std::string& name);
+    std::shared_ptr<Model> createScreenModel(Application* application, ModelCreateInfo info, const std::string& name);
 
-    std::shared_ptr<Texture> createLightSystem(
-        Room* room,
-        Render* render,
-        const std::vector<std::shared_ptr<Texture>>& textures,
-        TextureFormat outputFormat,
-        const std::shared_ptr<ShaderProgram>& directionalShader,
-        const std::shared_ptr<ShaderProgram>& pointShader,
-        const std::shared_ptr<ShaderProgram>& flashShader);
-};
-
+    std::shared_ptr<Texture> createLightSystem(Room* room, Render* render,
+                                               const std::vector<std::shared_ptr<Texture>>& textures,
+                                               TextureFormat outputFormat,
+                                               const std::shared_ptr<ShaderProgram>& directionalShader,
+                                               const std::shared_ptr<ShaderProgram>& pointShader,
+                                               const std::shared_ptr<ShaderProgram>& flashShader);
+}; // namespace neon::deferred_utils
 
 #endif //NEON_DEFERREDUTILS_H

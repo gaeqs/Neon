@@ -9,23 +9,19 @@
 
 #include <neon/util/component/CameraMovementComponent.h>
 
-class LockMouseComponent : public neon::Component {
-
-    neon::IdentifiableWrapper<neon::CameraMovementComponent>
-            _cameraMovementComponent;
-    bool _locked = false;
+class LockMouseComponent : public neon::Component
+{
+    neon::IdentifiableWrapper<neon::CameraMovementComponent> _cameraMovementComponent;
+    bool _locked;
 
     void performLock();
 
-public:
-
-    explicit LockMouseComponent(
-            neon::IdentifiableWrapper<neon::CameraMovementComponent> cameraMovementComponent);
+  public:
+    explicit LockMouseComponent(neon::IdentifiableWrapper<neon::CameraMovementComponent> cameraMovementComponent);
 
     void onStart() override;
 
     void onKey(const neon::KeyboardEvent& event) override;
-
 };
 
 #endif //NEON_LOCKMOUSECOMPONENT_H

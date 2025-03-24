@@ -5,7 +5,6 @@
 #ifndef RVTRACKING_APPLICATION_H
 #define RVTRACKING_APPLICATION_H
 
-
 #include <cstdint>
 #include <string>
 #include <memory>
@@ -24,8 +23,8 @@
 
 #include <neon/structure/ApplicationCreateInfo.h>
 
-
-namespace neon {
+namespace neon
+{
     class Room;
 
     class Render;
@@ -34,8 +33,9 @@ namespace neon {
 
     class Application;
 
-    class ApplicationImplementation {
-    public:
+    class ApplicationImplementation
+    {
+      public:
         ApplicationImplementation() = default;
 
         virtual ~ApplicationImplementation() = default;
@@ -46,11 +46,9 @@ namespace neon {
 
         [[nodiscard]] virtual rush::Vec2i getWindowSize() const = 0;
 
-        [[nodiscard]] virtual FrameInformation
-        getCurrentFrameInformation() const = 0;
+        [[nodiscard]] virtual FrameInformation getCurrentFrameInformation() const = 0;
 
-        [[nodiscard]] virtual CommandBuffer*
-        getCurrentCommandBuffer() const = 0;
+        [[nodiscard]] virtual CommandBuffer* getCurrentCommandBuffer() const = 0;
 
         virtual void lockMouse(bool lock) = 0;
 
@@ -59,7 +57,8 @@ namespace neon {
         virtual void renderFrame(Room* room) = 0;
     };
 
-    class Application {
+    class Application
+    {
         std::unique_ptr<ApplicationImplementation> _implementation;
 
         std::shared_ptr<Room> _room;
@@ -73,9 +72,8 @@ namespace neon {
         std::shared_ptr<Render> _render;
         std::optional<rush::Vec2i> _forcedViewport;
 
-    public:
-        explicit Application(
-            std::unique_ptr<ApplicationImplementation> implementation);
+      public:
+        explicit Application(std::unique_ptr<ApplicationImplementation> implementation);
 
         ~Application();
 
@@ -83,8 +81,7 @@ namespace neon {
 
         [[nodiscard]] Result<uint32_t, std::string> startGameLoop();
 
-        [[nodiscard]] const ApplicationImplementation*
-        getImplementation() const;
+        [[nodiscard]] const ApplicationImplementation* getImplementation() const;
 
         [[nodiscard]] ApplicationImplementation* getImplementation();
 
@@ -148,7 +145,6 @@ namespace neon {
 
         //endregion
     };
-}
-
+} // namespace neon
 
 #endif //RVTRACKING_APPLICATION_H

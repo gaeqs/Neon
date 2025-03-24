@@ -9,10 +9,11 @@
 #include <string>
 #include <typeindex>
 
-namespace neon {
+namespace neon
+{
 
-    struct AssetIdentifier {
-
+    struct AssetIdentifier
+    {
         std::type_index type;
         std::string name;
 
@@ -32,12 +33,11 @@ namespace neon {
      * An asset may be, for example, a Shader, a Texture or
      * a Model.
      */
-    class Asset {
-
+    class Asset
+    {
         AssetIdentifier _identifier;
 
-    public:
-
+      public:
         /**
          * Creates an asset
          * @param type the type of the asset.
@@ -78,23 +78,23 @@ namespace neon {
         * @return whether the two assets are not equivalent.
         */
         bool operator!=(const Asset& other) const;
-
     };
-}
+} // namespace neon
 
-namespace std {
+namespace std
+{
 
     template<>
-    struct hash<neon::AssetIdentifier> {
-
-        std::size_t operator()(neon::AssetIdentifier const& s) const noexcept {
+    struct hash<neon::AssetIdentifier>
+    {
+        std::size_t operator()(const neon::AssetIdentifier& s) const noexcept
+        {
             std::size_t h1 = std::hash<std::type_index>{}(s.type);
             std::size_t h2 = std::hash<std::string>{}(s.name);
             return h1 ^ (h2 << 1);
         }
-
     };
 
-}
+} // namespace std
 
 #endif //NEON_ASSET_H

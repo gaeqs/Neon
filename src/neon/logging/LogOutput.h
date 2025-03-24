@@ -8,8 +8,8 @@
 #include <vector>
 #include <neon/structure/Identifiable.h>
 
-
-namespace neon {
+namespace neon
+{
     struct Message;
     struct MessageGroup;
 
@@ -18,10 +18,11 @@ namespace neon {
      * You can create extensions of this function
      * to implement new log outputs.
      */
-    class LogOutput : public Identifiable {
+    class LogOutput : public Identifiable
+    {
         uint64_t _id;
 
-    public:
+      public:
         LogOutput(const LogOutput& other) = delete;
 
         /**
@@ -42,9 +43,8 @@ namespace neon {
          * @param message the message.
          * @param group the group.
          */
-        virtual void print(const Message& message,
-                           const std::vector<const MessageGroup*>& group) = 0;
+        virtual void print(const Message& message, const std::vector<const MessageGroup*>& group) = 0;
     };
-}
+} // namespace neon
 
 #endif //LOGOUTPUT_H

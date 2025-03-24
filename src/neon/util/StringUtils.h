@@ -7,9 +7,9 @@
 
 #include <string>
 
-namespace neon {
+namespace neon
+{
     std::string replace(const std::string& str, const std::string& toReplace, const std::string& replacement);
 }
-
 
 #endif //STRINGUTILS_H

@@ -5,7 +5,6 @@
 #ifndef NEON_MESH_H
 #define NEON_MESH_H
 
-
 #include <unordered_set>
 #include <string>
 
@@ -14,27 +13,29 @@
 
 #ifdef USE_VULKAN
 
-#include <vulkan/render/model/VKMesh.h>
+    #include <vulkan/render/model/VKMesh.h>
 
 #endif
 
-namespace neon {
+namespace neon
+{
     class Application;
 
     /**
      * Represents a set of vertices and indices
      * used by models to render an object.
      */
-    class Mesh : public Drawable {
-    public:
+    class Mesh : public Drawable
+    {
+      public:
 #ifdef USE_VULKAN
         using Implementation = vulkan::VKMesh;
 #endif
 
-    private:
+      private:
         Implementation _implementation;
 
-    public:
+      public:
         Mesh(const Mesh& other) = delete;
 
         /**
@@ -44,11 +45,8 @@ namespace neon {
          * @param modifiableVertices whether this mesh's vertices can be modified.
          * @param modifiableIndices whether this mesh's indices can be modified.
          */
-        Mesh(Application* application,
-             const std::string& name,
-             std::shared_ptr<Material> material,
-             bool modifiableVertices = false,
-             bool modifiableIndices = false);
+        Mesh(Application* application, const std::string& name, std::shared_ptr<Material> material,
+             bool modifiableVertices = false, bool modifiableIndices = false);
 
         /**
          * Creates a new mesh.
@@ -57,10 +55,8 @@ namespace neon {
          * @param modifiableVertices whether this mesh's vertices can be modified.
          * @param modifiableIndices whether this mesh's indices can be modified.
          */
-        Mesh(Application* application,
-             const std::string& name,
-             const std::unordered_set<std::shared_ptr<Material>>& materials,
-             bool modifiableVertices = false,
+        Mesh(Application* application, const std::string& name,
+             const std::unordered_set<std::shared_ptr<Material>>& materials, bool modifiableVertices = false,
              bool modifiableIndices = false);
 
         /**
@@ -89,7 +85,8 @@ namespace neon {
          * @param data the data.
          */
         template<typename... Types>
-        void uploadVertices(const std::vector<Types>&... data) {
+        void uploadVertices(const std::vector<Types>&... data)
+        {
             _implementation.uploadVertices(data...);
         }
 
@@ -100,7 +97,8 @@ namespace neon {
          * will be lost.
          * @param indices the indices.
          */
-        void uploadIndices(const std::vector<uint32_t>& indices) {
+        void uploadIndices(const std::vector<uint32_t>& indices)
+        {
             _implementation.uploadIndices(indices);
         }
 
@@ -114,9 +112,8 @@ namespace neon {
          * @return the vertices.
          */
         template<class Vertex>
-        [[nodiscard]] std::vector<Vertex>
-        getVertices(size_t index,
-                    CommandBuffer* cmd = nullptr) const {
+        [[nodiscard]] std::vector<Vertex> getVertices(size_t index, CommandBuffer* cmd = nullptr) const
+        {
             return _implementation.getVertices<Vertex>(index, cmd);
         }
 
@@ -136,9 +133,8 @@ namespace neon {
          * @return whether the operation was successful.
          */
         template<class Vertex>
-        bool setVertices(size_t index,
-                         const std::vector<Vertex>& vertices,
-                         CommandBuffer* cmd = nullptr) const {
+        bool setVertices(size_t index, const std::vector<Vertex>& vertices, CommandBuffer* cmd = nullptr) const
+        {
             return _implementation.setVertices(index, vertices, cmd);
         }
 
@@ -158,10 +154,7 @@ namespace neon {
          * @param length the length of the data buffer.
          * @return whether the operation was successful.
          */
-        bool setVertices(size_t index,
-                         const void* data,
-                         size_t length,
-                         CommandBuffer* cmd = nullptr) const;
+        bool setVertices(size_t index, const void* data, size_t length, CommandBuffer* cmd = nullptr) const;
 
         /**
          * Returns the indices of this mesh.
@@ -171,8 +164,7 @@ namespace neon {
          *
          * @return the indices.
          */
-        [[nodiscard]] std::vector<uint32_t>
-        getIndices(CommandBuffer* cmd = nullptr) const;
+        [[nodiscard]] std::vector<uint32_t> getIndices(CommandBuffer* cmd = nullptr) const;
 
         /**
          * Modifies the vertices of this mesh.
@@ -188,11 +180,8 @@ namespace neon {
          * @param indices the indices.
          * @return whether the operation was successful.
          */
-        [[nodiscard]] bool
-        setIndices(const std::vector<uint32_t>& indices,
-                   CommandBuffer* cmd = nullptr) const;
+        [[nodiscard]] bool setIndices(const std::vector<uint32_t>& indices, CommandBuffer* cmd = nullptr) const;
     };
-}
-
+} // namespace neon
 
 #endif //NEON_MESH_H

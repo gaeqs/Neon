@@ -9,7 +9,8 @@
 
 #include <neon/Neon.h>
 
-struct Matrices {
+struct Matrices
+{
     rush::Mat4f view;
     rush::Mat4f projection;
     rush::Mat4f projectionView;
@@ -19,7 +20,8 @@ struct Matrices {
     float far;
 };
 
-struct PBRParameters {
+struct PBRParameters
+{
     float metallic;
     float roughness;
     uint32_t useSSAO;
@@ -30,12 +32,11 @@ struct PBRParameters {
     float bloomFilterRadius;
 };
 
-class GlobalParametersUpdaterComponent : public neon::Component {
-
+class GlobalParametersUpdaterComponent : public neon::Component
+{
     PBRParameters _pbr = {0.4f, 0.4f, true, false, 2, 0.0f, 0.04f, 0.01f};
 
-public:
-
+  public:
     ~GlobalParametersUpdaterComponent() override;
 
     void onStart() override;
@@ -45,10 +46,7 @@ public:
     void drawEditor() override;
 
     void onKey(const neon::KeyboardEvent& event) override;
-
 };
-REGISTER_COMPONENT(GlobalParametersUpdaterComponent,
-                   "Global Parameters Updater")
-
+REGISTER_COMPONENT(GlobalParametersUpdaterComponent, "Global Parameters Updater")
 
 #endif //NEON_GLOBALPARAMETERSUPDATERCOMPONENT_H

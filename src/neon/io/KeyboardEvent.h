@@ -5,9 +5,11 @@
 #ifndef NEON_KEYBOARDEVENT_H
 #define NEON_KEYBOARDEVENT_H
 
-namespace neon {
+namespace neon
+{
 
-    enum class KeyboardKey {
+    enum class KeyboardKey
+    {
         UNKNOWN = -1,
         SPACE = 32,
         APOSTROPHE = 39,
@@ -131,13 +133,15 @@ namespace neon {
         MENU = 348
     };
 
-    enum class KeyboardAction {
+    enum class KeyboardAction
+    {
         RELEASE = 0,
         PRESS = 1,
         REPEAT = 2
     };
 
-    enum class KeyboardModifier {
+    enum class KeyboardModifier
+    {
         SHIFT = 0x0001,
         CONTROL = 0x0002,
         ALT = 0x0004,
@@ -146,17 +150,18 @@ namespace neon {
         NUM_LOCK = 0x0020
     };
 
-    struct KeyboardEvent {
+    struct KeyboardEvent
+    {
         int scancode;
         int modifiers;
         KeyboardKey key;
         KeyboardAction action;
 
-        [[nodiscard]] inline bool
-        isModifierActive(KeyboardModifier modifier) const {
+        [[nodiscard]] inline bool isModifierActive(KeyboardModifier modifier) const
+        {
             return (modifiers & static_cast<int>(modifier)) > 0;
         }
     };
-}
+} // namespace neon
 
 #endif //NEON_KEYBOARDEVENT_H

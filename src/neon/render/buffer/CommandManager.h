@@ -10,12 +10,14 @@
 #include <unordered_map>
 #include <vector>
 
-namespace neon {
+namespace neon
+{
     class Application;
     class CommandPool;
     class CommandPoolHolder;
 
-    class CommandManager {
+    class CommandManager
+    {
         friend class CommandPoolHolder;
 
         Application* _application;
@@ -27,7 +29,7 @@ namespace neon {
 
         void freePoolHolder(std::thread::id id);
 
-    public:
+      public:
         CommandManager(const CommandManager& other) = delete;
 
         explicit CommandManager(Application* application);
@@ -39,12 +41,13 @@ namespace neon {
         void disposeAll();
     };
 
-    class CommandPoolHolder {
+    class CommandPoolHolder
+    {
         CommandManager* _manager;
         std::thread::id _threadId;
         bool _valid;
 
-    public:
+      public:
         CommandPoolHolder(const CommandPoolHolder& other) = delete;
 
         CommandPoolHolder();
@@ -61,6 +64,6 @@ namespace neon {
 
         CommandPoolHolder& operator=(CommandPoolHolder&& move) noexcept;
     };
-}
+} // namespace neon
 
 #endif //COMMANDMANAGER_H

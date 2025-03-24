@@ -9,28 +9,30 @@
 
 #ifdef USE_VULKAN
 
-#include <vulkan/render/shader/VKShaderUniformBuffer.h>
+    #include <vulkan/render/shader/VKShaderUniformBuffer.h>
 
 #endif
 
-namespace neon {
+namespace neon
+{
     class Application;
 
     class ShaderUniformDescriptor;
 
     class CommandBuffer;
 
-    class ShaderUniformBuffer : public Asset {
-    public:
+    class ShaderUniformBuffer : public Asset
+    {
+      public:
 #ifdef USE_VULKAN
         using Implementation = vulkan::VKShaderUniformBuffer;
 #endif
 
-    private:
+      private:
         std::shared_ptr<ShaderUniformDescriptor> _descriptor;
         Implementation _implementation;
 
-    public:
+      public:
         ShaderUniformBuffer(const ShaderUniformBuffer& other) = delete;
 
         ShaderUniformBuffer(std::string name, const std::shared_ptr<ShaderUniformDescriptor>& descriptor);
@@ -39,8 +41,7 @@ namespace neon {
 
         [[nodiscard]] Implementation& getImplementation();
 
-        [[nodiscard]] const std::shared_ptr<ShaderUniformDescriptor>&
-        getDescriptor() const;
+        [[nodiscard]] const std::shared_ptr<ShaderUniformDescriptor>& getDescriptor() const;
 
         void uploadData(uint32_t index, const void* data, size_t size, size_t offset = 0);
 
@@ -53,7 +54,8 @@ namespace neon {
         void setTexture(uint32_t index, std::shared_ptr<Texture> texture);
 
         template<class T>
-        void uploadData(uint32_t index, const T& data) {
+        void uploadData(uint32_t index, const T& data)
+        {
             uploadData(index, &data, sizeof(T));
         }
 
@@ -70,7 +72,6 @@ namespace neon {
          */
         void transferDataFromGPU(uint32_t index);
     };
-}
-
+} // namespace neon
 
 #endif //NEON_SHADERUNIFORMBUFFER_H

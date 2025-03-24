@@ -8,17 +8,17 @@
 #include <vector>
 #include <memory>
 
-namespace neon::vulkan {
+namespace neon::vulkan
+{
     class Buffer;
 
-    class VKInstanceData {
-    public:
+    class VKInstanceData
+    {
+      public:
         virtual ~VKInstanceData() = default;
 
-        [[nodiscard]] virtual const std::vector<std::unique_ptr<Buffer>>&
-        getBuffers() const = 0;
+        [[nodiscard]] virtual const std::vector<std::unique_ptr<Buffer>>& getBuffers() const = 0;
     };
-}
-
+} // namespace neon::vulkan
 
 #endif //VKINSTANCEDATA_H

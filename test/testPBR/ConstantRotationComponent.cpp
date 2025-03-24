@@ -5,34 +5,38 @@
 #include "ConstantRotationComponent.h"
 
 ConstantRotationComponent::ConstantRotationComponent() :
-        _speed(static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX)),
-        _axis(0.0f, 1.0f, 0.0f) {
+    _speed(static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX)),
+    _axis(0.0f, 1.0f, 0.0f)
+{
 }
 
-float ConstantRotationComponent::getSpeed() const {
+float ConstantRotationComponent::getSpeed() const
+{
     return _speed;
 }
 
-void ConstantRotationComponent::setSpeed(float speed) {
+void ConstantRotationComponent::setSpeed(float speed)
+{
     _speed = speed;
 }
 
-const rush::Vec3f& ConstantRotationComponent::getAxis() const {
+const rush::Vec3f& ConstantRotationComponent::getAxis() const
+{
     return _axis;
 }
 
-void ConstantRotationComponent::setAxis(const rush::Vec3f& axis) {
+void ConstantRotationComponent::setAxis(const rush::Vec3f& axis)
+{
     _axis = axis;
 }
 
-void ConstantRotationComponent::onUpdate(float deltaTime) {
-    getGameObject()->getTransform().rotate(
-            _axis,
-            deltaTime * _speed
-    );
+void ConstantRotationComponent::onUpdate(float deltaTime)
+{
+    getGameObject()->getTransform().rotate(_axis, deltaTime * _speed);
 }
 
-void ConstantRotationComponent::drawEditor() {
+void ConstantRotationComponent::drawEditor()
+{
     ImGui::AlignTextToFramePadding();
     ImGui::Text("Speed (rad/s):");
     ImGui::SameLine();

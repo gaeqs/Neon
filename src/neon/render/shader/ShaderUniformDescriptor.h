@@ -12,41 +12,35 @@
 
 #ifdef USE_VULKAN
 
-#include <vulkan/render/shader/VKShaderUniformDescriptor.h>
+    #include <vulkan/render/shader/VKShaderUniformDescriptor.h>
 
 #endif
 
-namespace neon {
+namespace neon
+{
     class Application;
 
-    class ShaderUniformDescriptor : public Asset {
-
-    public:
-
+    class ShaderUniformDescriptor : public Asset
+    {
+      public:
 #ifdef USE_VULKAN
-    using Implementation = vulkan::VKShaderUniformDescriptor;
+        using Implementation = vulkan::VKShaderUniformDescriptor;
 #endif
 
-    private:
-
+      private:
         Implementation _implementation;
 
-    public:
-
+      public:
         ShaderUniformDescriptor(const ShaderUniformDescriptor& other) = delete;
 
-        ShaderUniformDescriptor(
-                Application* application,
-                std::string name,
-                const std::vector<ShaderUniformBinding>& bindings);
+        ShaderUniformDescriptor(Application* application, std::string name,
+                                const std::vector<ShaderUniformBinding>& bindings);
 
         [[nodiscard]] const Implementation& getImplementation() const;
 
         [[nodiscard]] Implementation& getImplementation();
 
-        [[nodiscard]] const std::vector<ShaderUniformBinding>&
-        getBindings() const;
-
+        [[nodiscard]] const std::vector<ShaderUniformBinding>& getBindings() const;
 
         // region Static helper constructors
 
@@ -57,12 +51,11 @@ namespace neon {
          * @param amount the amount of images.
          * @return the new ShaderUniformDescriptor.
          */
-        static std::unique_ptr<ShaderUniformDescriptor>
-        ofImages(Application* application, std::string name, uint32_t amount);
+        static std::unique_ptr<ShaderUniformDescriptor> ofImages(Application* application, std::string name,
+                                                                 uint32_t amount);
 
         // endregion
-
     };
-}
+} // namespace neon
 
 #endif //NEON_SHADERUNIFORMDESCRIPTOR_H

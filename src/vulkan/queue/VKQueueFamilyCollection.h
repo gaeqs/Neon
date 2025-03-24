@@ -10,35 +10,31 @@
 
 #include <vulkan/queue/VKQueueFamily.h>
 
-namespace neon::vulkan {
-    class VKQueueFamilyCollection {
+namespace neon::vulkan
+{
+    class VKQueueFamilyCollection
+    {
         std::vector<VKQueueFamily> _families;
 
-    public:
+      public:
         VKQueueFamilyCollection() = default;
 
         VKQueueFamilyCollection(VkPhysicalDevice device, VkSurfaceKHR surface);
 
-        VKQueueFamilyCollection(
-            const std::vector<VkQueueFamilyProperties>& families,
-            VkPhysicalDevice device,
-            VkSurfaceKHR surface);
+        VKQueueFamilyCollection(const std::vector<VkQueueFamilyProperties>& families, VkPhysicalDevice device,
+                                VkSurfaceKHR surface);
 
         [[nodiscard]] const std::vector<VKQueueFamily>& getFamilies() const;
 
-        [[nodiscard]] std::optional<const VKQueueFamily*>
-        getCompatibleQueueFamily(
+        [[nodiscard]] std::optional<const VKQueueFamily*> getCompatibleQueueFamily(
             const VKQueueFamily::Capabilities& capabilities) const;
 
-        [[nodiscard]] std::vector<const VKQueueFamily*>
-        getAllCompatibleQueueFamilies(
+        [[nodiscard]] std::vector<const VKQueueFamily*> getAllCompatibleQueueFamilies(
             const VKQueueFamily::Capabilities& capabilities) const;
 
-        void getAllCompatibleQueueFamilies(
-            const VKQueueFamily::Capabilities& capabilities,
-            std::vector<const VKQueueFamily*>& vector) const;
+        void getAllCompatibleQueueFamilies(const VKQueueFamily::Capabilities& capabilities,
+                                           std::vector<const VKQueueFamily*>& vector) const;
     };
-}
-
+} // namespace neon::vulkan
 
 #endif //VKQUEUEFAMILYCOLLECTION_H

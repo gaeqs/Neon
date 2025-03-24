@@ -12,8 +12,8 @@
 #include <cstdint>
 #include <neon/Neon.h>
 
-class Cloth : public neon::Component {
-
+class Cloth : public neon::Component
+{
     std::shared_ptr<neon::Material> _material;
     neon::IdentifiableWrapper<PhysicsManager> _physicsManager;
     uint32_t _width;
@@ -28,17 +28,13 @@ class Cloth : public neon::Component {
 
     void generateModel();
 
-public:
-
-    Cloth(std::shared_ptr<neon::Material> material,
-          neon::IdentifiableWrapper<PhysicsManager> physicsManager,
+  public:
+    Cloth(std::shared_ptr<neon::Material> material, neon::IdentifiableWrapper<PhysicsManager> physicsManager,
           uint32_t width, uint32_t height);
 
     void onStart() override;
 
     void onPreDraw() override;
-
 };
-
 
 #endif //NEON_CLOTH_H

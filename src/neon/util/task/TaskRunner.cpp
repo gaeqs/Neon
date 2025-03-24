@@ -6,10 +6,12 @@
 
 #include <neon/logging/Logger.h>
 
-namespace neon {
-    TaskRunner::TaskRunner(): _stop(false) {
-        uint32_t threads = std::max(std::thread::hardware_concurrency(), 2u) -
-                           1u;
+namespace neon
+{
+    TaskRunner::TaskRunner() :
+        _stop(false)
+    {
+        uint32_t threads = std::max(std::thread::hardware_concurrency(), 2u) - 1u;
         _workers.reserve(threads);
 
         for (uint32_t i = 0; i < threads; ++i) {
@@ -18,11 +20,11 @@ namespace neon {
                 while (true) {
                     {
                         std::unique_lock lock(_mutex);
-                        _pendingTasksCondition.wait(lock, [this] {
-                            return !_pendingTasks.empty() || _stop;
-                        });
+                        _pendingTasksCondition.wait(lock, [this] { return !_pendingTasks.empty() || _stop; });
 
-                        if (_stop && _pendingTasks.empty()) return;
+                        if (_stop && _pendingTasks.empty()) {
+                            return;
+                        }
 
                         task = std::move(_pendingTasks.front());
                         _pendingTasks.pop();
@@ -33,36 +35,38 @@ namespace neon {
         }
     }
 
-    TaskRunner::~TaskRunner() {
+    TaskRunner::~TaskRunner()
+    {
         shutdown();
     }
 
-    void TaskRunner::shutdown() {
-        if (_stop) return;
+    void TaskRunner::shutdown()
+    {
+        if (_stop) {
+            return;
+        }
         //
         {
             std::lock_guard lock(_mutex);
             _stop = true;
         }
         _pendingTasksCondition.notify_all();
-        for (auto& worker: _workers) {
+        for (auto& worker : _workers) {
             worker.join();
         }
     }
 
-    void TaskRunner::flushMainThreadTasks() {
-        if (_stop) return;
+    void TaskRunner::flushMainThreadTasks()
+    {
+        if (_stop) {
+            return;
+        }
         //
         {
             std::lock_guard lock(_coroutineMutex);
-            std::erase_if(
-                _coroutines,
-                [](const auto& it) {
-                    return it->isDone();
-                }
-            );
+            std::erase_if(_coroutines, [](const auto& it) { return it->isDone(); });
 
-            for (auto& coroutine: _coroutines) {
+            for (auto& coroutine : _coroutines) {
                 if (coroutine->isReady()) {
                     coroutine->launch();
                 }
@@ -76,11 +80,11 @@ namespace neon {
                 _mainThreadTasks.back()();
             } catch (std::exception& ex) {
                 logger.error(MessageBuilder()
-                    .print("Error while executing task: ")
-                    .print(ex.what(), TextEffect::foreground4bits(1))
-                    .print("."));
+                                 .print("Error while executing task: ")
+                                 .print(ex.what(), TextEffect::foreground4bits(1))
+                                 .print("."));
             }
             _mainThreadTasks.pop_back();
         }
     }
-}
+} // namespace neon

@@ -9,8 +9,10 @@
 
 #include <vulkan/AbstractVKApplication.h>
 
-namespace neon::vulkan {
-    VkShaderStageFlagBits VKShaderProgram::getStage(ShaderType type) {
+namespace neon::vulkan
+{
+    VkShaderStageFlagBits VKShaderProgram::getStage(ShaderType type)
+    {
         switch (type) {
             case ShaderType::VERTEX:
                 return VK_SHADER_STAGE_VERTEX_BIT;
@@ -27,44 +29,43 @@ namespace neon::vulkan {
         }
     }
 
-    void VKShaderProgram::deleteShaders() {
-        for (const auto& item: _shaders) {
-            vkDestroyShaderModule(
-                _vkApplication->getDevice()->getRaw(),
-                item.module,
-                nullptr
-            );
+    void VKShaderProgram::deleteShaders()
+    {
+        for (const auto& item : _shaders) {
+            vkDestroyShaderModule(_vkApplication->getDevice()->getRaw(), item.module, nullptr);
         }
         _shaders.clear();
     }
 
-    VKShaderProgram::VKShaderProgram(Application* application) : _vkApplication(
-        dynamic_cast<AbstractVKApplication*>(
-            application->getImplementation())) {}
+    VKShaderProgram::VKShaderProgram(Application* application) :
+        _vkApplication(dynamic_cast<AbstractVKApplication*>(application->getImplementation()))
+    {
+    }
 
-    VKShaderProgram::~VKShaderProgram() {
+    VKShaderProgram::~VKShaderProgram()
+    {
         deleteShaders();
     }
 
-    std::optional<std::string>
-    VKShaderProgram::compile(
-        const std::unordered_map<ShaderType, std::string>& raw) {
+    std::optional<std::string> VKShaderProgram::compile(const std::unordered_map<ShaderType, std::string>& raw)
+    {
         deleteShaders();
 
         SPIRVCompiler compiler(_vkApplication->getPhysicalDevice());
 
-        for (const auto& [type, code]: raw) {
+        for (const auto& [type, code] : raw) {
             auto error = compiler.addShader(getStage(type), code);
             if (error.has_value()) {
-                return "Error compiling shader:\n"
-                       + code + "\n" + error.value();
+                return "Error compiling shader:\n" + code + "\n" + error.value();
             }
         }
 
         auto error = compiler.compile();
-        if (error.has_value()) return error;
+        if (error.has_value()) {
+            return error;
+        }
 
-        for (const auto& [type, _]: raw) {
+        for (const auto& [type, _] : raw) {
             auto stage = getStage(type);
             auto result = compiler.getStage(stage).getResult(); // Always OK.
 
@@ -75,18 +76,13 @@ namespace neon::vulkan {
 
             VkShaderModule shaderModule;
 
-            if (vkCreateShaderModule(
-                    _vkApplication->getDevice()->getRaw(),
-                    &moduleInfo,
-                    nullptr,
-                    &shaderModule
-                ) != VK_SUCCESS) {
+            if (vkCreateShaderModule(_vkApplication->getDevice()->getRaw(), &moduleInfo, nullptr, &shaderModule) !=
+                VK_SUCCESS) {
                 return "Failed to create shader module.";
             }
 
             VkPipelineShaderStageCreateInfo stageInfo{};
-            stageInfo.sType =
-                    VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+            stageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
             stageInfo.stage = stage;
             stageInfo.module = shaderModule;
             stageInfo.pName = "main";
@@ -100,18 +96,18 @@ namespace neon::vulkan {
         return {};
     }
 
-    const std::vector<VkPipelineShaderStageCreateInfo>&
-    VKShaderProgram::getShaders() const {
+    const std::vector<VkPipelineShaderStageCreateInfo>& VKShaderProgram::getShaders() const
+    {
         return _shaders;
     }
 
-    const std::vector<ShaderUniformBlock>& VKShaderProgram::
-    getUniformBlocks() const {
+    const std::vector<ShaderUniformBlock>& VKShaderProgram::getUniformBlocks() const
+    {
         return _uniformBlocks;
     }
 
-    const std::vector<ShaderUniformSampler>&
-    VKShaderProgram::getUniformSamplers() const {
+    const std::vector<ShaderUniformSampler>& VKShaderProgram::getUniformSamplers() const
+    {
         return _samplers;
     }
-}
+} // namespace neon::vulkan

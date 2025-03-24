@@ -8,17 +8,18 @@
 #include <vector>
 #include <vulkan/vulkan.h>
 
-namespace neon::vulkan {
-    struct VKSwapChainSupportDetails {
+namespace neon::vulkan
+{
+    struct VKSwapChainSupportDetails
+    {
         VkSurfaceCapabilitiesKHR capabilities;
         std::vector<VkSurfaceFormatKHR> formats;
         std::vector<VkPresentModeKHR> presentModes;
 
         VKSwapChainSupportDetails() = default;
 
-        VKSwapChainSupportDetails(VkPhysicalDevice device,
-                                  VkSurfaceKHR surface);
+        VKSwapChainSupportDetails(VkPhysicalDevice device, VkSurfaceKHR surface);
     };
-}
+} // namespace neon::vulkan
 
 #endif //NEON_VKSWAPCHAINSUPPORTDETAILS_H

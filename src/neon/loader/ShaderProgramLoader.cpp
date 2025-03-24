@@ -8,13 +8,13 @@
 #include <neon/logging/Logger.h>
 #include <neon/structure/Application.h>
 
-namespace neon {
-    std::shared_ptr<ShaderProgram> ShaderProgramLoader::loadAsset(std::string name,
-                                                                  nlohmann::json json,
-                                                                  AssetLoaderContext context) {
-        constexpr std::array TYPES = {
-            ShaderType::VERTEX, ShaderType::FRAGMENT, ShaderType::GEOMETRY, ShaderType::TASK, ShaderType::MESH
-        };
+namespace neon
+{
+    std::shared_ptr<ShaderProgram> ShaderProgramLoader::loadAsset(std::string name, nlohmann::json json,
+                                                                  AssetLoaderContext context)
+    {
+        constexpr std::array TYPES = {ShaderType::VERTEX, ShaderType::FRAGMENT, ShaderType::GEOMETRY, ShaderType::TASK,
+                                      ShaderType::MESH};
         constexpr std::array NAMES = {"vertex", "fragment", "geometry", "task", "mesh"};
 
         std::shared_ptr<ShaderProgram> shader = std::make_shared<ShaderProgram>(context.application, name);
@@ -22,7 +22,9 @@ namespace neon {
         for (size_t i = 0; i < TYPES.size(); i++) {
             const std::string& typeName = NAMES[i];
             auto object = json[typeName];
-            if (!object.is_object()) continue;
+            if (!object.is_object()) {
+                continue;
+            }
             auto file = object["file"];
             if (file.is_string() && context.fileSystem != nullptr) {
                 // Load text from file.
@@ -49,4 +51,4 @@ namespace neon {
 
         return shader;
     }
-}
+} // namespace neon

@@ -18,14 +18,14 @@
 
 #include <neon/util/Result.h>
 
-
 #ifdef USE_VULKAN
 
-#include <vulkan/render/shader/VKShaderProgram.h>
+    #include <vulkan/render/shader/VKShaderProgram.h>
 
 #endif
 
-namespace neon {
+namespace neon
+{
     class Room;
 
     /**
@@ -42,22 +42,22 @@ namespace neon {
      * You may use the util static method <i>createShader</i> to
      * create an compile a shader program in one line.
      */
-    class ShaderProgram : public Asset {
+    class ShaderProgram : public Asset
+    {
         template<class T>
-        friend
-        class IdentifiableWrapper;
+        friend class IdentifiableWrapper;
 
-    public:
+      public:
 #ifdef USE_VULKAN
         using Implementation = vulkan::VKShaderProgram;
 #endif
 
-    private:
+      private:
         bool _compiled;
         std::unordered_map<ShaderType, std::string> _rawShaders;
         Implementation _implementation;
 
-    public:
+      public:
         ShaderProgram(const ShaderProgram& other) = delete;
 
         /**
@@ -133,8 +133,7 @@ namespace neon {
          */
         static neon::Result<std::shared_ptr<ShaderProgram>, std::string>
 
-        createShader(Application* app, std::string name,
-                     std::string vert, std::string frag);
+        createShader(Application* app, std::string name, std::string vert, std::string frag);
 
         /**
          * Util static method that creates a new shader program
@@ -147,13 +146,12 @@ namespace neon {
          * @param frag the fragment shader on GLSL source format.
          * @return the program or a compilation error.
          */
-        static neon::Result<std::shared_ptr<ShaderProgram>, std::string>
-        createShader(Application* app, std::string name,
-                     cmrc::file vert, cmrc::file frag);
+        static neon::Result<std::shared_ptr<ShaderProgram>, std::string> createShader(Application* app,
+                                                                                      std::string name, cmrc::file vert,
+                                                                                      cmrc::file frag);
 
         // endregion
     };
-}
-
+} // namespace neon
 
 #endif //NEON_SHADERPROGRAM_H

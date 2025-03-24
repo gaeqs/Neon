@@ -11,9 +11,10 @@
 #include <neon/render/GraphicComponent.h>
 #include <neon/render/model/Model.h>
 
-namespace neon {
-    class FlashLight : public Component {
-
+namespace neon
+{
+    class FlashLight : public Component
+    {
         IdentifiableWrapper<GraphicComponent> _graphicComponent;
         std::shared_ptr<Model> _customModel;
 
@@ -26,9 +27,9 @@ namespace neon {
         float _outerCutOff;
         float _radiance;
 
-    public:
-
-        struct Data {
+      public:
+        struct Data
+        {
             rush::Vec3f diffuseColor;
             rush::Vec3f specularColor;
             rush::Vec3f position;
@@ -39,11 +40,9 @@ namespace neon {
             float cutOff;
             float outerCutOff;
 
-            static InputDescription getDescription() {
-                InputDescription description(
-                        sizeof(Data),
-                        InputRate::INSTANCE
-                );
+            static InputDescription getDescription()
+            {
+                InputDescription description(sizeof(Data), InputRate::INSTANCE);
 
                 description.addAttribute(3, 0);
                 description.addAttribute(3, 12);
@@ -102,9 +101,8 @@ namespace neon {
         void onLateUpdate(float deltaTime) override;
 
         void drawEditor() override;
-
     };
     REGISTER_COMPONENT(FlashLight, "Flash Light")
-}
+} // namespace neon
 
 #endif //NEON_FLASHLIGHT_H

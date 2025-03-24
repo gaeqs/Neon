@@ -9,7 +9,8 @@
 #include <neon/logging/Message.h>
 #include <neon/structure/Component.h>
 
-namespace neon {
+namespace neon
+{
     /**
      * Component that implements an ImGUI window showing the
      * log of the application.
@@ -17,7 +18,8 @@ namespace neon {
      * This component will automatically hook an output
      * to the application's logger.
      */
-    class LogComponent : public Component {
+    class LogComponent : public Component
+    {
         std::vector<std::pair<Message, std::vector<MessageGroup>>> _messages;
         mutable std::mutex _mutex;
         SimpleMessage _locationMessage;
@@ -28,19 +30,17 @@ namespace neon {
 
         void printPart(const MessagePart& part);
 
-    public:
+      public:
         ~LogComponent() override;
 
         void onStart() override;
 
         void onPreDraw() override;
 
-        void addMessage(const Message& message,
-                        const std::vector<const MessageGroup*>& groups);
+        void addMessage(const Message& message, const std::vector<const MessageGroup*>& groups);
     };
 
     REGISTER_COMPONENT(LogComponent, "Log Component")
-}
-
+} // namespace neon
 
 #endif //LOGCOMPONENT_H

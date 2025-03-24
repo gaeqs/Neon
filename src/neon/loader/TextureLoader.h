@@ -8,9 +8,11 @@
 #include <neon/loader/AssetLoader.h>
 #include <neon/render/texture/Texture.h>
 
-namespace neon {
-    class TextureLoader : public AssetLoader<Texture> {
-    public:
+namespace neon
+{
+    class TextureLoader : public AssetLoader<Texture>
+    {
+      public:
         ~TextureLoader() override = default;
 
         std::shared_ptr<Texture> loadAsset(std::string name, nlohmann::json json, AssetLoaderContext context) override;
@@ -21,7 +23,6 @@ namespace neon {
 
         static void loadSampler(nlohmann::json& json, SamplerCreateInfo& info);
     };
-}
-
+} // namespace neon
 
 #endif //TEXTURELOADER_H
