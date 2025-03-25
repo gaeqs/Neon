@@ -48,6 +48,22 @@ namespace neon
         _positions.push_back(id);
         return Instance(id);
     }
+    Result<std::vector<InstanceData::Instance>, std::string> BasicInstanceData::createMultipleInstances(size_t amount)
+    {
+        if (_positions.size() + amount > _maximumInstances) {
+            return {"Buffer is full!"};
+        }
+
+        std::vector<Instance> instances;
+        instances.reserve(amount);
+        for (size_t i = 0; i < amount; ++i) {
+            auto* id = new uint32_t(static_cast<uint32_t>(_positions.size()));
+            _positions.push_back(id);
+            instances.emplace_back(id);
+        }
+
+        return std::move(instances);
+    }
 
     bool BasicInstanceData::freeInstance(Instance instance)
     {

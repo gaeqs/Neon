@@ -56,8 +56,14 @@ namespace neon
         virtual Result<Instance, std::string> createInstance() = 0;
 
         /**
+        * Creates multiple instances of this model.
+        * @return a vector with the identifiers of the instances or the error if something went wrong.
+        */
+        virtual Result<std::vector<Instance>, std::string> createMultipleInstances(size_t amount) = 0;
+
+        /**
          * Deletes an instance of this model.
-         * @param id the idetifier of the model to delete.
+         * @param id the identifier of the model to delete.
          * @return whether the operation was successful.
          */
         virtual bool freeInstance(Instance id) = 0;
@@ -83,7 +89,7 @@ namespace neon
          * before the room is rendered if shouldAutoFlush() is true.
          * <p>
          * You can provide this method an external command buffer.
-         * This allows you to upload the model data asynchonously.
+         * This allows you to upload the model data asynchronously.
          */
         virtual void flush() = 0;
 
@@ -94,17 +100,17 @@ namespace neon
          * before the room is rendered if shouldAutoFlush() is true.
          * <p>
          * You can provide this method an external command buffer.
-         * This allows you to upload the model data asynchonously.
+         * This allows you to upload the model data asynchronously.
          */
         virtual void flush(const CommandBuffer* commandBuffer) = 0;
 
         /**
-         * @return the implentation of this structure.
+         * @return the implementation of this structure.
          */
         [[nodiscard]] virtual Implementation& getImplementation() = 0;
 
         /**
-         * @return the implentation of this structure.
+         * @return the implementation of this structure.
          */
         [[nodiscard]] virtual const Implementation& getImplementation() const = 0;
 
