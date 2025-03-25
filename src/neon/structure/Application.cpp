@@ -169,6 +169,10 @@ namespace neon
     {
         _implementation->lockMouse(lock);
     }
+    bool Application::isMainThread() const
+    {
+        return _implementation->isMainThread();
+    }
 
     void Application::invokeKeyEvent(int key, int scancode, int action, int mods)
     {

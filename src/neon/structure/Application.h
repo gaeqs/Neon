@@ -55,6 +55,8 @@ namespace neon
         virtual Result<uint32_t, std::string> startGameLoop() = 0;
 
         virtual void renderFrame(Room* room) = 0;
+
+        [[nodiscard]] virtual bool isMainThread() const = 0;
     };
 
     class Application
@@ -132,6 +134,11 @@ namespace neon
         void setRoom(const std::shared_ptr<Room>& room);
 
         void lockMouse(bool lock);
+
+        /**
+        * Returns whether the thread calling this function is the main thread.
+        */
+        [[nodiscard]] bool isMainThread() const;
 
         //region INTERNAL CALLS
 

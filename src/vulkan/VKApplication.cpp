@@ -7,7 +7,7 @@
 #include <stdexcept>
 #include <cstring>
 #include <algorithm>
-#include <utility>
+#include <thread>
 
 #include <neon/structure/Room.h>
 #include <vulkan/VKSwapChainSupportDetails.h>
@@ -194,6 +194,8 @@ namespace neon::vulkan
             return {"Window is not initialized"};
         }
 
+        _mainThread = std::this_thread::get_id();
+
         uint32_t frames = 0;
 
         auto lastTick = std::chrono::high_resolution_clock::now();
@@ -254,6 +256,10 @@ namespace neon::vulkan
                 endDraw(_application->getProfiler());
             }
         }
+    }
+    bool VKApplication::isMainThread() const
+    {
+        return _mainThread == std::this_thread::get_id();
     }
 
     void VKApplication::preWindowCreation()

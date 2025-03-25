@@ -6,6 +6,7 @@
 #define NEON_VKAPPLICATION_H
 
 #include <vector>
+#include <thread>
 
 #define GLFW_INCLUDE_VULKAN
 
@@ -75,6 +76,7 @@ namespace neon::vulkan
 
         VkDescriptorPool _imGuiPool;
 
+        std::thread::id _mainThread;
         FrameInformation _currentFrameInformation;
 
         // region VULKAN INITIALIZATION
@@ -137,6 +139,8 @@ namespace neon::vulkan
         Result<uint32_t, std::string> startGameLoop() override;
 
         void renderFrame(neon::Room* room) override;
+
+        bool isMainThread() const override;
 
         void preWindowCreation();
 
