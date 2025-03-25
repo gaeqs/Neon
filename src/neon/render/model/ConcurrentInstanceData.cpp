@@ -99,6 +99,46 @@ namespace neon
 
         return true;
     }
+    size_t ConcurrentInstanceData::freeInstances(const std::vector<Instance>& ids)
+    {
+        std::lock_guard lock(_positionMutex);
+
+        size_t freedCount = 0;
+        std::vector<uint32_t> removalIds;
+        removalIds.reserve(ids.size());
+
+        for (const auto& inst : ids) {
+            removalIds.push_back(*inst.id);
+        }
+        std::ranges::sort(removalIds, std::greater<uint32_t>());
+
+        for (uint32_t id : removalIds) {
+            if (id >= _positions.size()) {
+                continue;
+            }
+
+            auto* toRemove = _positions[id];
+            auto* last = _positions.back();
+
+            if (id != _positions.size() - 1) {
+                for (auto& [size, data, changeRange] : _slots) {
+                    if (size == 0) {
+                        continue;
+                    }
+                    memcpy(data + size * id, data + size * *last, size);
+                    changeRange += Range(id, id + 1);
+                }
+            }
+
+            _positions[id] = last;
+            _positions.pop_back();
+            *last = id;
+
+            delete toRemove;
+            ++freedCount;
+        }
+        return freedCount;
+    }
 
     size_t ConcurrentInstanceData::getInstanceAmount() const
     {

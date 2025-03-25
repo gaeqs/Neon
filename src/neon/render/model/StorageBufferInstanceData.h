@@ -50,9 +50,11 @@ namespace neon
 
         Result<Instance, std::string> createInstance() override;
 
-      Result<std::vector<Instance>, std::string> createMultipleInstances(size_t amount) override;
+        Result<std::vector<Instance>, std::string> createMultipleInstances(size_t amount) override;
 
         bool freeInstance(Instance instance) override;
+
+        size_t freeInstances(const std::vector<Instance>& ids) override;
 
         [[nodiscard]] size_t getInstanceAmount() const override;
 

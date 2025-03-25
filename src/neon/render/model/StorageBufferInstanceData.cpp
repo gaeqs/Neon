@@ -93,6 +93,45 @@ namespace neon
         return true;
     }
 
+    size_t StorageBufferInstanceData::freeInstances(const std::vector<Instance>& ids)
+    {
+        size_t freedCount = 0;
+        std::vector<uint32_t> removalIds;
+        removalIds.reserve(ids.size());
+
+        for (const auto& inst : ids) {
+            removalIds.push_back(*inst.id);
+        }
+        std::ranges::sort(removalIds, std::greater<uint32_t>());
+
+        for (uint32_t id : removalIds) {
+            if (id >= _positions.size()) {
+                continue;
+            }
+
+            auto* toRemove = _positions[id];
+            auto* last = _positions.back();
+
+            if (id != _positions.size() - 1) {
+                for (auto& [size, padding, binding, uniformBuffer] : _slots) {
+                    if (size == 0) {
+                        continue;
+                    }
+                    auto* data = static_cast<char*>(uniformBuffer->fetchData(static_cast<uint32_t>(binding)));
+                    memcpy(data + padding * id, data + padding * *last, size);
+                }
+            }
+
+            _positions[id] = last;
+            _positions.pop_back();
+            *last = id;
+
+            delete toRemove;
+            ++freedCount;
+        }
+        return freedCount;
+    }
+
     size_t StorageBufferInstanceData::getInstanceAmount() const
     {
         return _positions.size();

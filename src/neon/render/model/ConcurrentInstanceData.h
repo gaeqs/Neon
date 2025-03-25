@@ -64,6 +64,8 @@ namespace neon
 
         bool freeInstance(Instance instance) override;
 
+        size_t freeInstances(const std::vector<Instance> &ids) override;
+
         [[nodiscard]] size_t getInstanceAmount() const override;
 
         bool uploadData(Instance instance, size_t index, const void* data) override;

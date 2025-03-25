@@ -53,20 +53,29 @@ namespace neon
          * @return the identifier of the instance or the
          * error if something went wrong.
          */
-        virtual Result<Instance, std::string> createInstance() = 0;
+        [[nodiscard]] virtual Result<Instance, std::string> createInstance() = 0;
 
         /**
         * Creates multiple instances of this model.
         * @return a vector with the identifiers of the instances or the error if something went wrong.
         */
-        virtual Result<std::vector<Instance>, std::string> createMultipleInstances(size_t amount) = 0;
+        [[nodiscard]] virtual Result<std::vector<Instance>, std::string> createMultipleInstances(size_t amount) = 0;
 
         /**
          * Deletes an instance of this model.
+         * The instance object used to call this method will be invalid after this call.
          * @param id the identifier of the model to delete.
          * @return whether the operation was successful.
          */
         virtual bool freeInstance(Instance id) = 0;
+
+        /**
+         * Deletes multiple instances of this model.
+         * All instance objects used to call this method will be invalid after this call.
+         * @param ids The vector of instances to delete.
+         * @return The number of instances that were successfully deleted.
+         */
+        virtual size_t freeInstances(const std::vector<Instance>& ids) = 0;
 
         /**
          * Returns the amount of instances inside this model.
