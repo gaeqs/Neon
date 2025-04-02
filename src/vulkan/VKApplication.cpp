@@ -724,10 +724,11 @@ namespace neon::vulkan
         }
 
         ImGui::CreateContext();
+        ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable | ImGuiConfigFlags_ViewportsEnable;
+
+
         ImPlot::CreateContext();
         ImGui_ImplGlfw_InitForVulkan(_window, true);
-
-        ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
     }
 
     void VKApplication::recreateSwapChain()
