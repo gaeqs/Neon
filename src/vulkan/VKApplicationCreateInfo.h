@@ -36,6 +36,19 @@ namespace neon::vulkan
 #endif
 
         /**
+         * Enables ImGui multi-viewport mode.
+         * This mode is kind of broken in X11 systems, and it doesn't work on wayland.
+         */
+        bool imGuiEnableMultiViewport = false;
+
+        /**
+         * Enable decorators for external viewports.
+         * This mode is even more broken than the multi viewport system.
+         * Use with caution!
+         */
+        bool imGuiMultiViewportDecorators = false;
+
+        /**
          * Whether all available extensions should be enabled
          * by default.
          */
@@ -124,4 +137,4 @@ namespace neon::vulkan
     };
 } // namespace neon::vulkan
 
-#endif //VKAPPLICATIONCREATEINFO_H
+#endif // VKAPPLICATIONCREATEINFO_H

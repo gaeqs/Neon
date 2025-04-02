@@ -11,7 +11,8 @@ namespace neon
 {
     class DockSpaceComponent : public Component
     {
-        int dockFlags;
+        int _dockFlags;
+        bool _firstTime;
 
       public:
         explicit DockSpaceComponent(bool topBar = false);

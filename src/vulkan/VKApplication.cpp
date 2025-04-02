@@ -257,6 +257,7 @@ namespace neon::vulkan
             }
         }
     }
+
     bool VKApplication::isMainThread() const
     {
         return _mainThread == std::this_thread::get_id();
@@ -724,8 +725,12 @@ namespace neon::vulkan
         }
 
         ImGui::CreateContext();
-        ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable | ImGuiConfigFlags_ViewportsEnable;
+        ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
+        if (_createInfo.imGuiEnableMultiViewport) {
+            ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+            ImGui::GetIO().ConfigViewportsNoDecoration = !_createInfo.imGuiMultiViewportDecorators;
+        }
 
         ImPlot::CreateContext();
         ImGui_ImplGlfw_InitForVulkan(_window, true);

@@ -33,14 +33,14 @@ FetchContent_MakeAvailable(rush)
 FetchContent_Declare(
         imgui
         GIT_REPOSITORY https://github.com/ocornut/imgui.git
-        GIT_TAG b4c96355c9b51b54c4deb52e7d7cdfc7bf79bc2f
+        GIT_TAG 9fdeb41e52cd4271601b85fadf7d36a62c6ed09e
         SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/lib/imgui
 )
 
 # ImPlot
 FetchContent_Declare(
         implot
-        GIT_TAG 18c72431f8265e2b0b5378a3a73d8a883b2175ff
+        GIT_TAG 3da8bd34299965d3b0ab124df743fe3e076fa222
         GIT_REPOSITORY https://github.com/epezent/implot.git
         SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/lib/implot
 )

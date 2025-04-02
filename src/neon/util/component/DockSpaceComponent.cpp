@@ -8,12 +8,13 @@
 
 namespace neon
 {
-    DockSpaceComponent::DockSpaceComponent(bool topBar)
+    DockSpaceComponent::DockSpaceComponent(bool topBar) :
+        _firstTime(true)
     {
-        dockFlags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoMove |
-                    ImGuiWindowFlags_NoResize;
+        _dockFlags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoMove |
+                     ImGuiWindowFlags_NoResize;
         if (topBar) {
-            dockFlags |= ImGuiWindowFlags_MenuBar;
+            _dockFlags |= ImGuiWindowFlags_MenuBar;
         }
     }
 
@@ -21,15 +22,13 @@ namespace neon
     {
         static ImGuiID dockSpaceId = 0;
         auto& io = ImGui::GetIO();
-        ImGui::SetNextWindowSize(io.DisplaySize);
-        ImGui::SetNextWindowPos({0, 0});
-        ImGui::SetNextWindowViewport(0);
-
-        if (ImGui::Begin("DockSpace", nullptr, dockFlags)) {
-            dockSpaceId = ImGui::GetID("HUB_DockSpace");
-            ImGui::DockSpace(dockSpaceId, ImVec2(0, 0), ImGuiDockNodeFlags_None);
+        if (_firstTime) {
+            ImGui::SetNextWindowSize(io.DisplaySize);
+            ImGui::SetNextWindowPos({0, 0});
+            _firstTime = false;
         }
 
-        ImGui::End();
+        dockSpaceId = ImGui::GetID("HUB_DockSpace");
+        ImGui::DockSpaceOverViewport(dockSpaceId, ImGui::GetMainViewport(), ImGuiDockNodeFlags_PassthruCentralNode);
     }
 } // namespace neon
