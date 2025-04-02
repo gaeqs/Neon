@@ -23,6 +23,7 @@ namespace neon
         auto& io = ImGui::GetIO();
         ImGui::SetNextWindowSize(io.DisplaySize);
         ImGui::SetNextWindowPos({0, 0});
+        ImGui::SetNextWindowViewport(0);
 
         if (ImGui::Begin("DockSpace", nullptr, dockFlags)) {
             dockSpaceId = ImGui::GetID("HUB_DockSpace");
