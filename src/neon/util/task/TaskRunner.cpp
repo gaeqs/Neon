@@ -16,7 +16,7 @@ namespace neon
 
         for (uint32_t i = 0; i < threads; ++i) {
             _workers.emplace_back([this] {
-                std::function<void()> task;
+                RunningTask task;
                 while (true) {
                     {
                         std::unique_lock lock(_mutex);
@@ -29,7 +29,18 @@ namespace neon
                         task = std::move(_pendingTasks.front());
                         _pendingTasks.pop();
                     }
-                    task();
+
+                    try {
+                        task.function();
+                    } catch (std::exception& ex) {
+                        logger.error(MessageBuilder()
+                                         .print("Error while executing task: ")
+                                         .print(ex.what(), TextEffect::foreground4bits(1))
+                                         .print("."));
+                        task.task->cancel();
+                    }
+
+                    checkBlockedTasks();
                 }
             });
         }
@@ -38,6 +49,60 @@ namespace neon
     TaskRunner::~TaskRunner()
     {
         shutdown();
+    }
+
+    void TaskRunner::manageRunningTaskAddition(RunningTask&& task)
+    {
+        if (task.task->isAnyDependencyCancelled() || task.task->isCancelled()) {
+            task.task->cancel();
+            return;
+        }
+
+        if (!task.task->isUnlocked()) {
+            std::lock_guard lock(_blockedMutex);
+            _blockedTasks.push_back(std::move(task));
+            return;
+        }
+
+        if (task.runOnMainThread) {
+            std::lock_guard lock(_mainThreadMutex);
+            _mainThreadTasks.push(std::move(task));
+            return;
+        }
+
+        std::lock_guard lock(_mutex);
+        _pendingTasks.push(std::move(task));
+        _pendingTasksCondition.notify_one();
+    }
+
+    void TaskRunner::checkBlockedTasks()
+    {
+        std::lock_guard lock(_blockedMutex);
+
+        for (auto it = _blockedTasks.begin(); it != _blockedTasks.end();) {
+            auto& task = *it;
+            if (task.task->isCancelled() || task.task->isAnyDependencyCancelled()) {
+                task.task->cancel();
+                it = _blockedTasks.erase(it);
+                continue;
+            }
+
+            if (task.task->isUnlocked()) {
+                if (task.runOnMainThread) {
+                    std::lock_guard pushLock(_mainThreadMutex);
+                    _mainThreadTasks.push(std::move(task));
+                } else {
+                    std::lock_guard pushLock(_mutex);
+                    _pendingTasks.push(std::move(task));
+                    _pendingTasksCondition.notify_one();
+                }
+                it = _blockedTasks.erase(it);
+
+                continue;
+            }
+
+            ++it;
+        }
     }
 
     void TaskRunner::shutdown()
@@ -61,7 +126,6 @@ namespace neon
         if (_stop) {
             return;
         }
-        //
         {
             std::lock_guard lock(_coroutineMutex);
             std::erase_if(_coroutines, [](const auto& it) { return it->isDone(); });
@@ -72,19 +136,23 @@ namespace neon
                 }
             }
         }
-
-        std::lock_guard lock(_mainThreadMutex);
-
-        while (!_mainThreadTasks.empty()) {
-            try {
-                _mainThreadTasks.back()();
-            } catch (std::exception& ex) {
-                logger.error(MessageBuilder()
-                                 .print("Error while executing task: ")
-                                 .print(ex.what(), TextEffect::foreground4bits(1))
-                                 .print("."));
+        {
+            std::lock_guard lock(_mainThreadMutex);
+            while (!_mainThreadTasks.empty()) {
+                RunningTask task;
+                try {
+                    task = std::move(_mainThreadTasks.front());
+                    _mainThreadTasks.pop();
+                    task.function();
+                } catch (std::exception& ex) {
+                    logger.error(MessageBuilder()
+                                     .print("Error while executing task: ")
+                                     .print(ex.what(), TextEffect::foreground4bits(1))
+                                     .print("."));
+                    task.task->cancel();
+                }
             }
-            _mainThreadTasks.pop_back();
         }
+        checkBlockedTasks();
     }
 } // namespace neon

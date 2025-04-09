@@ -162,3 +162,34 @@ TEST_CASE("Task on main thread", "[task]")
     REQUIRE(finished);
     REQUIRE(task->hasFinished());
 }
+
+TEST_CASE("Consecutive tasks", "[task]")
+{
+    neon::TaskRunner runner;
+
+    std::atomic_bool finished = false;
+    std::atomic_bool finished2 = false;
+
+    std::function func = [&finished] {
+        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+        finished = true;
+    };
+
+    std::function func2 = [&finished, &finished2] {
+        REQUIRE(finished);
+        finished2 = true;
+    };
+
+    std::function func3 = [&finished, &finished2] {
+        REQUIRE(finished);
+        REQUIRE(finished2);
+    };
+
+    auto task = runner.executeAsync(func);
+    auto task3 = task->then(func2)->then(func3);
+
+    task->wait();
+    task3->wait();
+
+    runner.shutdown();
+}
