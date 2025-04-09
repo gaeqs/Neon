@@ -193,3 +193,39 @@ TEST_CASE("Consecutive tasks", "[task]")
 
     runner.shutdown();
 }
+
+TEST_CASE("Multiple dependencies", "[task]")
+{
+    neon::TaskRunner runner;
+
+    std::atomic_bool finished = false;
+    std::atomic_bool finished2 = false;
+
+    std::function func = [&finished] {
+        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+        finished = true;
+    };
+
+    std::function func2 = [&finished2] {
+        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+        finished2 = true;
+    };
+
+    std::function func3 = [&finished, &finished2] {
+        REQUIRE(finished);
+        REQUIRE(finished2);
+    };
+
+    auto task = runner.executeAsync(func);
+    auto task2 = runner.executeAsync(func2);
+
+    auto task3 = std::make_shared<neon::Task<void>>(&runner);
+    task3->addDependency(false, task.get());
+    task3->addDependency(false, task2.get());
+    runner.executeAsync(task3, func3);
+
+    task->wait();
+    task3->wait();
+
+    runner.shutdown();
+}
