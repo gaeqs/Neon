@@ -251,9 +251,9 @@ namespace neon
                 return {};
             }
 
-            void return_void()
+            void return_void() const
             {
-                _task->finish();
+                _task->setResult(std::monostate());
             }
         };
 

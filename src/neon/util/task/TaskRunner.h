@@ -127,6 +127,8 @@ namespace neon
     template<typename Result>
     class Task : public AbstractTask
     {
+        using HoldValue = std::conditional_t<std::is_void_v<Result>, std::monostate, Result>;
+
         TaskRunner* _runner;
         std::mutex _valueMutex;
         std::condition_variable _valueCondition;
@@ -134,7 +136,7 @@ namespace neon
         std::vector<std::pair<bool, std::shared_ptr<const TaskStatus>>> _dependencies;
 
         std::shared_ptr<TaskStatus> _status;
-        std::optional<Result> _result;
+        std::optional<HoldValue> _result;
 
       public:
         /**
@@ -216,7 +218,7 @@ namespace neon
          *
          * @param result Rvalue reference to the result value.
          */
-        void setResult(Result&& result)
+        void setResult(HoldValue&& result)
         {
             std::lock_guard lock(_valueMutex);
             if (_status->finished || _status->cancelled) {
@@ -235,6 +237,7 @@ namespace neon
          * @return Rvalue of the task's result encapsulated in an std::optional.
          */
         std::optional<Result>&& moveResult()
+            requires !std::is_void_v<Result>
         {
             return std::move(_result);
         }
@@ -248,144 +251,9 @@ namespace neon
          * @return Reference to the optional result.
          */
         std::optional<Result>& getResult()
+            requires !std::is_void_v<Result>
         {
             return _result;
-        }
-
-        /**
-         * @brief Chains a function to be executed once this task completes.
-         *
-         * This overload schedules @p function to be executed after the task completes,
-         * using default settings (do not ignore cancellations and execute asynchronously).
-         *
-         * @tparam Func Type of the function to chain.
-         * @tparam Args Types of additional parameters for the function.
-         * @param function The function to execute after completion.
-         * @param args The arguments to forward to the function.
-         * @return A shared pointer to a new Task monitoring the execution of the chained function.
-         */
-        template<typename Func, typename... Args>
-        auto then(Func&& function, Args&&... args)
-        {
-            return then(false, false, std::forward<Func>(function), std::forward<Args>(args)...);
-        }
-
-        /**
-         * @brief Chains a function to be executed once this task completes.
-         *
-         * Schedules the provided @p function to be executed after this task completes.
-         *
-         * @tparam Func Type of the function to chain.
-         * @tparam Args Types of additional parameters.
-         * @param ignoreCancellations If true, ignore cancellations of dependencies.
-         * @param runOnMainThread If true, schedule the function to run on the main thread.
-         * @param function The function to execute.
-         * @param args Arguments to be passed to the function.
-         * @return A shared pointer to a new Task that monitors the state of the chained execution.
-         */
-        template<typename Func, typename... Args>
-        auto then(bool ignoreCancellations, bool runOnMainThread, Func&& function, Args&&... args)
-            -> std::shared_ptr<Task<decltype(function(std::forward<Args>(args)...))>>;
-    };
-
-    /**
-     * This class hold the status information
-     * about a task being executed.
-     * <p>
-     * Instances of this class may be used to check
-     * the status and the result of the represented task.
-     */
-    template<>
-    class Task<void> : public AbstractTask
-    {
-        TaskRunner* _runner;
-        std::mutex _valueMutex;
-        std::condition_variable _valueCondition;
-
-        std::vector<std::pair<bool, std::shared_ptr<const TaskStatus>>> _dependencies;
-        std::shared_ptr<TaskStatus> _status;
-
-      public:
-        /**
-         * Creates a Task instance.
-         */
-        explicit Task(TaskRunner* runner) :
-            _runner(runner),
-            _status(std::make_shared<TaskStatus>(false, false))
-        {
-        }
-
-        [[nodiscard]] std::shared_ptr<const TaskStatus> getStatus() const override
-        {
-            return _status;
-        }
-
-        [[nodiscard]] bool hasFinished() const override
-        {
-            return _status->finished;
-        }
-
-        [[nodiscard]] bool isCancelled() const override
-        {
-            return _status->cancelled;
-        }
-
-        void cancel() override
-        {
-            std::lock_guard lock(_valueMutex);
-            if (_status->finished | _status->cancelled) {
-                return;
-            }
-            _status->cancelled = true;
-            _valueCondition.notify_all();
-        }
-
-        void wait() override
-        {
-            std::unique_lock lock(_valueMutex);
-            if (_status->finished || _status->cancelled) {
-                return;
-            }
-            _valueCondition.wait(lock);
-        }
-
-        void addDependency(bool ignoreCancellations, const AbstractTask* dependency) override
-        {
-            _dependencies.push_back({ignoreCancellations, dependency->getStatus()});
-        }
-
-        void provideContext(TaskRunner* runner) override
-        {
-            _runner = runner;
-        }
-
-        [[nodiscard]] bool isUnlocked() const override
-        {
-            return std::ranges::all_of(_dependencies, [](const auto& dependency) {
-                return dependency.second->finished.load() || dependency.first && dependency.second->cancelled.load();
-            });
-        }
-
-        [[nodiscard]] bool isAnyDependencyCancelled() const override
-        {
-            return std::ranges::any_of(_dependencies, [](const auto& dependency) {
-                return !dependency.first && dependency.second->cancelled.load();
-            });
-        }
-
-        /**
-         * Marks the task as finished.
-         *
-         * Sets the task status to finished and notifies any waiting threads.
-         */
-        void finish()
-        {
-            std::lock_guard lock(_valueMutex);
-            if (_status->finished || _status->cancelled) {
-                return;
-            }
-            _status->finished = true;
-            _valueCondition.notify_all();
         }
 
         /**
@@ -461,7 +329,6 @@ namespace neon
         void checkBlockedTasks();
 
       public:
-
         /**
          * Creates a TaskRunner.
          */
@@ -546,7 +413,7 @@ namespace neon
                 Tu tu = std::move(*t);
                 if constexpr (std::is_void_v<Return>) {
                     function(std::move(std::get<std::decay_t<Args>>(tu))...);
-                    task->finish();
+                    task->setResult(std::monostate());
                 } else {
                     task->setResult(function(std::move(std::get<std::decay_t<Args>>(tu))...));
                 }
@@ -587,7 +454,7 @@ namespace neon
                 Tu tu = std::move(*t);
                 if constexpr (std::is_void_v<Return>) {
                     fun(std::move(std::get<std::decay_t<Args>>(tu))...);
-                    task->finish();
+                    task->setResult(std::monostate());
                 } else {
                     task->setResult(fun(std::move(std::get<std::decay_t<Args>>(tu))...));
                 }
@@ -595,7 +462,6 @@ namespace neon
 
             manageRunningTaskAddition(std::move(running));
         }
-
 
         /**
          * @brief Schedules a function to be executed asynchronously.
@@ -630,7 +496,7 @@ namespace neon
                 Tu tu = std::move(*t);
                 if constexpr (std::is_void_v<Return>) {
                     fun(std::move(std::get<std::decay_t<Args>>(tu))...);
-                    task->finish();
+                    task->setResult(std::monostate());
                 } else {
                     task->setResult(fun(std::move(std::get<std::decay_t<Args>>(tu))...));
                 }
@@ -671,7 +537,7 @@ namespace neon
                 Tu tu = std::move(*t);
                 if constexpr (std::is_void_v<Return>) {
                     fun(std::move(std::get<std::decay_t<Args>>(tu))...);
-                    task->finish();
+                    task->setResult(std::monostate());
                 } else {
                     task->setResult(fun(std::move(std::get<std::decay_t<Args>>(tu))...));
                 }
@@ -684,27 +550,6 @@ namespace neon
     template<typename Result>
     template<typename Func, typename... Args>
     auto Task<Result>::then(bool ignoreCancellations, bool runOnMainThread, Func&& function, Args&&... args)
-        -> std::shared_ptr<Task<decltype(function(std::forward<Args>(args)...))>>
-    {
-        using Return = decltype(function(std::forward<Args>(args)...));
-        std::shared_ptr<Task<Return>> task = std::make_shared<Task<Return>>(_runner);
-        task->addDependency(ignoreCancellations, this);
-
-        if (_runner == nullptr) {
-            error() << "This task has no context. If this is a coroutine's task, launch it before using this function.";
-            return nullptr;
-        }
-
-        if (runOnMainThread) {
-            _runner->executeOnMainThread(task, std::forward<Func>(function), std::forward<Args>(args)...);
-        } else {
-            _runner->executeAsync(task, function, std::forward<Args>(args)...);
-        }
-        return task;
-    }
-
-    template<typename Func, typename... Args>
-    auto Task<void>::then(bool ignoreCancellations, bool runOnMainThread, Func&& function, Args&&... args)
         -> std::shared_ptr<Task<decltype(function(std::forward<Args>(args)...))>>
     {
         using Return = decltype(function(std::forward<Args>(args)...));
