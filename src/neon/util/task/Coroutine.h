@@ -64,7 +64,7 @@ namespace neon
             std::shared_ptr<Task<Return>> _task;
 
             promise_type() :
-                _task(std::make_shared<Task<Return>>())
+                _task(std::make_shared<Task<Return>>(nullptr))
             {
             }
 
@@ -160,6 +160,11 @@ namespace neon
             _handler();
         }
 
+        void provideContext(TaskRunner* runner) override
+        {
+            _handler.promise()._task->provideContext(runner);
+        }
+
         /**
          * Returns the neon::Task representing this coroutine.
          * Use this task instance to check the status of this
@@ -215,7 +220,7 @@ namespace neon
             std::shared_ptr<Task<void>> _task;
 
             promise_type() :
-                _task(std::make_shared<Task<void>>())
+                _task(std::make_shared<Task<void>>(nullptr))
             {
             }
 
@@ -246,9 +251,9 @@ namespace neon
                 return {};
             }
 
-            void return_void()
+            void return_void() const
             {
-                _task->finish();
+                _task->setResult(std::monostate());
             }
         };
 
@@ -307,6 +312,11 @@ namespace neon
                 return;
             }
             _handler();
+        }
+
+        void provideContext(TaskRunner* runner) override
+        {
+            _handler.promise()._task->provideContext(runner);
         }
 
         /**
@@ -405,4 +415,4 @@ namespace neon
     };
 } // namespace neon
 
-#endif //COROUTINE_H
+#endif // COROUTINE_H
