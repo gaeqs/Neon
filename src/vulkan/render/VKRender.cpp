@@ -24,15 +24,6 @@ namespace neon::vulkan
     {
     }
 
-    void VKRender::render(Room* room, const Render* render,
-                          const std::vector<std::shared_ptr<Material>>& sortedMaterials,
-                          const std::vector<std::shared_ptr<RenderPassStrategy>>& strategies) const
-    {
-        for (const auto& strategy : strategies) {
-            strategy->render(room, render, sortedMaterials);
-        }
-    }
-
     void VKRender::setupFrameBufferRecreation()
     {
         vkDeviceWaitIdle(_vkApplication->getDevice()->getRaw());

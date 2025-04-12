@@ -20,13 +20,13 @@ namespace neon
         auto& passes = json["render_passes"];
         if (passes.is_array()) {
             for (auto& pass : passes) {
-                if (auto fb = getAsset<FrameBuffer>(pass, context); fb != nullptr) {
-                    render->addRenderPass(std::make_shared<DefaultRenderPassStrategy>(fb));
+                if (auto strategy = getAsset<RenderPassStrategy>(pass, context); strategy != nullptr) {
+                    render->addRenderPass(strategy);
                 }
             }
         } else {
-            if (auto fb = getAsset<FrameBuffer>(passes, context); fb != nullptr) {
-                render->addRenderPass(std::make_shared<DefaultRenderPassStrategy>(fb));
+            if (auto strategy = getAsset<RenderPassStrategy>(passes, context); strategy != nullptr) {
+                render->addRenderPass(strategy);
             }
         }
 

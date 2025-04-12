@@ -5,7 +5,7 @@
 #include "Render.h"
 
 #include <utility>
-#include <queue>
+#include <set>
 #include <unordered_set>
 
 #include <neon/render/buffer/FrameBuffer.h>
@@ -17,11 +17,11 @@ namespace neon
 {
     Render::Render(Application* application, std::string name,
                    const std::shared_ptr<ShaderUniformDescriptor>& descriptor) :
-        Asset(typeid(Render), std::move(name)),
+        Asset(typeid(Render), name),
         _implementation(application),
         _application(application),
         _globalUniformDescriptor(descriptor),
-        _globalUniformBuffer(name, descriptor)
+        _globalUniformBuffer(std::move(name), descriptor)
     {
     }
 
@@ -37,7 +37,12 @@ namespace neon
 
     void Render::addRenderPass(const std::shared_ptr<RenderPassStrategy>& strategy)
     {
-        _strategies.push_back(strategy);
+        _strategies.insert(strategy);
+    }
+
+    bool Render::removeRenderPass(const std::shared_ptr<RenderPassStrategy>& strategy)
+    {
+        return _strategies.erase(strategy) > 0;
     }
 
     void Render::clearRenderPasses()
@@ -47,41 +52,26 @@ namespace neon
 
     void Render::render(Room* room) const
     {
-        // Get the material priority list
-        struct CustomLess
-        {
-            bool operator()(const std::shared_ptr<Material>& l, const std::shared_ptr<Material>& r) const
-            {
-                return l->getPriority() < r->getPriority();
-            }
-        };
+        if (!room) {
+            return;
+        }
 
-        std::priority_queue<std::shared_ptr<Material>, std::vector<std::shared_ptr<Material>>, CustomLess> queue;
-
-        std::unordered_set<std::shared_ptr<Material>> materials;
-        if (room != nullptr) {
-            for (const auto& [model, _] : room->usedModels()) {
-                for (int i = 0; i < model->getMeshesAmount(); ++i) {
-                    const auto& mesh = model->getDrawable(i);
-                    for (const auto& material : mesh->getMaterials()) {
-                        materials.insert(material);
-                    }
+        std::set<std::shared_ptr<Material>> materials;
+        for (const auto& model : room->usedModels() | std::views::keys) {
+            for (size_t i = 0; i < model->getMeshesAmount(); ++i) {
+                for (const auto& material : model->getDrawable(i)->getMaterials()) {
+                    materials.insert(material);
                 }
             }
         }
 
-        for (const auto& material : materials) {
-            queue.push(material);
-        }
+        std::vector sortedMaterials(materials.begin(), materials.end());
+        std::ranges::sort(sortedMaterials,
+                          [](const auto& a, const auto& b) { return a->getPriority() > b->getPriority(); });
 
-        std::vector<std::shared_ptr<Material>> vector;
-        vector.reserve(queue.size());
-        while (!queue.empty()) {
-            vector.push_back(queue.top());
-            queue.pop();
+        for (const auto& strategy : _strategies) {
+            strategy->render(room, this, sortedMaterials);
         }
-
-        _implementation.render(room, this, vector, _strategies);
     }
 
     void Render::checkFrameBufferRecreationConditions()
@@ -101,11 +91,6 @@ namespace neon
     size_t Render::getStrategyAmount() const
     {
         return _strategies.size();
-    }
-
-    const std::vector<std::shared_ptr<RenderPassStrategy>>& Render::getStrategies() const
-    {
-        return _strategies;
     }
 
     const std::shared_ptr<ShaderUniformDescriptor>& Render::getGlobalUniformDescriptor() const

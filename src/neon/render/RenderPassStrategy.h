@@ -7,6 +7,7 @@
 
 #include <functional>
 #include <memory>
+#include <neon/structure/Asset.h>
 
 namespace neon
 {
@@ -18,12 +19,16 @@ namespace neon
 
     class Render;
 
-    class RenderPassStrategy
+    class RenderPassStrategy : public Asset
     {
-      public:
-        RenderPassStrategy() = default;
+        int _priority;
 
-        virtual ~RenderPassStrategy() = default;
+      public:
+        explicit RenderPassStrategy(std::string name, int priority = 0);
+
+        ~RenderPassStrategy() override = default;
+
+        [[nodiscard]] int getPriority() const;
 
         virtual void render(Room* room, const Render* render,
                             const std::vector<std::shared_ptr<Material>>& sortedMaterials) const = 0;
@@ -38,7 +43,7 @@ namespace neon
         std::shared_ptr<FrameBuffer> _frameBuffer;
 
       public:
-        explicit DefaultRenderPassStrategy(const std::shared_ptr<FrameBuffer>& frameBuffer);
+        DefaultRenderPassStrategy(std::string name, const std::shared_ptr<FrameBuffer>& frameBuffer, int priority = 0);
 
         [[nodiscard]] const std::shared_ptr<FrameBuffer>& getFrameBuffer() const;
 
@@ -51,4 +56,4 @@ namespace neon
     };
 } // namespace neon
 
-#endif //NEON_RENDERPASSSTRATEGY_H
+#endif // NEON_RENDERPASSSTRATEGY_H

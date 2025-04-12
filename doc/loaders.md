@@ -354,6 +354,18 @@ If no sources are available, the texture won't be created.
 
 Only the property `type` is required.
 
+## Render pass strategies
+
+```json
+{
+  "frame_buffer": "A:frame_buffer",
+  "priority": 0
+}
+```
+
+Only the property `frame_buffer` is required.
+Strategies are always `DefaultRenderPassStrategy`.
+
 ## Renders
 
 ```json
@@ -361,17 +373,16 @@ Only the property `type` is required.
   "global_uniform_descriptor": "A:uniform_descriptor",
   //Render_passes can also be an object or a string.
   "render_passes": [
-    "A:frame_buffer",
-    "frame/buffer.json",
+    "A:render_pass_strategies",
+    "render/pass.json",
     {
-      // Frame buffer...
+      // Render pass...
     }
   ]
 }
 ```
 
 All render passes will be loaded in order.
-The strategies provided to the render passes are always `DefaultRenderPassStrategy`.
 
 ## How to fetch children assets
 

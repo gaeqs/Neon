@@ -15,6 +15,7 @@
 #include "ShaderProgramLoader.h"
 #include "ShaderUniformDescriptorLoader.h"
 #include "TextureLoader.h"
+#include "RenderPassStrategyLoader.h"
 
 namespace neon
 {
@@ -28,6 +29,7 @@ namespace neon
         registerLoader<Texture, TextureLoader>();
         registerLoader<FrameBuffer, FrameBufferLoader>();
         registerLoader<ShaderUniformDescriptor, ShaderUniformDescriptorLoader>();
+        registerLoader<RenderPassStrategy, RenderPassStrategyLoader>();
         registerLoader<Render, RenderLoader>();
         registerLoader<Mesh, MeshLoader>();
         registerLoader<AssimpScene, AssimpSceneLoader>();

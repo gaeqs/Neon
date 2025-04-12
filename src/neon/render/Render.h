@@ -5,11 +5,10 @@
 #ifndef NEON_RENDER_H
 #define NEON_RENDER_H
 
-#include <vector>
+#include <set>
 
 #include <neon/render/RenderPassStrategy.h>
 #include <neon/structure/Asset.h>
-#include <neon/util/ClusteredLinkedCollection.h>
 
 #include <neon/render/shader/ShaderUniformBuffer.h>
 #include <neon/render/shader/ShaderUniformDescriptor.h>
@@ -27,6 +26,18 @@ namespace neon
 
     class Application;
 
+    struct PrioritizedRenderPassStrategyComparer
+    {
+        bool operator()(const std::shared_ptr<RenderPassStrategy>& a,
+                        const std::shared_ptr<RenderPassStrategy>& b) const
+        {
+            if (a->getPriority() == b->getPriority()) {
+                return a.get() < b.get();
+            }
+            return a->getPriority() > b->getPriority();
+        }
+    };
+
     class Render : public Asset
     {
       public:
@@ -37,7 +48,7 @@ namespace neon
       private:
         Implementation _implementation;
         Application* _application;
-        std::vector<std::shared_ptr<RenderPassStrategy>> _strategies;
+        std::set<std::shared_ptr<RenderPassStrategy>, PrioritizedRenderPassStrategyComparer> _strategies;
 
         std::shared_ptr<ShaderUniformDescriptor> _globalUniformDescriptor;
         ShaderUniformBuffer _globalUniformBuffer;
@@ -53,6 +64,8 @@ namespace neon
 
         void addRenderPass(const std::shared_ptr<RenderPassStrategy>& strategy);
 
+        bool removeRenderPass(const std::shared_ptr<RenderPassStrategy>& strategy);
+
         void clearRenderPasses();
 
         void render(Room* room) const;
@@ -61,13 +74,16 @@ namespace neon
 
         [[nodiscard]] size_t getStrategyAmount() const;
 
-        [[nodiscard]] const std::vector<std::shared_ptr<RenderPassStrategy>>& getStrategies() const;
-
         [[nodiscard]] const std::shared_ptr<ShaderUniformDescriptor>& getGlobalUniformDescriptor() const;
 
         [[nodiscard]] const ShaderUniformBuffer& getGlobalUniformBuffer() const;
 
         [[nodiscard]] ShaderUniformBuffer& getGlobalUniformBuffer();
+
+        auto getStrategies()
+        {
+            return _strategies;
+        }
 
         // region Strategy methods
 
@@ -79,4 +95,4 @@ namespace neon
     };
 } // namespace neon
 
-#endif //NEON_RENDER_H
+#endif // NEON_RENDER_H

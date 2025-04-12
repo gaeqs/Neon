@@ -12,7 +12,21 @@
 
 namespace neon
 {
-    DefaultRenderPassStrategy::DefaultRenderPassStrategy(const std::shared_ptr<FrameBuffer>& frameBuffer) :
+    RenderPassStrategy::RenderPassStrategy(std::string name, int priority) :
+        Asset(typeid(RenderPassStrategy), std::move(name)),
+        _priority(priority)
+    {
+    }
+
+    int RenderPassStrategy::getPriority() const
+    {
+        return _priority;
+    }
+
+    DefaultRenderPassStrategy::DefaultRenderPassStrategy(std::string name,
+                                                         const std::shared_ptr<FrameBuffer>& frameBuffer,
+                                                         int priority) :
+        RenderPassStrategy(std::move(name), priority),
         _frameBuffer(frameBuffer)
     {
     }
