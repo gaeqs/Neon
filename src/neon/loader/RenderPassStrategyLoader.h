@@ -15,8 +15,9 @@ namespace neon
       public:
         ~RenderPassStrategyLoader() override = default;
 
-        std::shared_ptr<RenderPassStrategy> loadAsset(std::string name, nlohmann::json json, AssetLoaderContext context) override;
+        std::shared_ptr<RenderPassStrategy> loadAsset(std::string name, nlohmann::json json,
+                                                      AssetLoaderContext context) override;
     };
 } // namespace neon
 
-#endif //RENDERPASSSTRATEGYLOADER_H
+#endif // RENDERPASSSTRATEGYLOADER_H
