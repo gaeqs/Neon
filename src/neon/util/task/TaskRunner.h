@@ -237,7 +237,7 @@ namespace neon
          * @return Rvalue of the task's result encapsulated in a std::optional.
          */
         std::optional<Result>&& moveResult()
-            requires (!std::is_void_v<Result>)
+            requires(!std::is_void_v<Result>)
         {
             return std::move(_result);
         }
@@ -251,7 +251,7 @@ namespace neon
          * @return Reference to the optional result.
          */
         std::optional<Result>& getResult()
-            requires (!std::is_void_v<Result>)
+            requires(!std::is_void_v<Result>)
         {
             return _result;
         }
