@@ -234,10 +234,10 @@ namespace neon
          *
          * This function moves the stored result. It is not thread-safe; ensure that the task has finished.
          *
-         * @return Rvalue of the task's result encapsulated in an std::optional.
+         * @return Rvalue of the task's result encapsulated in a std::optional.
          */
         std::optional<Result>&& moveResult()
-            requires !std::is_void_v<Result>
+            requires (!std::is_void_v<Result>)
         {
             return std::move(_result);
         }
@@ -251,7 +251,7 @@ namespace neon
          * @return Reference to the optional result.
          */
         std::optional<Result>& getResult()
-            requires !std::is_void_v<Result>
+            requires (!std::is_void_v<Result>)
         {
             return _result;
         }
