@@ -28,9 +28,7 @@ namespace neon::vulkan
             }
             auto* vk = dynamic_cast<AbstractVKApplication*>(_application->getImplementation());
 
-            mesh->getImplementation().draw(material,
-                                           &vk->getCurrentCommandBuffer()->getImplementation(),
-                                           *_model, &_application->getRender()->getGlobalUniformBuffer());
+            mesh->getImplementation().draw(material, &vk->getCurrentCommandBuffer()->getImplementation(), *_model, &_application->getRender()->getGlobalUniformBuffer());
         }
     }
 

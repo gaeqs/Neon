@@ -763,7 +763,6 @@ namespace neon::vulkan
 
     VKApplication::~VKApplication()
     {
-
         _bin.flush();
 
         auto raw = _device->getRaw();
