@@ -8,19 +8,26 @@
 
 #include <utility>
 
-
 namespace fs = std::filesystem;
 
-namespace neon::assimp_loader {
-    AssimpNewIOStream::AssimpNewIOStream(File file)
-        : _file(std::move(file)),
-          _pointer(0) {}
+namespace neon::assimp_loader
+{
+    AssimpNewIOStream::AssimpNewIOStream(File file) :
+        _file(std::move(file)),
+        _pointer(0)
+    {
+    }
 
-    size_t AssimpNewIOStream::Read(void* pvBuffer, size_t pSize, size_t pCount) {
-        if (_file.getSize() <= _pointer) return 0;
+    size_t AssimpNewIOStream::Read(void* pvBuffer, size_t pSize, size_t pCount)
+    {
+        if (_file.getSize() <= _pointer) {
+            return 0;
+        }
         size_t bytesLeft = _file.getSize() - _pointer;
         size_t elementsLeft = bytesLeft / pSize;
-        if (elementsLeft == 0) return 0;
+        if (elementsLeft == 0) {
+            return 0;
+        }
         size_t elementsToRead = std::min(elementsLeft, pCount);
         size_t bytesToRead = elementsToRead * pSize;
 
@@ -30,12 +37,13 @@ namespace neon::assimp_loader {
         return elementsToRead;
     }
 
-    size_t AssimpNewIOStream::Write(const void* pvBuffer,
-                                    size_t pSize, size_t pCount) {
+    size_t AssimpNewIOStream::Write(const void* pvBuffer, size_t pSize, size_t pCount)
+    {
         return 0;
     }
 
-    aiReturn AssimpNewIOStream::Seek(size_t pOffset, aiOrigin pOrigin) {
+    aiReturn AssimpNewIOStream::Seek(size_t pOffset, aiOrigin pOrigin)
+    {
         switch (pOrigin) {
             case aiOrigin_SET:
                 _pointer = pOffset;
@@ -53,39 +61,49 @@ namespace neon::assimp_loader {
         return AI_SUCCESS;
     }
 
-    size_t AssimpNewIOStream::Tell() const {
+    size_t AssimpNewIOStream::Tell() const
+    {
         return _pointer;
     }
 
-    size_t AssimpNewIOStream::FileSize() const {
+    size_t AssimpNewIOStream::FileSize() const
+    {
         return _file.getSize();
     }
 
-    void AssimpNewIOStream::Flush() {}
+    void AssimpNewIOStream::Flush()
+    {
+    }
 
-    AssimpNewIOSystem::AssimpNewIOSystem(const FileSystem* fileSystem)
-        : _fileSystem(fileSystem),
-          _root({}) {}
+    AssimpNewIOSystem::AssimpNewIOSystem(const FileSystem* fileSystem) :
+        _fileSystem(fileSystem),
+        _root({}),
+        _rootName("/")
+    {
+    }
 
-    AssimpNewIOSystem::AssimpNewIOSystem(
-        const FileSystem* fileSystem, std::filesystem::path root)
-        : _fileSystem(fileSystem),
-          _root(std::move(root)),
-          _rootName(_root.value().string()) {}
+    AssimpNewIOSystem::AssimpNewIOSystem(const FileSystem* fileSystem, std::filesystem::path root) :
+        _fileSystem(fileSystem),
+        _root(std::move(root)),
+        _rootName(_root.value().string().empty() ? "/" : _root.value().string())
+    {
+    }
 
-    bool AssimpNewIOSystem::Exists(const char* pFile) const {
+    bool AssimpNewIOSystem::Exists(const char* pFile) const
+    {
         if (!_root.has_value()) {
             return _fileSystem->exists(std::string(pFile));
         }
         return _fileSystem->exists(_root.value() / std::string(pFile));
     }
 
-    char AssimpNewIOSystem::getOsSeparator() const {
+    char AssimpNewIOSystem::getOsSeparator() const
+    {
         return '/';
     }
 
-    Assimp::IOStream* AssimpNewIOSystem::Open(const char* pFile,
-                                              const char* pMode) {
+    Assimp::IOStream* AssimpNewIOSystem::Open(const char* pFile, const char* pMode)
+    {
         auto path = _root.has_value() ? _root.value() / std::string(pFile) : std::filesystem::path(std::string(pFile));
         if (auto file = _fileSystem->readFile(path); file.has_value()) {
             return new AssimpNewIOStream(std::move(file.value()));
@@ -93,51 +111,53 @@ namespace neon::assimp_loader {
         return nullptr;
     }
 
-    void AssimpNewIOSystem::Close(Assimp::IOStream* pFile) {
+    void AssimpNewIOSystem::Close(Assimp::IOStream* pFile)
+    {
         delete pFile;
     }
 
-    bool AssimpNewIOSystem::ComparePaths(const char* one,
-                                         const char* second) const {
+    bool AssimpNewIOSystem::ComparePaths(const char* one, const char* second) const
+    {
         if (_root.has_value()) {
-            return fs::equivalent(
-                _root.value() / std::string(one),
-                _root.value() / std::string(second)
-            );
+            return fs::equivalent(_root.value() / std::string(one), _root.value() / std::string(second));
         }
-        return fs::equivalent(
-            std::string(one),
-            std::string(second)
-        );
+        return fs::equivalent(std::string(one), std::string(second));
     }
 
-    bool AssimpNewIOSystem::PushDirectory(const std::string& path) {
+    bool AssimpNewIOSystem::PushDirectory(const std::string& path)
+    {
         return IOSystem::PushDirectory(path);
     }
 
-    const std::string& AssimpNewIOSystem::CurrentDirectory() const {
+    const std::string& AssimpNewIOSystem::CurrentDirectory() const
+    {
         return _rootName;
     }
 
-    size_t AssimpNewIOSystem::StackSize() const {
+    size_t AssimpNewIOSystem::StackSize() const
+    {
         return IOSystem::StackSize();
     }
 
-    bool AssimpNewIOSystem::PopDirectory() {
+    bool AssimpNewIOSystem::PopDirectory()
+    {
         return IOSystem::PopDirectory();
     }
 
-    bool AssimpNewIOSystem::CreateDirectory(const std::string& path) {
+    bool AssimpNewIOSystem::CreateDirectory(const std::string& path)
+    {
         return false;
     }
 
-    bool AssimpNewIOSystem::ChangeDirectory(const std::string& path) {
+    bool AssimpNewIOSystem::ChangeDirectory(const std::string& path)
+    {
         _root = fs::path(path);
-        _rootName = _root.value().string();
+        _rootName = _root.value().string().empty() ? "/" : _root.value().string();
         return true;
     }
 
-    bool AssimpNewIOSystem::DeleteFile(const std::string& file) {
+    bool AssimpNewIOSystem::DeleteFile(const std::string& file)
+    {
         return false;
     }
-}
+} // namespace neon::assimp_loader

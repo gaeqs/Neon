@@ -19,10 +19,12 @@ namespace neon::vulkan
     {
     }
 
-    void VKMesh::draw(const Material* material, VkCommandBuffer commandBuffer, const Model& model,
-                      const ShaderUniformBuffer* globalBuffer)
+    void VKMesh::draw(Material* material, VKCommandBuffer* commandBuffer, const Model& model,
+                      ShaderUniformBuffer* globalBuffer)
     {
         constexpr size_t MAX_BUFFERS = 32;
+
+        auto rawCmd = commandBuffer->getCommandBuffer();
 
         if (_vertexBuffers.empty()) {
             return;
@@ -48,15 +50,16 @@ namespace neon::vulkan
             instances = std::min(instances, data->getInstanceAmount());
         }
 
-        vkCmdBindVertexBuffers(commandBuffer, 0, i, buffers, offsets);
+        vkCmdBindVertexBuffers(rawCmd, 0, i, buffers, offsets);
 
-        vkCmdBindIndexBuffer(commandBuffer, _indexBuffer.value()->getRaw(), 0, VK_INDEX_TYPE_UINT32);
+        vkCmdBindIndexBuffer(rawCmd, _indexBuffer.value()->getRaw(), 0, VK_INDEX_TYPE_UINT32);
 
         auto& mat = material->getImplementation();
 
-        vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, mat.getPipeline());
+        vkCmdBindPipeline(rawCmd, VK_PIPELINE_BIND_POINT_GRAPHICS, mat.getPipeline());
 
-        mat.uploadConstants(commandBuffer);
+        mat.uploadConstants(rawCmd);
+        mat.useMaterial(commandBuffer->getCurrentRun());
 
         auto layout = mat.getPipelineLayout();
 
@@ -87,7 +90,7 @@ namespace neon::vulkan
 
         int l = 20'000'000;
 
-        vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(_indexAmount), static_cast<uint32_t>(instances), 0, 0, 0);
+        vkCmdDrawIndexed(rawCmd, static_cast<uint32_t>(_indexAmount), static_cast<uint32_t>(instances), 0, 0, 0);
     }
 
     bool VKMesh::setVertices(size_t index, const void* data, size_t length, CommandBuffer* cmd) const

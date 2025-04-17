@@ -5,6 +5,8 @@
 #ifndef NEON_VKTEXTURE_H
 #define NEON_VKTEXTURE_H
 
+#include "VKResource.h"
+
 #include <cstdint>
 #include <vulkan/render/buffer/SimpleBuffer.h>
 #include <neon/render/texture/TextureCreateInfo.h>
@@ -19,7 +21,7 @@ namespace neon::vulkan
 {
     class AbstractVKApplication;
 
-    class VKTexture
+    class VKTexture : public VKResource
     {
         Application* _application;
         AbstractVKApplication* _vkApplication;
@@ -93,4 +95,4 @@ namespace neon::vulkan
     };
 } // namespace neon::vulkan
 
-#endif //NEON_VKTEXTURE_H
+#endif // NEON_VKTEXTURE_H

@@ -62,6 +62,7 @@ namespace neon::vulkan
         VkFormat _depthImageFormat;
 
         CommandPoolHolder _commandPool;
+        VKResourceBin _bin;
 
         CommandBuffer* _currentCommandBuffer;
         bool _recording;
@@ -184,10 +185,12 @@ namespace neon::vulkan
 
         [[nodiscard]] CommandPool* getCommandPool() const override;
 
+        [[nodiscard]] VKResourceBin* getBin() override;
+
         [[nodiscard]] VkDescriptorPool getImGuiPool() const override;
 
         [[nodiscard]] bool isRecordingCommandBuffer() const override;
     };
 } // namespace neon::vulkan
 
-#endif //NEON_VKAPPLICATION_H
+#endif // NEON_VKAPPLICATION_H

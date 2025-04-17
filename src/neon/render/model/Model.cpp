@@ -97,12 +97,12 @@ namespace neon
         }
     }
 
-    void Model::draw(const Material* material) const
+    void Model::draw(Material* material) const
     {
         _implementation.draw(material);
     }
 
-    void Model::drawOutside(const Material* material, const CommandBuffer* commandBuffer) const
+    void Model::drawOutside(Material* material, CommandBuffer* commandBuffer) const
     {
         _implementation.drawOutside(material, commandBuffer);
     }

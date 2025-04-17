@@ -35,9 +35,9 @@ namespace neon::vulkan
 
         VKModel(Application* application, Model* model);
 
-        void draw(const Material* material) const;
+        void draw(Material* material) const;
 
-        void drawOutside(const Material* material, const CommandBuffer* commandBuffer) const;
+        void drawOutside(Material* material, CommandBuffer* commandBuffer) const;
     };
 } // namespace neon::vulkan
 

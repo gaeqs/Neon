@@ -135,11 +135,15 @@ namespace neon::vulkan
 
     VKTexture::~VKTexture()
     {
-        vkDestroySampler(_vkApplication->getDevice()->getRaw(), _sampler, nullptr);
+        auto bin = _vkApplication->getBin();
+        auto device = _vkApplication->getDevice()->getRaw();
+        auto runs = getRuns();
+
+        bin->destroyLater(device, runs, _sampler, vkDestroySampler);
         if (!_external) {
-            vkDestroyImageView(_vkApplication->getDevice()->getRaw(), _imageView, nullptr);
-            vkDestroyImage(_vkApplication->getDevice()->getRaw(), _image, nullptr);
-            vkFreeMemory(_vkApplication->getDevice()->getRaw(), _imageMemory, nullptr);
+            bin->destroyLater(device, runs, _imageView, vkDestroyImageView);
+            bin->destroyLater(device, runs, _image, vkDestroyImage);
+            bin->destroyLater(device, runs, _imageMemory, vkFreeMemory);
         }
     }
 

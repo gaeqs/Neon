@@ -31,8 +31,11 @@ namespace neon::vulkan
 
     void VKShaderProgram::deleteShaders()
     {
+        auto bin = _vkApplication->getBin();
+        auto device = _vkApplication->getDevice()->getRaw();
+        auto runs = getRuns();
         for (const auto& item : _shaders) {
-            vkDestroyShaderModule(_vkApplication->getDevice()->getRaw(), item.module, nullptr);
+            bin->destroyLater(device, runs, item.module, vkDestroyShaderModule);
         }
         _shaders.clear();
     }

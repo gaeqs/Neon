@@ -290,8 +290,10 @@ namespace neon::vulkan
     {
         if (_pipeline != VK_NULL_HANDLE) {
             auto device = _vkApplication->getDevice()->getRaw();
-            vkDestroyPipeline(device, _pipeline, nullptr);
-            vkDestroyPipelineLayout(device, _pipelineLayout, nullptr);
+            auto bin = _vkApplication->getBin();
+            auto runs = getRuns();
+            bin->destroyLater(device, runs, _pipeline, vkDestroyPipeline);
+            bin->destroyLater(device, runs, _pipelineLayout, vkDestroyPipelineLayout);
         }
     }
 
@@ -361,5 +363,11 @@ namespace neon::vulkan
         if (samplerIt->binding.has_value()) {
             _material->getUniformBuffer()->setTexture(samplerIt->binding.value(), std::move(texture));
         }
+    }
+
+    void VKMaterial::useMaterial(std::shared_ptr<CommandBufferRun> run)
+    {
+        _material->getShader()->getImplementation().registerRun(run);
+        registerRun(std::move(run));
     }
 } // namespace neon::vulkan

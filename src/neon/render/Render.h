@@ -26,15 +26,20 @@ namespace neon
 
     class Application;
 
+    struct RenderEntry
+    {
+        std::shared_ptr<RenderPassStrategy> strategy;
+        size_t subId;
+    };
+
     struct PrioritizedRenderPassStrategyComparer
     {
-        bool operator()(const std::shared_ptr<RenderPassStrategy>& a,
-                        const std::shared_ptr<RenderPassStrategy>& b) const
+        bool operator()(const RenderEntry& a, const RenderEntry& b) const
         {
-            if (a->getPriority() == b->getPriority()) {
-                return a.get() < b.get();
+            if (a.strategy->getPriority() == b.strategy->getPriority()) {
+                return a.subId < b.subId;
             }
-            return a->getPriority() > b->getPriority();
+            return a.strategy->getPriority() < b.strategy->getPriority();
         }
     };
 
@@ -48,7 +53,7 @@ namespace neon
       private:
         Implementation _implementation;
         Application* _application;
-        std::set<std::shared_ptr<RenderPassStrategy>, PrioritizedRenderPassStrategyComparer> _strategies;
+        std::set<RenderEntry, PrioritizedRenderPassStrategyComparer> _strategies;
 
         std::shared_ptr<ShaderUniformDescriptor> _globalUniformDescriptor;
         ShaderUniformBuffer _globalUniformBuffer;
@@ -82,7 +87,7 @@ namespace neon
 
         auto getStrategies()
         {
-            return _strategies;
+            return _strategies | std::views::transform([](const RenderEntry& entry) { return entry.strategy; });
         }
 
         // region Strategy methods

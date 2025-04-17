@@ -150,14 +150,14 @@ namespace neon
          *
          * @param material the material.
          */
-        void draw(const Material* material) const;
+        void draw(Material* material) const;
 
         /**
          * Calls the draw calls for the meshes that
-         * contains the given material.
+         * contain the given material.
          * <p>
          * This method can only be used
-         * when a draw operation is being performed,
+         * when a draw operation is being performed
          * but doesn't require the material to be attached
          * to the model.
          * <p>
@@ -166,7 +166,7 @@ namespace neon
          * @param material the material.
          * @param commandBuffer the command buffer to use.
          */
-        void drawOutside(const Material* material, const CommandBuffer* commandBuffer) const;
+        void drawOutside(Material* material, CommandBuffer* commandBuffer) const;
     };
 } // namespace neon
 

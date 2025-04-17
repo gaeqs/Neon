@@ -11,6 +11,7 @@
     #include <vulkan/render/VKCommandPool.h>
 
 #endif
+#include "CommandBufferRun.h"
 
 namespace neon
 {
@@ -45,6 +46,8 @@ namespace neon
 
         [[nodiscard]] Implementation& getImplementation();
 
+        [[nodiscard]] std::shared_ptr<CommandBufferRun> getCurrentRun() const;
+
         bool begin(bool onlyOneSubmit = false);
 
         bool end();
@@ -61,4 +64,4 @@ namespace neon
     };
 } // namespace neon
 
-#endif //NEON_COMMANDBUFFER_H
+#endif // NEON_COMMANDBUFFER_H

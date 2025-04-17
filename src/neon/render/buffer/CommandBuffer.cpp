@@ -40,6 +40,11 @@ namespace neon
         return _implementation;
     }
 
+    std::shared_ptr<CommandBufferRun> CommandBuffer::getCurrentRun() const
+    {
+        return _implementation.getCurrentRun();
+    }
+
     bool CommandBuffer::begin(bool onlyOneSubmit)
     {
         return _implementation.begin(onlyOneSubmit);

@@ -7,8 +7,8 @@
 
 #include <vector>
 #include <memory>
-#include <vulkan/vulkan.h>
 #include <neon/render/shader/ShaderUniformBinding.h>
+#include <vulkan/VKResource.h>
 #include <vulkan/render/shader/VKShaderUniformDescriptor.h>
 
 namespace neon
@@ -28,7 +28,7 @@ namespace neon::vulkan
 
     class Buffer;
 
-    class VKShaderUniformBuffer
+    class VKShaderUniformBuffer : public VKResource
     {
         AbstractVKApplication* _vkApplication;
         VkDescriptorPool _descriptorPool;
@@ -61,8 +61,8 @@ namespace neon::vulkan
 
         void transferDataFromGPU(uint32_t index);
 
-        void bind(VkCommandBuffer commandBuffer, VkPipelineLayout layout, uint32_t bindingPoint) const;
+        void bind(VKCommandBuffer* commandBuffer, VkPipelineLayout layout, uint32_t bindingPoint);
     };
 } // namespace neon::vulkan
 
-#endif //NEON_VKSHADERUNIFORMBUFFER_H
+#endif // NEON_VKSHADERUNIFORMBUFFER_H

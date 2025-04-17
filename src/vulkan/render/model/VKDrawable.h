@@ -22,8 +22,8 @@ namespace neon::vulkan
       public:
         virtual ~VKDrawable() = default;
 
-        virtual void draw(const Material* material, VkCommandBuffer commandBuffer, const Model& model,
-                          const ShaderUniformBuffer* globalBuffer) = 0;
+        virtual void draw(Material* material, VKCommandBuffer* commandBuffer, const Model& model,
+                      ShaderUniformBuffer* globalBuffer) = 0;
     };
 } // namespace neon::vulkan
 

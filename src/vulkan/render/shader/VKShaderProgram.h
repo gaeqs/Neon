@@ -14,6 +14,7 @@
 
 #include <neon/render/shader/ShaderType.h>
 #include <neon/render/shader/ShaderUniform.h>
+#include <vulkan/VKResource.h>
 
 namespace neon
 {
@@ -24,7 +25,7 @@ namespace neon::vulkan
 {
     class AbstractVKApplication;
 
-    class VKShaderProgram
+    class VKShaderProgram : public VKResource
     {
         static VkShaderStageFlagBits getStage(ShaderType type);
 

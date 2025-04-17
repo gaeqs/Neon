@@ -31,9 +31,9 @@ namespace neon::vulkan
 
     void VKRender::beginRenderPass(const std::shared_ptr<FrameBuffer>& fb, bool clear) const
     {
-        auto* cb = _vkApplication->getCurrentCommandBuffer()->getImplementation().getCommandBuffer();
+        auto& cb = _vkApplication->getCurrentCommandBuffer()->getImplementation();
 
-        vulkan_util::beginRenderPass(cb, fb, clear);
+        vulkan_util::beginRenderPass(&cb, fb, clear);
 
         auto& frameBuffer = fb->getImplementation();
         _drawImGui = frameBuffer.renderImGui();

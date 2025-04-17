@@ -30,8 +30,8 @@ namespace neon::vulkan
 
         ~VKMeshShaderDrawable() override = default;
 
-        void draw(const Material* material, VkCommandBuffer commandBuffer, const Model& model,
-                  const ShaderUniformBuffer* globalBuffer) override;
+        void draw(Material* material, VKCommandBuffer* commandBuffer, const Model& model,
+                  ShaderUniformBuffer* globalBuffer) override;
 
         void setGroupsSupplier(const std::function<rush::Vec<3, uint32_t>(const Model&)>& supplier);
     };

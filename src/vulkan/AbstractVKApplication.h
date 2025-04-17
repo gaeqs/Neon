@@ -7,9 +7,9 @@
 
 #include <neon/structure/Application.h>
 #include <neon/render/buffer/CommandPool.h>
-#include <vulkan/vulkan.h>
 #include <vulkan/device/VKDevice.h>
 #include <vulkan/device/VKPhysicalDevice.h>
+#include <vulkan/VKResourceBin.h>
 
 namespace neon
 {
@@ -36,6 +36,8 @@ namespace neon::vulkan
         [[nodiscard]] virtual VkFormat getDepthImageFormat() const = 0;
 
         [[nodiscard]] virtual CommandPool* getCommandPool() const = 0;
+
+        [[nodiscard]] virtual VKResourceBin* getBin() = 0;
 
         [[nodiscard]] virtual VkSwapchainKHR getSwapChain() const = 0;
 
@@ -81,4 +83,4 @@ namespace neon::vulkan
     };
 } // namespace neon::vulkan
 
-#endif //VISIMPL_ABSTRACTVKAPPLICATION_H
+#endif // VISIMPL_ABSTRACTVKAPPLICATION_H

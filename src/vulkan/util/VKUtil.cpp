@@ -437,10 +437,12 @@ namespace neon::vulkan::vulkan_util
         return {bindingDescription, attributes};
     }
 
-    void beginRenderPass(VkCommandBuffer commandBuffer, const std::shared_ptr<FrameBuffer>& fb, bool clear)
+    void beginRenderPass(const VKCommandBuffer* commandBuffer, const std::shared_ptr<FrameBuffer>& fb, bool clear)
     {
         auto& frameBuffer = fb->getImplementation();
         auto& renderPass = frameBuffer.getRenderPass();
+
+        frameBuffer.registerRun(commandBuffer->getCurrentRun());
 
         VkRenderPassBeginInfo renderPassInfo{};
         renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
@@ -482,7 +484,8 @@ namespace neon::vulkan::vulkan_util
             renderPassInfo.clearValueCount = 0;
         }
 
-        vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+        auto cmd = commandBuffer->getCommandBuffer();
+        vkCmdBeginRenderPass(cmd, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
         VkViewport viewport{};
         viewport.x = 0.0f;
@@ -491,11 +494,11 @@ namespace neon::vulkan::vulkan_util
         viewport.height = static_cast<float>(frameBuffer.getHeight());
         viewport.minDepth = 0.0f;
         viewport.maxDepth = 1.0f;
-        vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
+        vkCmdSetViewport(cmd, 0, 1, &viewport);
 
         VkRect2D scissor{};
         scissor.offset = {0, 0};
         scissor.extent = {frameBuffer.getWidth(), frameBuffer.getHeight()};
-        vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
+        vkCmdSetScissor(cmd, 0, 1, &scissor);
     }
 } // namespace neon::vulkan::vulkan_util

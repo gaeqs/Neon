@@ -293,6 +293,11 @@ namespace neon::vulkan
             }
         }
 
+        {
+            DEBUG_PROFILE_ID(profiler, adquireImage, "Vulkan cleanup");
+            _bin.flush();
+        }
+
         auto& render = _application->getRender();
         // Check recreation
         {
@@ -758,6 +763,9 @@ namespace neon::vulkan
 
     VKApplication::~VKApplication()
     {
+
+        _bin.flush();
+
         auto raw = _device->getRaw();
         if (ImGui::GetIO().BackendRendererUserData != nullptr) {
             ImGui_ImplVulkan_Shutdown();
@@ -837,6 +845,11 @@ namespace neon::vulkan
     CommandPool* VKApplication::getCommandPool() const
     {
         return &_commandPool.getPool();
+    }
+
+    VKResourceBin* VKApplication::getBin()
+    {
+        return &_bin;
     }
 
     VkDescriptorPool VKApplication::getImGuiPool() const

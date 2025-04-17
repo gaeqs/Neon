@@ -13,6 +13,11 @@
 #include <neon/structure/Room.h>
 #include <neon/render/model/Model.h>
 
+namespace
+{
+    std::atomic_size_t SUB_ID_GENERATOR = 0;
+}
+
 namespace neon
 {
     Render::Render(Application* application, std::string name,
@@ -37,12 +42,12 @@ namespace neon
 
     void Render::addRenderPass(const std::shared_ptr<RenderPassStrategy>& strategy)
     {
-        _strategies.insert(strategy);
+        _strategies.insert(RenderEntry(std::move(strategy), SUB_ID_GENERATOR++));
     }
 
     bool Render::removeRenderPass(const std::shared_ptr<RenderPassStrategy>& strategy)
     {
-        return _strategies.erase(strategy) > 0;
+        return erase_if(_strategies, [strategy](const RenderEntry& entry) { return entry.strategy == strategy; }) > 0;
     }
 
     void Render::clearRenderPasses()
@@ -70,7 +75,7 @@ namespace neon
                           [](const auto& a, const auto& b) { return a->getPriority() > b->getPriority(); });
 
         for (const auto& strategy : _strategies) {
-            strategy->render(room, this, sortedMaterials);
+            strategy.strategy->render(room, this, sortedMaterials);
         }
     }
 
@@ -78,12 +83,12 @@ namespace neon
     {
         bool first = true;
         for (const auto& item : _strategies) {
-            if (item->requiresRecreation()) {
+            if (item.strategy->requiresRecreation()) {
                 if (first) {
                     _implementation.setupFrameBufferRecreation();
                     first = false;
                 }
-                item->recreate();
+                item.strategy->recreate();
             }
         }
     }

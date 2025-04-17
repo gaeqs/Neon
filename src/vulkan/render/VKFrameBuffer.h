@@ -11,12 +11,13 @@
 #include <vector>
 #include <neon/render/buffer/FrameBufferOutput.h>
 #include <neon/render/texture/TextureCreateInfo.h>
+#include <vulkan/VKResource.h>
 
 namespace neon::vulkan
 {
     class VKRenderPass;
 
-    class VKFrameBuffer
+    class VKFrameBuffer : public VKResource
     {
       public:
         VKFrameBuffer(const VKFrameBuffer& other) = delete;

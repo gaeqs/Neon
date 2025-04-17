@@ -13,6 +13,7 @@
 
 #include <neon/render/texture/TextureCreateInfo.h>
 #include <rush/vector/vec.h>
+#include <vulkan/render/VKCommandBuffer.h>
 
 namespace neon
 {
@@ -61,7 +62,7 @@ namespace neon::vulkan::vulkan_util
     std::pair<VkVertexInputBindingDescription, std::vector<VkVertexInputAttributeDescription>> toVulkanDescription(
         uint32_t binding, uint32_t startLocation, const InputDescription& description);
 
-    void beginRenderPass(VkCommandBuffer commandBuffer, const std::shared_ptr<FrameBuffer>& fb, bool clear);
+    void beginRenderPass(const VKCommandBuffer* commandBuffer, const std::shared_ptr<FrameBuffer>& fb, bool clear);
 } // namespace neon::vulkan::vulkan_util
 
-#endif //NEON_VKUTIL_H
+#endif // NEON_VKUTIL_H
