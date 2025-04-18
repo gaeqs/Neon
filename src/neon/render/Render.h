@@ -39,7 +39,7 @@ namespace neon
             if (a.strategy->getPriority() == b.strategy->getPriority()) {
                 return a.subId < b.subId;
             }
-            return a.strategy->getPriority() < b.strategy->getPriority();
+            return a.strategy->getPriority() > b.strategy->getPriority();
         }
     };
 
