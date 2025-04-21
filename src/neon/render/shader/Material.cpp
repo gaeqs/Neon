@@ -11,10 +11,16 @@ namespace neon
 {
     namespace
     {
-        std::unique_ptr<ShaderUniformBuffer> generateUniformBuffer(
-            const std::string& name, const std::shared_ptr<ShaderUniformDescriptor>& descriptor)
+        std::shared_ptr<ShaderUniformBuffer> generateUniformBuffer(const std::string& name,
+                                                                   const neon::MaterialCreateInfo& info)
         {
-            return descriptor == nullptr ? nullptr : std::make_unique<ShaderUniformBuffer>(name, descriptor);
+            if (info.descriptions.uniformBuffer == nullptr) {
+                if (info.descriptions.uniform == nullptr) {
+                    return nullptr;
+                }
+                return std::make_shared<ShaderUniformBuffer>(name, info.descriptions.uniform);
+            }
+            return info.descriptions.uniformBuffer;
         }
     } // namespace
 
@@ -22,7 +28,7 @@ namespace neon
         Asset(typeid(Material), name),
         _shader(createInfo.shader),
         _target(createInfo.target),
-        _uniformBuffer(generateUniformBuffer(name, createInfo.descriptions.uniform)),
+        _uniformBuffer(generateUniformBuffer(name, createInfo)),
         _priority(0),
         _implementation(application, this, createInfo)
     {
@@ -38,12 +44,12 @@ namespace neon
         return _target;
     }
 
-    const std::unique_ptr<ShaderUniformBuffer>& Material::getUniformBuffer() const
+    const std::shared_ptr<ShaderUniformBuffer>& Material::getUniformBuffer() const
     {
         return _uniformBuffer;
     }
 
-    std::unique_ptr<ShaderUniformBuffer>& Material::getUniformBuffer()
+    std::shared_ptr<ShaderUniformBuffer>& Material::getUniformBuffer()
     {
         return _uniformBuffer;
     }

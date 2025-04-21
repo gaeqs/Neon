@@ -14,14 +14,16 @@ namespace neon
     class ViewportComponent : public Component
     {
         std::shared_ptr<SimpleFrameBuffer> _frameBuffer;
+
+        std::string _name;
+
         ImVec2 _windowSize;
         ImVec2 _windowOrigin;
 
         bool _hovered;
 
       public:
-
-        ViewportComponent(const std::shared_ptr<SimpleFrameBuffer>& frameBuffer);
+        ViewportComponent(const std::shared_ptr<SimpleFrameBuffer>& frameBuffer, std::string name = "Viewport");
 
         void onPreDraw() override;
 
@@ -35,4 +37,4 @@ namespace neon
     REGISTER_COMPONENT(ViewportComponent, "Viewport")
 } // namespace neon
 
-#endif //NEON_IMGUITEST_H
+#endif // NEON_IMGUITEST_H

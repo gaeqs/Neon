@@ -8,6 +8,7 @@
 #include <functional>
 #include <mutex>
 #include <vector>
+#include <memory>
 #include <neon/render/buffer/CommandBufferRun.h>
 #include <vulkan/vulkan_core.h>
 
