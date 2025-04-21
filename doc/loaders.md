@@ -177,6 +177,7 @@ Only the parameter `file` is required.
 ```json
 {
   "maximum_instances": 20000,
+  "uniform_descriptor": "A:uniform_descriptor",
   "auto_flush": true,
   "custom_instance_sizes": [
     128
