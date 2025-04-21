@@ -12,7 +12,7 @@
 #include <neon/render/buffer/FrameBuffer.h>
 #include <neon/render/shader/ShaderProgram.h>
 #include <neon/render/shader/ShaderUniformDescriptor.h>
-#include <neon/structure/IdentifiableWrapper.h>
+#include <neon/render/shader/ShaderUniformBuffer.h>
 #include <neon/render/model/InputDescription.h>
 
 namespace neon

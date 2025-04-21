@@ -63,7 +63,9 @@ Each stage must include a `file` or `raw` parameter. The parameter `file` has pr
     "instance": {
       // Same as vertex.
     },
+    // If 'uniform_buffer' is not defined, 'uniform' can be used to describe a new uniform buffer!.
     "uniform": "A:shader_uniform_descriptor",
+    "uniform_buffer": "A:shader_uniform_buffer",
     "bindings": [
       {
         "binding": 0,
@@ -233,6 +235,14 @@ All parameters are optional, but if you don't include them an empty model will b
       "size": 0
     }
   ]
+}
+```
+
+## Shader uniform buffers
+
+```json
+{
+  "descriptor": "A:shader_uniform_descriptor"
 }
 ```
 
