@@ -312,16 +312,16 @@ namespace neon::vulkan
                                            _imageAvailableSemaphores[_currentFrame], VK_NULL_HANDLE, &_imageIndex);
         }
 
-        if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || _requiresSwapchainRecreation) {
-            {
-                DEBUG_PROFILE_ID(profiler, recreation2, "SC/FB Recreation");
-                recreateSwapChain();
-                render->checkFrameBufferRecreationConditions();
-            }
+        if (result == VK_ERROR_OUT_OF_DATE_KHR) {
+            DEBUG_PROFILE_ID(profiler, recreation2, "SC/FB Recreation");
+            recreateSwapChain();
+            render->checkFrameBufferRecreationConditions();
             return false;
-        } else if (result != VK_SUCCESS) {
+        }
+        if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
             throw std::runtime_error("Failed to acquire swap chain image!");
         }
+
         {
             DEBUG_PROFILE_ID(profiler, beginCB, "Begin Command Buffer");
             _currentCommandBuffer = _commandPool.getPool().beginCommandBuffer(true);
@@ -359,9 +359,17 @@ namespace neon::vulkan
         presentInfo.pSwapchains = swapChains;
         presentInfo.pImageIndices = &_imageIndex;
         presentInfo.pResults = nullptr;
+
+        VkResult presentResult;
         {
             DEBUG_PROFILE_ID(profiler, present, "Present");
-            vkQueuePresentKHR(_presentQueue.getQueue(), &presentInfo);
+            presentResult = vkQueuePresentKHR(_presentQueue.getQueue(), &presentInfo);
+        }
+
+        if (presentResult == VK_ERROR_OUT_OF_DATE_KHR || presentResult == VK_SUBOPTIMAL_KHR || _requiresSwapchainRecreation) {
+            DEBUG_PROFILE_ID(profiler, recreation2, "SC/FB Recreation");
+            recreateSwapChain();
+            _application->getRender()->checkFrameBufferRecreationConditions();
         }
 
         _currentFrame = (_currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
