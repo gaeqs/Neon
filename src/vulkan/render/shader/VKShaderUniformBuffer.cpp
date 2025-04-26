@@ -117,7 +117,7 @@ namespace neon::vulkan
                 if (binding.type == UniformBindingType::UNIFORM_BUFFER ||
                     binding.type == UniformBindingType::STORAGE_BUFFER) {
                     VkDescriptorBufferInfo bufferInfo{};
-                    bufferInfo.buffer = _buffers[bindingIndex]->getRaw();
+                    bufferInfo.buffer = _buffers[bindingIndex]->getRaw(nullptr);
                     bufferInfo.offset = 0;
                     bufferInfo.range = binding.size;
 

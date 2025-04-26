@@ -10,6 +10,7 @@
 
 #include <vulkan/vulkan.h>
 #include <neon/util/Range.h>
+#include <vulkan/VKResource.h>
 
 namespace neon
 {
@@ -72,7 +73,7 @@ namespace neon::vulkan
 
         virtual bool canBeWrittenOn() const = 0;
 
-        virtual VkBuffer getRaw() const = 0;
+        virtual VkBuffer getRaw(std::shared_ptr<CommandBufferRun> run) = 0;
 
         virtual AbstractVKApplication* getApplication() const = 0;
 
@@ -99,4 +100,4 @@ namespace neon::vulkan
     };
 } // namespace neon::vulkan
 
-#endif //VULKANTEST_BUFFER_H
+#endif // VULKANTEST_BUFFER_H

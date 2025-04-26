@@ -16,9 +16,9 @@ namespace neon::vulkan
         return true;
     }
 
-    VkBuffer StagingBuffer::getRaw() const
+    VkBuffer StagingBuffer::getRaw(std::shared_ptr<CommandBufferRun> run)
     {
-        return _deviceBuffer.getRaw();
+        return _deviceBuffer.getRaw(run);
     }
 
     std::optional<std::shared_ptr<BufferMap<char>>> StagingBuffer::rawMap(const CommandBuffer* commandBuffer)
@@ -38,7 +38,6 @@ namespace neon::vulkan
 
     StagingBuffer::StagingBuffer(AbstractVKApplication* application, VkBufferUsageFlags usage, uint32_t sizeInBytes) :
         _application(application),
-        _stagingBuffers(),
         _deviceBuffer(_application, VK_BUFFER_USAGE_TRANSFER_DST_BIT | usage, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
                       sizeInBytes)
     {

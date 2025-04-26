@@ -30,12 +30,14 @@ namespace neon::vulkan
             return;
         }
 
+        auto run = commandBuffer->getCurrentRun();
+
         VkBuffer buffers[MAX_BUFFERS];
         VkDeviceSize offsets[MAX_BUFFERS];
 
         uint32_t i = 0;
         for (; i < std::min(_vertexBuffers.size(), MAX_BUFFERS); ++i) {
-            buffers[i] = _vertexBuffers[i]->getRaw();
+            buffers[i] = _vertexBuffers[i]->getRaw(run);
             offsets[i] = 0;
         }
 
@@ -44,7 +46,7 @@ namespace neon::vulkan
             auto& instancingBuffers = data->getImplementation().getBuffers();
             for (size_t j = 0; j < instancingBuffers.size() && i < MAX_BUFFERS; ++j, ++i) {
                 auto& buffer = instancingBuffers[j];
-                buffers[i] = buffer == nullptr ? VK_NULL_HANDLE : buffer->getRaw();
+                buffers[i] = buffer == nullptr ? VK_NULL_HANDLE : buffer->getRaw(run);
                 offsets[i] = 0;
             }
             instances = std::min(instances, data->getInstanceAmount());
@@ -52,7 +54,7 @@ namespace neon::vulkan
 
         vkCmdBindVertexBuffers(rawCmd, 0, i, buffers, offsets);
 
-        vkCmdBindIndexBuffer(rawCmd, _indexBuffer.value()->getRaw(), 0, VK_INDEX_TYPE_UINT32);
+        vkCmdBindIndexBuffer(rawCmd, _indexBuffer.value()->getRaw(std::move(run)), 0, VK_INDEX_TYPE_UINT32);
 
         auto& mat = material->getImplementation();
 

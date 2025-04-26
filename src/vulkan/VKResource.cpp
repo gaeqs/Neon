@@ -16,6 +16,9 @@ namespace neon::vulkan
 
     void VKResource::registerRun(std::shared_ptr<CommandBufferRun> run)
     {
+        if (run == nullptr) {
+            return;
+        }
         discardFinished();
         if (!run->hasFinished()) {
             _runs.push_back(std::move(run));
