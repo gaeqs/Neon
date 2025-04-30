@@ -33,8 +33,8 @@ namespace neon
     struct ScrollEvent;
 
     /**
- * This class holds all components inside a room.
- */
+     * This class holds all components inside a room.
+     */
     class ComponentCollection
     {
         std::unordered_map<std::type_index, std::pair<ComponentImplementedEvents, std::shared_ptr<void>>> _components;
@@ -75,9 +75,7 @@ namespace neon
                                                   std::make_pair(events, std::static_pointer_cast<void>(pointer))));
 
                 T* component = pointer->emplace(std::forward<Args>(values)...);
-                if (events.onStart) {
-                    _notStartedComponents.push(static_cast<Component*>(component));
-                }
+                _notStartedComponents.push(static_cast<Component*>(component));
                 if (events.onConstruction) {
                     callOnConstruction(component);
                 }
@@ -87,9 +85,7 @@ namespace neon
             auto components = std::static_pointer_cast<ClusteredLinkedCollection<T>>(it->second.second);
 
             T* component = components->emplace(std::forward<Args>(values)...);
-            if (it->second.first.onStart) {
-                _notStartedComponents.push(static_cast<Component*>(component));
-            }
+            _notStartedComponents.push(static_cast<Component*>(component));
             if (it->second.first.onConstruction) {
                 callOnConstruction(component);
             }
@@ -188,4 +184,4 @@ namespace neon
     };
 } // namespace neon
 
-#endif //RVTRACKING_COMPONENTCOLLECTION_H
+#endif // RVTRACKING_COMPONENTCOLLECTION_H

@@ -13,6 +13,7 @@ namespace neon
 
     Component::Component() :
         _id(COMPONENT_ID_GENERATOR++),
+        _started(false),
         _enabled(true),
         _gameObject(nullptr)
     {
@@ -26,6 +27,11 @@ namespace neon
     IdentifiableWrapper<GameObject> Component::getGameObject() const
     {
         return _gameObject;
+    }
+
+    bool Component::hasStarted() const
+    {
+        return _started;
     }
 
     bool Component::isEnabled() const

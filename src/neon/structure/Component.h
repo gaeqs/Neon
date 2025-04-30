@@ -53,11 +53,13 @@ namespace neon
     class Component : public Identifiable
     {
         friend class GameObject;
+        friend class ComponentCollection;
 
         template<class T>
         friend class IdentifiableWrapper;
 
         uint64_t _id;
+        bool _started;
         bool _enabled;
         IdentifiableWrapper<GameObject> _gameObject;
 
@@ -94,6 +96,11 @@ namespace neon
          * @return the game object.
          */
         [[nodiscard]] IdentifiableWrapper<GameObject> getGameObject() const;
+
+        /**
+         * @return whether this component has started.
+         */
+        bool hasStarted() const;
 
         /**
          * Returns whether this component is enabled.
@@ -274,4 +281,4 @@ namespace neon
     };
 } // namespace neon
 
-#endif //NEON_COMPONENT_H
+#endif // NEON_COMPONENT_H
