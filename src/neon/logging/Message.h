@@ -9,6 +9,7 @@
 #include <source_location>
 #include <string>
 #include <vector>
+#include <sstream>
 
 #include "TextEffect.h"
 

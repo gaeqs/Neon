@@ -6,6 +6,7 @@
 #define NEON_RENDER_H
 
 #include <set>
+#include <ranges>
 
 #include <neon/render/RenderPassStrategy.h>
 #include <neon/structure/Asset.h>

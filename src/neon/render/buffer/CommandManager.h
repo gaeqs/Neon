@@ -10,10 +10,11 @@
 #include <unordered_map>
 #include <vector>
 
+#include <neon/render/buffer/CommandPool.h>
+
 namespace neon
 {
     class Application;
-    class CommandPool;
     class CommandPoolHolder;
 
     class CommandManager
