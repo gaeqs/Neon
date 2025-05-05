@@ -7,6 +7,7 @@
 
 #include <memory>
 #include <utility>
+#include <optional>
 #include <nlohmann/json.hpp>
 
 namespace neon
