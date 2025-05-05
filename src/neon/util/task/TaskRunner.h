@@ -15,6 +15,7 @@
 #include <queue>
 #include <thread>
 #include <utility>
+#include <variant>
 #include <neon/logging/Logger.h>
 
 #include <neon/util/task/AbstractCoroutine.h>
