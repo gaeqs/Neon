@@ -97,7 +97,7 @@ TEST_CASE("Clustered linked collection find and erase 3", "[clustered_linked_col
 
     for (size_t i = 0; i < 99; i++) {
         auto v1 = vector[i];
-        auto v2 = vector[i + 2];
+        auto v2 = vector[i + 1];
         auto it1 = std::find_if(collection.begin(), collection.end(), [v1](auto& i) { return i == v1; });
         auto it2 = std::find_if(collection.begin(), collection.end(), [v2](auto& i) { return i == v2; });
         collection.erase(it1);

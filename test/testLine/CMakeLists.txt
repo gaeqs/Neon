@@ -32,7 +32,7 @@ find_package(Eigen3 CONFIG REQUIRED)
 
 add_compile_definitions(EIGEN_INITIALIZE_MATRICES_BY_ZERO)
 
-add_executable(testLine ${TEST_SOURCES})
-set_target_properties(testLine PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${TEST_DIRECTORY})
-target_link_libraries(testLine neon shaders_line Eigen3::Eigen)
-add_dependencies(testLine neon_tests)
+add_executable(test_line ${TEST_SOURCES})
+set_target_properties(test_line PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${TEST_DIRECTORY})
+target_link_libraries(test_line neon shaders_line Eigen3::Eigen)
+add_dependencies(test_line neon_tests)
