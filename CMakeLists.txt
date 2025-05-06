@@ -13,7 +13,7 @@ include(CMake/CMakeRC.cmake)
 include(FetchContent)
 include(FetchContent)
 
-project(Neon LANGUAGES CXX VERSION 1.0.0)
+project(Neon LANGUAGES CXX VERSION 1.0.1)
 
 find_package(glfw3 CONFIG REQUIRED)
 find_package(assimp CONFIG REQUIRED)
@@ -128,10 +128,10 @@ endif ()
 
 # Create version.h
 
-if (EXISTS "${CMAKE_SOURCE_DIR}/.git")
+if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/.git")
     execute_process(
             COMMAND git rev-parse --short HEAD
-            WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
             OUTPUT_VARIABLE GIT_COMMIT
             OUTPUT_STRIP_TRAILING_WHITESPACE
             ERROR_QUIET
