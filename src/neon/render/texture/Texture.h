@@ -9,6 +9,7 @@
 
 #include <neon/structure/Asset.h>
 #include <neon/render/texture/TextureCreateInfo.h>
+#include <neon/filesystem/File.h>
 
 #include <cmrc/cmrc.hpp>
 
@@ -80,6 +81,16 @@ namespace neon
             const TextureCreateInfo& createInfo = TextureCreateInfo());
 
         /**
+         * Creates a new texture from a resource.
+         * @param resource the resource.
+         * @param createInfo the texture creation info.
+         * @return a pointer to the new texture.
+         */
+        static std::unique_ptr<Texture> createTextureFromFile(
+            Application* application, std::string name, const File& resource,
+            const TextureCreateInfo& createInfo = TextureCreateInfo());
+
+        /**
          * Creates a new texture from a set of resources.
          *
          * This method is useful if you want to create cube boxes
@@ -148,7 +159,7 @@ namespace neon
          * @param createInfo the texture creation info.
          * @return a pointer to the new texture.
          */
-        static std::unique_ptr<Texture> createTextureFromFile(
+        static std::unique_ptr<Texture> createTextureFromFiles(
             Application* application, std::string name, const std::vector<const void*>& data,
             const std::vector<uint32_t>& sizes, const TextureCreateInfo& createInfo = TextureCreateInfo());
 

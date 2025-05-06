@@ -331,6 +331,8 @@ int main()
     info.windowSize = {WIDTH, HEIGHT};
     info.vSync = false;
 
+    info.icon = TextureData::fromFile(cmrc::resources::get_filesystem().open("icon.png"));
+
     info.featuresConfigurator = [](const auto& d, auto& f) {
         vulkan::VKApplicationCreateInfo::defaultFeaturesConfigurer(d, f);
         f.basicFeatures.samplerAnisotropy = true;

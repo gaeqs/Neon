@@ -13,6 +13,7 @@ cmrc_add_resource_library(
         test1_resources
         NAMESPACE resources
         WHENCE resources
+        resources/icon.png
         resources/default.vert
         resources/default.frag
         resources/deferred.vert

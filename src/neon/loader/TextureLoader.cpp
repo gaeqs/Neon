@@ -114,6 +114,6 @@ namespace neon
         loadSampler(json["sampler"], info.sampler);
         info.commandBuffer = context.commandBuffer;
 
-        return Texture::createTextureFromFile(context.application, name, datas, sizes, info);
+        return Texture::createTextureFromFiles(context.application, name, datas, sizes, info);
     }
 } // namespace neon

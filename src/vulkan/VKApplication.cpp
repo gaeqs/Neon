@@ -137,10 +137,18 @@ namespace neon::vulkan
 
         preWindowCreation();
 
-        _window =
-            glfwCreateWindow(static_cast<int>(_width), static_cast<int>(_height), _name.c_str(), nullptr, nullptr);
+        int w = static_cast<int>(_width);
+        int h = static_cast<int>(_height);
+        _window = glfwCreateWindow(w, h, _name.c_str(), nullptr, nullptr);
         if (!_window) {
             throw std::runtime_error("Failed to open GLFW window");
+        }
+
+        if (_createInfo.icon.has_value()) {
+            auto& icon = _createInfo.icon.value();
+            auto* pixels = reinterpret_cast<unsigned char*>(icon.getData());
+            GLFWimage image(static_cast<int>(icon.getWidth()), static_cast<int>(icon.getHeight()), pixels);
+            glfwSetWindowIcon(_window, 1, &image);
         }
 
         glfwSetWindowAttrib(_window, GLFW_DECORATED, 1);
@@ -366,7 +374,8 @@ namespace neon::vulkan
             presentResult = vkQueuePresentKHR(_presentQueue.getQueue(), &presentInfo);
         }
 
-        if (presentResult == VK_ERROR_OUT_OF_DATE_KHR || presentResult == VK_SUBOPTIMAL_KHR || _requiresSwapchainRecreation) {
+        if (presentResult == VK_ERROR_OUT_OF_DATE_KHR || presentResult == VK_SUBOPTIMAL_KHR ||
+            _requiresSwapchainRecreation) {
             DEBUG_PROFILE_ID(profiler, recreation2, "SC/FB Recreation");
             recreateSwapChain();
             _application->getRender()->checkFrameBufferRecreationConditions();

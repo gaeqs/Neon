@@ -85,6 +85,13 @@ namespace neon
                                      static_cast<uint32_t>(resource.size()), createInfo);
     }
 
+    std::unique_ptr<Texture> Texture::createTextureFromFile(Application* application, std::string name,
+                                                            const File& resource, const TextureCreateInfo& createInfo)
+    {
+        return createTextureFromFile(application, std::move(name), resource.getData(),
+                                     static_cast<uint32_t>(resource.getSize()), createInfo);
+    }
+
     std::unique_ptr<Texture> Texture::createTextureFromFiles(Application* application, std::string name,
                                                              const std::vector<cmrc::file>& resources,
                                                              const TextureCreateInfo& createInfo)
@@ -99,7 +106,7 @@ namespace neon
             sizes.push_back(static_cast<uint32_t>(item.size()));
         }
 
-        return createTextureFromFile(application, std::move(name), data, sizes, createInfo);
+        return createTextureFromFiles(application, std::move(name), data, sizes, createInfo);
     }
 
     std::unique_ptr<Texture> Texture::createTextureFromFile(Application* application, std::string name,
@@ -203,10 +210,10 @@ namespace neon
         return image;
     }
 
-    std::unique_ptr<Texture> Texture::createTextureFromFile(Application* application, std::string name,
-                                                            const std::vector<const void*>& data,
-                                                            const std::vector<uint32_t>& sizes,
-                                                            const TextureCreateInfo& createInfo)
+    std::unique_ptr<Texture> Texture::createTextureFromFiles(Application* application, std::string name,
+                                                             const std::vector<const void*>& data,
+                                                             const std::vector<uint32_t>& sizes,
+                                                             const TextureCreateInfo& createInfo)
     {
         std::vector<int32_t> widths, heights;
         std::vector<stbi_uc*> pointers;
