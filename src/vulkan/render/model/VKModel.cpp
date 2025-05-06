@@ -18,7 +18,7 @@ namespace neon::vulkan
     {
     }
 
-    void VKModel::draw(const Material* material) const
+    void VKModel::draw(Material* material) const
     {
         auto sp = std::shared_ptr<Material>(const_cast<Material*>(material), [](Material*) {});
 
@@ -28,23 +28,22 @@ namespace neon::vulkan
             }
             auto* vk = dynamic_cast<AbstractVKApplication*>(_application->getImplementation());
 
-            mesh->getImplementation().draw(material,
-                                           vk->getCurrentCommandBuffer()->getImplementation().getCommandBuffer(),
-                                           *_model, &_application->getRender()->getGlobalUniformBuffer());
+            mesh->getImplementation().draw(material, &vk->getCurrentCommandBuffer()->getImplementation(), *_model,
+                                           &_application->getRender()->getGlobalUniformBuffer());
         }
     }
 
-    void VKModel::drawOutside(const Material* material, const CommandBuffer* commandBuffer) const
+    void VKModel::drawOutside(Material* material, CommandBuffer* commandBuffer) const
     {
-        auto buffer = commandBuffer->getImplementation().getCommandBuffer();
+        auto& buffer = commandBuffer->getImplementation();
 
-        vulkan_util::beginRenderPass(buffer, material->getTarget(), true);
+        vulkan_util::beginRenderPass(&buffer, material->getTarget(), true);
 
         for (const auto& mesh : _model->getMeshes()) {
-            mesh->getImplementation().draw(material, buffer, *_model,
+            mesh->getImplementation().draw(material, &buffer, *_model,
                                            &_application->getRender()->getGlobalUniformBuffer());
         }
 
-        vkCmdEndRenderPass(buffer);
+        vkCmdEndRenderPass(buffer.getCommandBuffer());
     }
 } // namespace neon::vulkan

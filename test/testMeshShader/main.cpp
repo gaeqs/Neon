@@ -122,8 +122,9 @@ std::shared_ptr<FrameBuffer> initRender(Room* room)
     };
 
     auto fpFrameBuffer = std::make_shared<SimpleFrameBuffer>(app, "frame_buffer", frameBufferFormats, true);
+    app->getAssets().store(fpFrameBuffer, AssetStorageMode::PERMANENT);
 
-    render->addRenderPass(std::make_shared<DefaultRenderPassStrategy>(fpFrameBuffer));
+    render->addRenderPass(std::make_shared<DefaultRenderPassStrategy>("frame_buffer", fpFrameBuffer));
 
     auto outputs = fpFrameBuffer->getOutputs();
     std::vector<std::shared_ptr<Texture>> textures;
@@ -138,7 +139,8 @@ std::shared_ptr<FrameBuffer> initRender(Room* room)
 
     std::vector<FrameBufferTextureCreateInfo> screenFormats = {TextureFormat::R8G8B8A8};
     auto screenFrameBuffer = std::make_shared<SimpleFrameBuffer>(app, "screen", screenFormats, false);
-    render->addRenderPass(std::make_shared<DefaultRenderPassStrategy>(screenFrameBuffer));
+    app->getAssets().store(screenFrameBuffer, AssetStorageMode::PERMANENT);
+    render->addRenderPass(std::make_shared<DefaultRenderPassStrategy>("screen", screenFrameBuffer));
 
     textures[0] = albedo;
 
@@ -154,9 +156,10 @@ std::shared_ptr<FrameBuffer> initRender(Room* room)
     screenModelGO->setName("Screen Model");
     screenModelGO->newComponent<GraphicComponent>(screenModel);
 
-    auto swapFrameBuffer = std::make_shared<SwapChainFrameBuffer>(app, "swap_chain", SamplesPerTexel::COUNT_1, false);
+    auto swapFrameBuffer =
+        std::make_shared<SwapChainFrameBuffer>(app, "swap_chain_frame_buffer", SamplesPerTexel::COUNT_1, false);
 
-    render->addRenderPass(std::make_shared<DefaultRenderPassStrategy>(swapFrameBuffer));
+    render->addRenderPass(std::make_shared<DefaultRenderPassStrategy>("swap_chain", swapFrameBuffer));
 
     return fpFrameBuffer;
 }
@@ -282,6 +285,7 @@ std::shared_ptr<Room> getTestRoom(Application* application)
     auto room = std::make_shared<Room>(application);
 
     auto fpFrameBuffer = initRender(room.get());
+    auto screenFrameBuffer = application->getAssets().get<FrameBuffer>("screen").value();
 
     auto skybox = loadSkybox(room.get());
     application->getRender()->getGlobalUniformBuffer().setTexture(1, skybox);
@@ -294,7 +298,7 @@ std::shared_ptr<Room> getTestRoom(Application* application)
     parameterUpdater->newComponent<GlobalParametersUpdaterComponent>();
     parameterUpdater->newComponent<LockMouseComponent>(cameraMovement);
     parameterUpdater->newComponent<DockSpaceComponent>();
-    parameterUpdater->newComponent<ViewportComponent>();
+    parameterUpdater->newComponent<ViewportComponent>(std::dynamic_pointer_cast<SimpleFrameBuffer>(screenFrameBuffer));
     auto goExplorer = parameterUpdater->newComponent<GameObjectExplorerComponent>();
     parameterUpdater->newComponent<SceneTreeComponent>(goExplorer);
     parameterUpdater->newComponent<DebugOverlayComponent>(false, 100);

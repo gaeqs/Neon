@@ -24,15 +24,6 @@ namespace neon::vulkan
     {
     }
 
-    void VKRender::render(Room* room, const Render* render,
-                          const std::vector<std::shared_ptr<Material>>& sortedMaterials,
-                          const std::vector<std::shared_ptr<RenderPassStrategy>>& strategies) const
-    {
-        for (const auto& strategy : strategies) {
-            strategy->render(room, render, sortedMaterials);
-        }
-    }
-
     void VKRender::setupFrameBufferRecreation()
     {
         vkDeviceWaitIdle(_vkApplication->getDevice()->getRaw());
@@ -40,9 +31,9 @@ namespace neon::vulkan
 
     void VKRender::beginRenderPass(const std::shared_ptr<FrameBuffer>& fb, bool clear) const
     {
-        auto* cb = _vkApplication->getCurrentCommandBuffer()->getImplementation().getCommandBuffer();
+        auto& cb = _vkApplication->getCurrentCommandBuffer()->getImplementation();
 
-        vulkan_util::beginRenderPass(cb, fb, clear);
+        vulkan_util::beginRenderPass(&cb, fb, clear);
 
         auto& frameBuffer = fb->getImplementation();
         _drawImGui = frameBuffer.renderImGui();

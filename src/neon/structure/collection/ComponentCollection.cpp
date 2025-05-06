@@ -49,7 +49,7 @@ namespace neon
             auto ptr = std::static_pointer_cast<AbstractClusteredLinkedCollection>(data.second);
             ptr->forEachRaw([&event](void* ptr) {
                 auto* component = reinterpret_cast<Component*>(ptr);
-                if (component->isEnabled()) {
+                if (component->isEnabled() && component->hasStarted()) {
                     component->onKey(event);
                 }
             });
@@ -71,7 +71,7 @@ namespace neon
             auto ptr = std::static_pointer_cast<AbstractClusteredLinkedCollection>(data.second);
             ptr->forEachRaw([&event](void* ptr) {
                 auto* component = reinterpret_cast<Component*>(ptr);
-                if (component->isEnabled()) {
+                if (component->isEnabled() && component->hasStarted()) {
                     component->onMouseButton(event);
                 }
             });
@@ -93,7 +93,7 @@ namespace neon
             auto ptr = std::static_pointer_cast<AbstractClusteredLinkedCollection>(data.second);
             ptr->forEachRaw([&event](void* ptr) {
                 auto* component = reinterpret_cast<Component*>(ptr);
-                if (component->isEnabled()) {
+                if (component->isEnabled() && component->hasStarted()) {
                     component->onCursorMove(event);
                 }
             });
@@ -115,7 +115,7 @@ namespace neon
             auto ptr = std::static_pointer_cast<AbstractClusteredLinkedCollection>(data.second);
             ptr->forEachRaw([&event](void* ptr) {
                 auto* component = reinterpret_cast<Component*>(ptr);
-                if (component->isEnabled()) {
+                if (component->isEnabled() && component->hasStarted()) {
                     component->onScroll(event);
                 }
             });
@@ -137,7 +137,7 @@ namespace neon
             auto ptr = std::static_pointer_cast<AbstractClusteredLinkedCollection>(data.second);
             ptr->forEachRaw([deltaTime](void* ptr) {
                 auto* component = reinterpret_cast<Component*>(ptr);
-                if (component->isEnabled()) {
+                if (component->isEnabled() && component->hasStarted()) {
                     component->onUpdate(deltaTime);
                 }
             });
@@ -159,7 +159,7 @@ namespace neon
             auto ptr = std::static_pointer_cast<AbstractClusteredLinkedCollection>(data.second);
             ptr->forEachRaw([deltaTime](void* ptr) {
                 auto* component = reinterpret_cast<Component*>(ptr);
-                if (component->isEnabled()) {
+                if (component->isEnabled() && component->hasStarted()) {
                     component->onLateUpdate(deltaTime);
                 }
             });
@@ -181,7 +181,7 @@ namespace neon
             auto ptr = std::static_pointer_cast<AbstractClusteredLinkedCollection>(data.second);
             ptr->forEachRaw([](void* ptr) {
                 auto* component = reinterpret_cast<Component*>(ptr);
-                if (component->isEnabled()) {
+                if (component->isEnabled() && component->hasStarted()) {
                     component->onPreDraw();
                 }
             });
@@ -200,6 +200,7 @@ namespace neon
 
             if (ptr.isValid()) {
                 ptr->onStart();
+                ptr->_started = true;
             }
         }
     }

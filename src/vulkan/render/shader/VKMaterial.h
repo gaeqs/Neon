@@ -26,7 +26,7 @@ namespace neon::vulkan
 {
     class AbstractVKApplication;
 
-    class VKMaterial
+    class VKMaterial : public VKResource
     {
         Material* _material;
 
@@ -57,6 +57,8 @@ namespace neon::vulkan
         void uploadConstants(VkCommandBuffer buffer) const;
 
         void setTexture(const std::string& name, std::shared_ptr<Texture> texture);
+
+        void useMaterial(std::shared_ptr<CommandBufferRun> run);
     };
 } // namespace neon::vulkan
 

@@ -5,9 +5,12 @@
 #ifndef RVTRACKING_IDENTIFIABLEWRAPPER_H
 #define RVTRACKING_IDENTIFIABLEWRAPPER_H
 
-#include <cstdint>
+#include <type_traits>
 #include <bitset>
+#include <functional>
+
 #include <neon/logging/Logger.h>
+#include <neon/structure/Identifiable.h>
 
 namespace neon
 {
@@ -33,6 +36,16 @@ namespace neon
                 _counter = nullptr;
             } else {
                 ++_counter->counter;
+            }
+        }
+
+        IdentifiableWrapper(const IdentifiableWrapper& other) :
+            _counter(other._counter)
+        {
+            if (_counter && _counter->valid) {
+                ++_counter->counter;
+            } else {
+                _counter = nullptr;
             }
         }
 
@@ -111,6 +124,27 @@ namespace neon
             return _counter;
         }
 
+
+        IdentifiableWrapper& operator=(const IdentifiableWrapper& other)
+        {
+            // Delete data from the old counter
+            if (_counter != nullptr) {
+                --_counter->counter;
+                if (!_counter->valid && _counter->counter == 0) {
+                    delete _counter;
+                }
+            }
+
+            _counter = other.getCounter();
+            if (_counter != nullptr && _counter->valid) {
+                ++_counter->counter;
+            } else {
+                _counter = nullptr;
+            }
+
+            return *this;
+        }
+
         template<class O>
             requires std::is_base_of_v<T, O>
         IdentifiableWrapper<T>& operator=(const IdentifiableWrapper<O>& other)
@@ -148,4 +182,4 @@ struct std::hash<neon::IdentifiableWrapper<T>>
     }
 };
 
-#endif //RVTRACKING_IDENTIFIABLEWRAPPER_H
+#endif // RVTRACKING_IDENTIFIABLEWRAPPER_H

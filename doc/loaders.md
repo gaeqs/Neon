@@ -63,7 +63,9 @@ Each stage must include a `file` or `raw` parameter. The parameter `file` has pr
     "instance": {
       // Same as vertex.
     },
+    // If 'uniform_buffer' is not defined, 'uniform' can be used to describe a new uniform buffer!.
     "uniform": "A:shader_uniform_descriptor",
+    "uniform_buffer": "A:shader_uniform_buffer",
     "bindings": [
       {
         "binding": 0,
@@ -175,6 +177,7 @@ Only the parameter `file` is required.
 ```json
 {
   "maximum_instances": 20000,
+  "uniform_descriptor": "A:uniform_descriptor",
   "auto_flush": true,
   "custom_instance_sizes": [
     128
@@ -233,6 +236,14 @@ All parameters are optional, but if you don't include them an empty model will b
       "size": 0
     }
   ]
+}
+```
+
+## Shader uniform buffers
+
+```json
+{
+  "descriptor": "A:shader_uniform_descriptor"
 }
 ```
 
@@ -354,6 +365,18 @@ If no sources are available, the texture won't be created.
 
 Only the property `type` is required.
 
+## Render pass strategies
+
+```json
+{
+  "frame_buffer": "A:frame_buffer",
+  "priority": 0
+}
+```
+
+Only the property `frame_buffer` is required.
+Strategies are always `DefaultRenderPassStrategy`.
+
 ## Renders
 
 ```json
@@ -361,17 +384,16 @@ Only the property `type` is required.
   "global_uniform_descriptor": "A:uniform_descriptor",
   //Render_passes can also be an object or a string.
   "render_passes": [
-    "A:frame_buffer",
-    "frame/buffer.json",
+    "A:render_pass_strategies",
+    "render/pass.json",
     {
-      // Frame buffer...
+      // Render pass...
     }
   ]
 }
 ```
 
 All render passes will be loaded in order.
-The strategies provided to the render passes are always `DefaultRenderPassStrategy`.
 
 ## How to fetch children assets
 

@@ -192,20 +192,25 @@ namespace neon::vulkan
                 slot.resolveImage->imGuiDescriptor = nullptr;
             }
         }
-        vkDestroyFramebuffer(d, _frameBuffer, nullptr);
+
+        _vkApplication->getBin()->destroyLater(_vkApplication->getDevice()->getRaw(), getRuns(), _frameBuffer,
+                                               vkDestroyFramebuffer);
     }
 
     void VKSimpleFrameBuffer::cleanupImages()
     {
-        auto d = _vkApplication->getDevice()->getRaw();
-        for (auto& slot : _images) {
-            vkDestroyImageView(d, slot.image.view, nullptr);
-            vkDestroyImage(d, slot.image.image, nullptr);
-            vkFreeMemory(d, slot.image.memory, nullptr);
-            if (slot.resolveImage.has_value()) {
-                vkDestroyImageView(d, slot.resolveImage->view, nullptr);
-                vkDestroyImage(d, slot.resolveImage->image, nullptr);
-                vkFreeMemory(d, slot.resolveImage->memory, nullptr);
+        auto bin = _vkApplication->getBin();
+        auto device = _vkApplication->getDevice()->getRaw();
+        auto runs = getRuns();
+
+        for (auto& [image, resolveImage] : _images) {
+            bin->destroyLater(device, runs, image.view, vkDestroyImageView);
+            bin->destroyLater(device, runs, image.image, vkDestroyImage);
+            bin->destroyLater(device, runs, image.memory, vkFreeMemory);
+            if (resolveImage.has_value()) {
+                bin->destroyLater(device, runs, resolveImage->view, vkDestroyImageView);
+                bin->destroyLater(device, runs, resolveImage->image, vkDestroyImage);
+                bin->destroyLater(device, runs, resolveImage->memory, vkFreeMemory);
             }
         }
     }

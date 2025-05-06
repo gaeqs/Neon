@@ -118,13 +118,14 @@ namespace neon::vulkan
             bool internal = _internalCommandBuffer != nullptr;
             auto buffer = internal ? _internalCommandBuffer : _externalCommandBuffer;
 
+            auto cmd = buffer->getImplementation().getCommandBuffer();
+            auto run = buffer->getCurrentRun();
             if (_range.has_value()) {
-                vulkan_util::copyBuffer(buffer->getImplementation().getCommandBuffer(), _stagingBuffer->getRaw(),
-                                        _deviceBuffer.getRaw(), _range.value().getFrom(), _range.value().getFrom(),
-                                        _range.value().size());
+                vulkan_util::copyBuffer(cmd, _stagingBuffer->getRaw(run), _deviceBuffer.getRaw(run),
+                                        _range.value().getFrom(), _range.value().getFrom(), _range.value().size());
             } else {
-                vulkan_util::copyBuffer(buffer->getImplementation().getCommandBuffer(), _stagingBuffer->getRaw(),
-                                        _deviceBuffer.getRaw(), _deviceBuffer.size());
+                vulkan_util::copyBuffer(cmd, _stagingBuffer->getRaw(run), _deviceBuffer.getRaw(run),
+                                        _deviceBuffer.size());
             }
             if (internal) {
                 // Command buffer is not external.
@@ -187,7 +188,7 @@ namespace neon::vulkan
 
         bool canBeWrittenOn() const override;
 
-        VkBuffer getRaw() const override;
+        VkBuffer getRaw(std::shared_ptr<CommandBufferRun> run) override;
 
         AbstractVKApplication* getApplication() const override;
 
@@ -197,4 +198,4 @@ namespace neon::vulkan
     };
 } // namespace neon::vulkan
 
-#endif //VULKANTEST_STAGINGBUFFER_H
+#endif // VULKANTEST_STAGINGBUFFER_H

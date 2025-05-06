@@ -135,24 +135,26 @@ namespace neon::vulkan
 
     void VKSwapChainFrameBuffer::cleanup()
     {
+        auto runs = getRuns();
+        auto bin = _vkApplication->getBin();
         auto d = _vkApplication->getDevice()->getRaw();
 
         if (_samples != SamplesPerTexel::COUNT_1) {
-            vkDestroyImageView(d, _colorImageView, nullptr);
-            vkDestroyImage(d, _colorImage, nullptr);
-            vkFreeMemory(d, _colorImageMemory, nullptr);
+            bin->destroyLater(d, runs, _colorImageView, vkDestroyImageView);
+            bin->destroyLater(d, runs, _colorImage, vkDestroyImage);
+            bin->destroyLater(d, runs, _colorImageMemory, vkFreeMemory);
         }
 
-        vkDestroyImageView(d, _depthImageView, nullptr);
-        vkDestroyImage(d, _depthImage, nullptr);
-        vkFreeMemory(d, _depthImageMemory, nullptr);
+        bin->destroyLater(d, runs, _depthImageView, vkDestroyImageView);
+        bin->destroyLater(d, runs, _depthImage, vkDestroyImage);
+        bin->destroyLater(d, runs, _depthImageMemory, vkFreeMemory);
 
-        for (auto& _swapChainFramebuffer : _swapChainFrameBuffers) {
-            vkDestroyFramebuffer(d, _swapChainFramebuffer, nullptr);
+        for (auto& swapChainFramebuffer : _swapChainFrameBuffers) {
+            bin->destroyLater(d, runs, swapChainFramebuffer, vkDestroyFramebuffer);
         }
 
-        for (auto& _swapChainImageView : _swapChainImageViews) {
-            vkDestroyImageView(d, _swapChainImageView, nullptr);
+        for (auto& swapChainImageView : _swapChainImageViews) {
+            bin->destroyLater(d, runs, swapChainImageView, vkDestroyImageView);
         }
     }
 

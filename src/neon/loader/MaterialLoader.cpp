@@ -5,6 +5,8 @@
 #include "MaterialLoader.h"
 
 #include <neon/render/Render.h>
+#include <neon/render/shader/ShaderUniformDescriptor.h>
+#include <neon/render/shader/ShaderUniformBuffer.h>
 
 #include "AssetLoaderHelpers.h"
 
@@ -262,6 +264,7 @@ namespace neon
         descriptions.vertex = parse(json["vertex"], InputRate::VERTEX);
         descriptions.instance = parse(json["instance"], InputRate::INSTANCE);
         descriptions.uniform = getAsset<ShaderUniformDescriptor>(json["uniform"], context);
+        descriptions.uniformBuffer = getAsset<ShaderUniformBuffer>(json["uniform_buffer"], context);
 
         if (auto extra = json["bindings"]; extra.is_array()) {
             descriptions.uniformBindings.clear();

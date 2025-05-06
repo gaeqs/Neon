@@ -55,7 +55,7 @@ namespace neon
       private:
         std::shared_ptr<ShaderProgram> _shader;
         std::shared_ptr<FrameBuffer> _target;
-        std::unique_ptr<ShaderUniformBuffer> _uniformBuffer;
+        std::shared_ptr<ShaderUniformBuffer> _uniformBuffer;
 
         int32_t _priority;
 
@@ -93,7 +93,7 @@ namespace neon
          * no description has been provided.
          * @return the uniform buffer.
          */
-        [[nodiscard]] const std::unique_ptr<ShaderUniformBuffer>& getUniformBuffer() const;
+        [[nodiscard]] const std::shared_ptr<ShaderUniformBuffer>& getUniformBuffer() const;
 
         /**
          * Returns the uniform buffer that contains the mutable information
@@ -102,7 +102,7 @@ namespace neon
          * no description has been provided.
          * @return the uniform buffer.
          */
-        [[nodiscard]] std::unique_ptr<ShaderUniformBuffer>& getUniformBuffer();
+        [[nodiscard]] std::shared_ptr<ShaderUniformBuffer>& getUniformBuffer();
 
         /**
          * Returns the priority of the material.

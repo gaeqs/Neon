@@ -7,6 +7,7 @@
 
 #include <memory>
 #include <utility>
+#include <optional>
 #include <nlohmann/json.hpp>
 
 namespace neon
@@ -31,10 +32,11 @@ namespace neon
         AssetLoaderCollection* loaders;
         AssetCollection* collection;
         CommandBuffer* commandBuffer;
+        AssetCollection* localCollection;
 
         AssetLoaderContext(Application* app, std::filesystem::path* path = nullptr, FileSystem* fileSystem = nullptr,
                            AssetLoaderCollection* loaders = nullptr, AssetCollection* collection = nullptr,
-                           CommandBuffer* commandBuffer = nullptr);
+                           CommandBuffer* commandBuffer = nullptr, AssetCollection* localCollection = nullptr);
     };
 
     template<typename AssetType>

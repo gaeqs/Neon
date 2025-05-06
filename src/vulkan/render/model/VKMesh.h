@@ -124,9 +124,9 @@ namespace neon::vulkan
 
         bool setIndices(const std::vector<uint32_t>& indices, CommandBuffer* cmd = nullptr) const;
 
-        void draw(const Material* material, VkCommandBuffer commandBuffer, const Model& model,
-                  const ShaderUniformBuffer* globalBuffer) override;
+        void draw(Material* material, VKCommandBuffer* commandBuffer, const Model& model,
+                  ShaderUniformBuffer* globalBuffer) override;
     };
 } // namespace neon::vulkan
 
-#endif //NEON_VKMESH_H
+#endif // NEON_VKMESH_H

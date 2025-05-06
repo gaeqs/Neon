@@ -131,7 +131,7 @@ namespace neon
         auto& jsonMaterials = metadata["materials"];
         std::vector<nlohmann::json> materialsMetadata;
         if (jsonMaterials.is_array()) {
-            materialsMetadata = jsonMaterials;
+            materialsMetadata = jsonMaterials.get<std::vector<nlohmann::json>>();;
         } else if (jsonMaterials.is_object()) {
             materialsMetadata.push_back(jsonMaterials);
         }
@@ -152,7 +152,7 @@ namespace neon
 
         std::vector<nlohmann::json> meshesMetadata;
         if (jsonMeshes.is_array()) {
-            meshesMetadata = jsonMeshes;
+            meshesMetadata = jsonMeshes.get<std::vector<nlohmann::json>>();;
         } else if (jsonMeshes.is_object()) {
             meshesMetadata.push_back(jsonMeshes);
         }
@@ -176,7 +176,7 @@ namespace neon
         auto& jsonExtraMaterials = metadata["extra_materials"];
         std::vector<nlohmann::json> extraMaterialsEntries;
         if (jsonExtraMaterials.is_array()) {
-            extraMaterialsEntries = jsonExtraMaterials;
+            extraMaterialsEntries = jsonExtraMaterials.get<std::vector<nlohmann::json>>();;
         } else {
             extraMaterialsEntries.push_back(jsonExtraMaterials);
         }

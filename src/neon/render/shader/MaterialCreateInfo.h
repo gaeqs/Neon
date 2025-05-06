@@ -12,7 +12,7 @@
 #include <neon/render/buffer/FrameBuffer.h>
 #include <neon/render/shader/ShaderProgram.h>
 #include <neon/render/shader/ShaderUniformDescriptor.h>
-#include <neon/structure/IdentifiableWrapper.h>
+#include <neon/render/shader/ShaderUniformBuffer.h>
 #include <neon/render/model/InputDescription.h>
 
 namespace neon
@@ -168,8 +168,21 @@ namespace neon
 
         /**
          * The description of the material's uniform buffer.
+         * If not null, a new ShaderUniformBuffer will be created according to the given
+         * description. This buffer can be used to store information about the material.
+         *
+         * This description will not be used if "uniformBuffer" is not null, as the material
+         * will use the buffer provided by the "uniformBuffer" variable instead.
          */
         std::shared_ptr<ShaderUniformDescriptor> uniform = nullptr;
+
+        /**
+         * The ShaderUniformBuffer used by the material. If not null, this
+         * buffer will be considered the material's ShaderUniformBuffer.
+         * Elsewhere, a new ShaderUniformBuffer will be created using the
+         * descriptor provided by the variable "uniform".
+         */
+        std::shared_ptr<ShaderUniformBuffer> uniformBuffer = nullptr;
 
         /**
          * The locations where the uniform buffers are bound.
@@ -357,4 +370,4 @@ namespace neon
     };
 } // namespace neon
 
-#endif //NEON_MATERIALCREATEINFO_H
+#endif // NEON_MATERIALCREATEINFO_H

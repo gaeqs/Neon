@@ -84,6 +84,14 @@ FetchContent_MakeAvailable(spirv_tools)
 FetchContent_MakeAvailable(glslang)
 FetchContent_MakeAvailable(libzippp)
 
+if (TARGET glslang)
+    target_compile_options(glslang PRIVATE -include cstdint)
+endif ()
+
+if (TARGET SPIRV)
+    target_compile_options(SPIRV PRIVATE -include cstdint)
+endif ()
+
 list(APPEND LIBRARIES
         glfw
         ${GLFW_LIBRARIES}

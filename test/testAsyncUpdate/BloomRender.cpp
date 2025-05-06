@@ -12,6 +12,7 @@ BloomRender::BloomRender(neon::Application* application, std::shared_ptr<neon::S
                          std::shared_ptr<neon::ShaderProgram> upsamplingShader,
                          std::shared_ptr<neon::Texture> pbrTexture, const std::shared_ptr<neon::Model>& screenModel,
                          uint32_t chainLength) :
+    RenderPassStrategy("neoneuron:bloom"),
     _application(application),
     _mipChain(),
     _pbrTexture(std::move(pbrTexture)),

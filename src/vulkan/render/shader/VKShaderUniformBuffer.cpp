@@ -117,7 +117,7 @@ namespace neon::vulkan
                 if (binding.type == UniformBindingType::UNIFORM_BUFFER ||
                     binding.type == UniformBindingType::STORAGE_BUFFER) {
                     VkDescriptorBufferInfo bufferInfo{};
-                    bufferInfo.buffer = _buffers[bindingIndex]->getRaw();
+                    bufferInfo.buffer = _buffers[bindingIndex]->getRaw(nullptr);
                     bufferInfo.offset = 0;
                     bufferInfo.range = binding.size;
 
@@ -141,7 +141,8 @@ namespace neon::vulkan
 
     VKShaderUniformBuffer::~VKShaderUniformBuffer()
     {
-        vkDestroyDescriptorPool(_vkApplication->getDevice()->getRaw(), _descriptorPool, nullptr);
+        _vkApplication->getBin()->destroyLater(_vkApplication->getDevice()->getRaw(), getRuns(), _descriptorPool,
+                                               vkDestroyDescriptorPool);
     }
 
     void VKShaderUniformBuffer::uploadData(uint32_t index, const void* data, size_t size, size_t offset)
@@ -294,10 +295,15 @@ namespace neon::vulkan
         memcpy(data.data(), optional.value()->raw(), data.size());
     }
 
-    void VKShaderUniformBuffer::bind(VkCommandBuffer commandBuffer, VkPipelineLayout layout,
-                                     uint32_t bindingPoint) const
+    void VKShaderUniformBuffer::bind(VKCommandBuffer* commandBuffer, VkPipelineLayout layout, uint32_t bindingPoint)
     {
-        vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, layout, bindingPoint, 1,
-                                &_descriptorSets[_vkApplication->getCurrentFrame()], 0, nullptr);
+        registerRun(commandBuffer->getCurrentRun());
+        for (auto& texture : _textures) {
+            if (texture != nullptr) {
+                texture->getImplementation().registerRun(commandBuffer->getCurrentRun());
+            }
+        }
+        vkCmdBindDescriptorSets(commandBuffer->getCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, layout,
+                                bindingPoint, 1, &_descriptorSets[_vkApplication->getCurrentFrame()], 0, nullptr);
     }
 } // namespace neon::vulkan

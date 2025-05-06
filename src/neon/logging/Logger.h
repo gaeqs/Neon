@@ -9,6 +9,7 @@
 #include <unordered_map>
 #include <vector>
 #include <mutex>
+#include <sstream>
 
 #include <neon/logging/LogOutput.h>
 #include <neon/logging/Message.h>

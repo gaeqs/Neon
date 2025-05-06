@@ -103,7 +103,7 @@ namespace neon::vulkan
         }
     };
 
-    class SimpleBuffer : public Buffer
+    class SimpleBuffer : public Buffer, public VKResource
     {
         size_t _size;
 
@@ -140,10 +140,10 @@ namespace neon::vulkan
 
         [[nodiscard]] bool canBeWrittenOn() const override;
 
-        [[nodiscard]] VkBuffer getRaw() const override;
+        [[nodiscard]] VkBuffer getRaw(std::shared_ptr<CommandBufferRun> run);
 
         [[nodiscard]] AbstractVKApplication* getApplication() const override;
     };
 } // namespace neon::vulkan
 
-#endif //VULKANTEST_SIMPLEBUFFER_H
+#endif // VULKANTEST_SIMPLEBUFFER_H

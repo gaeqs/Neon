@@ -31,14 +31,16 @@ neon::vulkan::VKMeshShaderDrawable::VKMeshShaderDrawable(Application* applicatio
     initFunction(_vkApplication->getInstance());
 }
 
-void neon::vulkan::VKMeshShaderDrawable::draw(const Material* material, VkCommandBuffer commandBuffer,
-                                              const Model& model, const ShaderUniformBuffer* globalBuffer)
+void neon::vulkan::VKMeshShaderDrawable::draw(Material* material, VKCommandBuffer* commandBuffer, const Model& model,
+                                              ShaderUniformBuffer* globalBuffer)
 {
+    auto rawCmd = commandBuffer->getCommandBuffer();
     auto& mat = material->getImplementation();
 
-    vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, mat.getPipeline());
+    vkCmdBindPipeline(rawCmd, VK_PIPELINE_BIND_POINT_GRAPHICS, mat.getPipeline());
 
-    mat.uploadConstants(commandBuffer);
+    mat.useMaterial(commandBuffer->getCurrentRun());
+    mat.uploadConstants(rawCmd);
 
     auto layout = mat.getPipelineLayout();
 
@@ -69,7 +71,7 @@ void neon::vulkan::VKMeshShaderDrawable::draw(const Material* material, VkComman
 
     if (funVkCmdDrawMeshTasksEXT != nullptr) {
         auto groups = _groupsSupplier(model);
-        funVkCmdDrawMeshTasksEXT(commandBuffer, groups.x(), groups.y(), groups.z());
+        funVkCmdDrawMeshTasksEXT(rawCmd, groups.x(), groups.y(), groups.z());
     }
 }
 

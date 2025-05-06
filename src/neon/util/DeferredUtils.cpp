@@ -58,7 +58,7 @@ namespace neon::deferred_utils
 
         auto frameBuffer =
             std::make_shared<SimpleFrameBuffer>(room->getApplication(), "deferred", outputFormatVector, false);
-        render->addRenderPass(std::make_shared<DefaultRenderPassStrategy>(frameBuffer));
+        render->addRenderPass(std::make_shared<DefaultRenderPassStrategy>("deferred", frameBuffer));
 
         std::vector<ShaderUniformBinding> bindings;
         for (const auto& _ : textures) {

@@ -73,8 +73,8 @@ namespace neon::vulkan
                                                VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, createInfo.image.mipmaps,
                                                createInfo.image.layers, rawBuffer);
 
-            vulkan_util::copyBufferToImage(_stagingBuffer->getRaw(), _image, _width, _height, _depth,
-                                           createInfo.image.layers, rawBuffer);
+            vulkan_util::copyBufferToImage(_stagingBuffer->getRaw(buffer->getCurrentRun()), _image, _width, _height,
+                                           _depth, createInfo.image.layers, rawBuffer);
 
             vulkan_util::generateMipmaps(_vkApplication, _image, _width, _height, _depth, createInfo.image.mipmaps,
                                          createInfo.image.layers, rawBuffer);
@@ -135,11 +135,15 @@ namespace neon::vulkan
 
     VKTexture::~VKTexture()
     {
-        vkDestroySampler(_vkApplication->getDevice()->getRaw(), _sampler, nullptr);
+        auto bin = _vkApplication->getBin();
+        auto device = _vkApplication->getDevice()->getRaw();
+        auto runs = getRuns();
+
+        bin->destroyLater(device, runs, _sampler, vkDestroySampler);
         if (!_external) {
-            vkDestroyImageView(_vkApplication->getDevice()->getRaw(), _imageView, nullptr);
-            vkDestroyImage(_vkApplication->getDevice()->getRaw(), _image, nullptr);
-            vkFreeMemory(_vkApplication->getDevice()->getRaw(), _imageMemory, nullptr);
+            bin->destroyLater(device, runs, _imageView, vkDestroyImageView);
+            bin->destroyLater(device, runs, _image, vkDestroyImage);
+            bin->destroyLater(device, runs, _imageMemory, vkFreeMemory);
         }
     }
 
@@ -255,7 +259,8 @@ namespace neon::vulkan
             vulkan_util::transitionImageLayout(_image, vkFormat, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
                                                VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, _mipmapLevels, _layers, rawBuffer);
 
-            vulkan_util::copyBufferToImage(_stagingBuffer->getRaw(), _image, width, height, depth, _layers, rawBuffer);
+            vulkan_util::copyBufferToImage(_stagingBuffer->getRaw(buffer->getCurrentRun()), _image, width, height,
+                                           depth, _layers, rawBuffer);
 
             vulkan_util::transitionImageLayout(_image, vkFormat, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
                                                VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, _mipmapLevels, _layers,
@@ -282,8 +287,8 @@ namespace neon::vulkan
                                            VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, _mipmapLevels, _layers,
                                            cmd->getImplementation().getCommandBuffer());
 
-        vulkan_util::copyImageToBuffer(_stagingBuffer->getRaw(), _image, offset, size, layersOffset, layers,
-                                       cmd->getImplementation().getCommandBuffer());
+        vulkan_util::copyImageToBuffer(_stagingBuffer->getRaw(cmd->getCurrentRun()), _image, offset, size, layersOffset,
+                                       layers, cmd->getImplementation().getCommandBuffer());
 
         vulkan_util::transitionImageLayout(_image, vkFormat, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
                                            VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, _mipmapLevels, _layers,

@@ -72,12 +72,10 @@ namespace neon::vulkan
     SimpleBuffer::~SimpleBuffer()
     {
         VkDevice device = _application->getDevice()->getRaw();
+        auto bin = _application->getBin();
 
-        vkDestroyBuffer(device, _vertexBuffer, nullptr);
-        vkFreeMemory(device, _vertexBufferMemory, nullptr);
-
-        _vertexBuffer = VK_NULL_HANDLE;
-        _vertexBufferMemory = VK_NULL_HANDLE;
+        bin->destroyLater(device, getRuns(), _vertexBuffer, vkDestroyBuffer);
+        bin->destroyLater(device, getRuns(), _vertexBufferMemory, vkFreeMemory);
     }
 
     size_t SimpleBuffer::size() const
@@ -95,8 +93,9 @@ namespace neon::vulkan
         return _application;
     }
 
-    VkBuffer SimpleBuffer::getRaw() const
+    VkBuffer SimpleBuffer::getRaw(std::shared_ptr<CommandBufferRun> run)
     {
+        registerRun(std::move(run));
         return _vertexBuffer;
     }
 } // namespace neon::vulkan

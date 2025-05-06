@@ -4,42 +4,22 @@
 
 #include "ViewportComponent.h"
 
-#include <imgui_internal.h>
 #include <neon/structure/Room.h>
 
 namespace neon
 {
-    ViewportComponent::ViewportComponent() :
-        _hovered(false)
-    {
-    }
 
-    ViewportComponent::ViewportComponent(const std::shared_ptr<SimpleFrameBuffer>& frameBuffer) :
+    ViewportComponent::ViewportComponent(const std::shared_ptr<SimpleFrameBuffer>& frameBuffer, std::string name) :
+        _name(name),
         _frameBuffer(frameBuffer),
         _hovered(false)
     {
     }
 
-    void ViewportComponent::onStart()
-    {
-        _hovered = false;
-
-        if (_frameBuffer != nullptr) {
-            return;
-        }
-        auto& r = getRoom()->getApplication()->getRender();
-        auto strategy = r->getStrategies()[r->getStrategyAmount() - 2];
-        auto defaultStrategy = std::dynamic_pointer_cast<DefaultRenderPassStrategy>(strategy);
-
-        if (defaultStrategy != nullptr) {
-            _frameBuffer = std::dynamic_pointer_cast<SimpleFrameBuffer>(defaultStrategy->getFrameBuffer());
-        }
-    }
-
     void ViewportComponent::onPreDraw()
     {
         ImGui::SetNextWindowSizeConstraints(ImVec2(200, 200), ImVec2(100000, 100000));
-        if (ImGui::Begin("Viewport")) {
+        if (ImGui::Begin(_name.c_str())) {
             _windowSize = ImGui::GetContentRegionAvail();
             _windowOrigin = ImGui::GetCursorScreenPos();
             getApplication()->forceViewport({_windowSize.x, _windowSize.y});

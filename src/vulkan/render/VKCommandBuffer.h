@@ -5,10 +5,11 @@
 #ifndef NEON_VKCOMMANDBUFFER_H
 #define NEON_VKCOMMANDBUFFER_H
 
+#include "VKCommandBufferRun.h"
+
 #include <vector>
 #include <vulkan/vulkan.h>
 #include <vulkan/queue/VKQueueProvider.h>
-
 #include <vulkan/render/VKCommandPool.h>
 
 namespace neon
@@ -39,6 +40,9 @@ namespace neon::vulkan
 
         mutable std::vector<VkFence> _fences;
         mutable std::vector<VkFence> _freedFences;
+
+        std::shared_ptr<VKCommandBufferRun> _currentRun;
+
         bool _external;
 
         void refreshStatus();
@@ -66,6 +70,8 @@ namespace neon::vulkan
 
         [[nodiscard]] VkCommandBuffer getCommandBuffer() const;
 
+        [[nodiscard]] std::shared_ptr<CommandBufferRun> getCurrentRun() const;
+
         void waitForFences();
 
         bool begin(bool onlyOneSubmit = false);
@@ -84,4 +90,4 @@ namespace neon::vulkan
     };
 } // namespace neon::vulkan
 
-#endif //NEON_VKCOMMANDBUFFER_H
+#endif // NEON_VKCOMMANDBUFFER_H

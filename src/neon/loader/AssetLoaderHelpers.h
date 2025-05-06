@@ -67,6 +67,11 @@ namespace neon
     template<typename T>
     std::shared_ptr<T> findAssetInCollection(const std::string& name, const AssetLoaderContext& context)
     {
+        if (context.localCollection != nullptr) {
+            if (auto result = context.localCollection->get<T>(name); result.has_value()) {
+                return result.value();
+            }
+        }
         if (context.collection == nullptr) {
             return nullptr;
         }

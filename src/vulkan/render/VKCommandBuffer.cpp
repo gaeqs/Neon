@@ -4,6 +4,8 @@
 
 #include "VKCommandBuffer.h"
 
+#include "VKCommandBufferRun.h"
+
 #include <ranges>
 #include <neon/logging/Logger.h>
 #include <neon/logging/Message.h>
@@ -106,6 +108,11 @@ namespace neon::vulkan
         return _commandBuffer;
     }
 
+    std::shared_ptr<CommandBufferRun> VKCommandBuffer::getCurrentRun() const
+    {
+        return _currentRun;
+    }
+
     bool VKCommandBuffer::begin(bool onlyOneSubmit)
     {
         refreshStatus();
@@ -127,6 +134,7 @@ namespace neon::vulkan
             return false;
         }
         _status = VKCommandBufferStatus::RECORDING;
+        _currentRun = std::make_shared<VKCommandBufferRun>(this);
         return true;
     }
 
@@ -200,6 +208,10 @@ namespace neon::vulkan
         if (_status == VKCommandBufferStatus::RECORDED) {
             if (!isBeingUsed()) {
                 _status = VKCommandBufferStatus::READY;
+                if (_currentRun != nullptr) {
+                    _currentRun->markCompletion();
+                    _currentRun = nullptr;
+                }
             }
         }
     }

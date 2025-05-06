@@ -239,8 +239,9 @@ std::shared_ptr<FrameBuffer> initRender(Room* room, const std::shared_ptr<Model>
 
     auto fpFrameBuffer = std::make_shared<SimpleFrameBuffer>(app, "frame_buffer", frameBufferFormats, /*depth buffer?*/
                                                              true);
+    app->getAssets().store(fpFrameBuffer, AssetStorageMode::PERMANENT);
 
-    render->addRenderPass(std::make_shared<DefaultRenderPassStrategy>(fpFrameBuffer));
+    render->addRenderPass(std::make_shared<DefaultRenderPassStrategy>("frame_buffer", fpFrameBuffer));
 
     // Out textures. You can use these in other frame buffers.
     auto fpTextures = fpFrameBuffer->getTextures();
@@ -256,13 +257,14 @@ std::shared_ptr<FrameBuffer> initRender(Room* room, const std::shared_ptr<Model>
         app, "ssao", ssaoTextureInfo, false, std::optional<std::string>(), SamplesPerTexel::COUNT_1,
         neon::SimpleFrameBuffer::defaultRecreationCondition, neon::SimpleFrameBuffer::defaultRecreationParameters);
 
-    app->getRender()->addRenderPass(std::make_shared<DefaultRenderPassStrategy>(ssaoFrameBuffer));
+    app->getRender()->addRenderPass(std::make_shared<DefaultRenderPassStrategy>("ssao_frame_buffer", ssaoFrameBuffer));
 
     auto ssaoBlurFrameBuffer = std::make_shared<SimpleFrameBuffer>(
         app, "ssao_blur", ssaoTextureInfo, false, std::optional<std::string>(), SamplesPerTexel::COUNT_1,
         neon::SimpleFrameBuffer::defaultRecreationCondition, neon::SimpleFrameBuffer::defaultRecreationParameters);
 
-    app->getRender()->addRenderPass(std::make_shared<DefaultRenderPassStrategy>(ssaoBlurFrameBuffer));
+    app->getRender()->addRenderPass(
+        std::make_shared<DefaultRenderPassStrategy>("ssao_blur_buffer", ssaoBlurFrameBuffer));
 
     auto ssaoMaterial = createSSAOMaterial(room, ssaoFrameBuffer,
                                            {
@@ -287,7 +289,9 @@ std::shared_ptr<FrameBuffer> initRender(Room* room, const std::shared_ptr<Model>
 
     std::vector<FrameBufferTextureCreateInfo> screenFormats = {TextureFormat::R8G8B8A8};
     auto screenFrameBuffer = std::make_shared<SimpleFrameBuffer>(app, "screen", screenFormats, false);
-    render->addRenderPass(std::make_shared<DefaultRenderPassStrategy>(screenFrameBuffer));
+    app->getAssets().store(screenFrameBuffer, AssetStorageMode::PERMANENT);
+    render->addRenderPass(std::make_shared<DefaultRenderPassStrategy>("screen", screenFrameBuffer));
+
 
     auto textures = fpFrameBuffer->getTextures();
     textures.push_back(albedo);
@@ -308,7 +312,7 @@ std::shared_ptr<FrameBuffer> initRender(Room* room, const std::shared_ptr<Model>
 
     auto swapFrameBuffer = std::make_shared<SwapChainFrameBuffer>(app, "swap_chain", SamplesPerTexel::COUNT_1, false);
 
-    render->addRenderPass(std::make_shared<DefaultRenderPassStrategy>(swapFrameBuffer));
+    render->addRenderPass(std::make_shared<DefaultRenderPassStrategy>("swap_chain", swapFrameBuffer));
 
     return fpFrameBuffer;
 }
@@ -466,6 +470,7 @@ std::shared_ptr<Room> getTestRoom(Application* application)
     auto room = std::make_shared<Room>(application);
 
     auto fpFrameBuffer = initRender(room.get(), screenModel);
+    auto screenFrameBuffer = application->getAssets().get<FrameBuffer>("screen").value();
 
     auto skybox = loadSkybox(room.get());
     auto brdf = loadBRDF(room.get());
@@ -481,7 +486,7 @@ std::shared_ptr<Room> getTestRoom(Application* application)
     auto parameterUpdater = room->newGameObject();
     parameterUpdater->newComponent<LockMouseComponent>(cameraMovement);
     parameterUpdater->newComponent<DockSpaceComponent>();
-    parameterUpdater->newComponent<ViewportComponent>();
+    parameterUpdater->newComponent<ViewportComponent>(std::dynamic_pointer_cast<SimpleFrameBuffer>(screenFrameBuffer));
     parameterUpdater->newComponent<LogComponent>();
     auto goExplorer = parameterUpdater->newComponent<GameObjectExplorerComponent>();
     parameterUpdater->newComponent<SceneTreeComponent>(goExplorer);
@@ -530,9 +535,10 @@ int main()
     info.name = "Neon";
     info.windowSize = {WIDTH, HEIGHT};
 
-    info.featuresConfigurator = [](const auto& d, auto& f) {
+    info.featuresConfigurator = [](const auto& d, vulkan::VKPhysicalDeviceFeatures& f) {
         vulkan::VKApplicationCreateInfo::defaultFeaturesConfigurer(d, f);
         f.basicFeatures.samplerAnisotropy = true;
+        f.basicFeatures.geometryShader = true;
     };
 
     Application application(std::make_unique<vulkan::VKApplication>(info));

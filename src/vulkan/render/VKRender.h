@@ -5,7 +5,6 @@
 #ifndef NEON_VKRENDER_H
 #define NEON_VKRENDER_H
 
-#include <vector>
 #include <memory>
 
 #include <neon/render/RenderPassStrategy.h>
@@ -34,9 +33,6 @@ namespace neon::vulkan
 
         explicit VKRender(Application* application);
 
-        void render(Room* room, const Render* render, const std::vector<std::shared_ptr<Material>>& sortedMaterials,
-                    const std::vector<std::shared_ptr<RenderPassStrategy>>& strategies) const;
-
         void beginRenderPass(const std::shared_ptr<FrameBuffer>& fb, bool clear) const;
 
         void endRenderPass() const;
@@ -45,4 +41,4 @@ namespace neon::vulkan
     };
 } // namespace neon::vulkan
 
-#endif //NEON_VKRENDER_H
+#endif // NEON_VKRENDER_H
