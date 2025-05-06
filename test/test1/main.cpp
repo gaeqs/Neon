@@ -13,6 +13,7 @@
 #include <neon/util/DeferredUtils.h>
 #include <neon/util/ModelUtils.h>
 #include <neon/assimp/AssimpLoader.h>
+#include <neon/version.h>
 #include <vulkan/util/component/VulkanInfoCompontent.h>
 
 #include "TestVertex.h"
@@ -320,6 +321,9 @@ std::shared_ptr<Room> getTestRoom(Application* application)
 
 int main()
 {
+
+    neon::debug() << "Using Neon " << NEON_VERSION;
+
     std::srand(std::time(nullptr));
 
     vulkan::VKApplicationCreateInfo info;

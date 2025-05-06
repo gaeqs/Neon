@@ -7,6 +7,7 @@ target_compile_features(neon PUBLIC cxx_std_20)
 
 target_include_directories(neon PUBLIC
         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>
+        $<BUILD_INTERFACE:${NEON_GENERATED_DIR}>
         $<INSTALL_INTERFACE:>
 )
 

@@ -1,17 +1,19 @@
 cmake_minimum_required(VERSION 3.14)
-set(CMAKE_CXX_STANDARD 20)
 
 option(NEON_TESTS "Enables Neon tests" OFF)
 option(NEON_USE_QT "Use QT implementation" OFF)
 
+set(CMAKE_CXX_STANDARD 20)
 set(LIBZIPPP_INSTALL ON)
+set(NEON_GENERATED_DIR ${CMAKE_BINARY_DIR}/generated)
+
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMake")
 include(CMake/CMakeRC.cmake)
 include(FetchContent)
 include(FetchContent)
 
-project(Neon)
+project(Neon LANGUAGES CXX VERSION 1.0.0)
 
 find_package(glfw3 CONFIG REQUIRED)
 find_package(assimp CONFIG REQUIRED)
@@ -123,3 +125,28 @@ add_subdirectory(src)
 if (NEON_TESTS)
     add_subdirectory(test)
 endif ()
+
+# Create version.h
+
+if (EXISTS "${CMAKE_SOURCE_DIR}/.git")
+    execute_process(
+            COMMAND git rev-parse --short HEAD
+            WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+            OUTPUT_VARIABLE GIT_COMMIT
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+            ERROR_QUIET
+    )
+else ()
+    set(GIT_COMMIT "unknown")
+endif ()
+
+configure_file(
+        ${CMAKE_CURRENT_SOURCE_DIR}/CMake/version.h.in
+        ${NEON_GENERATED_DIR}/neon/version.h
+)
+
+
+install(
+        DIRECTORY ${CMAKE_BINARY_DIR}/generated/neon
+        DESTINATION include
+)
