@@ -6,6 +6,8 @@
 #define APPLICATIONCREATEINFO_H
 
 #include <string>
+#include <vector>
+
 #include <neon/render/texture/TextureData.h>
 
 /**
@@ -34,9 +36,10 @@ struct ApplicationCreateInfo
     rush::Vec2f windowSize = {800, 600};
 
     /**
-     * The texture used as the window icon.
+     * The textures used as the window icon.
+     * You can provide several versions of the icon in several resolutions.
      */
-    std::optional<neon::TextureData> icon = {};
+    std::vector<neon::TextureData> icon = {};
 };
 
 #endif // APPLICATIONCREATEINFO_H

@@ -144,11 +144,15 @@ namespace neon::vulkan
             throw std::runtime_error("Failed to open GLFW window");
         }
 
-        if (_createInfo.icon.has_value()) {
-            auto& icon = _createInfo.icon.value();
-            auto* pixels = reinterpret_cast<unsigned char*>(icon.getData());
-            GLFWimage image(static_cast<int>(icon.getWidth()), static_cast<int>(icon.getHeight()), pixels);
-            glfwSetWindowIcon(_window, 1, &image);
+        if (!_createInfo.icon.empty()) {
+            std::vector<GLFWimage> images;
+            images.reserve(_createInfo.icon.size());
+            for (auto& icon : _createInfo.icon) {
+                auto* pixels = reinterpret_cast<unsigned char*>(icon.getData());
+                GLFWimage image(static_cast<int>(icon.getWidth()), static_cast<int>(icon.getHeight()), pixels);
+                images.push_back(image);
+            }
+            glfwSetWindowIcon(_window, images.size(), images.data());
         }
 
         glfwSetWindowAttrib(_window, GLFW_DECORATED, 1);

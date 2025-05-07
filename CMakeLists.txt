@@ -13,7 +13,7 @@ include(CMake/CMakeRC.cmake)
 include(FetchContent)
 include(FetchContent)
 
-project(Neon LANGUAGES CXX VERSION 1.0.1)
+project(Neon LANGUAGES CXX VERSION 1.0.2)
 
 find_package(glfw3 CONFIG REQUIRED)
 find_package(assimp CONFIG REQUIRED)
@@ -87,11 +87,19 @@ FetchContent_MakeAvailable(glslang)
 FetchContent_MakeAvailable(libzippp)
 
 if (TARGET glslang)
-    target_compile_options(glslang PRIVATE -include cstdint)
+    if (MSVC)
+        target_compile_options(glslang PRIVATE /FIcstdint)
+    else ()
+        target_compile_options(glslang PRIVATE -include cstdint)
+    endif ()
 endif ()
 
 if (TARGET SPIRV)
-    target_compile_options(SPIRV PRIVATE -include cstdint)
+    if (MSVC)
+        target_compile_options(SPIRV PRIVATE /FIcstdint)
+    else ()
+        target_compile_options(SPIRV PRIVATE -include cstdint)
+    endif ()
 endif ()
 
 list(APPEND LIBRARIES
