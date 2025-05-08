@@ -29,6 +29,7 @@ namespace neon
         }
 
         dockSpaceId = ImGui::GetID("HUB_DockSpace");
+        ImGui::LoadIniSettingsFromDisk()
         ImGui::DockSpaceOverViewport(dockSpaceId, ImGui::GetMainViewport(), ImGuiDockNodeFlags_PassthruCentralNode);
     }
 } // namespace neon
