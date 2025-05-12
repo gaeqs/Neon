@@ -27,7 +27,8 @@ namespace neon
         bool pickFolders = false;
     };
 
-    struct SaveFileDialogInfo {
+    struct SaveFileDialogInfo
+    {
         Application* application = nullptr;
         std::optional<std::vector<FileFilter>> filters;
         std::optional<std::filesystem::path> defaultPath;

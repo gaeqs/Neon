@@ -25,7 +25,7 @@ TEST_CASE("Open dialog", "[.files]")
     info.title = "Neon Open Dialog";
     info.filters = {
         neon::FileFilter{"Text file", "*.txt"},
-        neon::FileFilter{"Any file", "*"}
+        neon::FileFilter{ "Any file",     "*"}
     };
     info.multiselect = true;
     info.pickFolders = true;
@@ -41,7 +41,7 @@ TEST_CASE("Save dialog", "[.files]")
     info.title = "Neon Open Dialog";
     info.filters = {
         neon::FileFilter{"Text file", "*.txt"},
-        neon::FileFilter{"Any file", "*"}
+        neon::FileFilter{ "Any file",     "*"}
     };
     info.defaultFileName = "test";
     info.defaultExtension = "txt";
