@@ -8,6 +8,7 @@
 #include "Result.h"
 
 #include <filesystem>
+#include <optional>
 
 namespace neon
 {

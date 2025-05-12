@@ -8,6 +8,8 @@
 
 #ifdef WIN32
     #include "DialogsWindows.h"
+#elif defined(__linux__)
+    #include "DialogsLinux.h"
 #endif
 
 namespace neon
@@ -17,6 +19,8 @@ namespace neon
     {
 #ifdef WIN32
         return openFileDialogWindows(info);
+#elif defined(__linux__)
+        return openFileDialogLinux(info);
 #else
         neon::error() << "Unsupported OS";
         return {};
@@ -27,6 +31,8 @@ namespace neon
     {
 #ifdef WIN32
         return saveFileDialogWindows(info);
+#elif defined(__linux__)
+        return saveFileDialogLinux(info);
 #else
         neon::error() << "Unsupported OS";
         return {};

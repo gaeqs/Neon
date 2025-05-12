@@ -42,4 +42,4 @@ namespace neon
     std::optional<std::filesystem::path> saveFileDialog(const SaveFileDialogInfo& info);
 } // namespace neon
 
-#endif // DIALOGS_H
+#endif // NEON_DIALOGS_H
