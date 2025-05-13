@@ -20,6 +20,13 @@ find_package(assimp CONFIG REQUIRED)
 find_package(nlohmann_json REQUIRED)
 find_package(Vulkan REQUIRED)
 
+if (UNIX)
+    find_package(PkgConfig REQUIRED)
+    pkg_check_modules(GTK REQUIRED gtkmm-3.0)
+    include_directories(${GTK_INCLUDE_DIRS})
+    list(APPEND LIBRARIES ${GTK_LIBRARIES})
+endif ()
+
 
 # Rush
 FetchContent_Declare(

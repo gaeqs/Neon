@@ -28,7 +28,6 @@ TEST_CASE("Open dialog", "[.files]")
         neon::FileFilter{ "Any file",     "*"}
     };
     info.multiselect = true;
-    info.pickFolders = true;
     auto dialog = neon::openFileDialog(info);
     for (auto& paths : dialog) {
         neon::debug() << paths;
