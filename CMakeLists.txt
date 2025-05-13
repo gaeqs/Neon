@@ -22,8 +22,9 @@ find_package(Vulkan REQUIRED)
 
 if (UNIX)
     find_package(PkgConfig REQUIRED)
-    pkg_check_modules(GTK REQUIRED gtkmm-3.0)
+    pkg_check_modules(GTK REQUIRED gtkmm-3.0 gdk-x11-3.0)
     include_directories(${GTK_INCLUDE_DIRS})
+    add_definitions(${GTK_CFLAGS_OTHER})
     list(APPEND LIBRARIES ${GTK_LIBRARIES})
 endif ()
 

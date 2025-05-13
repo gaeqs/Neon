@@ -15,13 +15,13 @@
     #include <optional>
     #include <mutex>
     #include <gtk/gtk.h>
+    #include <gtk/gtkx.h>
     #include <vulkan/VKApplication.h>
 
-#define GLFW_EXPOSE_NATIVE_X11
-#define GLFW_EXPOSE_NATIVE_WAYLAND
+    #define GLFW_EXPOSE_NATIVE_X11
 
-#include <GLFW/glfw3.h>
-#include <GLFW/glfw3native.h>
+    #include <GLFW/glfw3.h>
+    #include <GLFW/glfw3native.h>
 
 namespace
 {
@@ -50,11 +50,23 @@ namespace neon
 
         std::string title = info.title.value_or(info.pickFolders ? "Select Folder" : "Open File");
 
-        GtkWidget* parentWindow = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-        gtk_widget_realize(parentWindow); // force it to have a GdkWindow
-        gtk_widget_hide(parentWindow);    // don't show it
-        GtkWidget* dialog = gtk_file_chooser_dialog_new(title.c_str(),   GTK_WINDOW(parentWindow), action,
-            "_Cancel", GTK_RESPONSE_CANCEL, "_Open", GTK_RESPONSE_ACCEPT, nullptr);
+        GtkWidget* gtkParent = nullptr;
+        if (info.application != nullptr) {
+            if (const auto* vk = dynamic_cast<vulkan::VKApplication*>(info.application->getImplementation())) {
+                Window w = glfwGetX11Window(vk->getWindow());
+                if (w != None) {
+                    gtkParent = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+                    gtk_widget_realize(gtkParent);
+                    GdkWindow* gdk = gtk_widget_get_window(gtkParent);
+                    GdkDisplay* gdkDisplay = gdk_window_get_display(gdk);
+                    GdkWindow* foreign = gdk_x11_window_foreign_new_for_display(gdkDisplay, w);
+                    gdk_window_set_transient_for(gdk, foreign);
+                }
+            }
+        }
+
+        GtkWidget* dialog = gtk_file_chooser_dialog_new(title.c_str(), GTK_WINDOW(gtkParent), action, "_Cancel",
+                                                        GTK_RESPONSE_CANCEL, "_Open", GTK_RESPONSE_ACCEPT, nullptr);
 
         gtk_file_chooser_set_select_multiple(GTK_FILE_CHOOSER(dialog), info.multiselect);
 
@@ -102,7 +114,10 @@ namespace neon
         }
 
         gtk_widget_destroy(dialog);
-        gtk_widget_destroy(parentWindow);
+        if (gtkParent != nullptr) {
+            gtk_widget_destroy(gtkParent);
+        }
+
         while (gtk_events_pending()) {
             gtk_main_iteration();
         }
