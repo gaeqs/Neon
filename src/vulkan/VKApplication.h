@@ -74,6 +74,7 @@ namespace neon::vulkan
         bool _requiresSwapchainRecreation;
         uint32_t _currentFrame;
         uint32_t _imageIndex;
+        std::atomic_bool _modalMode;
 
         VkDescriptorPool _imGuiPool;
 
@@ -136,6 +137,8 @@ namespace neon::vulkan
         [[nodiscard]] CommandBuffer* getCurrentCommandBuffer() const override;
 
         void lockMouse(bool lock) override;
+
+        void setModalMode(bool modal) override;
 
         Result<uint32_t, std::string> startGameLoop() override;
 

@@ -200,6 +200,11 @@ namespace neon::vulkan
         }
     }
 
+    void VKApplication::setModalMode(bool modal)
+    {
+        _modalMode = modal;
+    }
+
     Result<uint32_t, std::string> VKApplication::startGameLoop()
     {
         if (_window == nullptr) {
@@ -255,13 +260,15 @@ namespace neon::vulkan
         if (preUpdateDone) {
             glfwPollEvents();
 
-            if (room != nullptr) {
-                room->update(_currentFrameInformation.currentDeltaTime);
-                room->preDraw();
-            }
-            {
-                DEBUG_PROFILE(getApplication()->getProfiler(), draw);
-                _application->getRender()->render(room);
+            if (!_modalMode) {
+                if (room != nullptr) {
+                    room->update(_currentFrameInformation.currentDeltaTime);
+                    room->preDraw();
+                }
+                {
+                    DEBUG_PROFILE(getApplication()->getProfiler(), draw);
+                    _application->getRender()->render(room);
+                }
             }
             {
                 DEBUG_PROFILE(_application->getProfiler(), endDraw);

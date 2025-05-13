@@ -169,6 +169,12 @@ namespace neon
     {
         _implementation->lockMouse(lock);
     }
+
+    void Application::setModalMode(bool modal)
+    {
+        _implementation->setModalMode(modal);
+    }
+
     bool Application::isMainThread() const
     {
         return _implementation->isMainThread();
