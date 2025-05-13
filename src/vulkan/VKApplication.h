@@ -138,6 +138,8 @@ namespace neon::vulkan
 
         void lockMouse(bool lock) override;
 
+        bool isInModalMode() const override;
+
         void setModalMode(bool modal) override;
 
         Result<uint32_t, std::string> startGameLoop() override;

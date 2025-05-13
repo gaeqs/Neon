@@ -5,7 +5,6 @@
 #ifndef RVTRACKING_APPLICATION_H
 #define RVTRACKING_APPLICATION_H
 
-#include <cstdint>
 #include <string>
 #include <memory>
 #include <optional>
@@ -51,6 +50,8 @@ namespace neon
         [[nodiscard]] virtual CommandBuffer* getCurrentCommandBuffer() const = 0;
 
         virtual void lockMouse(bool lock) = 0;
+
+        virtual bool isInModalMode() const = 0;
 
         virtual void setModalMode(bool modal) = 0;
 
@@ -136,6 +137,8 @@ namespace neon
         void setRoom(const std::shared_ptr<Room>& room);
 
         void lockMouse(bool lock);
+
+        bool isInModalMode() const;
 
         void setModalMode(bool modal);
 

@@ -29,7 +29,6 @@ namespace neon::vulkan
     void key_size_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
     {
         auto* application = static_cast<VKApplication*>(glfwGetWindowUserPointer(window));
-
         application->getApplication()->invokeKeyEvent(key, scancode, action, mods);
     }
 
@@ -198,6 +197,11 @@ namespace neon::vulkan
         } else {
             glfwSetInputMode(_window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
         }
+    }
+
+    bool VKApplication::isInModalMode() const
+    {
+        return _modalMode;
     }
 
     void VKApplication::setModalMode(bool modal)
