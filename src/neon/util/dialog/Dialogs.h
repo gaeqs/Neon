@@ -37,9 +37,35 @@ namespace neon
         std::optional<std::string> title;
     };
 
+    struct NotificationInitInfo
+    {
+        std::string applicationName;
+    };
+
+    enum class NotificationUrgency
+    {
+        LOW,
+        NORMAL,
+        CRITICAL
+    };
+
+    struct NotificationInfo
+    {
+        NotificationInitInfo init;
+        std::string title;
+        std::string message;
+        std::optional<std::string> icon = "dialog-information";
+        NotificationUrgency urgency = NotificationUrgency::NORMAL;
+        std::optional<std::chrono::milliseconds> timeout = {};
+        std::optional<std::string> category = {};
+        bool resident = false;
+    };
+
     std::vector<std::filesystem::path> openFileDialog(const OpenFileDialogInfo& info);
 
     std::optional<std::filesystem::path> saveFileDialog(const SaveFileDialogInfo& info);
+
+    void sendNotification(const NotificationInfo& info);
 } // namespace neon
 
 #endif // NEON_DIALOGS_H

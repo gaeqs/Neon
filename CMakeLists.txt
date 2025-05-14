@@ -26,6 +26,11 @@ if (UNIX)
     include_directories(${GTK_INCLUDE_DIRS})
     add_definitions(${GTK_CFLAGS_OTHER})
     list(APPEND LIBRARIES ${GTK_LIBRARIES})
+
+    pkg_check_modules(LIBNOTIFY REQUIRED libnotify)
+    include_directories(${LIBNOTIFY_INCLUDE_DIRS})
+    add_definitions(${LIBNOTIFY_CFLAGS_OTHER})
+    list(APPEND LIBRARIES ${LIBNOTIFY_LIBRARIES})
 endif ()
 
 

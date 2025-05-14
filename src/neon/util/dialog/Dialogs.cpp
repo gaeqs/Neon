@@ -38,4 +38,14 @@ namespace neon
         return {};
 #endif
     }
+
+    void sendNotification(const NotificationInfo& info)
+    {
+#ifdef WIN32
+#elif defined(__linux__)
+        sendNotificationLinux(info);
+#else
+        neon::error() << "Unsupported OS";
+#endif
+    }
 } // namespace neon

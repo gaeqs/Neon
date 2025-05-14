@@ -48,3 +48,13 @@ TEST_CASE("Save dialog", "[.files]")
         neon::debug() << *dialog;
     }
 }
+
+TEST_CASE("Notification", "[.files]")
+{
+    neon::NotificationInfo info;
+    info.init.applicationName = "Neoneuron";
+    info.title = "My notification";
+    info.message = "Hello world!";
+    info.resident = true;
+    neon::sendNotification(info);
+}
