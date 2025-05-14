@@ -64,6 +64,10 @@ namespace neon
         GtkWidget* dialog = gtk_file_chooser_dialog_new(title.c_str(), nullptr, action, "_Cancel", GTK_RESPONSE_CANCEL,
                                                         "_Open", GTK_RESPONSE_ACCEPT, nullptr);
 
+        gtk_window_set_type_hint(GTK_WINDOW(dialog), GDK_WINDOW_TYPE_HINT_DIALOG);
+        gtk_window_set_keep_above(GTK_WINDOW(dialog), TRUE);
+        gtk_window_set_focus_on_map(GTK_WINDOW(dialog), TRUE);
+
         gtk_file_chooser_set_select_multiple(GTK_FILE_CHOOSER(dialog), info.multiselect);
 
         if (info.defaultPath && std::filesystem::exists(*info.defaultPath)) {
@@ -126,6 +130,9 @@ namespace neon
         GtkWidget* dialog = gtk_file_chooser_dialog_new(title.c_str(), nullptr, action, "_Cancel", GTK_RESPONSE_CANCEL,
                                                         "_Save", GTK_RESPONSE_ACCEPT, nullptr);
 
+        gtk_window_set_type_hint(GTK_WINDOW(dialog), GDK_WINDOW_TYPE_HINT_DIALOG);
+        gtk_window_set_keep_above(GTK_WINDOW(dialog), TRUE);
+        gtk_window_set_focus_on_map(GTK_WINDOW(dialog), TRUE);
         gtk_file_chooser_set_do_overwrite_confirmation(GTK_FILE_CHOOSER(dialog), TRUE);
 
         if (info.defaultPath && std::filesystem::exists(*info.defaultPath)) {
