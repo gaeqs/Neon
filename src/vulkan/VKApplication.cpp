@@ -255,6 +255,11 @@ namespace neon::vulkan
 
     void VKApplication::renderFrame(neon::Room* room)
     {
+        if (_currentFrameInformation.modalMode) {
+            glfwPollEvents();
+            return;
+        }
+
         bool preUpdateDone;
         {
             DEBUG_PROFILE_ID(_application->getProfiler(), preUpdate, "preUpdate (GPU Wait)");
@@ -264,15 +269,13 @@ namespace neon::vulkan
         if (preUpdateDone) {
             glfwPollEvents();
 
-            if (!_currentFrameInformation.modalMode) {
-                if (room != nullptr) {
-                    room->update(_currentFrameInformation.currentDeltaTime);
-                    room->preDraw();
-                }
-                {
-                    DEBUG_PROFILE(getApplication()->getProfiler(), draw);
-                    _application->getRender()->render(room);
-                }
+            if (room != nullptr) {
+                room->update(_currentFrameInformation.currentDeltaTime);
+                room->preDraw();
+            }
+            {
+                DEBUG_PROFILE(getApplication()->getProfiler(), draw);
+                _application->getRender()->render(room);
             }
             {
                 DEBUG_PROFILE(_application->getProfiler(), endDraw);
