@@ -21,7 +21,11 @@ namespace neon
     {
     }
 
-    Application::~Application() = default;
+    Application::~Application()
+    {
+        // Delete the room first.
+        _room = nullptr;
+    }
 
     void Application::init()
     {
