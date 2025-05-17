@@ -12,6 +12,7 @@ namespace neon
         uint32_t currentFrame = 0;
         float currentDeltaTime = 0.0f;
         float lastFrameProcessTime = 0.0f;
+        bool modalMode = false;
     };
 } // namespace neon
 

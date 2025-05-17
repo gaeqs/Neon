@@ -201,7 +201,7 @@ namespace neon::vulkan
 
     bool VKApplication::isInModalMode() const
     {
-        return _modalMode;
+        return _currentFrameInformation.modalMode;
     }
 
     void VKApplication::setModalMode(bool modal)
@@ -230,7 +230,7 @@ namespace neon::vulkan
 
                 float seconds = static_cast<float>(duration.count()) * 1e-9f;
 
-                _currentFrameInformation = {frames, seconds, lastFrameProcessTime};
+                _currentFrameInformation = {frames, seconds, lastFrameProcessTime, _modalMode};
                 {
                     DEBUG_PROFILE_ID(_application->getProfiler(), tasks, "tasks");
                     _application->getTaskRunner().flushMainThreadTasks();
@@ -264,7 +264,7 @@ namespace neon::vulkan
         if (preUpdateDone) {
             glfwPollEvents();
 
-            if (!_modalMode) {
+            if (!_currentFrameInformation.modalMode) {
                 if (room != nullptr) {
                     room->update(_currentFrameInformation.currentDeltaTime);
                     room->preDraw();
