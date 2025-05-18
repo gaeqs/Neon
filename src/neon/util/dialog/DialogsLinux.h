@@ -14,7 +14,7 @@
     #include <string>
     #include <optional>
     #include <mutex>
-    #include <gtk/gtk.h>
+
     #include <libnotify/notify.h>
     #include <vulkan/VKApplication.h>
 
@@ -22,6 +22,10 @@
 
     #include <GLFW/glfw3.h>
     #include <GLFW/glfw3native.h>
+
+#ifdef USE_GTK
+    #include <gtk/gtk.h>
+#endif
 
 namespace
 {
@@ -31,6 +35,7 @@ namespace
     std::mutex libNotifyMutex;
     bool libNotifyInit = false;
 
+    #ifdef USE_GTK
     void initGTK()
     {
         std::unique_lock lock(gtkMutex);
@@ -41,6 +46,7 @@ namespace
             gtkInit = true;
         }
     }
+    #endif
 
     void initNotify()
     {
@@ -55,6 +61,7 @@ namespace
 namespace neon
 {
 
+    #ifdef USE_GTK
     inline std::vector<std::filesystem::path> openFileDialogLinux(const OpenFileDialogInfo& info)
     {
         initGTK();
@@ -187,6 +194,7 @@ namespace neon
 
         return result;
     }
+    #endif
 
     void sendNotificationLinux(const NotificationInfo& info)
     {

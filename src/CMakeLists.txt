@@ -22,6 +22,14 @@ if (NEON_USE_QT)
     target_compile_definitions(neon PUBLIC USE_QT)
 endif ()
 
+if (NEON_USE_CEF)
+    target_compile_definitions(neon PUBLIC USE_CEF)
+endif ()
+
+if (NEON_USE_GTK)
+    target_compile_definitions(neon PUBLIC USE_GTK)
+endif ()
+
 install(TARGETS neon
         EXPORT neonTargets
         ARCHIVE DESTINATION lib
@@ -37,3 +45,13 @@ install(EXPORT neonTargets
         NAMESPACE neon::
         DESTINATION lib/cmake/neon
 )
+
+if (NEON_USE_CEF)
+    install(
+            TARGETS libcef_dll_wrapper
+            EXPORT neonTargets
+            ARCHIVE DESTINATION lib
+            LIBRARY DESTINATION lib
+            RUNTIME DESTINATION bin
+    )
+endif ()

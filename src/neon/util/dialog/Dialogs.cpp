@@ -19,7 +19,7 @@ namespace neon
     {
 #ifdef WIN32
         return openFileDialogWindows(info);
-#elif defined(__linux__)
+#elif defined(__linux__) && defined(USE_GTK)
         return openFileDialogLinux(info);
 #else
         neon::error() << "Unsupported OS";
@@ -31,7 +31,7 @@ namespace neon
     {
 #ifdef WIN32
         return saveFileDialogWindows(info);
-#elif defined(__linux__)
+#elif defined(__linux__) && defined(USE_GTK)
         return saveFileDialogLinux(info);
 #else
         neon::error() << "Unsupported OS";
