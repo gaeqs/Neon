@@ -34,18 +34,41 @@ macro(setup_cef VERSION DOWNLOAD_DIR)
 
     include(DownloadCEF)
     DownloadCEF(${CEF_PLATFORM} ${VERSION} ${DOWNLOAD_DIR})
-
-    set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CEF_ROOT}/cmake")
+    list(APPEND CMAKE_MODULE_PATH "${CEF_ROOT}/cmake")
     find_package(CEF REQUIRED)
     add_subdirectory(${CEF_LIBCEF_DLL_WRAPPER_PATH} libcef_dll_wrapper)
 
-    add_library(cef SHARED IMPORTED)
-
-    set_target_properties(cef PROPERTIES
-            IMPORTED_LOCATION_DEBUG "${CEF_LIB_DEBUG}"
-            IMPORTED_LOCATION_RELEASE "${CEF_LIB_RELEASE}"
-    )
-
     include_directories(${CEF_INCLUDE_PATH})
     include_directories(${CEF_INCLUDE_PATH}/include)
+
+    add_library(libcef SHARED IMPORTED)
+    set_target_properties(libcef PROPERTIES
+            IMPORTED_LOCATION_DEBUG "${CEF_BINARY_DIR_DEBUG}/libcef.dll"
+            IMPORTED_IMPLIB_DEBUG "${CEF_LIB_DEBUG}"
+            IMPORTED_LOCATION_RELEASE "${CEF_BINARY_DIR_RELEASE}/libcef.dll"
+            IMPORTED_IMPLIB_RELEASE "${CEF_LIB_RELEASE}"
+    )
+
+    message(STATUS "CEF_LIB_DEBUG: ${CEF_LIB_DEBUG}")
+    message(STATUS "CEF_LIB_RELEASE: ${CEF_LIB_RELEASE}")
+
 endmacro()
+
+
+function(copy_cef_resources TARGET OUT_DIR)
+    add_custom_command(TARGET ${TARGET} PRE_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_directory
+            "${CEF_ROOT}/Resources" "${OUT_DIR}"
+            COMMENT "Copying CEF Resources"
+    )
+endfunction()
+
+function(copy_cef_build TARGET OUT_DIR)
+    add_custom_command(TARGET ${TARGET} PRE_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_directory
+            "${CEF_ROOT}/$<CONFIG>" "${OUT_DIR}"
+            COMMENT "Copying CEF "
+    )
+endfunction()
+
+

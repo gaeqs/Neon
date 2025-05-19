@@ -326,7 +326,14 @@ std::shared_ptr<Room> getTestRoom(Application* application)
 
 int main(int argc, char** argv)
 {
+#if defined(_WIN32)
+    // En Windows CefMainArgs espera un HINSTANCE:
+    CefMainArgs main_args(::GetModuleHandle(nullptr));
+#else
+    // En Linux/macOS “normal”:
     CefMainArgs main_args(argc, argv);
+#endif
+
     int code = CefExecuteProcess(main_args, nullptr, nullptr);
     if (code >= 0) {
         return code;

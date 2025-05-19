@@ -41,6 +41,12 @@ set_target_properties(test_cef PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${TEST_DIRECT
 target_link_libraries(test_cef neon test_cef_resources)
 add_dependencies(test_cef neon_tests)
 
-add_custom_command(TARGET test_cef PRE_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_directory
-        ${CEF_ROOT}/Resources ${TEST_DIRECTORY})
+copy_cef_resources(test_cef ${TEST_DIRECTORY})
+#copy_cef_build(test_cef ${TEST_DIRECTORY})
+
+
+if (MSVC)
+    set_target_properties(test_cef PROPERTIES
+            MSVC_RUNTIME_LIBRARY $<IF:$<CONFIG:Debug>,MultiThreadedDebug,MultiThreaded>
+    )
+endif ()

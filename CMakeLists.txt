@@ -8,6 +8,7 @@ option(NEON_USE_GTK "Use GTK" ON)
 set(CMAKE_CXX_STANDARD 20)
 set(LIBZIPPP_INSTALL ON)
 set(NEON_GENERATED_DIR ${CMAKE_BINARY_DIR}/generated)
+set(CEF_RUNTIME_LIBRARY_FLAG "")
 
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMake")
@@ -23,8 +24,8 @@ find_package(nlohmann_json REQUIRED)
 find_package(Vulkan REQUIRED)
 
 if (NEON_USE_CEF)
-    setup_cef("135.0.17+gcbc1c5b+chromium-135.0.7049.52" ${CMAKE_CURRENT_SOURCE_DIR}/lib/cef)
-    list(APPEND LIBRARIES cef libcef_dll_wrapper)
+    setup_cef("136.1.6+g1ac1b14+chromium-136.0.7103.114" ${CMAKE_CURRENT_SOURCE_DIR}/lib/cef)
+    list(APPEND NEON_LIBRARIES libcef libcef_dll_wrapper)
 endif ()
 
 if (UNIX)
@@ -33,15 +34,19 @@ if (UNIX)
         pkg_check_modules(GTK REQUIRED gtkmm-3.0 gdk-x11-3.0)
         include_directories(${GTK_INCLUDE_DIRS})
         add_definitions(${GTK_CFLAGS_OTHER})
-        list(APPEND LIBRARIES ${GTK_LIBRARIES})
+        list(APPEND NEON_LIBRARIES ${GTK_LIBRARIES})
     endif ()
 
     pkg_check_modules(LIBNOTIFY REQUIRED libnotify)
     include_directories(${LIBNOTIFY_INCLUDE_DIRS})
     add_definitions(${LIBNOTIFY_CFLAGS_OTHER})
-    list(APPEND LIBRARIES ${LIBNOTIFY_LIBRARIES})
+    list(APPEND NEON_LIBRARIES ${LIBNOTIFY_LIBRARIES})
 endif ()
 
+if (MSVC)
+    add_compile_definitions(NOMINMAX WIN32_LEAN_AND_MEAN NOGDI)
+    add_compile_options(/UNEAR /UFAR)
+endif ()
 
 # Rush
 FetchContent_Declare(
@@ -143,7 +148,7 @@ if (TARGET SPIRV)
     endif ()
 endif ()
 
-list(APPEND LIBRARIES
+list(APPEND NEON_LIBRARIES
         glfw
         ${GLFW_LIBRARIES}
         Vulkan::Vulkan
@@ -162,7 +167,7 @@ list(APPEND LIBRARIES
 # QT
 if (NEON_USE_QT)
     find_package(Qt5 REQUIRED COMPONENTS Core Gui)
-    list(APPEND LIBRARIES Qt5::Core Qt5::Gui)
+    list(APPEND NEON_LIBRARIES Qt5::Core Qt5::Gui)
 endif ()
 
 if (RELEASE_DEBUG)
@@ -194,7 +199,6 @@ configure_file(
         ${CMAKE_CURRENT_SOURCE_DIR}/CMake/version.h.in
         ${NEON_GENERATED_DIR}/neon/version.h
 )
-
 
 install(
         DIRECTORY ${CMAKE_BINARY_DIR}/generated/neon

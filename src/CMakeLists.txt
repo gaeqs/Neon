@@ -12,7 +12,7 @@ target_include_directories(neon PUBLIC
 )
 
 target_link_libraries(neon
-        PUBLIC ${LIBRARIES} ${CMAKE_DL_LIBS}
+        PUBLIC ${NEON_LIBRARIES} ${CMAKE_DL_LIBS} libcef libcef_dll_wrapper
         PRIVATE cmrc::base
 )
 
