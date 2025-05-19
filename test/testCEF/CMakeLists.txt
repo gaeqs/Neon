@@ -42,11 +42,4 @@ target_link_libraries(test_cef neon test_cef_resources)
 add_dependencies(test_cef neon_tests)
 
 copy_cef_resources(test_cef ${TEST_DIRECTORY})
-#copy_cef_build(test_cef ${TEST_DIRECTORY})
-
-
-if (MSVC)
-    set_target_properties(test_cef PROPERTIES
-            MSVC_RUNTIME_LIBRARY $<IF:$<CONFIG:Debug>,MultiThreadedDebug,MultiThreaded>
-    )
-endif ()
+copy_cef_build(test_cef ${TEST_DIRECTORY})

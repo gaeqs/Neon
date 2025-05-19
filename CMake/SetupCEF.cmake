@@ -56,7 +56,7 @@ endmacro()
 
 
 function(copy_cef_resources TARGET OUT_DIR)
-    add_custom_command(TARGET ${TARGET} PRE_BUILD
+    add_custom_command(TARGET ${TARGET} POST_BUILD
             COMMAND ${CMAKE_COMMAND} -E copy_directory
             "${CEF_ROOT}/Resources" "${OUT_DIR}"
             COMMENT "Copying CEF Resources"
