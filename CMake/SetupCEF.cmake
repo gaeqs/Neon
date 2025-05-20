@@ -42,12 +42,25 @@ macro(setup_cef VERSION DOWNLOAD_DIR)
     include_directories(${CEF_INCLUDE_PATH}/include)
 
     add_library(libcef SHARED IMPORTED)
-    set_target_properties(libcef PROPERTIES
-            IMPORTED_LOCATION_DEBUG "${CEF_BINARY_DIR_DEBUG}/libcef.dll"
-            IMPORTED_IMPLIB_DEBUG "${CEF_LIB_DEBUG}"
-            IMPORTED_LOCATION_RELEASE "${CEF_BINARY_DIR_RELEASE}/libcef.dll"
-            IMPORTED_IMPLIB_RELEASE "${CEF_LIB_RELEASE}"
-    )
+
+    if(WIN32)
+        set_target_properties(libcef PROPERTIES
+                IMPORTED_LOCATION_DEBUG "${CEF_BINARY_DIR_DEBUG}/libcef.dll"
+                IMPORTED_IMPLIB_DEBUG "${CEF_LIB_DEBUG}"
+                IMPORTED_LOCATION_RELEASE "${CEF_BINARY_DIR_RELEASE}/libcef.dll"
+                IMPORTED_IMPLIB_RELEASE "${CEF_LIB_RELEASE}"
+        )
+    elseif(APPLE)
+        set_target_properties(libcef PROPERTIES
+                IMPORTED_LOCATION_DEBUG "${CEF_BINARY_DIR_DEBUG}/libcef.dylib"
+                IMPORTED_LOCATION_RELEASE "${CEF_BINARY_DIR_RELEASE}/libcef.dylib"
+        )
+    elseif(UNIX)  # Linux u otros POSIX
+        set_target_properties(libcef PROPERTIES
+                IMPORTED_LOCATION_DEBUG "${CEF_BINARY_DIR_DEBUG}/libcef.so"
+                IMPORTED_LOCATION_RELEASE "${CEF_BINARY_DIR_RELEASE}/libcef.so"
+        )
+    endif()
 
     message(STATUS "CEF_LIB_DEBUG: ${CEF_LIB_DEBUG}")
     message(STATUS "CEF_LIB_RELEASE: ${CEF_LIB_RELEASE}")

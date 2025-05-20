@@ -25,7 +25,6 @@ namespace neon
     void CefTextureRenderHandler::OnPaint(CefRefPtr<CefBrowser> browser, PaintElementType type,
                                           const RectList& dirtyRects, const void* buffer, int width, int height)
     {
-        debug() << "Refreshing CEF texture.";
         const char* data = static_cast<const char*>(buffer);
 
         _texture->updateData(data, std::min(static_cast<uint32_t>(width), _texture->getWidth()),

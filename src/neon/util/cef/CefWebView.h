@@ -20,7 +20,7 @@ namespace neon
             CefRefPtr<CefTextureRenderHandler> _renderHandler;
             CefRefPtr<CefBrowser> _browser;
 
-          public:
+        public:
             explicit NeonCefClient(std::shared_ptr<Texture> texture);
 
 
@@ -39,10 +39,10 @@ namespace neon
 
         std::shared_ptr<Texture> _texture;
         CefRefPtr<NeonCefClient> _client;
-        ImVec2 _windowOrigin;
+        rush::Vec2f _windowOrigin;
         rush::Vec2f _lastMousePosition;
 
-      public:
+    public:
         CefWebView();
 
         void onStart() override;

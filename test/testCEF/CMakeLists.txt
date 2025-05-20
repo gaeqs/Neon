@@ -39,7 +39,13 @@ cmrc_add_resource_library(
 add_executable(test_cef ${TEST_SOURCES})
 set_target_properties(test_cef PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${TEST_DIRECTORY})
 target_link_libraries(test_cef neon test_cef_resources)
-add_dependencies(test_cef neon_tests)
+add_dependencies(test_cef neon_tests neon_cef_executable)
 
 copy_cef_resources(test_cef ${TEST_DIRECTORY})
 copy_cef_build(test_cef ${TEST_DIRECTORY})
+
+add_custom_command(TARGET test_cef POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${CEF_EXECUTABLE_DIR}" "${TEST_DIRECTORY}"
+        COMMENT "Copying CEF Executable"
+)

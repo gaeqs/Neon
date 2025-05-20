@@ -18,7 +18,7 @@ namespace neon
         uint32_t _width, _height;
         std::shared_ptr<Texture> _texture;
 
-      public:
+    public:
         CefTextureRenderHandler(uint32_t width, uint32_t height, std::shared_ptr<Texture> texture);
 
         void GetViewRect(CefRefPtr<CefBrowser> browser, CefRect& rect) override;

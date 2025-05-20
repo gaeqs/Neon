@@ -16,12 +16,16 @@ namespace neon
     {
         class NeonCefApp : public CefApp
         {
+        public:
+
+            void OnBeforeCommandLineProcessing(const CefString& process_type, CefRefPtr<CefCommandLine> command_line) override;
+
             IMPLEMENT_REFCOUNTING(NeonCefApp);
         };
 
         CefRefPtr<NeonCefApp> _app;
 
-      public:
+    public:
         CefAppComponent();
 
         ~CefAppComponent() override;

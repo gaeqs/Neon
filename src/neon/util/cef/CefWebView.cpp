@@ -69,8 +69,9 @@ namespace neon
 
         CefBrowserSettings browser_settings;
         browser_settings.windowless_frame_rate = 60;
+        browser_settings.background_color = 0xFFFFFFFF;
 
-        CefBrowserHost::CreateBrowser(window_info, _client, "https://hanoi.prtal.io/?d=neuro", browser_settings,
+        CefBrowserHost::CreateBrowser(window_info, _client, "www.google.com", browser_settings,
                                       nullptr, nullptr);
     }
 
@@ -83,7 +84,8 @@ namespace neon
         if (ImGui::Begin("Webview")) {
             auto size = ImGui::GetContentRegionAvail();
 
-            _windowOrigin = ImGui::GetCursorScreenPos();
+            auto origin = ImGui::GetCursorScreenPos();
+            _windowOrigin = rush::Vec2i(origin.x, origin.y).cast<float>();
             _client->setSize(size.x, size.y);
 
             auto relative = ImVec2(size.x / max.x, size.y / max.y);
@@ -103,8 +105,8 @@ namespace neon
         _lastMousePosition = event.position;
 
         CefMouseEvent mouseEvent;
-        mouseEvent.x = event.position.x() - _windowOrigin.x;
-        mouseEvent.y = event.position.y() - _windowOrigin.y;
+        mouseEvent.x = event.position.x() - _windowOrigin.x();
+        mouseEvent.y = event.position.y() - _windowOrigin.y();
         browser->GetHost()->SendMouseMoveEvent(mouseEvent, false);
     }
 
@@ -116,9 +118,9 @@ namespace neon
         }
 
         CefMouseEvent mouseEvent;
-        mouseEvent.x = _lastMousePosition.x() - _windowOrigin.x;
-        mouseEvent.y = _lastMousePosition.y() - _windowOrigin.y;
-        mouseEvent.modifiers = event.modifiers;
+        mouseEvent.x = _lastMousePosition.x() - _windowOrigin.x();
+        mouseEvent.y = _lastMousePosition.y() - _windowOrigin.y();
+        mouseEvent.modifiers = 0;
         CefBrowserHost::MouseButtonType btn = (event.button == MouseButton::BUTTON_PRIMARY     ? MBT_LEFT
                                                : event.button == MouseButton::BUTTON_SECONDARY ? MBT_RIGHT
                                                : event.button == MouseButton::BUTTON_MIDDLE    ? MBT_MIDDLE
@@ -137,8 +139,8 @@ namespace neon
         }
 
         CefMouseEvent mouseEvent;
-        mouseEvent.x = _lastMousePosition.x() - _windowOrigin.x;
-        mouseEvent.y = _lastMousePosition.y() - _windowOrigin.y;
+        mouseEvent.x = _lastMousePosition.x() - _windowOrigin.x();
+        mouseEvent.y = _lastMousePosition.y() - _windowOrigin.y();
         auto delta = (event.delta * 100.0f).cast<int>();
         browser->GetHost()->SendMouseWheelEvent(mouseEvent, delta.x(), delta.y());
     }

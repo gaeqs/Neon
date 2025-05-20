@@ -1,6 +1,10 @@
 file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS "${PROJECT_SOURCE_DIR}/src/neon/*.cpp")
 file(GLOB_RECURSE VULKAN_SOURCES CONFIGURE_DEPENDS "${PROJECT_SOURCE_DIR}/src/vulkan/*.cpp")
 
+set(CEF_EXECUTABLE_CPP ${PROJECT_SOURCE_DIR}/src/neon/util/cef/CefExecutable.cpp)
+
+list(REMOVE_ITEM SOURCES ${CEF_EXECUTABLE_CPP})
+
 add_library(neon STATIC ${SOURCES} ${VULKAN_SOURCES})
 
 target_compile_features(neon PUBLIC cxx_std_20)
@@ -12,7 +16,7 @@ target_include_directories(neon PUBLIC
 )
 
 target_link_libraries(neon
-        PUBLIC ${NEON_LIBRARIES} ${CMAKE_DL_LIBS} libcef libcef_dll_wrapper
+        PUBLIC ${NEON_LIBRARIES} ${CMAKE_DL_LIBS}
         PRIVATE cmrc::base
 )
 
@@ -24,10 +28,6 @@ endif ()
 
 if (NEON_USE_CEF)
     target_compile_definitions(neon PUBLIC USE_CEF)
-endif ()
-
-if (NEON_USE_GTK)
-    target_compile_definitions(neon PUBLIC USE_GTK)
 endif ()
 
 install(TARGETS neon
@@ -54,4 +54,8 @@ if (NEON_USE_CEF)
             LIBRARY DESTINATION lib
             RUNTIME DESTINATION bin
     )
+
+    add_executable(neon_cef_executable ${CEF_EXECUTABLE_CPP})
+    target_link_libraries(neon_cef_executable libcef libcef_dll_wrapper)
+    set_target_properties(neon_cef_executable PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CEF_EXECUTABLE_DIR})
 endif ()
