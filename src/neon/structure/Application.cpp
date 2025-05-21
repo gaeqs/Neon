@@ -4,6 +4,7 @@
 
 #include "Application.h"
 
+#include <neon/io/CharEvent.h>
 #include <neon/structure/Room.h>
 #include <neon/io/KeyboardEvent.h>
 #include <neon/io/CursorEvent.h>
@@ -21,7 +22,11 @@ namespace neon
     {
     }
 
-    Application::~Application() = default;
+    Application::~Application()
+    {
+        // Delete the room first.
+        _room = nullptr;
+    }
 
     void Application::init()
     {
@@ -169,6 +174,17 @@ namespace neon
     {
         _implementation->lockMouse(lock);
     }
+
+    bool Application::isInModalMode() const
+    {
+        return _implementation->isInModalMode();
+    }
+
+    void Application::setModalMode(bool modal)
+    {
+        _implementation->setModalMode(modal);
+    }
+
     bool Application::isMainThread() const
     {
         return _implementation->isMainThread();
@@ -176,14 +192,33 @@ namespace neon
 
     void Application::invokeKeyEvent(int key, int scancode, int action, int mods)
     {
+        if (isInModalMode()) {
+            return;
+        }
         KeyboardEvent event{scancode, mods, static_cast<KeyboardKey>(key), static_cast<KeyboardAction>(action)};
         if (_room != nullptr) {
             _room->onKey(event);
         }
     }
 
+    void Application::invokeCharEvent(char32_t key)
+    {
+        if (isInModalMode()) {
+            return;
+        }
+
+        CharEvent event{key};
+        if (_room != nullptr) {
+            _room->onChar(event);
+        }
+    }
+
     void Application::invokeMouseButtonEvent(int button, int action, int mods)
     {
+        if (isInModalMode()) {
+            return;
+        }
+
         MouseButtonEvent event{static_cast<MouseButton>(button), static_cast<KeyboardAction>(action), mods};
         if (_room != nullptr) {
             _room->onMouseButton(event);
@@ -192,6 +227,10 @@ namespace neon
 
     void Application::invokeCursorPosEvent(double x, double y)
     {
+        if (isInModalMode()) {
+            return;
+        }
+
         rush::Vec2d current(x, y);
         auto delta = current - _lastCursorPosition;
         _lastCursorPosition = current;
@@ -205,6 +244,10 @@ namespace neon
 
     void Application::invokeScrollEvent(double xOffset, double yOffset)
     {
+        if (isInModalMode()) {
+            return;
+        }
+
         ScrollEvent event{
             {xOffset, yOffset}
         };

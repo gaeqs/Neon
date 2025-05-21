@@ -14,3 +14,7 @@ add_subdirectory(testAsyncUpdate)
 add_subdirectory(testGeometryShader)
 add_subdirectory(testMeshShader)
 add_subdirectory(unit)
+
+if (NEON_USE_CEF)
+    add_subdirectory(testCEF)
+endif ()

@@ -156,23 +156,23 @@ namespace neon
         uint32_t depth = 0;
 
         /**
-         * The amount of layers of the texture.
+         * The number of layers in the texture.
          */
         uint32_t layers = 1;
 
         /**
          * The tiling arrangement of the texels.
-         * Use "OPTIMAL" for more performance.
+         * Use "OPTIMAL" for higher performance.
          */
         Tiling tiling = Tiling::OPTIMAL;
 
         /**
-         * The amount of samples per texel of the texture.
+         * The number of samples per texel of the texture.
          */
         SamplesPerTexel samples = SamplesPerTexel::COUNT_1;
 
         /**
-         * The amount of mipmaps to generate.
+         * The number of mipmaps to generate.
          *
          * If this value is 0, the amount will be calculated automatically.
          */

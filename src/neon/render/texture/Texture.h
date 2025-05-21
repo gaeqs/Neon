@@ -7,6 +7,8 @@
 
 #include <memory>
 
+#include <imgui.h>
+
 #include <neon/structure/Asset.h>
 #include <neon/render/texture/TextureCreateInfo.h>
 #include <neon/filesystem/File.h>
@@ -67,6 +69,8 @@ namespace neon
 
         void fetchData(void* data, rush::Vec3i offset, rush::Vec<3, uint32_t> size, uint32_t layersOffset,
                        uint32_t layers);
+
+        ImTextureID getImGuiDescriptor() const;
 
         // region Static methods
 
@@ -149,11 +153,11 @@ namespace neon
          * Creates a new texture from a set of raw data pointers.
          *
          * This method is useful if you want to create cube boxes
-         * or layered textures.
-         *
+         * or layered textures.*
          * All images must have the same size!
          *
          * @param data the data array.
+
          * Their raw data will be concatenated.
          * @param sizes the lengths of the data in bytes.
          * @param createInfo the texture creation info.
@@ -167,4 +171,17 @@ namespace neon
     };
 } // namespace neon
 
-#endif //RVTRACKING_TEXTURE_H
+/**
+ * Helper functions that integrate neon texture into ImGui.
+ */
+namespace ImGui
+{
+
+    void Image(const std::shared_ptr<neon::Texture>& texture, const ImVec2& imageSize, const ImVec2& uv0 = ImVec2(0, 0),
+               const ImVec2& uv1 = ImVec2(1, 1));
+
+    void Image(const neon::Texture* texture, const ImVec2& imageSize, const ImVec2& uv0 = ImVec2(0, 0),
+               const ImVec2& uv1 = ImVec2(1, 1));
+}
+
+#endif // RVTRACKING_TEXTURE_H

@@ -2,24 +2,45 @@ cmake_minimum_required(VERSION 3.14)
 
 option(NEON_TESTS "Enables Neon tests" OFF)
 option(NEON_USE_QT "Use QT implementation" OFF)
+option(NEON_USE_CEF "Use Chromium Embedded Framework" OFF)
+option(NEON_UNITY_BUILD "Enable Unity Build" OFF)
 
 set(CMAKE_CXX_STANDARD 20)
 set(LIBZIPPP_INSTALL ON)
 set(NEON_GENERATED_DIR ${CMAKE_BINARY_DIR}/generated)
+set(CEF_RUNTIME_LIBRARY_FLAG "" CACHE STRING "Override CEF runtime flag" FORCE)
 
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMake")
 include(CMake/CMakeRC.cmake)
 include(FetchContent)
-include(FetchContent)
+include(SetupCEF)
 
-project(Neon LANGUAGES CXX VERSION 1.0.2)
+project(Neon LANGUAGES C CXX VERSION 1.0.2)
 
 find_package(glfw3 CONFIG REQUIRED)
 find_package(assimp CONFIG REQUIRED)
 find_package(nlohmann_json REQUIRED)
 find_package(Vulkan REQUIRED)
 
+if (NEON_USE_CEF)
+    setup_cef("136.1.6+g1ac1b14+chromium-136.0.7103.114" ${CMAKE_CURRENT_SOURCE_DIR}/lib/cef)
+    list(APPEND NEON_LIBRARIES libcef libcef_dll_wrapper)
+    set(CEF_EXECUTABLE_DIR ${CMAKE_CURRENT_BINARY_DIR}/bin/cef)
+endif ()
+
+if (UNIX)
+    find_package(PkgConfig REQUIRED)
+    pkg_check_modules(LIBNOTIFY REQUIRED libnotify)
+    include_directories(${LIBNOTIFY_INCLUDE_DIRS})
+    add_definitions(${LIBNOTIFY_CFLAGS_OTHER})
+    list(APPEND NEON_LIBRARIES ${LIBNOTIFY_LIBRARIES})
+endif ()
+
+if (MSVC)
+    add_compile_definitions(NOMINMAX WIN32_LEAN_AND_MEAN NOGDI)
+    add_compile_options(/UNEAR /UFAR)
+endif ()
 
 # Rush
 FetchContent_Declare(
@@ -79,12 +100,31 @@ FetchContent_Declare(
         SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/lib/libzippp
 )
 
+# portable-file-dialog
+FetchContent_Declare(
+        portable_file_dialog
+        GIT_REPOSITORY https://github.com/samhocevar/portable-file-dialogs.git
+        GIT_TAG c12ea8c9a727f5320a2b4570aee863bbede2a204
+)
+
 FetchContent_MakeAvailable(imgui)
 FetchContent_MakeAvailable(implot)
 FetchContent_MakeAvailable(spirv_headers)
 FetchContent_MakeAvailable(spirv_tools)
 FetchContent_MakeAvailable(glslang)
 FetchContent_MakeAvailable(libzippp)
+FetchContent_MakeAvailable(portable_file_dialog)
+
+set_target_properties(portable_file_dialogs PROPERTIES
+        INTERFACE_INCLUDE_DIRECTORIES
+        "$<BUILD_INTERFACE:${portable_file_dialog_SOURCE_DIR}>;$<INSTALL_INTERFACE:include/portablefiledialog>"
+)
+
+install(TARGETS portable_file_dialogs EXPORT pfdTargets)
+install(DIRECTORY ${portable_file_dialog_SOURCE_DIR}/
+        DESTINATION include/portablefiledialog
+        FILES_MATCHING PATTERN "*.h")
+install(EXPORT pfdTargets FILE PfdTargets.cmake NAMESPACE pfd:: DESTINATION lib/cmake/pfd)
 
 if (TARGET glslang)
     if (MSVC)
@@ -102,7 +142,7 @@ if (TARGET SPIRV)
     endif ()
 endif ()
 
-list(APPEND LIBRARIES
+list(APPEND NEON_LIBRARIES
         glfw
         ${GLFW_LIBRARIES}
         Vulkan::Vulkan
@@ -115,12 +155,22 @@ list(APPEND LIBRARIES
         implot
         rush
         stb
+        portable_file_dialogs
+)
+
+list(APPEND UNITY_BUILD_TARGETS
+        SPIRV
+        glslang
+        libzippp
+        portable_file_dialogs
+        neon
+        libcef_dll_wrapper
 )
 
 # QT
 if (NEON_USE_QT)
     find_package(Qt5 REQUIRED COMPONENTS Core Gui)
-    list(APPEND LIBRARIES Qt5::Core Qt5::Gui)
+    list(APPEND NEON_LIBRARIES Qt5::Core Qt5::Gui)
 endif ()
 
 if (RELEASE_DEBUG)
@@ -153,8 +203,18 @@ configure_file(
         ${NEON_GENERATED_DIR}/neon/version.h
 )
 
-
 install(
         DIRECTORY ${CMAKE_BINARY_DIR}/generated/neon
         DESTINATION include
 )
+
+if (NEON_UNITY_BUILD)
+    foreach (target ${UNITY_BUILD_TARGETS})
+        if (TARGET ${target})
+            set_target_properties(${target} PROPERTIES UNITY_BUILD ON)
+        endif ()
+    endforeach ()
+
+    set_target_properties(neon PROPERTIES UNITY_BUILD ON)
+    set_target_properties(neon_tests PROPERTIES UNITY_BUILD ON)
+endif ()

@@ -206,6 +206,12 @@ namespace neon
         _components.invokeKeyEvent(getApplication()->getProfiler(), event);
     }
 
+    void Room::onChar(const CharEvent& event)
+    {
+        DEBUG_PROFILE(getApplication()->getProfiler(), onChar);
+        _components.invokeCharEvent(getApplication()->getProfiler(), event);
+    }
+
     void Room::onMouseButton(const MouseButtonEvent& event)
     {
         DEBUG_PROFILE(getApplication()->getProfiler(), onMouseButton);

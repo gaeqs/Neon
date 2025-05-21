@@ -8,6 +8,7 @@
 #include "VKResource.h"
 
 #include <cstdint>
+#include <imgui.h>
 #include <vulkan/render/buffer/SimpleBuffer.h>
 #include <neon/render/texture/TextureCreateInfo.h>
 #include <rush/vector/vec.h>
@@ -36,6 +37,8 @@ namespace neon::vulkan
         VkImageView _imageView;
         VkSampler _sampler;
         VkImageLayout _layout;
+
+        mutable VkDescriptorSet _imGuiDescriptor;
 
         /**
          * If true, the VkImageView is managed by an external
@@ -92,6 +95,8 @@ namespace neon::vulkan
 
         void fetchData(void* data, rush::Vec3i offset, rush::Vec<3, uint32_t> size, uint32_t layersOffset,
                        uint32_t layers);
+
+        ImTextureID getImGuiDescriptor() const;
     };
 } // namespace neon::vulkan
 

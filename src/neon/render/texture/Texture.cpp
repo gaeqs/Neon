@@ -268,4 +268,27 @@ namespace neon
     {
         _implementation.fetchData(data, offset, size, layersOffset, layers);
     }
+
+    ImTextureID Texture::getImGuiDescriptor() const
+    {
+        return _implementation.getImGuiDescriptor();
+    }
 } // namespace neon
+
+namespace ImGui
+{
+    void Image(const std::shared_ptr<neon::Texture>& texture, const ImVec2& imageSize, const ImVec2& uv0,
+               const ImVec2& uv1)
+    {
+        if (texture != nullptr) {
+            Image(texture->getImGuiDescriptor(), imageSize, uv0, uv1);
+        }
+    }
+
+    void Image(const neon::Texture* texture, const ImVec2& imageSize, const ImVec2& uv0, const ImVec2& uv1)
+    {
+        if (texture != nullptr) {
+            Image(texture->getImGuiDescriptor(), imageSize, uv0, uv1);
+        }
+    }
+} // namespace ImGui

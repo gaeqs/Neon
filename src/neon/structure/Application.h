@@ -5,7 +5,6 @@
 #ifndef RVTRACKING_APPLICATION_H
 #define RVTRACKING_APPLICATION_H
 
-#include <cstdint>
 #include <string>
 #include <memory>
 #include <optional>
@@ -51,6 +50,10 @@ namespace neon
         [[nodiscard]] virtual CommandBuffer* getCurrentCommandBuffer() const = 0;
 
         virtual void lockMouse(bool lock) = 0;
+
+        virtual bool isInModalMode() const = 0;
+
+        virtual void setModalMode(bool modal) = 0;
 
         virtual Result<uint32_t, std::string> startGameLoop() = 0;
 
@@ -135,14 +138,20 @@ namespace neon
 
         void lockMouse(bool lock);
 
+        bool isInModalMode() const;
+
+        void setModalMode(bool modal);
+
         /**
-        * Returns whether the thread calling this function is the main thread.
-        */
+         * Returns whether the thread calling this function is the main thread.
+         */
         [[nodiscard]] bool isMainThread() const;
 
-        //region INTERNAL CALLS
+        // region INTERNAL CALLS
 
         void invokeKeyEvent(int key, int scancode, int action, int mods);
+
+        void invokeCharEvent(char32_t key);
 
         void invokeMouseButtonEvent(int button, int action, int mods);
 
@@ -150,8 +159,8 @@ namespace neon
 
         void invokeScrollEvent(double xOffset, double yOffset);
 
-        //endregion
+        // endregion
     };
 } // namespace neon
 
-#endif //RVTRACKING_APPLICATION_H
+#endif // RVTRACKING_APPLICATION_H

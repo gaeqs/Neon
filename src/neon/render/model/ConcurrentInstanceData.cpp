@@ -53,6 +53,7 @@ namespace neon
         _positions.push_back(id);
         return Instance(id);
     }
+
     Result<std::vector<InstanceData::Instance>, std::string> ConcurrentInstanceData::createMultipleInstances(
         size_t amount)
     {
@@ -99,6 +100,7 @@ namespace neon
 
         return true;
     }
+
     size_t ConcurrentInstanceData::freeInstances(const std::vector<Instance>& ids)
     {
         std::lock_guard lock(_positionMutex);
@@ -144,6 +146,20 @@ namespace neon
     {
         std::lock_guard lock(_positionMutex);
         return _positions.size();
+    }
+
+    size_t ConcurrentInstanceData::getMaximumInstances() const
+    {
+        return _maximumInstances;
+    }
+
+    size_t ConcurrentInstanceData::getBytesRequiredPerInstance() const
+    {
+        size_t bytes = 0;
+        for (auto& slot : _slots) {
+            bytes += slot.size;
+        }
+        return bytes;
     }
 
     bool ConcurrentInstanceData::uploadData(Instance instance, size_t index, const void* data)

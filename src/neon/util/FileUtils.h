@@ -5,10 +5,10 @@
 #ifndef NEON_FILEUTILS_H
 #define NEON_FILEUTILS_H
 
-#include <optional>
-#include <filesystem>
+#include "Result.h"
 
-#include <neon/util/Result.h>
+#include <filesystem>
+#include <optional>
 
 namespace neon
 {

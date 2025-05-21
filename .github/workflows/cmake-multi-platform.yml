@@ -53,7 +53,8 @@ jobs:
           libglm-dev \
           nlohmann-json3-dev \
           libzip-dev \
-          libbz2-dev
+          libbz2-dev \
+          libnotify-dev
 
     - name: Prepare Vulkan SDK
       uses: humbletim/setup-vulkan-sdk@v1.2.1

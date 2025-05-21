@@ -33,6 +33,8 @@ namespace neon
 
     struct ScrollEvent;
 
+    struct CharEvent;
+
     class Model;
 
     class Room
@@ -102,9 +104,11 @@ namespace neon
 
         // endregion
 
-        //region EVENTS
+        // region EVENTS
 
         void onKey(const KeyboardEvent& event);
+
+        void onChar(const CharEvent& event);
 
         void onMouseButton(const MouseButtonEvent& event);
 
@@ -116,8 +120,8 @@ namespace neon
 
         void preDraw();
 
-        //endregion
+        // endregion
     };
 } // namespace neon
 
-#endif //NEON_ROOM_H
+#endif // NEON_ROOM_H

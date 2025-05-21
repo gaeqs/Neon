@@ -48,6 +48,7 @@ namespace neon
         _positions.push_back(id);
         return Instance(id);
     }
+
     Result<std::vector<InstanceData::Instance>, std::string> BasicInstanceData::createMultipleInstances(size_t amount)
     {
         if (_positions.size() + amount > _maximumInstances) {
@@ -134,6 +135,20 @@ namespace neon
     size_t BasicInstanceData::getInstanceAmount() const
     {
         return _positions.size();
+    }
+
+    size_t BasicInstanceData::getMaximumInstances() const
+    {
+        return _maximumInstances;
+    }
+
+    size_t BasicInstanceData::getBytesRequiredPerInstance() const
+    {
+        size_t bytes = 0;
+        for (auto& slot : _slots) {
+            bytes += slot.size;
+        }
+        return bytes;
     }
 
     bool BasicInstanceData::uploadData(Instance instance, size_t index, const void* data)

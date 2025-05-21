@@ -4,6 +4,7 @@
 
 #include "VKTexture.h"
 
+#include <imgui_impl_vulkan.h>
 #include <neon/structure/Application.h>
 #include <neon/structure/Room.h>
 
@@ -33,7 +34,8 @@ namespace neon::vulkan
         _sampler(VK_NULL_HANDLE),
         _layout(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL),
         _external(false),
-        _externalDirtyFlag(1)
+        _externalDirtyFlag(1),
+        _imGuiDescriptor(nullptr)
     {
         // Create copy: useful if we want to modify data.
         TextureCreateInfo createInfo = dummyInfo;
@@ -120,7 +122,8 @@ namespace neon::vulkan
         _sampler(VK_NULL_HANDLE),
         _layout(layout),
         _external(true),
-        _externalDirtyFlag(1)
+        _externalDirtyFlag(1),
+        _imGuiDescriptor(nullptr)
     {
         VkPhysicalDeviceProperties properties{};
         vkGetPhysicalDeviceProperties(_vkApplication->getPhysicalDevice().getRaw(), &properties);
@@ -135,6 +138,10 @@ namespace neon::vulkan
 
     VKTexture::~VKTexture()
     {
+        if (_imGuiDescriptor) {
+            ImGui_ImplVulkan_RemoveTexture(_imGuiDescriptor);
+        }
+
         auto bin = _vkApplication->getBin();
         auto device = _vkApplication->getDevice()->getRaw();
         auto runs = getRuns();
@@ -224,6 +231,11 @@ namespace neon::vulkan
             // Staging buffer becomes invalid because the image size has changed.
             _stagingBuffer = nullptr;
         }
+
+        if (_imGuiDescriptor) {
+            ImGui_ImplVulkan_RemoveTexture(_imGuiDescriptor);
+            _imGuiDescriptor = nullptr;
+        }
     }
 
     void VKTexture::updateData(const void* data, int32_t width, int32_t height, int32_t depth, TextureFormat format)
@@ -241,31 +253,32 @@ namespace neon::vulkan
                 vc::pixelSize(_format) * _width * _height * _depth * _layers);
         }
 
-        auto map = _stagingBuffer->map<char>();
-        if (map.has_value()) {
-            memcpy(map.value()->raw(), data, vc::pixelSize(format) * width * height * depth);
-            map.value()->dispose();
+        CommandPoolHolder holder = _application->getCommandManager().fetchCommandPool();
+        CommandBuffer* buffer = holder.getPool().beginCommandBuffer(true);
+        VkCommandBuffer rawBuffer = buffer->getImplementation().getCommandBuffer();
+
+        if (auto map = _stagingBuffer->map<char>(buffer)) {
+            auto ptr = map.value()->raw();
+            size_t pixelSize = vc::pixelSize(format);
+            size_t size = width * height * depth * pixelSize;
+            memcpy(ptr, data, size);
         }
 
         _format = format;
         auto vkFormat = vc::vkFormat(format);
 
-        //
-        {
-            CommandPoolHolder holder = _application->getCommandManager().fetchCommandPool();
-            CommandBuffer* buffer = holder.getPool().beginCommandBuffer(true);
-            VkCommandBuffer rawBuffer = buffer->getImplementation().getCommandBuffer();
+        vulkan_util::transitionImageLayout(_image, vkFormat, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+                                           VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, _mipmapLevels, _layers, rawBuffer);
 
-            vulkan_util::transitionImageLayout(_image, vkFormat, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-                                               VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, _mipmapLevels, _layers, rawBuffer);
+        vulkan_util::copyBufferToImage(_stagingBuffer->getRaw(buffer->getCurrentRun()), _image, width, height, depth,
+                                        _layers, rawBuffer);
 
-            vulkan_util::copyBufferToImage(_stagingBuffer->getRaw(buffer->getCurrentRun()), _image, width, height,
-                                           depth, _layers, rawBuffer);
+        vulkan_util::transitionImageLayout(_image, vkFormat, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+                                           VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, _mipmapLevels, _layers, rawBuffer);
 
-            vulkan_util::transitionImageLayout(_image, vkFormat, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-                                               VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, _mipmapLevels, _layers,
-                                               rawBuffer);
-        }
+        buffer->end();
+        buffer->submit();
+        buffer->wait();
     }
 
     void VKTexture::fetchData(void* data, rush::Vec3i offset, rush::Vec<3, uint32_t> size, uint32_t layersOffset,
@@ -304,5 +317,15 @@ namespace neon::vulkan
         }
         auto bufferData = map.value()->raw();
         memcpy(data, bufferData, size[0] * size[1] * size[2] * layers * conversions::pixelSize(_format));
+    }
+
+    ImTextureID VKTexture::getImGuiDescriptor() const
+    {
+        if (_imGuiDescriptor == nullptr) {
+            _imGuiDescriptor =
+                ImGui_ImplVulkan_AddTexture(_sampler, _imageView, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+        }
+
+        return reinterpret_cast<ImTextureID>(_imGuiDescriptor);
     }
 } // namespace neon::vulkan

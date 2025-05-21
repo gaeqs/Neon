@@ -26,11 +26,16 @@ namespace neon::vulkan
         application->internalForceSizeValues(width, height);
     }
 
-    void key_size_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
+    void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
     {
         auto* application = static_cast<VKApplication*>(glfwGetWindowUserPointer(window));
-
         application->getApplication()->invokeKeyEvent(key, scancode, action, mods);
+    }
+
+    void char_callback(GLFWwindow* window, unsigned int unicode)
+    {
+        auto* application = static_cast<VKApplication*>(glfwGetWindowUserPointer(window));
+        application->getApplication()->invokeCharEvent(static_cast<char32_t>(unicode));
     }
 
     void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
@@ -158,7 +163,8 @@ namespace neon::vulkan
         glfwSetWindowAttrib(_window, GLFW_DECORATED, 1);
         glfwSetWindowUserPointer(_window, this);
         glfwSetFramebufferSizeCallback(_window, framebuffer_size_callback);
-        glfwSetKeyCallback(_window, key_size_callback);
+        glfwSetKeyCallback(_window, key_callback);
+        glfwSetCharCallback(_window, char_callback);
         glfwSetMouseButtonCallback(_window, mouse_button_callback);
         glfwSetCursorPosCallback(_window, cursor_pos_callback);
         glfwSetScrollCallback(_window, scroll_callback);
@@ -200,6 +206,16 @@ namespace neon::vulkan
         }
     }
 
+    bool VKApplication::isInModalMode() const
+    {
+        return _currentFrameInformation.modalMode;
+    }
+
+    void VKApplication::setModalMode(bool modal)
+    {
+        _modalMode = modal;
+    }
+
     Result<uint32_t, std::string> VKApplication::startGameLoop()
     {
         if (_window == nullptr) {
@@ -221,7 +237,7 @@ namespace neon::vulkan
 
                 float seconds = static_cast<float>(duration.count()) * 1e-9f;
 
-                _currentFrameInformation = {frames, seconds, lastFrameProcessTime};
+                _currentFrameInformation = {frames, seconds, lastFrameProcessTime, _modalMode};
                 {
                     DEBUG_PROFILE_ID(_application->getProfiler(), tasks, "tasks");
                     _application->getTaskRunner().flushMainThreadTasks();
@@ -246,6 +262,11 @@ namespace neon::vulkan
 
     void VKApplication::renderFrame(neon::Room* room)
     {
+        if (_currentFrameInformation.modalMode) {
+            glfwPollEvents();
+            return;
+        }
+
         bool preUpdateDone;
         {
             DEBUG_PROFILE_ID(_application->getProfiler(), preUpdate, "preUpdate (GPU Wait)");

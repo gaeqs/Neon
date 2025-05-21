@@ -24,7 +24,7 @@ namespace neon
      * Use this class to create, remove and modify model
      * instances.
      * <p>
-     * This is a base class: you must provide your model
+     * This is a base class: you must provide your model with
      * an implementation of this class.
      * The default implementation is BasicInstanceData.
      */
@@ -43,7 +43,7 @@ namespace neon
         virtual ~InstanceData() = default;
 
         /**
-         * Returns the type of the structure used for instancing data,
+         * Returns the type of the structure used for instancing data.
          * @return the type.
          */
         [[nodiscard]] virtual const std::vector<std::type_index>& getInstancingStructTypes() const = 0;
@@ -56,9 +56,9 @@ namespace neon
         [[nodiscard]] virtual Result<Instance, std::string> createInstance() = 0;
 
         /**
-        * Creates multiple instances of this model.
-        * @return a vector with the identifiers of the instances or the error if something went wrong.
-        */
+         * Creates multiple instances of this model.
+         * @return a vector with the identifiers of the instances or the error if something went wrong.
+         */
         [[nodiscard]] virtual Result<std::vector<Instance>, std::string> createMultipleInstances(size_t amount) = 0;
 
         /**
@@ -78,10 +78,28 @@ namespace neon
         virtual size_t freeInstances(const std::vector<Instance>& ids) = 0;
 
         /**
-         * Returns the amount of instances inside this model.
-         * @return the amount of instances.
+         * Returns the number of instances inside this model.
+         * @return the number of instances.
          */
         [[nodiscard]] virtual size_t getInstanceAmount() const = 0;
+
+        /**
+         * Retrieves the maximum number of instances that can be managed.
+         * Use this method to determine the upper limit of model instances
+         * allowed by the underlying system or configuration.
+         * This value is typically fixed and does not change during
+         * the runtime of the application.
+         */
+        [[nodiscard]] virtual size_t getMaximumInstances() const = 0;
+
+        /**
+         * Calculates the number of bytes required to store data for a single instance.
+         * This method determines the memory requirements per instance based on the
+         * specific implementation.
+         *
+         * @return The number of bytes needed per instance.
+         */
+        [[nodiscard]] virtual size_t getBytesRequiredPerInstance() const = 0;
 
         /**
          * Sets the instancing data of an instance.
@@ -97,7 +115,7 @@ namespace neon
          * This method is invoked automatically
          * before the room is rendered if shouldAutoFlush() is true.
          * <p>
-         * You can provide this method an external command buffer.
+         * You can provide this method with an external command buffer.
          * This allows you to upload the model data asynchronously.
          */
         virtual void flush() = 0;
@@ -108,7 +126,7 @@ namespace neon
          * This method is invoked automatically
          * before the room is rendered if shouldAutoFlush() is true.
          * <p>
-         * You can provide this method an external command buffer.
+         * You can provide this method with an external command buffer.
          * This allows you to upload the model data asynchronously.
          */
         virtual void flush(const CommandBuffer* commandBuffer) = 0;
@@ -140,4 +158,4 @@ namespace neon
     };
 } // namespace neon
 
-#endif //INSTANCEDATA_H
+#endif // INSTANCEDATA_H
