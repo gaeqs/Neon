@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.14)
 
 option(NEON_TESTS "Enables Neon tests" OFF)
 option(NEON_USE_QT "Use QT implementation" OFF)
-option(NEON_USE_CEF "Use Chromium Embedded Framework" ON)
+option(NEON_USE_CEF "Use Chromium Embedded Framework" OFF)
 option(NEON_UNITY_BUILD "Enable Unity Build" OFF)
 
 set(CMAKE_CXX_STANDARD 20)

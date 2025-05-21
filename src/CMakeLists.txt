@@ -56,6 +56,6 @@ if (NEON_USE_CEF)
     )
 
     add_executable(neon_cef_executable ${CEF_EXECUTABLE_CPP})
-    target_link_libraries(neon_cef_executable libcef libcef_dll_wrapper)
+    target_link_libraries(neon_cef_executable libcef libcef_dll_wrapper Vulkan::Vulkan)
     set_target_properties(neon_cef_executable PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CEF_EXECUTABLE_DIR})
 endif ()
