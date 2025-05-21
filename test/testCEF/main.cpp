@@ -317,7 +317,9 @@ std::shared_ptr<Room> getTestRoom(Application* application)
 
     auto cefGO = room->newGameObject();
     cefGO->newComponent<CefAppComponent>();
-    cefGO->newComponent<CefWebView>();
+    //cefGO->newComponent<CefWebView>("https://hanoi.prtal.io/?d=neuro");
+    cefGO->newComponent<CefWebView>("chrome://gpu");
+    //cefGO->newComponent<CefWebView>("https://www.google.com");
 
     loadModels(application, room.get(), fpFrameBuffer);
 

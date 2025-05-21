@@ -61,10 +61,6 @@ macro(setup_cef VERSION DOWNLOAD_DIR)
                 IMPORTED_LOCATION_RELEASE "${CEF_BINARY_DIR_RELEASE}/libcef.so"
         )
     endif()
-
-    message(STATUS "CEF_LIB_DEBUG: ${CEF_LIB_DEBUG}")
-    message(STATUS "CEF_LIB_RELEASE: ${CEF_LIB_RELEASE}")
-
 endmacro()
 
 

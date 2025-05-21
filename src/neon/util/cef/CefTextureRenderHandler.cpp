@@ -32,10 +32,14 @@ namespace neon
                              TextureFormat::B8G8R8A8);
     }
 
-    void CefTextureRenderHandler::setSize(uint32_t width, uint32_t height)
+    bool CefTextureRenderHandler::setSize(uint32_t width, uint32_t height)
     {
-        _width = width;
-        _height = height;
+        if (_width != width || _height != height) {
+            _width = width;
+            _height = height;
+            return true;
+        }
+        return false;
     }
 } // namespace neon
 

@@ -15,14 +15,24 @@ namespace neon
 {
     class CefWebView : public Component
     {
+        struct Modifiers
+        {
+            bool capsLock;
+            bool shift;
+            bool control;
+            bool alt;
+            bool primary;
+            bool secondary;
+            bool middle;
+        };
+
         class NeonCefClient : public CefClient, public CefLifeSpanHandler
         {
             CefRefPtr<CefTextureRenderHandler> _renderHandler;
             CefRefPtr<CefBrowser> _browser;
 
-        public:
+          public:
             explicit NeonCefClient(std::shared_ptr<Texture> texture);
-
 
             CefRefPtr<CefRenderHandler> GetRenderHandler() override;
 
@@ -37,13 +47,20 @@ namespace neon
             IMPLEMENT_REFCOUNTING(NeonCefClient);
         };
 
+        std::string _startURL;
         std::shared_ptr<Texture> _texture;
         CefRefPtr<NeonCefClient> _client;
         rush::Vec2f _windowOrigin;
         rush::Vec2f _lastMousePosition;
 
-    public:
-        CefWebView();
+        Modifiers _modifiers;
+
+        void refreshModifiers(const MouseButtonEvent& event);
+
+        [[nodiscard]] int fetchModifiers() const;
+
+      public:
+        CefWebView(const std::string& url);
 
         void onStart() override;
 
@@ -54,6 +71,10 @@ namespace neon
         void onMouseButton(const MouseButtonEvent& event) override;
 
         void onScroll(const ScrollEvent& event) override;
+
+        void onKey(const KeyboardEvent& event) override;
+
+        void onChar(const CharEvent& event) override;
     };
 } // namespace neon
 

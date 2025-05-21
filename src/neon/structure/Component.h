@@ -173,6 +173,12 @@ namespace neon
         virtual void onKey(const KeyboardEvent& event);
 
         /**
+         * Virtual method invoked when a char from the keyboard is received.
+         * @param event the event.
+         */
+        virtual void onChar(const CharEvent& event);
+
+        /**
          * Virtual method invoked when a mouse button is pressed or released.
          * @param event the event.
          */

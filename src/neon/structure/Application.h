@@ -151,6 +151,8 @@ namespace neon
 
         void invokeKeyEvent(int key, int scancode, int action, int mods);
 
+        void invokeCharEvent(char32_t key);
+
         void invokeMouseButtonEvent(int button, int action, int mods);
 
         void invokeCursorPosEvent(double x, double y);

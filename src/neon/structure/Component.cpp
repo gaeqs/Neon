@@ -80,6 +80,10 @@ namespace neon
     {
     }
 
+    void Component::onChar(const CharEvent& event)
+    {
+    }
+
     void Component::onMouseButton(const neon::MouseButtonEvent& event)
     {
     }

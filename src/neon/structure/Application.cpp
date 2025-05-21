@@ -4,6 +4,7 @@
 
 #include "Application.h"
 
+#include <neon/io/CharEvent.h>
 #include <neon/structure/Room.h>
 #include <neon/io/KeyboardEvent.h>
 #include <neon/io/CursorEvent.h>
@@ -197,6 +198,18 @@ namespace neon
         KeyboardEvent event{scancode, mods, static_cast<KeyboardKey>(key), static_cast<KeyboardAction>(action)};
         if (_room != nullptr) {
             _room->onKey(event);
+        }
+    }
+
+    void Application::invokeCharEvent(char32_t key)
+    {
+        if (isInModalMode()) {
+            return;
+        }
+
+        CharEvent event{key};
+        if (_room != nullptr) {
+            _room->onChar(event);
         }
     }
 

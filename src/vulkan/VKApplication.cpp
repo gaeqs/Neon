@@ -26,10 +26,16 @@ namespace neon::vulkan
         application->internalForceSizeValues(width, height);
     }
 
-    void key_size_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
+    void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
     {
         auto* application = static_cast<VKApplication*>(glfwGetWindowUserPointer(window));
         application->getApplication()->invokeKeyEvent(key, scancode, action, mods);
+    }
+
+    void char_callback(GLFWwindow* window, unsigned int unicode)
+    {
+        auto* application = static_cast<VKApplication*>(glfwGetWindowUserPointer(window));
+        application->getApplication()->invokeCharEvent(static_cast<char32_t>(unicode));
     }
 
     void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
@@ -157,7 +163,8 @@ namespace neon::vulkan
         glfwSetWindowAttrib(_window, GLFW_DECORATED, 1);
         glfwSetWindowUserPointer(_window, this);
         glfwSetFramebufferSizeCallback(_window, framebuffer_size_callback);
-        glfwSetKeyCallback(_window, key_size_callback);
+        glfwSetKeyCallback(_window, key_callback);
+        glfwSetCharCallback(_window, char_callback);
         glfwSetMouseButtonCallback(_window, mouse_button_callback);
         glfwSetCursorPosCallback(_window, cursor_pos_callback);
         glfwSetScrollCallback(_window, scroll_callback);

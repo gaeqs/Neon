@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.14)
 option(NEON_TESTS "Enables Neon tests" OFF)
 option(NEON_USE_QT "Use QT implementation" OFF)
 option(NEON_USE_CEF "Use Chromium Embedded Framework" ON)
+option(NEON_UNITY_BUILD "Enable Unity Build" OFF)
 
 set(CMAKE_CXX_STANDARD 20)
 set(LIBZIPPP_INSTALL ON)
@@ -157,6 +158,15 @@ list(APPEND NEON_LIBRARIES
         portable_file_dialogs
 )
 
+list(APPEND UNITY_BUILD_TARGETS
+        SPIRV
+        glslang
+        libzippp
+        portable_file_dialogs
+        neon
+        libcef_dll_wrapper
+)
+
 # QT
 if (NEON_USE_QT)
     find_package(Qt5 REQUIRED COMPONENTS Core Gui)
@@ -197,3 +207,14 @@ install(
         DIRECTORY ${CMAKE_BINARY_DIR}/generated/neon
         DESTINATION include
 )
+
+if (NEON_UNITY_BUILD)
+    foreach (target ${UNITY_BUILD_TARGETS})
+        if (TARGET ${target})
+            set_target_properties(${target} PROPERTIES UNITY_BUILD ON)
+        endif ()
+    endforeach ()
+
+    set_target_properties(neon PROPERTIES UNITY_BUILD ON)
+    set_target_properties(neon_tests PROPERTIES UNITY_BUILD ON)
+endif ()

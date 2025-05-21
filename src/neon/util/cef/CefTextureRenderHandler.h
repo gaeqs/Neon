@@ -26,7 +26,7 @@ namespace neon
         void OnPaint(CefRefPtr<CefBrowser> browser, PaintElementType type, const RectList& dirtyRects,
                      const void* buffer, int width, int height) override;
 
-        void setSize(uint32_t width, uint32_t height);
+        bool setSize(uint32_t width, uint32_t height);
 
         IMPLEMENT_REFCOUNTING(CefTextureRenderHandler);
     };

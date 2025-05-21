@@ -32,6 +32,8 @@ namespace neon
 
     struct ScrollEvent;
 
+    struct CharEvent;
+
     /**
      * This class holds all components inside a room.
      */
@@ -128,6 +130,14 @@ namespace neon
          * Calls onKey() on all components.
          */
         void invokeKeyEvent(Profiler& profiler, const KeyboardEvent& event);
+
+        /**
+         * THIS METHOD SHOULD ONLY BE USED BY ROOMS!
+         * USERS MUSTN'T USE THIS METHOD.
+         * <p>
+         * Calls onChar() on all components.
+         */
+        void invokeCharEvent(Profiler& profiler, const CharEvent& event);
 
         /**
          * THIS METHOD SHOULD ONLY BE USED BY ROOMS!
