@@ -58,6 +58,10 @@ namespace neon
 
         [[nodiscard]] size_t getInstanceAmount() const override;
 
+        [[nodiscard]] size_t getMaximumInstances() const override;
+
+        [[nodiscard]] size_t getBytesRequiredPerInstance() const override;
+
         bool uploadData(Instance instance, size_t index, const void* data) override;
 
         void flush() override;

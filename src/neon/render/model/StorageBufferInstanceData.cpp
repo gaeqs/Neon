@@ -51,6 +51,7 @@ namespace neon
         _positions.push_back(id);
         return Instance(id);
     }
+
     Result<std::vector<InstanceData::Instance>, std::string> StorageBufferInstanceData::createMultipleInstances(
         size_t amount)
     {
@@ -135,6 +136,20 @@ namespace neon
     size_t StorageBufferInstanceData::getInstanceAmount() const
     {
         return _positions.size();
+    }
+
+    size_t StorageBufferInstanceData::getMaximumInstances() const
+    {
+        return _maximumInstances;
+    }
+
+    size_t StorageBufferInstanceData::getBytesRequiredPerInstance() const
+    {
+        size_t bytes = 0;
+        for (auto& slot : _slots) {
+            bytes += slot.size;
+        }
+        return bytes;
     }
 
     bool StorageBufferInstanceData::uploadData(Instance instance, size_t index, const void* data)
