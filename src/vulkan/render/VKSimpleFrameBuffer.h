@@ -33,7 +33,8 @@ namespace neon::vulkan
         ImageCreateInfo info;
         SamplerCreateInfo sampler;
         VkImage image;
-        VkDeviceMemory memory;
+        VmaAllocator allocator;
+        VmaAllocation allocation;
         VkImageLayout layout;
         VkImageView view;
         VkDescriptorSet imGuiDescriptor;
@@ -120,4 +121,4 @@ namespace neon::vulkan
     };
 } // namespace neon::vulkan
 
-#endif //NEON_VKSIMPLEFRAMEBUFFER_H
+#endif // NEON_VKSIMPLEFRAMEBUFFER_H

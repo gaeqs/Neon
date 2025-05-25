@@ -601,7 +601,7 @@ namespace neon::vulkan
         }
 
         auto& families = _physicalDevice.getFamilyCollection();
-        _device = new VKDevice(_physicalDevice.getRaw(), features, families);
+        _device = new VKDevice(_instance, _physicalDevice.getRaw(), features, families);
         _graphicQueue = _device->getQueueProvider()->fetchCompatibleQueue(VKQueueFamily::Capabilities::withGraphics());
         _presentQueue = _device->getQueueProvider()->fetchCompatibleQueue(VKQueueFamily::Capabilities::withPresent());
     }

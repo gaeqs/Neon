@@ -156,6 +156,7 @@ list(APPEND NEON_LIBRARIES
         rush
         stb
         portable_file_dialogs
+        vma
 )
 
 list(APPEND UNITY_BUILD_TARGETS

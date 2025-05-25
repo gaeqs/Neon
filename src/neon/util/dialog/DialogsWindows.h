@@ -5,7 +5,7 @@
 #ifndef NEON_DIALOGS_WINDOWS_H
 #define NEON_DIALOGS_WINDOWS_H
 
-#if WIN32
+#ifdef _WIN32
 
     #include "Dialogs.h"
 
