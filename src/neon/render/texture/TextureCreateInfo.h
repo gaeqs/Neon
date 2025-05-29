@@ -178,12 +178,25 @@ namespace neon
          */
         uint32_t mipmaps = 0;
 
+        /**
+         * The view type of the TextureViews that will use this image.
+         * This is a hint for the texture creation.
+         */
+        TextureViewType viewType = TextureViewType::NORMAL_2D;
+
         std::vector<TextureUsage> usages = {TextureUsage::TRANSFER_SOURCE, TextureUsage::TRANSFER_DESTINY,
                                             TextureUsage::SAMPLING};
     };
 
     struct ImageViewCreateInfo
     {
+        /**
+         * The texture format of the view.
+         * This format must be compatible with the format of the texture itself.
+         * If empty, the format will match the texture format.
+         */
+        std::optional<TextureFormat> format = {};
+
         /**
          * The view mode of the texture.
          */
@@ -342,4 +355,4 @@ namespace neon
     } // namespace serialization
 } // namespace neon
 
-#endif //NEON_TEXTURECREATEINFO_H
+#endif // NEON_TEXTURECREATEINFO_H

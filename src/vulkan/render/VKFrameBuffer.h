@@ -10,7 +10,7 @@
 
 #include <vector>
 #include <neon/render/buffer/FrameBufferOutput.h>
-#include <neon/render/texture/TextureCreateInfo.h>
+#include <../../neon/render/texture/TextureCreateInfo.h>
 #include <vulkan/VKResource.h>
 
 namespace neon::vulkan

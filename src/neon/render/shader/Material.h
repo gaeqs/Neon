@@ -13,7 +13,7 @@
 #include <neon/render/shader/ShaderUniformBuffer.h>
 #include <neon/render/shader/MaterialCreateInfo.h>
 #include <neon/render/model/InputDescription.h>
-#include <neon/render/texture/Texture.h>
+#include <neon/render/textureold/Texture.h>
 #include <neon/render/buffer/FrameBuffer.h>
 
 #include <assimp/types.h>

@@ -10,7 +10,7 @@
 #include <cstdint>
 #include <imgui.h>
 #include <vulkan/render/buffer/SimpleBuffer.h>
-#include <neon/render/texture/TextureCreateInfo.h>
+#include <../neon/render/texture/TextureCreateInfo.h>
 #include <rush/vector/vec.h>
 
 namespace neon

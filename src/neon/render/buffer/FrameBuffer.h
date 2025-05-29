@@ -6,7 +6,7 @@
 #define NEON_FRAMEBUFFER_H
 
 #include <vector>
-#include <neon/render/texture/TextureCreateInfo.h>
+#include <../texture/TextureCreateInfo.h>
 #include <neon/render/buffer/FrameBufferOutput.h>
 #include <neon/structure/Asset.h>
 

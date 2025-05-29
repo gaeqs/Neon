@@ -6,7 +6,7 @@
 
 #include <neon/render/shader/ShaderUniformDescriptor.h>
 #include <vulkan/render/buffer/StagingBuffer.h>
-#include <neon/render/texture/Texture.h>
+#include <neon/render/textureold/Texture.h>
 #include <cstring>
 #include <utility>
 

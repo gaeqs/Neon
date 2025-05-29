@@ -7,7 +7,7 @@
 
 #include <optional>
 #include <string>
-#include <neon/render/texture/TextureCreateInfo.h>
+#include <../texture/TextureCreateInfo.h>
 
 namespace neon
 {

@@ -9,7 +9,7 @@
 
 #include <neon/structure/Asset.h>
 #include <neon/render/model/LocalModel.h>
-#include <neon/render/texture/Texture.h>
+#include <neon/render/textureold/Texture.h>
 
 namespace neon {
     enum class AssimpMaterialPropertyType {

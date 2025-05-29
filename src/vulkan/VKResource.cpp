@@ -12,7 +12,25 @@ namespace neon::vulkan
         std::erase_if(_runs, [](const std::shared_ptr<CommandBufferRun>& run) { return run->hasFinished(); });
     }
 
-    VKResource::VKResource() = default;
+    VKResource::VKResource(AbstractVKApplication* application) :
+        _application(application)
+    {
+    }
+
+    VKResource::VKResource(Application* application) :
+        _application(dynamic_cast<AbstractVKApplication*>(application->getImplementation()))
+    {
+    }
+
+    AbstractVKApplication* VKResource::getApplication()
+    {
+        return _application;
+    }
+
+    const AbstractVKApplication* VKResource::getApplication() const
+    {
+        return _application;
+    }
 
     void VKResource::registerRun(std::shared_ptr<CommandBufferRun> run)
     {
@@ -29,5 +47,15 @@ namespace neon::vulkan
     {
         discardFinished();
         return _runs;
+    }
+
+    VkDevice VKResource::rawDevice() const
+    {
+        return _application->getDevice()->getRaw();
+    }
+
+    VkPhysicalDevice VKResource::rawPhysicalDevice() const
+    {
+        return _application->getPhysicalDevice().getRaw();
     }
 } // namespace neon::vulkan

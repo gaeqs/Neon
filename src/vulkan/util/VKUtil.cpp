@@ -226,7 +226,7 @@ namespace neon::vulkan::vulkan_util
         vkCmdPipelineBarrier(commandBuffer, srcStage, dstStage, 0, 0, nullptr, 0, nullptr, 1, &barrier);
     }
 
-    void copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height, uint32_t depth,
+    void copyBufferToImage(VkBuffer buffer, VkImage image, rush::Vec3i offset, rush::Vec3ui size, uint32_t baseLayer,
                            uint32_t layers, VkCommandBuffer commandBuffer)
     {
         VkBufferImageCopy region{};
@@ -236,14 +236,14 @@ namespace neon::vulkan::vulkan_util
 
         region.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
         region.imageSubresource.mipLevel = 0;
-        region.imageSubresource.baseArrayLayer = 0;
+        region.imageSubresource.baseArrayLayer = baseLayer;
         region.imageSubresource.layerCount = layers;
 
-        region.imageOffset = {0, 0, 0};
+        region.imageOffset = {offset[0], offset[1], offset[2]};
         region.imageExtent = {
-            width,
-            height,
-            depth,
+            size[0],
+            size[1],
+            size[2],
         };
 
         vkCmdCopyBufferToImage(commandBuffer, buffer, image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);

@@ -6,7 +6,7 @@
 #define SHADERUNIFORM_H
 
 #include <vector>
-#include <neon/render/texture/TextureCreateInfo.h>
+#include <../texture/TextureCreateInfo.h>
 
 namespace neon
 {

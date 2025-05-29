@@ -4,6 +4,7 @@
 
 #ifndef VKRESOURCE_H
 #define VKRESOURCE_H
+
 #include "VKApplication.h"
 
 #include <memory>
@@ -12,18 +13,32 @@
 
 namespace neon::vulkan
 {
+
+    class AbstractVKApplication;
+
     class VKResource
     {
+        AbstractVKApplication* _application;
         std::vector<std::shared_ptr<CommandBufferRun>> _runs;
 
         void discardFinished();
 
       public:
-        VKResource();
+        explicit VKResource(AbstractVKApplication* application);
+
+        explicit VKResource(Application* application);
+
+        [[nodiscard]] AbstractVKApplication* getApplication();
+
+        [[nodiscard]] const AbstractVKApplication* getApplication() const;
 
         void registerRun(std::shared_ptr<CommandBufferRun> run);
 
-        std::vector<std::shared_ptr<CommandBufferRun>> getRuns();
+        [[nodiscard]] std::vector<std::shared_ptr<CommandBufferRun>> getRuns();
+
+        [[nodiscard]] VkDevice rawDevice() const;
+
+        [[nodiscard]] VkPhysicalDevice rawPhysicalDevice() const;
     };
 } // namespace neon::vulkan
 

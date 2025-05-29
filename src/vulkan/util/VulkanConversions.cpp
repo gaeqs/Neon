@@ -6,7 +6,7 @@
 
 #include <stdexcept>
 
-#include <neon/render/texture/TextureCreateInfo.h>
+#include <../../neon/render/texture/TextureCreateInfo.h>
 #include <neon/render/buffer/FrameBufferTextureCreateInfo.h>
 #include <neon/render/shader/MaterialCreateInfo.h>
 #include <vulkan/vulkan_core.h>

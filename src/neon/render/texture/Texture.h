@@ -1,78 +1,66 @@
 //
-// Created by gaelr on 23/10/2022.
+// Created by gaeqs on 27/05/2025.
 //
 
-#ifndef RVTRACKING_TEXTURE_H
-#define RVTRACKING_TEXTURE_H
+#ifndef NEON_TEXTURE_H
+#define NEON_TEXTURE_H
 
-#include <memory>
+#include <string>
+#include <optional>
 
-#include <imgui.h>
+#include <rush/rush.h>
 
 #include <neon/structure/Asset.h>
-#include <neon/render/texture/TextureCreateInfo.h>
-#include <neon/filesystem/File.h>
 
-#include <cmrc/cmrc.hpp>
+#include "TextureCreateInfo.h"
 
-#ifdef USE_VULKAN
-
-    #include <vulkan/VKTexture.h>
-
-#endif
+#include <neon/filesystem/CMRCFileSystem.h>
 
 namespace neon
 {
-    class Application;
+    class TextureCapabilityModifiable
+    {
+      public:
+        virtual ~TextureCapabilityModifiable() = default;
+
+        virtual Result<void, std::string> updateData(const std::byte* data, rush::Vec3ui offset, rush::Vec3ui size,
+                                                     uint32_t layerOffset, uint32_t layers,
+                                                     CommandBuffer* commandBuffer = nullptr) = 0;
+
+        virtual void resize(rush::Vec3ui dimensions) = 0;
+    };
+
+    class TextureCapabilityRead
+    {
+      public:
+        virtual ~TextureCapabilityRead() = default;
+
+        virtual void readData(std::byte* data, rush::Vec3ui offset, rush::Vec3ui size, uint32_t layerOffset,
+                              uint32_t layers, TextureFormat format) const = 0;
+    };
 
     class Texture : public Asset
     {
       public:
-#ifdef USE_VULKAN
-        using Implementation = vulkan::VKTexture;
-#endif
+        explicit Texture(std::string name);
 
-      private:
-        Implementation _implementation;
-        TextureFormat _format;
-        SamplesPerTexel _samples;
+        ~Texture() override = default;
 
-      public:
-        Texture(const Texture& other) = delete;
+        [[nodiscard]] virtual rush::Vec3ui getDimensions() const = 0;
 
-        Texture(Application* application, std::string name, const void* data,
-                const TextureCreateInfo& createInfo = TextureCreateInfo());
+        [[nodiscard]] virtual TextureFormat getFormat() const = 0;
 
-#ifdef USE_VULKAN
+        [[nodiscard]] virtual SamplesPerTexel getSamplesPerTexel() const = 0;
 
-        Texture(Application* application, std::string name, VkImage image, VkDeviceMemory memory, VkImageView imageView,
-                VkImageLayout layout, uint32_t width, uint32_t height, uint32_t depth, TextureFormat format,
-                SamplesPerTexel samples, const SamplerCreateInfo& createInfo = SamplerCreateInfo());
+        [[nodiscard]] virtual size_t getNumberOfMipmaps() const = 0;
 
-#endif
+        [[nodiscard]] virtual std::optional<const TextureCapabilityRead*> asReadable() const = 0;
 
-        [[nodiscard]] const Implementation& getImplementation() const;
+        [[nodiscard]] virtual std::optional<TextureCapabilityModifiable*> asModifiable() = 0;
 
-        Implementation& getImplementation();
+        [[nodiscard]] virtual void* getNativeHandle() = 0;
 
-        [[nodiscard]] uint32_t getWidth() const;
-
-        [[nodiscard]] uint32_t getHeight() const;
-
-        [[nodiscard]] uint32_t getDepth() const;
-
-        [[nodiscard]] TextureFormat getFormat() const;
-
-        [[nodiscard]] SamplesPerTexel getSamples() const;
-
-        void updateData(const char* data, int32_t width, int32_t height, int32_t depth, TextureFormat format);
-
-        void fetchData(void* data, rush::Vec3i offset, rush::Vec<3, uint32_t> size, uint32_t layersOffset,
-                       uint32_t layers);
-
-        ImTextureID getImGuiDescriptor() const;
-
-        // region Static methods
+        [[nodiscard]] virtual const void* getNativeHandle() const = 0;
 
         /**
          * Creates a new texture from a resource.
@@ -80,9 +68,9 @@ namespace neon
          * @param createInfo the texture creation info.
          * @return a pointer to the new texture.
          */
-        static std::unique_ptr<Texture> createTextureFromFile(
-            Application* application, std::string name, const cmrc::file& resource,
-            const TextureCreateInfo& createInfo = TextureCreateInfo());
+        static std::unique_ptr<Texture> createTextureFromFile(Application* application, std::string name,
+                                                              const cmrc::file& resource,
+                                                              const ImageCreateInfo& createInfo = ImageCreateInfo());
 
         /**
          * Creates a new texture from a resource.
@@ -90,9 +78,9 @@ namespace neon
          * @param createInfo the texture creation info.
          * @return a pointer to the new texture.
          */
-        static std::unique_ptr<Texture> createTextureFromFile(
-            Application* application, std::string name, const File& resource,
-            const TextureCreateInfo& createInfo = TextureCreateInfo());
+        static std::unique_ptr<Texture> createTextureFromFile(Application* application, std::string name,
+                                                              const File& resource,
+                                                              const ImageCreateInfo& createInfo = ImageCreateInfo());
 
         /**
          * Creates a new texture from a set of resources.
@@ -107,9 +95,9 @@ namespace neon
          * @param createInfo the texture creation info.
          * @return a pointer to the new texture.
          */
-        static std::unique_ptr<Texture> createTextureFromFiles(
-            Application* application, std::string name, const std::vector<cmrc::file>& resources,
-            const TextureCreateInfo& createInfo = TextureCreateInfo());
+        static std::unique_ptr<Texture> createTextureFromFiles(Application* application, std::string name,
+                                                               const std::vector<cmrc::file>& resources,
+                                                               const ImageCreateInfo& createInfo = ImageCreateInfo());
 
         /**
          * Creates a new texture from a file.
@@ -117,9 +105,9 @@ namespace neon
          * @param createInfo the texture creation info.
          * @return a pointer to the new texture.
          */
-        static std::unique_ptr<Texture> createTextureFromFile(
-            Application* application, std::string name, const std::string& path,
-            const TextureCreateInfo& createInfo = TextureCreateInfo());
+        static std::unique_ptr<Texture> createTextureFromFile(Application* application, std::string name,
+                                                              const std::string& path,
+                                                              ImageCreateInfo createInfo = ImageCreateInfo());
 
         /**
          * Creates a new texture from a set of files.
@@ -134,9 +122,9 @@ namespace neon
          * @param createInfo the texture creation info.
          * @return a pointer to the new texture.
          */
-        static std::unique_ptr<Texture> createTextureFromFiles(
-            Application* application, std::string name, const std::vector<std::string>& paths,
-            const TextureCreateInfo& createInfo = TextureCreateInfo());
+        static std::unique_ptr<Texture> createTextureFromFiles(Application* application, std::string name,
+                                                               const std::vector<std::string>& paths,
+                                                               ImageCreateInfo createInfo = ImageCreateInfo());
 
         /**
          * Creates a new texture from raw data.
@@ -145,9 +133,9 @@ namespace neon
          * @param createInfo the texture creation info.
          * @return a pointer to the new texture.
          */
-        static std::unique_ptr<Texture> createTextureFromFile(
-            Application* application, std::string name, const void* data, uint32_t size,
-            const TextureCreateInfo& createInfo = TextureCreateInfo());
+        static std::unique_ptr<Texture> createTextureFromFile(Application* application, std::string name,
+                                                              const void* data, uint32_t size,
+                                                              ImageCreateInfo createInfo = ImageCreateInfo());
 
         /**
          * Creates a new texture from a set of raw data pointers.
@@ -163,25 +151,11 @@ namespace neon
          * @param createInfo the texture creation info.
          * @return a pointer to the new texture.
          */
-        static std::unique_ptr<Texture> createTextureFromFiles(
-            Application* application, std::string name, const std::vector<const void*>& data,
-            const std::vector<uint32_t>& sizes, const TextureCreateInfo& createInfo = TextureCreateInfo());
-
-        // endregion
+        static std::unique_ptr<Texture> createTextureFromFiles(Application* application, std::string name,
+                                                               const std::vector<const void*>& data,
+                                                               const std::vector<uint32_t>& sizes,
+                                                               ImageCreateInfo createInfo = ImageCreateInfo());
     };
 } // namespace neon
 
-/**
- * Helper functions that integrate neon texture into ImGui.
- */
-namespace ImGui
-{
-
-    void Image(const std::shared_ptr<neon::Texture>& texture, const ImVec2& imageSize, const ImVec2& uv0 = ImVec2(0, 0),
-               const ImVec2& uv1 = ImVec2(1, 1));
-
-    void Image(const neon::Texture* texture, const ImVec2& imageSize, const ImVec2& uv0 = ImVec2(0, 0),
-               const ImVec2& uv1 = ImVec2(1, 1));
-}
-
-#endif // RVTRACKING_TEXTURE_H
+#endif // NEON_TEXTURE_H

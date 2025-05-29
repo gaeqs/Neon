@@ -6,7 +6,7 @@
 #define TEXTURELOADER_H
 
 #include <neon/loader/AssetLoader.h>
-#include <neon/render/texture/Texture.h>
+#include <neon/render/textureold/Texture.h>
 
 namespace neon
 {

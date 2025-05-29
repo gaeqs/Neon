@@ -10,7 +10,7 @@
 
 #include <vulkan/vulkan.h>
 
-#include <neon/render/texture/Texture.h>
+#include <neon/render/textureold/Texture.h>
 #include <neon/render/shader/MaterialCreateInfo.h>
 
 namespace neon

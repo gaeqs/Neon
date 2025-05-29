@@ -23,7 +23,7 @@
 #include <neon/filesystem/DirectoryFileSystem.h>
 
 #include <neon/render/shader/Material.h>
-#include <neon/render/texture/Texture.h>
+#include <neon/render/textureold/Texture.h>
 #include <neon/structure/Room.h>
 #include <neon/render/model/Mesh.h>
 #include <neon/render/model/Model.h>

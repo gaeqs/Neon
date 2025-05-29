@@ -12,7 +12,7 @@
 
 #include <neon/structure/collection/AssetCollection.h>
 #include <neon/render/model/InputDescription.h>
-#include <neon/render/texture/TextureCreateInfo.h>
+#include <../render/texture/TextureCreateInfo.h>
 #include <neon/render/shader/MaterialCreateInfo.h>
 #include <neon/render/model/ModelCreateInfo.h>
 

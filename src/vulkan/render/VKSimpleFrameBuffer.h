@@ -5,6 +5,8 @@
 #ifndef NEON_VKSIMPLEFRAMEBUFFER_H
 #define NEON_VKSIMPLEFRAMEBUFFER_H
 
+#include "texture/VKFrameBufferTexture.h"
+
 #include <vector>
 #include <memory>
 
@@ -14,6 +16,7 @@
 #include <vulkan/render/VKRenderPass.h>
 
 #include <imgui.h>
+#include <neon/render/texture/TextureCreateInfo.h>
 
 namespace neon
 {
@@ -28,14 +31,11 @@ namespace neon::vulkan
 
     struct SimpleFrameBufferImage
     {
-        std::optional<std::string> name;
         bool depth;
         ImageCreateInfo info;
         SamplerCreateInfo sampler;
-        VkImage image;
-        VmaAllocator allocator;
-        VmaAllocation allocation;
-        VkImageLayout layout;
+        std::shared_ptr<VKFrameBufferTexture> texture;
+
         VkImageView view;
         VkDescriptorSet imGuiDescriptor;
         std::shared_ptr<Texture> overrideTexture;

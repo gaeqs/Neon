@@ -1,7 +1,7 @@
 //
 // Created by gaelr on 28/01/2023.
 //
-#include "TextureCreateInfo.h"
+#include "../textureold/TextureCreateInfo.h"
 
 #include <algorithm>
 #include <unordered_map>

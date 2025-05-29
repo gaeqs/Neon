@@ -129,6 +129,70 @@ namespace neon
             return mapper(getError());
         }
     };
+
+    template<class Error>
+    class Result<void, Error>
+    {
+        void* _data;
+        bool _valid;
+
+      public:
+        Result() :
+            _valid(true)
+        {
+            _data = nullptr;
+        }
+
+        Result(const Error& error) :
+            _valid(false)
+        {
+            _data = new uint8_t[sizeof(Error)];
+            std::construct_at<Error, const Error&>(static_cast<Error*>(_data), error);
+        }
+
+        Result(Error&& error) :
+            _valid(false)
+        {
+            _data = new uint8_t[sizeof(Error)];
+            std::construct_at<Error, Error&&>(static_cast<Error*>(_data), std::forward<Error>(error));
+        }
+
+        ~Result()
+        {
+            if (!_valid)  {
+                std::destroy_at<Error>(static_cast<Error*>(_data));
+            }
+            delete[] static_cast<uint8_t*>(_data);
+        }
+
+        [[nodiscard]] bool isOk() const
+        {
+            return _valid;
+        }
+
+        [[nodiscard]] Error& getError()
+        {
+            return *static_cast<Error*>(_data);
+        }
+
+        [[nodiscard]] const Error& getError() const
+        {
+            return *static_cast<Error*>(_data);
+        }
+
+        template<class OError>
+        [[nodiscard]] Result<void, OError> mapError(std::function<OError(Error)> mapper) const
+        {
+            // Don't use a ternary operator.
+            // The return value is implicitly transformed
+            // into a Result using different constructors.
+            // Using a ternary operator Idisallows that.
+            if (_valid) {
+                return Result();
+            }
+            return mapper(getError());
+        }
+    };
 } // namespace neon
 
-#endif //RVTRACKING_RESULT_H
+#endif // RVTRACKING_RESULT_H
