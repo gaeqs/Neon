@@ -5,9 +5,12 @@
 #include "VKTextureView.h"
 
 #include <vulkan/util/VKUtil.h>
+#include <vulkan/util/VulkanConversions.h>
 
 namespace neon::vulkan
 {
+
+    namespace vc = conversions;
 
     VKTextureView::VKTextureView(Application* application, std::string name, const ImageViewCreateInfo& info,
                                  std::shared_ptr<Texture> texture) :
@@ -22,8 +25,12 @@ namespace neon::vulkan
             format = vc::vkFormat(texture->getFormat());
         }
 
-        _view = vulkan_util::createImageView(getApplication()->getDevice()->getRaw(), native, format,
-                                             VK_IMAGE_ASPECT_COLOR_BIT, info);
+        VkImageAspectFlags flags = 0;
+        for (auto aspect : info.aspect) {
+            flags |= static_cast<VkImageAspectFlags>(aspect);
+        }
+
+        _view = vulkan_util::createImageView(getApplication()->getDevice()->getRaw(), native, format, flags, info);
     }
 
     VKTextureView::~VKTextureView()

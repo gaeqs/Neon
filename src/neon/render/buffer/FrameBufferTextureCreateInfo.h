@@ -7,20 +7,20 @@
 
 #include <optional>
 #include <string>
-#include <../texture/TextureCreateInfo.h>
+#include <neon/render/texture/TextureCreateInfo.h>
 
 namespace neon
 {
     struct FrameBufferTextureCreateInfo
     {
         /**
-        * The name of the texture.
-        */
+         * The name of the texture.
+         */
         std::optional<std::string> name = {};
 
         /**
-        * The name of the resolved texture.
-        */
+         * The name of the resolved texture.
+         */
         std::optional<std::string> resolveName = {};
 
         /**
@@ -29,12 +29,12 @@ namespace neon
         TextureFormat format = TextureFormat::R8G8B8A8;
 
         /**
-        * The samplers of the image. Use this to implement MSAA.
-        */
+         * The samplers of the image. Use this to implement MSAA.
+         */
         SamplesPerTexel samples = SamplesPerTexel::COUNT_1;
 
         /**
-         * The amount of layers of the texture.
+         * The number of texture's layers.
          */
         uint32_t layers = 1;
 
@@ -63,6 +63,19 @@ namespace neon
             sampler.magnificationFilter = TextureFilter::NEAREST;
         }
     };
+
+    struct FrameBufferDepthCreateInfo
+    {
+        /**
+         * The name of the texture.
+         */
+        std::optional<std::string> name = {};
+
+        /**
+         * The samplers of the image. Use this to implement MSAA.
+         */
+        SamplesPerTexel samples = SamplesPerTexel::COUNT_1;
+    };
 } // namespace neon
 
-#endif //NEON_FRAMEBUFFERTEXTURECREATEINFO_H
+#endif // NEON_FRAMEBUFFERTEXTURECREATEINFO_H

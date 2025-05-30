@@ -125,6 +125,22 @@ namespace neon
         LINEAR
     };
 
+    enum class ViewAspect
+    {
+        COLOR = 0x00000001,
+        DEPTH = 0x00000002,
+        STENCIL = 0x00000004,
+        METADATA = 0x00000008,
+        PLANE_0 = 0x00000010,
+        PLANE_1 = 0x00000020,
+        PLANE_2 = 0x00000040,
+        MEMORY_PLANE_0 = 0x00000080,
+        MEMORY_PLANE_1 = 0x00000100,
+        MEMORY_PLANE_2 = 0x00000200,
+        MEMORY_PLANE_3 = 0x00000400,
+        ALL = 0x7FFFFFFF
+    };
+
     struct ImageCreateInfo
     {
         /**
@@ -239,10 +255,16 @@ namespace neon
         uint32_t baseArrayLayerLevel = 0;
 
         /**
-         * The amount of array layers for the view to use.
+         * The number of array layers for the view to use.
          * If set to 0, the view will use all layers.
          */
         uint32_t arrayLayerCount = 0;
+
+        /**
+         * The image aspects that will be visible to this view.
+         * These aspects can be defined as "the elements of the image that the view can access".
+         */
+        std::vector<ViewAspect> aspect = {ViewAspect::COLOR};
     };
 
     struct SamplerCreateInfo

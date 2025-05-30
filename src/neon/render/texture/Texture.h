@@ -10,11 +10,11 @@
 
 #include <rush/rush.h>
 
+#include <neon/structure/Application.h>
 #include <neon/structure/Asset.h>
-
-#include "TextureCreateInfo.h"
-
+#include <neon/render/texture/TextureCreateInfo.h>
 #include <neon/filesystem/CMRCFileSystem.h>
+#include <neon/util/Result.h>
 
 namespace neon
 {
@@ -25,7 +25,7 @@ namespace neon
 
         virtual Result<void, std::string> updateData(const std::byte* data, rush::Vec3ui offset, rush::Vec3ui size,
                                                      uint32_t layerOffset, uint32_t layers,
-                                                     CommandBuffer* commandBuffer = nullptr) = 0;
+                                                     CommandBuffer* commandBuffer) = 0;
 
         virtual void resize(rush::Vec3ui dimensions) = 0;
     };

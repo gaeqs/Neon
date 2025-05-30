@@ -24,6 +24,8 @@ namespace neon::vulkan
 
         VKFrameBuffer() = default;
 
+        explicit VKFrameBuffer(Application* application);
+
         virtual ~VKFrameBuffer() = default;
 
         [[nodiscard]] virtual bool hasDepth() const = 0;

@@ -7,9 +7,12 @@
 
 #include <vulkan/render/buffer/SimpleBuffer.h>
 #include <vulkan/util/VKUtil.h>
+#include <vulkan/util/VulkanConversions.h>
 
 namespace neon::vulkan
 {
+    namespace vc = conversions;
+
     void VKSimpleTexture::transitionLayout(VkImageLayout layout, VkCommandBuffer commandBuffer)
     {
         vulkan_util::transitionImageLayout(_image, vc::vkFormat(_info.format), _currentLayout, layout, _info.mipmaps,
@@ -192,5 +195,10 @@ namespace neon::vulkan
         }
 
         return {};
+    }
+
+    VkImage VKSimpleTexture::getImage() const
+    {
+        return _image;
     }
 } // namespace neon::vulkan

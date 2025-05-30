@@ -5,9 +5,9 @@
 #ifndef NEON_VKSIMPLETEXTURE_H
 #define NEON_VKSIMPLETEXTURE_H
 
-#include <imgui.h>
 #include <neon/render/texture/Texture.h>
 #include <neon/render/texture/TextureCreateInfo.h>
+#include <vulkan/VKResource.h>
 
 namespace neon::vulkan
 {
@@ -53,6 +53,8 @@ namespace neon::vulkan
         Result<void, std::string> updateData(const std::byte* data, rush::Vec3ui offset, rush::Vec3ui size,
                                              uint32_t layerOffset, uint32_t layers,
                                              CommandBuffer* commandBuffer) override;
+
+        [[nodiscard]] VkImage getImage() const;
     };
 } // namespace neon::vulkan
 
