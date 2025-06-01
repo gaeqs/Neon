@@ -6,9 +6,23 @@
 
 #include <vulkan/render/texture/VKSimpleTexture.h>
 #include <vulkan/render/texture/VKTextureView.h>
+#include <vulkan/util/VulkanConversions.h>
 
 namespace neon::vulkan
 {
+    void VKSimpleFrameBuffer::initRenderPass(const std::vector<FrameBufferTextureCreateInfo>& textureInfos,
+                                             const std::optional<FrameBufferDepthCreateInfo>& depthInfo)
+    {
+        namespace vc = conversions;
+        SamplesPerTexel depthSamples = depthInfo.has_value() ? depthInfo->samples : SamplesPerTexel::COUNT_1;
+
+        _renderPass = std::make_unique<VKRenderPass>(
+            getApplication()->getApplication(), vc::vkFormat(textureInfos),
+            conversions::vkSampleCountFlagBits(textureInfos), depthInfo.has_value(), false,
+            depthSamples != SamplesPerTexel::COUNT_1, getApplication()->getDepthImageFormat(),
+            conversions::vkSampleCountFlagBits(depthSamples));
+    }
+
     void VKSimpleFrameBuffer::initOutputs(const std::vector<FrameBufferTextureCreateInfo>& textureInfos,
                                           const std::optional<FrameBufferDepthCreateInfo>& depthInfo)
     {
@@ -41,16 +55,15 @@ namespace neon::vulkan
             info.samples = output.createInfo.samples;
 
             auto texture = std::make_shared<VKSimpleTexture>(app, name, info, nullptr);
-            std::shared_ptr<TextureView> view =
-                std::make_shared<VKTextureView>(app, name, ImageViewCreateInfo(), texture);
-            output.texture = view;
+            output.texture = std::make_shared<VKTextureView>(app, name, ImageViewCreateInfo(), texture);
 
             if (output.createInfo.samples != SamplesPerTexel::COUNT_1) {
                 info.samples = SamplesPerTexel::COUNT_1;
                 auto resolved = std::make_shared<VKSimpleTexture>(app, name, info, nullptr);
-                std::shared_ptr<TextureView> resolvedView = std::make_shared<VKTextureView>(
+                output.resolved = std::make_shared<VKTextureView>(
                     app, name, ImageViewCreateInfo{.aspect = {ViewAspect::COLOR}}, resolved);
-                output.resolved = resolvedView;
+            } else {
+                output.resolved = output.texture;
             }
         }
 
@@ -64,9 +77,50 @@ namespace neon::vulkan
             info.usages = {TextureUsage::DEPTH_STENCIL_ATTACHMENT, TextureUsage::SAMPLING};
 
             auto texture = std::make_shared<VKSimpleTexture>(app, name, info, nullptr);
-            std::shared_ptr<TextureView> view = std::make_shared<VKTextureView>(app, name, viewCreateInfo, texture);
+            auto view = std::make_shared<VKTextureView>(app, name, viewCreateInfo, texture);
             _depth->texture = view;
         }
+    }
+
+    void VKSimpleFrameBuffer::createFrameBuffer()
+    {
+        uint32_t layers = 1;
+        for (const auto& item : _outputs) {
+            layers = std::min(layers, item.createInfo.layers);
+        }
+
+        std::vector<VkImageView> views;
+        views.reserve(_outputs.size() * 2);
+
+        for (auto& item : _outputs) {
+            views.push_back(item.texture->vk());
+            if (item.resolved != item.texture) {
+                views.push_back(item.resolved->vk());
+            }
+        }
+
+        if (_depth) {
+            views.push_back(_depth->texture->vk());
+        }
+
+        VkFramebufferCreateInfo framebufferInfo{};
+        framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+        framebufferInfo.renderPass = _renderPass->getRaw();
+        framebufferInfo.attachmentCount = static_cast<uint32_t>(views.size());
+        framebufferInfo.pAttachments = views.data();
+        framebufferInfo.width = _dimensions.x();
+        framebufferInfo.height = _dimensions.y();
+        framebufferInfo.layers = layers;
+
+        if (vkCreateFramebuffer(getApplication()->getDevice()->getRaw(), &framebufferInfo, nullptr, &_frameBuffer) !=
+            VK_SUCCESS) {
+            throw std::runtime_error("Failed to create framebuffer!");
+        }
+    }
+
+    void VKSimpleFrameBuffer::destroyFrameBuffer()
+    {
+        vkDestroyFramebuffer(getApplication()->getDevice()->getRaw(), _frameBuffer, nullptr);
     }
 
     VKSimpleFrameBuffer::VKSimpleFrameBuffer(Application* application, rush::Vec2ui dimensions,
@@ -75,6 +129,17 @@ namespace neon::vulkan
         VKFrameBuffer(application),
         _dimensions(dimensions)
     {
+        initRenderPass(textureInfos, depthInfo);
         initOutputs(textureInfos, depthInfo);
+        createImages();
+        createFrameBuffer();
+    }
+
+    void VKSimpleFrameBuffer::recreate(rush::Vec2ui dimensions)
+    {
+        _dimensions = std::move(dimensions);
+        destroyFrameBuffer();
+        createImages();
+        createFrameBuffer();
     }
 } // namespace neon::vulkan

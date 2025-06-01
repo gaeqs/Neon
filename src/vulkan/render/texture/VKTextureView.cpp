@@ -49,4 +49,9 @@ namespace neon::vulkan
         return _view;
     }
 
+    VkImageView VKTextureView::vk() const
+    {
+        return _view;
+    }
+
 } // namespace neon::vulkan
