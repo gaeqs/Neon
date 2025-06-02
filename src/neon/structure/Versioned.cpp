@@ -7,7 +7,7 @@
 namespace neon
 {
     Versioned::Versioned() :
-        _version(0)
+        _version(1)
     {
     }
 

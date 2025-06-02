@@ -31,8 +31,8 @@ namespace neon::vulkan
 
     void VKShaderProgram::deleteShaders()
     {
-        auto bin = _vkApplication->getBin();
-        auto device = _vkApplication->getDevice()->getRaw();
+        auto bin = getApplication()->getBin();
+        auto device = getApplication()->getDevice()->getRaw();
         auto runs = getRuns();
         for (const auto& item : _shaders) {
             bin->destroyLater(device, runs, item.module, vkDestroyShaderModule);
@@ -41,7 +41,7 @@ namespace neon::vulkan
     }
 
     VKShaderProgram::VKShaderProgram(Application* application) :
-        _vkApplication(dynamic_cast<AbstractVKApplication*>(application->getImplementation()))
+        VKResource(application)
     {
     }
 
@@ -54,7 +54,7 @@ namespace neon::vulkan
     {
         deleteShaders();
 
-        SPIRVCompiler compiler(_vkApplication->getPhysicalDevice());
+        SPIRVCompiler compiler(getApplication()->getPhysicalDevice());
 
         for (const auto& [type, code] : raw) {
             auto error = compiler.addShader(getStage(type), code);
@@ -79,7 +79,7 @@ namespace neon::vulkan
 
             VkShaderModule shaderModule;
 
-            if (vkCreateShaderModule(_vkApplication->getDevice()->getRaw(), &moduleInfo, nullptr, &shaderModule) !=
+            if (vkCreateShaderModule(getApplication()->getDevice()->getRaw(), &moduleInfo, nullptr, &shaderModule) !=
                 VK_SUCCESS) {
                 return "Failed to create shader module.";
             }

@@ -59,8 +59,4 @@ namespace neon::vulkan
         return _deviceBuffer;
     }
 
-    AbstractVKApplication* StagingBuffer::getApplication() const
-    {
-        return _application;
-    }
 } // namespace neon::vulkan

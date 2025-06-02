@@ -11,10 +11,7 @@
 
 namespace neon::vulkan
 {
-    class VKSimpleTexture :
-        public VKResource,
-        public Texture,
-        public TextureCapabilityModifiable
+    class VKSimpleTexture : public VKResource, public Texture, public TextureCapabilityModifiable
     {
         VkImage _image;
         VmaAllocation _allocation;
@@ -29,8 +26,8 @@ namespace neon::vulkan
         void generateMipmaps(VkCommandBuffer buffer);
 
       public:
-        VKSimpleTexture(Application* application, std::string name, const ImageCreateInfo& info,
-                        const std::byte* data, CommandBuffer* commandBuffer = nullptr);
+        VKSimpleTexture(Application* application, std::string name, const ImageCreateInfo& info, const std::byte* data,
+                        CommandBuffer* commandBuffer = nullptr);
 
         ~VKSimpleTexture() override;
 
@@ -50,11 +47,15 @@ namespace neon::vulkan
 
         [[nodiscard]] const void* getNativeHandle() const override;
 
+        [[nodiscard]] std::any getLayoutNativeHandle() const override;
+
         Result<void, std::string> updateData(const std::byte* data, rush::Vec3ui offset, rush::Vec3ui size,
                                              uint32_t layerOffset, uint32_t layers,
                                              CommandBuffer* commandBuffer) override;
 
-        [[nodiscard]] VkImage getImage() const;
+        [[nodiscard]] VkImage vk() const;
+
+        [[nodiscard]] VkImageLayout vkLayout() const;
     };
 } // namespace neon::vulkan
 

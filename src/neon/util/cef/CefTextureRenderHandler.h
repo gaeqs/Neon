@@ -7,7 +7,7 @@
 
 #ifdef USE_CEF
 
-    #include <neon/render/textureold/Texture.h>
+    #include <neon/render/texture/Texture.h>
 
     #include <cef_render_handler.h>
 

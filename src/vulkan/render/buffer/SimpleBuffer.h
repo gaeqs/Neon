@@ -108,7 +108,6 @@ namespace neon::vulkan
     {
         size_t _size;
 
-        AbstractVKApplication* _application;
         VkBuffer _buffer;
 
         VmaAllocator _allocator;
@@ -144,8 +143,6 @@ namespace neon::vulkan
         [[nodiscard]] bool canBeWrittenOn() const override;
 
         [[nodiscard]] VkBuffer getRaw(std::shared_ptr<CommandBufferRun> run);
-
-        [[nodiscard]] AbstractVKApplication* getApplication() const override;
     };
 } // namespace neon::vulkan
 

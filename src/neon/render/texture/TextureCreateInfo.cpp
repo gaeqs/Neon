@@ -1,7 +1,7 @@
 //
 // Created by gaelr on 28/01/2023.
 //
-#include "../textureold/TextureCreateInfo.h"
+#include <neon/render/texture/TextureCreateInfo.h>
 
 #include <algorithm>
 #include <unordered_map>
@@ -28,9 +28,11 @@ namespace neon::serialization
             {    "R16FG16FB16F",     TextureFormat::R16FG16FB16F},
             {"R16FG16FB16FA16F", TextureFormat::R16FG16FB16FA16F},
             { "DEPTH24STENCIL8",  TextureFormat::DEPTH24STENCIL8},
+            {        "DEPTH32F",         TextureFormat::DEPTH32F},
+            {"DEPTH32FSTENCIL8", TextureFormat::DEPTH32FSTENCIL8},
         };
 
-        std::transform(s.begin(), s.end(), s.begin(), [](unsigned char c) { return std::toupper(c); });
+        std::ranges::transform(s, s.begin(), [](unsigned char c) { return std::toupper(c); });
 
         auto it = map.find(s);
         if (it != map.end()) {

@@ -73,7 +73,8 @@ namespace neon
         info.mipmapMode = serialization::toMipmapMode(json.value("mipmap_mode", "")).value_or(info.mipmapMode);
     }
 
-    std::shared_ptr<Texture> TextureLoader::loadAsset(std::string name, nlohmann::json json, AssetLoaderContext context)
+    std::shared_ptr<SampledTexture> TextureLoader::loadAsset(std::string name, nlohmann::json json,
+                                                             AssetLoaderContext context)
     {
         if (context.fileSystem == nullptr) {
             return nullptr;
@@ -112,8 +113,11 @@ namespace neon
         loadImage(json["image"], info.image);
         loadImageView(json["image_view"], info.imageView);
         loadSampler(json["sampler"], info.sampler);
-        info.commandBuffer = context.commandBuffer;
+        info.image.viewType = info.imageView.viewType;
 
-        return Texture::createTextureFromFiles(context.application, name, datas, sizes, info);
+        auto texture = Texture::createTextureFromFiles(context.application, name, datas, sizes, info.image);
+        auto view = TextureView::create(context.application, name, info.imageView, std::move(texture));
+        auto sampler = Sampler::create(context.application, name, info.sampler);
+        return SampledTexture::create(name, std::move(view), std::move(sampler));
     }
 } // namespace neon

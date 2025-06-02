@@ -12,7 +12,7 @@
 
 #ifdef USE_VULKAN
 
-    #include <vulkan/render/VKSimpleFrameBuffer.h>
+    #include <vulkan/render/buffer/VKSimpleFrameBuffer.h>
 
 #endif
 
@@ -25,7 +25,7 @@ namespace neon
       public:
         using Condition = std::function<bool(const SimpleFrameBuffer*)>;
 
-        using Parameters = std::function<std::pair<uint32_t, uint32_t>(Application*)>;
+        using Parameters = std::function<rush::Vec2ui(Application*)>;
 
 #ifdef USE_VULKAN
         using Implementation = vulkan::VKSimpleFrameBuffer;
@@ -41,19 +41,13 @@ namespace neon
       public:
         static bool defaultRecreationCondition(const SimpleFrameBuffer*);
 
-        static std::pair<uint32_t, uint32_t> defaultRecreationParameters(Application*);
+        static rush::Vec2ui defaultRecreationParameters(Application*);
 
-        SimpleFrameBuffer(Application* application, std::string name,
-                          const std::vector<FrameBufferTextureCreateInfo>& textureInfos, bool depth,
-                          std::optional<std::string> depthName = {},
-                          SamplesPerTexel depthSamples = SamplesPerTexel::COUNT_1,
-                          Condition condition = defaultRecreationCondition,
-                          const Parameters& parameters = defaultRecreationParameters);
-
-        SimpleFrameBuffer(Application* application, std::string name,
+        SimpleFrameBuffer(Application* application, std::string name, SamplesPerTexel samples,
                           const std::vector<FrameBufferTextureCreateInfo>& textureInfos,
-                          std::shared_ptr<Texture> depthTexture, Condition condition = defaultRecreationCondition,
-                          const Parameters& parameters = defaultRecreationParameters);
+                          const std::optional<FrameBufferDepthCreateInfo>& depthInfo = {},
+                          Condition condition = defaultRecreationCondition,
+                          Parameters parameters = defaultRecreationParameters);
 
         ~SimpleFrameBuffer() override = default;
 
@@ -67,9 +61,7 @@ namespace neon
 
         std::vector<FrameBufferOutput> getOutputs() const override;
 
-        [[nodiscard]] uint32_t getWidth() const override;
-
-        [[nodiscard]] uint32_t getHeight() const override;
+        rush::Vec2ui getDimensions() const override;
 
         SamplesPerTexel getSamples() const override;
 
@@ -80,9 +72,7 @@ namespace neon
         [[nodiscard]] const Parameters& getRecreationParameters() const;
 
         void setRecreationParameters(const Parameters& recreationParameters);
-
-        [[nodiscard]] ImTextureID getImGuiDescriptor(uint32_t index);
     };
 } // namespace neon
 
-#endif //NEON_SIMPLEFRAMEBUFFER_H
+#endif // NEON_SIMPLEFRAMEBUFFER_H

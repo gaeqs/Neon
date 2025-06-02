@@ -77,13 +77,13 @@ namespace neon::vulkan
 
         auto pair = vulkan_util::createImage(_vkApplication->getDevice()->getRaw(),
                                              _vkApplication->getPhysicalDevice().getRaw(), info,
-                                             TextureViewType::NORMAL_2D, _vkApplication->getDepthImageFormat());
+                                             TextureViewType::NORMAL_2D, _vkApplication->getVkDepthImageFormat());
 
         _depthImage = pair.first;
         _depthImageMemory = pair.second;
 
         _depthImageView = vulkan_util::createImageView(_vkApplication->getDevice()->getRaw(), _depthImage,
-                                                       _vkApplication->getDepthImageFormat(), VK_IMAGE_ASPECT_DEPTH_BIT,
+                                                       _vkApplication->getVkDepthImageFormat(), VK_IMAGE_ASPECT_DEPTH_BIT,
                                                        ImageViewCreateInfo());
 
         //
@@ -92,7 +92,7 @@ namespace neon::vulkan
             CommandBuffer* buffer = holder.getPool().beginCommandBuffer(true);
             VkCommandBuffer rawBuffer = buffer->getImplementation().getCommandBuffer();
 
-            vulkan_util::transitionImageLayout(_depthImage, _vkApplication->getDepthImageFormat(),
+            vulkan_util::transitionImageLayout(_depthImage, _vkApplication->getVkDepthImageFormat(),
                                                VK_IMAGE_LAYOUT_UNDEFINED,
                                                VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL, 1, 1, rawBuffer);
         }
@@ -159,7 +159,7 @@ namespace neon::vulkan
     }
 
     VKSwapChainFrameBuffer::VKSwapChainFrameBuffer(Application* application, SamplesPerTexel samples, bool depth) :
-        VKFrameBuffer(),
+        VKFrameBuffer(application),
         _vkApplication(dynamic_cast<AbstractVKApplication*>(application->getImplementation())),
         _samples(samples),
         _depthImage(VK_NULL_HANDLE),
@@ -168,7 +168,7 @@ namespace neon::vulkan
         _extent(),
         _renderPass(application, {_vkApplication->getSwapChainImageFormat()},
                     {conversions::vkSampleCountFlagBits(samples)}, depth, true, samples != SamplesPerTexel::COUNT_1,
-                    _vkApplication->getDepthImageFormat(), conversions::vkSampleCountFlagBits(samples)),
+                    _vkApplication->getVkDepthImageFormat(), conversions::vkSampleCountFlagBits(samples)),
         _swapChainCount(_vkApplication->getSwapChainCount()),
         _depth(depth)
     {
@@ -210,11 +210,6 @@ namespace neon::vulkan
         cleanup();
     }
 
-    VkFramebuffer VKSwapChainFrameBuffer::getRaw() const
-    {
-        return _swapChainFrameBuffers[_vkApplication->getCurrentSwapChainImage()];
-    }
-
     bool VKSwapChainFrameBuffer::hasDepth() const
     {
         return _depth;
@@ -247,9 +242,19 @@ namespace neon::vulkan
         return {_vkApplication->getSwapChainImageFormat()};
     }
 
-    VkFormat VKSwapChainFrameBuffer::getDepthFormat() const
+    std::optional<VkFormat> VKSwapChainFrameBuffer::getDepthFormat() const
     {
-        return _vkApplication->getDepthImageFormat();
+        return _depth ? _vkApplication->getVkDepthImageFormat() : std::optional<VkFormat>();
+    }
+
+    void* VKSwapChainFrameBuffer::getNativeHandle()
+    {
+        return _swapChainFrameBuffers[_vkApplication->getCurrentSwapChainImage()];
+    }
+
+    const void* VKSwapChainFrameBuffer::getNativeHandle() const
+    {
+        return _swapChainFrameBuffers[_vkApplication->getCurrentSwapChainImage()];
     }
 
     const VKRenderPass& VKSwapChainFrameBuffer::getRenderPass() const
@@ -274,16 +279,6 @@ namespace neon::vulkan
         return {output};
     }
 
-    uint32_t VKSwapChainFrameBuffer::getWidth() const
-    {
-        return _extent.width;
-    }
-
-    uint32_t VKSwapChainFrameBuffer::getHeight() const
-    {
-        return _extent.height;
-    }
-
     SamplesPerTexel VKSwapChainFrameBuffer::getSamples() const
     {
         return _samples;
@@ -292,5 +287,10 @@ namespace neon::vulkan
     bool VKSwapChainFrameBuffer::requiresRecreation()
     {
         return _swapChainCount != _vkApplication->getSwapChainCount();
+    }
+
+    rush::Vec2ui VKSwapChainFrameBuffer::getDimensions() const
+    {
+        return {_extent.width, _extent.height};
     }
 } // namespace neon::vulkan

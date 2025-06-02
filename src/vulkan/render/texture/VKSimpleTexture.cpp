@@ -22,7 +22,7 @@ namespace neon::vulkan
 
     void VKSimpleTexture::uploadData(const std::byte* data, CommandBuffer* commandBuffer)
     {
-        size_t size = _info.width * _info.height * _info.depth * vc::pixelSize(_info.format);
+        size_t size = _info.width * _info.height * _info.depth * _info.layers * vc::pixelSize(_info.format);
         SimpleBuffer buffer(getApplication(), VK_BUFFER_USAGE_TRANSFER_SRC_BIT, 0, size);
         {
             auto map = buffer.map<std::byte>(commandBuffer);
@@ -35,6 +35,10 @@ namespace neon::vulkan
         VkCommandBuffer rawBuffer = commandBuffer->getImplementation().getCommandBuffer();
 
         transitionLayout(VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, rawBuffer);
+
+        vulkan_util::copyBufferToImage(buffer.getRaw(commandBuffer->getCurrentRun()), _image, {0, 0, 0},
+                                       {_info.width, _info.height, _info.depth}, 0, _info.layers, rawBuffer);
+
         generateMipmaps(rawBuffer);
         // generateMipmaps transforms image to
         // VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
@@ -100,8 +104,12 @@ namespace neon::vulkan
         if (data != nullptr) {
             uploadData(data, commandBuffer);
         } else {
-            transitionLayout(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-                             commandBuffer->getImplementation().getCommandBuffer());
+            VkImageLayout layout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+            if (vulkan_util::isDepthFormat(info.format)) {
+                layout = vulkan_util::isStencilFormat(info.format) ? VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL
+                                                                   : VK_IMAGE_LAYOUT_DEPTH_READ_ONLY_OPTIMAL;
+            }
+            transitionLayout(layout, commandBuffer->getImplementation().getCommandBuffer());
         }
         if (holder.isValid()) {
             commandBuffer->end();
@@ -113,9 +121,11 @@ namespace neon::vulkan
     {
         auto device = rawDevice();
         auto bin = getApplication()->getBin();
-        auto alloc = getApplication()->getDevice()->getAllocator();
+        auto allocator = getApplication()->getDevice()->getAllocator();
 
-        bin->destroyLater(device, getRuns(), [=] { vmaDestroyImage(alloc, _image, _allocation); });
+        bin->destroyLater(device, getRuns(), [allocator, image = _image, allocation = _allocation] {
+            vmaDestroyImage(allocator, image, allocation);
+        });
     }
 
     rush::Vec3ui VKSimpleTexture::getDimensions() const
@@ -158,6 +168,11 @@ namespace neon::vulkan
         return _image;
     }
 
+    std::any VKSimpleTexture::getLayoutNativeHandle() const
+    {
+        return _currentLayout;
+    }
+
     Result<void, std::string> VKSimpleTexture::updateData(const std::byte* data, rush::Vec3ui offset, rush::Vec3ui size,
                                                           uint32_t layerOffset, uint32_t layers,
                                                           CommandBuffer* commandBuffer)
@@ -197,8 +212,13 @@ namespace neon::vulkan
         return {};
     }
 
-    VkImage VKSimpleTexture::getImage() const
+    VkImage VKSimpleTexture::vk() const
     {
         return _image;
+    }
+
+    VkImageLayout VKSimpleTexture::vkLayout() const
+    {
+        return _currentLayout;
     }
 } // namespace neon::vulkan

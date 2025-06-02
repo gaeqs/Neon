@@ -32,7 +32,9 @@ namespace neon
         R16FG16F,
         R16FG16FB16F,
         R16FG16FB16FA16F,
-        DEPTH24STENCIL8
+        DEPTH24STENCIL8,
+        DEPTH32F,
+        DEPTH32FSTENCIL8
     };
 
     enum class TextureFilter

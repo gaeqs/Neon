@@ -27,7 +27,7 @@ namespace neon
 
         MutableAsset() = default;
 
-        std::shared_ptr<T> get() const
+        const std::shared_ptr<T>& get() const
         {
             return _asset;
         }

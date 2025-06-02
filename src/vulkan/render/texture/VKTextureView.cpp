@@ -17,12 +17,12 @@ namespace neon::vulkan
         VKResource(application),
         TextureView(std::move(name), info, std::move(texture))
     {
-        VkImage native = static_cast<VkImage>(getTexture()->getNativeHandle());
+        auto native = static_cast<VkImage>(getTexture()->getNativeHandle());
         VkFormat format;
         if (info.format) {
             format = vc::vkFormat(info.format.value());
         } else {
-            format = vc::vkFormat(texture->getFormat());
+            format = vc::vkFormat(getTexture()->getFormat());
         }
 
         VkImageAspectFlags flags = 0;

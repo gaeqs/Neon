@@ -6,7 +6,8 @@
 #define FRAMEBUFFEROUTPUT_H
 
 #include <memory>
-#include <neon/render/textureold/Texture.h>
+#include <neon/render/texture/TextureView.h>
+#include <neon/structure/MutableAsset.h>
 
 namespace neon
 {
@@ -20,9 +21,9 @@ namespace neon
     struct FrameBufferOutput
     {
         FrameBufferOutputType type;
-        std::shared_ptr<Texture> texture;
-        std::shared_ptr<Texture> resolvedTexture;
+        std::shared_ptr<MutableAsset<TextureView>> texture;
+        std::shared_ptr<MutableAsset<TextureView>> resolvedTexture;
     };
 } // namespace neon
 
-#endif //FRAMEBUFFEROUTPUT_H
+#endif // FRAMEBUFFEROUTPUT_H

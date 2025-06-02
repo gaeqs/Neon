@@ -54,18 +54,18 @@ namespace neon
             aiTexture* texture = scene->mTextures[i];
             auto name = "*" + std::to_string(i);
 
-            TextureCreateInfo info;
-            info.commandBuffer = context.commandBuffer;
+            ImageCreateInfo info;
             if (texture->mHeight == 0) {
                 // Compressed texture
-                textures.push_back(
-                    Texture::createTextureFromFile(context.application, name, texture->pcData, texture->mWidth, info));
+                textures.push_back(Texture::createTextureFromFile(context.application, name, texture->pcData,
+                                                                  texture->mWidth, info, context.commandBuffer));
             } else {
-                info.image.width = texture->mWidth;
-                info.image.height = texture->mHeight;
-                info.image.depth = 1;
-                info.image.format = TextureFormat::A8R8G8B8;
-                textures.push_back(std::make_shared<Texture>(context.application, name, texture->pcData, info));
+                info.width = texture->mWidth;
+                info.height = texture->mHeight;
+                info.depth = 1;
+                info.format = TextureFormat::A8R8G8B8;
+                textures.push_back(Texture::createFromRawData(context.application, name, texture->pcData, info,
+                                                              context.commandBuffer));
             }
         }
 

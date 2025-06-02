@@ -5,13 +5,10 @@
 #include "DeferredUtils.h"
 
 #include <memory>
-#include <stdexcept>
 #include <utility>
 
-#include <neon/structure/collection/AssetCollection.h>
 #include <neon/render/shader/MaterialCreateInfo.h>
 #include <neon/structure/Room.h>
-#include <neon/render/textureold/Texture.h>
 #include <neon/render/buffer/SimpleFrameBuffer.h>
 #include <neon/render/Render.h>
 #include <neon/render/light/DirectionalLight.h>
@@ -41,8 +38,8 @@ namespace neon::deferred_utils
         return std::make_shared<Model>(application, name, info);
     }
 
-    std::shared_ptr<Texture> createLightSystem(Room* room, Render* render,
-                                               const std::vector<std::shared_ptr<Texture>>& textures,
+    std::shared_ptr<MutableAsset<TextureView>> createLightSystem(Room* room, Render* render,
+                                               const std::vector<std::shared_ptr<SampledTexture>>& textures,
                                                TextureFormat outputFormat,
                                                const std::shared_ptr<ShaderProgram>& directionalShader,
                                                const std::shared_ptr<ShaderProgram>& pointShader,
@@ -56,8 +53,8 @@ namespace neon::deferred_utils
         std::shared_ptr<Model> pointModel = nullptr;
         std::shared_ptr<Model> flashModel = nullptr;
 
-        auto frameBuffer =
-            std::make_shared<SimpleFrameBuffer>(room->getApplication(), "deferred", outputFormatVector, false);
+        auto frameBuffer = std::make_shared<SimpleFrameBuffer>(room->getApplication(), "deferred",
+                                                               SamplesPerTexel::COUNT_1, outputFormatVector);
         render->addRenderPass(std::make_shared<DefaultRenderPassStrategy>("deferred", frameBuffer));
 
         std::vector<ShaderUniformBinding> bindings;

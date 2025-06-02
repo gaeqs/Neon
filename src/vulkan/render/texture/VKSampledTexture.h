@@ -6,18 +6,21 @@
 #define NEON_VKSAMPLEDTEXTURE_H
 
 #include <neon/render/texture/SampledTexture.h>
-#include <vulkan/VKResource.h>
 
 namespace neon::vulkan
 {
     class VKSampledTexture : public SampledTexture
     {
-        VkDescriptorSet _set;
+        mutable VkDescriptorSet _set;
+        mutable uint64_t _setVersion;
 
       public:
-        VKSampledTexture(std::shared_ptr<TextureView> view, std::shared_ptr<Sampler> sampler);
+        VKSampledTexture(std::string name, std::shared_ptr<MutableAsset<TextureView>> view,
+                         std::shared_ptr<Sampler> sampler);
 
-        ImTextureID getImGuiDescriptor() const override;
+        ~VKSampledTexture() override;
+
+        [[nodiscard]] ImTextureID getImGuiDescriptor() const override;
     };
 } // namespace neon::vulkan
 

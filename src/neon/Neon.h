@@ -80,8 +80,12 @@
 #include <neon/render/shader/ShaderUniformBuffer.h>
 #include <neon/render/shader/ShaderUniformDescriptor.h>
 
-#include <neon/render/textureold/Texture.h>
-#include <render/texture/TextureCreateInfo.h>
+#include <neon/render/texture/Texture.h>
+#include <neon/render/texture/SampledTexture.h>
+#include <neon/render/texture/Sampler.h>
+#include <neon/render/texture/TextureView.h>
+#include <neon/render/texture/TextureData.h>
+#include <neon/render/texture/TextureCreateInfo.h>
 
 #include <neon/render/FrameInformation.h>
 #include <neon/render/GraphicComponent.h>

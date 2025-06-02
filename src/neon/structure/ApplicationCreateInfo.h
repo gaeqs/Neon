@@ -8,7 +8,7 @@
 #include <string>
 #include <vector>
 
-#include <neon/render/textureold/TextureData.h>
+#include <neon/render/texture/TextureData.h>
 
 /**
  * This class provides the necessary information to create and configure an application instance.

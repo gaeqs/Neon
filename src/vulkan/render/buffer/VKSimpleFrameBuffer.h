@@ -13,7 +13,6 @@
 
 #include <vulkan/vulkan.h>
 #include <vulkan/render/VKRenderPass.h>
-#include <vulkan/render/texture/VKTextureView.h>
 
 namespace neon::vulkan
 {
@@ -22,19 +21,20 @@ namespace neon::vulkan
     {
         std::optional<std::string> name;
         FrameBufferTextureCreateInfo createInfo;
-        std::shared_ptr<VKTextureView> texture;
-        std::shared_ptr<VKTextureView> resolved;
+        std::shared_ptr<MutableAsset<TextureView>> texture;
+        std::shared_ptr<MutableAsset<TextureView>> resolved;
     };
 
     struct SimpleFrameBufferDepth
     {
         std::optional<std::string> name;
         FrameBufferDepthCreateInfo createInfo;
-        std::shared_ptr<VKTextureView> texture;
+        std::shared_ptr<MutableAsset<TextureView>> texture;
     };
 
     class VKSimpleFrameBuffer : public VKFrameBuffer
     {
+        SamplesPerTexel _samplesPerTexel;
         VkFramebuffer _frameBuffer;
         std::unique_ptr<VKRenderPass> _renderPass;
         std::vector<SimpleFrameBufferOutput> _outputs;
@@ -54,11 +54,39 @@ namespace neon::vulkan
         void destroyFrameBuffer();
 
       public:
-        VKSimpleFrameBuffer(Application* application, rush::Vec2ui dimensions,
+        VKSimpleFrameBuffer(Application* application, rush::Vec2ui dimensions, SamplesPerTexel samples,
                             const std::vector<FrameBufferTextureCreateInfo>& textureInfos,
                             const std::optional<FrameBufferDepthCreateInfo>& depthInfo);
 
+        ~VKSimpleFrameBuffer() override;
+
+        [[nodiscard]] rush::Vec2ui getDimensions() const override;
+
+        [[nodiscard]] bool hasDepth() const override;
+
+        [[nodiscard]] uint32_t getColorAttachmentAmount() const override;
+
+        [[nodiscard]] std::vector<VkFormat> getColorFormats() const override;
+
+        [[nodiscard]] std::optional<VkFormat> getDepthFormat() const override;
+
+        [[nodiscard]] const VKRenderPass& getRenderPass() const override;
+
+        [[nodiscard]] VKRenderPass& getRenderPass() override;
+
+        [[nodiscard]] SamplesPerTexel getSamples() const override;
+
+        [[nodiscard]] bool renderImGui() override;
+
+        [[nodiscard]] std::vector<FrameBufferOutput> getOutputs() const override;
+
+        [[nodiscard]] void* getNativeHandle() override;
+
+        [[nodiscard]] const void* getNativeHandle() const override;
+
         void recreate(rush::Vec2ui dimensions);
+
+        [[nodiscard]] VkFramebuffer vk() const;
     };
 } // namespace neon::vulkan
 

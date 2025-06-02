@@ -5,7 +5,9 @@
 #ifndef NEON_SAMPLER_H
 #define NEON_SAMPLER_H
 
+#include <memory>
 #include <neon/structure/Asset.h>
+#include <neon/structure/Application.h>
 #include "TextureCreateInfo.h"
 
 namespace neon

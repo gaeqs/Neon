@@ -40,11 +40,9 @@ namespace neon
 
         [[nodiscard]] const FrameBuffer::Implementation& getImplementation() const override;
 
-        [[nodiscard]] std::vector<FrameBufferOutput> getOutputs() const override;
+        std::vector<FrameBufferOutput> getOutputs() const override;
 
-        [[nodiscard]] uint32_t getWidth() const override;
-
-        [[nodiscard]] uint32_t getHeight() const override;
+        rush::Vec2ui getDimensions() const override;
 
         SamplesPerTexel getSamples() const override;
     };

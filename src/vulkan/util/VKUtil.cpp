@@ -203,11 +203,12 @@ namespace neon::vulkan::vulkan_util
         barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
         barrier.image = image;
 
-        if (newLayout == VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL) {
-            barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
-            if (format == VK_FORMAT_D32_SFLOAT_S8_UINT || format == VK_FORMAT_D24_UNORM_S8_UINT) {
-                barrier.subresourceRange.aspectMask |= VK_IMAGE_ASPECT_STENCIL_BIT;
-            }
+        if (newLayout == VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL) {
+            barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT;
+        } else if (newLayout == VK_IMAGE_LAYOUT_DEPTH_READ_ONLY_OPTIMAL) {
+            barrier.subresourceRange.aspectMask |= VK_IMAGE_ASPECT_DEPTH_BIT;
+        } else if (newLayout == VK_IMAGE_LAYOUT_STENCIL_READ_ONLY_OPTIMAL) {
+            barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_STENCIL_BIT;
         } else {
             barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
         }
@@ -273,7 +274,7 @@ namespace neon::vulkan::vulkan_util
     }
 
     void generateMipmaps(AbstractVKApplication* application, VkImage image, uint32_t width, uint32_t height,
-                         uint32_t depth, uint32_t levels, int32_t layers, VkCommandBuffer commandBuffer)
+                         uint32_t depth, uint32_t levels, uint32_t layers, VkCommandBuffer commandBuffer)
     {
         VkImageMemoryBarrier barrier{};
         barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
@@ -343,21 +344,32 @@ namespace neon::vulkan::vulkan_util
                              nullptr, 0, nullptr, 1, &barrier);
     }
 
-    std::optional<VkFormat> findSupportedFormat(VkPhysicalDevice physicalDevice,
-                                                const std::vector<VkFormat>& candidates, VkImageTiling tiling,
-                                                VkFormatFeatureFlags features)
+    std::optional<size_t> findSupportedFormat(VkPhysicalDevice physicalDevice, const std::vector<VkFormat>& candidates,
+                                              VkImageTiling tiling, VkFormatFeatureFlags features)
     {
+        size_t i = 0;
         for (const auto& format : candidates) {
             VkFormatProperties props;
             vkGetPhysicalDeviceFormatProperties(physicalDevice, format, &props);
 
             if ((tiling == VK_IMAGE_TILING_LINEAR && (props.linearTilingFeatures & features) == features) ||
                 (tiling == VK_IMAGE_TILING_OPTIMAL && (props.optimalTilingFeatures & features) == features)) {
-                return format;
+                return i;
             }
         }
 
         return {};
+    }
+
+    bool isDepthFormat(TextureFormat format)
+    {
+        return format == TextureFormat::DEPTH32FSTENCIL8 || format == TextureFormat::DEPTH32F ||
+               format == TextureFormat::DEPTH24STENCIL8;
+    }
+
+    bool isStencilFormat(TextureFormat format)
+    {
+        return format == TextureFormat::DEPTH32FSTENCIL8 || format == TextureFormat::DEPTH24STENCIL8;
     }
 
     VkImageView createImageView(VkDevice device, VkImage image, VkFormat format, VkImageAspectFlags aspectFlags,
@@ -430,12 +442,14 @@ namespace neon::vulkan::vulkan_util
 
         frameBuffer.registerRun(commandBuffer->getCurrentRun());
 
+        auto dimensions = frameBuffer.getDimensions();
+
         VkRenderPassBeginInfo renderPassInfo{};
         renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
         renderPassInfo.renderPass = renderPass.getRaw();
-        renderPassInfo.framebuffer = frameBuffer.getRaw();
+        renderPassInfo.framebuffer = static_cast<VkFramebuffer>(frameBuffer.getNativeHandle());
         renderPassInfo.renderArea.offset = {0, 0};
-        renderPassInfo.renderArea.extent = {frameBuffer.getWidth(), frameBuffer.getHeight()};
+        renderPassInfo.renderArea.extent = {dimensions.x(), dimensions.y()};
 
         std::vector<VkClearValue> clearValues;
         if (clear) {
@@ -459,7 +473,7 @@ namespace neon::vulkan::vulkan_util
                 }
 
                 clearValues.push_back(value);
-                if (output.texture != output.resolvedTexture) {
+                if (output.resolvedTexture != nullptr && *output.texture != *output.resolvedTexture) {
                     clearValues.push_back(value);
                 }
             }
@@ -476,15 +490,15 @@ namespace neon::vulkan::vulkan_util
         VkViewport viewport{};
         viewport.x = 0.0f;
         viewport.y = 0.0f;
-        viewport.width = static_cast<float>(frameBuffer.getWidth());
-        viewport.height = static_cast<float>(frameBuffer.getHeight());
+        viewport.width = static_cast<float>(dimensions.x());
+        viewport.height = static_cast<float>(dimensions.y());
         viewport.minDepth = 0.0f;
         viewport.maxDepth = 1.0f;
         vkCmdSetViewport(cmd, 0, 1, &viewport);
 
         VkRect2D scissor{};
         scissor.offset = {0, 0};
-        scissor.extent = {frameBuffer.getWidth(), frameBuffer.getHeight()};
+        scissor.extent = {dimensions.x(), dimensions.y()};
         vkCmdSetScissor(cmd, 0, 1, &scissor);
     }
 } // namespace neon::vulkan::vulkan_util

@@ -36,7 +36,7 @@ namespace neon
         return _implementation.fetchData(index);
     }
 
-    void ShaderUniformBuffer::setTexture(uint32_t index, std::shared_ptr<Texture> texture)
+    void ShaderUniformBuffer::setTexture(uint32_t index, std::shared_ptr<SampledTexture> texture)
     {
         _implementation.setTexture(index, std::move(texture));
     }

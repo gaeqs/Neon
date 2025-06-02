@@ -8,30 +8,51 @@
 #include "Sampler.h"
 #include "TextureView.h"
 
+#include <imgui.h>
 #include <memory>
+#include <neon/structure/MutableAsset.h>
 
 namespace neon
 {
-    class SampledTexture
+    class SampledTexture : public Asset
     {
-        std::shared_ptr<TextureView> _view;
+        std::shared_ptr<MutableAsset<TextureView>> _view;
         std::shared_ptr<Sampler> _sampler;
 
       public:
-        SampledTexture(std::shared_ptr<TextureView> view, std::shared_ptr<Sampler> sampler);
+        SampledTexture(std::string name, std::shared_ptr<MutableAsset<TextureView>> view,
+                       std::shared_ptr<Sampler> sampler);
 
-        virtual ~SampledTexture() = default;
+        ~SampledTexture() override = default;
 
-        [[nodiscard]] const std::shared_ptr<TextureView>& getView() const;
+        [[nodiscard]] const std::shared_ptr<MutableAsset<TextureView>>& getView() const;
+
+        [[nodiscard]] uint64_t getViewVersion() const;
 
         [[nodiscard]] const std::shared_ptr<Sampler>& getSampler() const;
 
         [[nodiscard]] virtual ImTextureID getImGuiDescriptor() const = 0;
 
-        static std::shared_ptr<SampledTexture> create(std::shared_ptr<TextureView> view,
+        [[nodiscard]] std::tuple<void*, void*, std::any> getNativeHandlers();
+
+        [[nodiscard]] std::tuple<const void*, const void*, std::any> getNativeHandlers() const;
+
+        static std::shared_ptr<SampledTexture> create(std::string name, std::shared_ptr<TextureView> view,
                                                       std::shared_ptr<Sampler> sampler);
 
+        static std::shared_ptr<SampledTexture> create(std::string name, std::shared_ptr<MutableAsset<TextureView>> view,
+                                                      std::shared_ptr<Sampler> sampler);
+
+        static std::shared_ptr<SampledTexture> create(Application* application, std::string name,
+                                                      std::shared_ptr<Texture> texture);
+
         static std::shared_ptr<SampledTexture> create(Application* application, std::shared_ptr<Texture> texture);
+
+        static std::shared_ptr<SampledTexture> create(Application* application, std::string name,
+                                                      std::shared_ptr<MutableAsset<TextureView>> view);
+
+        static std::shared_ptr<SampledTexture> create(Application* application,
+                                                      std::shared_ptr<MutableAsset<TextureView>> view);
     };
 } // namespace neon
 

@@ -13,10 +13,11 @@
 #include <neon/render/shader/ShaderUniformBuffer.h>
 #include <neon/render/shader/MaterialCreateInfo.h>
 #include <neon/render/model/InputDescription.h>
-#include <neon/render/textureold/Texture.h>
+#include <neon/render/texture/Texture.h>
 #include <neon/render/buffer/FrameBuffer.h>
 
 #include <assimp/types.h>
+#include <neon/render/texture/SampledTexture.h>
 
 #ifdef USE_VULKAN
 
@@ -165,7 +166,7 @@ namespace neon
          * @param name the name of the sampler.
          * @param texture the texture.
          */
-        void setTexture(const std::string& name, std::shared_ptr<Texture> texture);
+        void setTexture(const std::string& name, std::shared_ptr<SampledTexture> texture);
 
         // region Util static methods
 
@@ -174,7 +175,7 @@ namespace neon
                                                 const std::shared_ptr<ShaderProgram>& shader,
                                                 const InputDescription& vertex, const InputDescription& instance,
                                                 const std::vector<std::pair<void*, size_t>>& buffers,
-                                                const std::vector<std::shared_ptr<Texture>>& textures);
+                                                const std::vector<std::shared_ptr<SampledTexture>>& textures);
 
         // endregion
     };

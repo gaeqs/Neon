@@ -10,6 +10,7 @@
     #include "CefTextureRenderHandler.h"
     #include <cef_client.h>
     #include <neon/structure/Component.h>
+    #include <neon/render/texture/SampledTexture.h>
 
 namespace neon
 {
@@ -49,6 +50,7 @@ namespace neon
 
         std::string _startURL;
         std::shared_ptr<Texture> _texture;
+        std::shared_ptr<SampledTexture> _sampled;
         CefRefPtr<NeonCefClient> _client;
         rush::Vec2f _windowOrigin;
         rush::Vec2f _lastMousePosition;

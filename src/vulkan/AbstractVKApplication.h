@@ -6,6 +6,7 @@
 #define VISIMPL_ABSTRACTVKAPPLICATION_H
 
 #include <neon/structure/Application.h>
+#include <neon/render/texture/TextureCreateInfo.h>
 #include <neon/render/buffer/CommandPool.h>
 #include <vulkan/device/VKDevice.h>
 #include <vulkan/device/VKPhysicalDevice.h>
@@ -33,7 +34,9 @@ namespace neon::vulkan
 
         [[nodiscard]] virtual VkFormat getSwapChainImageFormat() const = 0;
 
-        [[nodiscard]] virtual VkFormat getDepthImageFormat() const = 0;
+        [[nodiscard]] virtual TextureFormat getDepthImageFormat() const = 0;
+
+        [[nodiscard]] virtual VkFormat getVkDepthImageFormat() const = 0;
 
         [[nodiscard]] virtual CommandPool* getCommandPool() const = 0;
 

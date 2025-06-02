@@ -12,7 +12,7 @@
 
 namespace neon
 {
-    FrameBufferTextureCreateInfo FrameBufferLoader::loadTexture(nlohmann::json& json, SamplesPerTexel samples)
+    FrameBufferTextureCreateInfo FrameBufferLoader::loadTexture(nlohmann::json& json)
     {
         FrameBufferTextureCreateInfo info;
         if (!json.is_object()) {
@@ -29,7 +29,6 @@ namespace neon
             }
         }
 
-        info.samples = samples;
         info.format = serialization::toTextureFormat(json.value("format", "")).value_or(info.format);
         info.layers = json.value("layers", info.layers);
         TextureLoader::loadImageView(json["image_view"], info.imageView);
@@ -54,34 +53,39 @@ namespace neon
             return std::make_shared<SwapChainFrameBuffer>(context.application, name, samples, depth);
         }
         if (type == "simple") {
-            std::vector<std::pair<AssetGeneralProperties<Texture>, AssetGeneralProperties<Texture>>> props;
+            std::vector<std::pair<AssetGeneralProperties<TextureView>, AssetGeneralProperties<TextureView>>> props;
             std::vector<FrameBufferTextureCreateInfo> infos;
 
             auto& textures = json["textures"];
             if (textures.is_object()) {
-                auto original = fetchGeneralProperties<Texture>(textures, context);
-                auto resolved = fetchGeneralProperties<Texture>(textures["resolved"], context);
+                auto original = fetchGeneralProperties<TextureView>(textures, context);
+                auto resolved = fetchGeneralProperties<TextureView>(textures["resolved"], context);
                 props.emplace_back(original, resolved);
-                infos.push_back(loadTexture(textures, samples));
+                infos.push_back(loadTexture(textures));
             } else if (textures.is_array()) {
                 for (auto& texture : textures) {
-                    auto original = fetchGeneralProperties<Texture>(texture, context);
-                    auto resolved = fetchGeneralProperties<Texture>(texture["resolved"], context);
+                    auto original = fetchGeneralProperties<TextureView>(texture, context);
+                    auto resolved = fetchGeneralProperties<TextureView>(texture["resolved"], context);
                     props.emplace_back(original, resolved);
-                    infos.push_back(loadTexture(texture, samples));
+                    infos.push_back(loadTexture(texture));
                 }
             }
 
             auto& depthJson = json["depth_properties"];
 
-            auto depthProps = fetchGeneralProperties<Texture>(depthJson, context);
+            auto depthProps = fetchGeneralProperties<TextureView>(depthJson, context);
             auto depthName = depthProps.error.has_value() ? std::optional<std::string>{} : depthProps.name;
 
-            auto fb = std::make_shared<SimpleFrameBuffer>(context.application, name, infos, depth, depthName, samples);
+            std::optional<FrameBufferDepthCreateInfo> depthInfo = {};
+            if (depth) {
+                depthInfo = FrameBufferDepthCreateInfo(depthName);
+            }
+
+            auto fb = std::make_shared<SimpleFrameBuffer>(context.application, name, samples, infos, depthInfo);
 
             if (depth && !depthProps.error.has_value()) {
                 auto& output = fb->getOutputs().back();
-                applyGeneralProperties(output.texture, depthProps, context);
+                applyGeneralProperties(output.texture->get(), depthProps, context);
                 if (output.resolvedTexture != nullptr) {
                 }
             }
@@ -92,10 +96,10 @@ namespace neon
                 auto& prop = props[i];
 
                 if (!prop.first.error.has_value()) {
-                    applyGeneralProperties(output.texture, prop.first, context);
+                    applyGeneralProperties(output.texture->get(), prop.first, context);
                 }
                 if (!prop.second.error.has_value() && output.texture != output.resolvedTexture) {
-                    applyGeneralProperties(output.resolvedTexture, prop.second, context);
+                    applyGeneralProperties(output.resolvedTexture->get(), prop.second, context);
                 }
             }
 

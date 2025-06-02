@@ -29,11 +29,6 @@ namespace neon
         TextureFormat format = TextureFormat::R8G8B8A8;
 
         /**
-         * The samplers of the image. Use this to implement MSAA.
-         */
-        SamplesPerTexel samples = SamplesPerTexel::COUNT_1;
-
-        /**
          * The number of texture's layers.
          */
         uint32_t layers = 1;
@@ -70,11 +65,6 @@ namespace neon
          * The name of the texture.
          */
         std::optional<std::string> name = {};
-
-        /**
-         * The samplers of the image. Use this to implement MSAA.
-         */
-        SamplesPerTexel samples = SamplesPerTexel::COUNT_1;
     };
 } // namespace neon
 

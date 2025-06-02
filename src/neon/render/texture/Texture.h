@@ -7,6 +7,7 @@
 
 #include <string>
 #include <optional>
+#include <any>
 
 #include <rush/rush.h>
 
@@ -26,8 +27,6 @@ namespace neon
         virtual Result<void, std::string> updateData(const std::byte* data, rush::Vec3ui offset, rush::Vec3ui size,
                                                      uint32_t layerOffset, uint32_t layers,
                                                      CommandBuffer* commandBuffer) = 0;
-
-        virtual void resize(rush::Vec3ui dimensions) = 0;
     };
 
     class TextureCapabilityRead
@@ -62,6 +61,12 @@ namespace neon
 
         [[nodiscard]] virtual const void* getNativeHandle() const = 0;
 
+        [[nodiscard]] virtual std::any getLayoutNativeHandle() const = 0;
+
+        static std::unique_ptr<Texture> createFromRawData(Application* application, std::string name, const void* data,
+                                                          const ImageCreateInfo& createInfo = ImageCreateInfo(),
+                                                          CommandBuffer* commandBuffer = nullptr);
+
         /**
          * Creates a new texture from a resource.
          * @param resource the resource.
@@ -70,7 +75,8 @@ namespace neon
          */
         static std::unique_ptr<Texture> createTextureFromFile(Application* application, std::string name,
                                                               const cmrc::file& resource,
-                                                              const ImageCreateInfo& createInfo = ImageCreateInfo());
+                                                              const ImageCreateInfo& createInfo = ImageCreateInfo(),
+                                                              CommandBuffer* commandBuffer = nullptr);
 
         /**
          * Creates a new texture from a resource.
@@ -80,7 +86,8 @@ namespace neon
          */
         static std::unique_ptr<Texture> createTextureFromFile(Application* application, std::string name,
                                                               const File& resource,
-                                                              const ImageCreateInfo& createInfo = ImageCreateInfo());
+                                                              const ImageCreateInfo& createInfo = ImageCreateInfo(),
+                                                              CommandBuffer* commandBuffer = nullptr);
 
         /**
          * Creates a new texture from a set of resources.
@@ -97,7 +104,8 @@ namespace neon
          */
         static std::unique_ptr<Texture> createTextureFromFiles(Application* application, std::string name,
                                                                const std::vector<cmrc::file>& resources,
-                                                               const ImageCreateInfo& createInfo = ImageCreateInfo());
+                                                               const ImageCreateInfo& createInfo = ImageCreateInfo(),
+                                                               CommandBuffer* commandBuffer = nullptr);
 
         /**
          * Creates a new texture from a file.
@@ -107,7 +115,8 @@ namespace neon
          */
         static std::unique_ptr<Texture> createTextureFromFile(Application* application, std::string name,
                                                               const std::string& path,
-                                                              ImageCreateInfo createInfo = ImageCreateInfo());
+                                                              ImageCreateInfo createInfo = ImageCreateInfo(),
+                                                              CommandBuffer* commandBuffer = nullptr);
 
         /**
          * Creates a new texture from a set of files.
@@ -124,7 +133,8 @@ namespace neon
          */
         static std::unique_ptr<Texture> createTextureFromFiles(Application* application, std::string name,
                                                                const std::vector<std::string>& paths,
-                                                               ImageCreateInfo createInfo = ImageCreateInfo());
+                                                               ImageCreateInfo createInfo = ImageCreateInfo(),
+                                                               CommandBuffer* commandBuffer = nullptr);
 
         /**
          * Creates a new texture from raw data.
@@ -135,7 +145,8 @@ namespace neon
          */
         static std::unique_ptr<Texture> createTextureFromFile(Application* application, std::string name,
                                                               const void* data, uint32_t size,
-                                                              ImageCreateInfo createInfo = ImageCreateInfo());
+                                                              ImageCreateInfo createInfo = ImageCreateInfo(),
+                                                              CommandBuffer* commandBuffer = nullptr);
 
         /**
          * Creates a new texture from a set of raw data pointers.
@@ -154,7 +165,8 @@ namespace neon
         static std::unique_ptr<Texture> createTextureFromFiles(Application* application, std::string name,
                                                                const std::vector<const void*>& data,
                                                                const std::vector<uint32_t>& sizes,
-                                                               ImageCreateInfo createInfo = ImageCreateInfo());
+                                                               ImageCreateInfo createInfo = ImageCreateInfo(),
+                                                               CommandBuffer* commandBuffer = nullptr);
     };
 } // namespace neon
 

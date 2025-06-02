@@ -6,16 +6,16 @@
 #define TEXTURELOADER_H
 
 #include <neon/loader/AssetLoader.h>
-#include <neon/render/textureold/Texture.h>
+#include <neon/render/texture/SampledTexture.h>
 
 namespace neon
 {
-    class TextureLoader : public AssetLoader<Texture>
+    class TextureLoader : public AssetLoader<SampledTexture>
     {
       public:
         ~TextureLoader() override = default;
 
-        std::shared_ptr<Texture> loadAsset(std::string name, nlohmann::json json, AssetLoaderContext context) override;
+        std::shared_ptr<SampledTexture> loadAsset(std::string name, nlohmann::json json, AssetLoaderContext context) override;
 
         static void loadImage(nlohmann::json& json, ImageCreateInfo& info);
 

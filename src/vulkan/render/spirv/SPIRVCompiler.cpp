@@ -4,7 +4,7 @@
 
 #include "SPIRVCompiler.h"
 
-#include <../../../neon/render/texture/TextureCreateInfo.h>
+#include <neon/render/texture/TextureCreateInfo.h>
 
 #include "glslang/Include/Types.h"
 #include "SPIRV/GlslangToSpv.h"

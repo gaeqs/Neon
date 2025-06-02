@@ -21,7 +21,6 @@ namespace neon
         uint64_t _version;
 
       public:
-
         /**
          * Constructs a Versioned object with an initial unique version number.
          */

@@ -25,11 +25,13 @@ namespace neon
     void CefTextureRenderHandler::OnPaint(CefRefPtr<CefBrowser> browser, PaintElementType type,
                                           const RectList& dirtyRects, const void* buffer, int width, int height)
     {
-        const char* data = static_cast<const char*>(buffer);
+        const std::byte* data = static_cast<const std::byte*>(buffer);
 
-        _texture->updateData(data, std::min(static_cast<uint32_t>(width), _texture->getWidth()),
-                             std::min(static_cast<uint32_t>(height), _texture->getHeight()), 1,
-                             TextureFormat::B8G8R8A8);
+        if (auto modifiable = _texture->asModifiable()) {
+            rush::Vec3ui size = rush::min(_texture->getDimensions(), rush::Vec3ui(width, height, 1));
+
+            modifiable.value()->updateData(data, rush::Vec3ui(0), size, 0, 1, nullptr);
+        }
     }
 
     bool CefTextureRenderHandler::setSize(uint32_t width, uint32_t height)

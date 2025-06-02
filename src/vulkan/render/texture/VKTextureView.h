@@ -24,8 +24,8 @@ namespace neon::vulkan
 
         [[nodiscard]] const void* getNativeHandle() const override;
 
-        VkImageView vk() const;
+        [[nodiscard]] VkImageView vk() const;
     };
-} // namespace neon
+} // namespace neon::vulkan
 
 #endif // VKTEXTUREVIEW_H

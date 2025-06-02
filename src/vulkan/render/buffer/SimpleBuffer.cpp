@@ -31,9 +31,9 @@ namespace neon::vulkan
 
     SimpleBuffer::SimpleBuffer(AbstractVKApplication* application, VkBufferUsageFlags usage,
                                VkMemoryPropertyFlags properties, const void* data, uint32_t sizeInBytes) :
+        VKResource(application),
         Buffer(),
         _size(sizeInBytes),
-        _application(application),
         _buffer(VK_NULL_HANDLE),
         _allocator(application->getDevice()->getAllocator()),
         _allocation(VK_NULL_HANDLE),
@@ -59,10 +59,13 @@ namespace neon::vulkan
 
     SimpleBuffer::~SimpleBuffer()
     {
-        auto device = _application->getDevice();
-        auto bin = _application->getBin();
+        auto device = getApplication()->getDevice();
+        auto bin = getApplication()->getBin();
 
-        bin->destroyLater(device->getRaw(), getRuns(), [=] { vmaDestroyBuffer(_allocator, _buffer, _allocation); });
+        bin->destroyLater(device->getRaw(), getRuns(),
+                          [allocator = _allocator, buffer = _buffer, allocation = _allocation] {
+                              vmaDestroyBuffer(allocator, buffer, allocation);
+                          });
     }
 
     size_t SimpleBuffer::size() const
@@ -73,11 +76,6 @@ namespace neon::vulkan
     bool SimpleBuffer::canBeWrittenOn() const
     {
         return _modifiable;
-    }
-
-    AbstractVKApplication* SimpleBuffer::getApplication() const
-    {
-        return _application;
     }
 
     VkBuffer SimpleBuffer::getRaw(std::shared_ptr<CommandBufferRun> run)

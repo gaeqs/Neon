@@ -20,11 +20,10 @@ namespace vc = neon::vulkan::conversions;
 namespace neon::vulkan
 {
     VKMaterial::VKMaterial(Application* application, Material* material, const MaterialCreateInfo& createInfo) :
+        VKResource(application),
         _material(material),
-        _vkApplication(dynamic_cast<AbstractVKApplication*>(application->getImplementation())),
         _pipelineLayout(VK_NULL_HANDLE),
         _pipeline(VK_NULL_HANDLE),
-        _pushConstants(),
         _pushConstantStages(0),
         _target(createInfo.target->getImplementation().getRenderPass().getRaw())
     {
@@ -256,7 +255,7 @@ namespace neon::vulkan
         pipelineLayoutInfo.pushConstantRangeCount = static_cast<uint32_t>(pushConstants.size());
         pipelineLayoutInfo.pPushConstantRanges = pushConstants.data();
 
-        if (vkCreatePipelineLayout(_vkApplication->getDevice()->getRaw(), &pipelineLayoutInfo, nullptr,
+        if (vkCreatePipelineLayout(getApplication()->getDevice()->getRaw(), &pipelineLayoutInfo, nullptr,
                                    &_pipelineLayout) != VK_SUCCESS) {
             throw std::runtime_error("Failed to create pipeline layout!");
         }
@@ -280,7 +279,7 @@ namespace neon::vulkan
         pipelineInfo.renderPass = _target;
         pipelineInfo.subpass = 0;
 
-        if (vkCreateGraphicsPipelines(_vkApplication->getDevice()->getRaw(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr,
+        if (vkCreateGraphicsPipelines(getApplication()->getDevice()->getRaw(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr,
                                       &_pipeline) != VK_SUCCESS) {
             throw std::runtime_error("Failed to create graphics pipeline!");
         }
@@ -289,8 +288,8 @@ namespace neon::vulkan
     VKMaterial::~VKMaterial()
     {
         if (_pipeline != VK_NULL_HANDLE) {
-            auto device = _vkApplication->getDevice()->getRaw();
-            auto bin = _vkApplication->getBin();
+            auto device = getApplication()->getDevice()->getRaw();
+            auto bin = getApplication()->getBin();
             auto runs = getRuns();
             bin->destroyLater(device, runs, _pipeline, vkDestroyPipeline);
             bin->destroyLater(device, runs, _pipelineLayout, vkDestroyPipelineLayout);
@@ -347,7 +346,7 @@ namespace neon::vulkan
                            static_cast<uint32_t>(_pushConstants.size()), _pushConstants.data());
     }
 
-    void VKMaterial::setTexture(const std::string& name, std::shared_ptr<Texture> texture)
+    void VKMaterial::setTexture(const std::string& name, std::shared_ptr<SampledTexture> texture)
     {
         if (_material->getUniformBuffer() == nullptr) {
             return;

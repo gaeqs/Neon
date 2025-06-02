@@ -27,7 +27,7 @@ namespace neon
         }
         registerLoader<Material, MaterialLoader>();
         registerLoader<ShaderProgram, ShaderProgramLoader>();
-        registerLoader<Texture, TextureLoader>();
+        registerLoader<SampledTexture, TextureLoader>();
         registerLoader<FrameBuffer, FrameBufferLoader>();
         registerLoader<ShaderUniformDescriptor, ShaderUniformDescriptorLoader>();
         registerLoader<ShaderUniformBuffer, ShaderUniformBufferLoader>();

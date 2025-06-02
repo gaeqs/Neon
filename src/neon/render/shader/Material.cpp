@@ -79,7 +79,7 @@ namespace neon
         _implementation.pushConstant(name, data, size);
     }
 
-    void Material::setTexture(const std::string& name, std::shared_ptr<Texture> texture)
+    void Material::setTexture(const std::string& name, std::shared_ptr<SampledTexture> texture)
     {
         _implementation.setTexture(name, texture);
     }
@@ -89,7 +89,7 @@ namespace neon
                                                const std::shared_ptr<ShaderProgram>& shader,
                                                const InputDescription& vertex, const InputDescription& instance,
                                                const std::vector<std::pair<void*, size_t>>& buffers,
-                                               const std::vector<std::shared_ptr<Texture>>& textures)
+                                               const std::vector<std::shared_ptr<SampledTexture>>& textures)
     {
         std::vector<ShaderUniformBinding> bindings;
         for (const auto& size : buffers | std::views::values) {

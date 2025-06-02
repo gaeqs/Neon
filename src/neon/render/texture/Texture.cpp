@@ -4,6 +4,7 @@
 
 #include "Texture.h"
 
+#define STB_IMAGE_IMPLEMENTATION
 #include <stb/stb_image.h>
 #ifdef USE_VULKAN
     #include <vulkan/render/texture/VKSimpleTexture.h>
@@ -15,24 +16,39 @@ namespace neon
     {
     }
 
-    std::unique_ptr<Texture> Texture::createTextureFromFile(Application* application, std::string name,
-                                                            const cmrc::file& resource,
-                                                            const ImageCreateInfo& createInfo)
+    std::unique_ptr<Texture> Texture::createFromRawData(Application* application, std::string name, const void* data,
+                                                        const ImageCreateInfo& createInfo, CommandBuffer* commandBuffer)
     {
-        return createTextureFromFile(application, std::move(name), resource.begin(),
-                                     static_cast<uint32_t>(resource.size()), createInfo);
+#ifdef USE_VULKAN
+        auto image = std::make_unique<vulkan::VKSimpleTexture>(application, std::move(name), createInfo,
+                                                               static_cast<const std::byte*>(data), commandBuffer);
+#else
+        std::unique_ptr<Texture> image = nullptr;
+#endif
+        return image;
     }
 
     std::unique_ptr<Texture> Texture::createTextureFromFile(Application* application, std::string name,
-                                                            const File& resource, const ImageCreateInfo& createInfo)
+                                                            const cmrc::file& resource,
+                                                            const ImageCreateInfo& createInfo,
+                                                            CommandBuffer* commandBuffer)
+    {
+        return createTextureFromFile(application, std::move(name), resource.begin(),
+                                     static_cast<uint32_t>(resource.size()), createInfo, commandBuffer);
+    }
+
+    std::unique_ptr<Texture> Texture::createTextureFromFile(Application* application, std::string name,
+                                                            const File& resource, const ImageCreateInfo& createInfo,
+                                                            CommandBuffer* commandBuffer)
     {
         return createTextureFromFile(application, std::move(name), resource.getData(),
-                                     static_cast<uint32_t>(resource.getSize()), createInfo);
+                                     static_cast<uint32_t>(resource.getSize()), createInfo, commandBuffer);
     }
 
     std::unique_ptr<Texture> Texture::createTextureFromFiles(Application* application, std::string name,
                                                              const std::vector<cmrc::file>& resources,
-                                                             const ImageCreateInfo& createInfo)
+                                                             const ImageCreateInfo& createInfo,
+                                                             CommandBuffer* commandBuffer)
     {
         std::vector<const void*> data;
         std::vector<uint32_t> sizes;
@@ -44,11 +60,12 @@ namespace neon
             sizes.push_back(static_cast<uint32_t>(item.size()));
         }
 
-        return createTextureFromFiles(application, std::move(name), data, sizes, createInfo);
+        return createTextureFromFiles(application, std::move(name), data, sizes, createInfo, commandBuffer);
     }
 
     std::unique_ptr<Texture> Texture::createTextureFromFile(Application* application, std::string name,
-                                                            const std::string& path, ImageCreateInfo createInfo)
+                                                            const std::string& path, ImageCreateInfo createInfo,
+                                                            CommandBuffer* commandBuffer)
     {
         int32_t width, height, channels;
         auto ptr = stbi_load(path.c_str(), &width, &height, &channels, 4);
@@ -65,7 +82,7 @@ namespace neon
 
 #ifdef USE_VULKAN
         auto image = std::make_unique<vulkan::VKSimpleTexture>(application, std::move(name), createInfo,
-                                                               reinterpret_cast<std::byte*>(ptr));
+                                                               reinterpret_cast<std::byte*>(ptr), commandBuffer);
 #else
         std::unique_ptr<Texture> image = nullptr;
 #endif
@@ -75,7 +92,7 @@ namespace neon
 
     std::unique_ptr<Texture> Texture::createTextureFromFiles(Application* application, std::string name,
                                                              const std::vector<std::string>& paths,
-                                                             ImageCreateInfo createInfo)
+                                                             ImageCreateInfo createInfo, CommandBuffer* commandBuffer)
     {
         std::vector<int32_t> widths, heights;
         std::vector<stbi_uc*> pointers;
@@ -119,7 +136,7 @@ namespace neon
         }
 #ifdef USE_VULKAN
         auto image = std::make_unique<vulkan::VKSimpleTexture>(application, std::move(name), createInfo,
-                                                               reinterpret_cast<std::byte*>(data));
+                                                               reinterpret_cast<std::byte*>(data), commandBuffer);
 #else
         std::unique_ptr<Texture> image = nullptr;
 #endif
@@ -129,7 +146,8 @@ namespace neon
     }
 
     std::unique_ptr<Texture> Texture::createTextureFromFile(Application* application, std::string name,
-                                                            const void* data, uint32_t size, ImageCreateInfo createInfo)
+                                                            const void* data, uint32_t size, ImageCreateInfo createInfo,
+                                                            CommandBuffer* commandBuffer)
     {
         int32_t width, height, channels;
         auto ptr = stbi_load_from_memory(static_cast<const uint8_t*>(data), static_cast<int32_t>(size), &width, &height,
@@ -147,7 +165,7 @@ namespace neon
 
 #ifdef USE_VULKAN
         auto image = std::make_unique<vulkan::VKSimpleTexture>(application, std::move(name), createInfo,
-                                                               reinterpret_cast<std::byte*>(ptr));
+                                                               reinterpret_cast<std::byte*>(ptr), commandBuffer);
 #else
         std::unique_ptr<Texture> image = nullptr;
 #endif
@@ -158,7 +176,7 @@ namespace neon
     std::unique_ptr<Texture> Texture::createTextureFromFiles(Application* application, std::string name,
                                                              const std::vector<const void*>& data,
                                                              const std::vector<uint32_t>& sizes,
-                                                             ImageCreateInfo createInfo)
+                                                             ImageCreateInfo createInfo, CommandBuffer* commandBuffer)
     {
         std::vector<int32_t> widths, heights;
         std::vector<stbi_uc*> pointers;
@@ -203,7 +221,7 @@ namespace neon
         }
 #ifdef USE_VULKAN
         auto image = std::make_unique<vulkan::VKSimpleTexture>(application, std::move(name), createInfo,
-                                                               reinterpret_cast<std::byte*>(flatData));
+                                                               reinterpret_cast<std::byte*>(flatData), commandBuffer);
 #else
         std::unique_ptr<Texture> image = nullptr;
 #endif
