@@ -43,6 +43,8 @@ namespace neon::vulkan
 
         [[nodiscard]] std::optional<TextureCapabilityModifiable*> asModifiable() override;
 
+        [[nodiscard]] size_t getAllocatedMemoryInBytes() const override;
+
         [[nodiscard]] void* getNativeHandle() override;
 
         [[nodiscard]] const void* getNativeHandle() const override;

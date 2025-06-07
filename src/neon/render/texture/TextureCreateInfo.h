@@ -202,6 +202,9 @@ namespace neon
          */
         TextureViewType viewType = TextureViewType::NORMAL_2D;
 
+        /**
+         * Describes how a texture can be used.
+         */
         std::vector<TextureUsage> usages = {TextureUsage::TRANSFER_SOURCE, TextureUsage::TRANSFER_DESTINY,
                                             TextureUsage::SAMPLING};
     };

@@ -158,6 +158,14 @@ namespace neon::vulkan
         return this;
     }
 
+    size_t VKSimpleTexture::getAllocatedMemoryInBytes() const
+    {
+        auto alloc = getApplication()->getDevice()->getAllocator();
+        VmaAllocationInfo info;
+        vmaGetAllocationInfo(alloc, _allocation, &info);
+        return info.size;
+    }
+
     void* VKSimpleTexture::getNativeHandle()
     {
         return _image;

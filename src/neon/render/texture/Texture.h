@@ -57,6 +57,8 @@ namespace neon
 
         [[nodiscard]] virtual std::optional<TextureCapabilityModifiable*> asModifiable() = 0;
 
+        [[nodiscard]] virtual size_t getAllocatedMemoryInBytes() const = 0;
+
         [[nodiscard]] virtual void* getNativeHandle() = 0;
 
         [[nodiscard]] virtual const void* getNativeHandle() const = 0;
