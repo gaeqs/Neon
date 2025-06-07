@@ -83,8 +83,8 @@ namespace neon::vulkan
         _depthImageMemory = pair.second;
 
         _depthImageView = vulkan_util::createImageView(_vkApplication->getDevice()->getRaw(), _depthImage,
-                                                       _vkApplication->getVkDepthImageFormat(), VK_IMAGE_ASPECT_DEPTH_BIT,
-                                                       ImageViewCreateInfo());
+                                                       _vkApplication->getVkDepthImageFormat(),
+                                                       VK_IMAGE_ASPECT_DEPTH_BIT, ImageViewCreateInfo());
 
         //
         {

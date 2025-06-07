@@ -11,7 +11,7 @@ namespace neon::serialization
     std::optional<TextureFormat> toTextureFormat(std::string s)
     {
         static const std::unordered_map<std::string, TextureFormat> map = {
-            {             "R8,",               TextureFormat::R8},
+            {              "R8",               TextureFormat::R8},
             {            "R8G8",             TextureFormat::R8G8},
             {          "R8G8B8",           TextureFormat::R8G8B8},
             {          "B8G8R8",           TextureFormat::B8G8R8},
