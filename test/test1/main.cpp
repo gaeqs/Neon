@@ -359,5 +359,8 @@ int main()
 
     application.setRoom(nullptr);
 
+    Result<int, std::string> a = 20;
+    Result<int, std::string> b = a;
+
     return EXIT_SUCCESS;
 }

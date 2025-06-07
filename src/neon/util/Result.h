@@ -53,6 +53,56 @@ namespace neon
             std::construct_at<Error, Error&&>(static_cast<Error*>(_data), std::forward<Error>(error));
         }
 
+        Result(const Result& other) :
+            _valid(other._valid)
+        {
+            if (_valid) {
+                _data = new uint8_t[sizeof(Ok)];
+                std::construct_at<Ok>(static_cast<Ok*>(_data), other.getResult());
+            } else {
+                _data = new uint8_t[sizeof(Error)];
+                std::construct_at<Error>(static_cast<Error*>(_data), other.getError());
+            }
+        }
+
+        Result(Result&& other) noexcept :
+          _data(other._data),
+          _valid(other._valid)
+        {
+            other._data = nullptr;
+        }
+
+        Result& operator=(const Result& other)
+        {
+            if (this == &other) {
+                return *this;
+            }
+
+            this->~Result();
+            _valid = other._valid;
+            if (_valid) {
+                _data = new uint8_t[sizeof(Ok)];
+                std::construct_at<Ok>(static_cast<Ok*>(_data), other.getResult());
+            } else {
+                _data = new uint8_t[sizeof(Error)];
+                std::construct_at<Error>(static_cast<Error*>(_data), other.getError());
+            }
+            return *this;
+        }
+
+        Result& operator=(Result&& other) noexcept
+        {
+            if (this == &other) {
+                return *this;
+            }
+
+            this->~Result();
+            _data = other._data;
+            _valid = other._valid;
+            other._data = nullptr;
+            return *this;
+        }
+
         ~Result()
         {
             if (_valid) {
@@ -159,7 +209,7 @@ namespace neon
 
         ~Result()
         {
-            if (!_valid)  {
+            if (!_valid) {
                 std::destroy_at<Error>(static_cast<Error*>(_data));
             }
             delete[] static_cast<uint8_t*>(_data);
