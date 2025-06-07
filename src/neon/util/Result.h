@@ -117,7 +117,7 @@ namespace neon
         }
 
         template<class OError>
-        [[nodiscard]] Result<OError, Error> mapError(std::function<OError(Error)> mapper) const
+        [[nodiscard]] Result<Ok, OError> mapError(std::function<OError(Error)> mapper) const
         {
             // Don't use a ternary operator.
             // The return value is implicitly transformed
