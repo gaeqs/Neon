@@ -66,8 +66,8 @@ namespace neon
         }
 
         Result(Result&& other) noexcept :
-          _data(other._data),
-          _valid(other._valid)
+            _data(other._data),
+            _valid(other._valid)
         {
             other._data = nullptr;
         }
