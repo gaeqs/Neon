@@ -90,8 +90,6 @@ namespace neon::vulkan
             }
         }
 
-        int l = 20'000'000;
-
         vkCmdDrawIndexed(rawCmd, static_cast<uint32_t>(_indexAmount), static_cast<uint32_t>(instances), 0, 0, 0);
     }
 

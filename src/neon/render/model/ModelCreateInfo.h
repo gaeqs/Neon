@@ -106,7 +106,7 @@ namespace neon
         * Whether the renderer should call Model::flush() before rendering.
         *
         * Set this flag to false if you want to manage the instance data
-        * asyncronally.
+        * asynchronously.
         */
         bool shouldAutoFlush = true;
 

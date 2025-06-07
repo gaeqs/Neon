@@ -53,6 +53,12 @@ namespace neon
 
         static std::shared_ptr<SampledTexture> create(Application* application,
                                                       std::shared_ptr<MutableAsset<TextureView>> view);
+
+        static std::vector<std::shared_ptr<SampledTexture>> create(
+            Application* application, const std::vector<std::shared_ptr<MutableAsset<TextureView>>>& textures);
+
+        static std::vector<std::shared_ptr<SampledTexture>> create(
+            Application* application, const std::vector<std::shared_ptr<Texture>>& textures);
     };
 } // namespace neon
 

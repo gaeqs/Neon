@@ -16,7 +16,7 @@ namespace neon
     {
     }
 
-    std::unique_ptr<Texture> Texture::createFromRawData(Application* application, std::string name, const void* data,
+    std::shared_ptr<Texture> Texture::createFromRawData(Application* application, std::string name, const void* data,
                                                         const ImageCreateInfo& createInfo, CommandBuffer* commandBuffer)
     {
 #ifdef USE_VULKAN
@@ -28,7 +28,7 @@ namespace neon
         return image;
     }
 
-    std::unique_ptr<Texture> Texture::createTextureFromFile(Application* application, std::string name,
+    std::shared_ptr<Texture> Texture::createTextureFromFile(Application* application, std::string name,
                                                             const cmrc::file& resource,
                                                             const ImageCreateInfo& createInfo,
                                                             CommandBuffer* commandBuffer)
@@ -37,7 +37,7 @@ namespace neon
                                      static_cast<uint32_t>(resource.size()), createInfo, commandBuffer);
     }
 
-    std::unique_ptr<Texture> Texture::createTextureFromFile(Application* application, std::string name,
+    std::shared_ptr<Texture> Texture::createTextureFromFile(Application* application, std::string name,
                                                             const File& resource, const ImageCreateInfo& createInfo,
                                                             CommandBuffer* commandBuffer)
     {
@@ -45,7 +45,7 @@ namespace neon
                                      static_cast<uint32_t>(resource.getSize()), createInfo, commandBuffer);
     }
 
-    std::unique_ptr<Texture> Texture::createTextureFromFiles(Application* application, std::string name,
+    std::shared_ptr<Texture> Texture::createTextureFromFiles(Application* application, std::string name,
                                                              const std::vector<cmrc::file>& resources,
                                                              const ImageCreateInfo& createInfo,
                                                              CommandBuffer* commandBuffer)
@@ -63,7 +63,7 @@ namespace neon
         return createTextureFromFiles(application, std::move(name), data, sizes, createInfo, commandBuffer);
     }
 
-    std::unique_ptr<Texture> Texture::createTextureFromFile(Application* application, std::string name,
+    std::shared_ptr<Texture> Texture::createTextureFromFile(Application* application, std::string name,
                                                             const std::string& path, ImageCreateInfo createInfo,
                                                             CommandBuffer* commandBuffer)
     {
@@ -90,7 +90,7 @@ namespace neon
         return image;
     }
 
-    std::unique_ptr<Texture> Texture::createTextureFromFiles(Application* application, std::string name,
+    std::shared_ptr<Texture> Texture::createTextureFromFiles(Application* application, std::string name,
                                                              const std::vector<std::string>& paths,
                                                              ImageCreateInfo createInfo, CommandBuffer* commandBuffer)
     {
@@ -145,7 +145,7 @@ namespace neon
         return image;
     }
 
-    std::unique_ptr<Texture> Texture::createTextureFromFile(Application* application, std::string name,
+    std::shared_ptr<Texture> Texture::createTextureFromFile(Application* application, std::string name,
                                                             const void* data, uint32_t size, ImageCreateInfo createInfo,
                                                             CommandBuffer* commandBuffer)
     {
@@ -173,7 +173,7 @@ namespace neon
         return image;
     }
 
-    std::unique_ptr<Texture> Texture::createTextureFromFiles(Application* application, std::string name,
+    std::shared_ptr<Texture> Texture::createTextureFromFiles(Application* application, std::string name,
                                                              const std::vector<const void*>& data,
                                                              const std::vector<uint32_t>& sizes,
                                                              ImageCreateInfo createInfo, CommandBuffer* commandBuffer)

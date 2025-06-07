@@ -99,4 +99,26 @@ namespace neon
         std::string name = view->get()->getName();
         return create(application, std::string(name), std::move(view));
     }
+
+    std::vector<std::shared_ptr<SampledTexture>> SampledTexture::create(
+        Application* application, const std::vector<std::shared_ptr<MutableAsset<TextureView>>>& textures)
+    {
+        std::vector<std::shared_ptr<SampledTexture>> result;
+        result.reserve(textures.size());
+        for (auto& texture : textures) {
+            result.push_back(create(application, texture));
+        }
+        return result;
+    }
+
+    std::vector<std::shared_ptr<SampledTexture>> SampledTexture::create(
+        Application* application, const std::vector<std::shared_ptr<Texture>>& textures)
+    {
+        std::vector<std::shared_ptr<SampledTexture>> result;
+        result.reserve(textures.size());
+        for (auto& texture : textures) {
+            result.push_back(create(application, texture));
+        }
+        return result;
+    }
 } // namespace neon

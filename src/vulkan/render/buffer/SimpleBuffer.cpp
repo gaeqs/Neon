@@ -84,14 +84,3 @@ namespace neon::vulkan
         return _buffer;
     }
 } // namespace neon::vulkan
-
-VkResult neon::vulkan::simple_buffer::mapMemory(VkDevice pT, VkDeviceMemory pT1, uint32_t from, uint32_t size, int i,
-                                                void** pVoid)
-{
-    return vkMapMemory(pT, pT1, from, size, i, pVoid);
-}
-
-void neon::vulkan::simple_buffer::unmapMemory(VkDevice device, VkDeviceMemory memory)
-{
-    vkUnmapMemory(device, memory);
-}

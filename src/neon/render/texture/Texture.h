@@ -65,7 +65,7 @@ namespace neon
 
         [[nodiscard]] virtual std::any getLayoutNativeHandle() const = 0;
 
-        static std::unique_ptr<Texture> createFromRawData(Application* application, std::string name, const void* data,
+        static std::shared_ptr<Texture> createFromRawData(Application* application, std::string name, const void* data,
                                                           const ImageCreateInfo& createInfo = ImageCreateInfo(),
                                                           CommandBuffer* commandBuffer = nullptr);
 
@@ -75,7 +75,7 @@ namespace neon
          * @param createInfo the texture creation info.
          * @return a pointer to the new texture.
          */
-        static std::unique_ptr<Texture> createTextureFromFile(Application* application, std::string name,
+        static std::shared_ptr<Texture> createTextureFromFile(Application* application, std::string name,
                                                               const cmrc::file& resource,
                                                               const ImageCreateInfo& createInfo = ImageCreateInfo(),
                                                               CommandBuffer* commandBuffer = nullptr);
@@ -86,7 +86,7 @@ namespace neon
          * @param createInfo the texture creation info.
          * @return a pointer to the new texture.
          */
-        static std::unique_ptr<Texture> createTextureFromFile(Application* application, std::string name,
+        static std::shared_ptr<Texture> createTextureFromFile(Application* application, std::string name,
                                                               const File& resource,
                                                               const ImageCreateInfo& createInfo = ImageCreateInfo(),
                                                               CommandBuffer* commandBuffer = nullptr);
@@ -104,7 +104,7 @@ namespace neon
          * @param createInfo the texture creation info.
          * @return a pointer to the new texture.
          */
-        static std::unique_ptr<Texture> createTextureFromFiles(Application* application, std::string name,
+        static std::shared_ptr<Texture> createTextureFromFiles(Application* application, std::string name,
                                                                const std::vector<cmrc::file>& resources,
                                                                const ImageCreateInfo& createInfo = ImageCreateInfo(),
                                                                CommandBuffer* commandBuffer = nullptr);
@@ -115,7 +115,7 @@ namespace neon
          * @param createInfo the texture creation info.
          * @return a pointer to the new texture.
          */
-        static std::unique_ptr<Texture> createTextureFromFile(Application* application, std::string name,
+        static std::shared_ptr<Texture> createTextureFromFile(Application* application, std::string name,
                                                               const std::string& path,
                                                               ImageCreateInfo createInfo = ImageCreateInfo(),
                                                               CommandBuffer* commandBuffer = nullptr);
@@ -133,7 +133,7 @@ namespace neon
          * @param createInfo the texture creation info.
          * @return a pointer to the new texture.
          */
-        static std::unique_ptr<Texture> createTextureFromFiles(Application* application, std::string name,
+        static std::shared_ptr<Texture> createTextureFromFiles(Application* application, std::string name,
                                                                const std::vector<std::string>& paths,
                                                                ImageCreateInfo createInfo = ImageCreateInfo(),
                                                                CommandBuffer* commandBuffer = nullptr);
@@ -145,7 +145,7 @@ namespace neon
          * @param createInfo the texture creation info.
          * @return a pointer to the new texture.
          */
-        static std::unique_ptr<Texture> createTextureFromFile(Application* application, std::string name,
+        static std::shared_ptr<Texture> createTextureFromFile(Application* application, std::string name,
                                                               const void* data, uint32_t size,
                                                               ImageCreateInfo createInfo = ImageCreateInfo(),
                                                               CommandBuffer* commandBuffer = nullptr);
@@ -164,7 +164,7 @@ namespace neon
          * @param createInfo the texture creation info.
          * @return a pointer to the new texture.
          */
-        static std::unique_ptr<Texture> createTextureFromFiles(Application* application, std::string name,
+        static std::shared_ptr<Texture> createTextureFromFiles(Application* application, std::string name,
                                                                const std::vector<const void*>& data,
                                                                const std::vector<uint32_t>& sizes,
                                                                ImageCreateInfo createInfo = ImageCreateInfo(),

@@ -50,10 +50,14 @@ namespace neon::vulkan
             _allocation(allocation),
             _pointer(nullptr)
         {
-            auto result = vmaMapMemory(_allocator, _allocation, (void**)&_pointer);
+            void* ptr;
+            auto result = vmaMapMemory(_allocator, _allocation, &ptr);
             if (result != VK_SUCCESS) {
                 throw std::runtime_error("Couldn't map buffer! Result: " + std::to_string(result));
             }
+
+            // Add offset
+            _pointer = static_cast<T*>(static_cast<void*>(static_cast<std::byte*>(ptr) + range.getFrom()));
         }
 
         ~SimpleBufferMap() override

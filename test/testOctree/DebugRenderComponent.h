@@ -136,11 +136,12 @@ class DebugRenderComponent : public neon::Component
     void onPreDraw() override
     {
         std::swap(_frontInstances, _backInstances);
+        auto* instanceData = _model->getInstanceData(0);
         for (const neon::InstanceData::Instance& instance : _backInstances) {
-            _model->getInstanceData(0)->freeInstance(instance);
+            instanceData->freeInstance(instance);
         }
         _backInstances.clear();
     }
 };
 
-#endif //DEBUGRENDERCOMPONENT_H
+#endif // DEBUGRENDERCOMPONENT_H
