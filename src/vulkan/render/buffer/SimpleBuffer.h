@@ -96,7 +96,7 @@ namespace neon::vulkan
 
         SimpleBufferMap& operator=(SimpleBufferMap&& other) noexcept
         {
-            _allocator = other._allocation;
+            _allocator = other._allocator;
             _allocation = other._allocation;
             _pointer = other._pointer;
             other._pointer = nullptr;
