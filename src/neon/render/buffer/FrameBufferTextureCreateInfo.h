@@ -34,6 +34,11 @@ namespace neon
         uint32_t layers = 1;
 
         /**
+         * The view type of the image view.
+         */
+        TextureViewType viewType = TextureViewType::NORMAL_2D;
+
+        /**
          * The creation information of the image view.
          */
         TextureViewCreateInfo imageView = TextureViewCreateInfo();

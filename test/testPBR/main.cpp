@@ -160,8 +160,7 @@ std::shared_ptr<SampledTexture> computeIrradiance(Application* app, const std::s
 {
     neon::FrameBufferTextureCreateInfo testInfo;
     testInfo.layers = 6;
-    testInfo.imageView.viewType = neon::TextureViewType::CUBE;
-
+    testInfo.viewType = neon::TextureViewType::CUBE;
     auto testFrameBuffer = std::make_shared<SimpleFrameBuffer>(
         app, "neoneuron:test", SamplesPerTexel::COUNT_1, std::vector{testInfo},
         std::optional<FrameBufferDepthCreateInfo>(), [](const auto& _) { return false; },
@@ -438,12 +437,12 @@ std::shared_ptr<SampledTexture> loadSkybox(Room* room)
     };
 
     TextureCreateInfo info;
-    info.imageView.viewType = TextureViewType::CUBE;
-    info.image.layers = 6;
-    info.image.mipmaps = 10;
+    info.layers = 6;
+    info.mipmaps = 10;
+    info.viewType = TextureViewType::CUBE;
 
-    auto texture = Texture::createTextureFromFiles(room->getApplication(), "skybox", PATHS, info.image);
-    auto view = TextureView::create(room->getApplication(), "skybox", info.imageView, texture);
+    auto texture = Texture::createTextureFromFiles(room->getApplication(), "skybox", PATHS, info);
+    auto view = TextureView::create(room->getApplication(), "skybox", TextureViewCreateInfo(), texture);
     return SampledTexture::create(room->getApplication(), "skybox", std::make_shared<MutableAsset<TextureView>>(view));
 }
 

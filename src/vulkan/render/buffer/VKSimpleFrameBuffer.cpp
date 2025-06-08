@@ -52,6 +52,7 @@ namespace neon::vulkan
 
             info.format = output.createInfo.format;
             info.layers = output.createInfo.layers;
+            info.viewType = output.createInfo.viewType;
             info.samples = _samplesPerTexel;
 
             auto texture = std::make_shared<VKSimpleTexture>(app, name, info, nullptr);
