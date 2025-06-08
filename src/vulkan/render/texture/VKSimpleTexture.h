@@ -11,23 +11,27 @@
 
 namespace neon::vulkan
 {
-    class VKSimpleTexture : public VKResource, public Texture, public TextureCapabilityModifiable
+    class VKSimpleTexture :
+        public VKResource,
+        public Texture,
+        public TextureCapabilityRead,
+        public TextureCapabilityModifiable
     {
         VkImage _image;
         VmaAllocation _allocation;
-        ImageCreateInfo _info;
+        TextureCreateInfo _info;
 
-        VkImageLayout _currentLayout;
+        mutable VkImageLayout _currentLayout;
 
-        void transitionLayout(VkImageLayout layout, VkCommandBuffer commandBuffer);
+        void transitionLayout(VkImageLayout layout, VkCommandBuffer commandBuffer) const;
 
         void uploadData(const std::byte* data, CommandBuffer* commandBuffer);
 
         void generateMipmaps(VkCommandBuffer buffer);
 
       public:
-        VKSimpleTexture(Application* application, std::string name, const ImageCreateInfo& info, const std::byte* data,
-                        CommandBuffer* commandBuffer = nullptr);
+        VKSimpleTexture(Application* application, std::string name, const TextureCreateInfo& info,
+                        const std::byte* data, CommandBuffer* commandBuffer = nullptr);
 
         ~VKSimpleTexture() override;
 
@@ -36,6 +40,8 @@ namespace neon::vulkan
         [[nodiscard]] TextureFormat getFormat() const override;
 
         [[nodiscard]] SamplesPerTexel getSamplesPerTexel() const override;
+
+        [[nodiscard]] TextureViewType getTextureViewType() const override;
 
         [[nodiscard]] size_t getNumberOfMipmaps() const override;
 
@@ -50,6 +56,9 @@ namespace neon::vulkan
         [[nodiscard]] const void* getNativeHandle() const override;
 
         [[nodiscard]] std::any getLayoutNativeHandle() const override;
+
+        Result<void, std::string> readData(std::byte* data, rush::Vec3ui offset, rush::Vec3ui size,
+                                           uint32_t layerOffset, uint32_t layers) const override;
 
         Result<void, std::string> updateData(const std::byte* data, rush::Vec3ui offset, rush::Vec3ui size,
                                              uint32_t layerOffset, uint32_t layers,

@@ -18,12 +18,12 @@ namespace neon
         std::shared_ptr<SampledTexture> loadAsset(std::string name, nlohmann::json json,
                                                   AssetLoaderContext context) override;
 
-        static void loadImage(nlohmann::json& json, ImageCreateInfo& info);
+        static void loadImage(nlohmann::json& json, TextureCreateInfo& info);
 
-        static void loadImageView(nlohmann::json& json, ImageViewCreateInfo& info);
+        static void loadImageView(nlohmann::json& json, TextureViewCreateInfo& info);
 
         static void loadSampler(nlohmann::json& json, SamplerCreateInfo& info);
     };
 } // namespace neon
 
-#endif //TEXTURELOADER_H
+#endif // TEXTURELOADER_H

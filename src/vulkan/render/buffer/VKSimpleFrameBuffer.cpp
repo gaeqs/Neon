@@ -39,7 +39,7 @@ namespace neon::vulkan
     void VKSimpleFrameBuffer::createImages()
     {
         auto* app = getApplication()->getApplication();
-        ImageCreateInfo info;
+        TextureCreateInfo info;
         info.width = _dimensions.x();
         info.height = _dimensions.y();
         info.depth = 1;
@@ -55,12 +55,12 @@ namespace neon::vulkan
             info.samples = _samplesPerTexel;
 
             auto texture = std::make_shared<VKSimpleTexture>(app, name, info, nullptr);
-            output.texture->emplace<VKTextureView>(app, name, ImageViewCreateInfo(), texture);
+            output.texture->emplace<VKTextureView>(app, name, TextureViewCreateInfo(), texture);
 
             if (_samplesPerTexel != SamplesPerTexel::COUNT_1) {
                 info.samples = SamplesPerTexel::COUNT_1;
                 auto resolved = std::make_shared<VKSimpleTexture>(app, name, info, nullptr);
-                output.resolved->emplace<VKTextureView>(app, name, ImageViewCreateInfo{.aspect = {ViewAspect::COLOR}},
+                output.resolved->emplace<VKTextureView>(app, name, TextureViewCreateInfo{.aspect = {ViewAspect::COLOR}},
                                                         resolved);
             } else {
                 output.resolved->set(output.texture->get());
@@ -77,7 +77,7 @@ namespace neon::vulkan
 
             auto texture = std::make_shared<VKSimpleTexture>(app, name, info, nullptr);
 
-            ImageViewCreateInfo viewCreateInfo{.aspect = {ViewAspect::DEPTH}};
+            TextureViewCreateInfo viewCreateInfo{.aspect = {ViewAspect::DEPTH}};
 
             if (info.format == TextureFormat::DEPTH24STENCIL8 || info.format == TextureFormat::DEPTH32FSTENCIL8) {
                 viewCreateInfo.aspect.emplace_back(ViewAspect::STENCIL);

@@ -17,7 +17,7 @@ namespace neon
     }
 
     std::shared_ptr<Texture> Texture::createFromRawData(Application* application, std::string name, const void* data,
-                                                        const ImageCreateInfo& createInfo, CommandBuffer* commandBuffer)
+                                                        const TextureCreateInfo& createInfo, CommandBuffer* commandBuffer)
     {
 #ifdef USE_VULKAN
         auto image = std::make_unique<vulkan::VKSimpleTexture>(application, std::move(name), createInfo,
@@ -30,7 +30,7 @@ namespace neon
 
     std::shared_ptr<Texture> Texture::createTextureFromFile(Application* application, std::string name,
                                                             const cmrc::file& resource,
-                                                            const ImageCreateInfo& createInfo,
+                                                            const TextureCreateInfo& createInfo,
                                                             CommandBuffer* commandBuffer)
     {
         return createTextureFromFile(application, std::move(name), resource.begin(),
@@ -38,7 +38,7 @@ namespace neon
     }
 
     std::shared_ptr<Texture> Texture::createTextureFromFile(Application* application, std::string name,
-                                                            const File& resource, const ImageCreateInfo& createInfo,
+                                                            const File& resource, const TextureCreateInfo& createInfo,
                                                             CommandBuffer* commandBuffer)
     {
         return createTextureFromFile(application, std::move(name), resource.getData(),
@@ -47,7 +47,7 @@ namespace neon
 
     std::shared_ptr<Texture> Texture::createTextureFromFiles(Application* application, std::string name,
                                                              const std::vector<cmrc::file>& resources,
-                                                             const ImageCreateInfo& createInfo,
+                                                             const TextureCreateInfo& createInfo,
                                                              CommandBuffer* commandBuffer)
     {
         std::vector<const void*> data;
@@ -64,7 +64,7 @@ namespace neon
     }
 
     std::shared_ptr<Texture> Texture::createTextureFromFile(Application* application, std::string name,
-                                                            const std::string& path, ImageCreateInfo createInfo,
+                                                            const std::string& path, TextureCreateInfo createInfo,
                                                             CommandBuffer* commandBuffer)
     {
         int32_t width, height, channels;
@@ -92,7 +92,7 @@ namespace neon
 
     std::shared_ptr<Texture> Texture::createTextureFromFiles(Application* application, std::string name,
                                                              const std::vector<std::string>& paths,
-                                                             ImageCreateInfo createInfo, CommandBuffer* commandBuffer)
+                                                             TextureCreateInfo createInfo, CommandBuffer* commandBuffer)
     {
         std::vector<int32_t> widths, heights;
         std::vector<stbi_uc*> pointers;
@@ -146,7 +146,7 @@ namespace neon
     }
 
     std::shared_ptr<Texture> Texture::createTextureFromFile(Application* application, std::string name,
-                                                            const void* data, uint32_t size, ImageCreateInfo createInfo,
+                                                            const void* data, uint32_t size, TextureCreateInfo createInfo,
                                                             CommandBuffer* commandBuffer)
     {
         int32_t width, height, channels;
@@ -176,7 +176,7 @@ namespace neon
     std::shared_ptr<Texture> Texture::createTextureFromFiles(Application* application, std::string name,
                                                              const std::vector<const void*>& data,
                                                              const std::vector<uint32_t>& sizes,
-                                                             ImageCreateInfo createInfo, CommandBuffer* commandBuffer)
+                                                             TextureCreateInfo createInfo, CommandBuffer* commandBuffer)
     {
         std::vector<int32_t> widths, heights;
         std::vector<stbi_uc*> pointers;

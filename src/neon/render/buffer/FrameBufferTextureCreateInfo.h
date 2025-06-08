@@ -36,7 +36,7 @@ namespace neon
         /**
          * The creation information of the image view.
          */
-        ImageViewCreateInfo imageView = ImageViewCreateInfo();
+        TextureViewCreateInfo imageView = TextureViewCreateInfo();
 
         /**
          * The creation information of the sampler.

@@ -268,6 +268,7 @@ All parameters are optional, but if you don't include them an empty model will b
     "samples": "COUNT_1|COUNT_2|COUNT_4|COUNT_8|COUNT_16|COUNT_32|COUNT_64",
     // If mipmaps are 0, the amount will be calculated automatically.
     "mipmaps": 0,
+    "view_type": "NORMAL_1D|NORMAL_2D|NORMAL_3D|CUBE|ARRAY_1D|ARRAY_2D|CUBE_ARRAY",
     "usages": [
       "TRANSFER_SOURCE",
       "TRANSFER_DESTINY",
@@ -289,7 +290,6 @@ All parameters are optional, but if you don't include them an empty model will b
     ]
   },
   "image_view": {
-    "view_type": "NORMAL_1D|NORMAL_2D|NORMAL_3D|CUBE|ARRAY_1D|ARRAY_2D|CUBE_ARRAY",
     "r_swizzle": "IDENTITY|ZERO|ONE|R|G|B|A",
     "g_swizzle": "IDENTITY|ZERO|ONE|R|G|B|A",
     "b_swizzle": "IDENTITY|ZERO|ONE|R|G|B|A",

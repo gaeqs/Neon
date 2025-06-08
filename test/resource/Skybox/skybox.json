@@ -9,9 +9,7 @@
     "back.jpg"
   ],
   "image": {
-    "layers": 6
-  },
-  "image_view": {
+    "layers": 6,
     "view_type": "cube"
   }
 }

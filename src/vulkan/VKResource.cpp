@@ -22,12 +22,7 @@ namespace neon::vulkan
     {
     }
 
-    AbstractVKApplication* VKResource::getApplication()
-    {
-        return _application;
-    }
-
-    const AbstractVKApplication* VKResource::getApplication() const
+    AbstractVKApplication* VKResource::getApplication() const
     {
         return _application;
     }

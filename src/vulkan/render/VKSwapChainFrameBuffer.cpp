@@ -30,7 +30,7 @@ namespace neon::vulkan
         for (auto i = 0; i < _swapChainImages.size(); ++i) {
             _swapChainImageViews[i] = vulkan_util::createImageView(
                 _vkApplication->getDevice()->getRaw(), _swapChainImages[i], _vkApplication->getSwapChainImageFormat(),
-                VK_IMAGE_ASPECT_COLOR_BIT, ImageViewCreateInfo());
+                VK_IMAGE_ASPECT_COLOR_BIT, TextureViewCreateInfo(), TextureViewType::NORMAL_2D);
         }
     }
 
@@ -41,7 +41,7 @@ namespace neon::vulkan
         }
         auto extent = _vkApplication->getSwapChainExtent();
 
-        ImageCreateInfo info;
+        TextureCreateInfo info;
         info.width = extent.width;
         info.height = extent.height;
         info.samples = _samples;
@@ -57,16 +57,16 @@ namespace neon::vulkan
         _colorImage = pair.first;
         _colorImageMemory = pair.second;
 
-        _colorImageView = vulkan_util::createImageView(_vkApplication->getDevice()->getRaw(), _colorImage,
-                                                       _vkApplication->getSwapChainImageFormat(),
-                                                       VK_IMAGE_ASPECT_COLOR_BIT, ImageViewCreateInfo());
+        _colorImageView = vulkan_util::createImageView(
+            _vkApplication->getDevice()->getRaw(), _colorImage, _vkApplication->getSwapChainImageFormat(),
+            VK_IMAGE_ASPECT_COLOR_BIT, TextureViewCreateInfo(), TextureViewType::NORMAL_2D);
     }
 
     void VKSwapChainFrameBuffer::createDepthImage()
     {
         auto extent = _vkApplication->getSwapChainExtent();
 
-        ImageCreateInfo info;
+        TextureCreateInfo info;
         info.width = extent.width;
         info.height = extent.height;
         info.samples = _samples;
@@ -82,9 +82,9 @@ namespace neon::vulkan
         _depthImage = pair.first;
         _depthImageMemory = pair.second;
 
-        _depthImageView = vulkan_util::createImageView(_vkApplication->getDevice()->getRaw(), _depthImage,
-                                                       _vkApplication->getVkDepthImageFormat(),
-                                                       VK_IMAGE_ASPECT_DEPTH_BIT, ImageViewCreateInfo());
+        _depthImageView = vulkan_util::createImageView(
+            _vkApplication->getDevice()->getRaw(), _depthImage, _vkApplication->getVkDepthImageFormat(),
+            VK_IMAGE_ASPECT_DEPTH_BIT, TextureViewCreateInfo(), TextureViewType::NORMAL_2D);
 
         //
         {

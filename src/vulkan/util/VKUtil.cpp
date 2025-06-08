@@ -94,7 +94,7 @@ namespace neon::vulkan::vulkan_util
     }
 
     std::pair<VkImage, VkDeviceMemory> createImage(VkDevice device, VkPhysicalDevice physicalDevice,
-                                                   const ImageCreateInfo& info, TextureViewType viewType,
+                                                   const TextureCreateInfo& info, TextureViewType viewType,
                                                    VkFormat override)
     {
         VkImage image;
@@ -250,7 +250,7 @@ namespace neon::vulkan::vulkan_util
         vkCmdCopyBufferToImage(commandBuffer, buffer, image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
     }
 
-    void copyImageToBuffer(VkBuffer buffer, VkImage image, rush::Vec3i offset, rush::Vec<3, uint32_t> size,
+    void copyImageToBuffer(VkBuffer buffer, VkImage image, rush::Vec3i offset, rush::Vec3ui size,
                            uint32_t layerOffset, uint32_t layers, VkCommandBuffer commandBuffer)
     {
         VkBufferImageCopy region{};
@@ -373,12 +373,12 @@ namespace neon::vulkan::vulkan_util
     }
 
     VkImageView createImageView(VkDevice device, VkImage image, VkFormat format, VkImageAspectFlags aspectFlags,
-                                const ImageViewCreateInfo& info)
+                                const TextureViewCreateInfo& info, TextureViewType type)
     {
         VkImageViewCreateInfo viewInfo{};
         viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
         viewInfo.image = image;
-        viewInfo.viewType = vc::vkImageViewType(info.viewType);
+        viewInfo.viewType = vc::vkImageViewType(type);
         viewInfo.format = format;
         viewInfo.components.r = vc::vkComponentSwizzle(info.rSwizzle);
         viewInfo.components.g = vc::vkComponentSwizzle(info.gSwizzle);

@@ -117,7 +117,7 @@ std::shared_ptr<Material> createSSAOMaterial(Room* room, const std::shared_ptr<F
                            0.0f);
     }
 
-    ImageCreateInfo noiseTextureCreateInfo;
+    TextureCreateInfo noiseTextureCreateInfo;
     noiseTextureCreateInfo.format = TextureFormat::R32FG32FB32F;
     noiseTextureCreateInfo.width = NOISE_WIDTH;
     noiseTextureCreateInfo.height = NOISE_WIDTH;
@@ -392,7 +392,7 @@ void loadModels(Application* application, Room* room, const std::shared_ptr<Fram
 
     // CUBE
 
-    ImageCreateInfo albedoInfo;
+    TextureCreateInfo albedoInfo;
     albedoInfo.format = TextureFormat::R8G8B8A8_SRGB;
 
     std::shared_ptr<Texture> cubeAlbedo =
@@ -449,7 +449,7 @@ std::shared_ptr<SampledTexture> loadSkybox(Room* room)
 
 std::shared_ptr<SampledTexture> loadBRDF(Room* room)
 {
-    ImageCreateInfo info;
+    TextureCreateInfo info;
     info.layers = 1;
     info.mipmaps = 0;
 

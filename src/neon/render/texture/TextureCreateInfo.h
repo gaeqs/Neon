@@ -143,7 +143,7 @@ namespace neon
         ALL = 0x7FFFFFFF
     };
 
-    struct ImageCreateInfo
+    struct TextureCreateInfo
     {
         /**
          * The format of the texture.
@@ -209,7 +209,7 @@ namespace neon
                                             TextureUsage::SAMPLING};
     };
 
-    struct ImageViewCreateInfo
+    struct TextureViewCreateInfo
     {
         /**
          * The texture format of the view.
@@ -217,11 +217,6 @@ namespace neon
          * If empty, the format will match the texture format.
          */
         std::optional<TextureFormat> format = {};
-
-        /**
-         * The view mode of the texture.
-         */
-        TextureViewType viewType = TextureViewType::NORMAL_2D;
 
         /**
          * What channel the view should use as the R component.
@@ -325,37 +320,6 @@ namespace neon
          * The filter used to interpolate mipmaps.
          */
         MipmapMode mipmapMode = MipmapMode::LINEAR;
-    };
-
-    /**
-     * Information used to create a texture.
-     * By default, this info is configured
-     * to create an 2D albedo texture.
-     */
-    struct TextureCreateInfo
-    {
-        /**
-         * The creation information of the image itself.
-         */
-        ImageCreateInfo image = ImageCreateInfo();
-
-        /**
-         * The creation information of the image view.
-         */
-        ImageViewCreateInfo imageView = ImageViewCreateInfo();
-
-        /**
-         * The creation information of the sampler.
-         */
-        SamplerCreateInfo sampler = SamplerCreateInfo();
-
-        /**
-         * Defines the command buffer used to create
-         * the texture.
-         * If this command buffer is nullptr, the default
-         * command buffer will be used.
-         */
-        const CommandBuffer* commandBuffer = nullptr;
     };
 
     namespace serialization

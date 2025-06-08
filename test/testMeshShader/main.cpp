@@ -179,7 +179,7 @@ void loadModels(Application* application, Room* room, const std::shared_ptr<Fram
     modelLoaderInfo.flipWindingOrder = false;
     modelLoaderInfo.flipNormals = false;
 
-    ImageCreateInfo info;
+    TextureCreateInfo info;
     info.viewType = TextureViewType::NORMAL_2D;
 
     std::shared_ptr diffuse = Texture::createTextureFromFile(application, "Diffuse", "resource/Sans/diffuse.png", info);

@@ -36,7 +36,7 @@ namespace neon::vulkan::vulkan_util
                     VkDeviceSize destinyOffset, VkDeviceSize size);
 
     std::pair<VkImage, VkDeviceMemory> createImage(VkDevice device, VkPhysicalDevice physicalDevice,
-                                                   const ImageCreateInfo& info, TextureViewType viewType,
+                                                   const TextureCreateInfo& info, TextureViewType viewType,
                                                    VkFormat override = VK_FORMAT_UNDEFINED);
 
     void transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout,
@@ -45,7 +45,7 @@ namespace neon::vulkan::vulkan_util
     void copyBufferToImage(VkBuffer buffer, VkImage image, rush::Vec3i offset, rush::Vec3ui size, uint32_t baseLayer,
                            uint32_t layers, VkCommandBuffer commandBuffer);
 
-    void copyImageToBuffer(VkBuffer buffer, VkImage image, rush::Vec3i offset, rush::Vec<3, uint32_t> size,
+    void copyImageToBuffer(VkBuffer buffer, VkImage image, rush::Vec3i offset, rush::Vec3ui size,
                            uint32_t layerOffset, uint32_t layers, VkCommandBuffer commandBuffer);
 
     void generateMipmaps(AbstractVKApplication* application, VkImage image, uint32_t width, uint32_t height,
@@ -59,7 +59,7 @@ namespace neon::vulkan::vulkan_util
     bool isStencilFormat(TextureFormat format);
 
     VkImageView createImageView(VkDevice device, VkImage image, VkFormat format, VkImageAspectFlags aspectFlags,
-                                const ImageViewCreateInfo& info);
+                                const TextureViewCreateInfo& info, TextureViewType type);
 
     std::pair<VkVertexInputBindingDescription, std::vector<VkVertexInputAttributeDescription>> toVulkanDescription(
         uint32_t binding, uint32_t startLocation, const InputDescription& description);

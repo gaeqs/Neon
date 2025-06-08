@@ -28,9 +28,7 @@ namespace neon::vulkan
 
         explicit VKResource(Application* application);
 
-        [[nodiscard]] AbstractVKApplication* getApplication();
-
-        [[nodiscard]] const AbstractVKApplication* getApplication() const;
+        [[nodiscard]] AbstractVKApplication* getApplication() const;
 
         void registerRun(std::shared_ptr<CommandBufferRun> run);
 
