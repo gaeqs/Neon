@@ -119,7 +119,8 @@ TEST_CASE("Load material")
     neon::AssetLoaderContext context(&application, nullptr, &fileSystem);
 
     std::shared_ptr<neon::SimpleFrameBuffer> fb = std::make_shared<neon::SimpleFrameBuffer>(
-        &application, "frame_buffer", std::vector<neon::FrameBufferTextureCreateInfo>(), true);
+        &application, "frame_buffer", neon::SamplesPerTexel::COUNT_1, std::vector<neon::FrameBufferTextureCreateInfo>(),
+        neon::FrameBufferDepthCreateInfo());
 
     application.getAssets().store(fb, neon::AssetStorageMode::PERMANENT);
 

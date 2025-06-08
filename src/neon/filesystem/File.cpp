@@ -9,18 +9,18 @@ namespace neon
     File::File() :
         _data(nullptr),
         _size(0),
-        _autoFree(false)
+        _destructor(nullptr)
     {
     }
 
     File::File(File&& other) noexcept :
         _data(other._data),
         _size(other._size),
-        _autoFree(other._autoFree)
+        _destructor(other._destructor)
     {
         other._data = nullptr;
         other._size = 0;
-        other._autoFree = false;
+        other._destructor = _destructor;
     }
 
     File& File::operator=(File&& other) noexcept
@@ -28,26 +28,31 @@ namespace neon
         if (this == &other) {
             return *this;
         }
+
+        if (_destructor != nullptr && _data != nullptr) {
+            _destructor(_data);
+        }
+
         _data = other._data;
         _size = other._size;
-        _autoFree = other._autoFree;
+        _destructor = other._destructor;
         other._data = nullptr;
         other._size = 0;
-        other._autoFree = false;
+        other._destructor = nullptr;
         return *this;
     }
 
-    File::File(const char* data, size_t size, bool autoFree) :
+    File::File(const std::byte* data, size_t size, std::function<void(const std::byte*)> destructor) :
         _data(data),
         _size(size),
-        _autoFree(autoFree)
+        _destructor(std::move(destructor))
     {
     }
 
     File::~File()
     {
-        if (_autoFree && _data != nullptr) {
-            delete _data;
+        if (_destructor != nullptr && _data != nullptr) {
+            _destructor(_data);
         }
     }
 
@@ -56,7 +61,7 @@ namespace neon
         return _data != nullptr;
     }
 
-    const char* File::getData() const
+    const std::byte* File::getData() const
     {
         return _data;
     }
@@ -77,7 +82,7 @@ namespace neon
 
     std::string File::toString() const
     {
-        return std::string(_data, _size);
+        return std::string(static_cast<const char*>(static_cast<const void*>(_data)), _size);
     }
 
     std::vector<std::string> File::readLines() const

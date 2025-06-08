@@ -13,9 +13,9 @@ namespace neon
 {
     class File
     {
-        const char* _data;
+        const std::byte* _data;
         size_t _size;
-        bool _autoFree;
+        std::function<void(const std::byte*)> _destructor;
 
       public:
         File();
@@ -26,13 +26,13 @@ namespace neon
 
         File& operator=(File&& other) noexcept;
 
-        File(const char* data, size_t size, bool autoFree = true);
+        File(const std::byte* data, size_t size, std::function<void(const std::byte*)> destructor = nullptr);
 
         ~File();
 
         [[nodiscard]] bool isValid() const;
 
-        [[nodiscard]] const char* getData() const;
+        [[nodiscard]] const std::byte* getData() const;
 
         [[nodiscard]] size_t getSize() const;
 
@@ -44,4 +44,4 @@ namespace neon
     };
 } // namespace neon
 
-#endif //FILE_H
+#endif // FILE_H

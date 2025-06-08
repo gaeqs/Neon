@@ -21,7 +21,7 @@ namespace neon
         std::ranges::replace(string, '\\', '/');
         auto file = _filesystem.open(string);
 
-        return File(file.begin(), file.size(), false);
+        return File(static_cast<const std::byte*>(static_cast<const void*>(file.begin())), file.size());
     }
 
     bool CMRCFileSystem::exists(std::filesystem::path path) const

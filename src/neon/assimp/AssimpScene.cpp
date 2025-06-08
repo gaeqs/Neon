@@ -8,20 +8,54 @@
 
 
 namespace neon {
-    AssimpMaterialProperty::AssimpMaterialProperty(const AssimpMaterialProperty& other)
-    : _data(new char[other._length]),
-          _length(other._length),
-          _type(other._type) {
+    AssimpMaterialProperty::AssimpMaterialProperty(const AssimpMaterialProperty& other) :
+        _data(new char[other._length]),
+        _length(other._length),
+        _type(other._type)
+    {
         std::memcpy(_data, other._data, _length);
     }
 
-    AssimpMaterialProperty& AssimpMaterialProperty::operator=(const AssimpMaterialProperty& other) {
-        if (this == &other) return *this;
+    AssimpMaterialProperty::AssimpMaterialProperty(AssimpMaterialProperty&& other) noexcept
+    : _data(other._data),
+      _length(other._length),
+      _type(other._type)
+    {
+        other._data = nullptr;
+        other._length = 0;
+        other._type = AssimpMaterialPropertyType::BUFFER;
+    }
+
+    AssimpMaterialProperty& AssimpMaterialProperty::operator=(const AssimpMaterialProperty& other)
+    {
+        if (this == &other) {
+            return *this;
+        }
+        if (_data != nullptr) {
+            delete[] static_cast<char*>(_data);
+        }
         _data = new char[other._length];
         _length = other._length;
         _type = other._type;
         std::memcpy(_data, other._data, _length);
 
+        return *this;
+    }
+
+    AssimpMaterialProperty& AssimpMaterialProperty::operator=(AssimpMaterialProperty&& other)
+    {
+        if (this == &other) {
+            return *this;
+        }
+        if (_data != nullptr) {
+            delete[] static_cast<char*>(_data);
+        }
+        _data = other._data;
+        _length = other._length;
+        _type = other._type;
+        other._data = nullptr;
+        other._length = 0;
+        other._type = AssimpMaterialPropertyType::BUFFER;
         return *this;
     }
 

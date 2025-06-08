@@ -137,16 +137,16 @@ namespace neon::assimp_loader
                 m->pushConstant(TWO_SIDED, b);
             }
             if (material->Get(AI_MATKEY_OPACITY, f) == aiReturn_SUCCESS) {
-                m->pushConstant(OPACITY, b);
+                m->pushConstant(OPACITY, f);
             }
             if (material->Get(AI_MATKEY_SHININESS, f) == aiReturn_SUCCESS) {
-                m->pushConstant(SHININESS, b);
+                m->pushConstant(SHININESS, f);
             }
             if (material->Get(AI_MATKEY_SHININESS_STRENGTH, f) == aiReturn_SUCCESS) {
-                m->pushConstant(SHININESS_STRENGTH, b);
+                m->pushConstant(SHININESS_STRENGTH, f);
             }
             if (material->Get(AI_MATKEY_REFRACTI, f) == aiReturn_SUCCESS) {
-                m->pushConstant(REFRACT_INDEX, b);
+                m->pushConstant(REFRACT_INDEX, f);
             }
             if (material->Get(AI_MATKEY_TEXTURE_DIFFUSE(0), t) == aiReturn_SUCCESS) {
                 auto texture = textures.find(std::string(t.data, std::min(t.length, 2u)));
@@ -169,7 +169,7 @@ namespace neon::assimp_loader
             if (material->Get(AI_MATKEY_TEXTURE_EMISSIVE(0), t) == aiReturn_SUCCESS) {
                 auto texture = textures.find(getTextureId(t));
                 if (texture != textures.end()) {
-                    m->setTexture(AMBIENT_TEXTURE, texture->second);
+                    m->setTexture(EMISSIVE_TEXTURE, texture->second);
                 }
             }
             if (material->Get(AI_MATKEY_TEXTURE_DISPLACEMENT(0), t) == aiReturn_SUCCESS) {
