@@ -10,7 +10,6 @@
 
 #include <vulkan/vulkan.h>
 
-#include <neon/render/texture/Texture.h>
 #include <neon/render/shader/MaterialCreateInfo.h>
 
 namespace neon
@@ -30,7 +29,6 @@ namespace neon::vulkan
     {
         Material* _material;
 
-        AbstractVKApplication* _vkApplication;
         VkPipelineLayout _pipelineLayout;
         VkPipeline _pipeline;
 
@@ -56,7 +54,7 @@ namespace neon::vulkan
 
         void uploadConstants(VkCommandBuffer buffer) const;
 
-        void setTexture(const std::string& name, std::shared_ptr<Texture> texture);
+        void setTexture(const std::string& name, std::shared_ptr<SampledTexture> texture);
 
         void useMaterial(std::shared_ptr<CommandBufferRun> run);
     };

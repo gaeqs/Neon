@@ -5,6 +5,7 @@
 #ifndef NEON_SHADERUNIFORMBUFFER_H
 #define NEON_SHADERUNIFORMBUFFER_H
 
+#include <neon/render/texture/SampledTexture.h>
 #include <neon/structure/Asset.h>
 
 #ifdef USE_VULKAN
@@ -51,7 +52,7 @@ namespace neon
 
         const void* fetchData(uint32_t index) const;
 
-        void setTexture(uint32_t index, std::shared_ptr<Texture> texture);
+        void setTexture(uint32_t index, std::shared_ptr<SampledTexture> texture);
 
         template<class T>
         void uploadData(uint32_t index, const T& data)

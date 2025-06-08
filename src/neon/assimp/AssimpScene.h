@@ -54,8 +54,11 @@ namespace neon {
 
         AssimpMaterialProperty(const AssimpMaterialProperty& other);
 
+        AssimpMaterialProperty(AssimpMaterialProperty&& other) noexcept;
 
         AssimpMaterialProperty& operator=(const AssimpMaterialProperty& other);
+
+        AssimpMaterialProperty& operator=(AssimpMaterialProperty&& other);
 
         AssimpMaterialProperty(const void* data, size_t length, AssimpMaterialPropertyType type);
 

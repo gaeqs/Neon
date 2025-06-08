@@ -7,6 +7,7 @@
 
 #include <neon/structure/Component.h>
 #include <neon/render/buffer/SimpleFrameBuffer.h>
+#include <neon/render/texture/SampledTexture.h>
 #include <imgui.h>
 
 namespace neon
@@ -14,6 +15,7 @@ namespace neon
     class ViewportComponent : public Component
     {
         std::shared_ptr<SimpleFrameBuffer> _frameBuffer;
+        std::shared_ptr<SampledTexture> _sampled;
 
         std::string _name;
 
@@ -24,6 +26,8 @@ namespace neon
 
       public:
         ViewportComponent(const std::shared_ptr<SimpleFrameBuffer>& frameBuffer, std::string name = "Viewport");
+
+        void onStart() override;
 
         void onPreDraw() override;
 

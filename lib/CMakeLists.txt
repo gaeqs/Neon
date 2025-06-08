@@ -78,3 +78,4 @@ install(EXPORT implotTargets
 )
 
 add_subdirectory(stb)
+add_subdirectory(vma)

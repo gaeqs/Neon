@@ -1,100 +1,54 @@
 //
-// Created by gaelr on 23/10/2022.
+// Created by gaeqs on 27/05/2025.
 //
 
 #include "Texture.h"
 
-#include <utility>
-
 #define STB_IMAGE_IMPLEMENTATION
-
 #include <stb/stb_image.h>
-
-#include <neon/structure/Room.h>
-
+#ifdef USE_VULKAN
+    #include <vulkan/render/texture/VKSimpleTexture.h>
+#endif
 namespace neon
 {
-    Texture::Texture(Application* application, std::string name, const void* data,
-                     const TextureCreateInfo& createInfo) :
-        Asset(typeid(Texture), std::move(name)),
-        _implementation(application, data, createInfo),
-        _format(createInfo.image.format),
-        _samples(createInfo.image.samples)
+    Texture::Texture(std::string name) :
+        Asset(typeid(Texture), std::move(name))
     {
     }
 
+    std::shared_ptr<Texture> Texture::createFromRawData(Application* application, std::string name, const void* data,
+                                                        const ImageCreateInfo& createInfo, CommandBuffer* commandBuffer)
+    {
 #ifdef USE_VULKAN
-
-    Texture::Texture(Application* application, std::string name, VkImage image, VkDeviceMemory memory,
-                     VkImageView imageView, VkImageLayout layout, uint32_t width, uint32_t height, uint32_t depth,
-                     TextureFormat format, SamplesPerTexel samples, const SamplerCreateInfo& createInfo) :
-        Asset(typeid(Texture), std::move(name)),
-        _implementation(application, format, image, memory, imageView, layout, width, height, depth, createInfo),
-        _format(format),
-        _samples(samples)
-    {
-    }
-
+        auto image = std::make_unique<vulkan::VKSimpleTexture>(application, std::move(name), createInfo,
+                                                               static_cast<const std::byte*>(data), commandBuffer);
+#else
+        std::unique_ptr<Texture> image = nullptr;
 #endif
-
-    const Texture::Implementation& Texture::getImplementation() const
-    {
-        return _implementation;
+        return image;
     }
 
-    Texture::Implementation& Texture::getImplementation()
-    {
-        return _implementation;
-    }
-
-    uint32_t Texture::getWidth() const
-    {
-        return _implementation.getWidth();
-    }
-
-    uint32_t Texture::getHeight() const
-    {
-        return _implementation.getHeight();
-    }
-
-    uint32_t Texture::getDepth() const
-    {
-        return _implementation.getDepth();
-    }
-
-    TextureFormat Texture::getFormat() const
-    {
-        return _format;
-    }
-
-    SamplesPerTexel Texture::getSamples() const
-    {
-        return _samples;
-    }
-
-    void Texture::updateData(const char* data, int32_t width, int32_t height, int32_t depth, TextureFormat format)
-    {
-        _implementation.updateData(data, width, height, depth, format);
-    }
-
-    std::unique_ptr<Texture> Texture::createTextureFromFile(Application* application, std::string name,
+    std::shared_ptr<Texture> Texture::createTextureFromFile(Application* application, std::string name,
                                                             const cmrc::file& resource,
-                                                            const TextureCreateInfo& createInfo)
+                                                            const ImageCreateInfo& createInfo,
+                                                            CommandBuffer* commandBuffer)
     {
         return createTextureFromFile(application, std::move(name), resource.begin(),
-                                     static_cast<uint32_t>(resource.size()), createInfo);
+                                     static_cast<uint32_t>(resource.size()), createInfo, commandBuffer);
     }
 
-    std::unique_ptr<Texture> Texture::createTextureFromFile(Application* application, std::string name,
-                                                            const File& resource, const TextureCreateInfo& createInfo)
+    std::shared_ptr<Texture> Texture::createTextureFromFile(Application* application, std::string name,
+                                                            const File& resource, const ImageCreateInfo& createInfo,
+                                                            CommandBuffer* commandBuffer)
     {
         return createTextureFromFile(application, std::move(name), resource.getData(),
-                                     static_cast<uint32_t>(resource.getSize()), createInfo);
+                                     static_cast<uint32_t>(resource.getSize()), createInfo, commandBuffer);
     }
 
-    std::unique_ptr<Texture> Texture::createTextureFromFiles(Application* application, std::string name,
+    std::shared_ptr<Texture> Texture::createTextureFromFiles(Application* application, std::string name,
                                                              const std::vector<cmrc::file>& resources,
-                                                             const TextureCreateInfo& createInfo)
+                                                             const ImageCreateInfo& createInfo,
+                                                             CommandBuffer* commandBuffer)
     {
         std::vector<const void*> data;
         std::vector<uint32_t> sizes;
@@ -106,36 +60,39 @@ namespace neon
             sizes.push_back(static_cast<uint32_t>(item.size()));
         }
 
-        return createTextureFromFiles(application, std::move(name), data, sizes, createInfo);
+        return createTextureFromFiles(application, std::move(name), data, sizes, createInfo, commandBuffer);
     }
 
-    std::unique_ptr<Texture> Texture::createTextureFromFile(Application* application, std::string name,
-                                                            const std::string& path,
-                                                            const TextureCreateInfo& createInfo)
+    std::shared_ptr<Texture> Texture::createTextureFromFile(Application* application, std::string name,
+                                                            const std::string& path, ImageCreateInfo createInfo,
+                                                            CommandBuffer* commandBuffer)
     {
         int32_t width, height, channels;
         auto ptr = stbi_load(path.c_str(), &width, &height, &channels, 4);
 
-        TextureCreateInfo customInfo = createInfo;
-        if (customInfo.image.width == 0) {
-            customInfo.image.width = width;
+        if (createInfo.width == 0) {
+            createInfo.width = width;
         }
-        if (customInfo.image.height == 0) {
-            customInfo.image.height = height;
+        if (createInfo.height == 0) {
+            createInfo.height = height;
         }
-        if (customInfo.image.depth == 0) {
-            customInfo.image.depth = 1;
+        if (createInfo.depth == 0) {
+            createInfo.depth = 1;
         }
 
-        auto image = std::make_unique<Texture>(application, std::move(name), (const char*)ptr, customInfo);
-
+#ifdef USE_VULKAN
+        auto image = std::make_unique<vulkan::VKSimpleTexture>(application, std::move(name), createInfo,
+                                                               reinterpret_cast<std::byte*>(ptr), commandBuffer);
+#else
+        std::unique_ptr<Texture> image = nullptr;
+#endif
         stbi_image_free(ptr);
         return image;
     }
 
-    std::unique_ptr<Texture> Texture::createTextureFromFiles(Application* application, std::string name,
+    std::shared_ptr<Texture> Texture::createTextureFromFiles(Application* application, std::string name,
                                                              const std::vector<std::string>& paths,
-                                                             const TextureCreateInfo& createInfo)
+                                                             ImageCreateInfo createInfo, CommandBuffer* commandBuffer)
     {
         std::vector<int32_t> widths, heights;
         std::vector<stbi_uc*> pointers;
@@ -168,52 +125,58 @@ namespace neon
             stbi_image_free(pointer);
         }
 
-        TextureCreateInfo customInfo = createInfo;
-        if (customInfo.image.width == 0) {
-            customInfo.image.width = widths[0];
+        if (createInfo.width == 0) {
+            createInfo.width = widths[0];
         }
-        if (customInfo.image.height == 0) {
-            customInfo.image.height = heights[0];
+        if (createInfo.height == 0) {
+            createInfo.height = heights[0];
         }
-        if (customInfo.image.depth == 0) {
-            customInfo.image.depth = 1;
+        if (createInfo.depth == 0) {
+            createInfo.depth = 1;
         }
-
-        auto image = std::make_unique<Texture>(application, std::move(name), (const char*)data, customInfo);
+#ifdef USE_VULKAN
+        auto image = std::make_unique<vulkan::VKSimpleTexture>(application, std::move(name), createInfo,
+                                                               reinterpret_cast<std::byte*>(data), commandBuffer);
+#else
+        std::unique_ptr<Texture> image = nullptr;
+#endif
 
         delete[] data;
         return image;
     }
 
-    std::unique_ptr<Texture> Texture::createTextureFromFile(Application* application, std::string name,
-                                                            const void* data, uint32_t size,
-                                                            const TextureCreateInfo& createInfo)
+    std::shared_ptr<Texture> Texture::createTextureFromFile(Application* application, std::string name,
+                                                            const void* data, uint32_t size, ImageCreateInfo createInfo,
+                                                            CommandBuffer* commandBuffer)
     {
         int32_t width, height, channels;
         auto ptr = stbi_load_from_memory(static_cast<const uint8_t*>(data), static_cast<int32_t>(size), &width, &height,
                                          &channels, 4);
 
-        TextureCreateInfo customInfo = createInfo;
-        if (customInfo.image.width == 0) {
-            customInfo.image.width = width;
+        if (createInfo.width == 0) {
+            createInfo.width = width;
         }
-        if (customInfo.image.height == 0) {
-            customInfo.image.height = height;
+        if (createInfo.height == 0) {
+            createInfo.height = height;
         }
-        if (customInfo.image.depth == 0) {
-            customInfo.image.depth = 1;
+        if (createInfo.depth == 0) {
+            createInfo.depth = 1;
         }
 
-        auto image = std::make_unique<Texture>(application, std::move(name), (const char*)ptr, customInfo);
-
+#ifdef USE_VULKAN
+        auto image = std::make_unique<vulkan::VKSimpleTexture>(application, std::move(name), createInfo,
+                                                               reinterpret_cast<std::byte*>(ptr), commandBuffer);
+#else
+        std::unique_ptr<Texture> image = nullptr;
+#endif
         stbi_image_free(ptr);
         return image;
     }
 
-    std::unique_ptr<Texture> Texture::createTextureFromFiles(Application* application, std::string name,
+    std::shared_ptr<Texture> Texture::createTextureFromFiles(Application* application, std::string name,
                                                              const std::vector<const void*>& data,
                                                              const std::vector<uint32_t>& sizes,
-                                                             const TextureCreateInfo& createInfo)
+                                                             ImageCreateInfo createInfo, CommandBuffer* commandBuffer)
     {
         std::vector<int32_t> widths, heights;
         std::vector<stbi_uc*> pointers;
@@ -247,48 +210,23 @@ namespace neon
             stbi_image_free(pointer);
         }
 
-        TextureCreateInfo customInfo = createInfo;
-        if (customInfo.image.width == 0) {
-            customInfo.image.width = widths[0];
+        if (createInfo.width == 0) {
+            createInfo.width = widths[0];
         }
-        if (customInfo.image.height == 0) {
-            customInfo.image.height = heights[0];
+        if (createInfo.height == 0) {
+            createInfo.height = heights[0];
         }
-        if (customInfo.image.depth == 0) {
-            customInfo.image.depth = 1;
+        if (createInfo.depth == 0) {
+            createInfo.depth = 1;
         }
+#ifdef USE_VULKAN
+        auto image = std::make_unique<vulkan::VKSimpleTexture>(application, std::move(name), createInfo,
+                                                               reinterpret_cast<std::byte*>(flatData), commandBuffer);
+#else
+        std::unique_ptr<Texture> image = nullptr;
+#endif
 
-        auto image = std::make_unique<Texture>(application, std::move(name), (const char*)flatData, customInfo);
         delete[] flatData;
         return image;
     }
-
-    void Texture::fetchData(void* data, rush::Vec3i offset, rush::Vec<3, uint32_t> size, uint32_t layersOffset,
-                            uint32_t layers)
-    {
-        _implementation.fetchData(data, offset, size, layersOffset, layers);
-    }
-
-    ImTextureID Texture::getImGuiDescriptor() const
-    {
-        return _implementation.getImGuiDescriptor();
-    }
 } // namespace neon
-
-namespace ImGui
-{
-    void Image(const std::shared_ptr<neon::Texture>& texture, const ImVec2& imageSize, const ImVec2& uv0,
-               const ImVec2& uv1)
-    {
-        if (texture != nullptr) {
-            Image(texture->getImGuiDescriptor(), imageSize, uv0, uv1);
-        }
-    }
-
-    void Image(const neon::Texture* texture, const ImVec2& imageSize, const ImVec2& uv0, const ImVec2& uv1)
-    {
-        if (texture != nullptr) {
-            Image(texture->getImGuiDescriptor(), imageSize, uv0, uv1);
-        }
-    }
-} // namespace ImGui

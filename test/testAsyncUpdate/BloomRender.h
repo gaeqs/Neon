@@ -21,17 +21,17 @@ class BloomRender : public neon::RenderPassStrategy
 {
     neon::Application* _application;
     std::vector<BloomMip> _mipChain;
-    std::shared_ptr<neon::Texture> _pbrTexture;
+    std::shared_ptr<neon::SampledTexture> _pbrTexture;
     std::shared_ptr<neon::Model> _screenModel;
 
     rush::Vec2i _extent;
 
-  public:
+public:
     BloomRender(neon::Application* application, std::shared_ptr<neon::ShaderProgram> downsamplingShader,
-                std::shared_ptr<neon::ShaderProgram> upsamplingShader, std::shared_ptr<neon::Texture> pbrTexture,
+                std::shared_ptr<neon::ShaderProgram> upsamplingShader, std::shared_ptr<neon::SampledTexture> pbrTexture,
                 const std::shared_ptr<neon::Model>& screenModel, uint32_t chainLength);
 
-    [[nodiscard]] std::shared_ptr<neon::Texture> getBloomTexture() const;
+    [[nodiscard]] std::shared_ptr<neon::MutableAsset<neon::TextureView>> getBloomTexture() const;
 
     void render(neon::Room* room, const neon::Render* render,
                 const std::vector<std::shared_ptr<neon::Material>>& sortedMaterials) const override;
@@ -41,4 +41,4 @@ class BloomRender : public neon::RenderPassStrategy
     void recreate() override;
 };
 
-#endif //NEON_BLOOMRENDER_H
+#endif // NEON_BLOOMRENDER_H

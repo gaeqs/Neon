@@ -75,8 +75,6 @@ namespace neon::vulkan
 
         virtual VkBuffer getRaw(std::shared_ptr<CommandBufferRun> run) = 0;
 
-        virtual AbstractVKApplication* getApplication() const = 0;
-
         template<class T>
         std::optional<std::shared_ptr<BufferMap<T>>> map(const CommandBuffer* commandBuffer = nullptr)
         {

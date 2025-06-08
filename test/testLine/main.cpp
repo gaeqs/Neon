@@ -85,8 +85,8 @@ std::shared_ptr<FrameBuffer> initRender(Room* room)
     // Just after creation, the frame buffer should be added
     // to the render as a render pass.
     // We'll use the default strategy for the rendering.
-    auto fpFrameBuffer =
-        std::make_shared<SimpleFrameBuffer>(room->getApplication(), "frame_buffer", frameBufferFormats, true);
+    auto fpFrameBuffer = std::make_shared<SimpleFrameBuffer>(app, "frame_buffer", SamplesPerTexel::COUNT_1,
+                                                             frameBufferFormats, FrameBufferDepthCreateInfo());
     app->getAssets().store(fpFrameBuffer, AssetStorageMode::PERMANENT);
 
     render->addRenderPass(std::make_shared<DefaultRenderPassStrategy>("frame_buffer", fpFrameBuffer));
@@ -97,7 +97,7 @@ std::shared_ptr<FrameBuffer> initRender(Room* room)
     // create the frame buffer and add a render pass.
     std::vector<FrameBufferTextureCreateInfo> screenFormats = {TextureFormat::R8G8B8A8};
     auto screenFrameBuffer =
-        std::make_shared<SimpleFrameBuffer>(room->getApplication(), "screen", screenFormats, false);
+        std::make_shared<SimpleFrameBuffer>(app, "screen", SamplesPerTexel::COUNT_1, screenFormats);
     app->getAssets().store(screenFrameBuffer, AssetStorageMode::PERMANENT);
     render->addRenderPass(std::make_shared<DefaultRenderPassStrategy>("screen", screenFrameBuffer));
 
@@ -108,12 +108,18 @@ std::shared_ptr<FrameBuffer> initRender(Room* room)
 
     auto screenShader = createShader(app, "screen", "screen.vert", "screen.frag");
 
-    auto textures = fpFrameBuffer->getTextures();
-
     // We can also create a GraphicComponent that handles
     // an instance of the model.
     // This option is more direct.
     auto screenModel = deferred_utils::createScreenModel(app, ModelCreateInfo(), "screen model");
+
+    auto outputs = fpFrameBuffer->getOutputs();
+    std::vector<std::shared_ptr<SampledTexture>> textures;
+    textures.reserve(outputs.size());
+
+    for (auto& output : outputs) {
+        textures.push_back(SampledTexture::create(app, output.resolvedTexture));
+    }
 
     std::shared_ptr<Material> screenMaterial = Material::create(
         room->getApplication(), "Screen Model", screenFrameBuffer, screenShader,
@@ -138,7 +144,7 @@ std::shared_ptr<FrameBuffer> initRender(Room* room)
     return fpFrameBuffer;
 }
 
-std::shared_ptr<Texture> loadSkybox(Room* room)
+std::shared_ptr<SampledTexture> loadSkybox(Room* room)
 {
     static const std::vector<std::string> PATHS = {
         "resource/Skybox/right.jpg",  "resource/Skybox/left.jpg",  "resource/Skybox/top.jpg",
@@ -146,10 +152,14 @@ std::shared_ptr<Texture> loadSkybox(Room* room)
     };
 
     TextureCreateInfo info;
+    info.image.viewType = TextureViewType::CUBE;
     info.imageView.viewType = TextureViewType::CUBE;
     info.image.layers = 6;
+    info.image.mipmaps = 10;
 
-    return Texture::createTextureFromFiles(room->getApplication(), "skybox", PATHS, info);
+    auto texture = Texture::createTextureFromFiles(room->getApplication(), "skybox", PATHS, info.image);
+    auto view = TextureView::create(room->getApplication(), "skybox", info.imageView, texture);
+    return SampledTexture::create(room->getApplication(), "skybox", std::make_shared<MutableAsset<TextureView>>(view));
 }
 
 std::shared_ptr<Room> getTestRoom(Application* application)

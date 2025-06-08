@@ -5,7 +5,6 @@
 #ifndef NEON_VKUTIL_H
 #define NEON_VKUTIL_H
 
-#include <cstdint>
 #include <vector>
 #include <optional>
 #include <memory>
@@ -43,18 +42,21 @@ namespace neon::vulkan::vulkan_util
     void transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout,
                                uint32_t mipLevels, uint32_t layers, VkCommandBuffer commandBuffer);
 
-    void copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height, uint32_t depth,
+    void copyBufferToImage(VkBuffer buffer, VkImage image, rush::Vec3i offset, rush::Vec3ui size, uint32_t baseLayer,
                            uint32_t layers, VkCommandBuffer commandBuffer);
 
     void copyImageToBuffer(VkBuffer buffer, VkImage image, rush::Vec3i offset, rush::Vec<3, uint32_t> size,
                            uint32_t layerOffset, uint32_t layers, VkCommandBuffer commandBuffer);
 
     void generateMipmaps(AbstractVKApplication* application, VkImage image, uint32_t width, uint32_t height,
-                         uint32_t depth, uint32_t levels, int32_t layers, VkCommandBuffer commandBuffer);
+                         uint32_t depth, uint32_t levels, uint32_t layers, VkCommandBuffer commandBuffer);
 
-    std::optional<VkFormat> findSupportedFormat(VkPhysicalDevice physicalDevice,
-                                                const std::vector<VkFormat>& candidates, VkImageTiling tiling,
-                                                VkFormatFeatureFlags features);
+    std::optional<size_t> findSupportedFormat(VkPhysicalDevice physicalDevice, const std::vector<VkFormat>& candidates,
+                                              VkImageTiling tiling, VkFormatFeatureFlags features);
+
+    bool isDepthFormat(TextureFormat format);
+
+    bool isStencilFormat(TextureFormat format);
 
     VkImageView createImageView(VkDevice device, VkImage image, VkFormat format, VkImageAspectFlags aspectFlags,
                                 const ImageViewCreateInfo& info);

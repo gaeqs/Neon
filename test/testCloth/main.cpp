@@ -74,69 +74,58 @@ std::shared_ptr<FrameBuffer> initRender(Room* room)
     auto render = std::make_shared<Render>(app, "default", globalDescriptor);
     app->setRender(render);
 
-    // The format of the first frame buffer.
+    auto directionalShader = createShader(app, "directional_light", "directional_light.vert", "directional_light.frag");
+    auto pointShader = createShader(app, "point_light", "point_light.vert", "point_light.frag");
+    auto flashShader = createShader(app, "flash_light", "flash_light.vert", "flash_light.frag");
+    auto screenShader = createShader(app, "screen", "screen.vert", "screen.frag");
+
     std::vector<FrameBufferTextureCreateInfo> frameBufferFormats = {
         TextureFormat::R8G8B8A8,
         TextureFormat::R16FG16F, // NORMAL XY
         TextureFormat::R16FG16F  // NORMAL Z / SPECULAR
     };
 
-    // Here we create the first frame buffer.
-    // Just after creation, the frame buffer should be added
-    // to the render as a render pass.
-    // We'll use the default strategy for the rendering.
-    auto fpFrameBuffer =
-        std::make_shared<SimpleFrameBuffer>(room->getApplication(), "frame_buffer", frameBufferFormats, true);
+    auto fpFrameBuffer = std::make_shared<SimpleFrameBuffer>(app, "frame_buffer", SamplesPerTexel::COUNT_1,
+                                                             frameBufferFormats, FrameBufferDepthCreateInfo());
     app->getAssets().store(fpFrameBuffer, AssetStorageMode::PERMANENT);
 
     render->addRenderPass(std::make_shared<DefaultRenderPassStrategy>("frame_buffer", fpFrameBuffer));
 
-    // Here we create the second frame buffer.
-    // Just like the first frame buffer, we define the output,
-    // create the frame buffer and add a render pass.
+    auto outputs = fpFrameBuffer->getOutputs();
+    std::vector<std::shared_ptr<SampledTexture>> textures;
+    textures.reserve(outputs.size());
+
+    for (auto& output : outputs) {
+        textures.push_back(SampledTexture::create(app, output.resolvedTexture));
+    }
+
     std::vector<FrameBufferTextureCreateInfo> screenFormats = {TextureFormat::R8G8B8A8};
-    auto screenFrameBuffer = std::make_shared<SimpleFrameBuffer>(app, "screen", screenFormats, false);
+    auto screenFrameBuffer =
+        std::make_shared<SimpleFrameBuffer>(app, "screen", SamplesPerTexel::COUNT_1, screenFormats);
     app->getAssets().store(screenFrameBuffer, AssetStorageMode::PERMANENT);
     render->addRenderPass(std::make_shared<DefaultRenderPassStrategy>("screen", screenFrameBuffer));
 
-    // Here we create a model that renders the screen on
-    // the second render pass.
-    // This model is a screen plane that uses the
-    // output textures of the first render pass.
+    std::shared_ptr screenMaterial = Material::create(room->getApplication(), "Screen Model", screenFrameBuffer,
+                                                      screenShader, deferred_utils::DeferredVertex::getDescription(),
+                                                      InputDescription(0, InputRate::INSTANCE), {}, textures);
 
-    auto screenShader = createShader(app, "screen", "screen.vert", "screen.frag");
+    auto screenModel = deferred_utils::createScreenModel(room->getApplication(), ModelCreateInfo(), "Screen Model");
 
-    auto textures = fpFrameBuffer->getTextures();
-
-    // We can also create a GraphicComponent that handles
-    // an instance of the model.
-    // This option is more direct.
-    auto screenModel = deferred_utils::createScreenModel(app, ModelCreateInfo(), "screen model");
-
-    std::shared_ptr<Material> screenMaterial = Material::create(
-        room->getApplication(), "Screen Model", screenFrameBuffer, screenShader,
-        deferred_utils::DeferredVertex::getDescription(), InputDescription(0, InputRate::INSTANCE), {}, textures);
     screenModel->addMaterial(screenMaterial);
 
     auto screenModelGO = room->newGameObject();
     screenModelGO->setName("Screen Model");
     screenModelGO->newComponent<GraphicComponent>(screenModel);
 
-    // Finally, we create the swap chain buffer.
-    // We split the screen render in two frame buffers
-    // because of ImGUI.
-    // ImGUI will use the result of screenFrameBuffer
-    // to render a viewport.
-    // Then, it will render its UI.
-    // If you don't use ImGUI, you don't have to
-    // split the screen render in two frame buffers.
-    auto swapFrameBuffer = std::make_shared<SwapChainFrameBuffer>(app, "swap_chain", SamplesPerTexel::COUNT_1, false);
+    auto swapFrameBuffer =
+        std::make_shared<SwapChainFrameBuffer>(app, "swap_chain_frame_buffer", SamplesPerTexel::COUNT_1, false);
+
     render->addRenderPass(std::make_shared<DefaultRenderPassStrategy>("swap_chain", swapFrameBuffer));
 
     return fpFrameBuffer;
 }
 
-std::shared_ptr<Texture> loadSkybox(Room* room)
+std::shared_ptr<SampledTexture> loadSkybox(Room* room)
 {
     static const std::vector<std::string> PATHS = {
         "resource/Skybox/right.jpg",  "resource/Skybox/left.jpg",  "resource/Skybox/top.jpg",
@@ -144,10 +133,14 @@ std::shared_ptr<Texture> loadSkybox(Room* room)
     };
 
     TextureCreateInfo info;
+    info.image.viewType = TextureViewType::CUBE;
     info.imageView.viewType = TextureViewType::CUBE;
     info.image.layers = 6;
+    info.image.mipmaps = 10;
 
-    return Texture::createTextureFromFiles(room->getApplication(), "skybox", PATHS, info);
+    auto texture = Texture::createTextureFromFiles(room->getApplication(), "skybox", PATHS, info.image);
+    auto view = TextureView::create(room->getApplication(), "skybox", info.imageView, texture);
+    return SampledTexture::create(room->getApplication(), "skybox", std::make_shared<MutableAsset<TextureView>>(view));
 }
 
 std::shared_ptr<Room> getTestRoom(Application* application)
@@ -172,8 +165,7 @@ std::shared_ptr<Room> getTestRoom(Application* application)
     imgui->newComponent<SceneTreeComponent>(goExplorer);
     imgui->newComponent<DebugOverlayComponent>(false, 100);
 
-    std::shared_ptr<ShaderUniformDescriptor> materialDescriptor =
-        ShaderUniformDescriptor::ofImages(application, "descriptor", 1);
+    std::shared_ptr materialDescriptor = ShaderUniformDescriptor::ofImages(application, "descriptor", 1);
 
     auto shader = createShader(application, "deferred", "deferred.vert", "deferred.frag");
 

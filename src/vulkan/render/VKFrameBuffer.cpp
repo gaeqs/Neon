@@ -3,3 +3,11 @@
 //
 
 #include "VKFrameBuffer.h"
+
+namespace neon::vulkan
+{
+    VKFrameBuffer::VKFrameBuffer(Application* application) :
+        VKResource(application)
+    {
+    }
+} // namespace neon::vulkan

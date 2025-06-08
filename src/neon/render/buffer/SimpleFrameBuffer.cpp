@@ -16,36 +16,24 @@ namespace neon
         if (vp.x() == 0 || vp.y() == 0) {
             return false;
         }
-        return vp.x() != fb->getWidth() || vp.y() != fb->getHeight();
+        return fb->getDimensions().cast<int32_t>() != vp;
     }
 
-    std::pair<uint32_t, uint32_t> SimpleFrameBuffer::defaultRecreationParameters(Application* app)
+    rush::Vec2ui SimpleFrameBuffer::defaultRecreationParameters(Application* app)
     {
         auto vp = app->getViewport();
         return {std::max(vp.x(), 1), std::max(vp.y(), 1)};
     }
 
-    SimpleFrameBuffer::SimpleFrameBuffer(Application* application, std::string name,
-                                         const std::vector<FrameBufferTextureCreateInfo>& textureInfos, bool depth,
-                                         std::optional<std::string> depthName, SamplesPerTexel depthSamples,
-                                         Condition condition, const Parameters& parameters) :
-        FrameBuffer(std::move(name)),
-        _application(application),
-        _implementation(application, textureInfos, parameters(application), depth, std::move(depthName), depthSamples),
-        _recreationCondition(std::move(condition)),
-        _recreationParameters(parameters)
-    {
-    }
-
-    SimpleFrameBuffer::SimpleFrameBuffer(Application* application, std::string name,
+    SimpleFrameBuffer::SimpleFrameBuffer(Application* application, std::string name, SamplesPerTexel samples,
                                          const std::vector<FrameBufferTextureCreateInfo>& textureInfos,
-                                         std::shared_ptr<Texture> depthTexture, Condition condition,
-                                         const Parameters& parameters) :
+                                         const std::optional<FrameBufferDepthCreateInfo>& depthInfo,
+                                         Condition condition, Parameters parameters) :
         FrameBuffer(std::move(name)),
         _application(application),
-        _implementation(application, textureInfos, parameters(application), std::move(depthTexture)),
+        _implementation(application, parameters(application), samples, textureInfos, depthInfo),
         _recreationCondition(std::move(condition)),
-        _recreationParameters(parameters)
+        _recreationParameters(std::move(parameters))
     {
     }
 
@@ -74,19 +62,9 @@ namespace neon
         return _implementation.getOutputs();
     }
 
-    ImTextureID SimpleFrameBuffer::getImGuiDescriptor(uint32_t index)
+    rush::Vec2ui SimpleFrameBuffer::getDimensions() const
     {
-        return _implementation.getImGuiDescriptor(index);
-    }
-
-    uint32_t SimpleFrameBuffer::getWidth() const
-    {
-        return _implementation.getWidth();
-    }
-
-    uint32_t SimpleFrameBuffer::getHeight() const
-    {
-        return _implementation.getHeight();
+        return _implementation.getDimensions();
     }
 
     SamplesPerTexel SimpleFrameBuffer::getSamples() const

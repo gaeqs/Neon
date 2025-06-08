@@ -10,10 +10,17 @@ namespace neon
 {
 
     ViewportComponent::ViewportComponent(const std::shared_ptr<SimpleFrameBuffer>& frameBuffer, std::string name) :
-        _name(name),
+        _name(std::move(name)),
         _frameBuffer(frameBuffer),
         _hovered(false)
     {
+    }
+
+    void ViewportComponent::onStart()
+    {
+        auto outputs = _frameBuffer->getOutputs();
+        auto output = outputs[0].resolvedTexture;
+        _sampled = SampledTexture::create(_name, output, Sampler::create(getApplication(), _name, SamplerCreateInfo()));
     }
 
     void ViewportComponent::onPreDraw()
@@ -24,7 +31,7 @@ namespace neon
             _windowOrigin = ImGui::GetCursorScreenPos();
             getApplication()->forceViewport({_windowSize.x, _windowSize.y});
             if (_frameBuffer) {
-                ImGui::Image(_frameBuffer->getImGuiDescriptor(0), _windowSize);
+                ImGui::Image(_sampled->getImGuiDescriptor(), _windowSize);
                 _hovered = ImGui::IsItemHovered();
             }
         }

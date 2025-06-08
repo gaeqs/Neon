@@ -29,7 +29,6 @@ namespace neon::vulkan
     {
         static VkShaderStageFlagBits getStage(ShaderType type);
 
-        AbstractVKApplication* _vkApplication;
         std::vector<VkPipelineShaderStageCreateInfo> _shaders;
 
         std::vector<ShaderUniformBlock> _uniformBlocks;

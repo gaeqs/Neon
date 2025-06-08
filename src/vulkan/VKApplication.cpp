@@ -117,6 +117,7 @@ namespace neon::vulkan
         _swapChainExtent(),
         _swapChainCount(0),
         _depthImageFormat(),
+        _vkDepthImageFormat(),
         _recording(false),
         _currentFrame(0),
         _imageIndex(0),
@@ -601,7 +602,7 @@ namespace neon::vulkan
         }
 
         auto& families = _physicalDevice.getFamilyCollection();
-        _device = new VKDevice(_physicalDevice.getRaw(), features, families);
+        _device = new VKDevice(_instance, _physicalDevice.getRaw(), features, families);
         _graphicQueue = _device->getQueueProvider()->fetchCompatibleQueue(VKQueueFamily::Capabilities::withGraphics());
         _presentQueue = _device->getQueueProvider()->fetchCompatibleQueue(VKQueueFamily::Capabilities::withPresent());
     }
@@ -663,14 +664,19 @@ namespace neon::vulkan
         _swapChainImageFormat = format.format;
         _swapChainExtent = extent;
 
-        auto depthFormat = vulkan_util::findSupportedFormat(
-            _physicalDevice.getRaw(), {VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT},
-            VK_IMAGE_TILING_OPTIMAL, VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
+        std::vector vkCandidates = {VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT};
+        std::vector candidates = {TextureFormat::DEPTH32F, TextureFormat::DEPTH32FSTENCIL8,
+                                  TextureFormat::DEPTH24STENCIL8};
+
+        auto depthFormat =
+            vulkan_util::findSupportedFormat(_physicalDevice.getRaw(), vkCandidates, VK_IMAGE_TILING_OPTIMAL,
+                                             VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
         if (!depthFormat.has_value()) {
             throw std::runtime_error("Couldn't find depth format!");
         }
 
-        _depthImageFormat = depthFormat.value();
+        _vkDepthImageFormat = vkCandidates[depthFormat.value()];
+        _depthImageFormat = candidates[depthFormat.value()];
         ++_swapChainCount;
     }
 
@@ -908,9 +914,14 @@ namespace neon::vulkan
         return _swapChainImageFormat;
     }
 
-    VkFormat VKApplication::getDepthImageFormat() const
+    TextureFormat VKApplication::getDepthImageFormat() const
     {
         return _depthImageFormat;
+    }
+
+    VkFormat VKApplication::getVkDepthImageFormat() const
+    {
+        return _vkDepthImageFormat;
     }
 
     VkExtent2D VKApplication::getSwapChainExtent() const

@@ -13,6 +13,7 @@
     #include <neon/io/CursorEvent.h>
     #include <neon/io/MouseButtonEvent.h>
     #include <neon/io/ScrollEvent.h>
+    #include <neon/render/texture/SampledTexture.h>
 
 namespace neon
 {
@@ -110,14 +111,15 @@ namespace neon
 
     void CefWebView::onStart()
     {
-        TextureCreateInfo info;
-        info.image.width = 2048;
-        info.image.height = 2048;
-        info.image.depth = 1;
-        info.image.format = TextureFormat::B8G8R8A8;
-        info.image.mipmaps = 1;
+        ImageCreateInfo info;
+        info.width = 2048;
+        info.height = 2048;
+        info.depth = 1;
+        info.format = TextureFormat::B8G8R8A8;
+        info.mipmaps = 1;
 
-        _texture = std::make_shared<Texture>(getApplication(), "neon::webview", nullptr, info);
+        _texture = Texture::createFromRawData(getApplication(), "neon::webview", nullptr, info);
+        _sampled = SampledTexture::create(getApplication(), _texture);
         _client = new NeonCefClient(_texture);
 
         CefWindowInfo window_info;
@@ -133,7 +135,7 @@ namespace neon
     void CefWebView::onPreDraw()
     {
         ImGui::ShowDemoWindow();
-        ImVec2 max(_texture->getWidth(), _texture->getHeight());
+        ImVec2 max(_texture->getDimensions().x(), _texture->getDimensions().y());
 
         ImGui::SetNextWindowSizeConstraints(ImVec2(200, 200), max);
         if (ImGui::Begin("Webview")) {
@@ -145,7 +147,7 @@ namespace neon
 
             auto relative = ImVec2(size.x / max.x, size.y / max.y);
 
-            ImGui::Image(_texture, size, ImVec2(0, 0), relative);
+            ImGui::Image(_sampled->getImGuiDescriptor(), size, ImVec2(0, 0), relative);
 
             if (auto browser = _client->getBrowser()) {
                 browser->GetHost()->SetFocus(ImGui::IsWindowFocused());

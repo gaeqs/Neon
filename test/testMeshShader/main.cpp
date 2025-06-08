@@ -121,28 +121,30 @@ std::shared_ptr<FrameBuffer> initRender(Room* room)
         TextureFormat::R16FG16F  // NORMAL Z / SPECULAR
     };
 
-    auto fpFrameBuffer = std::make_shared<SimpleFrameBuffer>(app, "frame_buffer", frameBufferFormats, true);
+    auto fpFrameBuffer = std::make_shared<SimpleFrameBuffer>(app, "frame_buffer", SamplesPerTexel::COUNT_1,
+                                                             frameBufferFormats, FrameBufferDepthCreateInfo());
     app->getAssets().store(fpFrameBuffer, AssetStorageMode::PERMANENT);
 
     render->addRenderPass(std::make_shared<DefaultRenderPassStrategy>("frame_buffer", fpFrameBuffer));
 
     auto outputs = fpFrameBuffer->getOutputs();
-    std::vector<std::shared_ptr<Texture>> textures;
+    std::vector<std::shared_ptr<SampledTexture>> textures;
     textures.reserve(outputs.size());
 
     for (auto& output : outputs) {
-        textures.push_back(output.resolvedTexture);
+        textures.push_back(SampledTexture::create(app, output.resolvedTexture));
     }
 
     auto albedo = deferred_utils::createLightSystem(room, render.get(), textures, TextureFormat::R8G8B8A8,
                                                     directionalShader, pointShader, flashShader);
 
     std::vector<FrameBufferTextureCreateInfo> screenFormats = {TextureFormat::R8G8B8A8};
-    auto screenFrameBuffer = std::make_shared<SimpleFrameBuffer>(app, "screen", screenFormats, false);
+    auto screenFrameBuffer =
+        std::make_shared<SimpleFrameBuffer>(app, "screen", SamplesPerTexel::COUNT_1, screenFormats);
     app->getAssets().store(screenFrameBuffer, AssetStorageMode::PERMANENT);
     render->addRenderPass(std::make_shared<DefaultRenderPassStrategy>("screen", screenFrameBuffer));
 
-    textures[0] = albedo;
+    textures[0] = SampledTexture::create(app, albedo);
 
     std::shared_ptr screenMaterial = Material::create(room->getApplication(), "Screen Model", screenFrameBuffer,
                                                       screenShader, deferred_utils::DeferredVertex::getDescription(),
@@ -177,11 +179,10 @@ void loadModels(Application* application, Room* room, const std::shared_ptr<Fram
     modelLoaderInfo.flipWindingOrder = false;
     modelLoaderInfo.flipNormals = false;
 
-    TextureCreateInfo info;
-    info.imageView.viewType = TextureViewType::NORMAL_2D;
+    ImageCreateInfo info;
+    info.viewType = TextureViewType::NORMAL_2D;
 
     std::shared_ptr diffuse = Texture::createTextureFromFile(application, "Diffuse", "resource/Sans/diffuse.png", info);
-
     std::shared_ptr normal = Texture::createTextureFromFile(application, "Normal", "resource/Sans/normal.png", info);
 
     auto modelResult = load(R"(resource/Sans)", "Sans.obj", modelLoaderInfo);
@@ -251,8 +252,8 @@ void loadModels(Application* application, Room* room, const std::shared_ptr<Fram
 
     model->getUniformBuffer()->uploadData(0, vertices.data(), sizeInBytes);
     model->getUniformBuffer()->uploadData(2, verticesAmount);
-    model->getUniformBuffer()->setTexture(3, diffuse);
-    model->getUniformBuffer()->setTexture(4, normal);
+    model->getUniformBuffer()->setTexture(3, SampledTexture::create(application, diffuse));
+    model->getUniformBuffer()->setTexture(4, SampledTexture::create(application, normal));
     model->getUniformBuffer()->prepareForFrame(nullptr);
 
     for (int x = 0; x < 30; ++x) {
@@ -266,7 +267,7 @@ void loadModels(Application* application, Room* room, const std::shared_ptr<Fram
     }
 }
 
-std::shared_ptr<Texture> loadSkybox(Room* room)
+std::shared_ptr<SampledTexture> loadSkybox(Room* room)
 {
     static const std::vector<std::string> PATHS = {
         "resource/Skybox/right.jpg",  "resource/Skybox/left.jpg",  "resource/Skybox/top.jpg",
@@ -274,10 +275,14 @@ std::shared_ptr<Texture> loadSkybox(Room* room)
     };
 
     TextureCreateInfo info;
+    info.image.viewType = TextureViewType::CUBE;
     info.imageView.viewType = TextureViewType::CUBE;
     info.image.layers = 6;
+    info.image.mipmaps = 10;
 
-    return Texture::createTextureFromFiles(room->getApplication(), "skybox", PATHS, info);
+    auto texture = Texture::createTextureFromFiles(room->getApplication(), "skybox", PATHS, info.image);
+    auto view = TextureView::create(room->getApplication(), "skybox", info.imageView, texture);
+    return SampledTexture::create(room->getApplication(), "skybox", std::make_shared<MutableAsset<TextureView>>(view));
 }
 
 std::shared_ptr<Room> getTestRoom(Application* application)

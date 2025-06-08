@@ -13,14 +13,14 @@ namespace neon::vulkan
 {
     std::optional<std::shared_ptr<BufferMap<char>>> SimpleBuffer::rawMap(const CommandBuffer* commandBuffer)
     {
-        return std::make_shared<SimpleBufferMap<char>>(_application->getDevice()->getRaw(), _vertexBufferMemory,
+        return std::make_shared<SimpleBufferMap<char>>(_allocator, _allocation,
                                                        Range<uint32_t>(0, static_cast<uint32_t>(_size)));
     }
 
     std::optional<std::shared_ptr<BufferMap<char>>> SimpleBuffer::rawMap(Range<uint32_t> range,
                                                                          const CommandBuffer* commandBuffer)
     {
-        return std::make_shared<SimpleBufferMap<char>>(_application->getDevice()->getRaw(), _vertexBufferMemory, range);
+        return std::make_shared<SimpleBufferMap<char>>(_allocator, _allocation, range);
     }
 
     SimpleBuffer::SimpleBuffer(AbstractVKApplication* application, VkBufferUsageFlags usage,
@@ -31,39 +31,27 @@ namespace neon::vulkan
 
     SimpleBuffer::SimpleBuffer(AbstractVKApplication* application, VkBufferUsageFlags usage,
                                VkMemoryPropertyFlags properties, const void* data, uint32_t sizeInBytes) :
+        VKResource(application),
         Buffer(),
         _size(sizeInBytes),
-        _application(application),
-        _vertexBuffer(VK_NULL_HANDLE),
-        _vertexBufferMemory(VK_NULL_HANDLE),
+        _buffer(VK_NULL_HANDLE),
+        _allocator(application->getDevice()->getAllocator()),
+        _allocation(VK_NULL_HANDLE),
         _modifiable(properties & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT)
     {
-        VkDevice device = _application->getDevice()->getRaw();
-
         VkBufferCreateInfo bufferInfo{};
         bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
         bufferInfo.size = _size;
         bufferInfo.usage = usage;
         bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
-        if (vkCreateBuffer(device, &bufferInfo, nullptr, &_vertexBuffer) != VK_SUCCESS) {
-            throw std::runtime_error("failed to create vertex buffer!");
-        }
+        VmaAllocationCreateInfo allocInfo = {};
+        allocInfo.usage = VMA_MEMORY_USAGE_AUTO;
+        allocInfo.flags = VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT;
+        allocInfo.preferredFlags = properties;
 
-        VkMemoryRequirements requirements;
-        vkGetBufferMemoryRequirements(device, _vertexBuffer, &requirements);
+        vmaCreateBuffer(_allocator, &bufferInfo, &allocInfo, &_buffer, &_allocation, nullptr);
 
-        VkMemoryAllocateInfo allocInfo{};
-        allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-        allocInfo.allocationSize = requirements.size;
-        allocInfo.memoryTypeIndex = vulkan_util::findMemoryType(_application->getPhysicalDevice().getRaw(),
-                                                                requirements.memoryTypeBits, properties);
-
-        if (vkAllocateMemory(device, &allocInfo, nullptr, &_vertexBufferMemory) != VK_SUCCESS) {
-            throw std::runtime_error("failed to allocate vertex buffer memory!");
-        }
-
-        vkBindBufferMemory(device, _vertexBuffer, _vertexBufferMemory, 0);
         if (data != nullptr && sizeInBytes != 0 && _modifiable) {
             memcpy(map<char>().value()->raw(), data, _size);
         }
@@ -71,11 +59,13 @@ namespace neon::vulkan
 
     SimpleBuffer::~SimpleBuffer()
     {
-        VkDevice device = _application->getDevice()->getRaw();
-        auto bin = _application->getBin();
+        auto device = getApplication()->getDevice();
+        auto bin = getApplication()->getBin();
 
-        bin->destroyLater(device, getRuns(), _vertexBuffer, vkDestroyBuffer);
-        bin->destroyLater(device, getRuns(), _vertexBufferMemory, vkFreeMemory);
+        bin->destroyLater(device->getRaw(), getRuns(),
+                          [allocator = _allocator, buffer = _buffer, allocation = _allocation] {
+                              vmaDestroyBuffer(allocator, buffer, allocation);
+                          });
     }
 
     size_t SimpleBuffer::size() const
@@ -88,25 +78,9 @@ namespace neon::vulkan
         return _modifiable;
     }
 
-    AbstractVKApplication* SimpleBuffer::getApplication() const
-    {
-        return _application;
-    }
-
     VkBuffer SimpleBuffer::getRaw(std::shared_ptr<CommandBufferRun> run)
     {
         registerRun(std::move(run));
-        return _vertexBuffer;
+        return _buffer;
     }
 } // namespace neon::vulkan
-
-VkResult neon::vulkan::simple_buffer::mapMemory(VkDevice pT, VkDeviceMemory pT1, uint32_t from, uint32_t size, int i,
-                                                void** pVoid)
-{
-    return vkMapMemory(pT, pT1, from, size, i, pVoid);
-}
-
-void neon::vulkan::simple_buffer::unmapMemory(VkDevice device, VkDeviceMemory memory)
-{
-    vkUnmapMemory(device, memory);
-}

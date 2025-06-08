@@ -4,7 +4,6 @@
 
 #include "ShaderUniformDescriptor.h"
 #include "ShaderUniformBinding.h"
-#include "vulkan/VKTexture.h"
 #include <vector>
 
 namespace neon

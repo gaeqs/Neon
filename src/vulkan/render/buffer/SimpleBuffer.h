@@ -8,6 +8,7 @@
 #include <vector>
 #include <stdexcept>
 #include <string>
+#include <vma/vk_mem_alloc.h>
 
 #include <vulkan/render/buffer/Buffer.h>
 
@@ -25,8 +26,8 @@ namespace neon::vulkan
     template<class T>
     class SimpleBufferMap : public BufferMap<T>
     {
-        VkDevice _device;
-        VkDeviceMemory _memory;
+        VmaAllocator _allocator;
+        VmaAllocation _allocation;
 
         T* _pointer;
 
@@ -34,8 +35,8 @@ namespace neon::vulkan
         SimpleBufferMap(const SimpleBufferMap& other) = delete;
 
         SimpleBufferMap(SimpleBufferMap&& other) noexcept :
-            _device(other._device),
-            _memory(other._memory),
+            _allocator(other._allocator),
+            _allocation(other._allocation),
             _pointer(other._pointer)
         {
             other._pointer = nullptr;
@@ -43,16 +44,20 @@ namespace neon::vulkan
 
         SimpleBufferMap() = default;
 
-        SimpleBufferMap(VkDevice device, VkDeviceMemory memory, Range<uint32_t> range) :
+        SimpleBufferMap(VmaAllocator allocator, VmaAllocation allocation, Range<uint32_t> range) :
             BufferMap<T>(),
-            _device(device),
-            _memory(memory),
+            _allocator(allocator),
+            _allocation(allocation),
             _pointer(nullptr)
         {
-            auto result = simple_buffer::mapMemory(device, memory, range.getFrom(), range.size(), 0, (void**)&_pointer);
+            void* ptr;
+            auto result = vmaMapMemory(_allocator, _allocation, &ptr);
             if (result != VK_SUCCESS) {
                 throw std::runtime_error("Couldn't map buffer! Result: " + std::to_string(result));
             }
+
+            // Add offset
+            _pointer = static_cast<T*>(static_cast<void*>(static_cast<std::byte*>(ptr) + range.getFrom()));
         }
 
         ~SimpleBufferMap() override
@@ -60,7 +65,7 @@ namespace neon::vulkan
             if (_pointer == nullptr) {
                 return;
             }
-            simple_buffer::unmapMemory(_device, _memory);
+            vmaUnmapMemory(_allocator, _allocation);
             _pointer = nullptr;
         };
 
@@ -84,7 +89,7 @@ namespace neon::vulkan
             if (_pointer == nullptr) {
                 return;
             }
-            simple_buffer::unmapMemory(_device, _memory);
+            vmaUnmapMemory(_allocator, _allocation);
             _pointer = nullptr;
         }
 
@@ -95,8 +100,8 @@ namespace neon::vulkan
 
         SimpleBufferMap& operator=(SimpleBufferMap&& other) noexcept
         {
-            _device = other._device;
-            _memory = other._memory;
+            _allocator = other._allocator;
+            _allocation = other._allocation;
             _pointer = other._pointer;
             other._pointer = nullptr;
             return *this;
@@ -107,9 +112,10 @@ namespace neon::vulkan
     {
         size_t _size;
 
-        AbstractVKApplication* _application;
-        VkBuffer _vertexBuffer;
-        VkDeviceMemory _vertexBufferMemory;
+        VkBuffer _buffer;
+
+        VmaAllocator _allocator;
+        VmaAllocation _allocation;
 
         bool _modifiable;
 
@@ -141,8 +147,6 @@ namespace neon::vulkan
         [[nodiscard]] bool canBeWrittenOn() const override;
 
         [[nodiscard]] VkBuffer getRaw(std::shared_ptr<CommandBufferRun> run);
-
-        [[nodiscard]] AbstractVKApplication* getApplication() const override;
     };
 } // namespace neon::vulkan
 

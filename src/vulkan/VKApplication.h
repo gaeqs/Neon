@@ -59,7 +59,8 @@ namespace neon::vulkan
         VkExtent2D _swapChainExtent;
         uint32_t _swapChainCount;
 
-        VkFormat _depthImageFormat;
+        TextureFormat _depthImageFormat;
+        VkFormat _vkDepthImageFormat;
 
         CommandPoolHolder _commandPool;
         VKResourceBin _bin;
@@ -182,7 +183,9 @@ namespace neon::vulkan
 
         [[nodiscard]] VkFormat getSwapChainImageFormat() const override;
 
-        [[nodiscard]] VkFormat getDepthImageFormat() const override;
+        [[nodiscard]] TextureFormat getDepthImageFormat() const override;
+
+        [[nodiscard]] VkFormat getVkDepthImageFormat() const override;
 
         [[nodiscard]] VkExtent2D getSwapChainExtent() const override;
 

@@ -85,28 +85,30 @@ std::shared_ptr<FrameBuffer> initRender(Room* room)
         TextureFormat::R16FG16F  // NORMAL Z / SPECULAR
     };
 
-    auto fpFrameBuffer = std::make_shared<SimpleFrameBuffer>(app, "frame_buffer", frameBufferFormats, true);
+    auto fpFrameBuffer = std::make_shared<SimpleFrameBuffer>(app, "frame_buffer", SamplesPerTexel::COUNT_1,
+                                                             frameBufferFormats, FrameBufferDepthCreateInfo());
     app->getAssets().store(fpFrameBuffer, AssetStorageMode::PERMANENT);
 
     render->addRenderPass(std::make_shared<DefaultRenderPassStrategy>("frame_buffer", fpFrameBuffer));
 
     auto outputs = fpFrameBuffer->getOutputs();
-    std::vector<std::shared_ptr<Texture>> textures;
+    std::vector<std::shared_ptr<SampledTexture>> textures;
     textures.reserve(outputs.size());
 
     for (auto& output : outputs) {
-        textures.push_back(output.resolvedTexture);
+        textures.push_back(SampledTexture::create(app, output.resolvedTexture));
     }
 
     auto albedo = deferred_utils::createLightSystem(room, render.get(), textures, TextureFormat::R8G8B8A8,
                                                     directionalShader, pointShader, flashShader);
 
     std::vector<FrameBufferTextureCreateInfo> screenFormats = {TextureFormat::R8G8B8A8};
-    auto screenFrameBuffer = std::make_shared<SimpleFrameBuffer>(app, "screen", screenFormats, false);
+    auto screenFrameBuffer =
+        std::make_shared<SimpleFrameBuffer>(app, "screen", SamplesPerTexel::COUNT_1, screenFormats);
     app->getAssets().store(screenFrameBuffer, AssetStorageMode::PERMANENT);
     render->addRenderPass(std::make_shared<DefaultRenderPassStrategy>("screen", screenFrameBuffer));
 
-    textures[0] = albedo;
+    textures[0] = SampledTexture::create(app, albedo);
 
     std::shared_ptr screenMaterial = Material::create(room->getApplication(), "Screen Model", screenFrameBuffer,
                                                       screenShader, deferred_utils::DeferredVertex::getDescription(),
@@ -220,8 +222,8 @@ void loadModels(Application* application, Room* room, const std::shared_ptr<Fram
 
     // CUBE
 
-    TextureCreateInfo albedoInfo;
-    albedoInfo.image.format = TextureFormat::R8G8B8A8_SRGB;
+    ImageCreateInfo albedoInfo;
+    albedoInfo.format = TextureFormat::R8G8B8A8_SRGB;
 
     std::shared_ptr<Texture> cubeAlbedo =
         Texture::createTextureFromFile(application, "cube_albedo", "resource/Cube/bricks.png", albedoInfo);
@@ -245,9 +247,9 @@ void loadModels(Application* application, Room* room, const std::shared_ptr<Fram
 
     auto material = std::make_shared<Material>(application, "cubeMaterial", cubeMaterialInfo);
 
-    material->getUniformBuffer()->setTexture(0, cubeAlbedo);
-    material->getUniformBuffer()->setTexture(1, cubeNormal);
-    material->getUniformBuffer()->setTexture(2, cubeParallax);
+    material->getUniformBuffer()->setTexture(0, SampledTexture::create(application, cubeAlbedo));
+    material->getUniformBuffer()->setTexture(1, SampledTexture::create(application, cubeNormal));
+    material->getUniformBuffer()->setTexture(2, SampledTexture::create(application, cubeParallax));
 
     auto cubeModel = model_utils::createCubeModel<TestVertex>(room, material);
 
@@ -258,11 +260,11 @@ void loadModels(Application* application, Room* room, const std::shared_ptr<Fram
     cube->setName("Cube");
 }
 
-std::shared_ptr<Texture> loadSkybox(Room* room)
+std::shared_ptr<SampledTexture> loadSkybox(Room* room)
 {
     CMRCFileSystem fileSystem(cmrc::resources::get_filesystem());
     AssetLoaderContext context(room->getApplication(), nullptr, &fileSystem);
-    return loadAssetFromFile<Texture>("texture/skybox/skybox.json", context);
+    return loadAssetFromFile<SampledTexture>("texture/skybox/skybox.json", context);
 }
 
 std::shared_ptr<Room> getTestRoom(Application* application)
@@ -321,7 +323,6 @@ std::shared_ptr<Room> getTestRoom(Application* application)
 
 int main()
 {
-
     neon::debug() << "Using Neon " << NEON_VERSION;
 
     std::srand(std::time(nullptr));

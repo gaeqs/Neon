@@ -9,16 +9,35 @@
 
 namespace neon::vulkan
 {
-    VKDevice::VKDevice(VkDevice raw, const VKQueueFamilyCollection& families, const VKPhysicalDeviceFeatures& features,
+    void VKDevice::createAllocator(VkInstance instance, VkPhysicalDevice physicalDevice)
+    {
+        VmaVulkanFunctions vulkanFunctions = {};
+        vulkanFunctions.vkGetInstanceProcAddr = &vkGetInstanceProcAddr;
+        vulkanFunctions.vkGetDeviceProcAddr = &vkGetDeviceProcAddr;
+
+        VmaAllocatorCreateInfo allocatorCreateInfo = {};
+        allocatorCreateInfo.flags = VMA_ALLOCATOR_CREATE_EXT_MEMORY_BUDGET_BIT;
+        allocatorCreateInfo.vulkanApiVersion = VK_API_VERSION_1_2;
+        allocatorCreateInfo.physicalDevice = physicalDevice;
+        allocatorCreateInfo.device = _raw;
+        allocatorCreateInfo.instance = instance;
+        allocatorCreateInfo.pVulkanFunctions = &vulkanFunctions;
+
+        vmaCreateAllocator(&allocatorCreateInfo, &_allocator);
+    }
+
+    VKDevice::VKDevice(VkInstance instance, VkPhysicalDevice physicalDevice, VkDevice raw,
+                       const VKQueueFamilyCollection& families, const VKPhysicalDeviceFeatures& features,
                        const std::vector<uint32_t>& presentQueues) :
         _raw(raw),
         _queueProvider(std::make_unique<VKQueueProvider>(raw, families, presentQueues)),
         _enabledFeatures(features),
         _external(true)
     {
+        createAllocator(instance, physicalDevice);
     }
 
-    VKDevice::VKDevice(VkPhysicalDevice physicalDevice, const VKPhysicalDeviceFeatures& features,
+    VKDevice::VKDevice(VkInstance instance, VkPhysicalDevice physicalDevice, const VKPhysicalDeviceFeatures& features,
                        const VKQueueFamilyCollection& families) :
         _enabledFeatures(features),
         _external(false)
@@ -70,10 +89,13 @@ namespace neon::vulkan
         }
 
         _queueProvider = std::make_unique<VKQueueProvider>(_raw, families, presentQueues);
+
+        createAllocator(instance, physicalDevice);
     }
 
     VKDevice::~VKDevice()
     {
+        vmaDestroyAllocator(_allocator);
         if (!_external) {
             vkDestroyDevice(_raw, nullptr);
         }
@@ -82,6 +104,11 @@ namespace neon::vulkan
     VkDevice VKDevice::getRaw() const
     {
         return _raw;
+    }
+
+    VmaAllocator VKDevice::getAllocator() const
+    {
+        return _allocator;
     }
 
     VKQueueProvider* VKDevice::getQueueProvider() const

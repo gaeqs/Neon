@@ -190,8 +190,6 @@ namespace neon::vulkan
 
         VkBuffer getRaw(std::shared_ptr<CommandBufferRun> run) override;
 
-        AbstractVKApplication* getApplication() const override;
-
         SimpleBuffer& getDeviceBuffer();
 
         const SimpleBuffer& getDeviceBuffer() const;

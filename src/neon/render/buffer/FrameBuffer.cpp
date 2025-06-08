@@ -36,10 +36,10 @@ namespace neon
         _depthClear = {depth, stencil};
     }
 
-    std::vector<std::shared_ptr<Texture>> FrameBuffer::getTextures() const
+    std::vector<std::shared_ptr<MutableAsset<TextureView>>> FrameBuffer::getTextures() const
     {
         auto outputs = getOutputs();
-        std::vector<std::shared_ptr<Texture>> textures;
+        std::vector<std::shared_ptr<MutableAsset<TextureView>>> textures;
         textures.reserve(outputs.size());
 
         for (auto& output : outputs) {

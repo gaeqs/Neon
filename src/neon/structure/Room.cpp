@@ -262,7 +262,7 @@ namespace neon
             for (const auto& [model, amount] : _usedModels) {
                 if (model->shouldAutoFlush()) {
                     for (auto& instanceData : model->getInstanceDatas()) {
-                        instanceData->flush();
+                        instanceData->flush(cb);
                     }
                 }
                 if (model->getUniformBuffer() != nullptr) {

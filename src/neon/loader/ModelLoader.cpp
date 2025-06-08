@@ -49,7 +49,7 @@ namespace neon
                 if (texture == assimpMaterial.getTextures().end()) {
                     continue;
                 }
-                material->setTexture(key, texture->second);
+                material->setTexture(key, SampledTexture::create(context.application, texture->second));
             }
         }
 
@@ -209,9 +209,7 @@ namespace neon
 
             info.instanceSizes = sizes;
             info.instanceTypes.clear();
-            for (size_t _ : info.instanceSizes) {
-                info.instanceTypes.push_back(typeid(void));
-            }
+            info.instanceTypes.resize(info.instanceSizes.size(), typeid(void));
         }
 
         if (auto& meshes = json["meshes"]; meshes.is_array()) {

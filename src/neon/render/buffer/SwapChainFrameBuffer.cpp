@@ -33,19 +33,14 @@ namespace neon
         return _implementation;
     }
 
+    rush::Vec2ui SwapChainFrameBuffer::getDimensions() const
+    {
+        return _implementation.getDimensions();
+    }
+
     std::vector<FrameBufferOutput> SwapChainFrameBuffer::getOutputs() const
     {
         return {};
-    }
-
-    uint32_t SwapChainFrameBuffer::getWidth() const
-    {
-        return _implementation.getWidth();
-    }
-
-    uint32_t SwapChainFrameBuffer::getHeight() const
-    {
-        return _implementation.getHeight();
     }
 
     SamplesPerTexel SwapChainFrameBuffer::getSamples() const

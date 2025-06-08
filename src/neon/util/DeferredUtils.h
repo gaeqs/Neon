@@ -10,7 +10,6 @@
 
 #include <rush/rush.h>
 
-#include <neon/structure/collection/AssetCollection.h>
 #include <neon/render/model/InputDescription.h>
 #include <neon/render/texture/TextureCreateInfo.h>
 #include <neon/render/shader/MaterialCreateInfo.h>
@@ -58,9 +57,9 @@ namespace neon::deferred_utils
 
     std::shared_ptr<Model> createScreenModel(Application* application, ModelCreateInfo info, const std::string& name);
 
-    std::shared_ptr<Texture> createLightSystem(Room* room, Render* render,
-                                               const std::vector<std::shared_ptr<Texture>>& textures,
-                                               TextureFormat outputFormat,
+    std::shared_ptr<MutableAsset<TextureView>> createLightSystem(
+        Room* room, Render* render, const std::vector<std::shared_ptr<SampledTexture>>& textures,
+        TextureFormat outputFormat,
                                                const std::shared_ptr<ShaderProgram>& directionalShader,
                                                const std::shared_ptr<ShaderProgram>& pointShader,
                                                const std::shared_ptr<ShaderProgram>& flashShader);

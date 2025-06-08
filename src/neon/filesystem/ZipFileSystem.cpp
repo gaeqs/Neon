@@ -31,7 +31,7 @@ namespace neon
             return {};
         }
         libzippp_uint8* data = file.readAsBinary();
-        return File(reinterpret_cast<const char*>(data), file.getSize());
+        return File(reinterpret_cast<const std::byte*>(data), file.getSize(), [](const std::byte* d) { delete[] d; });
     }
 
     bool ZipFileSystem::exists(std::filesystem::path path) const

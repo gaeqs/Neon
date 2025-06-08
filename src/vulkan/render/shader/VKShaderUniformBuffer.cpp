@@ -6,13 +6,15 @@
 
 #include <neon/render/shader/ShaderUniformDescriptor.h>
 #include <vulkan/render/buffer/StagingBuffer.h>
-#include <neon/render/texture/Texture.h>
-#include <cstring>
 #include <utility>
+#include <vulkan/render/texture/VKSampler.h>
+#include <vulkan/render/texture/VKSimpleTexture.h>
+#include <vulkan/render/texture/VKTextureView.h>
 
 namespace neon::vulkan
 {
     VKShaderUniformBuffer::VKShaderUniformBuffer(const std::shared_ptr<ShaderUniformDescriptor>& descriptor) :
+        VKResource(descriptor->getImplementation().getVkApplication()),
         _vkApplication(descriptor->getImplementation().getVkApplication()),
         _descriptorPool(VK_NULL_HANDLE)
     {
@@ -198,7 +200,7 @@ namespace neon::vulkan
         return _data[index].data();
     }
 
-    void VKShaderUniformBuffer::setTexture(uint32_t index, std::shared_ptr<Texture> texture)
+    void VKShaderUniformBuffer::setTexture(uint32_t index, std::shared_ptr<SampledTexture> texture)
     {
         if (index >= _bindings.size()) {
             return;
@@ -237,7 +239,7 @@ namespace neon::vulkan
                     if (texture == nullptr) {
                         continue;
                     }
-                    auto flag = texture->getImplementation().getExternalDirtyFlag();
+                    auto flag = texture->getViewVersion();
                     if (updated[frame] == flag) {
                         continue;
                     }
@@ -246,10 +248,10 @@ namespace neon::vulkan
                     VkDescriptorImageInfo imageInfo{};
 
                     if (texture != nullptr) {
-                        auto& impl = texture->getImplementation();
-                        imageInfo.imageView = impl.getImageView();
-                        imageInfo.sampler = impl.getSampler();
-                        imageInfo.imageLayout = impl.getLayout();
+                        auto [view, sampler, layout] = texture->getNativeHandlers();
+                        imageInfo.imageView = static_cast<VkImageView>(view);
+                        imageInfo.sampler = static_cast<VkSampler>(sampler);
+                        imageInfo.imageLayout = std::any_cast<VkImageLayout>(layout);
                     } else {
                         imageInfo.imageView = VK_NULL_HANDLE;
                         imageInfo.sampler = VK_NULL_HANDLE;
@@ -300,7 +302,16 @@ namespace neon::vulkan
         registerRun(commandBuffer->getCurrentRun());
         for (auto& texture : _textures) {
             if (texture != nullptr) {
-                texture->getImplementation().registerRun(commandBuffer->getCurrentRun());
+                if (auto sampler = std::dynamic_pointer_cast<VKSampler>(texture->getSampler())) {
+                    sampler->registerRun(commandBuffer->getCurrentRun());
+                }
+
+                if (auto view = std::dynamic_pointer_cast<VKTextureView>(texture->getView()->get())) {
+                    view->registerRun(commandBuffer->getCurrentRun());
+                    if (auto texture = std::dynamic_pointer_cast<VKSimpleTexture>(view->getTexture())) {
+                        texture->registerRun(commandBuffer->getCurrentRun());
+                    }
+                }
             }
         }
         vkCmdBindDescriptorSets(commandBuffer->getCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, layout,

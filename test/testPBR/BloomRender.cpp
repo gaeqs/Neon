@@ -10,8 +10,8 @@
 
 BloomRender::BloomRender(neon::Application* application, std::shared_ptr<neon::ShaderProgram> downsamplingShader,
                          std::shared_ptr<neon::ShaderProgram> upsamplingShader,
-                         std::shared_ptr<neon::Texture> pbrTexture, const std::shared_ptr<neon::Model>& screenModel,
-                         uint32_t chainLength) :
+                         std::shared_ptr<neon::SampledTexture> pbrTexture,
+                         const std::shared_ptr<neon::Model>& screenModel, uint32_t chainLength) :
     RenderPassStrategy("Bloom render"),
     _application(application),
     _pbrTexture(std::move(pbrTexture)),
@@ -50,13 +50,14 @@ BloomRender::BloomRender(neon::Application* application, std::shared_ptr<neon::S
         BloomMip mip;
         mip.relativeSize = relativeSize;
         mip.frameBuffer = std::make_shared<neon::SimpleFrameBuffer>(
-            application, "bloom", textureInfo, false, std::optional<std::string>(), neon::SamplesPerTexel::COUNT_1,
+            application, "bloom", neon::SamplesPerTexel::COUNT_1, textureInfo,
+            std::optional<neon::FrameBufferDepthCreateInfo>(),
             // This will not be required. Set as default.
             neon::SimpleFrameBuffer::defaultRecreationCondition, [relativeSize](neon::Application* app) {
                 auto vp = app->getViewport();
                 auto w = static_cast<float>(vp.x());
                 auto h = static_cast<float>(vp.y());
-                return std::make_pair(static_cast<uint32_t>(w * relativeSize), static_cast<float>(h * relativeSize));
+                return rush::Vec2ui(static_cast<uint32_t>(w * relativeSize), static_cast<uint32_t>(h * relativeSize));
             });
 
         downInfo.target = mip.frameBuffer;
@@ -81,7 +82,7 @@ void BloomRender::render(neon::Room* room, const neon::Render* render,
     auto* cb = room->getApplication()->getCurrentCommandBuffer();
 
     // Downsampling
-    std::shared_ptr<neon::Texture> previousTexture = _pbrTexture;
+    std::shared_ptr<neon::SampledTexture> previousTexture = _pbrTexture;
     for (const auto& mip : _mipChain) {
         auto& buf = mip.downsamplingMaterial->getUniformBuffer();
         buf->setTexture(0, previousTexture);
@@ -89,7 +90,7 @@ void BloomRender::render(neon::Room* room, const neon::Render* render,
         render->beginRenderPass(mip.frameBuffer);
         _screenModel->draw(mip.downsamplingMaterial.get());
         render->endRenderPass();
-        previousTexture = mip.frameBuffer->getTextures()[0];
+        previousTexture = neon::SampledTexture::create(_application, mip.frameBuffer->getTextures()[0]);
     }
 
     // Upsampling
@@ -101,11 +102,11 @@ void BloomRender::render(neon::Room* room, const neon::Render* render,
         render->beginRenderPass(mip.frameBuffer, true);
         _screenModel->draw(mip.upsamplingMaterial.get());
         render->endRenderPass();
-        previousTexture = mip.frameBuffer->getTextures()[0];
+        previousTexture = neon::SampledTexture::create(_application, mip.frameBuffer->getTextures()[0]);
     }
 }
 
-std::shared_ptr<neon::Texture> BloomRender::getBloomTexture() const
+std::shared_ptr<neon::MutableAsset<neon::TextureView>> BloomRender::getBloomTexture() const
 {
     if (_mipChain.empty()) {
         return nullptr;
