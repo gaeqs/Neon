@@ -186,7 +186,7 @@ namespace neon::vulkan
         return _currentLayout;
     }
 
-    Result<void, std::string> VKSimpleTexture::readData(std::byte* data, rush::Vec3ui offset, rush::Vec3ui size,
+    Result<void, std::string> VKSimpleTexture::readData(void* data, rush::Vec3ui offset, rush::Vec3ui size,
                                                         uint32_t layerOffset, uint32_t layers) const
     {
         if (offset.x() + size.x() > _info.width || offset.y() + size.y() > _info.height ||
@@ -223,7 +223,7 @@ namespace neon::vulkan
         return {};
     }
 
-    Result<void, std::string> VKSimpleTexture::updateData(const std::byte* data, rush::Vec3ui offset, rush::Vec3ui size,
+    Result<void, std::string> VKSimpleTexture::updateData(const void* data, rush::Vec3ui offset, rush::Vec3ui size,
                                                           uint32_t layerOffset, uint32_t layers,
                                                           CommandBuffer* commandBuffer)
     {

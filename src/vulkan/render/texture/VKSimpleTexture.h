@@ -57,10 +57,10 @@ namespace neon::vulkan
 
         [[nodiscard]] std::any getLayoutNativeHandle() const override;
 
-        Result<void, std::string> readData(std::byte* data, rush::Vec3ui offset, rush::Vec3ui size,
+        Result<void, std::string> readData(void* data, rush::Vec3ui offset, rush::Vec3ui size,
                                            uint32_t layerOffset, uint32_t layers) const override;
 
-        Result<void, std::string> updateData(const std::byte* data, rush::Vec3ui offset, rush::Vec3ui size,
+        Result<void, std::string> updateData(const void* data, rush::Vec3ui offset, rush::Vec3ui size,
                                              uint32_t layerOffset, uint32_t layers,
                                              CommandBuffer* commandBuffer) override;
 

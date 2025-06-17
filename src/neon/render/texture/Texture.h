@@ -42,7 +42,7 @@ namespace neon
          * @param commandBuffer Optional command buffer used for GPU transfer.
          * @return A Result indicating success or an error message.
          */
-        virtual Result<void, std::string> updateData(const std::byte* data, rush::Vec3ui offset, rush::Vec3ui size,
+        virtual Result<void, std::string> updateData(const void* data, rush::Vec3ui offset, rush::Vec3ui size,
                                                      uint32_t layerOffset, uint32_t layers,
                                                      CommandBuffer* commandBuffer) = 0;
     };
@@ -67,7 +67,7 @@ namespace neon
          * @param layers Number of texture layers to read.
          * @return A Result indicating success or an error message.
          */
-        virtual Result<void, std::string> readData(std::byte* data, rush::Vec3ui offset, rush::Vec3ui size,
+        virtual Result<void, std::string> readData(void* data, rush::Vec3ui offset, rush::Vec3ui size,
                                                    uint32_t layerOffset, uint32_t layers) const = 0;
     };
 
