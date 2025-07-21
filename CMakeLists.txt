@@ -56,7 +56,7 @@ FetchContent_MakeAvailable(rush)
 FetchContent_Declare(
         imgui
         GIT_REPOSITORY https://github.com/ocornut/imgui.git
-        GIT_TAG 9fdeb41e52cd4271601b85fadf7d36a62c6ed09e
+        GIT_TAG 44aa9a4b3a6f27d09a4eb5770d095cbd376dfc4b
         SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/lib/imgui
 )
 
@@ -100,31 +100,12 @@ FetchContent_Declare(
         SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/lib/libzippp
 )
 
-# portable-file-dialog
-FetchContent_Declare(
-        portable_file_dialog
-        GIT_REPOSITORY https://github.com/samhocevar/portable-file-dialogs.git
-        GIT_TAG c12ea8c9a727f5320a2b4570aee863bbede2a204
-)
-
 FetchContent_MakeAvailable(imgui)
 FetchContent_MakeAvailable(implot)
 FetchContent_MakeAvailable(spirv_headers)
 FetchContent_MakeAvailable(spirv_tools)
 FetchContent_MakeAvailable(glslang)
 FetchContent_MakeAvailable(libzippp)
-FetchContent_MakeAvailable(portable_file_dialog)
-
-set_target_properties(portable_file_dialogs PROPERTIES
-        INTERFACE_INCLUDE_DIRECTORIES
-        "$<BUILD_INTERFACE:${portable_file_dialog_SOURCE_DIR}>;$<INSTALL_INTERFACE:include/portablefiledialog>"
-)
-
-install(TARGETS portable_file_dialogs EXPORT pfdTargets)
-install(DIRECTORY ${portable_file_dialog_SOURCE_DIR}/
-        DESTINATION include/portablefiledialog
-        FILES_MATCHING PATTERN "*.h")
-install(EXPORT pfdTargets FILE PfdTargets.cmake NAMESPACE pfd:: DESTINATION lib/cmake/pfd)
 
 if (TARGET glslang)
     if (MSVC)
@@ -155,7 +136,6 @@ list(APPEND NEON_LIBRARIES
         implot
         rush
         stb
-        portable_file_dialogs
         vma
 )
 

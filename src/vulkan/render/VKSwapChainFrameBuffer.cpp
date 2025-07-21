@@ -198,8 +198,6 @@ namespace neon::vulkan
 
         auto cmd = _vkApplication->getCommandPool()->beginCommandBuffer(true);
 
-        ImGui_ImplVulkan_CreateFontsTexture();
-
         cmd->end();
         cmd->submit();
         cmd->wait();
