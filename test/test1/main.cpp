@@ -284,13 +284,16 @@ std::shared_ptr<Room> getTestRoom(Application* application)
     auto parameterUpdater = room->newGameObject();
     parameterUpdater->newComponent<GlobalParametersUpdaterComponent>();
     parameterUpdater->newComponent<LockMouseComponent>(cameraMovement);
-    parameterUpdater->newComponent<DockSpaceComponent>();
+    auto dock = parameterUpdater->newComponent<DockSpaceComponent>();
     parameterUpdater->newComponent<ViewportComponent>(std::dynamic_pointer_cast<SimpleFrameBuffer>(screenFrameBuffer));
     auto goExplorer = parameterUpdater->newComponent<GameObjectExplorerComponent>();
     parameterUpdater->newComponent<SceneTreeComponent>(goExplorer);
     parameterUpdater->newComponent<DebugOverlayComponent>(false, 100);
     parameterUpdater->newComponent<LogComponent>();
     parameterUpdater->newComponent<vulkan::VulkanInfoCompontent>();
+
+    dock->addSidebar(DockSidebarPosition::BOTTOM, "BottomBar", 24.0f,
+                      [] { ImGui::Text("I'm a bottom bar."); });
 
     auto directionalLight = room->newGameObject();
     directionalLight->newComponent<DirectionalLight>();
