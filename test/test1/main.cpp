@@ -24,12 +24,74 @@
 #include "neon/render/shader/MaterialCreateInfo.h"
 #include "neon/render/shader/ShaderUniformBinding.h"
 
+#include <neon/util/ImGuiUtils.h>
+
 constexpr float WIDTH = 800;
 constexpr float HEIGHT = 600;
 
 CMRC_DECLARE(resources);
 
 using namespace neon;
+
+class TestComponent : public Component
+{
+    ImGui::neon::RowLayout _rowLayout;
+    ImGui::neon::RowLayout _rowLayout2;
+    ImGui::neon::ColumnLayout _layout;
+
+    size_t _counter = 0;
+
+  public:
+    TestComponent() = default;
+    ~TestComponent() override = default;
+
+    void onPreDraw() override
+    {
+        ImGui::ShowDemoWindow();
+        if (ImGui::Begin("Layout test")) {
+            _layout.begin();
+
+            _layout.button("Test1");
+            _layout.stretchedButton("Text2", 1.0f, 100.0f);
+
+            ImGui::ProgressBar(0.5f, ImVec2(0.0f, _layout.popStretchedSize()));
+            _layout.next(true, 1.0f, ImGui::GetFrameHeight());
+
+            _layout.text("Hello world!");
+
+            _rowLayout.begin();
+            _rowLayout.button("Test3", ImVec2(100.0f, 100.0f));
+            _rowLayout.stretchedButton("Test with a very long label", 10.0f);
+            _rowLayout.stretch(7.0f);
+            _rowLayout.stretchedButton("Test5", 5.0f);
+
+            for (size_t i = 0; i < _counter; ++i) {
+                _rowLayout.stretchedButton(std::format("Element {}", i + 1).c_str());
+            }
+
+            _rowLayout.end();
+            _layout.next();
+
+            _rowLayout2.begin();
+            if (_rowLayout2.stretchedButton("Add")) {
+                ++_counter;
+            }
+            if (_rowLayout2.stretchedButton("Remove")) {
+                if (_counter > 0) {
+                    --_counter;
+                }
+            }
+            _rowLayout2.end();
+            _layout.next();
+
+            _layout.text("The end!");
+
+            _layout.end();
+        }
+
+        ImGui::End();
+    }
+};
 
 /**
  * Creates a shader program.
@@ -291,9 +353,9 @@ std::shared_ptr<Room> getTestRoom(Application* application)
     parameterUpdater->newComponent<DebugOverlayComponent>(false, 100);
     parameterUpdater->newComponent<LogComponent>();
     parameterUpdater->newComponent<vulkan::VulkanInfoCompontent>();
+    parameterUpdater->newComponent<TestComponent>();
 
-    dock->addSidebar(DockSidebarPosition::BOTTOM, "BottomBar", 24.0f,
-                      [] { ImGui::Text("I'm a bottom bar."); });
+    dock->addSidebar(DockSidebarPosition::BOTTOM, "BottomBar", 24.0f, [] { ImGui::Text("I'm a bottom bar."); });
 
     auto directionalLight = room->newGameObject();
     directionalLight->newComponent<DirectionalLight>();
