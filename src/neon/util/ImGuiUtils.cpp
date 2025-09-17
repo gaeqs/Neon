@@ -276,12 +276,14 @@ namespace ImGui::neon
         auto imguiId = ImGui::GetID(id);
         auto layout = getLayout(imguiId);
         if (auto columnLayout = dynamic_cast<ColumnLayout*>(layout)) {
+            columnLayout->begin();
             return *columnLayout;
         }
 
         auto newLayout = std::make_unique<ColumnLayout>();
         auto raw = newLayout.get();
         pushLayout(imguiId, std::move(newLayout));
+        raw->begin();
         return *raw;
     }
 
@@ -290,12 +292,14 @@ namespace ImGui::neon
         auto imguiId = ImGui::GetID(id);
         auto layout = getLayout(imguiId);
         if (auto rowLayout = dynamic_cast<RowLayout*>(layout)) {
+            rowLayout->begin();
             return *rowLayout;
         }
 
         auto newLayout = std::make_unique<RowLayout>();
         auto raw = newLayout.get();
         pushLayout(imguiId, std::move(newLayout));
+        raw->begin();
         return *raw;
     }
 } // namespace ImGui::neon
