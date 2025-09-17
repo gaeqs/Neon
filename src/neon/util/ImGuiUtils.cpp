@@ -56,6 +56,16 @@ namespace
 namespace ImGui::neon
 {
 
+    void LinearLayout::space(float size)
+    {
+        if (getDirection() == FlowDirection::HORIZONTAL) {
+            ImGui::Dummy(ImVec2(size, 0.0f));
+        } else {
+            ImGui::Dummy(ImVec2(0.0f, size));
+        }
+        next();
+    }
+
     bool LinearLayout::button(const char* label, ImVec2 size)
     {
         bool result = Button(label, size);
@@ -154,8 +164,8 @@ namespace ImGui::neon
 
     void RowLayout::stretch(float weight, float minSize)
     {
-        _items.emplace_back(weight, true, minSize);
-        SameLine(0, GetStyle().ItemSpacing.x + popStretchedSize());
+        ImGui::Dummy(ImVec2(popStretchedSize(), 1.0f));
+        next(true, weight, minSize);
     }
 
     void RowLayout::next(bool stretch, float weight, float minSize)
@@ -247,8 +257,8 @@ namespace ImGui::neon
 
     void ColumnLayout::stretch(float weight, float minSize)
     {
-        _items.emplace_back(weight, true, minSize);
-        SetCursorPosY(GetCursorPosY() + popStretchedSize() + GetStyle().ItemSpacing.y);
+        ImGui::Dummy(ImVec2(1.0f, popStretchedSize()));
+        next(true, weight, minSize);
     }
 
     void ColumnLayout::next(bool stretch, float weight, float minSize)

@@ -162,6 +162,18 @@ namespace ImGui::neon
         virtual void stretch(float weight = 1.0f, float minSize = 0.0f) = 0;
 
         /**
+         * @brief Adds spacing within a linear layout.
+         *
+         * Inserts an empty space in the layout based on the current flow direction.
+         * When the layout direction is horizontal, it inserts horizontal spacing,
+         * and when the layout direction is vertical, it inserts vertical spacing.
+         *
+         * @param size Specifies the size of the space to add, either horizontally or vertically,
+         *             depending on the layout's flow direction.
+         */
+        void space(float size);
+
+        /**
          * @brief Creates a button within the layout and advances to the next position.
          *
          * Displays a button with the given label and size parameters, ensuring it is

@@ -51,8 +51,6 @@ class TestComponent : public Component
 
             auto& layout = ImGui::neon::BeginColumnLayout("Test");
 
-            layout.begin();
-
             layout.button("Test1");
             layout.stretchedButton("Text2", 1.0f, 100.0f);
 
