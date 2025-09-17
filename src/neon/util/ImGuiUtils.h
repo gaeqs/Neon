@@ -73,6 +73,10 @@ namespace ImGui::neon
     class LinearLayout
     {
       public:
+        LinearLayout() = default;
+
+        LinearLayout(const LinearLayout& other) = delete;
+
         virtual ~LinearLayout() = default;
 
         /**
@@ -205,6 +209,12 @@ namespace ImGui::neon
         void text(const char* fmt, ...);
     };
 
+    /**
+     * @brief Represents a layout structure that arranges items in a single horizontal row.
+     *
+     * Manages the horizontal alignment and spacing of child elements within the layout.
+     * Commonly used in user interfaces to organize elements in a linear, row-based fashion.
+     */
     class RowLayout : public LinearLayout
     {
         std::vector<LayoutItem> _items;
@@ -229,6 +239,12 @@ namespace ImGui::neon
         void end() override;
     };
 
+    /**
+     * @brief Represents a layout structure that arranges items in a single vertical column.
+     *
+     * Manages the vertical alignment and spacing of child elements within the layout.
+     * Commonly used in user interfaces to organize elements in a linear, column-based fashion.
+     */
     class ColumnLayout : public LinearLayout
     {
         std::vector<LayoutItem> _items;
@@ -252,6 +268,36 @@ namespace ImGui::neon
 
         void end() override;
     };
+
+    /**
+     * @brief Begins a column-based layout with the specified identifier.
+     *
+     * Initializes or retrieves an existing instance of a column layout, allowing
+     * for structured arrangement of UI elements in a columnar format.
+     * The identifier is used to uniquely identify a specific layout within the current ImGui context.
+     * If a layout with the provided ID does not exist, a new one is created.
+     *
+     * Remember to invoke layout.end() when the layout composition is finished.
+     *
+     * @param id The unique identifier for the column layout.
+     * @return A reference to the initialized or retrieved ColumnLayout object.
+     */
+    ColumnLayout& BeginColumnLayout(const char* id);
+
+    /**
+     * @brief Begins a row-based layout with the specified identifier.
+     *
+     * Initializes or retrieves an existing instance of a row layout, allowing
+     * for structured arrangement of UI elements in a linear format.
+     * The identifier is used to uniquely identify a specific layout within the current ImGui context.
+     * If a layout with the provided ID does not exist, a new one is created.
+     *
+     * Remember to invoke layout.end() when the layout composition is finished.
+     *
+     * @param id The unique identifier for the row layout.
+     * @return A reference to the initialized or retrieved RowLayout object.
+     */
+    RowLayout& BeginRowLayout(const char* id);
 
 } // namespace ImGui::neon
 

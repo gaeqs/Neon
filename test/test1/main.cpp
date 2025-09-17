@@ -37,7 +37,6 @@ class TestComponent : public Component
 {
     ImGui::neon::RowLayout _rowLayout;
     ImGui::neon::RowLayout _rowLayout2;
-    ImGui::neon::ColumnLayout _layout;
 
     size_t _counter = 0;
 
@@ -49,15 +48,18 @@ class TestComponent : public Component
     {
         ImGui::ShowDemoWindow();
         if (ImGui::Begin("Layout test")) {
-            _layout.begin();
 
-            _layout.button("Test1");
-            _layout.stretchedButton("Text2", 1.0f, 100.0f);
+            auto& layout = ImGui::neon::BeginColumnLayout("Test");
 
-            ImGui::ProgressBar(0.5f, ImVec2(0.0f, _layout.popStretchedSize()));
-            _layout.next(true, 1.0f, ImGui::GetFrameHeight());
+            layout.begin();
 
-            _layout.text("Hello world!");
+            layout.button("Test1");
+            layout.stretchedButton("Text2", 1.0f, 100.0f);
+
+            ImGui::ProgressBar(0.5f, ImVec2(0.0f, layout.popStretchedSize()));
+            layout.next(true, 1.0f, ImGui::GetFrameHeight());
+
+            layout.text("Hello world!");
 
             _rowLayout.begin();
             _rowLayout.button("Test3", ImVec2(100.0f, 100.0f));
@@ -70,7 +72,7 @@ class TestComponent : public Component
             }
 
             _rowLayout.end();
-            _layout.next();
+            layout.next();
 
             _rowLayout2.begin();
             if (_rowLayout2.stretchedButton("Add")) {
@@ -82,11 +84,11 @@ class TestComponent : public Component
                 }
             }
             _rowLayout2.end();
-            _layout.next();
+            layout.next();
 
-            _layout.text("The end!");
+            layout.text("The end!");
 
-            _layout.end();
+            layout.end();
         }
 
         ImGui::End();

@@ -6,10 +6,51 @@
 
 #include <imgui.h>
 #include <imgui_internal.h>
+#include <memory>
+#include <unordered_map>
 #include <vector>
+#include <neon/logging/Logger.h>
 
 namespace
 {
+    struct UsingLayout
+    {
+        int lastFrame;
+        std::unique_ptr<ImGui::neon::LinearLayout> layout;
+    };
+
+    std::unordered_map<ImGuiID, UsingLayout> _layouts;
+
+    void eraseOldLayouts()
+    {
+        if (_layouts.size() < 10) {
+            return;
+        }
+        auto it = _layouts.begin();
+        while (it != _layouts.end()) {
+            if (it->second.lastFrame + 10 < ImGui::GetCurrentContext()->FrameCount) {
+                it = _layouts.erase(it);
+            } else {
+                ++it;
+            }
+        }
+    }
+
+    ImGui::neon::LinearLayout* getLayout(ImGuiID id)
+    {
+        auto it = _layouts.find(id);
+        if (it == _layouts.end()) {
+            return nullptr;
+        }
+        it->second.lastFrame = ImGui::GetCurrentContext()->FrameCount;
+        return it->second.layout.get();
+    }
+
+    void pushLayout(ImGuiID id, std::unique_ptr<ImGui::neon::LinearLayout> layout)
+    {
+        eraseOldLayouts();
+        _layouts[id] = {ImGui::GetCurrentContext()->FrameCount, std::move(layout)};
+    }
 } // namespace
 
 namespace ImGui::neon
@@ -30,7 +71,7 @@ namespace ImGui::neon
             minSize = minSize < 0.0f ? CalcTextSize(label).x + GetStyle().FramePadding.x * 2.0f : minSize;
         } else {
             size.y = popStretchedSize();
-            minSize = minSize < 0.0f ? CalcTextSize(label).y + GetStyle().FramePadding.y * 2.0f  : minSize;
+            minSize = minSize < 0.0f ? CalcTextSize(label).y + GetStyle().FramePadding.y * 2.0f : minSize;
         }
         bool result = Button(label, size);
         next(true, weight, minSize);
@@ -228,5 +269,33 @@ namespace ImGui::neon
     void ColumnLayout::end()
     {
         EndGroup();
+    }
+
+    ColumnLayout& BeginColumnLayout(const char* id)
+    {
+        auto imguiId = ImGui::GetID(id);
+        auto layout = getLayout(imguiId);
+        if (auto columnLayout = dynamic_cast<ColumnLayout*>(layout)) {
+            return *columnLayout;
+        }
+
+        auto newLayout = std::make_unique<ColumnLayout>();
+        auto raw = newLayout.get();
+        pushLayout(imguiId, std::move(newLayout));
+        return *raw;
+    }
+
+    RowLayout& BeginRowLayout(const char* id)
+    {
+        auto imguiId = ImGui::GetID(id);
+        auto layout = getLayout(imguiId);
+        if (auto rowLayout = dynamic_cast<RowLayout*>(layout)) {
+            return *rowLayout;
+        }
+
+        auto newLayout = std::make_unique<RowLayout>();
+        auto raw = newLayout.get();
+        pushLayout(imguiId, std::move(newLayout));
+        return *raw;
     }
 } // namespace ImGui::neon
