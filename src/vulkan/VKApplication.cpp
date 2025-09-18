@@ -145,7 +145,11 @@ namespace neon::vulkan
 
         int w = static_cast<int>(_width);
         int h = static_cast<int>(_height);
-        _window = glfwCreateWindow(w, h, _name.c_str(), nullptr, nullptr);
+        if (_createInfo.fullscreen) {
+            _window = glfwCreateWindow(w, h, _name.c_str(), glfwGetPrimaryMonitor(), nullptr);
+        } else {
+            _window = glfwCreateWindow(w, h, _name.c_str(), nullptr, nullptr);
+        }
         if (!_window) {
             throw std::runtime_error("Failed to open GLFW window");
         }
