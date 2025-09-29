@@ -107,12 +107,30 @@ namespace neon
         bool addShader(ShaderType type, std::string resource);
 
         /**
-         * Compiles this shader program.
-         * You cannot add new shaders after a shader program is
-         * compiled.
+         * @brief Compiles this shader program.
+         *
+         * @warning No new shaders can be added after the program has been compiled.
+         *
          * @return a compilation error if present.
          */
         std::optional<std::string> compile();
+
+        /**
+         * @brief Compiles the shader program, processing #include directives.
+         *
+         * This overload handles file inclusion (#include) during shader
+         * preprocessing, similar to C/C++.
+         *
+         * - `#include "path/to/shader.glsl"`: Resolved relative to `includerRootPath`.
+         * - `#include <library_shader.glsl>`: Resolved relative to the root of 'includeFileSystem'.
+         *
+         * @warning No new shaders can be added after the program has been compiled.
+         *
+         * @param includerFileSystem The file system for system includes (`<...>`).
+         * @param includerRootPath The base directory for local includes (`"..._).
+         * @return A std::string containing the compilation error if one occurs, or nothing on success.
+         */
+        std::optional<std::string> compile(FileSystem* includerFileSystem, std::filesystem::path includerRootPath);
 
         const std::vector<ShaderUniformBlock>& getUniformBlocks() const;
 
@@ -154,4 +172,4 @@ namespace neon
     };
 } // namespace neon
 
-#endif //NEON_SHADERPROGRAM_H
+#endif // NEON_SHADERPROGRAM_H

@@ -9,11 +9,80 @@
 #include "glslang/Include/Types.h"
 #include "SPIRV/GlslangToSpv.h"
 
+#include <neon/logging/Logger.h>
+
 namespace neon::vulkan
 {
     constexpr int DEFAULT_VERSION = 450;
 
     static bool GLSLANG_INITIALIZED = false;
+
+    std::string* SPIRVIncluder::fetch(std::filesystem::path path)
+    {
+        if (auto it = _cache.find(path); it != _cache.end()) {
+            return &it->second;
+        }
+
+        if (auto opt = _fileSystem->readFile(path)) {
+            auto& file = opt.value();
+            auto [it, ok] = _cache.insert({path, file.toString()});
+            return &it->second;
+        }
+
+        neon::debug() << "Failed to fetch include file: " << path;
+        return nullptr;
+    }
+
+    SPIRVIncluder::SPIRVIncluder(FileSystem* fileSystem, std::filesystem::path rootPath) :
+        _fileSystem(fileSystem),
+        _rootPath(std::move(rootPath))
+    {
+    }
+
+    glslang::TShader::Includer::IncludeResult* SPIRVIncluder::includeSystem(const char* headerName,
+                                                                            const char* includerName, size_t depth)
+    {
+        auto path = std::filesystem::path(headerName);
+        neon::debug() << "Fetching system include file: " << path;
+        if (!_fileSystem) {
+            return nullptr;
+        }
+
+        auto* data = fetch(path);
+        if (!data) {
+            return nullptr;
+        }
+
+        return new IncludeResult(path.generic_string(), data->data(), data->length(), data->data());
+    }
+
+    glslang::TShader::Includer::IncludeResult* SPIRVIncluder::includeLocal(const char* headerName,
+                                                                           const char* includerName, size_t depth)
+    {
+        std::filesystem::path path;
+        if (includerName) {
+            path = std::filesystem::path(includerName).parent_path() / headerName;
+        } else {
+            path = _rootPath / headerName;
+        }
+
+        neon::debug() << "Fetching local include file: " << headerName << " (" << path << ")";
+        if (!_fileSystem) {
+            return nullptr;
+        }
+
+        auto* data = fetch(path);
+        if (!data) {
+            return nullptr;
+        }
+
+        return new IncludeResult(path.generic_string(), data->data(), data->length(), data->data());
+    }
+
+    void SPIRVIncluder::releaseInclude(IncludeResult* result)
+    {
+        delete result;
+    }
 
     TBuiltInResource SPIRVCompiler::generateDefaultResources(const VKPhysicalDevice& device)
     {
@@ -181,9 +250,11 @@ namespace neon::vulkan
         }
     }
 
-    SPIRVCompiler::SPIRVCompiler(const VKPhysicalDevice& device) :
+    SPIRVCompiler::SPIRVCompiler(const VKPhysicalDevice& device, FileSystem* includerFileSystem,
+                                 std::filesystem::path includerRootPath) :
         _compiled(false),
-        _resources(generateDefaultResources(device))
+        _resources(generateDefaultResources(device)),
+        _includer(includerFileSystem, std::move(includerRootPath))
     {
         if (!GLSLANG_INITIALIZED) {
             glslang::InitializeProcess();
@@ -201,6 +272,8 @@ namespace neon::vulkan
     std::optional<std::string> SPIRVCompiler::addShader(const VkShaderStageFlagBits& shaderType,
                                                         const std::string& source)
     {
+        constexpr auto preamble = "#extension GL_GOOGLE_include_directive : enable\n";
+
         auto language = getLanguage(shaderType);
         auto* shader = new glslang::TShader(language);
 
@@ -208,12 +281,12 @@ namespace neon::vulkan
 
         const char* value = source.data();
         shader->setStrings(&value, 1);
-
+        shader->setPreamble(preamble);
         shader->setEnvInput(glslang::EShSourceGlsl, language, glslang::EShClientVulkan, DEFAULT_VERSION);
         shader->setEnvClient(glslang::EShClientVulkan, glslang::EShTargetVulkan_1_2);
         shader->setEnvTarget(glslang::EShTargetSpv, glslang::EShTargetSpv_1_5);
 
-        if (!shader->parse(&_resources, DEFAULT_VERSION, false, messages)) {
+        if (!shader->parse(&_resources, DEFAULT_VERSION, false, messages, _includer)) {
             std::string infoLog(shader->getInfoLog());
             std::string infoDebugLog(shader->getInfoDebugLog());
             delete shader;

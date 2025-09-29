@@ -44,7 +44,10 @@ namespace neon
             }
         }
 
-        if (auto result = shader->compile(); result.has_value()) {
+        auto fileSystem = context.fileSystem;
+        auto parentPath = context.path.has_value() ? context.path.value().parent_path() : std::filesystem::path();
+
+        if (auto result = shader->compile(fileSystem, parentPath); result.has_value()) {
             logger.error(result.value());
             return nullptr;
         }

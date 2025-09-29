@@ -27,6 +27,7 @@ cmrc_add_resource_library(
         resources/point_light.frag
         resources/flash_light.vert
         resources/flash_light.frag
+        resources/parallax_shader.json
         resources/texture/skybox/skybox.json
         resources/texture/skybox/right.jpg
         resources/texture/skybox/left.jpg
@@ -34,6 +35,9 @@ cmrc_add_resource_library(
         resources/texture/skybox/bottom.jpg
         resources/texture/skybox/front.jpg
         resources/texture/skybox/back.jpg
+
+        resources/glsl/utils.glsl
+        resources/glsl/utils_impl.glsl
 )
 
 add_executable(test1 ${TEST_SOURCES})

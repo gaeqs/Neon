@@ -48,7 +48,6 @@ class TestComponent : public Component
     {
         ImGui::ShowDemoWindow();
         if (ImGui::Begin("Layout test")) {
-
             auto& layout = ImGui::neon::BeginColumnLayout("Test");
 
             layout.button("Test1");
@@ -251,7 +250,12 @@ void loadModels(Application* application, Room* room, const std::shared_ptr<Fram
     application->getAssets().store(materialDescriptor, AssetStorageMode::PERMANENT);
 
     auto shader = createShader(application, "deferred", "deferred.vert", "deferred.frag");
-    auto shaderParallax = createShader(application, "parallax", "deferred.vert", "deferred_parallax.frag");
+
+    CMRCFileSystem fileSystem(cmrc::resources::get_filesystem());
+    AssetLoaderContext context(application);
+    context.fileSystem = &fileSystem;
+
+    auto shaderParallax = neon::loadAssetFromFile<ShaderProgram>("parallax_shader.json", context);
     application->getAssets().store(shader, AssetStorageMode::PERMANENT);
 
     MaterialCreateInfo sansMaterialInfo(target, shader);
