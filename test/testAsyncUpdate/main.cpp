@@ -118,7 +118,7 @@ std::shared_ptr<Material> createSSAOMaterial(Room* room, const std::shared_ptr<F
                            0.0f);
     }
 
-    ImageCreateInfo noiseTextureCreateInfo;
+    TextureCreateInfo noiseTextureCreateInfo;
     noiseTextureCreateInfo.format = TextureFormat::R32FG32FB32F;
     noiseTextureCreateInfo.width = NOISE_WIDTH;
     noiseTextureCreateInfo.height = NOISE_WIDTH;
@@ -145,8 +145,9 @@ std::shared_ptr<Material> createSSAOMaterial(Room* room, const std::shared_ptr<F
     return material;
 }
 
-std::shared_ptr<Material> createSSAOBlurMaterial(Room* room, const std::shared_ptr<FrameBuffer>& ssaoFrameBuffer,
-                                                 const std::vector<std::shared_ptr<MutableAsset<TextureView>>>& textures)
+std::shared_ptr<Material> createSSAOBlurMaterial(
+    Room* room, const std::shared_ptr<FrameBuffer>& ssaoFrameBuffer,
+    const std::vector<std::shared_ptr<MutableAsset<TextureView>>>& textures)
 {
     auto ssaoShader = createShader(room->getApplication(), "SSAO", "ssao_blur.vert", "ssao_blur.frag");
 
@@ -160,7 +161,7 @@ std::shared_ptr<SampledTexture> computeIrradiance(Application* app, const std::s
 {
     neon::FrameBufferTextureCreateInfo testInfo;
     testInfo.layers = 6;
-    testInfo.imageView.viewType = neon::TextureViewType::CUBE;
+    testInfo.viewType = neon::TextureViewType::CUBE;
 
     auto testFrameBuffer = std::make_shared<SimpleFrameBuffer>(
         app, "neoneuron:test", SamplesPerTexel::COUNT_1, std::vector{testInfo},
@@ -397,7 +398,7 @@ void loadModels(Application* application, Room* room, const std::shared_ptr<Fram
 
     // CUBE
 
-    ImageCreateInfo albedoInfo;
+    TextureCreateInfo albedoInfo;
     albedoInfo.format = TextureFormat::R8G8B8A8_SRGB;
 
     std::shared_ptr<Texture> cubeAlbedo =
@@ -443,18 +444,18 @@ std::shared_ptr<SampledTexture> loadSkybox(Room* room)
     };
 
     TextureCreateInfo info;
-    info.imageView.viewType = TextureViewType::CUBE;
-    info.image.layers = 6;
-    info.image.mipmaps = 10;
+    info.layers = 6;
+    info.mipmaps = 10;
+    info.viewType = TextureViewType::CUBE;
 
-    auto texture = Texture::createTextureFromFiles(room->getApplication(), "skybox", PATHS, info.image);
-    auto view = TextureView::create(room->getApplication(), "skybox", info.imageView, texture);
+    auto texture = Texture::createTextureFromFiles(room->getApplication(), "skybox", PATHS, info);
+    auto view = TextureView::create(room->getApplication(), "skybox", TextureViewCreateInfo(), texture);
     return SampledTexture::create(room->getApplication(), "skybox", std::make_shared<MutableAsset<TextureView>>(view));
 }
 
 std::shared_ptr<SampledTexture> loadBRDF(Room* room)
 {
-    ImageCreateInfo info;
+    TextureCreateInfo info;
     info.layers = 1;
     info.mipmaps = 0;
 

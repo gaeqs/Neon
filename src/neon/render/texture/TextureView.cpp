@@ -11,7 +11,7 @@
 namespace neon
 {
 
-    TextureView::TextureView(std::string name, ImageViewCreateInfo info, std::shared_ptr<Texture> texture) :
+    TextureView::TextureView(std::string name, TextureViewCreateInfo info, std::shared_ptr<Texture> texture) :
         Asset(typeid(TextureView), std::move(name)),
         _info(std::move(info)),
         _texture(std::move(texture))
@@ -23,13 +23,13 @@ namespace neon
         return _texture;
     }
 
-    const ImageViewCreateInfo& TextureView::getInfo() const
+    const TextureViewCreateInfo& TextureView::getInfo() const
     {
         return _info;
     }
 
     std::shared_ptr<TextureView> TextureView::create(Application* application, std::string name,
-                                                     const ImageViewCreateInfo& info, std::shared_ptr<Texture> texture)
+                                                     const TextureViewCreateInfo& info, std::shared_ptr<Texture> texture)
     {
 #ifdef USE_VULKAN
         return std::make_shared<vulkan::VKTextureView>(application, std::move(name), info, std::move(texture));

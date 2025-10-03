@@ -65,11 +65,11 @@ namespace neon::assimp_loader
                 // Compressed format! Let's stbi decide.
                 std::shared_ptr<Texture> t =
                     Texture::createTextureFromFile(info.application, texture->mFilename.C_Str(), texture->pcData,
-                                                   texture->mWidth, ImageCreateInfo(), info.commandBuffer);
+                                                   texture->mWidth, TextureCreateInfo(), info.commandBuffer);
                 return SampledTexture::create(info.application, texture->mFilename.C_Str(), t);
             }
 
-            ImageCreateInfo createInfo;
+            TextureCreateInfo createInfo;
             createInfo.width = texture->mWidth;
             createInfo.height = texture->mHeight;
             createInfo.depth = 1;

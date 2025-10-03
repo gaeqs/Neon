@@ -12,7 +12,7 @@ namespace neon::vulkan
 
     namespace vc = conversions;
 
-    VKTextureView::VKTextureView(Application* application, std::string name, const ImageViewCreateInfo& info,
+    VKTextureView::VKTextureView(Application* application, std::string name, const TextureViewCreateInfo& info,
                                  std::shared_ptr<Texture> texture) :
         VKResource(application),
         TextureView(std::move(name), info, std::move(texture))
@@ -30,7 +30,8 @@ namespace neon::vulkan
             flags |= static_cast<VkImageAspectFlags>(aspect);
         }
 
-        _view = vulkan_util::createImageView(getApplication()->getDevice()->getRaw(), native, format, flags, info);
+        _view = vulkan_util::createImageView(getApplication()->getDevice()->getRaw(), native, format, flags, info,
+                                             getTexture()->getTextureViewType());
     }
 
     VKTextureView::~VKTextureView()

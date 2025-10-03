@@ -223,7 +223,7 @@ void loadModels(Application* application, Room* room, const std::shared_ptr<Fram
 
     // CUBE
 
-    ImageCreateInfo albedoInfo;
+    TextureCreateInfo albedoInfo;
     albedoInfo.format = TextureFormat::R8G8B8A8_SRGB;
 
     std::shared_ptr<Texture> cubeAlbedo =

@@ -8,7 +8,7 @@
 
 namespace neon
 {
-    void TextureLoader::loadImage(nlohmann::json& json, ImageCreateInfo& info)
+    void TextureLoader::loadImage(nlohmann::json& json, TextureCreateInfo& info)
     {
         if (!json.is_object()) {
             return;
@@ -22,6 +22,7 @@ namespace neon
         info.tiling = serialization::toTiling(json.value("tiling", "")).value_or(info.tiling);
         info.samples = serialization::toSamplesPerTexel(json.value("samples", "")).value_or(info.samples);
         info.mipmaps = json.value("mipmaps", info.mipmaps);
+        info.viewType = serialization::toTextureViewType(json.value("view_type", "")).value_or(info.viewType);
 
         auto& usages = json["usages"];
         if (usages.is_string()) {
@@ -39,12 +40,11 @@ namespace neon
         }
     }
 
-    void TextureLoader::loadImageView(nlohmann::json& json, ImageViewCreateInfo& info)
+    void TextureLoader::loadImageView(nlohmann::json& json, TextureViewCreateInfo& info)
     {
         if (!json.is_object()) {
             return;
         }
-        info.viewType = serialization::toTextureViewType(json.value("view_type", "")).value_or(info.viewType);
         info.rSwizzle = serialization::toTextureComponentSwizzle(json.value("r_swizzle", "")).value_or(info.rSwizzle);
         info.gSwizzle = serialization::toTextureComponentSwizzle(json.value("g_swizzle", "")).value_or(info.gSwizzle);
         info.bSwizzle = serialization::toTextureComponentSwizzle(json.value("b_swizzle", "")).value_or(info.bSwizzle);
@@ -109,15 +109,16 @@ namespace neon
             return nullptr;
         }
 
-        TextureCreateInfo info;
-        loadImage(json["image"], info.image);
-        loadImageView(json["image_view"], info.imageView);
-        loadSampler(json["sampler"], info.sampler);
-        info.image.viewType = info.imageView.viewType;
+        TextureCreateInfo imageInfo;
+        TextureViewCreateInfo viewInfo;
+        SamplerCreateInfo samplerInfo;
+        loadImage(json["image"], imageInfo);
+        loadImageView(json["image_view"], viewInfo);
+        loadSampler(json["sampler"], samplerInfo);
 
-        auto texture = Texture::createTextureFromFiles(context.application, name, datas, sizes, info.image);
-        auto view = TextureView::create(context.application, name, info.imageView, std::move(texture));
-        auto sampler = Sampler::create(context.application, name, info.sampler);
+        auto texture = Texture::createTextureFromFiles(context.application, name, datas, sizes, imageInfo);
+        auto view = TextureView::create(context.application, name, viewInfo, std::move(texture));
+        auto sampler = Sampler::create(context.application, name, samplerInfo);
         return SampledTexture::create(name, std::move(view), std::move(sampler));
     }
 } // namespace neon

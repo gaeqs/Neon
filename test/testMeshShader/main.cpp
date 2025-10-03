@@ -179,7 +179,7 @@ void loadModels(Application* application, Room* room, const std::shared_ptr<Fram
     modelLoaderInfo.flipWindingOrder = false;
     modelLoaderInfo.flipNormals = false;
 
-    ImageCreateInfo info;
+    TextureCreateInfo info;
     info.viewType = TextureViewType::NORMAL_2D;
 
     std::shared_ptr diffuse = Texture::createTextureFromFile(application, "Diffuse", "resource/Sans/diffuse.png", info);
@@ -275,13 +275,12 @@ std::shared_ptr<SampledTexture> loadSkybox(Room* room)
     };
 
     TextureCreateInfo info;
-    info.image.viewType = TextureViewType::CUBE;
-    info.imageView.viewType = TextureViewType::CUBE;
-    info.image.layers = 6;
-    info.image.mipmaps = 10;
+    info.layers = 6;
+    info.mipmaps = 10;
+    info.viewType = TextureViewType::CUBE;
 
-    auto texture = Texture::createTextureFromFiles(room->getApplication(), "skybox", PATHS, info.image);
-    auto view = TextureView::create(room->getApplication(), "skybox", info.imageView, texture);
+    auto texture = Texture::createTextureFromFiles(room->getApplication(), "skybox", PATHS, info);
+    auto view = TextureView::create(room->getApplication(), "skybox", TextureViewCreateInfo(), texture);
     return SampledTexture::create(room->getApplication(), "skybox", std::make_shared<MutableAsset<TextureView>>(view));
 }
 

@@ -54,7 +54,7 @@ namespace neon
             aiTexture* texture = scene->mTextures[i];
             auto name = "*" + std::to_string(i);
 
-            ImageCreateInfo info;
+            TextureCreateInfo info;
             if (texture->mHeight == 0) {
                 // Compressed texture
                 textures.push_back(Texture::createTextureFromFile(context.application, name, texture->pcData,

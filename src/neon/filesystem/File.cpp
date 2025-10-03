@@ -20,7 +20,7 @@ namespace neon
     {
         other._data = nullptr;
         other._size = 0;
-        other._destructor = _destructor;
+        other._destructor = nullptr;
     }
 
     File& File::operator=(File&& other) noexcept

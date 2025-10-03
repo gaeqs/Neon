@@ -111,7 +111,7 @@ namespace neon
 
     void CefWebView::onStart()
     {
-        ImageCreateInfo info;
+        TextureCreateInfo info;
         info.width = 2048;
         info.height = 2048;
         info.depth = 1;

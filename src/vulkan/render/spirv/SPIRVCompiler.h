@@ -12,12 +12,33 @@
 #include <vulkan/vulkan.h>
 #include <glslang/Public/ShaderLang.h>
 #include <neon/render/shader/ShaderUniform.h>
-
+#include <neon/filesystem/FileSystem.h>
 #include <neon/util/Result.h>
 #include <vulkan/device/VKPhysicalDevice.h>
 
 namespace neon::vulkan
 {
+    class SPIRVIncluder : public glslang::TShader::Includer
+    {
+        FileSystem* _fileSystem;
+        std::filesystem::path _rootPath;
+
+        std::unordered_map<std::filesystem::path, std::string> _cache;
+
+        std::string* fetch(std::filesystem::path path);
+
+      public:
+        SPIRVIncluder(FileSystem* fileSystem, std::filesystem::path rootPath);
+
+        ~SPIRVIncluder() override = default;
+
+        IncludeResult* includeSystem(const char*, const char*, size_t) override;
+
+        IncludeResult* includeLocal(const char*, const char*, size_t) override;
+
+        void releaseInclude(IncludeResult*) override;
+    };
+
     class SPIRVCompiler
     {
         static TBuiltInResource generateDefaultResources(const VKPhysicalDevice& device);
@@ -28,9 +49,11 @@ namespace neon::vulkan
         std::vector<glslang::TShader*> _shaders;
         glslang::TProgram _program;
         TBuiltInResource _resources;
+        SPIRVIncluder _includer;
 
       public:
-        SPIRVCompiler(const VKPhysicalDevice& device);
+        SPIRVCompiler(const VKPhysicalDevice& device, FileSystem* includerFileSystem,
+                      std::filesystem::path includerRootPath);
 
         ~SPIRVCompiler();
 
@@ -43,10 +66,10 @@ namespace neon::vulkan
         [[nodiscard]] std::vector<ShaderUniformBlock> getUniformBlocks() const;
 
         //[[nodiscard]] std::unordered_map<std::string, VKShaderUniform>
-        //getBuffers() const;
+        // getBuffers() const;
 
         [[nodiscard]] std::vector<ShaderUniformSampler> getSamplers() const;
     };
 } // namespace neon::vulkan
 
-#endif //NEON_SPIRVCOMPILER_H
+#endif // NEON_SPIRVCOMPILER_H

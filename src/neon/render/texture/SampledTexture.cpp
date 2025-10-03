@@ -73,7 +73,7 @@ namespace neon
             return nullptr;
         }
         auto sampler = Sampler::create(application, name, SamplerCreateInfo());
-        auto view = TextureView::create(application, name, ImageViewCreateInfo(), std::move(texture));
+        auto view = TextureView::create(application, name, TextureViewCreateInfo(), std::move(texture));
         return create(std::move(name), std::move(view), std::move(sampler));
     }
 

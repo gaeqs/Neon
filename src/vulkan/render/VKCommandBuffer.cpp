@@ -297,7 +297,8 @@ namespace neon::vulkan
             _fences, [device](const VkFence& it) { return vkGetFenceStatus(device, it) == VK_NOT_READY; });
 
         if (!used) {
-            vkResetFences(_vkApplication->getDevice()->getRaw(), static_cast<uint32_t>(_fences.size()), _fences.data());
+            uint32_t amount = static_cast<uint32_t>(_fences.size());
+            vkResetFences(_vkApplication->getDevice()->getRaw(), amount, _fences.data());
             _freedFences.insert(_freedFences.end(), _fences.begin(), _fences.end());
             _fences.clear();
         }

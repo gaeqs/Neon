@@ -1,5 +1,7 @@
 #version 460
 
+#include "glsl/utils.glsl"
+
 layout(location = 0) in vec3 fragPosition;
 layout(location = 1) in vec2 fragTexCoords;
 layout(location = 2) in mat3 TBN;
@@ -47,8 +49,11 @@ vec2 parallaxMapping(in vec2 texCoords, in vec3 viewDir) {
 void main() {
     vec2 parallaxTexCoord = parallaxMapping(fragTexCoords, inverseTBN * normalize(-fragPosition));
 
-    if (parallaxTexCoord.x > 1.0 || parallaxTexCoord.y > 1.0 || parallaxTexCoord.x < 0.0 || parallaxTexCoord.y < 0.0)
-    discard;
+    bounded(parallaxTexCoord, 0.0f, 1.0f);
+
+    if (!bounded(parallaxTexCoord, 0.0f, 1.0f)) {
+        discard;
+    }
 
     vec3 tn = texture(normalTexture, parallaxTexCoord).xyz;
     tn = normalize(tn * 2.0f - 1.0f);

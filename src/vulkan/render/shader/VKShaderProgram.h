@@ -43,7 +43,8 @@ namespace neon::vulkan
 
         ~VKShaderProgram();
 
-        std::optional<std::string> compile(const std::unordered_map<ShaderType, std::string>& raw);
+        std::optional<std::string> compile(const std::unordered_map<ShaderType, std::string>& raw,
+                                           FileSystem* includerFileSystem, std::filesystem::path includerRootPath);
 
         [[nodiscard]] const std::vector<VkPipelineShaderStageCreateInfo>& getShaders() const;
 
@@ -53,4 +54,4 @@ namespace neon::vulkan
     };
 } // namespace neon::vulkan
 
-#endif //NEON_VKSHADERPROGRAM_H
+#endif // NEON_VKSHADERPROGRAM_H

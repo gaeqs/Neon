@@ -15,7 +15,7 @@ namespace neon::vulkan
         VkImageView _view;
 
       public:
-        VKTextureView(Application* application, std::string name, const ImageViewCreateInfo& info,
+        VKTextureView(Application* application, std::string name, const TextureViewCreateInfo& info,
             std::shared_ptr<Texture> texture);
 
         ~VKTextureView() override;

@@ -24,12 +24,73 @@
 #include "neon/render/shader/MaterialCreateInfo.h"
 #include "neon/render/shader/ShaderUniformBinding.h"
 
+#include <neon/util/ImGuiUtils.h>
+
 constexpr float WIDTH = 800;
 constexpr float HEIGHT = 600;
 
 CMRC_DECLARE(resources);
 
 using namespace neon;
+
+class TestComponent : public Component
+{
+    ImGui::neon::RowLayout _rowLayout;
+    ImGui::neon::RowLayout _rowLayout2;
+
+    size_t _counter = 0;
+
+  public:
+    TestComponent() = default;
+    ~TestComponent() override = default;
+
+    void onPreDraw() override
+    {
+        ImGui::ShowDemoWindow();
+        if (ImGui::Begin("Layout test")) {
+            auto& layout = ImGui::neon::BeginColumnLayout("Test");
+
+            layout.button("Test1");
+            layout.stretchedButton("Text2", 1.0f, 100.0f);
+
+            ImGui::ProgressBar(0.5f, ImVec2(0.0f, layout.popStretchedSize()));
+            layout.next(true, 1.0f, ImGui::GetFrameHeight());
+
+            layout.text("Hello world!");
+
+            _rowLayout.begin();
+            _rowLayout.button("Test3", ImVec2(100.0f, 100.0f));
+            _rowLayout.stretchedButton("Test with a very long label", 10.0f);
+            _rowLayout.stretch(7.0f);
+            _rowLayout.stretchedButton("Test5", 5.0f);
+
+            for (size_t i = 0; i < _counter; ++i) {
+                _rowLayout.stretchedButton(std::format("Element {}", i + 1).c_str());
+            }
+
+            _rowLayout.end();
+            layout.next();
+
+            _rowLayout2.begin();
+            if (_rowLayout2.stretchedButton("Add")) {
+                ++_counter;
+            }
+            if (_rowLayout2.stretchedButton("Remove")) {
+                if (_counter > 0) {
+                    --_counter;
+                }
+            }
+            _rowLayout2.end();
+            layout.next();
+
+            layout.text("The end!");
+
+            layout.end();
+        }
+
+        ImGui::End();
+    }
+};
 
 /**
  * Creates a shader program.
@@ -189,7 +250,12 @@ void loadModels(Application* application, Room* room, const std::shared_ptr<Fram
     application->getAssets().store(materialDescriptor, AssetStorageMode::PERMANENT);
 
     auto shader = createShader(application, "deferred", "deferred.vert", "deferred.frag");
-    auto shaderParallax = createShader(application, "parallax", "deferred.vert", "deferred_parallax.frag");
+
+    CMRCFileSystem fileSystem(cmrc::resources::get_filesystem());
+    AssetLoaderContext context(application);
+    context.fileSystem = &fileSystem;
+
+    auto shaderParallax = neon::loadAssetFromFile<ShaderProgram>("parallax_shader.json", context);
     application->getAssets().store(shader, AssetStorageMode::PERMANENT);
 
     MaterialCreateInfo sansMaterialInfo(target, shader);
@@ -222,7 +288,7 @@ void loadModels(Application* application, Room* room, const std::shared_ptr<Fram
 
     // CUBE
 
-    ImageCreateInfo albedoInfo;
+    TextureCreateInfo albedoInfo;
     albedoInfo.format = TextureFormat::R8G8B8A8_SRGB;
 
     std::shared_ptr<Texture> cubeAlbedo =
@@ -284,13 +350,16 @@ std::shared_ptr<Room> getTestRoom(Application* application)
     auto parameterUpdater = room->newGameObject();
     parameterUpdater->newComponent<GlobalParametersUpdaterComponent>();
     parameterUpdater->newComponent<LockMouseComponent>(cameraMovement);
-    parameterUpdater->newComponent<DockSpaceComponent>();
+    auto dock = parameterUpdater->newComponent<DockSpaceComponent>();
     parameterUpdater->newComponent<ViewportComponent>(std::dynamic_pointer_cast<SimpleFrameBuffer>(screenFrameBuffer));
     auto goExplorer = parameterUpdater->newComponent<GameObjectExplorerComponent>();
     parameterUpdater->newComponent<SceneTreeComponent>(goExplorer);
     parameterUpdater->newComponent<DebugOverlayComponent>(false, 100);
     parameterUpdater->newComponent<LogComponent>();
     parameterUpdater->newComponent<vulkan::VulkanInfoCompontent>();
+    parameterUpdater->newComponent<TestComponent>();
+
+    dock->addSidebar(DockSidebarPosition::BOTTOM, "BottomBar", 24.0f, [] { ImGui::Text("I'm a bottom bar."); });
 
     auto directionalLight = room->newGameObject();
     directionalLight->newComponent<DirectionalLight>();

@@ -13,7 +13,7 @@ namespace neon::vulkan
 {
     namespace vc = conversions;
 
-    void VKSimpleTexture::transitionLayout(VkImageLayout layout, VkCommandBuffer commandBuffer)
+    void VKSimpleTexture::transitionLayout(VkImageLayout layout, VkCommandBuffer commandBuffer) const
     {
         vulkan_util::transitionImageLayout(_image, vc::vkFormat(_info.format), _currentLayout, layout, _info.mipmaps,
                                            _info.layers, commandBuffer);
@@ -51,7 +51,7 @@ namespace neon::vulkan
         _currentLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
     }
 
-    VKSimpleTexture::VKSimpleTexture(Application* application, std::string name, const ImageCreateInfo& info,
+    VKSimpleTexture::VKSimpleTexture(Application* application, std::string name, const TextureCreateInfo& info,
                                      const std::byte* data, CommandBuffer* commandBuffer) :
         VKResource(application),
         Texture(std::move(name)),
@@ -143,6 +143,11 @@ namespace neon::vulkan
         return _info.samples;
     }
 
+    TextureViewType VKSimpleTexture::getTextureViewType() const
+    {
+        return _info.viewType;
+    }
+
     size_t VKSimpleTexture::getNumberOfMipmaps() const
     {
         return _info.mipmaps;
@@ -150,7 +155,7 @@ namespace neon::vulkan
 
     std::optional<const TextureCapabilityRead*> VKSimpleTexture::asReadable() const
     {
-        return {};
+        return this;
     }
 
     std::optional<TextureCapabilityModifiable*> VKSimpleTexture::asModifiable()
@@ -181,7 +186,44 @@ namespace neon::vulkan
         return _currentLayout;
     }
 
-    Result<void, std::string> VKSimpleTexture::updateData(const std::byte* data, rush::Vec3ui offset, rush::Vec3ui size,
+    Result<void, std::string> VKSimpleTexture::readData(void* data, rush::Vec3ui offset, rush::Vec3ui size,
+                                                        uint32_t layerOffset, uint32_t layers) const
+    {
+        if (offset.x() + size.x() > _info.width || offset.y() + size.y() > _info.height ||
+            offset.z() + size.z() > _info.depth || layerOffset + layers > _info.layers) {
+            return {"Texture update region is out of bounds."};
+        }
+
+        CommandPoolHolder holder = getApplication()->getApplication()->getCommandManager().fetchCommandPool();
+        CommandBuffer* cmd = holder.getPool().beginCommandBuffer(true);
+        VkCommandBuffer rawCmd = cmd->getImplementation().getCommandBuffer();
+
+        size_t bytesSize = size.x() * size.y() * size.z() * layers * vc::pixelSize(_info.format);
+        SimpleBuffer buffer(getApplication(), VK_BUFFER_USAGE_TRANSFER_DST_BIT, 0, bytesSize);
+
+        auto layout = _currentLayout;
+
+        transitionLayout(VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, rawCmd);
+        vulkan_util::copyImageToBuffer(buffer.getRaw(cmd->getCurrentRun()), _image, offset.cast<int32_t>(), size,
+                                       layerOffset, layers, rawCmd);
+        transitionLayout(layout, rawCmd);
+
+        cmd->end();
+        cmd->submit();
+        cmd->wait();
+
+        auto map = buffer.map<uint8_t>();
+        if (!map.has_value()) {
+            return {"Couldn't map destination buffer."};
+        }
+
+        auto bufferData = map.value()->raw();
+        memcpy(data, bufferData, size[0] * size[1] * size[2] * layers * conversions::pixelSize(_info.format));
+
+        return {};
+    }
+
+    Result<void, std::string> VKSimpleTexture::updateData(const void* data, rush::Vec3ui offset, rush::Vec3ui size,
                                                           uint32_t layerOffset, uint32_t layers,
                                                           CommandBuffer* commandBuffer)
     {

@@ -50,11 +50,13 @@ namespace neon::vulkan
         deleteShaders();
     }
 
-    std::optional<std::string> VKShaderProgram::compile(const std::unordered_map<ShaderType, std::string>& raw)
+    std::optional<std::string> VKShaderProgram::compile(const std::unordered_map<ShaderType, std::string>& raw,
+                                                        FileSystem* includerFileSystem,
+                                                        std::filesystem::path includerRootPath)
     {
         deleteShaders();
 
-        SPIRVCompiler compiler(getApplication()->getPhysicalDevice());
+        SPIRVCompiler compiler(getApplication()->getPhysicalDevice(), includerFileSystem, std::move(includerRootPath));
 
         for (const auto& [type, code] : raw) {
             auto error = compiler.addShader(getStage(type), code);
