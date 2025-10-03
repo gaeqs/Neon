@@ -782,6 +782,7 @@ namespace neon::vulkan
         }
 
         ImGui::CreateContext();
+        ImGui::GetIO().IniFilename = _createInfo.imGuiIniPath.c_str();
         ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
         if (_createInfo.imGuiEnableMultiViewport) {

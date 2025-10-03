@@ -11,7 +11,9 @@
 #include <neon/render/texture/TextureData.h>
 
 /**
- * This class provides the necessary information to create and configure an application instance.
+ * This class provides information required to create an application.
+ * It is used to encapsulate all the parameters relevant for setting up
+ * an application instance.
  */
 struct ApplicationCreateInfo
 {
@@ -40,6 +42,12 @@ struct ApplicationCreateInfo
      * You can provide several versions of the icon in several resolutions.
      */
     std::vector<neon::TextureData> icon = {};
+
+    /**
+     * Represents the file system path to the Dear ImGui initialization configuration file.
+     * This path is used to load or save layout settings and other ImGui state-related data.
+     */
+    std::string imGuiIniPath = "imgui.ini";
 };
 
 #endif // APPLICATIONCREATEINFO_H
