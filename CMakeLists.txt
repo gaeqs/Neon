@@ -143,7 +143,6 @@ list(APPEND UNITY_BUILD_TARGETS
         SPIRV
         glslang
         libzippp
-        portable_file_dialogs
         neon
         libcef_dll_wrapper
 )
