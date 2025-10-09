@@ -44,6 +44,8 @@ namespace neon
         [[nodiscard]] const std::deque<ProfileDuration>& getDurations() const;
 
         [[nodiscard]] ProfileDuration getAverageDuration() const;
+
+        [[nodiscard]] ProfileDuration getMaximumDuration() const;
     };
 } // namespace neon
 

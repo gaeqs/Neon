@@ -61,6 +61,19 @@ namespace neon
         return duration / _durations.size();
     }
 
+    ProfileStack::ProfileDuration ProfileStack::getMaximumDuration() const
+    {
+        if (_durations.empty()) {
+            return ProfileDuration(0);
+        }
+
+        ProfileDuration duration{0};
+        for (const auto& d : _durations) {
+            duration = std::max(d, duration);
+        }
+        return duration;
+    }
+
     const std::string& ProfileStack::getName() const
     {
         return _name;

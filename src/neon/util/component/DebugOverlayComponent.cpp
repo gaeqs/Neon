@@ -115,10 +115,12 @@ namespace neon
     {
         std::string id = parentId + "_" + stack->getName();
         auto average = stack->getAverageDuration();
-        auto ms = static_cast<double>(average.count()) * 0.000001;
+        auto max = stack->getMaximumDuration();
+        auto averageMs = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(average).count();
+        auto maxMs = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(max).count();
 
-        if (ImGui::TreeNode(id.c_str(), "%s (%.3f ms)", stack->getName().c_str(), ms)) {
-            for (const auto& [name, s] : stack->getChildren()) {
+        if (ImGui::TreeNode(id.c_str(), "%s (%.3f ms) (Max %.3f ms)", stack->getName().c_str(), averageMs, maxMs)) {
+            for (const auto& s : stack->getChildren() | std::views::values) {
                 drawStack(id, s.get());
             }
             ImGui::TreePop();
