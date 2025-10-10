@@ -23,7 +23,7 @@ namespace neon::vulkan
         _buffers.reserve(_bindings.size());
         _data.reserve(_bindings.size());
         _updated.reserve(_bindings.size());
-
+        _updateRange.resize(_bindings.size(), Range<uint32_t>(0, 0));
         _textures.resize(_bindings.size());
 
         uint32_t uniformAmount = 0;
@@ -160,6 +160,7 @@ namespace neon::vulkan
         auto finalSize = std::min(size, vector.size());
         memcpy(vector.data() + offset, data, finalSize);
         std::ranges::fill(_updated[index], 0);
+        _updateRange[index] += Range<uint32_t>(offset, offset + finalSize);
     }
 
     void VKShaderUniformBuffer::clearData(uint32_t index)
@@ -173,19 +174,7 @@ namespace neon::vulkan
         }
         std::ranges::fill(_updated[index], 0);
         std::ranges::fill(_data[index], 0);
-    }
-
-    void* VKShaderUniformBuffer::fetchData(uint32_t index)
-    {
-        if (index >= _bindings.size()) {
-            return nullptr;
-        }
-        if (_bindings[index].type != UniformBindingType::UNIFORM_BUFFER &&
-            _bindings[index].type != UniformBindingType::STORAGE_BUFFER) {
-            return nullptr;
-        }
-        std::ranges::fill(_updated[index], 0);
-        return _data[index].data();
+        _updateRange[index] = Range<uint32_t>(0, _data[index].size());
     }
 
     const void* VKShaderUniformBuffer::fetchData(uint32_t index) const
@@ -224,12 +213,15 @@ namespace neon::vulkan
                     if (updated[frame] == 1) {
                         continue;
                     }
-                    std::fill(updated.begin(), updated.end(), 1);
+                    std::ranges::fill(updated, 1);
 
-                    auto optional = _buffers[index]->map<char>(commandBuffer);
+                    auto range = _updateRange[index];
+
+                    auto optional = _buffers[index]->map<char>(range, commandBuffer);
                     if (optional.has_value()) {
                         auto& data = _data[index];
-                        memcpy(optional.value()->raw(), data.data(), data.size());
+                        memcpy(optional.value()->raw(), data.data() + range.getFrom(), range.size());
+                        _updateRange[index] = Range<uint32_t>(0, 0);
                     } else {
                         logger.error("Optional has no value.");
                     }

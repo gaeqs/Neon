@@ -9,6 +9,7 @@
 #include <memory>
 #include <neon/render/shader/ShaderUniformBinding.h>
 #include <neon/render/texture/SampledTexture.h>
+#include <neon/util/Range.h>
 #include <vulkan/VKResource.h>
 #include <vulkan/render/shader/VKShaderUniformDescriptor.h>
 
@@ -39,6 +40,7 @@ namespace neon::vulkan
         std::vector<ShaderUniformBinding> _bindings;
         std::vector<std::vector<uint32_t>> _updated;
         std::vector<std::vector<char>> _data;
+        std::vector<Range<uint32_t>> _updateRange;
         std::vector<std::shared_ptr<SampledTexture>> _textures;
 
         uint32_t _bindingPoint; // In vulkan this is the "set" parameter.
@@ -51,8 +53,6 @@ namespace neon::vulkan
         void uploadData(uint32_t index, const void* data, size_t size, size_t offset);
 
         void clearData(uint32_t index);
-
-        void* fetchData(uint32_t index);
 
         const void* fetchData(uint32_t index) const;
 

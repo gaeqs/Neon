@@ -48,8 +48,6 @@ namespace neon
 
         void clearData(uint32_t index);
 
-        void* fetchData(uint32_t index);
-
         const void* fetchData(uint32_t index) const;
 
         void setTexture(uint32_t index, std::shared_ptr<SampledTexture> texture);

@@ -81,8 +81,10 @@ namespace neon
             if (slot.size == 0) {
                 continue;
             }
-            char* data = static_cast<char*>(slot.uniformBuffer->fetchData(static_cast<uint32_t>(slot.binding)));
-            memcpy(data + slot.padding * id, data + slot.padding * *last, slot.size);
+
+            auto index = static_cast<uint32_t>(slot.binding);
+            const char* data = static_cast<const char*>(slot.uniformBuffer->fetchData(index)) + slot.padding * *last;
+            slot.uniformBuffer->uploadData(index, data, slot.size, slot.padding * id);
         }
 
         _positions[id] = last;
@@ -118,8 +120,10 @@ namespace neon
                     if (size == 0) {
                         continue;
                     }
-                    auto* data = static_cast<char*>(uniformBuffer->fetchData(static_cast<uint32_t>(binding)));
-                    memcpy(data + padding * id, data + padding * *last, size);
+
+                    auto index = static_cast<uint32_t>(binding);
+                    const char* data = static_cast<const char*>(uniformBuffer->fetchData(index)) + padding * *last;
+                    uniformBuffer->uploadData(index, data, size, padding * id);
                 }
             }
 
@@ -175,9 +179,8 @@ namespace neon
             return false;
         }
 
-        char* dst = static_cast<char*>(slot.uniformBuffer->fetchData(static_cast<uint32_t>(slot.binding)));
-        memcpy(dst + slot.padding * static_cast<size_t>(id), data, slot.size);
-
+        slot.uniformBuffer->uploadData(static_cast<uint32_t>(slot.binding), data, slot.size,
+                                       slot.padding * static_cast<size_t>(id));
         return true;
     }
 

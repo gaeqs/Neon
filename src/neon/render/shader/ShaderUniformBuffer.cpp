@@ -26,11 +26,6 @@ namespace neon
         _implementation.clearData(index);
     }
 
-    void* ShaderUniformBuffer::fetchData(uint32_t index)
-    {
-        return _implementation.fetchData(index);
-    }
-
     const void* ShaderUniformBuffer::fetchData(uint32_t index) const
     {
         return _implementation.fetchData(index);
