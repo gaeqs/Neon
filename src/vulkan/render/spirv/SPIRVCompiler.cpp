@@ -33,9 +33,10 @@ namespace neon::vulkan
         return nullptr;
     }
 
-    SPIRVIncluder::SPIRVIncluder(FileSystem* fileSystem, std::filesystem::path rootPath) :
-        _fileSystem(fileSystem),
-        _rootPath(std::move(rootPath))
+    SPIRVIncluder::SPIRVIncluder(IncluderCreateInfo includerCreateInfo) :
+        _fileSystem(includerCreateInfo.fileSystem),
+        _rootPath(std::move(includerCreateInfo.rootPath)),
+        _cache(std::move(includerCreateInfo.prefetchedIncludes))
     {
     }
 
@@ -250,11 +251,10 @@ namespace neon::vulkan
         }
     }
 
-    SPIRVCompiler::SPIRVCompiler(const VKPhysicalDevice& device, FileSystem* includerFileSystem,
-                                 std::filesystem::path includerRootPath) :
+    SPIRVCompiler::SPIRVCompiler(const VKPhysicalDevice& device, IncluderCreateInfo includerCreateInfo) :
         _compiled(false),
         _resources(generateDefaultResources(device)),
-        _includer(includerFileSystem, std::move(includerRootPath))
+        _includer(std::move(includerCreateInfo))
     {
         if (!GLSLANG_INITIALIZED) {
             glslang::InitializeProcess();

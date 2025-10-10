@@ -2,11 +2,14 @@
 <project version="4">
   <component name="VcsDirectoryMappings">
     <mapping directory="$PROJECT_DIR$" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/lib/Rush" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/lib/glslang" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/lib/imgui" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/lib/implot" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/lib/libzippp" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/lib/rush" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/lib/spirv-headers" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/lib/spirv-tools" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/lib/spirv_headers" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/lib/spirv_tools" vcs="Git" />
   </component>

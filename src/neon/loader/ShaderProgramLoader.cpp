@@ -47,7 +47,8 @@ namespace neon
         auto fileSystem = context.fileSystem;
         auto parentPath = context.path.has_value() ? context.path.value().parent_path() : std::filesystem::path();
 
-        if (auto result = shader->compile(fileSystem, parentPath); result.has_value()) {
+        IncluderCreateInfo info{fileSystem, parentPath};
+        if (auto result = shader->compile(info); result.has_value()) {
             logger.error(result.value());
             return nullptr;
         }
