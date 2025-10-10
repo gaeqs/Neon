@@ -2,8 +2,8 @@
 // Created by gaelr on 9/15/2024.
 //
 
-#ifndef STORAGEBUFFERINSTANCEDATA_H
-#define STORAGEBUFFERINSTANCEDATA_H
+#ifndef PINNEDSTORAGEBUFFERINSTANCEDATA_H
+#define PINNEDSTORAGEBUFFERINSTANCEDATA_H
 
 #include <neon/render/model/InstanceData.h>
 #include <neon/render/shader/ShaderUniformBuffer.h>
@@ -17,9 +17,13 @@ namespace neon
     /**
      * InstanceData implementation that used an already defined ShaderUniformBuffer
      * as the underlying buffer.
+     *
+     * Instances reserved by this InstanceData
+     * won't have their memory location changed.
+     *
      * This implementation is not thread-safe.
      */
-    class StorageBufferInstanceData : public InstanceData
+    class PinnedStorageBufferInstanceData : public InstanceData
     {
       public:
         struct Slot
@@ -34,17 +38,18 @@ namespace neon
       private:
         Application* _application;
         uint32_t _maximumInstances;
-        std::vector<uint32_t*> _positions;
+        std::vector<std::pair<uint32_t*, bool>> _positions; // {pointer to index, valid (not deleted)}
+        std::vector<uint32_t> _freedPositions;
         std::vector<std::type_index> _types;
         std::vector<Slot> _slots;
 
       public:
-        StorageBufferInstanceData(Application* application, const ModelCreateInfo& info, std::vector<Slot> slots);
+        PinnedStorageBufferInstanceData(Application* application, const ModelCreateInfo& info, std::vector<Slot> slots);
 
-        StorageBufferInstanceData(Application* application, uint32_t maximumInstances,
+        PinnedStorageBufferInstanceData(Application* application, uint32_t maximumInstances,
                                   std::vector<std::type_index> types, std::vector<Slot> slots);
 
-        ~StorageBufferInstanceData() override;
+        ~PinnedStorageBufferInstanceData() override;
 
         [[nodiscard]] const std::vector<std::type_index>& getInstancingStructTypes() const override;
 
@@ -74,4 +79,4 @@ namespace neon
     };
 } // namespace neon
 
-#endif // STORAGEBUFFERINSTANCEDATA_H
+#endif // PINNEDSTORAGEBUFFERINSTANCEDATA_H
