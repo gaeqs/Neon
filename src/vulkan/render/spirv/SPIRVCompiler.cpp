@@ -23,6 +23,11 @@ namespace neon::vulkan
             return &it->second;
         }
 
+        if (!_fileSystem) {
+            neon::debug() << "Failed to fetch include file: " << path << ". Filesystem not defined.";
+            return nullptr;
+        }
+
         if (auto opt = _fileSystem->readFile(path)) {
             auto& file = opt.value();
             auto [it, ok] = _cache.insert({path, file.toString()});
@@ -44,10 +49,8 @@ namespace neon::vulkan
                                                                             const char* includerName, size_t depth)
     {
         auto path = std::filesystem::path(headerName);
+
         neon::debug() << "Fetching system include file: " << path;
-        if (!_fileSystem) {
-            return nullptr;
-        }
 
         auto* data = fetch(path);
         if (!data) {
@@ -68,9 +71,6 @@ namespace neon::vulkan
         }
 
         neon::debug() << "Fetching local include file: " << headerName << " (" << path << ")";
-        if (!_fileSystem) {
-            return nullptr;
-        }
 
         auto* data = fetch(path);
         if (!data) {
