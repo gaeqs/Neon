@@ -7,6 +7,7 @@ option(NEON_UNITY_BUILD "Enable Unity Build" OFF)
 
 set(CMAKE_CXX_STANDARD 20)
 set(LIBZIPPP_INSTALL ON)
+set(GLSLANG_ENABLE_INSTALL ON)
 set(NEON_GENERATED_DIR ${CMAKE_BINARY_DIR}/generated)
 set(CEF_RUNTIME_LIBRARY_FLAG "" CACHE STRING "Override CEF runtime flag" FORCE)
 
@@ -71,7 +72,7 @@ FetchContent_Declare(
 # SPIRV-Headers
 FetchContent_Declare(
         spirv_headers
-        GIT_TAG cfbe4feef20c3c0628712c2792624f0221e378ac
+        GIT_TAG 9268f3057354a2cb65991ba5f38b16d81e803692
         GIT_REPOSITORY https://github.com/KhronosGroup/SPIRV-Headers.git
         SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/lib/spirv_headers
 )
@@ -79,7 +80,7 @@ FetchContent_Declare(
 # SPIRV-Tools
 FetchContent_Declare(
         spirv_tools
-        GIT_TAG 6f276e05ccab210584996bc40a0bef82b91f4f40
+        GIT_TAG 7f2d9ee926f98fc77a3ed1e1e0f113b8c9c49458
         GIT_REPOSITORY https://github.com/KhronosGroup/SPIRV-Tools.git
         SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/lib/spirv_tools
 )
@@ -88,7 +89,7 @@ FetchContent_Declare(
 FetchContent_Declare(
         glslang
         GIT_REPOSITORY https://github.com/KhronosGroup/glslang.git
-        GIT_TAG 68f073b19569b580ecc7ba13fa96be3ecf65a0f6
+        GIT_TAG a57276bf558f5cf94d3a9854ebdf5a2236849a5a
         SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/lib/glslang
 )
 

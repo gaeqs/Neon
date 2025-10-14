@@ -277,7 +277,7 @@ namespace neon::vulkan
         auto language = getLanguage(shaderType);
         auto* shader = new glslang::TShader(language);
 
-        auto messages = static_cast<EShMessages>(EShMsgSpvRules | EShMsgVulkanRules);
+        auto messages = static_cast<EShMessages>(EShMsgSpvRules | EShMsgVulkanRules | EShMsgDebugInfo);
 
         const char* value = source.data();
         shader->setStrings(&value, 1);
@@ -319,9 +319,14 @@ namespace neon::vulkan
             return {"Shader is not compiled!"};
         }
 
+        glslang::SpvOptions spvOptions;
+        spvOptions.generateDebugInfo = true;
+        spvOptions.emitNonSemanticShaderDebugInfo = true;
+        spvOptions.emitNonSemanticShaderDebugSource = true;
+
         auto* intermediate = _program.getIntermediate(getLanguage(shaderType));
         std::vector<uint32_t> result;
-        glslang::GlslangToSpv(*intermediate, result);
+        glslang::GlslangToSpv(*intermediate, result, &spvOptions);
         return {result};
     }
 
