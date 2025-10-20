@@ -95,6 +95,7 @@ namespace neon::vulkan
 
     VKDevice::~VKDevice()
     {
+        vkDeviceWaitIdle(_raw);
         vmaDestroyAllocator(_allocator);
         if (!_external) {
             vkDestroyDevice(_raw, nullptr);

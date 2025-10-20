@@ -62,6 +62,13 @@ namespace neon
         void flush();
 
         /**
+         * Clears all resources inside this VKResourceBin, waiting for the GPU to free them.
+         *
+         * This function is typically invoked when the VKResourceBin is being destroyed.
+         */
+        void waitAndFlush();
+
+        /**
          * Schedules a resource for deferred destruction.
          * The resource will not be destroyed until all associated command buffer runs have finished.
          *

@@ -10,7 +10,7 @@ namespace neon
 {
     VKResourceBin::~VKResourceBin()
     {
-        flush();
+        waitAndFlush();
     }
 
     void VKResourceBin::destroyLater(VkDevice device, std::vector<std::shared_ptr<CommandBufferRun>> runs,
@@ -31,5 +31,16 @@ namespace neon
             }
             return finished;
         });
+    }
+
+    void VKResourceBin::waitAndFlush()
+    {
+        for (auto& entry : _entries) {
+            for (auto& run : entry.runs) {
+                run->wait();
+            }
+            entry.deleteFunction();
+        }
+        _entries.clear();
     }
 } // namespace neon

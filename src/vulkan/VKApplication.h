@@ -71,7 +71,7 @@ namespace neon::vulkan
         bool _recording;
 
         uint32_t _swapChainImageCount;
-        std::unordered_map<uint32_t, std::shared_ptr<VKSemaphore>> _imageAvailableSemaphores;
+        std::shared_ptr<VKSemaphore> _imageAvailableSemaphore;
         std::vector<std::shared_ptr<CommandBufferRun>> _runOfFrame;
 
         bool _requiresSwapchainRecreation;

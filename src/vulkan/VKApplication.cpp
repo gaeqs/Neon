@@ -348,7 +348,7 @@ namespace neon::vulkan
             DEBUG_PROFILE_ID(profiler, adquireImage, "Image Acquisition");
             result = vkAcquireNextImageKHR(_device->getRaw(), _swapChain, UINT64_MAX, semaphore->getRaw(),
                                            VK_NULL_HANDLE, &_imageIndex);
-            _imageAvailableSemaphores[_imageIndex] = std::move(semaphore);
+            _imageAvailableSemaphore = std::move(semaphore);
         }
 
         if (result == VK_ERROR_OUT_OF_DATE_KHR) {
@@ -384,7 +384,7 @@ namespace neon::vulkan
 
         VkPipelineStageFlags waitStages[] = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
 
-        _currentCommandBuffer->getImplementation().submit(_imageAvailableSemaphores[_imageIndex], nullptr, waitStages);
+        _currentCommandBuffer->getImplementation().submit(_imageAvailableSemaphore, nullptr, waitStages);
 
         VkPresentInfoKHR presentInfo{};
         presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
@@ -429,6 +429,7 @@ namespace neon::vulkan
 
         // Free the command pool here and not in the
         // destructor.
+        _commandPool.getPool().waitForAll();
         _commandPool = CommandPoolHolder();
     }
 
@@ -812,9 +813,11 @@ namespace neon::vulkan
 
     VKApplication::~VKApplication()
     {
-        _bin.flush();
+        _imageAvailableSemaphore = nullptr;
 
         auto raw = _device->getRaw();
+        _bin.waitAndFlush();
+
         if (ImGui::GetIO().BackendRendererUserData != nullptr) {
             ImGui_ImplVulkan_Shutdown();
         }
@@ -828,6 +831,7 @@ namespace neon::vulkan
         cleanupSwapChain();
         _graphicQueue = VKQueueHolder();
         _presentQueue = VKQueueHolder();
+
         delete _device;
         vkDestroySurfaceKHR(_instance, _surface, nullptr);
 
