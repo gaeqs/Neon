@@ -4,6 +4,7 @@
 
 #include "VKTextureView.h"
 
+#include <vulkan/AbstractVKApplication.h>
 #include <vulkan/util/VKUtil.h>
 #include <vulkan/util/VulkanConversions.h>
 

@@ -5,6 +5,8 @@
 #include "VKSimpleTexture.h"
 #include "VKTextureView.h"
 
+#include <neon/render/buffer/CommandBuffer.h>
+#include <vulkan/AbstractVKApplication.h>
 #include <vulkan/render/buffer/SimpleBuffer.h>
 #include <vulkan/util/VKUtil.h>
 #include <vulkan/util/VulkanConversions.h>

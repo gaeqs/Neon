@@ -106,8 +106,12 @@ namespace neon::vulkan
                 return false;
             }
 
-            // Has the swapchain extension.
+            // Has the required extensions.
             if (!device.getFeatures().hasExtension(VK_KHR_SWAPCHAIN_EXTENSION_NAME)) {
+                return false;
+            }
+
+            if (!device.getFeatures().hasExtension(VK_EXT_SWAPCHAIN_MAINTENANCE_1_EXTENSION_NAME)) {
                 return false;
             }
 
@@ -132,7 +136,13 @@ namespace neon::vulkan
 
         static void defaultFeaturesConfigurer(const VKPhysicalDevice& device, VKPhysicalDeviceFeatures& features)
         {
+            features
+                .findFeature<VkPhysicalDeviceSwapchainMaintenance1FeaturesEXT>(
+                    VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SWAPCHAIN_MAINTENANCE_1_FEATURES_EXT)
+                .value()
+                ->swapchainMaintenance1 = true;
             features.extensions.emplace_back(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
+            features.extensions.emplace_back(VK_EXT_SWAPCHAIN_MAINTENANCE_1_EXTENSION_NAME);
         }
     };
 } // namespace neon::vulkan

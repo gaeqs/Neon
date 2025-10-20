@@ -5,7 +5,8 @@
 #ifndef VKRESOURCE_H
 #define VKRESOURCE_H
 
-#include "VKApplication.h"
+#include <neon/structure/Application.h>
+#include <vulkan/vulkan.h>
 
 #include <memory>
 #include <vector>
@@ -20,6 +21,7 @@ namespace neon::vulkan
     {
         AbstractVKApplication* _application;
         std::vector<std::shared_ptr<CommandBufferRun>> _runs;
+        size_t _registeredRunsHistory;
 
         void discardFinished();
 
@@ -37,6 +39,8 @@ namespace neon::vulkan
         [[nodiscard]] VkDevice rawDevice() const;
 
         [[nodiscard]] VkPhysicalDevice rawPhysicalDevice() const;
+
+        [[nodiscard]] size_t getRegisteredRunsHistory() const;
     };
 } // namespace neon::vulkan
 

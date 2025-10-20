@@ -4,6 +4,7 @@
 
 #include "VKSampler.h"
 
+#include <vulkan/AbstractVKApplication.h>
 #include <vulkan/util/VulkanConversions.h>
 
 namespace vc = neon::vulkan::conversions;

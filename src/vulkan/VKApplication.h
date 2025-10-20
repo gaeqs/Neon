@@ -10,6 +10,7 @@
 
 #define GLFW_INCLUDE_VULKAN
 
+
 #include <GLFW/glfw3.h>
 
 #include <neon/render/buffer/CommandBuffer.h>
@@ -17,6 +18,7 @@
 #include <neon/util/profile/Profiler.h>
 
 #include <vulkan/vulkan.h>
+#include <vulkan/sync/VKSemaphore.h>
 #include <vulkan/AbstractVKApplication.h>
 #include <vulkan/device/VKDevice.h>
 #include <vulkan/VKApplicationCreateInfo.h>
@@ -68,10 +70,9 @@ namespace neon::vulkan
         CommandBuffer* _currentCommandBuffer;
         bool _recording;
 
-        std::vector<VkSemaphore> _imageAvailableSemaphores;
-        std::vector<VkSemaphore> _renderFinishedSemaphores;
+        uint32_t _swapChainImageCount;
+        std::unordered_map<uint32_t, std::shared_ptr<VKSemaphore>> _imageAvailableSemaphores;
         std::vector<std::shared_ptr<CommandBufferRun>> _runOfFrame;
-        std::vector<std::shared_ptr<CommandBufferRun>> _runOfImage;
 
         bool _requiresSwapchainRecreation;
         uint32_t _currentFrame;

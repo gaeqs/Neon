@@ -7,6 +7,7 @@
 
 #include <neon/render/texture/Texture.h>
 #include <neon/render/texture/TextureCreateInfo.h>
+#include <vma/vk_mem_alloc.h>
 #include <vulkan/VKResource.h>
 
 namespace neon::vulkan

@@ -62,7 +62,7 @@ namespace neon::vulkan
 
         VKPhysicalDeviceFeatures(const VKPhysicalDeviceFeatures& other);
 
-        VKPhysicalDeviceFeatures() = default;
+        VKPhysicalDeviceFeatures();
 
         explicit VKPhysicalDeviceFeatures(VkPhysicalDevice device,
                                           const std::vector<VKFeatureHolder>& extraFeatures = {});

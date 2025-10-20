@@ -11,6 +11,7 @@
 #include <vulkan/vulkan.h>
 #include <vulkan/queue/VKQueueProvider.h>
 #include <vulkan/render/VKCommandPool.h>
+#include <vulkan/sync/VKSemaphore.h>
 
 namespace neon
 {
@@ -78,13 +79,23 @@ namespace neon::vulkan
 
         bool end();
 
-        bool submit(uint32_t waitSemaphoreAmount = 0, VkSemaphore* waitSemaphores = nullptr,
-                    VkPipelineStageFlags* waitStages = nullptr, uint32_t signalSemaphoreAmount = 0,
-                    VkSemaphore* signalSemaphores = nullptr);
+        bool submit(std::shared_ptr<VKSemaphore> waitSemaphore = nullptr,
+                    std::shared_ptr<VKSemaphore> signalSemaphore = nullptr, VkPipelineStageFlags* waitStages = nullptr);
 
         void reset(bool releaseResources = true);
 
         bool isBeingUsed() const;
+
+        /**
+         * This method returns a new VkFence.
+         * This fence will be registered into this command buffer, and
+         * this command buffer won't be marked as finished until
+         * this new VkFence is signaled.
+         *
+         * This is useful if you don't want to mark this command buffer
+         * as finished until something else is finished, such as a presentation action.
+         */
+        VkFence createAndRegisterFence();
 
         VKCommandBuffer& operator=(VKCommandBuffer&& move) noexcept;
     };

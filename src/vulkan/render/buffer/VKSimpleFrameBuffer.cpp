@@ -4,6 +4,7 @@
 
 #include "VKSimpleFrameBuffer.h"
 
+#include <vulkan/AbstractVKApplication.h>
 #include <vulkan/render/texture/VKSimpleTexture.h>
 #include <vulkan/render/texture/VKTextureView.h>
 #include <vulkan/util/VulkanConversions.h>

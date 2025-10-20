@@ -4,6 +4,8 @@
 
 #include "VKResource.h"
 
+#include <vulkan/AbstractVKApplication.h>
+
 namespace neon::vulkan
 {
 
@@ -13,12 +15,14 @@ namespace neon::vulkan
     }
 
     VKResource::VKResource(AbstractVKApplication* application) :
-        _application(application)
+        _application(application),
+        _registeredRunsHistory(0)
     {
     }
 
     VKResource::VKResource(Application* application) :
-        _application(dynamic_cast<AbstractVKApplication*>(application->getImplementation()))
+        _application(dynamic_cast<AbstractVKApplication*>(application->getImplementation())),
+        _registeredRunsHistory(0)
     {
     }
 
@@ -35,6 +39,9 @@ namespace neon::vulkan
         discardFinished();
         if (!run->hasFinished()) {
             _runs.push_back(std::move(run));
+            ++_registeredRunsHistory;
+        } else {
+            neon::warning() << "Trying to register a run that has already finished execution.";
         }
     }
 
@@ -52,5 +59,10 @@ namespace neon::vulkan
     VkPhysicalDevice VKResource::rawPhysicalDevice() const
     {
         return _application->getPhysicalDevice().getRaw();
+    }
+
+    size_t VKResource::getRegisteredRunsHistory() const
+    {
+        return _registeredRunsHistory;
     }
 } // namespace neon::vulkan

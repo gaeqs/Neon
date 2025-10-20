@@ -149,29 +149,41 @@ namespace neon::vulkan
         return true;
     }
 
-    bool VKCommandBuffer::submit(uint32_t waitSemaphoreAmount, VkSemaphore* waitSemaphores,
-                                 VkPipelineStageFlags* waitStages, uint32_t signalSemaphoreAmount,
-                                 VkSemaphore* signalSemaphores)
+    bool VKCommandBuffer::submit(std::shared_ptr<VKSemaphore> waitSemaphore,
+                                 std::shared_ptr<VKSemaphore> signalSemaphore, VkPipelineStageFlags* waitStages)
     {
         if (_status != VKCommandBufferStatus::RECORDED) {
             printInvalidState(VKCommandBufferStatus::RECORDED);
             return false;
         }
 
+        uint32_t waitCount = waitSemaphore ? 1 : 0;
+        uint32_t signalCount = signalSemaphore ? 1 : 0;
+
+        VkSemaphore rawWait = waitSemaphore ? waitSemaphore->getRaw() : VK_NULL_HANDLE;
+        VkSemaphore rawSignal = signalSemaphore ? signalSemaphore->getRaw() : VK_NULL_HANDLE;
+
         VkSubmitInfo submitInfo{};
         submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
         submitInfo.commandBufferCount = 1;
         submitInfo.pCommandBuffers = &_commandBuffer;
-        submitInfo.waitSemaphoreCount = waitSemaphoreAmount;
-        submitInfo.pWaitSemaphores = waitSemaphores;
+        submitInfo.waitSemaphoreCount = waitCount;
+        submitInfo.pWaitSemaphores = &rawWait;
         submitInfo.pWaitDstStageMask = waitStages;
-        submitInfo.signalSemaphoreCount = signalSemaphoreAmount;
-        submitInfo.pSignalSemaphores = signalSemaphores;
+        submitInfo.signalSemaphoreCount = signalCount;
+        submitInfo.pSignalSemaphores = &rawSignal;
 
         VkQueue queue = _queue;
         VkFence fence = fetchAvailableFence();
         vkQueueSubmit(queue, 1, &submitInfo, fence);
         _fences.push_back(fence);
+
+        if (waitSemaphore) {
+            waitSemaphore->registerRun(getCurrentRun());
+        }
+        if (signalSemaphore) {
+            signalSemaphore->registerRun(getCurrentRun());
+        }
 
         return true;
     }
@@ -304,6 +316,13 @@ namespace neon::vulkan
         }
 
         return used;
+    }
+
+    VkFence VKCommandBuffer::createAndRegisterFence()
+    {
+        auto fence = fetchAvailableFence();
+        _fences.push_back(fence);
+        return fence;
     }
 
     VKCommandBuffer& VKCommandBuffer::operator=(VKCommandBuffer&& move) noexcept
