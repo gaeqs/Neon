@@ -28,6 +28,14 @@ namespace neon::vulkan
         return false;
     }
 
+    void VKCommandBufferRun::wait()
+    {
+        if (_cmd == nullptr) {
+            return;
+        }
+        _cmd->waitForFences();
+    }
+
     void VKCommandBufferRun::markCompletion()
     {
         _cmd = nullptr;

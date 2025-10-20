@@ -14,6 +14,8 @@ namespace neon
         virtual ~CommandBufferRun() = default;
 
         virtual bool hasFinished() = 0;
+
+        virtual void wait() = 0;
     };
 
 } // namespace neon

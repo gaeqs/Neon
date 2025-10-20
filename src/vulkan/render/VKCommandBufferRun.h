@@ -21,6 +21,8 @@ namespace neon::vulkan
 
         bool hasFinished() override;
 
+        void wait() override;
+
         void markCompletion();
     };
 

@@ -30,7 +30,7 @@ namespace neon::vulkan
 {
     class VKApplication : public AbstractVKApplication
     {
-        static constexpr int MAX_FRAMES_IN_FLIGHT = 2;
+        static constexpr int MAX_FRAMES_IN_FLIGHT = 3;
 
         const std::vector<const char*> VALIDATION_LAYERS = {"VK_LAYER_KHRONOS_validation"};
 
@@ -70,7 +70,8 @@ namespace neon::vulkan
 
         std::vector<VkSemaphore> _imageAvailableSemaphores;
         std::vector<VkSemaphore> _renderFinishedSemaphores;
-        std::vector<CommandBuffer*> _assignedCommandBuffer;
+        std::vector<std::shared_ptr<CommandBufferRun>> _runOfFrame;
+        std::vector<std::shared_ptr<CommandBufferRun>> _runOfImage;
 
         bool _requiresSwapchainRecreation;
         uint32_t _currentFrame;
