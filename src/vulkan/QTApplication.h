@@ -30,14 +30,73 @@
 
     #include <QVulkanWindowRenderer>
 
+    #include <QPointer>
+
     #include <vulkan/AbstractVKApplication.h>
 
 namespace neon::vulkan
 {
 
-    class QTApplication : public QVulkanWindowRenderer, public QVulkanWindow, public AbstractVKApplication
+    class QTApplication;
+
+    /**
+     * @brief This class is the bridge between a QVulkanWindow and a QTApplication.
+     *
+     * This class inherits from QVulkanWindowRenderer and QVulkanWindow.
+     * It handles all the Vulkan-related calls from the QT Window, redirecting
+     * them to the QTApplication.
+     *
+     * It also handles all the QT events.
+     */
+    class QTApplicationHandler : public QVulkanWindowRenderer, public QVulkanWindow
+    {
+        QTApplication* _application;
+
+      public:
+        /**
+         * @brief Constructs a new QTApplicationHandler.
+         * @param application the application to link to.
+         */
+        explicit QTApplicationHandler(QTApplication* application);
+
+        /**
+         * @brief Invalidates the handler.
+         * This method is called when the application is destroyed.
+         */
+        void invalidate();
+
+        void preInitResources() override;
+
+        void initResources() override;
+
+        void initSwapChainResources() override;
+
+        void releaseSwapChainResources() override;
+
+        void releaseResources() override;
+
+        void startNextFrame() override;
+
+        void physicalDeviceLost() override;
+
+        void logicalDeviceLost() override;
+
+        bool eventFilter(QObject* watched, QEvent* event) override;
+
+        QVulkanWindowRenderer* createRenderer() override;
+    };
+
+    /**
+     * @brief An ApplicationImplementation that uses QT as a backend.
+     *
+     * This class uses a QTApplicationHandler to manage the window and the Vulkan context.
+     * The game loop is managed by QT's event loop.
+     */
+    class QTApplication : public AbstractVKApplication
     {
         using TimeStamp = std::chrono::time_point<std::chrono::system_clock>;
+
+        QPointer<QTApplicationHandler> _handler;
 
         Application* _application;
         std::function<void(QTApplication*)> _onInit;
@@ -48,6 +107,7 @@ namespace neon::vulkan
         VKPhysicalDevice _physicalDevice;
         std::unique_ptr<VKDevice> _device;
 
+        std::unique_ptr<CommandManager> _commandManager;
         CommandPoolHolder _commandPool;
         VKResourceBin _bin;
 
@@ -61,16 +121,43 @@ namespace neon::vulkan
 
         VkDescriptorPool _imGuiPool;
 
+        void initImGui();
+
+        void setupImGUIFrame() const;
+
+        static int32_t qtToGLFWKey(Qt::Key key);
+
+        static int32_t qtToGLFWMouseButton(Qt::MouseButton button);
+
       public:
         QTApplication(const QTApplication& other) = delete;
 
-        QTApplication();
+        /**
+         * @brief Constructs a new QTApplication.
+         * @param instance the Vulkan instance to use.
+         */
+        explicit QTApplication(QVulkanInstance* instance);
 
-        ~QTApplication() override = default;
+        ~QTApplication() override;
 
+        /**
+         * @brief Returns the handler of this application.
+         * The handler is the QVulkanWindow that manages the window.
+         * @return the handler.
+         */
+        QVulkanWindow* getHandler();
+
+        /**
+         * @brief Sets the function to be called when the application is initialized.
+         * @param func the function.
+         */
         void setInitializationFunction(std::function<void(QTApplication*)> func);
 
         void init(Application* application) override;
+
+        [[nodiscard]] const CommandManager& getCommandManager() const override;
+
+        [[nodiscard]] CommandManager& getCommandManager() override;
 
         [[nodiscard]] rush::Vec2i getWindowSize() const override;
 
@@ -116,23 +203,26 @@ namespace neon::vulkan
 
         [[nodiscard]] VkQueue getGraphicsQueue() override;
 
-        void preInitResources() override;
+        // region QT-related methods.
+        // These methods are called by the QTApplicationHandler.
 
-        void initResources() override;
+        void preInitResources();
 
-        void initSwapChainResources() override;
+        void initResources();
 
-        void releaseSwapChainResources() override;
+        void initSwapChainResources();
 
-        void releaseResources() override;
+        void releaseSwapChainResources();
 
-        void startNextFrame() override;
+        void releaseResources();
 
-        void physicalDeviceLost() override;
+        void startNextFrame();
 
-        void logicalDeviceLost() override;
+        void physicalDeviceLost();
 
-        QVulkanWindowRenderer* createRenderer() override;
+        void logicalDeviceLost();
+
+        // endregion
 
         const ApplicationCreateInfo& getCreationInfo() const override;
 
@@ -146,29 +236,22 @@ namespace neon::vulkan
 
         [[nodiscard]] VKResourceBin* getBin() override;
 
-      protected:
-        bool eventFilter(QObject* watched, QEvent* event) override;
+        // region Event handlers
+        // These methods are called by the QTApplicationHandler's event filter.
 
-        void mouseMoveEvent(QMouseEvent* event) override;
+        void mouseMoveEvent(QMouseEvent* event);
 
-        void mousePressEvent(QMouseEvent* event) override;
+        void mousePressEvent(QMouseEvent* event);
 
-        void mouseReleaseEvent(QMouseEvent*) override;
+        void mouseReleaseEvent(QMouseEvent* event);
 
-        void keyPressEvent(QKeyEvent* event) override;
+        void keyPressEvent(QKeyEvent* event);
 
-        void keyReleaseEvent(QKeyEvent* event) override;
+        void keyReleaseEvent(QKeyEvent* event);
 
-        void wheelEvent(QWheelEvent* event) override;
+        void wheelEvent(QWheelEvent* event);
 
-      private:
-        void initImGui();
-
-        void setupImGUIFrame() const;
-
-        static int32_t qtToGLFWKey(Qt::Key key);
-
-        static int32_t qtToGLFWMouseButton(Qt::MouseButton button);
+        // endregion
     };
 } // namespace neon::vulkan
 

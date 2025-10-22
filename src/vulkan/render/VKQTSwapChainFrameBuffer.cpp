@@ -23,7 +23,7 @@ namespace neon::vulkan
     VKQTSwapChainFrameBuffer::VKQTSwapChainFrameBuffer(Application* application) :
         VKFrameBuffer(application),
         _qtApplication(dynamic_cast<QTApplication*>(application->getImplementation())),
-        _renderPass(application, _qtApplication->defaultRenderPass())
+        _renderPass(application, _qtApplication->getHandler()->defaultRenderPass())
     {
         auto d = holdRawDevice();
         ImGui_ImplVulkan_InitInfo init_info = {};
@@ -90,12 +90,12 @@ namespace neon::vulkan
 
     void* VKQTSwapChainFrameBuffer::getNativeHandle()
     {
-        return _qtApplication->currentFramebuffer();
+        return _qtApplication->getHandler()->currentFramebuffer();
     }
 
     const void* VKQTSwapChainFrameBuffer::getNativeHandle() const
     {
-        return _qtApplication->currentFramebuffer();
+        return _qtApplication->getHandler()->currentFramebuffer();
     }
 
     std::optional<VkFormat> VKQTSwapChainFrameBuffer::getDepthFormat() const

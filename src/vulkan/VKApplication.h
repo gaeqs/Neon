@@ -10,7 +10,6 @@
 
 #define GLFW_INCLUDE_VULKAN
 
-
 #include <GLFW/glfw3.h>
 
 #include <neon/render/buffer/CommandBuffer.h>
@@ -64,6 +63,7 @@ namespace neon::vulkan
         TextureFormat _depthImageFormat;
         VkFormat _vkDepthImageFormat;
 
+        std::unique_ptr<CommandManager> _commandManager;
         CommandPoolHolder _commandPool;
         VKResourceBin _bin;
 
@@ -130,6 +130,10 @@ namespace neon::vulkan
         void init(neon::Application* application) override;
 
         GLFWwindow* getWindow() const;
+
+        [[nodiscard]] CommandManager& getCommandManager() override;
+
+        [[nodiscard]] const CommandManager& getCommandManager() const override;
 
         [[nodiscard]] rush::Vec2i getWindowSize() const override;
 

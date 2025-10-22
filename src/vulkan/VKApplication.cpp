@@ -128,6 +128,7 @@ namespace neon::vulkan
     void VKApplication::init(neon::Application* application)
     {
         _application = application;
+        _commandManager = std::make_unique<CommandManager>(application);
 
         // Add vulkan log group
         logger.addGroup(MessageGroupBuilder()
@@ -180,6 +181,16 @@ namespace neon::vulkan
     GLFWwindow* VKApplication::getWindow() const
     {
         return _window;
+    }
+
+    CommandManager& VKApplication::getCommandManager()
+    {
+        return *_commandManager;
+    }
+
+    const CommandManager& VKApplication::getCommandManager() const
+    {
+        return *_commandManager;
     }
 
     rush::Vec2i VKApplication::getWindowSize() const
@@ -746,7 +757,7 @@ namespace neon::vulkan
 
     void VKApplication::createCommandPool()
     {
-        _commandPool = _application->getCommandManager().fetchCommandPool();
+        _commandPool = _commandManager->fetchCommandPool();
     }
 
     void VKApplication::createSyncObjects()

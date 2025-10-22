@@ -68,7 +68,116 @@ namespace
 
 namespace neon::vulkan
 {
-    QTApplication::QTApplication() :
+    QTApplicationHandler::QTApplicationHandler(QTApplication* application) :
+        _application(application)
+    {
+    }
+
+    void QTApplicationHandler::invalidate()
+    {
+        _application = nullptr;
+    }
+
+    void QTApplicationHandler::preInitResources()
+    {
+        if (_application == nullptr) {
+            return;
+        }
+        _application->preInitResources();
+    }
+
+    void QTApplicationHandler::initResources()
+    {
+        if (_application == nullptr) {
+            return;
+        }
+        _application->initResources();
+    }
+
+    void QTApplicationHandler::initSwapChainResources()
+    {
+        if (_application == nullptr) {
+            return;
+        }
+        _application->initSwapChainResources();
+    }
+
+    void QTApplicationHandler::releaseSwapChainResources()
+    {
+        if (_application == nullptr) {
+            return;
+        }
+        _application->releaseSwapChainResources();
+    }
+
+    void QTApplicationHandler::releaseResources()
+    {
+        if (_application == nullptr) {
+            return;
+        }
+        _application->releaseResources();
+    }
+
+    void QTApplicationHandler::startNextFrame()
+    {
+        if (_application == nullptr) {
+            return;
+        }
+        _application->startNextFrame();
+    }
+
+    void QTApplicationHandler::physicalDeviceLost()
+    {
+        if (_application == nullptr) {
+            return;
+        }
+        _application->physicalDeviceLost();
+    }
+
+    void QTApplicationHandler::logicalDeviceLost()
+    {
+        if (_application == nullptr) {
+            return;
+        }
+        _application->logicalDeviceLost();
+    }
+
+    bool QTApplicationHandler::eventFilter(QObject* watched, QEvent* event)
+    {
+        if (_application == nullptr) {
+            return QVulkanWindow::eventFilter(watched, event);
+        }
+        switch (event->type()) {
+            case QEvent::KeyPress:
+                _application->keyPressEvent(static_cast<QKeyEvent*>(event));
+                return true;
+            case QEvent::KeyRelease:
+                _application->keyReleaseEvent(static_cast<QKeyEvent*>(event));
+                return true;
+            case QEvent::MouseMove:
+                _application->mouseMoveEvent(static_cast<QMouseEvent*>(event));
+                return true;
+            case QEvent::MouseButtonPress:
+                _application->mousePressEvent(static_cast<QMouseEvent*>(event));
+                return true;
+            case QEvent::MouseButtonRelease:
+                _application->mouseReleaseEvent(static_cast<QMouseEvent*>(event));
+                return true;
+            case QEvent::Wheel:
+                _application->wheelEvent(static_cast<QWheelEvent*>(event));
+                return true;
+            default:
+                return QVulkanWindow::eventFilter(watched, event);
+        }
+    }
+
+    QVulkanWindowRenderer* QTApplicationHandler::createRenderer()
+    {
+        return this;
+    }
+
+    QTApplication::QTApplication(QVulkanInstance* instance) :
+        _handler(new QTApplicationHandler(this)),
         _application(nullptr),
         _currentFrameInformation(0, 0.016f, 0.0f),
         _lastFrameTime(std::chrono::high_resolution_clock::now()),
@@ -78,25 +187,50 @@ namespace neon::vulkan
         _recording(false),
         _imGuiPool(VK_NULL_HANDLE)
     {
+        _handler->setVulkanInstance(instance);
     }
 
-    void QTApplication::init(neon::Application* application)
+    QTApplication::~QTApplication()
+    {
+        neon::debug() << "Deleting QTApplication";
+    }
+
+    QVulkanWindow* QTApplication::getHandler()
+    {
+        return _handler;
+    }
+
+    void QTApplication::init(Application* application)
     {
         _application = application;
+        _commandManager = std::make_unique<CommandManager>(_application);
+    }
+
+    const CommandManager& QTApplication::getCommandManager() const
+    {
+        return *_commandManager;
+    }
+
+    CommandManager& QTApplication::getCommandManager()
+    {
+        return *_commandManager;
     }
 
     rush::Vec2i QTApplication::getWindowSize() const
     {
-        QSize s = size();
-        return {s.width(), s.height()};
+        if (_handler) {
+            QSize s = _handler->size();
+            return {s.width(), s.height()};
+        }
+        return {0, 0};
     }
 
-    neon::FrameInformation QTApplication::getCurrentFrameInformation() const
+    FrameInformation QTApplication::getCurrentFrameInformation() const
     {
         return _currentFrameInformation;
     }
 
-    neon::CommandBuffer* QTApplication::getCurrentCommandBuffer() const
+    CommandBuffer* QTApplication::getCurrentCommandBuffer() const
     {
         return _currentCommandBuffer;
     }
@@ -106,13 +240,16 @@ namespace neon::vulkan
         // TODO
     }
 
-    neon::Result<uint32_t, std::string> QTApplication::startGameLoop()
+    Result<uint32_t, std::string> QTApplication::startGameLoop()
     {
         return {"QTApplicaiton doesn't contain a GameLoop, as Qt already has one."};
     }
 
-    void QTApplication::renderFrame(neon::Room* room)
+    void QTApplication::renderFrame(Room* room)
     {
+        if (!_handler) {
+            return;
+        }
         auto now = std::chrono::high_resolution_clock::now();
         auto duration = now - _lastFrameTime;
         _lastFrameTime = now;
@@ -142,8 +279,8 @@ namespace neon::vulkan
         VkPipelineStageFlags waitStages[] = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
         _currentCommandBuffer->getImplementation().submit(nullptr, nullptr, waitStages);
 
-        frameReady();
-        requestUpdate();
+        _handler->frameReady();
+        _handler->requestUpdate();
 
         now = std::chrono::high_resolution_clock::now();
         auto processTime = now - _lastFrameTime;
@@ -152,7 +289,10 @@ namespace neon::vulkan
 
     VkInstance QTApplication::getInstance() const
     {
-        return vulkanInstance()->vkInstance();
+        if (_handler) {
+            return _handler->vulkanInstance()->vkInstance();
+        }
+        return nullptr;
     }
 
     VKDevice* QTApplication::getDevice() const
@@ -167,12 +307,18 @@ namespace neon::vulkan
 
     VkFormat QTApplication::getSwapChainImageFormat() const
     {
-        return colorFormat();
+        if (_handler) {
+            return _handler->colorFormat();
+        }
+        return VK_FORMAT_R8G8B8_SINT;
     }
 
     TextureFormat QTApplication::getDepthImageFormat() const
     {
-        return conversions::textureFormat(depthStencilFormat());
+        if (_handler) {
+            return conversions::textureFormat(_handler->depthStencilFormat());
+        }
+        return TextureFormat::DEPTH24STENCIL8;
     }
 
     CommandPool* QTApplication::getCommandPool() const
@@ -188,17 +334,23 @@ namespace neon::vulkan
 
     uint32_t QTApplication::getMaxFramesInFlight() const
     {
-        return MAX_CONCURRENT_FRAME_COUNT;
+        return QVulkanWindow::MAX_CONCURRENT_FRAME_COUNT;
     }
 
     uint32_t QTApplication::getCurrentFrame() const
     {
-        return concurrentFrameCount();
+        if (_handler) {
+            return _handler->concurrentFrameCount();
+        }
+        return 0;
     }
 
     uint32_t QTApplication::getCurrentSwapChainImage() const
     {
-        return swapChainImageCount();
+        if (_handler) {
+            return _handler->swapChainImageCount();
+        }
+        return 0;
     }
 
     uint32_t QTApplication::getSwapChainCount() const
@@ -208,8 +360,11 @@ namespace neon::vulkan
 
     VkExtent2D QTApplication::getSwapChainExtent() const
     {
-        QSize s = swapChainImageSize();
-        return {static_cast<uint32_t>(s.width()), static_cast<uint32_t>(s.height())};
+        if (_handler) {
+            QSize s = _handler->swapChainImageSize();
+            return {static_cast<uint32_t>(s.width()), static_cast<uint32_t>(s.height())};
+        }
+        return {0, 0};
     }
 
     VkDescriptorPool QTApplication::getImGuiPool() const
@@ -229,15 +384,21 @@ namespace neon::vulkan
 
     VkQueue QTApplication::getGraphicsQueue()
     {
-        return graphicsQueue();
+        if (_handler) {
+            return _handler->graphicsQueue();
+        }
+        return nullptr;
     }
 
     void QTApplication::preInitResources()
     {
-        vulkanInstance()->installDebugOutputFilter(debugFilter);
+        if (!_handler) {
+            return;
+        }
+        _handler->vulkanInstance()->installDebugOutputFilter(debugFilter);
 
-        _queueFamilies =
-            std::make_unique<VKQueueFamilyCollection>(physicalDevice(), vulkanInstance()->surfaceForWindow(this));
+        _queueFamilies = std::make_unique<VKQueueFamilyCollection>(
+            _handler->physicalDevice(), _handler->vulkanInstance()->surfaceForWindow(_handler));
 
         uint32_t maxQueues = 0;
         for (auto family : _queueFamilies->getFamilies()) {
@@ -260,8 +421,8 @@ namespace neon::vulkan
             _presentQueues[family.getIndex()] = family.getCount();
         }
 
-        setQueueCreateInfoModifier([queueCreateInfos](const VkQueueFamilyProperties* prop, uint32_t amount,
-                                                      QVector<VkDeviceQueueCreateInfo>& vec) {
+        _handler->setQueueCreateInfoModifier([queueCreateInfos](const VkQueueFamilyProperties* prop, uint32_t amount,
+                                                                QVector<VkDeviceQueueCreateInfo>& vec) {
             vec.clear();
             for (auto& info : queueCreateInfos) {
                 vec.push_back(info);
@@ -271,15 +432,19 @@ namespace neon::vulkan
 
     void QTApplication::initResources()
     {
-        _physicalDevice = VKPhysicalDevice(physicalDevice(), nullptr);
-        _device = std::make_unique<VKDevice>(vulkanInstance()->vkInstance(), physicalDevice(), device(),
-                                             *_queueFamilies, _physicalDevice.getFeatures(), _presentQueues);
+        if (!_handler) {
+            return;
+        }
+        _physicalDevice = VKPhysicalDevice(_handler->physicalDevice(), nullptr);
+        _device = std::make_unique<VKDevice>(_handler->vulkanInstance()->vkInstance(), _handler->physicalDevice(),
+                                             _handler->device(), *_queueFamilies, _physicalDevice.getFeatures(),
+                                             _presentQueues);
 
-        neon::debug() << "Family: " << graphicsQueueFamilyIndex();
+        neon::debug() << "Family: " << _handler->graphicsQueueFamilyIndex();
 
         // Fetch queue index:
-        size_t family = graphicsQueueFamilyIndex();
-        VkQueue queue = graphicsQueue();
+        size_t family = _handler->graphicsQueueFamilyIndex();
+        VkQueue queue = _handler->graphicsQueue();
         VkQueue fetchedQueue;
         size_t index = 0;
         do {
@@ -290,8 +455,8 @@ namespace neon::vulkan
 
         neon::debug() << "Index: " << index;
 
-        _device->getQueueProvider()->markUsed(std::this_thread::get_id(), graphicsQueueFamilyIndex(), index);
-        _commandPool = _application->getCommandManager().fetchCommandPool();
+        _device->getQueueProvider()->markUsed(std::this_thread::get_id(), _handler->graphicsQueueFamilyIndex(), index);
+        _commandPool = _commandManager->fetchCommandPool();
 
         initImGui();
         if (_onInit) {
@@ -310,6 +475,9 @@ namespace neon::vulkan
 
     void QTApplication::releaseResources()
     {
+        _application->getAssets().clear();
+        _application->setRoom(nullptr);
+        _application->setRender(nullptr);
         _bin.waitAndFlush();
 
         if (ImGui::GetIO().BackendRendererUserData != nullptr) {
@@ -319,11 +487,12 @@ namespace neon::vulkan
         ImPlot::DestroyContext();
         ImGui::DestroyContext();
 
-
         vkDestroyDescriptorPool(_device->hold(), _imGuiPool, nullptr);
-        _commandPool = CommandPoolHolder();
 
+        _commandPool = CommandPoolHolder();
+        _commandManager = nullptr;
         _device = nullptr;
+        _handler->invalidate();
     }
 
     void QTApplication::startNextFrame()
@@ -343,11 +512,6 @@ namespace neon::vulkan
     void QTApplication::logicalDeviceLost()
     {
         neon::debug() << "Logical device lost";
-    }
-
-    QVulkanWindowRenderer* QTApplication::createRenderer()
-    {
-        return this;
     }
 
     const ApplicationCreateInfo& QTApplication::getCreationInfo() const
@@ -371,25 +535,15 @@ namespace neon::vulkan
 
     VkFormat QTApplication::getVkDepthImageFormat() const
     {
-        return depthStencilFormat();
+        if (_handler) {
+            return _handler->depthStencilFormat();
+        }
+        return VK_FORMAT_D24_UNORM_S8_UINT;
     }
 
     VKResourceBin* QTApplication::getBin()
     {
         return &_bin;
-    }
-
-    bool QTApplication::eventFilter(QObject* watched, QEvent* event)
-    {
-        if (event->type() == QEvent::KeyPress) {
-            keyPressEvent(static_cast<QKeyEvent*>(event));
-            return true;
-        }
-        if (event->type() == QEvent::KeyRelease) {
-            keyReleaseEvent(static_cast<QKeyEvent*>(event));
-            return true;
-        }
-        return QVulkanWindow::eventFilter(watched, event);
     }
 
     void QTApplication::setInitializationFunction(std::function<void(QTApplication*)> func)
@@ -522,6 +676,10 @@ namespace neon::vulkan
 
     void QTApplication::initImGui()
     {
+        if (!_handler) {
+            return;
+        }
+
         VkDescriptorPoolSize pool_sizes[] = {
             {               VK_DESCRIPTOR_TYPE_SAMPLER, 1000},
             {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1000},
@@ -543,8 +701,8 @@ namespace neon::vulkan
         pool_info.poolSizeCount = std::size(pool_sizes);
         pool_info.pPoolSizes = pool_sizes;
 
-        auto* fun = vulkanInstance()->deviceFunctions(device());
-        if (fun->vkCreateDescriptorPool(device(), &pool_info, nullptr, &_imGuiPool) != VK_SUCCESS) {
+        auto* fun = _handler->vulkanInstance()->deviceFunctions(_handler->device());
+        if (fun->vkCreateDescriptorPool(_handler->device(), &pool_info, nullptr, &_imGuiPool) != VK_SUCCESS) {
             throw std::runtime_error("Failed to init ImGui!");
         }
 

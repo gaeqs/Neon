@@ -43,6 +43,10 @@ namespace neon
 
         virtual const ApplicationCreateInfo& getCreationInfo() const = 0;
 
+        [[nodiscard]] virtual const CommandManager& getCommandManager() const = 0;
+
+        [[nodiscard]] virtual CommandManager& getCommandManager() = 0;
+
         [[nodiscard]] virtual rush::Vec2i getWindowSize() const = 0;
 
         [[nodiscard]] virtual FrameInformation getCurrentFrameInformation() const = 0;
@@ -73,7 +77,6 @@ namespace neon
         AssetCollection _assets;
         AssetLoaderCollection _assetLoaders;
         TaskRunner _taskRunner;
-        CommandManager _commandManager;
         std::shared_ptr<Render> _render;
         std::optional<rush::Vec2i> _forcedViewport;
 
@@ -84,7 +87,7 @@ namespace neon
 
         void init();
 
-        [[nodiscard]] Result<uint32_t, std::string> startGameLoop();
+        [[nodiscard]] Result<uint32_t, std::string> startGameLoop() const;
 
         [[nodiscard]] const ApplicationImplementation* getImplementation() const;
 

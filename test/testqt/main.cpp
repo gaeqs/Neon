@@ -424,29 +424,29 @@ int main(int argc, char** argv)
         qFatal("Failed to create Vulkan instance: %d", inst.errorCode());
     }
 
-    auto qtApp = std::make_unique<vulkan::QTApplication>();
-    qtApp->setVulkanInstance(&inst);
+    auto qtApp = std::make_unique<vulkan::QTApplication>(&inst);
     qtApp->setInitializationFunction([](const vulkan::QTApplication* qtApplication) {
         auto application = qtApplication->getApplication();
         application->setRoom(getTestRoom(application));
     });
 
-    auto widget = QWidget::createWindowContainer(qtApp.get());
-    widget->installEventFilter(qtApp.get());
+    auto handler = qtApp->getHandler();
+
+    auto widget = QWidget::createWindowContainer(handler);
+    widget->installEventFilter(handler);
     widget->setFocusPolicy(Qt::StrongFocus);
     widget->setFocus();
 
     Application application(std::move(qtApp));
     application.init();
 
-    QLabel text("Hello Qt6!");
+    QLabel* text = new QLabel("Hello Qt6!");
 
-    QWidget mainWindow;
-    QVBoxLayout layout(&mainWindow);
-    layout.addWidget(widget, 1);
-    layout.addWidget(&text);
+    QWidget* mainWindow = new QWidget();
+    QVBoxLayout* layout = new QVBoxLayout(mainWindow);
+    layout->addWidget(widget, 1);
+    layout->addWidget(text);
 
-    mainWindow.show();
+    mainWindow->show();
     return QApplication::exec();
-    return EXIT_SUCCESS;
 }
