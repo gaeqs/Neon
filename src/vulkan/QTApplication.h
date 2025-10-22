@@ -133,7 +133,7 @@ namespace neon::vulkan
         QTApplication(const QTApplication& other) = delete;
 
         /**
-         * @brief Constructs a new QTApplication.
+         * @brief Creates a new QTApplication.
          * @param instance the Vulkan instance to use.
          */
         explicit QTApplication(QVulkanInstance* instance);
