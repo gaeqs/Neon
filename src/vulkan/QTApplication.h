@@ -28,20 +28,16 @@
 
 #ifdef USE_QT
 
-#include <QVulkanWindowRenderer>
+    #include <QVulkanWindowRenderer>
 
-#include <vulkan/AbstractVKApplication.h>
+    #include <vulkan/AbstractVKApplication.h>
 
 namespace neon::vulkan
 {
 
-    class QTApplication : public QVulkanWindowRenderer,
-                          public QVulkanWindow,
-                          public AbstractVKApplication {
-
-        using TimeStamp = std::chrono::time_point<
-                std::chrono::system_clock,
-                std::chrono::nanoseconds>;
+    class QTApplication : public QVulkanWindowRenderer, public QVulkanWindow, public AbstractVKApplication
+    {
+        using TimeStamp = std::chrono::time_point<std::chrono::system_clock>;
 
         Application* _application;
         std::function<void(QTApplication*)> _onInit;
@@ -65,21 +61,20 @@ namespace neon::vulkan
 
         VkDescriptorPool _imGuiPool;
 
-    public:
+      public:
+        QTApplication(const QTApplication& other) = delete;
 
         QTApplication();
 
-        ~QTApplication() override;
+        ~QTApplication() override = default;
 
-        void setInitializationFunction(
-                std::function<void(QTApplication*)> func);
+        void setInitializationFunction(std::function<void(QTApplication*)> func);
 
         void init(Application* application) override;
 
         [[nodiscard]] rush::Vec2i getWindowSize() const override;
 
-        [[nodiscard]] FrameInformation
-        getCurrentFrameInformation() const override;
+        [[nodiscard]] FrameInformation getCurrentFrameInformation() const override;
 
         [[nodiscard]] CommandBuffer* getCurrentCommandBuffer() const override;
 
@@ -151,10 +146,7 @@ namespace neon::vulkan
 
         [[nodiscard]] VKResourceBin* getBin() override;
 
-
-
-    protected:
-
+      protected:
         bool eventFilter(QObject* watched, QEvent* event) override;
 
         void mouseMoveEvent(QMouseEvent* event) override;
@@ -169,8 +161,7 @@ namespace neon::vulkan
 
         void wheelEvent(QWheelEvent* event) override;
 
-    private:
-
+      private:
         void initImGui();
 
         void setupImGUIFrame() const;
@@ -178,10 +169,9 @@ namespace neon::vulkan
         static int32_t qtToGLFWKey(Qt::Key key);
 
         static int32_t qtToGLFWMouseButton(Qt::MouseButton button);
-
     };
-}
+} // namespace neon::vulkan
 
 #endif
 
-#endif //VISIMPL_QTAPPLICATION_H
+#endif // VISIMPL_QTAPPLICATION_H

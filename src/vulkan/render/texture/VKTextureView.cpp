@@ -37,8 +37,7 @@ namespace neon::vulkan
 
     VKTextureView::~VKTextureView()
     {
-        auto device = getApplication()->getDevice()->hold();
-        getApplication()->getBin()->destroyLater(device, getRuns(), _view, vkDestroyImageView);
+        getApplication()->getBin()->destroyLater(getApplication()->getDevice(), getRuns(), _view, vkDestroyImageView);
     }
 
     void* VKTextureView::getNativeHandle()

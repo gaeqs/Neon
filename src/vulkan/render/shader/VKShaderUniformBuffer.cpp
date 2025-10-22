@@ -92,7 +92,7 @@ namespace neon::vulkan
         poolInfo.pPoolSizes = pools.data();
         poolInfo.maxSets = _vkApplication->getMaxFramesInFlight();
 
-        if (vkCreateDescriptorPool(_vkApplication->getDevice()->getRaw(), &poolInfo, nullptr, &_descriptorPool) !=
+        if (vkCreateDescriptorPool(_vkApplication->getDevice()->hold(), &poolInfo, nullptr, &_descriptorPool) !=
             VK_SUCCESS) {
             throw std::runtime_error("Failed to create descriptor pool!");
         }
@@ -107,7 +107,7 @@ namespace neon::vulkan
         allocInfo.pSetLayouts = layouts.data();
 
         _descriptorSets.resize(_vkApplication->getMaxFramesInFlight());
-        if (vkAllocateDescriptorSets(_vkApplication->getDevice()->getRaw(), &allocInfo, _descriptorSets.data()) !=
+        if (vkAllocateDescriptorSets(_vkApplication->getDevice()->hold(), &allocInfo, _descriptorSets.data()) !=
             VK_SUCCESS) {
             throw std::runtime_error("Failed to allocate descriptor sets!");
         }
@@ -135,7 +135,7 @@ namespace neon::vulkan
                     descriptorWrite.descriptorCount = 1;
                     descriptorWrite.pBufferInfo = &bufferInfo;
 
-                    vkUpdateDescriptorSets(_vkApplication->getDevice()->getRaw(), 1, &descriptorWrite, 0, nullptr);
+                    vkUpdateDescriptorSets(_vkApplication->getDevice()->hold(), 1, &descriptorWrite, 0, nullptr);
                 }
             }
         }
@@ -143,7 +143,7 @@ namespace neon::vulkan
 
     VKShaderUniformBuffer::~VKShaderUniformBuffer()
     {
-        _vkApplication->getBin()->destroyLater(_vkApplication->getDevice()->getRaw(), getRuns(), _descriptorPool,
+        _vkApplication->getBin()->destroyLater(_vkApplication->getDevice(), getRuns(), _descriptorPool,
                                                vkDestroyDescriptorPool);
     }
 
@@ -260,7 +260,7 @@ namespace neon::vulkan
                     descriptorWrite.descriptorCount = 1;
                     descriptorWrite.pImageInfo = &imageInfo;
 
-                    vkUpdateDescriptorSets(_vkApplication->getDevice()->getRaw(), 1, &descriptorWrite, 0, nullptr);
+                    vkUpdateDescriptorSets(_vkApplication->getDevice()->hold(), 1, &descriptorWrite, 0, nullptr);
                 } break;
             }
         }

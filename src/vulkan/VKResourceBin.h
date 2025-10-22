@@ -24,7 +24,6 @@ namespace neon::vulkan
     {
         struct Entry
         {
-            VkDevice device;
             std::vector<std::shared_ptr<CommandBufferRun>> runs;
             std::function<void()> deleteFunction;
         };
@@ -39,13 +38,11 @@ namespace neon::vulkan
          * Schedules a resource for deferred destruction.
          * The resource will not be destroyed until all associated command buffer runs have finished.
          *
-         * @param device The Vulkan device associated with the resource.
          * @param runs A vector of shared pointers to CommandBufferRun objects. These represent the command buffer runs
          *             whose completion is required before the resource can be destroyed.
          * @param deleteFunction The callback function that performs the destruction of the resource.
          */
-        void destroyLater(VkDevice device, std::vector<std::shared_ptr<CommandBufferRun>> runs,
-                          std::function<void()> deleteFunction);
+        void destroyLater(std::vector<std::shared_ptr<CommandBufferRun>> runs, std::function<void()> deleteFunction);
 
         /**
          * Clears stored resources in the VKResourceBin that are no longer needed.
@@ -82,7 +79,7 @@ namespace neon::vulkan
         void destroyLater(VKDevice* device, std::vector<std::shared_ptr<CommandBufferRun>> runs, T* resource,
                           void (*destroyFn)(VkDevice, T*, const VkAllocationCallbacks*))
         {
-            destroyLater(device, std::move(runs), [=] { destroyFn(device->hold(), resource, nullptr); });
+            destroyLater(std::move(runs), [=] { destroyFn(device->hold(), resource, nullptr); });
         }
     };
 

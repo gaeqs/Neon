@@ -115,7 +115,7 @@ namespace neon::vulkan
         framebufferInfo.height = _dimensions.y();
         framebufferInfo.layers = layers;
 
-        if (vkCreateFramebuffer(getApplication()->getDevice()->getRaw(), &framebufferInfo, nullptr, &_frameBuffer) !=
+        if (vkCreateFramebuffer(getApplication()->getDevice()->hold(), &framebufferInfo, nullptr, &_frameBuffer) !=
             VK_SUCCESS) {
             throw std::runtime_error("Failed to create framebuffer!");
         }
@@ -123,7 +123,7 @@ namespace neon::vulkan
 
     void VKSimpleFrameBuffer::destroyFrameBuffer()
     {
-        getApplication()->getBin()->destroyLater(getApplication()->getDevice()->getRaw(), getRuns(), _frameBuffer,
+        getApplication()->getBin()->destroyLater(getApplication()->getDevice(), getRuns(), _frameBuffer,
                                                  vkDestroyFramebuffer);
     }
 

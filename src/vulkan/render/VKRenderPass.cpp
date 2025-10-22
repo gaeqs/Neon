@@ -138,7 +138,7 @@ namespace neon::vulkan
         renderPassInfo.dependencyCount = 2;
         renderPassInfo.pDependencies = dependencies;
 
-        if (vkCreateRenderPass(_vkApplication->getDevice()->getRaw(), &renderPassInfo, nullptr, &_raw) != VK_SUCCESS) {
+        if (vkCreateRenderPass(_vkApplication->getDevice()->hold(), &renderPassInfo, nullptr, &_raw) != VK_SUCCESS) {
             throw std::runtime_error("Failed to create render pass!");
         }
     }
@@ -153,7 +153,7 @@ namespace neon::vulkan
     VKRenderPass::~VKRenderPass()
     {
         if (_raw != VK_NULL_HANDLE && !_external) {
-            vkDestroyRenderPass(_vkApplication->getDevice()->getRaw(), _raw, nullptr);
+            vkDestroyRenderPass(_vkApplication->getDevice()->hold(), _raw, nullptr);
         }
     }
 

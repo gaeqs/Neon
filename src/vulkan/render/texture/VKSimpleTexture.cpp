@@ -121,11 +121,10 @@ namespace neon::vulkan
 
     VKSimpleTexture::~VKSimpleTexture()
     {
-        auto device = rawDevice();
         auto bin = getApplication()->getBin();
         auto allocator = getApplication()->getDevice()->getAllocator();
 
-        bin->destroyLater(device, getRuns(), [allocator, image = _image, allocation = _allocation] {
+        bin->destroyLater(getRuns(), [allocator, image = _image, allocation = _allocation] {
             vmaDestroyImage(allocator, image, allocation);
         });
     }

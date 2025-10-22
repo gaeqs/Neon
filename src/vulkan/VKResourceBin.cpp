@@ -6,18 +6,18 @@
 
 #include <neon/logging/Logger.h>
 
-namespace neon
+namespace neon::vulkan
 {
     VKResourceBin::~VKResourceBin()
     {
         waitAndFlush();
     }
 
-    void VKResourceBin::destroyLater(VkDevice device, std::vector<std::shared_ptr<CommandBufferRun>> runs,
+    void VKResourceBin::destroyLater(std::vector<std::shared_ptr<CommandBufferRun>> runs,
                                      std::function<void()> deleteFunction)
     {
         std::lock_guard lock(_mutex);
-        _entries.emplace_back(device, std::move(runs), std::move(deleteFunction));
+        _entries.emplace_back(std::move(runs), std::move(deleteFunction));
     }
 
     void VKResourceBin::flush()
@@ -35,12 +35,12 @@ namespace neon
 
     void VKResourceBin::waitAndFlush()
     {
-        for (auto& entry : _entries) {
-            for (auto& run : entry.runs) {
+        for (auto& [runs, deleteFunction] : _entries) {
+            for (auto& run : runs) {
                 run->wait();
             }
-            entry.deleteFunction();
+            deleteFunction();
         }
         _entries.clear();
     }
-} // namespace neon
+} // namespace neon::vulkan

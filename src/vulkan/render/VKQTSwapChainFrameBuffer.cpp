@@ -25,10 +25,11 @@ namespace neon::vulkan
         _qtApplication(dynamic_cast<QTApplication*>(application->getImplementation())),
         _renderPass(application, _qtApplication->defaultRenderPass())
     {
+        auto d = holdRawDevice();
         ImGui_ImplVulkan_InitInfo init_info = {};
         init_info.Instance = _qtApplication->getInstance();
         init_info.PhysicalDevice = _qtApplication->getPhysicalDevice().getRaw();
-        init_info.Device = _qtApplication->getDevice()->getRaw();
+        init_info.Device = d;
         init_info.Queue = _qtApplication->getGraphicsQueue();
         init_info.DescriptorPool = _qtApplication->getImGuiPool();
         init_info.MinImageCount = 3;

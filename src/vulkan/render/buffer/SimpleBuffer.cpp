@@ -59,13 +59,10 @@ namespace neon::vulkan
 
     SimpleBuffer::~SimpleBuffer()
     {
-        auto device = getApplication()->getDevice();
         auto bin = getApplication()->getBin();
-
-        bin->destroyLater(device->getRaw(), getRuns(),
-                          [allocator = _allocator, buffer = _buffer, allocation = _allocation] {
-                              vmaDestroyBuffer(allocator, buffer, allocation);
-                          });
+        bin->destroyLater(getRuns(), [allocator = _allocator, buffer = _buffer, allocation = _allocation] {
+            vmaDestroyBuffer(allocator, buffer, allocation);
+        });
     }
 
     size_t SimpleBuffer::size() const

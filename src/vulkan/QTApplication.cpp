@@ -120,7 +120,6 @@ namespace neon::vulkan
         float seconds = static_cast<float>(duration.count()) * 1e-9f;
 
         _currentCommandBuffer = _commandPool.getPool().beginCommandBuffer(true);
-        neon::debug() << _currentCommandBuffer;
         _currentFrameInformation = {_currentFrameInformation.currentFrame + 1, seconds, _lastFrameProcessTime, false};
 
         {
@@ -284,7 +283,7 @@ namespace neon::vulkan
         VkQueue fetchedQueue;
         size_t index = 0;
         do {
-            vkGetDeviceQueue(_device->getRaw(), family, index, &fetchedQueue);
+            vkGetDeviceQueue(_device->getDeviceWithoutHolding(), family, index, &fetchedQueue);
             ++index;
         } while (queue != fetchedQueue);
         --index;
@@ -311,6 +310,20 @@ namespace neon::vulkan
 
     void QTApplication::releaseResources()
     {
+        _bin.waitAndFlush();
+
+        if (ImGui::GetIO().BackendRendererUserData != nullptr) {
+            ImGui_ImplVulkan_Shutdown();
+        }
+
+        ImPlot::DestroyContext();
+        ImGui::DestroyContext();
+
+
+        vkDestroyDescriptorPool(_device->hold(), _imGuiPool, nullptr);
+        _commandPool = CommandPoolHolder();
+
+        _device = nullptr;
     }
 
     void QTApplication::startNextFrame()
@@ -803,13 +816,6 @@ namespace neon::vulkan
             default:
                 return -1;
         }
-    }
-
-    QTApplication::~QTApplication()
-    {
-        _bin.waitAndFlush();
-        ImPlot::DestroyContext();
-        ImGui::DestroyContext();
     }
 } // namespace neon::vulkan
 
