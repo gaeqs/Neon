@@ -56,7 +56,9 @@ namespace neon::vulkan
         info.commandPool = _pool;
         info.level = primary ? VK_COMMAND_BUFFER_LEVEL_PRIMARY : VK_COMMAND_BUFFER_LEVEL_SECONDARY;
         info.commandBufferCount = 1;
-        if (vkAllocateCommandBuffers(_vkApplication->getDevice()->getRaw(), &info, &_commandBuffer) != VK_SUCCESS) {
+
+        auto holder = _vkApplication->getDevice()->hold();
+        if (vkAllocateCommandBuffers(holder, &info, &_commandBuffer) != VK_SUCCESS) {
             throw std::runtime_error("Failed to allocate command buffers!");
         }
     }
@@ -80,7 +82,9 @@ namespace neon::vulkan
         info.commandPool = _pool;
         info.level = primary ? VK_COMMAND_BUFFER_LEVEL_PRIMARY : VK_COMMAND_BUFFER_LEVEL_SECONDARY;
         info.commandBufferCount = 1;
-        if (vkAllocateCommandBuffers(_vkApplication->getDevice()->getRaw(), &info, &_commandBuffer) != VK_SUCCESS) {
+
+        auto holder = _vkApplication->getDevice()->hold();
+        if (vkAllocateCommandBuffers(holder, &info, &_commandBuffer) != VK_SUCCESS) {
             throw std::runtime_error("Failed to allocate command buffers!");
         }
     }
@@ -203,10 +207,11 @@ namespace neon::vulkan
         if (_fences.empty()) {
             return;
         }
-        vkWaitForFences(_vkApplication->getDevice()->getRaw(), static_cast<uint32_t>(_fences.size()), _fences.data(),
-                        VK_TRUE, UINT64_MAX);
 
-        vkResetFences(_vkApplication->getDevice()->getRaw(), static_cast<uint32_t>(_fences.size()), _fences.data());
+        auto device = _vkApplication->getDevice()->getDeviceWithoutHolding();
+        vkWaitForFences(device, static_cast<uint32_t>(_fences.size()), _fences.data(), VK_TRUE, UINT64_MAX);
+
+        vkResetFences(device, static_cast<uint32_t>(_fences.size()), _fences.data());
 
         for (const auto& fence : _fences) {
             _freedFences.push_back(fence);
@@ -246,8 +251,8 @@ namespace neon::vulkan
         VkFenceCreateInfo fenceInfo{};
         fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
         fenceInfo.flags = 0;
-
-        if (vkCreateFence(_vkApplication->getDevice()->getRaw(), &fenceInfo, nullptr, &fence) != VK_SUCCESS) {
+        auto holder = _vkApplication->getDevice()->hold();
+        if (vkCreateFence(holder, &fenceInfo, nullptr, &fence) != VK_SUCCESS) {
             throw std::runtime_error("Failed to create fence!");
         }
 
@@ -286,12 +291,13 @@ namespace neon::vulkan
 
         waitForFences();
 
+        auto holder = _vkApplication->getDevice()->hold();
         for (const auto& fence : _freedFences) {
-            vkDestroyFence(_vkApplication->getDevice()->getRaw(), fence, nullptr);
+            vkDestroyFence(holder, fence, nullptr);
         }
 
         if (!_external) {
-            vkFreeCommandBuffers(_vkApplication->getDevice()->getRaw(), _pool, 1, &_commandBuffer);
+            vkFreeCommandBuffers(holder, _pool, 1, &_commandBuffer);
         }
     }
 
@@ -303,14 +309,13 @@ namespace neon::vulkan
         if (_fences.empty()) {
             return false;
         }
-        auto device = _vkApplication->getDevice()->getRaw();
-
+        auto device = _vkApplication->getDevice()->getDeviceWithoutHolding();
         bool used = std::ranges::any_of(
             _fences, [device](const VkFence& it) { return vkGetFenceStatus(device, it) == VK_NOT_READY; });
 
         if (!used) {
             uint32_t amount = static_cast<uint32_t>(_fences.size());
-            vkResetFences(_vkApplication->getDevice()->getRaw(), amount, _fences.data());
+            vkResetFences(device, amount, _fences.data());
             _freedFences.insert(_freedFences.end(), _fences.begin(), _fences.end());
             _fences.clear();
         }

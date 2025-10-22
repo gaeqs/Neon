@@ -10,9 +10,10 @@
 #include <vector>
 #include <memory>
 #include <neon/render/buffer/CommandBufferRun.h>
+#include <vulkan/device/VKDevice.h>
 #include <vulkan/vulkan_core.h>
 
-namespace neon
+namespace neon::vulkan
 {
 
     /**
@@ -78,13 +79,13 @@ namespace neon
          * @param destroyFn A callable that handles the actual destruction of the resource.
          */
         template<typename T>
-        void destroyLater(VkDevice device, std::vector<std::shared_ptr<CommandBufferRun>> runs, T* resource,
+        void destroyLater(VKDevice* device, std::vector<std::shared_ptr<CommandBufferRun>> runs, T* resource,
                           void (*destroyFn)(VkDevice, T*, const VkAllocationCallbacks*))
         {
-            destroyLater(device, std::move(runs), [=] { destroyFn(device, resource, nullptr); });
+            destroyLater(device, std::move(runs), [=] { destroyFn(device->hold(), resource, nullptr); });
         }
     };
 
-} // namespace neon
+} // namespace neon::vulkan
 
 #endif // VKRESOURCEBIN_H

@@ -31,13 +31,13 @@ namespace neon::vulkan
             flags |= static_cast<VkImageAspectFlags>(aspect);
         }
 
-        _view = vulkan_util::createImageView(getApplication()->getDevice()->getRaw(), native, format, flags, info,
+        _view = vulkan_util::createImageView(getApplication()->getDevice()->hold(), native, format, flags, info,
                                              getTexture()->getTextureViewType());
     }
 
     VKTextureView::~VKTextureView()
     {
-        auto device = getApplication()->getDevice()->getRaw();
+        auto device = getApplication()->getDevice()->hold();
         getApplication()->getBin()->destroyLater(device, getRuns(), _view, vkDestroyImageView);
     }
 

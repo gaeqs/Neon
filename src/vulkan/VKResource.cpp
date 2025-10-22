@@ -51,9 +51,9 @@ namespace neon::vulkan
         return _runs;
     }
 
-    VkDevice VKResource::rawDevice() const
+    VKDeviceHolder VKResource::holdRawDevice() const
     {
-        return _application->getDevice()->getRaw();
+        return _application->getDevice()->hold();
     }
 
     VkPhysicalDevice VKResource::rawPhysicalDevice() const

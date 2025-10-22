@@ -346,8 +346,8 @@ namespace neon::vulkan
         {
             auto semaphore = std::make_shared<VKSemaphore>(_application);
             DEBUG_PROFILE_ID(profiler, adquireImage, "Image Acquisition");
-            result = vkAcquireNextImageKHR(_device->getRaw(), _swapChain, UINT64_MAX, semaphore->getRaw(),
-                                           VK_NULL_HANDLE, &_imageIndex);
+            result = vkAcquireNextImageKHR(_device->getDeviceWithoutHolding(), _swapChain, UINT64_MAX,
+                                           semaphore->getRaw(), VK_NULL_HANDLE, &_imageIndex);
             _imageAvailableSemaphore = std::move(semaphore);
         }
 
@@ -425,7 +425,9 @@ namespace neon::vulkan
     void VKApplication::finishLoop()
     {
         _application->getTaskRunner().shutdown();
-        vkDeviceWaitIdle(_device->getRaw());
+
+        auto holder = _device->hold();
+        vkDeviceWaitIdle(holder);
 
         // Free the command pool here and not in the
         // destructor.
@@ -667,17 +669,18 @@ namespace neon::vulkan
         createInfo.clipped = VK_TRUE;
         createInfo.oldSwapchain = VK_NULL_HANDLE;
 
-        VkResult result = vkCreateSwapchainKHR(_device->getRaw(), &createInfo, nullptr, &_swapChain);
+        auto holder = _device->hold();
+        VkResult result = vkCreateSwapchainKHR(holder, &createInfo, nullptr, &_swapChain);
 
         if (result != VK_SUCCESS) {
             throw std::runtime_error(std::format("Failed to create swap chain! Error code: {}.\n"
                                                  "Device is: {}\n"
                                                  "Surface is: {}",
-                                                 static_cast<int>(result), static_cast<void*>(_device->getRaw()),
+                                                 static_cast<int>(result), static_cast<void*>(holder.get()),
                                                  static_cast<void*>(_surface)));
         }
 
-        vkGetSwapchainImagesKHR(_device->getRaw(), _swapChain, &_swapChainImageCount, nullptr);
+        vkGetSwapchainImagesKHR(holder, _swapChain, &_swapChainImageCount, nullptr);
 
         _surfaceFormat = format;
         _swapChainImageFormat = format.format;
@@ -774,7 +777,7 @@ namespace neon::vulkan
         pool_info.poolSizeCount = std::size(pool_sizes);
         pool_info.pPoolSizes = pool_sizes;
 
-        if (vkCreateDescriptorPool(_device->getRaw(), &pool_info, nullptr, &_imGuiPool) != VK_SUCCESS) {
+        if (vkCreateDescriptorPool(_device->hold(), &pool_info, nullptr, &_imGuiPool) != VK_SUCCESS) {
             throw std::runtime_error("Failed to init ImGui!");
         }
 
@@ -801,7 +804,7 @@ namespace neon::vulkan
             glfwWaitEvents();
         }
 
-        vkDeviceWaitIdle(_device->getRaw());
+        vkDeviceWaitIdle(_device->hold());
         cleanupSwapChain();
         createSwapChain();
         _requiresSwapchainRecreation = false;
@@ -809,14 +812,13 @@ namespace neon::vulkan
 
     void VKApplication::cleanupSwapChain()
     {
-        vkDestroySwapchainKHR(_device->getRaw(), _swapChain, nullptr);
+        vkDestroySwapchainKHR(_device->hold(), _swapChain, nullptr);
     }
 
     VKApplication::~VKApplication()
     {
         _imageAvailableSemaphore = nullptr;
 
-        auto raw = _device->getRaw();
         _bin.waitAndFlush();
 
         if (ImGui::GetIO().BackendRendererUserData != nullptr) {
@@ -827,7 +829,7 @@ namespace neon::vulkan
         ImPlot::DestroyContext();
         ImGui::DestroyContext();
 
-        vkDestroyDescriptorPool(raw, _imGuiPool, nullptr);
+        vkDestroyDescriptorPool(_device->hold(), _imGuiPool, nullptr);
 
         cleanupSwapChain();
         _graphicQueue = VKQueueHolder();

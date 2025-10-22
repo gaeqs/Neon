@@ -16,8 +16,28 @@
 namespace neon::vulkan
 {
 
+    class VKDeviceHolder
+    {
+        std::unique_lock<std::mutex> _lock;
+        VkDevice _device;
+
+      public:
+        VKDeviceHolder(const VKDeviceHolder& other) = delete;
+
+        VKDeviceHolder(VKDeviceHolder&& other) noexcept;
+
+        VKDeviceHolder& operator=(VKDeviceHolder&& other) noexcept;
+
+        VKDeviceHolder(std::mutex& mutex, VkDevice device);
+
+        VkDevice get() const;
+
+        operator VkDevice() const;
+    };
+
     class VKDevice
     {
+        std::mutex _holdMutex;
         VkDevice _raw;
         std::unique_ptr<VKQueueProvider> _queueProvider;
         VKPhysicalDeviceFeatures _enabledFeatures;
@@ -27,6 +47,8 @@ namespace neon::vulkan
         void createAllocator(VkInstance instance, VkPhysicalDevice physicalDevice);
 
       public:
+        VKDevice(const VKDevice& other) = delete;
+
         VKDevice(VkInstance instance, VkPhysicalDevice physicalDevice, VkDevice raw,
                  const VKQueueFamilyCollection& families, const VKPhysicalDeviceFeatures& features,
                  const std::vector<uint32_t>& presentQueues);
@@ -36,7 +58,9 @@ namespace neon::vulkan
 
         ~VKDevice();
 
-        [[nodiscard]] VkDevice getRaw() const;
+        [[nodiscard]] VKDeviceHolder hold();
+
+        [[nodiscard]] VkDevice getDeviceWithoutHolding() const;
 
         [[nodiscard]] VmaAllocator getAllocator() const;
 

@@ -32,10 +32,10 @@ namespace neon::vulkan
     void VKShaderProgram::deleteShaders()
     {
         auto bin = getApplication()->getBin();
-        auto device = getApplication()->getDevice()->getRaw();
+        auto holder = holdRawDevice();
         auto runs = getRuns();
         for (const auto& item : _shaders) {
-            bin->destroyLater(device, runs, item.module, vkDestroyShaderModule);
+            bin->destroyLater(holder, runs, item.module, vkDestroyShaderModule);
         }
         _shaders.clear();
     }
@@ -80,8 +80,8 @@ namespace neon::vulkan
 
             VkShaderModule shaderModule;
 
-            if (vkCreateShaderModule(getApplication()->getDevice()->getRaw(), &moduleInfo, nullptr, &shaderModule) !=
-                VK_SUCCESS) {
+            auto holder = holdRawDevice();
+            if (vkCreateShaderModule(holder, &moduleInfo, nullptr, &shaderModule) != VK_SUCCESS) {
                 return "Failed to create shader module.";
             }
 

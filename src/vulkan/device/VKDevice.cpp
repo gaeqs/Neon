@@ -9,6 +9,39 @@
 
 namespace neon::vulkan
 {
+
+    VKDeviceHolder::VKDeviceHolder(VKDeviceHolder&& other) noexcept :
+        _lock(std::move(other._lock)),
+        _device(other._device)
+    {
+    }
+
+    VKDeviceHolder& VKDeviceHolder::operator=(VKDeviceHolder&& other) noexcept
+    {
+        if (this == &other) {
+            return *this;
+        }
+        _lock = std::move(other._lock);
+        _device = other._device;
+        return *this;
+    }
+
+    VKDeviceHolder::VKDeviceHolder(std::mutex& mutex, VkDevice device) :
+        _lock(mutex),
+        _device(device)
+    {
+    }
+
+    VkDevice VKDeviceHolder::get() const
+    {
+        return _device;
+    }
+
+    VKDeviceHolder::operator struct VkDevice_T *() const
+    {
+        return _device;
+    }
+
     void VKDevice::createAllocator(VkInstance instance, VkPhysicalDevice physicalDevice)
     {
         VmaVulkanFunctions vulkanFunctions = {};
@@ -102,7 +135,12 @@ namespace neon::vulkan
         }
     }
 
-    VkDevice VKDevice::getRaw() const
+    VKDeviceHolder VKDevice::hold()
+    {
+        return VKDeviceHolder(_holdMutex, _raw);
+    }
+
+    VkDevice VKDevice::getDeviceWithoutHolding() const
     {
         return _raw;
     }

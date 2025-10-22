@@ -10,6 +10,7 @@
 
 #include <memory>
 #include <vector>
+#include <vulkan/device/VKDevice.h>
 #include <neon/render/buffer/CommandBufferRun.h>
 
 namespace neon::vulkan
@@ -36,7 +37,7 @@ namespace neon::vulkan
 
         [[nodiscard]] std::vector<std::shared_ptr<CommandBufferRun>> getRuns();
 
-        [[nodiscard]] VkDevice rawDevice() const;
+        [[nodiscard]] VKDeviceHolder holdRawDevice() const;
 
         [[nodiscard]] VkPhysicalDevice rawPhysicalDevice() const;
 
