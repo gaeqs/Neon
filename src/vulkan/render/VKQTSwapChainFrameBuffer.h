@@ -35,22 +35,27 @@ namespace neon::vulkan
 
         [[nodiscard]] uint32_t getColorAttachmentAmount() const override;
 
-        [[nodiscard]] VkFramebuffer getRaw() const override;
 
         [[nodiscard]] std::vector<VkFormat> getColorFormats() const override;
 
-        [[nodiscard]] VkFormat getDepthFormat() const override;
 
         [[nodiscard]] const VKRenderPass& getRenderPass() const override;
 
         [[nodiscard]] VKRenderPass& getRenderPass() override;
 
-        [[nodiscard]] uint32_t getWidth() const override;
-
-        [[nodiscard]] uint32_t getHeight() const override;
-
         bool renderImGui() override;
 
+        [[nodiscard]] rush::Vec2ui getDimensions() const override;
+
+        [[nodiscard]] SamplesPerTexel getSamples() const override;
+
+        [[nodiscard]] std::vector<FrameBufferOutput> getOutputs() const override;
+
+        [[nodiscard]] void* getNativeHandle() override;
+
+        [[nodiscard]] const void* getNativeHandle() const override;
+
+        [[nodiscard]] std::optional<VkFormat> getDepthFormat() const override;
     };
 
 }

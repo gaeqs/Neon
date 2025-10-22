@@ -1,0 +1,11 @@
+{
+  "name": "neoneuron:parallax_shader",
+  "save": true,
+  "use_present": true,
+  "vertex": {
+    "file": "deferred.vert"
+  },
+  "fragment": {
+    "file": "deferred_parallax.frag"
+  }
+}

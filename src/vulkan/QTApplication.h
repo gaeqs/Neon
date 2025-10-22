@@ -52,13 +52,14 @@ namespace neon::vulkan
         VKPhysicalDevice _physicalDevice;
         std::unique_ptr<VKDevice> _device;
 
-        mutable std::unique_ptr<CommandPool> _commandPool;
+        CommandPoolHolder _commandPool;
+        VKResourceBin _bin;
 
         FrameInformation _currentFrameInformation;
         TimeStamp _lastFrameTime;
         float _lastFrameProcessTime;
 
-        mutable std::unique_ptr<CommandBuffer> _currentCommandBuffer;
+        CommandBuffer* _currentCommandBuffer;
         uint32_t _swapChainCount;
         bool _recording;
 
@@ -96,7 +97,7 @@ namespace neon::vulkan
 
         [[nodiscard]] VkFormat getSwapChainImageFormat() const override;
 
-        [[nodiscard]] VkFormat getDepthImageFormat() const override;
+        [[nodiscard]] TextureFormat getDepthImageFormat() const override;
 
         [[nodiscard]] CommandPool* getCommandPool() const override;
 
@@ -138,7 +139,23 @@ namespace neon::vulkan
 
         QVulkanWindowRenderer* createRenderer() override;
 
+        const ApplicationCreateInfo& getCreationInfo() const override;
+
+        bool isInModalMode() const override;
+
+        void setModalMode(bool modal) override;
+
+        [[nodiscard]] bool isMainThread() const override;
+
+        [[nodiscard]] VkFormat getVkDepthImageFormat() const override;
+
+        [[nodiscard]] VKResourceBin* getBin() override;
+
+
+
     protected:
+
+        bool eventFilter(QObject* watched, QEvent* event) override;
 
         void mouseMoveEvent(QMouseEvent* event) override;
 

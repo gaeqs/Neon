@@ -521,6 +521,7 @@ namespace neon::vulkan
         }
 
         extensions.push_back(VK_EXT_SURFACE_MAINTENANCE_1_EXTENSION_NAME);
+        extensions.push_back(VK_KHR_GET_SURFACE_CAPABILITIES_2_EXTENSION_NAME);
 
         return extensions;
     }

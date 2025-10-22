@@ -195,12 +195,6 @@ namespace neon::vulkan
         init_info.RenderPass = _renderPass.getRaw();
 
         ImGui_ImplVulkan_Init(&init_info);
-
-        auto cmd = _vkApplication->getCommandPool()->beginCommandBuffer(true);
-
-        cmd->end();
-        cmd->submit();
-        cmd->wait();
     }
 
     VKSwapChainFrameBuffer::~VKSwapChainFrameBuffer()

@@ -81,10 +81,6 @@ namespace neon::vulkan
 
             TextureViewCreateInfo viewCreateInfo{.aspect = {ViewAspect::DEPTH}};
 
-            if (info.format == TextureFormat::DEPTH24STENCIL8 || info.format == TextureFormat::DEPTH32FSTENCIL8) {
-                viewCreateInfo.aspect.emplace_back(ViewAspect::STENCIL);
-            }
-
             _depth->texture->emplace<VKTextureView>(app, name, viewCreateInfo, texture);
         }
     }

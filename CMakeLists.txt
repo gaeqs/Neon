@@ -150,8 +150,8 @@ list(APPEND UNITY_BUILD_TARGETS
 
 # QT
 if (NEON_USE_QT)
-    find_package(Qt5 REQUIRED COMPONENTS Core Gui)
-    list(APPEND NEON_LIBRARIES Qt5::Core Qt5::Gui)
+    find_package(Qt6 REQUIRED COMPONENTS Core Gui)
+    list(APPEND NEON_LIBRARIES Qt6::Core Qt6::Gui)
 endif ()
 
 if (RELEASE_DEBUG)

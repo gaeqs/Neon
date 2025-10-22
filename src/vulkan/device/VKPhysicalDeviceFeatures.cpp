@@ -94,8 +94,6 @@ namespace neon::vulkan
 
         extensions.reserve(extensionCount);
         for (auto& [name, _] : rawExtensions) {
-            neon::debug() << "Physical device supported extensions: ";
-            neon::debug() << " - " << name;
             extensions.emplace_back(name);
         }
     }

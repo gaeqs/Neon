@@ -95,6 +95,50 @@ VkFormat vc::vkFormat(const TextureFormat& format)
     }
 }
 
+neon::TextureFormat neon::vulkan::conversions::textureFormat(const VkFormat& format)
+{
+    switch (format) {
+        case VK_FORMAT_R8_UNORM:
+            return TextureFormat::R8;
+        case VK_FORMAT_R8G8_UNORM:
+            return TextureFormat::R8G8;
+        case VK_FORMAT_R8G8B8_UNORM:
+            return TextureFormat::R8G8B8;
+        case VK_FORMAT_B8G8R8_UNORM:
+            return TextureFormat::B8G8R8;
+        case VK_FORMAT_B8G8R8A8_UNORM:
+            return TextureFormat::B8G8R8A8;
+        case VK_FORMAT_A8B8G8R8_SRGB_PACK32:
+            return TextureFormat::A8B8G8R8;
+        case VK_FORMAT_R8G8B8A8_SRGB:
+            return TextureFormat::R8G8B8A8_SRGB;
+        case VK_FORMAT_R8G8B8A8_UNORM:
+            return TextureFormat::R8G8B8A8;
+        case VK_FORMAT_R32G32B32_SFLOAT:
+            return TextureFormat::R32FG32FB32F;
+        case VK_FORMAT_R32G32B32A32_SFLOAT:
+            return TextureFormat::R32FG32FB32FA32F;
+        case VK_FORMAT_R32_SFLOAT:
+            return TextureFormat::R32F;
+        case VK_FORMAT_R32G32_SFLOAT:
+            return TextureFormat::R32FG32F;
+        case VK_FORMAT_R16G16_SFLOAT:
+            return TextureFormat::R16FG16F;
+        case VK_FORMAT_R16G16B16_SFLOAT:
+            return TextureFormat::R16FG16FB16F;
+        case VK_FORMAT_R16G16B16A16_SFLOAT:
+            return TextureFormat::R16FG16FB16FA16F;
+        case VK_FORMAT_D24_UNORM_S8_UINT:
+            return TextureFormat::DEPTH24STENCIL8;
+        case VK_FORMAT_D32_SFLOAT:
+            return TextureFormat::DEPTH32F;
+        case VK_FORMAT_D32_SFLOAT_S8_UINT:
+            return TextureFormat::DEPTH32FSTENCIL8;
+        default:
+            return TextureFormat::A8R8G8B8;
+    }
+}
+
 std::vector<VkFormat> vc::vkFormat(const std::vector<TextureFormat>& formats)
 {
     std::vector<VkFormat> map;

@@ -8,8 +8,8 @@
 
 namespace neon
 {
-    QTSwapChainFrameBuffer::QTSwapChainFrameBuffer(Application* application) :
-        FrameBuffer(),
+    QTSwapChainFrameBuffer::QTSwapChainFrameBuffer(Application* application, std::string name) :
+        FrameBuffer(std::move(name)),
         _implementation(application)
     {
     }
@@ -33,19 +33,19 @@ namespace neon
         return _implementation;
     }
 
-    std::vector<std::shared_ptr<Texture>> QTSwapChainFrameBuffer::getTextures() const
+    rush::Vec2ui QTSwapChainFrameBuffer::getDimensions() const
     {
-        return {};
+        return _implementation.getDimensions();
     }
 
-    uint32_t QTSwapChainFrameBuffer::getWidth() const
+    std::vector<FrameBufferOutput> QTSwapChainFrameBuffer::getOutputs() const
     {
-        return _implementation.getWidth();
+        return _implementation.getOutputs();
     }
 
-    uint32_t QTSwapChainFrameBuffer::getHeight() const
+    SamplesPerTexel QTSwapChainFrameBuffer::getSamples() const
     {
-        return _implementation.getHeight();
+        return _implementation.getSamples();
     }
 } // namespace neon
 
