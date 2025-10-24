@@ -1,0 +1,10 @@
+{
+  "name": "sans_material",
+  "frame_buffer": "frame_buffer",
+  "shader": {
+    "name": "shader",
+    "vertex": "deferred.vert",
+    "fragment": "deferred.frag",
+    "uniform": "A:default"
+  }
+}

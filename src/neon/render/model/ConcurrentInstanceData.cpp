@@ -165,28 +165,24 @@ namespace neon
     bool ConcurrentInstanceData::uploadData(Instance instance, size_t index, const void* data)
     {
         if (_slots.size() < index) {
-            logger.error(MessageBuilder()
-                             .group("vulkan")
-                             .print("Cannot upload instance data. Index ")
-                             .print(index)
-                             .print(" is not defined!"));
+            neon::error().group("vulkan") << "Cannot upload instance data. Slot " << index << " is not defined!";
             return false;
         }
-
-        uint32_t id = *instance.id;
         auto& slot = _slots[index];
-
-        std::lock_guard posLock(_positionMutex);
-        if (id >= _positions.size()) {
-            logger.error(MessageBuilder()
-                             .group("vulkan")
-                             .print("Cannot upload instance data. Invalid id ")
-                             .print(id)
-                             .print("!"));
+        if (slot.size == 0) {
+            neon::error().group("vulkan") << "Cannot upload instance data. Slot" << index << " has no memory!";
             return false;
         }
+
 
         std::lock_guard slotLock(_mutex[index]);
+
+        uint32_t id = *instance.id;
+
+        if (id >= _positions.size()) {
+            neon::error().group("vulkan") << "Cannot upload instance data. Instance" << id << " is not valid!";
+            return false;
+        }
 
         memcpy(slot.data + slot.size * id, data, slot.size);
 

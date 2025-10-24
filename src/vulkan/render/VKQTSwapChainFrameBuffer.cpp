@@ -16,82 +16,92 @@
     #include <vulkan/util/VKUtil.h>
 
     #include <neon/render/buffer/CommandBuffer.h>
+    #include <vulkan/util/VulkanConversions.h>
 
-neon::vulkan::VKQTSwapChainFrameBuffer::VKQTSwapChainFrameBuffer(Application* application) :
-    _qtApplication(dynamic_cast<QTApplication*>(application->getImplementation())),
-    _renderPass(application, _qtApplication->defaultRenderPass())
+namespace neon::vulkan
 {
-    ImGui_ImplVulkan_InitInfo init_info = {};
-    init_info.Instance = _qtApplication->getInstance();
-    init_info.PhysicalDevice = _qtApplication->getPhysicalDevice().getRaw();
-    init_info.Device = _qtApplication->getDevice()->getRaw();
-    init_info.Queue = _qtApplication->getGraphicsQueue();
-    init_info.DescriptorPool = _qtApplication->getImGuiPool();
-    init_info.MinImageCount = 3;
-    init_info.ImageCount = 3;
-    init_info.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
+    VKQTSwapChainFrameBuffer::VKQTSwapChainFrameBuffer(Application* application) :
+        VKFrameBuffer(application),
+        _qtApplication(dynamic_cast<QTApplication*>(application->getImplementation())),
+        _renderPass(application, _qtApplication->getHandler()->defaultRenderPass())
+    {
+        auto d = holdRawDevice();
+        ImGui_ImplVulkan_InitInfo init_info = {};
+        init_info.Instance = _qtApplication->getInstance();
+        init_info.PhysicalDevice = _qtApplication->getPhysicalDevice().getRaw();
+        init_info.Device = d;
+        init_info.Queue = _qtApplication->getGraphicsQueue();
+        init_info.DescriptorPool = _qtApplication->getImGuiPool();
+        init_info.MinImageCount = 3;
+        init_info.ImageCount = 3;
+        init_info.MSAASamples = conversions::vkSampleCountFlagBits(SamplesPerTexel::COUNT_1);
+        init_info.RenderPass = _renderPass.getRaw();
 
-    ImGui_ImplVulkan_Init(&init_info, _qtApplication->defaultRenderPass());
+        ImGui_ImplVulkan_Init(&init_info);
+    }
 
-    auto cmd = _qtApplication->getCommandPool()->beginCommandBuffer(true);
+    bool VKQTSwapChainFrameBuffer::hasDepth() const
+    {
+        return true;
+    }
 
-    ImGui_ImplVulkan_CreateFontsTexture(cmd->getImplementation().getCommandBuffer());
+    uint32_t VKQTSwapChainFrameBuffer::getColorAttachmentAmount() const
+    {
+        return 1;
+    }
 
-    cmd->end();
-    cmd->submit();
-    cmd->wait();
+    std::vector<VkFormat> VKQTSwapChainFrameBuffer::getColorFormats() const
+    {
+        return {_qtApplication->getSwapChainImageFormat()};
+    }
 
-    ImGui_ImplVulkan_DestroyFontUploadObjects();
-}
+    const VKRenderPass& VKQTSwapChainFrameBuffer::getRenderPass() const
+    {
+        return _renderPass;
+    }
 
-bool neon::vulkan::VKQTSwapChainFrameBuffer::hasDepth() const
-{
-    return true;
-}
+    VKRenderPass& VKQTSwapChainFrameBuffer::getRenderPass()
+    {
+        return _renderPass;
+    }
 
-uint32_t neon::vulkan::VKQTSwapChainFrameBuffer::getColorAttachmentAmount() const
-{
-    return 1;
-}
+    bool VKQTSwapChainFrameBuffer::renderImGui()
+    {
+        return true;
+    }
 
-VkFramebuffer neon::vulkan::VKQTSwapChainFrameBuffer::getRaw() const
-{
-    return _qtApplication->currentFramebuffer();
-}
+    rush::Vec2ui VKQTSwapChainFrameBuffer::getDimensions() const
+    {
+        auto [width, height] = _qtApplication->getSwapChainExtent();
+        return {width, height};
+    }
 
-std::vector<VkFormat> neon::vulkan::VKQTSwapChainFrameBuffer::getColorFormats() const
-{
-    return {_qtApplication->getSwapChainImageFormat()};
-}
+    SamplesPerTexel VKQTSwapChainFrameBuffer::getSamples() const
+    {
+        return SamplesPerTexel::COUNT_1;
+    }
 
-VkFormat neon::vulkan::VKQTSwapChainFrameBuffer::getDepthFormat() const
-{
-    return _qtApplication->getDepthImageFormat();
-}
+    std::vector<FrameBufferOutput> VKQTSwapChainFrameBuffer::getOutputs() const
+    {
+        FrameBufferOutput output;
+        output.type = FrameBufferOutputType::SWAP;
+        return {output};
+    }
 
-const neon::vulkan::VKRenderPass& neon::vulkan::VKQTSwapChainFrameBuffer::getRenderPass() const
-{
-    return _renderPass;
-}
+    void* VKQTSwapChainFrameBuffer::getNativeHandle()
+    {
+        return _qtApplication->getHandler()->currentFramebuffer();
+    }
 
-neon::vulkan::VKRenderPass& neon::vulkan::VKQTSwapChainFrameBuffer::getRenderPass()
-{
-    return _renderPass;
-}
+    const void* VKQTSwapChainFrameBuffer::getNativeHandle() const
+    {
+        return _qtApplication->getHandler()->currentFramebuffer();
+    }
 
-uint32_t neon::vulkan::VKQTSwapChainFrameBuffer::getWidth() const
-{
-    return _qtApplication->getSwapChainExtent().width;
-}
-
-uint32_t neon::vulkan::VKQTSwapChainFrameBuffer::getHeight() const
-{
-    return _qtApplication->getSwapChainExtent().height;
-}
-
-bool neon::vulkan::VKQTSwapChainFrameBuffer::renderImGui()
-{
-    return true;
-}
+    std::optional<VkFormat> VKQTSwapChainFrameBuffer::getDepthFormat() const
+    {
+        return _qtApplication->getVkDepthImageFormat();
+    }
+} // namespace neon::vulkan
 
 #endif

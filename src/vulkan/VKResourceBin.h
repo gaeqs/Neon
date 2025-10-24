@@ -10,9 +10,10 @@
 #include <vector>
 #include <memory>
 #include <neon/render/buffer/CommandBufferRun.h>
+#include <vulkan/device/VKDevice.h>
 #include <vulkan/vulkan_core.h>
 
-namespace neon
+namespace neon::vulkan
 {
 
     /**
@@ -23,7 +24,6 @@ namespace neon
     {
         struct Entry
         {
-            VkDevice device;
             std::vector<std::shared_ptr<CommandBufferRun>> runs;
             std::function<void()> deleteFunction;
         };
@@ -38,13 +38,11 @@ namespace neon
          * Schedules a resource for deferred destruction.
          * The resource will not be destroyed until all associated command buffer runs have finished.
          *
-         * @param device The Vulkan device associated with the resource.
          * @param runs A vector of shared pointers to CommandBufferRun objects. These represent the command buffer runs
          *             whose completion is required before the resource can be destroyed.
          * @param deleteFunction The callback function that performs the destruction of the resource.
          */
-        void destroyLater(VkDevice device, std::vector<std::shared_ptr<CommandBufferRun>> runs,
-                          std::function<void()> deleteFunction);
+        void destroyLater(std::vector<std::shared_ptr<CommandBufferRun>> runs, std::function<void()> deleteFunction);
 
         /**
          * Clears stored resources in the VKResourceBin that are no longer needed.
@@ -62,6 +60,13 @@ namespace neon
         void flush();
 
         /**
+         * Clears all resources inside this VKResourceBin, waiting for the GPU to free them.
+         *
+         * This function is typically invoked when the VKResourceBin is being destroyed.
+         */
+        void waitAndFlush();
+
+        /**
          * Schedules a resource for deferred destruction.
          * The resource will not be destroyed until all associated command buffer runs have finished.
          *
@@ -71,13 +76,13 @@ namespace neon
          * @param destroyFn A callable that handles the actual destruction of the resource.
          */
         template<typename T>
-        void destroyLater(VkDevice device, std::vector<std::shared_ptr<CommandBufferRun>> runs, T* resource,
+        void destroyLater(VKDevice* device, std::vector<std::shared_ptr<CommandBufferRun>> runs, T* resource,
                           void (*destroyFn)(VkDevice, T*, const VkAllocationCallbacks*))
         {
-            destroyLater(device, std::move(runs), [=] { destroyFn(device, resource, nullptr); });
+            destroyLater(std::move(runs), [=] { destroyFn(device->hold(), resource, nullptr); });
         }
     };
 
-} // namespace neon
+} // namespace neon::vulkan
 
 #endif // VKRESOURCEBIN_H

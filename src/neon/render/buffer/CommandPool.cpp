@@ -82,6 +82,14 @@ namespace neon
         return raw;
     }
 
+    void CommandPool::waitForAll()
+    {
+        checkUsedBufferForAvailability();
+        for (auto cmd : _usedBuffers) {
+            _buffers[cmd]->wait();
+        }
+    }
+
     CommandPool& CommandPool::operator=(CommandPool&& move) noexcept
     {
         _buffers.clear();

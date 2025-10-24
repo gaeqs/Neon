@@ -23,6 +23,11 @@ namespace neon::vulkan
             return &it->second;
         }
 
+        if (!_fileSystem) {
+            neon::debug() << "Failed to fetch include file: " << path << ". Filesystem not defined.";
+            return nullptr;
+        }
+
         if (auto opt = _fileSystem->readFile(path)) {
             auto& file = opt.value();
             auto [it, ok] = _cache.insert({path, file.toString()});
@@ -33,9 +38,10 @@ namespace neon::vulkan
         return nullptr;
     }
 
-    SPIRVIncluder::SPIRVIncluder(FileSystem* fileSystem, std::filesystem::path rootPath) :
-        _fileSystem(fileSystem),
-        _rootPath(std::move(rootPath))
+    SPIRVIncluder::SPIRVIncluder(IncluderCreateInfo includerCreateInfo) :
+        _fileSystem(includerCreateInfo.fileSystem),
+        _rootPath(std::move(includerCreateInfo.rootPath)),
+        _cache(std::move(includerCreateInfo.prefetchedIncludes))
     {
     }
 
@@ -43,10 +49,8 @@ namespace neon::vulkan
                                                                             const char* includerName, size_t depth)
     {
         auto path = std::filesystem::path(headerName);
+
         neon::debug() << "Fetching system include file: " << path;
-        if (!_fileSystem) {
-            return nullptr;
-        }
 
         auto* data = fetch(path);
         if (!data) {
@@ -67,9 +71,6 @@ namespace neon::vulkan
         }
 
         neon::debug() << "Fetching local include file: " << headerName << " (" << path << ")";
-        if (!_fileSystem) {
-            return nullptr;
-        }
 
         auto* data = fetch(path);
         if (!data) {
@@ -250,11 +251,10 @@ namespace neon::vulkan
         }
     }
 
-    SPIRVCompiler::SPIRVCompiler(const VKPhysicalDevice& device, FileSystem* includerFileSystem,
-                                 std::filesystem::path includerRootPath) :
+    SPIRVCompiler::SPIRVCompiler(const VKPhysicalDevice& device, IncluderCreateInfo includerCreateInfo) :
         _compiled(false),
         _resources(generateDefaultResources(device)),
-        _includer(includerFileSystem, std::move(includerRootPath))
+        _includer(std::move(includerCreateInfo))
     {
         if (!GLSLANG_INITIALIZED) {
             glslang::InitializeProcess();
@@ -277,7 +277,7 @@ namespace neon::vulkan
         auto language = getLanguage(shaderType);
         auto* shader = new glslang::TShader(language);
 
-        auto messages = static_cast<EShMessages>(EShMsgSpvRules | EShMsgVulkanRules);
+        auto messages = static_cast<EShMessages>(EShMsgSpvRules | EShMsgVulkanRules | EShMsgDebugInfo);
 
         const char* value = source.data();
         shader->setStrings(&value, 1);
@@ -319,9 +319,14 @@ namespace neon::vulkan
             return {"Shader is not compiled!"};
         }
 
+        glslang::SpvOptions spvOptions;
+        spvOptions.generateDebugInfo = true;
+        spvOptions.emitNonSemanticShaderDebugInfo = true;
+        spvOptions.emitNonSemanticShaderDebugSource = true;
+
         auto* intermediate = _program.getIntermediate(getLanguage(shaderType));
         std::vector<uint32_t> result;
-        glslang::GlslangToSpv(*intermediate, result);
+        glslang::GlslangToSpv(*intermediate, result, &spvOptions);
         return {result};
     }
 

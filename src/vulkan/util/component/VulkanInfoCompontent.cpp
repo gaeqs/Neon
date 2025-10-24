@@ -6,7 +6,7 @@
 
 #include <imgui_internal.h>
 #include <neon/structure/Application.h>
-#include <vulkan/VKApplication.h>
+#include <vulkan/AbstractVKApplication.h>
 
 void neon::vulkan::VulkanInfoCompontent::tooltip(const char* desc)
 {
@@ -578,7 +578,7 @@ void neon::vulkan::VulkanInfoCompontent::physicalDeviceFeatures() const
 
 void neon::vulkan::VulkanInfoCompontent::onStart()
 {
-    auto application = dynamic_cast<VKApplication*>(getApplication()->getImplementation());
+    auto application = dynamic_cast<AbstractVKApplication*>(getApplication()->getImplementation());
 
     _properties = application->getPhysicalDevice().getProperties();
     _features = &application->getDevice()->getEnabledFeatures();

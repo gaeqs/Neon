@@ -255,7 +255,7 @@ namespace neon::vulkan
         pipelineLayoutInfo.pushConstantRangeCount = static_cast<uint32_t>(pushConstants.size());
         pipelineLayoutInfo.pPushConstantRanges = pushConstants.data();
 
-        if (vkCreatePipelineLayout(getApplication()->getDevice()->getRaw(), &pipelineLayoutInfo, nullptr,
+        if (vkCreatePipelineLayout(getApplication()->getDevice()->hold(), &pipelineLayoutInfo, nullptr,
                                    &_pipelineLayout) != VK_SUCCESS) {
             throw std::runtime_error("Failed to create pipeline layout!");
         }
@@ -279,7 +279,7 @@ namespace neon::vulkan
         pipelineInfo.renderPass = _target;
         pipelineInfo.subpass = 0;
 
-        if (vkCreateGraphicsPipelines(getApplication()->getDevice()->getRaw(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr,
+        if (vkCreateGraphicsPipelines(getApplication()->getDevice()->hold(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr,
                                       &_pipeline) != VK_SUCCESS) {
             throw std::runtime_error("Failed to create graphics pipeline!");
         }
@@ -288,7 +288,7 @@ namespace neon::vulkan
     VKMaterial::~VKMaterial()
     {
         if (_pipeline != VK_NULL_HANDLE) {
-            auto device = getApplication()->getDevice()->getRaw();
+            auto device = getApplication()->getDevice();
             auto bin = getApplication()->getBin();
             auto runs = getRuns();
             bin->destroyLater(device, runs, _pipeline, vkDestroyPipeline);

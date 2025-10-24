@@ -61,6 +61,12 @@ namespace neon
         return itType->second.erase(asset->getName()) == 1;
     }
 
+    void AssetCollection::clear()
+    {
+        _assets.clear();
+        _permanentAssets.clear();
+    }
+
     void AssetCollection::flushExpiredReferences()
     {
         for (auto& val : _assets | std::views::values) {

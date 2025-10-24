@@ -172,10 +172,15 @@ namespace neon
         bool remove(const std::shared_ptr<Asset>& asset);
 
         /**
+         * Clear all assets stored in this collection.
+         */
+        void clear();
+
+        /**
          * Removes all expired weak pointers from the collection.
          */
         void flushExpiredReferences();
     };
 } // namespace neon
 
-#endif //NEON_ASSETCOLLECTION_H
+#endif // NEON_ASSETCOLLECTION_H

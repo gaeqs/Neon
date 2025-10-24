@@ -1,0 +1,15 @@
+{
+  "name": "skybox",
+  "source": [
+    "right.jpg",
+    "left.jpg",
+    "top.jpg",
+    "bottom.jpg",
+    "front.jpg",
+    "back.jpg"
+  ],
+  "image": {
+    "layers": 6,
+    "view_type": "cube"
+  }
+}

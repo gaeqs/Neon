@@ -4,6 +4,7 @@
 
 #include "VKSampler.h"
 
+#include <vulkan/AbstractVKApplication.h>
 #include <vulkan/util/VulkanConversions.h>
 
 namespace vc = neon::vulkan::conversions;
@@ -18,15 +19,14 @@ namespace neon::vulkan
         vkGetPhysicalDeviceProperties(getApplication()->getPhysicalDevice().getRaw(), &properties);
         auto samplerInfo = vc::vkSamplerCreateInfo(info, VK_LOD_CLAMP_NONE, properties.limits.maxSamplerAnisotropy);
 
-        if (vkCreateSampler(getApplication()->getDevice()->getRaw(), &samplerInfo, nullptr, &_sampler) != VK_SUCCESS) {
+        if (vkCreateSampler(getApplication()->getDevice()->hold(), &samplerInfo, nullptr, &_sampler) != VK_SUCCESS) {
             throw std::runtime_error("Failed to create texture sampler!");
         }
     }
 
     VKSampler::~VKSampler()
     {
-        auto device = getApplication()->getDevice()->getRaw();
-        getApplication()->getBin()->destroyLater(device, getRuns(), _sampler, vkDestroySampler);
+        getApplication()->getBin()->destroyLater(getApplication()->getDevice(), getRuns(), _sampler, vkDestroySampler);
     }
 
     void* VKSampler::getNativeHandle()

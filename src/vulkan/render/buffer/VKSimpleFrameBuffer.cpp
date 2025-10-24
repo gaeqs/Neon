@@ -4,6 +4,7 @@
 
 #include "VKSimpleFrameBuffer.h"
 
+#include <vulkan/AbstractVKApplication.h>
 #include <vulkan/render/texture/VKSimpleTexture.h>
 #include <vulkan/render/texture/VKTextureView.h>
 #include <vulkan/util/VulkanConversions.h>
@@ -80,10 +81,6 @@ namespace neon::vulkan
 
             TextureViewCreateInfo viewCreateInfo{.aspect = {ViewAspect::DEPTH}};
 
-            if (info.format == TextureFormat::DEPTH24STENCIL8 || info.format == TextureFormat::DEPTH32FSTENCIL8) {
-                viewCreateInfo.aspect.emplace_back(ViewAspect::STENCIL);
-            }
-
             _depth->texture->emplace<VKTextureView>(app, name, viewCreateInfo, texture);
         }
     }
@@ -118,7 +115,7 @@ namespace neon::vulkan
         framebufferInfo.height = _dimensions.y();
         framebufferInfo.layers = layers;
 
-        if (vkCreateFramebuffer(getApplication()->getDevice()->getRaw(), &framebufferInfo, nullptr, &_frameBuffer) !=
+        if (vkCreateFramebuffer(getApplication()->getDevice()->hold(), &framebufferInfo, nullptr, &_frameBuffer) !=
             VK_SUCCESS) {
             throw std::runtime_error("Failed to create framebuffer!");
         }
@@ -126,7 +123,7 @@ namespace neon::vulkan
 
     void VKSimpleFrameBuffer::destroyFrameBuffer()
     {
-        getApplication()->getBin()->destroyLater(getApplication()->getDevice()->getRaw(), getRuns(), _frameBuffer,
+        getApplication()->getBin()->destroyLater(getApplication()->getDevice(), getRuns(), _frameBuffer,
                                                  vkDestroyFramebuffer);
     }
 

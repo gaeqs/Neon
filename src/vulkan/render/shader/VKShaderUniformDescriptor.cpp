@@ -45,7 +45,7 @@ namespace neon::vulkan
         layoutInfo.bindingCount = static_cast<uint32_t>(layoutBindings.size());
         layoutInfo.pBindings = layoutBindings.data();
 
-        if (vkCreateDescriptorSetLayout(_vkApplication->getDevice()->getRaw(), &layoutInfo, nullptr,
+        if (vkCreateDescriptorSetLayout(_vkApplication->getDevice()->hold(), &layoutInfo, nullptr,
                                         &_descriptorSetLayout) != VK_SUCCESS) {
             throw std::runtime_error("Failed to create descriptor set layout!");
         }
@@ -53,7 +53,7 @@ namespace neon::vulkan
 
     VKShaderUniformDescriptor::~VKShaderUniformDescriptor()
     {
-        vkDestroyDescriptorSetLayout(_vkApplication->getDevice()->getRaw(), _descriptorSetLayout, nullptr);
+        vkDestroyDescriptorSetLayout(_vkApplication->getDevice()->hold(), _descriptorSetLayout, nullptr);
     }
 
     AbstractVKApplication* VKShaderUniformDescriptor::getVkApplication() const

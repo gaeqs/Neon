@@ -9,8 +9,7 @@
 #include <optional>
 #include <string>
 #include <unordered_map>
-
-#include <vulkan/vulkan.h>
+#include <neon/render/shader/IncluderCreateInfo.h>
 
 #include <neon/render/shader/ShaderType.h>
 #include <neon/render/shader/ShaderUniform.h>
@@ -44,7 +43,7 @@ namespace neon::vulkan
         ~VKShaderProgram();
 
         std::optional<std::string> compile(const std::unordered_map<ShaderType, std::string>& raw,
-                                           FileSystem* includerFileSystem, std::filesystem::path includerRootPath);
+                                           IncluderCreateInfo includerCreateInfo);
 
         [[nodiscard]] const std::vector<VkPipelineShaderStageCreateInfo>& getShaders() const;
 

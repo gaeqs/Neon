@@ -5,6 +5,8 @@
 #include "VKSimpleTexture.h"
 #include "VKTextureView.h"
 
+#include <neon/render/buffer/CommandBuffer.h>
+#include <vulkan/AbstractVKApplication.h>
 #include <vulkan/render/buffer/SimpleBuffer.h>
 #include <vulkan/util/VKUtil.h>
 #include <vulkan/util/VulkanConversions.h>
@@ -119,11 +121,10 @@ namespace neon::vulkan
 
     VKSimpleTexture::~VKSimpleTexture()
     {
-        auto device = rawDevice();
         auto bin = getApplication()->getBin();
         auto allocator = getApplication()->getDevice()->getAllocator();
 
-        bin->destroyLater(device, getRuns(), [allocator, image = _image, allocation = _allocation] {
+        bin->destroyLater(getRuns(), [allocator, image = _image, allocation = _allocation] {
             vmaDestroyImage(allocator, image, allocation);
         });
     }

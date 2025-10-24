@@ -17,8 +17,7 @@ namespace neon
         _implementation(std::move(implementation)),
         _room(nullptr),
         _assetLoaders(true),
-        _lastCursorPosition(0.0, 0.0),
-        _commandManager(this)
+        _lastCursorPosition(0.0, 0.0)
     {
     }
 
@@ -33,7 +32,7 @@ namespace neon
         _implementation->init(this);
     }
 
-    Result<uint32_t, std::string> Application::startGameLoop()
+    Result<uint32_t, std::string> Application::startGameLoop() const
     {
         return _implementation->startGameLoop();
     }
@@ -60,12 +59,12 @@ namespace neon
 
     const CommandManager& Application::getCommandManager() const
     {
-        return _commandManager;
+        return _implementation->getCommandManager();
     }
 
     CommandManager& Application::getCommandManager()
     {
-        return _commandManager;
+        return _implementation->getCommandManager();
     }
 
     const TaskRunner& Application::getTaskRunner() const

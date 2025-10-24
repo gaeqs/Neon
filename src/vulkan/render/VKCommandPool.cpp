@@ -46,7 +46,7 @@ namespace neon::vulkan
         poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
         poolInfo.queueFamilyIndex = _queueFamilyIndex;
 
-        if (vkCreateCommandPool(_vkApplication->getDevice()->getRaw(), &poolInfo, nullptr, &_raw) != VK_SUCCESS) {
+        if (vkCreateCommandPool(_vkApplication->getDevice()->hold(), &poolInfo, nullptr, &_raw) != VK_SUCCESS) {
             throw std::runtime_error("Failed to create command pool!");
         }
     }
@@ -63,7 +63,7 @@ namespace neon::vulkan
     VKCommandPool::~VKCommandPool()
     {
         if (_raw != VK_NULL_HANDLE && !_external) {
-            vkDestroyCommandPool(_vkApplication->getDevice()->getRaw(), _raw, nullptr);
+            vkDestroyCommandPool(_vkApplication->getDevice()->hold(), _raw, nullptr);
         }
     }
 
@@ -93,7 +93,7 @@ namespace neon::vulkan
             return *this; // SAME!
         }
         if (_raw != VK_NULL_HANDLE && !_external) {
-            vkDestroyCommandPool(_vkApplication->getDevice()->getRaw(), _raw, nullptr);
+            vkDestroyCommandPool(_vkApplication->getDevice()->hold(), _raw, nullptr);
         }
         _application = move._application;
         _vkApplication = move._vkApplication;

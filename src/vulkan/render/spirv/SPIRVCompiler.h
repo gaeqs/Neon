@@ -13,6 +13,7 @@
 #include <glslang/Public/ShaderLang.h>
 #include <neon/render/shader/ShaderUniform.h>
 #include <neon/filesystem/FileSystem.h>
+#include <neon/render/shader/IncluderCreateInfo.h>
 #include <neon/util/Result.h>
 #include <vulkan/device/VKPhysicalDevice.h>
 
@@ -28,7 +29,7 @@ namespace neon::vulkan
         std::string* fetch(std::filesystem::path path);
 
       public:
-        SPIRVIncluder(FileSystem* fileSystem, std::filesystem::path rootPath);
+        explicit SPIRVIncluder(IncluderCreateInfo includerCreateInfo);
 
         ~SPIRVIncluder() override = default;
 
@@ -52,8 +53,7 @@ namespace neon::vulkan
         SPIRVIncluder _includer;
 
       public:
-        SPIRVCompiler(const VKPhysicalDevice& device, FileSystem* includerFileSystem,
-                      std::filesystem::path includerRootPath);
+        SPIRVCompiler(const VKPhysicalDevice& device, IncluderCreateInfo includerCreateInfo);
 
         ~SPIRVCompiler();
 

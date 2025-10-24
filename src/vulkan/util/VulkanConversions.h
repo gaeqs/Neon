@@ -39,6 +39,8 @@ namespace neon::vulkan::conversions
 
     VkFormat vkFormat(const TextureFormat& format);
 
+    TextureFormat textureFormat(const VkFormat& format);
+
     std::vector<VkFormat> vkFormat(const std::vector<TextureFormat>& formats);
 
     std::vector<VkFormat> vkFormat(const std::vector<FrameBufferTextureCreateInfo>& infos);

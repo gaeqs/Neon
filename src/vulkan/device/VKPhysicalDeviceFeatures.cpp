@@ -52,9 +52,15 @@ namespace neon::vulkan
         features(other.features),
         extensions(other.extensions)
     {
+        reweave();
+    }
+
+    VKPhysicalDeviceFeatures::VKPhysicalDeviceFeatures()
+    {
         features.emplace_back(VkPhysicalDeviceVulkan11Features(VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_1_FEATURES));
         features.emplace_back(VkPhysicalDeviceVulkan12Features(VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES));
         features.emplace_back(VkPhysicalDeviceVulkan13Features(VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES));
+        features.emplace_back(VkPhysicalDeviceSwapchainMaintenance1FeaturesEXT(VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SWAPCHAIN_MAINTENANCE_1_FEATURES_EXT));
 
         reweave();
     }
@@ -68,6 +74,7 @@ namespace neon::vulkan
         features.emplace_back(VkPhysicalDeviceVulkan11Features(VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_1_FEATURES));
         features.emplace_back(VkPhysicalDeviceVulkan12Features(VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES));
         features.emplace_back(VkPhysicalDeviceVulkan13Features(VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES));
+        features.emplace_back(VkPhysicalDeviceSwapchainMaintenance1FeaturesEXT(VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SWAPCHAIN_MAINTENANCE_1_FEATURES_EXT));
 
         features.insert(features.end(), extraFeatures.begin(), extraFeatures.end());
 

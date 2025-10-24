@@ -17,10 +17,10 @@ namespace neon::vulkan
     void VKSwapChainFrameBuffer::fetchSwapChainImages()
     {
         uint32_t imageCount = -1;
-        vkGetSwapchainImagesKHR(_vkApplication->getDevice()->getRaw(), _vkApplication->getSwapChain(), &imageCount,
+        vkGetSwapchainImagesKHR(_vkApplication->getDevice()->getDeviceWithoutHolding(), _vkApplication->getSwapChain(), &imageCount,
                                 nullptr);
         _swapChainImages.resize(imageCount);
-        vkGetSwapchainImagesKHR(_vkApplication->getDevice()->getRaw(), _vkApplication->getSwapChain(), &imageCount,
+        vkGetSwapchainImagesKHR(_vkApplication->getDevice()->getDeviceWithoutHolding(), _vkApplication->getSwapChain(), &imageCount,
                                 _swapChainImages.data());
     }
 
@@ -29,7 +29,7 @@ namespace neon::vulkan
         _swapChainImageViews.resize(_swapChainImages.size());
         for (auto i = 0; i < _swapChainImages.size(); ++i) {
             _swapChainImageViews[i] = vulkan_util::createImageView(
-                _vkApplication->getDevice()->getRaw(), _swapChainImages[i], _vkApplication->getSwapChainImageFormat(),
+                _vkApplication->getDevice()->hold(), _swapChainImages[i], _vkApplication->getSwapChainImageFormat(),
                 VK_IMAGE_ASPECT_COLOR_BIT, TextureViewCreateInfo(), TextureViewType::NORMAL_2D);
         }
     }
@@ -50,7 +50,7 @@ namespace neon::vulkan
         info.layers = 1;
         info.usages = {TextureUsage::COLOR_ATTACHMENT, TextureUsage::TRANSFER_ATTACHMENT};
 
-        auto pair = vulkan_util::createImage(_vkApplication->getDevice()->getRaw(),
+        auto pair = vulkan_util::createImage(_vkApplication->getDevice()->hold(),
                                              _vkApplication->getPhysicalDevice().getRaw(), info,
                                              TextureViewType::NORMAL_2D, _vkApplication->getSwapChainImageFormat());
 
@@ -58,7 +58,7 @@ namespace neon::vulkan
         _colorImageMemory = pair.second;
 
         _colorImageView = vulkan_util::createImageView(
-            _vkApplication->getDevice()->getRaw(), _colorImage, _vkApplication->getSwapChainImageFormat(),
+            _vkApplication->getDevice()->hold(), _colorImage, _vkApplication->getSwapChainImageFormat(),
             VK_IMAGE_ASPECT_COLOR_BIT, TextureViewCreateInfo(), TextureViewType::NORMAL_2D);
     }
 
@@ -75,7 +75,7 @@ namespace neon::vulkan
         info.layers = 1;
         info.usages = {TextureUsage::DEPTH_STENCIL_ATTACHMENT};
 
-        auto pair = vulkan_util::createImage(_vkApplication->getDevice()->getRaw(),
+        auto pair = vulkan_util::createImage(_vkApplication->getDevice()->hold(),
                                              _vkApplication->getPhysicalDevice().getRaw(), info,
                                              TextureViewType::NORMAL_2D, _vkApplication->getVkDepthImageFormat());
 
@@ -83,7 +83,7 @@ namespace neon::vulkan
         _depthImageMemory = pair.second;
 
         _depthImageView = vulkan_util::createImageView(
-            _vkApplication->getDevice()->getRaw(), _depthImage, _vkApplication->getVkDepthImageFormat(),
+            _vkApplication->getDevice()->hold(), _depthImage, _vkApplication->getVkDepthImageFormat(),
             VK_IMAGE_ASPECT_DEPTH_BIT, TextureViewCreateInfo(), TextureViewType::NORMAL_2D);
 
         //
@@ -124,7 +124,7 @@ namespace neon::vulkan
             framebufferInfo.height = extent.height;
             framebufferInfo.layers = 1;
 
-            if (vkCreateFramebuffer(_vkApplication->getDevice()->getRaw(), &framebufferInfo, nullptr,
+            if (vkCreateFramebuffer(_vkApplication->getDevice()->hold(), &framebufferInfo, nullptr,
                                     &_swapChainFrameBuffers[i]) != VK_SUCCESS) {
                 throw std::runtime_error("Failed to create framebuffer!");
             }
@@ -137,7 +137,7 @@ namespace neon::vulkan
     {
         auto runs = getRuns();
         auto bin = _vkApplication->getBin();
-        auto d = _vkApplication->getDevice()->getRaw();
+        auto d = _vkApplication->getDevice();
 
         if (_samples != SamplesPerTexel::COUNT_1) {
             bin->destroyLater(d, runs, _colorImageView, vkDestroyImageView);
@@ -183,10 +183,11 @@ namespace neon::vulkan
 
         createFrameBuffers();
 
+        auto d = holdRawDevice();
         ImGui_ImplVulkan_InitInfo init_info = {};
         init_info.Instance = _vkApplication->getInstance();
         init_info.PhysicalDevice = _vkApplication->getPhysicalDevice().getRaw();
-        init_info.Device = _vkApplication->getDevice()->getRaw();
+        init_info.Device = d;
         init_info.Queue = _vkApplication->getGraphicsQueue();
         init_info.DescriptorPool = _vkApplication->getImGuiPool();
         init_info.MinImageCount = 3;
@@ -195,12 +196,6 @@ namespace neon::vulkan
         init_info.RenderPass = _renderPass.getRaw();
 
         ImGui_ImplVulkan_Init(&init_info);
-
-        auto cmd = _vkApplication->getCommandPool()->beginCommandBuffer(true);
-
-        cmd->end();
-        cmd->submit();
-        cmd->wait();
     }
 
     VKSwapChainFrameBuffer::~VKSwapChainFrameBuffer()

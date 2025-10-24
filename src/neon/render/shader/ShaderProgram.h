@@ -15,6 +15,7 @@
 #include <neon/structure/Asset.h>
 #include <neon/render/shader/ShaderType.h>
 #include <neon/render/shader/ShaderUniform.h>
+#include <neon/render/shader/IncluderCreateInfo.h>
 
 #include <neon/util/Result.h>
 
@@ -31,7 +32,7 @@ namespace neon
     /**
      * Represents a set of shaders that can be used in a material.
      * <p>
-     * Shader programs contains all shaders used by a pipeline
+     * Shader programs contain all shaders used by a pipeline
      * to render an object.
      * To create a shader program, you must provide a set of shaders
      * in GLSL format.
@@ -40,7 +41,7 @@ namespace neon
      * You cannot use a shader program that is not compiled.
      * <p>
      * You may use the util static method <i>createShader</i> to
-     * create an compile a shader program in one line.
+     * create and compile a shader program in one line.
      */
     class ShaderProgram : public Asset
     {
@@ -126,11 +127,10 @@ namespace neon
          *
          * @warning No new shaders can be added after the program has been compiled.
          *
-         * @param includerFileSystem The file system for system includes (`<...>`).
-         * @param includerRootPath The base directory for local includes (`"..._).
+         * @param includerCreateInfo the information that configures the includer's creation.
          * @return A std::string containing the compilation error if one occurs, or nothing on success.
          */
-        std::optional<std::string> compile(FileSystem* includerFileSystem, std::filesystem::path includerRootPath);
+        std::optional<std::string> compile(IncluderCreateInfo includerCreateInfo);
 
         const std::vector<ShaderUniformBlock>& getUniformBlocks() const;
 

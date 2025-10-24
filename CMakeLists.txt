@@ -7,6 +7,7 @@ option(NEON_UNITY_BUILD "Enable Unity Build" OFF)
 
 set(CMAKE_CXX_STANDARD 20)
 set(LIBZIPPP_INSTALL ON)
+set(GLSLANG_ENABLE_INSTALL ON)
 set(NEON_GENERATED_DIR ${CMAKE_BINARY_DIR}/generated)
 set(CEF_RUNTIME_LIBRARY_FLAG "" CACHE STRING "Override CEF runtime flag" FORCE)
 
@@ -71,7 +72,7 @@ FetchContent_Declare(
 # SPIRV-Headers
 FetchContent_Declare(
         spirv_headers
-        GIT_TAG cfbe4feef20c3c0628712c2792624f0221e378ac
+        GIT_TAG 6bb105b6c4b3a246e1e6bb96366fe14c6dbfde83
         GIT_REPOSITORY https://github.com/KhronosGroup/SPIRV-Headers.git
         SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/lib/spirv_headers
 )
@@ -79,7 +80,7 @@ FetchContent_Declare(
 # SPIRV-Tools
 FetchContent_Declare(
         spirv_tools
-        GIT_TAG 6f276e05ccab210584996bc40a0bef82b91f4f40
+        GIT_TAG 5d01ec711f3077a89f33c7818d737cfa5dd932d6
         GIT_REPOSITORY https://github.com/KhronosGroup/SPIRV-Tools.git
         SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/lib/spirv_tools
 )
@@ -88,7 +89,7 @@ FetchContent_Declare(
 FetchContent_Declare(
         glslang
         GIT_REPOSITORY https://github.com/KhronosGroup/glslang.git
-        GIT_TAG 68f073b19569b580ecc7ba13fa96be3ecf65a0f6
+        GIT_TAG 5f6c7176c5483da9af6432afb3dd962e4f8873a1
         SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/lib/glslang
 )
 
@@ -149,8 +150,8 @@ list(APPEND UNITY_BUILD_TARGETS
 
 # QT
 if (NEON_USE_QT)
-    find_package(Qt5 REQUIRED COMPONENTS Core Gui)
-    list(APPEND NEON_LIBRARIES Qt5::Core Qt5::Gui)
+    find_package(Qt6 REQUIRED COMPONENTS Core Gui)
+    list(APPEND NEON_LIBRARIES Qt6::Core Qt6::Gui)
 endif ()
 
 if (RELEASE_DEBUG)

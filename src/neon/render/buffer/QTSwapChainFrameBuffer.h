@@ -31,7 +31,7 @@ namespace neon
         Implementation _implementation;
 
       public:
-        explicit QTSwapChainFrameBuffer(Application* application);
+        QTSwapChainFrameBuffer(Application* application, std::string name);
 
         ~QTSwapChainFrameBuffer() override = default;
 
@@ -43,14 +43,14 @@ namespace neon
 
         [[nodiscard]] const FrameBuffer::Implementation& getImplementation() const override;
 
-        [[nodiscard]] std::vector<std::shared_ptr<Texture>> getTextures() const override;
+        [[nodiscard]] rush::Vec2ui getDimensions() const override;
 
-        [[nodiscard]] uint32_t getWidth() const override;
+        [[nodiscard]] std::vector<FrameBufferOutput> getOutputs() const override;
 
-        [[nodiscard]] uint32_t getHeight() const override;
+        [[nodiscard]] SamplesPerTexel getSamples() const override;
     };
 } // namespace neon
 
 #endif
 
-#endif //NEON_QTSWAPCHAINFRAMEBUFFER_H
+#endif // NEON_QTSWAPCHAINFRAMEBUFFER_H

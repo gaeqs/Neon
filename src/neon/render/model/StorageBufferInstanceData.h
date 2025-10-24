@@ -7,7 +7,6 @@
 
 #include <neon/render/model/InstanceData.h>
 #include <neon/render/shader/ShaderUniformBuffer.h>
-#include <neon/util/Range.h>
 
 namespace neon
 {
@@ -16,7 +15,8 @@ namespace neon
     struct ModelCreateInfo;
 
     /**
-     * Basic InstanceData implementation.
+     * InstanceData implementation that used an already defined ShaderUniformBuffer
+     * as the underlying buffer.
      * This implementation is not thread-safe.
      */
     class StorageBufferInstanceData : public InstanceData
@@ -74,4 +74,4 @@ namespace neon
     };
 } // namespace neon
 
-#endif //STORAGEBUFFERINSTANCEDATA_H
+#endif // STORAGEBUFFERINSTANCEDATA_H

@@ -17,6 +17,7 @@
 #include <neon/util/profile/Profiler.h>
 
 #include <vulkan/vulkan.h>
+#include <vulkan/sync/VKSemaphore.h>
 #include <vulkan/AbstractVKApplication.h>
 #include <vulkan/device/VKDevice.h>
 #include <vulkan/VKApplicationCreateInfo.h>
@@ -30,7 +31,7 @@ namespace neon::vulkan
 {
     class VKApplication : public AbstractVKApplication
     {
-        static constexpr int MAX_FRAMES_IN_FLIGHT = 2;
+        static constexpr int MAX_FRAMES_IN_FLIGHT = 3;
 
         const std::vector<const char*> VALIDATION_LAYERS = {"VK_LAYER_KHRONOS_validation"};
 
@@ -62,15 +63,16 @@ namespace neon::vulkan
         TextureFormat _depthImageFormat;
         VkFormat _vkDepthImageFormat;
 
+        std::unique_ptr<CommandManager> _commandManager;
         CommandPoolHolder _commandPool;
         VKResourceBin _bin;
 
         CommandBuffer* _currentCommandBuffer;
         bool _recording;
 
-        std::vector<VkSemaphore> _imageAvailableSemaphores;
-        std::vector<VkSemaphore> _renderFinishedSemaphores;
-        std::vector<CommandBuffer*> _assignedCommandBuffer;
+        uint32_t _swapChainImageCount;
+        std::shared_ptr<VKSemaphore> _imageAvailableSemaphore;
+        std::vector<std::shared_ptr<CommandBufferRun>> _runOfFrame;
 
         bool _requiresSwapchainRecreation;
         uint32_t _currentFrame;
@@ -128,6 +130,10 @@ namespace neon::vulkan
         void init(neon::Application* application) override;
 
         GLFWwindow* getWindow() const;
+
+        [[nodiscard]] CommandManager& getCommandManager() override;
+
+        [[nodiscard]] const CommandManager& getCommandManager() const override;
 
         [[nodiscard]] rush::Vec2i getWindowSize() const override;
 

@@ -56,7 +56,9 @@ namespace neon::vulkan
         info.commandPool = _pool;
         info.level = primary ? VK_COMMAND_BUFFER_LEVEL_PRIMARY : VK_COMMAND_BUFFER_LEVEL_SECONDARY;
         info.commandBufferCount = 1;
-        if (vkAllocateCommandBuffers(_vkApplication->getDevice()->getRaw(), &info, &_commandBuffer) != VK_SUCCESS) {
+
+        auto holder = _vkApplication->getDevice()->hold();
+        if (vkAllocateCommandBuffers(holder, &info, &_commandBuffer) != VK_SUCCESS) {
             throw std::runtime_error("Failed to allocate command buffers!");
         }
     }
@@ -80,7 +82,9 @@ namespace neon::vulkan
         info.commandPool = _pool;
         info.level = primary ? VK_COMMAND_BUFFER_LEVEL_PRIMARY : VK_COMMAND_BUFFER_LEVEL_SECONDARY;
         info.commandBufferCount = 1;
-        if (vkAllocateCommandBuffers(_vkApplication->getDevice()->getRaw(), &info, &_commandBuffer) != VK_SUCCESS) {
+
+        auto holder = _vkApplication->getDevice()->hold();
+        if (vkAllocateCommandBuffers(holder, &info, &_commandBuffer) != VK_SUCCESS) {
             throw std::runtime_error("Failed to allocate command buffers!");
         }
     }
@@ -149,29 +153,41 @@ namespace neon::vulkan
         return true;
     }
 
-    bool VKCommandBuffer::submit(uint32_t waitSemaphoreAmount, VkSemaphore* waitSemaphores,
-                                 VkPipelineStageFlags* waitStages, uint32_t signalSemaphoreAmount,
-                                 VkSemaphore* signalSemaphores)
+    bool VKCommandBuffer::submit(std::shared_ptr<VKSemaphore> waitSemaphore,
+                                 std::shared_ptr<VKSemaphore> signalSemaphore, VkPipelineStageFlags* waitStages)
     {
         if (_status != VKCommandBufferStatus::RECORDED) {
             printInvalidState(VKCommandBufferStatus::RECORDED);
             return false;
         }
 
+        uint32_t waitCount = waitSemaphore ? 1 : 0;
+        uint32_t signalCount = signalSemaphore ? 1 : 0;
+
+        VkSemaphore rawWait = waitSemaphore ? waitSemaphore->getRaw() : VK_NULL_HANDLE;
+        VkSemaphore rawSignal = signalSemaphore ? signalSemaphore->getRaw() : VK_NULL_HANDLE;
+
         VkSubmitInfo submitInfo{};
         submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
         submitInfo.commandBufferCount = 1;
         submitInfo.pCommandBuffers = &_commandBuffer;
-        submitInfo.waitSemaphoreCount = waitSemaphoreAmount;
-        submitInfo.pWaitSemaphores = waitSemaphores;
+        submitInfo.waitSemaphoreCount = waitCount;
+        submitInfo.pWaitSemaphores = &rawWait;
         submitInfo.pWaitDstStageMask = waitStages;
-        submitInfo.signalSemaphoreCount = signalSemaphoreAmount;
-        submitInfo.pSignalSemaphores = signalSemaphores;
+        submitInfo.signalSemaphoreCount = signalCount;
+        submitInfo.pSignalSemaphores = &rawSignal;
 
         VkQueue queue = _queue;
         VkFence fence = fetchAvailableFence();
         vkQueueSubmit(queue, 1, &submitInfo, fence);
         _fences.push_back(fence);
+
+        if (waitSemaphore) {
+            waitSemaphore->registerRun(getCurrentRun());
+        }
+        if (signalSemaphore) {
+            signalSemaphore->registerRun(getCurrentRun());
+        }
 
         return true;
     }
@@ -191,10 +207,11 @@ namespace neon::vulkan
         if (_fences.empty()) {
             return;
         }
-        vkWaitForFences(_vkApplication->getDevice()->getRaw(), static_cast<uint32_t>(_fences.size()), _fences.data(),
-                        VK_TRUE, UINT64_MAX);
 
-        vkResetFences(_vkApplication->getDevice()->getRaw(), static_cast<uint32_t>(_fences.size()), _fences.data());
+        auto device = _vkApplication->getDevice()->getDeviceWithoutHolding();
+        vkWaitForFences(device, static_cast<uint32_t>(_fences.size()), _fences.data(), VK_TRUE, UINT64_MAX);
+
+        vkResetFences(device, static_cast<uint32_t>(_fences.size()), _fences.data());
 
         for (const auto& fence : _fences) {
             _freedFences.push_back(fence);
@@ -234,8 +251,8 @@ namespace neon::vulkan
         VkFenceCreateInfo fenceInfo{};
         fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
         fenceInfo.flags = 0;
-
-        if (vkCreateFence(_vkApplication->getDevice()->getRaw(), &fenceInfo, nullptr, &fence) != VK_SUCCESS) {
+        auto holder = _vkApplication->getDevice()->hold();
+        if (vkCreateFence(holder, &fenceInfo, nullptr, &fence) != VK_SUCCESS) {
             throw std::runtime_error("Failed to create fence!");
         }
 
@@ -274,12 +291,13 @@ namespace neon::vulkan
 
         waitForFences();
 
+        auto holder = _vkApplication->getDevice()->hold();
         for (const auto& fence : _freedFences) {
-            vkDestroyFence(_vkApplication->getDevice()->getRaw(), fence, nullptr);
+            vkDestroyFence(holder, fence, nullptr);
         }
 
         if (!_external) {
-            vkFreeCommandBuffers(_vkApplication->getDevice()->getRaw(), _pool, 1, &_commandBuffer);
+            vkFreeCommandBuffers(holder, _pool, 1, &_commandBuffer);
         }
     }
 
@@ -291,19 +309,25 @@ namespace neon::vulkan
         if (_fences.empty()) {
             return false;
         }
-        auto device = _vkApplication->getDevice()->getRaw();
-
+        auto device = _vkApplication->getDevice()->getDeviceWithoutHolding();
         bool used = std::ranges::any_of(
             _fences, [device](const VkFence& it) { return vkGetFenceStatus(device, it) == VK_NOT_READY; });
 
         if (!used) {
             uint32_t amount = static_cast<uint32_t>(_fences.size());
-            vkResetFences(_vkApplication->getDevice()->getRaw(), amount, _fences.data());
+            vkResetFences(device, amount, _fences.data());
             _freedFences.insert(_freedFences.end(), _fences.begin(), _fences.end());
             _fences.clear();
         }
 
         return used;
+    }
+
+    VkFence VKCommandBuffer::createAndRegisterFence()
+    {
+        auto fence = fetchAvailableFence();
+        _fences.push_back(fence);
+        return fence;
     }
 
     VKCommandBuffer& VKCommandBuffer::operator=(VKCommandBuffer&& move) noexcept

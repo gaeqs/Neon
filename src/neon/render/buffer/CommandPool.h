@@ -55,6 +55,8 @@ namespace neon
 
         CommandBuffer* beginCommandBuffer(bool onlyOneSummit);
 
+        void waitForAll();
+
         CommandPool& operator=(CommandPool&& move) noexcept;
     };
 } // namespace neon

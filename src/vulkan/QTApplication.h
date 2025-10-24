@@ -28,20 +28,83 @@
 
 #ifdef USE_QT
 
-#include <QVulkanWindowRenderer>
+    #include <QVulkanWindowRenderer>
 
-#include <vulkan/AbstractVKApplication.h>
+    #include <QPointer>
+
+    #include <vulkan/AbstractVKApplication.h>
 
 namespace neon::vulkan
 {
 
-    class QTApplication : public QVulkanWindowRenderer,
-                          public QVulkanWindow,
-                          public AbstractVKApplication {
+    class QTApplication;
 
-        using TimeStamp = std::chrono::time_point<
-                std::chrono::system_clock,
-                std::chrono::nanoseconds>;
+    /**
+     * @brief This class is the bridge between a QVulkanWindow and a QTApplication.
+     *
+     * This class inherits from QVulkanWindowRenderer and QVulkanWindow.
+     * It handles all the Vulkan-related calls from the QT Window, redirecting
+     * them to the QTApplication.
+     *
+     * It also handles all the QT events.
+     */
+    class QTApplicationHandler : public QVulkanWindowRenderer, public QVulkanWindow
+    {
+        QTApplication* _application;
+
+      public:
+        /**
+         * @brief Constructs a new QTApplicationHandler.
+         * @param application the application to link to.
+         */
+        explicit QTApplicationHandler(QTApplication* application);
+
+        /**
+         * @brief Invalidates the handler.
+         * This method is called when the application is destroyed.
+         */
+        void invalidate();
+
+        void preInitResources() override;
+
+        void initResources() override;
+
+        void initSwapChainResources() override;
+
+        void releaseSwapChainResources() override;
+
+        void releaseResources() override;
+
+        void startNextFrame() override;
+
+        void physicalDeviceLost() override;
+
+        void logicalDeviceLost() override;
+
+        bool eventFilter(QObject* watched, QEvent* event) override;
+
+        void mouseMoveEvent(QMouseEvent*) override;
+
+        void mousePressEvent(QMouseEvent*) override;
+
+        void mouseReleaseEvent(QMouseEvent*) override;
+
+        void wheelEvent(QWheelEvent*) override;
+
+        QVulkanWindowRenderer* createRenderer() override;
+    };
+
+    /**
+     * @brief An ApplicationImplementation that uses QT as a backend.
+     *
+     * This class uses a QTApplicationHandler to manage the window and the Vulkan context.
+     * The game loop is managed by QT's event loop.
+     */
+    class QTApplication : public AbstractVKApplication
+    {
+        using TimeStamp = std::chrono::time_point<std::chrono::system_clock>;
+
+        QPointer<QTApplicationHandler> _handler;
 
         Application* _application;
         std::function<void(QTApplication*)> _onInit;
@@ -52,33 +115,61 @@ namespace neon::vulkan
         VKPhysicalDevice _physicalDevice;
         std::unique_ptr<VKDevice> _device;
 
-        mutable std::unique_ptr<CommandPool> _commandPool;
+        std::unique_ptr<CommandManager> _commandManager;
+        CommandPoolHolder _commandPool;
+        VKResourceBin _bin;
 
         FrameInformation _currentFrameInformation;
         TimeStamp _lastFrameTime;
         float _lastFrameProcessTime;
 
-        mutable std::unique_ptr<CommandBuffer> _currentCommandBuffer;
+        CommandBuffer* _currentCommandBuffer;
         uint32_t _swapChainCount;
         bool _recording;
 
         VkDescriptorPool _imGuiPool;
 
-    public:
+        void initImGui();
 
-        QTApplication();
+        void setupImGUIFrame() const;
+
+        static int32_t qtToGLFWKey(Qt::Key key);
+
+        static int32_t qtToGLFWMouseButton(Qt::MouseButton button);
+
+      public:
+        QTApplication(const QTApplication& other) = delete;
+
+        /**
+         * @brief Creates a new QTApplication.
+         * @param instance the Vulkan instance to use.
+         */
+        explicit QTApplication(QVulkanInstance* instance);
 
         ~QTApplication() override;
 
-        void setInitializationFunction(
-                std::function<void(QTApplication*)> func);
+        /**
+         * @brief Returns the handler of this application.
+         * The handler is the QVulkanWindow that manages the window.
+         * @return the handler.
+         */
+        QVulkanWindow* getHandler();
+
+        /**
+         * @brief Sets the function to be called when the application is initialized.
+         * @param func the function.
+         */
+        void setInitializationFunction(std::function<void(QTApplication*)> func);
 
         void init(Application* application) override;
 
+        [[nodiscard]] const CommandManager& getCommandManager() const override;
+
+        [[nodiscard]] CommandManager& getCommandManager() override;
+
         [[nodiscard]] rush::Vec2i getWindowSize() const override;
 
-        [[nodiscard]] FrameInformation
-        getCurrentFrameInformation() const override;
+        [[nodiscard]] FrameInformation getCurrentFrameInformation() const override;
 
         [[nodiscard]] CommandBuffer* getCurrentCommandBuffer() const override;
 
@@ -96,7 +187,7 @@ namespace neon::vulkan
 
         [[nodiscard]] VkFormat getSwapChainImageFormat() const override;
 
-        [[nodiscard]] VkFormat getDepthImageFormat() const override;
+        [[nodiscard]] TextureFormat getDepthImageFormat() const override;
 
         [[nodiscard]] CommandPool* getCommandPool() const override;
 
@@ -120,51 +211,58 @@ namespace neon::vulkan
 
         [[nodiscard]] VkQueue getGraphicsQueue() override;
 
-        void preInitResources() override;
+        // region QT-related methods.
+        // These methods are called by the QTApplicationHandler.
 
-        void initResources() override;
+        void preInitResources();
 
-        void initSwapChainResources() override;
+        void initResources();
 
-        void releaseSwapChainResources() override;
+        void initSwapChainResources();
 
-        void releaseResources() override;
+        void releaseSwapChainResources();
 
-        void startNextFrame() override;
+        void releaseResources();
 
-        void physicalDeviceLost() override;
+        void startNextFrame();
 
-        void logicalDeviceLost() override;
+        void physicalDeviceLost();
 
-        QVulkanWindowRenderer* createRenderer() override;
+        void logicalDeviceLost();
 
-    protected:
+        // endregion
 
-        void mouseMoveEvent(QMouseEvent* event) override;
+        const ApplicationCreateInfo& getCreationInfo() const override;
 
-        void mousePressEvent(QMouseEvent* event) override;
+        bool isInModalMode() const override;
 
-        void mouseReleaseEvent(QMouseEvent*) override;
+        void setModalMode(bool modal) override;
 
-        void keyPressEvent(QKeyEvent* event) override;
+        [[nodiscard]] bool isMainThread() const override;
 
-        void keyReleaseEvent(QKeyEvent* event) override;
+        [[nodiscard]] VkFormat getVkDepthImageFormat() const override;
 
-        void wheelEvent(QWheelEvent* event) override;
+        [[nodiscard]] VKResourceBin* getBin() override;
 
-    private:
+        // region Event handlers
+        // These methods are called by the QTApplicationHandler's event filter.
 
-        void initImGui();
+        void mouseMoveEvent(QMouseEvent* event);
 
-        void setupImGUIFrame() const;
+        void mousePressEvent(QMouseEvent* event);
 
-        static int32_t qtToGLFWKey(Qt::Key key);
+        void mouseReleaseEvent(QMouseEvent* event);
 
-        static int32_t qtToGLFWMouseButton(Qt::MouseButton button);
+        void keyPressEvent(const QKeyEvent* event) const;
 
+        void keyReleaseEvent(const QKeyEvent* event) const;
+
+        void wheelEvent(QWheelEvent* event);
+
+        // endregion
     };
-}
+} // namespace neon::vulkan
 
 #endif
 
-#endif //VISIMPL_QTAPPLICATION_H
+#endif // VISIMPL_QTAPPLICATION_H

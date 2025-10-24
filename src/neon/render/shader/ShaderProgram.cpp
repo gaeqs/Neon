@@ -45,20 +45,19 @@ namespace neon
         if (_compiled) {
             return "Shader already compiled.";
         }
-        auto result = _implementation.compile(_rawShaders, nullptr, std::filesystem::path());
+        auto result = _implementation.compile(_rawShaders, IncluderCreateInfo{});
         if (!result.has_value()) {
             _compiled = true;
         }
         return result;
     }
 
-    std::optional<std::string> ShaderProgram::compile(FileSystem* includerFileSystem,
-                                                      std::filesystem::path includerRootPath)
+    std::optional<std::string> ShaderProgram::compile(IncluderCreateInfo includerCreateInfo)
     {
         if (_compiled) {
             return "Shader already compiled.";
         }
-        auto result = _implementation.compile(_rawShaders, includerFileSystem, std::move(includerRootPath));
+        auto result = _implementation.compile(_rawShaders, std::move(includerCreateInfo));
         if (!result.has_value()) {
             _compiled = true;
         }

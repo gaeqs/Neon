@@ -128,6 +128,7 @@ namespace neon::vulkan
     void VKApplication::init(neon::Application* application)
     {
         _application = application;
+        _commandManager = std::make_unique<CommandManager>(application);
 
         // Add vulkan log group
         logger.addGroup(MessageGroupBuilder()
@@ -180,6 +181,16 @@ namespace neon::vulkan
     GLFWwindow* VKApplication::getWindow() const
     {
         return _window;
+    }
+
+    CommandManager& VKApplication::getCommandManager()
+    {
+        return *_commandManager;
+    }
+
+    const CommandManager& VKApplication::getCommandManager() const
+    {
+        return *_commandManager;
     }
 
     rush::Vec2i VKApplication::getWindowSize() const
@@ -324,10 +335,9 @@ namespace neon::vulkan
         // Wait
         {
             DEBUG_PROFILE_ID(profiler, adquireImage, "Wait for fences");
-            auto* cmd = _assignedCommandBuffer[_currentFrame];
-            if (cmd != nullptr) {
+            if (auto cmd = _runOfFrame[_currentFrame]) {
                 cmd->wait();
-                _assignedCommandBuffer[_currentFrame] = nullptr;
+                _runOfFrame[_currentFrame] = nullptr;
             }
         }
 
@@ -345,9 +355,11 @@ namespace neon::vulkan
 
         VkResult result;
         {
+            auto semaphore = std::make_shared<VKSemaphore>(_application);
             DEBUG_PROFILE_ID(profiler, adquireImage, "Image Acquisition");
-            result = vkAcquireNextImageKHR(_device->getRaw(), _swapChain, UINT64_MAX,
-                                           _imageAvailableSemaphores[_currentFrame], VK_NULL_HANDLE, &_imageIndex);
+            result = vkAcquireNextImageKHR(_device->getDeviceWithoutHolding(), _swapChain, UINT64_MAX,
+                                           semaphore->getRaw(), VK_NULL_HANDLE, &_imageIndex);
+            _imageAvailableSemaphore = std::move(semaphore);
         }
 
         if (result == VK_ERROR_OUT_OF_DATE_KHR) {
@@ -376,27 +388,34 @@ namespace neon::vulkan
 
     void VKApplication::endDraw(Profiler& profiler)
     {
+        _runOfFrame[_currentFrame] = _currentCommandBuffer->getCurrentRun();
         _currentCommandBuffer->end();
 
         _recording = false;
 
         VkPipelineStageFlags waitStages[] = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
 
-        _currentCommandBuffer->getImplementation().submit(1, &_imageAvailableSemaphores[_currentFrame], waitStages, 1,
-                                                          &_renderFinishedSemaphores[_currentFrame]);
-
-        _assignedCommandBuffer[_currentFrame] = _currentCommandBuffer;
+        _currentCommandBuffer->getImplementation().submit(_imageAvailableSemaphore, nullptr, waitStages);
 
         VkPresentInfoKHR presentInfo{};
         presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
-        presentInfo.waitSemaphoreCount = 1;
-        presentInfo.pWaitSemaphores = &_renderFinishedSemaphores[_currentFrame];
+        presentInfo.waitSemaphoreCount = 0;
+        presentInfo.swapchainCount = 1;
+        presentInfo.pWaitSemaphores = nullptr;
 
         VkSwapchainKHR swapChains[] = {_swapChain};
         presentInfo.swapchainCount = 1;
         presentInfo.pSwapchains = swapChains;
         presentInfo.pImageIndices = &_imageIndex;
         presentInfo.pResults = nullptr;
+
+        VkFence presentFence = _currentCommandBuffer->getImplementation().createAndRegisterFence();
+
+        VkSwapchainPresentFenceInfoEXT presentInfoFence{};
+        presentInfoFence.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_PRESENT_FENCE_INFO_EXT;
+        presentInfoFence.swapchainCount = 1;
+        presentInfoFence.pFences = &presentFence;
+        presentInfo.pNext = &presentInfoFence;
 
         VkResult presentResult;
         {
@@ -417,10 +436,13 @@ namespace neon::vulkan
     void VKApplication::finishLoop()
     {
         _application->getTaskRunner().shutdown();
-        vkDeviceWaitIdle(_device->getRaw());
+
+        auto holder = _device->hold();
+        vkDeviceWaitIdle(holder);
 
         // Free the command pool here and not in the
         // destructor.
+        _commandPool.getPool().waitForAll();
         _commandPool = CommandPoolHolder();
     }
 
@@ -444,7 +466,7 @@ namespace neon::vulkan
         applicationInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
         applicationInfo.pEngineName = "No Engine";
         applicationInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
-        applicationInfo.apiVersion = VK_API_VERSION_1_2;
+        applicationInfo.apiVersion = VK_API_VERSION_1_3;
 
         createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
         createInfo.pApplicationInfo = &applicationInfo;
@@ -510,6 +532,9 @@ namespace neon::vulkan
         if (_createInfo.enableValidationLayers) {
             extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
         }
+
+        extensions.push_back(VK_EXT_SURFACE_MAINTENANCE_1_EXTENSION_NAME);
+        extensions.push_back(VK_KHR_GET_SURFACE_CAPABILITIES_2_EXTENSION_NAME);
 
         return extensions;
     }
@@ -594,7 +619,8 @@ namespace neon::vulkan
             features = _physicalDevice.getFeatures();
         } else {
             features = VKPhysicalDeviceFeatures();
-            features.features = _createInfo.extraFeatures;
+            features.features.insert(features.features.end(), _createInfo.extraFeatures.begin(),
+                                     _createInfo.extraFeatures.end());
         }
 
         if (_createInfo.defaultExtensionInclusion != InclusionMode::INCLUDE_ALL) {
@@ -654,15 +680,18 @@ namespace neon::vulkan
         createInfo.clipped = VK_TRUE;
         createInfo.oldSwapchain = VK_NULL_HANDLE;
 
-        VkResult result = vkCreateSwapchainKHR(_device->getRaw(), &createInfo, nullptr, &_swapChain);
+        auto holder = _device->hold();
+        VkResult result = vkCreateSwapchainKHR(holder, &createInfo, nullptr, &_swapChain);
 
         if (result != VK_SUCCESS) {
             throw std::runtime_error(std::format("Failed to create swap chain! Error code: {}.\n"
                                                  "Device is: {}\n"
                                                  "Surface is: {}",
-                                                 static_cast<int>(result), static_cast<void*>(_device->getRaw()),
+                                                 static_cast<int>(result), static_cast<void*>(holder.get()),
                                                  static_cast<void*>(_surface)));
         }
+
+        vkGetSwapchainImagesKHR(holder, _swapChain, &_swapChainImageCount, nullptr);
 
         _surfaceFormat = format;
         _swapChainImageFormat = format.format;
@@ -728,30 +757,12 @@ namespace neon::vulkan
 
     void VKApplication::createCommandPool()
     {
-        _commandPool = _application->getCommandManager().fetchCommandPool();
+        _commandPool = _commandManager->fetchCommandPool();
     }
 
     void VKApplication::createSyncObjects()
     {
-        _imageAvailableSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
-        _renderFinishedSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
-        _assignedCommandBuffer.resize(MAX_FRAMES_IN_FLIGHT);
-
-        VkSemaphoreCreateInfo semaphoreInfo{};
-        semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
-
-        VkFenceCreateInfo fenceInfo{};
-        fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
-        fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
-
-        for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
-            if (vkCreateSemaphore(_device->getRaw(), &semaphoreInfo, nullptr, &_imageAvailableSemaphores[i]) !=
-                    VK_SUCCESS ||
-                vkCreateSemaphore(_device->getRaw(), &semaphoreInfo, nullptr, &_renderFinishedSemaphores[i]) !=
-                    VK_SUCCESS) {
-                throw std::runtime_error("Failed to create synchronization objects!");
-            }
-        }
+        _runOfFrame.resize(MAX_FRAMES_IN_FLIGHT);
     }
 
     void VKApplication::initImGui()
@@ -777,7 +788,7 @@ namespace neon::vulkan
         pool_info.poolSizeCount = std::size(pool_sizes);
         pool_info.pPoolSizes = pool_sizes;
 
-        if (vkCreateDescriptorPool(_device->getRaw(), &pool_info, nullptr, &_imGuiPool) != VK_SUCCESS) {
+        if (vkCreateDescriptorPool(_device->hold(), &pool_info, nullptr, &_imGuiPool) != VK_SUCCESS) {
             throw std::runtime_error("Failed to init ImGui!");
         }
 
@@ -796,6 +807,7 @@ namespace neon::vulkan
 
     void VKApplication::recreateSwapChain()
     {
+        neon::debug() << "Recreating swap chain!";
         int width = 0, height = 0;
         glfwGetFramebufferSize(_window, &width, &height);
         while (width == 0 || height == 0) {
@@ -803,7 +815,7 @@ namespace neon::vulkan
             glfwWaitEvents();
         }
 
-        vkDeviceWaitIdle(_device->getRaw());
+        vkDeviceWaitIdle(_device->hold());
         cleanupSwapChain();
         createSwapChain();
         _requiresSwapchainRecreation = false;
@@ -811,14 +823,15 @@ namespace neon::vulkan
 
     void VKApplication::cleanupSwapChain()
     {
-        vkDestroySwapchainKHR(_device->getRaw(), _swapChain, nullptr);
+        vkDestroySwapchainKHR(_device->hold(), _swapChain, nullptr);
     }
 
     VKApplication::~VKApplication()
     {
-        _bin.flush();
+        _imageAvailableSemaphore = nullptr;
 
-        auto raw = _device->getRaw();
+        _bin.waitAndFlush();
+
         if (ImGui::GetIO().BackendRendererUserData != nullptr) {
             ImGui_ImplVulkan_Shutdown();
         }
@@ -827,16 +840,12 @@ namespace neon::vulkan
         ImPlot::DestroyContext();
         ImGui::DestroyContext();
 
-        vkDestroyDescriptorPool(raw, _imGuiPool, nullptr);
-
-        for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
-            vkDestroySemaphore(raw, _imageAvailableSemaphores[i], nullptr);
-            vkDestroySemaphore(raw, _renderFinishedSemaphores[i], nullptr);
-        }
+        vkDestroyDescriptorPool(_device->hold(), _imGuiPool, nullptr);
 
         cleanupSwapChain();
         _graphicQueue = VKQueueHolder();
         _presentQueue = VKQueueHolder();
+
         delete _device;
         vkDestroySurfaceKHR(_instance, _surface, nullptr);
 
