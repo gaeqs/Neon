@@ -71,6 +71,8 @@ namespace neon::vulkan
     QTApplicationHandler::QTApplicationHandler(QTApplication* application) :
         _application(application)
     {
+        // This flag avoids resources from being released when
+        // the window is not being exposed.
         setFlags(flags() | PersistentResources);
     }
 
