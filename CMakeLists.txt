@@ -72,7 +72,7 @@ FetchContent_Declare(
 # SPIRV-Headers
 FetchContent_Declare(
         spirv_headers
-        GIT_TAG 9268f3057354a2cb65991ba5f38b16d81e803692
+        GIT_TAG 6bb105b6c4b3a246e1e6bb96366fe14c6dbfde83
         GIT_REPOSITORY https://github.com/KhronosGroup/SPIRV-Headers.git
         SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/lib/spirv_headers
 )
@@ -80,7 +80,7 @@ FetchContent_Declare(
 # SPIRV-Tools
 FetchContent_Declare(
         spirv_tools
-        GIT_TAG 7f2d9ee926f98fc77a3ed1e1e0f113b8c9c49458
+        GIT_TAG 5d01ec711f3077a89f33c7818d737cfa5dd932d6
         GIT_REPOSITORY https://github.com/KhronosGroup/SPIRV-Tools.git
         SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/lib/spirv_tools
 )
@@ -89,7 +89,7 @@ FetchContent_Declare(
 FetchContent_Declare(
         glslang
         GIT_REPOSITORY https://github.com/KhronosGroup/glslang.git
-        GIT_TAG a57276bf558f5cf94d3a9854ebdf5a2236849a5a
+        GIT_TAG 5f6c7176c5483da9af6432afb3dd962e4f8873a1
         SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/lib/glslang
 )
 
