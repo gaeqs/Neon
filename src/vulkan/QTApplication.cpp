@@ -152,10 +152,10 @@ namespace neon::vulkan
         }
         switch (event->type()) {
             case QEvent::KeyPress:
-                _application->keyPressEvent(static_cast<QKeyEvent*>(event));
+                _application->keyPressEvent(dynamic_cast<QKeyEvent*>(event));
                 return true;
             case QEvent::KeyRelease:
-                _application->keyReleaseEvent(static_cast<QKeyEvent*>(event));
+                _application->keyReleaseEvent(dynamic_cast<QKeyEvent*>(event));
                 return true;
             default:
                 return QVulkanWindow::eventFilter(watched, event);
@@ -416,8 +416,8 @@ namespace neon::vulkan
         }
         _handler->vulkanInstance()->installDebugOutputFilter(debugFilter);
 
-        _queueFamilies = std::make_unique<VKQueueFamilyCollection>(
-            _handler->physicalDevice(), _handler->vulkanInstance()->surfaceForWindow(_handler));
+        _queueFamilies = std::make_unique<VKQueueFamilyCollection>(_handler->physicalDevice(),
+                                                                   QVulkanInstance::surfaceForWindow(_handler));
 
         uint32_t maxQueues = 0;
         for (auto family : _queueFamilies->getFamilies()) {
@@ -629,24 +629,24 @@ namespace neon::vulkan
         }
     }
 
-    void QTApplication::keyPressEvent(QKeyEvent* event)
+    void QTApplication::keyPressEvent(const QKeyEvent* event) const
     {
         auto qtMod = event->modifiers();
         int modifier = 0;
         if (qtMod & Qt::ShiftModifier) {
-            modifier |= (int)neon::KeyboardModifier::SHIFT;
+            modifier |= static_cast<int>(KeyboardModifier::SHIFT);
         }
         if (qtMod & Qt::ControlModifier) {
-            modifier |= (int)neon::KeyboardModifier::CONTROL;
+            modifier |= static_cast<int>(KeyboardModifier::CONTROL);
         }
         if (qtMod & Qt::AltModifier) {
-            modifier |= (int)neon::KeyboardModifier::ALT;
+            modifier |= static_cast<int>(KeyboardModifier::ALT);
         }
         if (qtMod & Qt::MetaModifier) {
-            modifier |= (int)neon::KeyboardModifier::SUPER;
+            modifier |= static_cast<int>(KeyboardModifier::SUPER);
         }
 
-        int glfwKey = qtToGLFWKey((Qt::Key)event->key());
+        int glfwKey = qtToGLFWKey(static_cast<Qt::Key>(event->key()));
         auto& io = ImGui::GetIO();
         io.AddKeyEvent(ImGui_ImplGlfw_KeyToImGuiKey(glfwKey, event->nativeScanCode()), true);
         if (!io.WantCaptureKeyboard) {
@@ -654,21 +654,21 @@ namespace neon::vulkan
         }
     }
 
-    void QTApplication::keyReleaseEvent(QKeyEvent* event)
+    void QTApplication::keyReleaseEvent(const QKeyEvent* event) const
     {
         auto qtMod = event->modifiers();
         int modifier = 0;
         if (qtMod & Qt::ShiftModifier) {
-            modifier |= (int)neon::KeyboardModifier::SHIFT;
+            modifier |= static_cast<int>(KeyboardModifier::SHIFT);
         }
         if (qtMod & Qt::ControlModifier) {
-            modifier |= (int)neon::KeyboardModifier::CONTROL;
+            modifier |= static_cast<int>(KeyboardModifier::CONTROL);
         }
         if (qtMod & Qt::AltModifier) {
-            modifier |= (int)neon::KeyboardModifier::ALT;
+            modifier |= static_cast<int>(KeyboardModifier::ALT);
         }
         if (qtMod & Qt::MetaModifier) {
-            modifier |= (int)neon::KeyboardModifier::SUPER;
+            modifier |= static_cast<int>(KeyboardModifier::SUPER);
         }
 
         int glfwKey = qtToGLFWKey((Qt::Key)event->key());

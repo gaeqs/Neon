@@ -253,9 +253,9 @@ namespace neon::vulkan
 
         void mouseReleaseEvent(QMouseEvent* event);
 
-        void keyPressEvent(QKeyEvent* event);
+        void keyPressEvent(const QKeyEvent* event) const;
 
-        void keyReleaseEvent(QKeyEvent* event);
+        void keyReleaseEvent(const QKeyEvent* event) const;
 
         void wheelEvent(QWheelEvent* event);
 
