@@ -154,20 +154,36 @@ namespace neon::vulkan
             case QEvent::KeyRelease:
                 _application->keyReleaseEvent(static_cast<QKeyEvent*>(event));
                 return true;
-            case QEvent::MouseMove:
-                _application->mouseMoveEvent(static_cast<QMouseEvent*>(event));
-                return true;
-            case QEvent::MouseButtonPress:
-                _application->mousePressEvent(static_cast<QMouseEvent*>(event));
-                return true;
-            case QEvent::MouseButtonRelease:
-                _application->mouseReleaseEvent(static_cast<QMouseEvent*>(event));
-                return true;
-            case QEvent::Wheel:
-                _application->wheelEvent(static_cast<QWheelEvent*>(event));
-                return true;
             default:
                 return QVulkanWindow::eventFilter(watched, event);
+        }
+    }
+
+    void QTApplicationHandler::mouseMoveEvent(QMouseEvent* event)
+    {
+        if (_application != nullptr) {
+            _application->mouseMoveEvent(event);
+        }
+    }
+
+    void QTApplicationHandler::mousePressEvent(QMouseEvent* event)
+    {
+        if (_application != nullptr) {
+            _application->mousePressEvent(event);
+        }
+    }
+
+    void QTApplicationHandler::mouseReleaseEvent(QMouseEvent* event)
+    {
+        if (_application != nullptr) {
+            _application->mouseReleaseEvent(event);
+        }
+    }
+
+    void QTApplicationHandler::wheelEvent(QWheelEvent* event)
+    {
+        if (_application != nullptr) {
+            _application->wheelEvent(event);
         }
     }
 

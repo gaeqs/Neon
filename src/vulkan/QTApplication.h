@@ -83,6 +83,14 @@ namespace neon::vulkan
 
         bool eventFilter(QObject* watched, QEvent* event) override;
 
+        void mouseMoveEvent(QMouseEvent*) override;
+
+        void mousePressEvent(QMouseEvent*) override;
+
+        void mouseReleaseEvent(QMouseEvent*) override;
+
+        void wheelEvent(QWheelEvent*) override;
+
         QVulkanWindowRenderer* createRenderer() override;
     };
 

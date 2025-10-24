@@ -401,21 +401,6 @@ int main(int argc, char** argv)
 
     neon::debug() << "Using Neon " << NEON_VERSION;
 
-    std::srand(std::time(nullptr));
-
-    vulkan::VKApplicationCreateInfo info;
-    info.name = "Neon";
-    info.windowSize = {WIDTH, HEIGHT};
-    info.vSync = false;
-
-    info.icon.push_back(TextureData::fromFile(cmrc::resources::get_filesystem().open("icon.png")));
-
-    info.featuresConfigurator = [](const auto& d, auto& f) {
-        vulkan::VKApplicationCreateInfo::defaultFeaturesConfigurer(d, f);
-        f.basicFeatures.samplerAnisotropy = true;
-        f.basicFeatures.samplerAnisotropy = true;
-    };
-
     QVulkanInstance inst;
     inst.setApiVersion(QVersionNumber(1, 3, 0));
     inst.setLayers({"VK_LAYER_KHRONOS_validation"});
@@ -424,8 +409,8 @@ int main(int argc, char** argv)
         qFatal("Failed to create Vulkan instance: %d", inst.errorCode());
     }
 
-    auto qtApp = std::make_unique<vulkan::QTApplication>(&inst);
-    qtApp->setInitializationFunction([](const vulkan::QTApplication* qtApplication) {
+    auto qtApp = std::make_unique<neon::vulkan::QTApplication>(&inst);
+    qtApp->setInitializationFunction([](const neon::vulkan::QTApplication* qtApplication) {
         auto application = qtApplication->getApplication();
         application->setRoom(getTestRoom(application));
     });
