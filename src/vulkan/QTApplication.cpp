@@ -71,6 +71,7 @@ namespace neon::vulkan
     QTApplicationHandler::QTApplicationHandler(QTApplication* application) :
         _application(application)
     {
+        setFlags(flags() | PersistentResources);
     }
 
     void QTApplicationHandler::invalidate()
