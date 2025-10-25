@@ -207,6 +207,96 @@ namespace neon
         // region UTIL
 
         /**
+         * Returns the first component inside this game object
+         * that matches the given type.
+         * <p>
+         * If the component cannot be found, this method returns null.
+         * <p>
+         * This method may return a component whose type is a child
+         * of the given type.
+         *
+         * @tparam T the type of the component.
+         * @return the component or null.
+         */
+        template<class T>
+            requires std::is_base_of_v<Component, T>
+        [[nodiscard]] IdentifiableWrapper<T> findComponent()
+        {
+            return _gameObject->findComponent<T>();
+        }
+
+        /**
+         * Returns the first component of type T that is found in this game object or any of its children recursively.
+         * <p>
+         * This performs a depth-first search.
+         *
+         * @tparam T The type of the component to find.
+         * @return A wrapper to the component, or null if not found.
+         */
+        template<class T>
+            requires std::is_base_of_v<Component, T>
+        [[nodiscard]] IdentifiableWrapper<T> findComponentInChildren()
+        {
+            return _gameObject->findComponentInChildren<T>();
+        }
+
+        /**
+         * Returns the first component of type T that is found in this game object or any of its parents recursively.
+         *
+         * @tparam T The type of the component to find.
+         * @return A wrapper to the component, or null if not found.
+         */
+        template<class T>
+            requires std::is_base_of_v<Component, T>
+        [[nodiscard]] IdentifiableWrapper<T> findComponentInParent()
+        {
+            return _gameObject->findComponentInParent<T>();
+        }
+
+        /**
+         * Returns all components of type T that are found in this game object and all its children recursively.
+         *
+         * @tparam T The type of the component to find.
+         * @return A list with all the found components.
+         */
+        template<class T>
+            requires std::is_base_of_v<Component, T>
+        [[nodiscard]] std::vector<IdentifiableWrapper<T>> findComponentsInChildren()
+        {
+            return _gameObject->findComponentsInChildren<T>();
+        }
+
+        /**
+         * Returns all components of type T that are found in this game object and all its parents recursively.
+         *
+         * @tparam T The type of the component to find.
+         * @return A list with all the found components.
+         */
+        template<class T>
+            requires std::is_base_of_v<Component, T>
+        [[nodiscard]] std::vector<IdentifiableWrapper<T>> findComponentsInParent()
+        {
+            return _gameObject->findComponentsInParent<T>();
+        }
+
+        /**
+         * Returns a list containing all components inside this game object
+         * that match the given type.
+         * <p>
+         * This method may return components whose types are children
+         * of the given type.
+         *
+         * @tparam T the type of the component.
+         * @return the list.
+         */
+        template<class T>
+            requires std::is_base_of_v<Component, T>
+        [[nodiscard]] std::vector<IdentifiableWrapper<T>> findComponents()
+        {
+            return _gameObject->findComponents<T>();
+        }
+
+        /**
          * Returns the room of this component's game object.
          * <p>
          * This method is an alias of getGameObject()->getRoom().

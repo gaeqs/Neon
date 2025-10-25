@@ -13,12 +13,22 @@ namespace neon
 
     GameObject::GameObject(Room* room) :
         _id(GAME_OBJECT_ID_GENERATOR++),
-        _name("Game Object " + std::to_string(_id)),
+        _name(std::format("Game Object {ºº}", _id)),
         _transform(this),
         _room(room),
-        _components(),
-        _parent(nullptr),
-        _children()
+        _parent(nullptr)
+    {
+        if (_room == nullptr) {
+            throw std::runtime_error("Room is null!");
+        }
+    }
+
+    GameObject::GameObject(Room* room, std::string name) :
+        _id(GAME_OBJECT_ID_GENERATOR++),
+        _name(std::move(name)),
+        _transform(this),
+        _room(room),
+        _parent(nullptr)
     {
         if (_room == nullptr) {
             throw std::runtime_error("Room is null!");

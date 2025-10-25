@@ -52,7 +52,7 @@ namespace neon
       public:
         Room(const Room& other) = delete;
 
-        Room(Application* application);
+        explicit Room(Application* application);
 
         ~Room();
 
@@ -67,6 +67,10 @@ namespace neon
         [[nodiscard]] ComponentCollection& getComponents();
 
         IdentifiableWrapper<GameObject> newGameObject();
+
+        IdentifiableWrapper<GameObject> newGameObject(std::string name);
+
+        IdentifiableWrapper<GameObject> findGameObject(const std::string& name);
 
         void destroyGameObject(IdentifiableWrapper<GameObject> gameObject);
 

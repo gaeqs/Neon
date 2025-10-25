@@ -65,6 +65,22 @@ namespace neon
         return _gameObjects.emplace(this);
     }
 
+    IdentifiableWrapper<GameObject> Room::newGameObject(std::string name)
+    {
+        return _gameObjects.emplace(this, std::move(name));
+    }
+
+    IdentifiableWrapper<GameObject> Room::findGameObject(const std::string& name)
+    {
+        for (auto it = _gameObjects.begin(); it != _gameObjects.end(); ++it) {
+            if (it->getName() == name) {
+                return &*it;
+            }
+        }
+
+        return nullptr;
+    }
+
     void Room::destroyGameObject(IdentifiableWrapper<GameObject> gameObject)
     {
         if (!_gameObjects.erase(gameObject.raw())) {
