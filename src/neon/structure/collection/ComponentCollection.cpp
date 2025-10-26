@@ -221,6 +221,9 @@ namespace neon
             auto ptr = _notStartedComponents.front();
 
             if (ptr.isValid()) {
+                if (ptr->isEnabled()) {
+                    ptr->onEnable();
+                }
                 ptr->onStart();
                 ptr->_started = true;
             }

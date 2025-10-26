@@ -15,24 +15,22 @@
 #define REGISTER_COMPONENT(clazz, name)                                             \
     namespace                                                                       \
     {                                                                               \
-        struct _##clazz##_component_register_                                       \
+        inline static const struct _##clazz##_component_register_                   \
         {                                                                           \
             _##clazz##_component_register_()                                        \
             {                                                                       \
                 neon::ComponentRegister::instance().registerComponent<clazz>(name); \
             }                                                                       \
-        };                                                                          \
-        _##clazz##_component_register_ __##clazz##_register;                        \
+        } __##clazz##_register;                                                     \
     }
 #define KEY_REGISTER_COMPONENT(key, clazz, name)                                \
-    struct _##key##_component_register_                                         \
+    inline static const struct _##key##_component_register_                     \
     {                                                                           \
         _##key##_component_register_()                                          \
         {                                                                       \
             neon::ComponentRegister::instance().registerComponent<clazz>(name); \
         }                                                                       \
-    };                                                                          \
-    _##key##_component_register_ __##key##_register;
+    } __##clazz##_register;
 
 namespace neon
 {
@@ -100,7 +98,7 @@ namespace neon
         /**
          * @return whether this component has started.
          */
-        bool hasStarted() const;
+        [[nodiscard]] bool hasStarted() const;
 
         /**
          * Returns whether this component is enabled.
@@ -115,7 +113,7 @@ namespace neon
         /**
          * Sets whether this component is enabled.
          *
-         * Components won't be called on any event
+         * Components won't be called in any event
          * when they are disabled.
          *
          * @param enabled whether this component is enabled.
@@ -138,6 +136,25 @@ namespace neon
          * Virtual method invoked when this component is constructed.
          */
         virtual void onConstruction();
+
+        /**
+         * Virtual method invoked when the component is enabled.
+         *
+         * This method is called when setEnabled(true) is called,
+         * but only if the component was previously disabled.
+         *
+         * It's also called on the first frame for components
+         * that start as enabled, just before onStart().
+         */
+        virtual void onEnable();
+
+        /**
+         * Virtual method invoked when the component is disabled.
+         *
+         * This method is called when setEnabled(false) is called,
+         * but only if the component was previously enabled.
+         */
+        virtual void onDisable();
 
         /**
          * Virtual method invoked before this component's first tick.

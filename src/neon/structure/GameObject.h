@@ -86,7 +86,7 @@ namespace neon
          * are destroyed when this game object is destroyed.
          *
          */
-        ~GameObject();
+        ~GameObject() override;
 
         /**
          * Returns the unique identifier of this game object.
@@ -112,13 +112,13 @@ namespace neon
         void setName(const std::string& name);
 
         /**
-         * Returns the transformation of this game objet.
+         * Returns the transformation of this game object.
          * @return the transformation.
          */
         [[nodiscard]] const Transform& getTransform() const;
 
         /**
-         * Returns the transformation of this game objet.
+         * Returns the transformation of this game object.
          * @return the transformation.
          */
         [[nodiscard]] Transform& getTransform();
@@ -181,7 +181,7 @@ namespace neon
          * Returns a collection with all components inside this
          * game object.
          *
-         * This collection is not a copy, and may be modified
+         * This collection is not a copy and may be modified
          * internally after this method's call.
          *
          * This collection <b>never</b> contains null elements.
