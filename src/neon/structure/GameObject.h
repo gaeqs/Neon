@@ -21,12 +21,12 @@ namespace neon
     class Component;
 
     /**
-     * Represents a object inside a scene.
+     * Represents an object inside a scene.
      * <p>
      * Objects are represented by an identifier, a transform
      * and a collection of components.
      * <p>
-     * Components define behaviours to the game object.
+     * Components define the behaviors of the game object.
      * You can add or remove components from a game object
      * using the appropriated methods.
      */
@@ -65,9 +65,19 @@ namespace neon
          * USERS MUSTN'T USE THIS METHOD.
          *
          * Creates a new game object.
-         * @param room the room this game object is inside of.
+         * @param room the room this game object is inside.
          */
         explicit GameObject(Room* room);
+
+        /**
+         * THIS METHOD SHOULD ONLY BE USED BY ROOMS!
+         * USERS MUSTN'T USE THIS METHOD.
+         *
+         * Creates a new game object.
+         * @param room the room this game object is inside.
+         * @param name the name of the game object.
+         */
+        explicit GameObject(Room* room, std::string name);
 
         /**
          * This game object's destructor.
@@ -76,7 +86,7 @@ namespace neon
          * are destroyed when this game object is destroyed.
          *
          */
-        ~GameObject();
+        ~GameObject() override;
 
         /**
          * Returns the unique identifier of this game object.
@@ -102,13 +112,13 @@ namespace neon
         void setName(const std::string& name);
 
         /**
-         * Returns the transformation of this game objet.
+         * Returns the transformation of this game object.
          * @return the transformation.
          */
         [[nodiscard]] const Transform& getTransform() const;
 
         /**
-         * Returns the transformation of this game objet.
+         * Returns the transformation of this game object.
          * @return the transformation.
          */
         [[nodiscard]] Transform& getTransform();
@@ -171,7 +181,7 @@ namespace neon
          * Returns a collection with all components inside this
          * game object.
          *
-         * This collection is not a copy, and may be modified
+         * This collection is not a copy and may be modified
          * internally after this method's call.
          *
          * This collection <b>never</b> contains null elements.
@@ -234,6 +244,54 @@ namespace neon
         }
 
         /**
+         * Returns the first component of type T that is found in this game object or any of its children recursively.
+         * <p>
+         * This performs a depth-first search.
+         *
+         * @tparam T The type of the component to find.
+         * @return A wrapper to the component, or null if not found.
+         */
+        template<class T>
+            requires std::is_base_of_v<Component, T>
+        [[nodiscard]] IdentifiableWrapper<T> findComponentInChildren()
+        {
+            auto component = findComponent<T>();
+            if (component != nullptr) {
+                return component;
+            }
+            for (const auto& children : _children) {
+                component = children->findComponentInChildren<T>();
+                if (component != nullptr) {
+                    return component;
+                }
+            }
+
+            return nullptr;
+        }
+
+        /**
+         * Returns the first component of type T that is found in this game object or any of its parents recursively.
+         *
+         * @tparam T The type of the component to find.
+         * @return A wrapper to the component, or null if not found.
+         */
+        template<class T>
+            requires std::is_base_of_v<Component, T>
+        [[nodiscard]] IdentifiableWrapper<T> findComponentInParent()
+        {
+            auto component = findComponent<T>();
+            if (component != nullptr) {
+                return component;
+            }
+
+            if (_parent != nullptr) {
+                return _parent->findComponentInParent<T>();
+            }
+
+            return nullptr;
+        }
+
+        /**
          * Returns a list containing all components inside this game object
          * that match the given type.
          * <p>
@@ -255,7 +313,47 @@ namespace neon
             }
             return list;
         }
+
+        /**
+         * Returns all components of type T that are found in this game object and all its children recursively.
+         *
+         * @tparam T The type of the component to find.
+         * @return A list with all the found components.
+         */
+        template<class T>
+            requires std::is_base_of_v<Component, T>
+        [[nodiscard]] std::vector<IdentifiableWrapper<T>> findComponentsInChildren()
+        {
+            auto components = findComponents<T>();
+            for (const auto& children : _children) {
+                auto childrenComponents = children->findComponentsInChildren<T>();
+                components.reserve(components.size() + childrenComponents.size());
+                components.insert(components.end(), childrenComponents.begin(), childrenComponents.end());
+            }
+
+            return components;
+        }
+
+        /**
+         * Returns all components of type T that are found in this game object and all its parents recursively.
+         *
+         * @tparam T The type of the component to find.
+         * @return A list with all the found components.
+         */
+        template<class T>
+            requires std::is_base_of_v<Component, T>
+        [[nodiscard]] std::vector<IdentifiableWrapper<T>> findComponentsInParent()
+        {
+            auto components = findComponents<T>();
+            if (_parent != nullptr) {
+                auto parentComponents = _parent->findComponentsInParent<T>();
+                components.reserve(components.size() + parentComponents.size());
+                components.insert(components.end(), parentComponents.begin(), parentComponents.end());
+            }
+
+            return components;
+        }
     };
 } // namespace neon
 
-#endif //RVTRACKING_GAMEOBJECT_H
+#endif // RVTRACKING_GAMEOBJECT_H

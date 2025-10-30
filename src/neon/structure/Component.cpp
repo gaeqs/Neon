@@ -41,7 +41,14 @@ namespace neon
 
     void Component::setEnabled(bool enabled)
     {
-        _enabled = enabled;
+        if (_enabled != enabled) {
+            _enabled = enabled;
+            if (_enabled) {
+                onEnable();
+            } else {
+                onDisable();
+            }
+        }
     }
 
     void Component::destroy()
@@ -57,6 +64,14 @@ namespace neon
     }
 
     void Component::onConstruction()
+    {
+    }
+
+    void Component::onEnable()
+    {
+    }
+
+    void Component::onDisable()
     {
     }
 
