@@ -121,11 +121,15 @@ namespace neon::vulkan
             auto cmd = buffer->getImplementation().getCommandBuffer();
             auto run = buffer->getCurrentRun();
             if (_range.has_value()) {
-                vulkan_util::copyBuffer(cmd, _stagingBuffer->getRaw(run), _deviceBuffer.getRaw(run),
-                                        _range.value().getFrom(), _range.value().getFrom(), _range.value().size());
+                if (_range->size() > 0) {
+                    vulkan_util::copyBuffer(cmd, _stagingBuffer->getRaw(run), _deviceBuffer.getRaw(run),
+                                            _range.value().getFrom(), _range.value().getFrom(), _range.value().size());
+                }
             } else {
-                vulkan_util::copyBuffer(cmd, _stagingBuffer->getRaw(run), _deviceBuffer.getRaw(run),
-                                        _deviceBuffer.size());
+                if (_deviceBuffer.size() > 0) {
+                    vulkan_util::copyBuffer(cmd, _stagingBuffer->getRaw(run), _deviceBuffer.getRaw(run),
+                                            _deviceBuffer.size());
+                }
             }
             if (internal) {
                 // Command buffer is not external.
