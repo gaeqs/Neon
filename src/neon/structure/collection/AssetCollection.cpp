@@ -35,8 +35,16 @@ namespace neon
             _permanentAssets[asset->getIdentifier()] = asset;
         }
         _assets[asset->getType()][asset->getName()] = asset;
-        neon::debug() << "Storing " << asset->getName() << " of type " << asset->getType().name()
-                      << (mode == AssetStorageMode::PERMANENT ? " as permanent." : " as a weak reference.");
+        neon::debug()
+        << "Storing "
+        << TextEffect::foreground4bits(TextColor4Bits::BRIGHT_CYAN)
+        << asset->getName()
+        << TextEffect::reset()
+        << " of type "
+        << TextEffect::foreground4bits(TextColor4Bits::BRIGHT_RED)
+        << asset->getType().name()
+        << TextEffect::reset()
+        << (mode == AssetStorageMode::PERMANENT ? " as permanent." : " as a weak reference.");
     }
 
     bool AssetCollection::remove(const AssetIdentifier& identifier)

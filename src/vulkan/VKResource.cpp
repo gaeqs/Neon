@@ -40,8 +40,6 @@ namespace neon::vulkan
         if (!run->hasFinished()) {
             _runs.push_back(std::move(run));
             ++_registeredRunsHistory;
-        } else {
-            neon::warning() << "Trying to register a run that has already finished execution.";
         }
     }
 

@@ -5,11 +5,8 @@
 #include "SPIRVCompiler.h"
 
 #include <neon/render/texture/TextureCreateInfo.h>
-
-#include "glslang/Include/Types.h"
-#include "SPIRV/GlslangToSpv.h"
-
-#include <neon/logging/Logger.h>
+#include <glslang/Include/Types.h>
+#include <SPIRV/GlslangToSpv.h>
 
 namespace neon::vulkan
 {
@@ -24,7 +21,6 @@ namespace neon::vulkan
         }
 
         if (!_fileSystem) {
-            neon::debug() << "Failed to fetch include file: " << path << ". Filesystem not defined.";
             return nullptr;
         }
 
@@ -34,7 +30,6 @@ namespace neon::vulkan
             return &it->second;
         }
 
-        neon::debug() << "Failed to fetch include file: " << path;
         return nullptr;
     }
 
@@ -49,8 +44,6 @@ namespace neon::vulkan
                                                                             const char* includerName, size_t depth)
     {
         auto path = std::filesystem::path(headerName);
-
-        neon::debug() << "Fetching system include file: " << path;
 
         auto* data = fetch(path);
         if (!data) {
@@ -69,8 +62,6 @@ namespace neon::vulkan
         } else {
             path = _rootPath / headerName;
         }
-
-        neon::debug() << "Fetching local include file: " << headerName << " (" << path << ")";
 
         auto* data = fetch(path);
         if (!data) {
@@ -308,7 +299,6 @@ namespace neon::vulkan
         _compiled = true;
 
         _program.buildReflection();
-        _program.dumpReflection();
 
         return {};
     }
@@ -333,22 +323,6 @@ namespace neon::vulkan
     [[nodiscard]] std::vector<ShaderUniformBlock> SPIRVCompiler::getUniformBlocks() const
     {
         std::vector<ShaderUniformBlock> blocks;
-
-        std::cout << "Buffers: " << _program.getNumBufferBlocks() << std::endl;
-        std::cout << "Uniforms: " << _program.getNumUniformBlocks() << std::endl;
-        std::cout << "In: " << _program.getNumPipeInputs() << std::endl;
-        std::cout << "Out: " << _program.getNumPipeOutputs() << std::endl;
-
-        for (int i = 0; i < _program.getNumPipeInputs(); ++i) {
-            auto& it = _program.getPipeInput(i);
-            std::cout << " - " << it.name << std::endl;
-        }
-
-        for (int i = 0; i < _program.getNumPipeOutputs(); ++i) {
-            auto& it = _program.getPipeOutput(i);
-            std::cout << " - " << it.name << std::endl;
-        }
-
         for (int i = 0; i < _program.getNumUniformBlocks(); ++i) {
             auto& reflection = _program.getUniformBlock(i);
             auto* type = reflection.getType();

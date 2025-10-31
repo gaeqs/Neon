@@ -44,10 +44,7 @@ void initRender(Room* room)
     // the application's render.
     CMRCFileSystem fileSystem(cmrc::neon::get_filesystem());
     AssetLoaderContext context(app, nullptr, &fileSystem);
-    app->setRender(loadAssetFromFile<Render>("render/render.json", context));
-
     auto screenModel = loadAssetFromFile<Model>("model/screen.json", context);
-
     auto screenModelGO = room->newGameObject();
     screenModelGO->setName("Screen Model");
     screenModelGO->newComponent<GraphicComponent>(screenModel);
@@ -266,6 +263,7 @@ int main()
     info.name = "Neon";
     info.windowSize = {WIDTH, HEIGHT};
     info.vSync = false;
+    info.loadDefaultRender = true;
 
     info.icon.push_back(TextureData::fromFile(cmrc::resources::get_filesystem().open("icon.png")));
 

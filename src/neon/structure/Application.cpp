@@ -10,6 +10,9 @@
 #include <neon/io/CursorEvent.h>
 #include <neon/io/MouseButtonEvent.h>
 #include <neon/io/ScrollEvent.h>
+#include <neon/loader/AssetLoaderHelpers.h>
+
+CMRC_DECLARE(neon);
 
 namespace neon
 {
@@ -25,11 +28,17 @@ namespace neon
     {
         // Delete the room first.
         _room = nullptr;
+        getAssets().clear();
     }
 
     void Application::init()
     {
         _implementation->init(this);
+        if (_implementation->getCreationInfo().loadDefaultRender) {
+            CMRCFileSystem fs(cmrc::neon::get_filesystem());
+            AssetLoaderContext context(this, nullptr, &fs);
+            _render = loadAssetFromFile<Render>("render/render.json", context);
+        }
     }
 
     Result<uint32_t, std::string> Application::startGameLoop() const
@@ -131,8 +140,21 @@ namespace neon
         _forcedViewport = {};
     }
 
-    const std::shared_ptr<Render>& Application::getRender() const
+    const std::shared_ptr<Render>& Application::getRender()
     {
+        if (_render == nullptr) {
+            neon::warning() << "A render was not provided for this application!\n"
+                            << "This application will now fall back to the default render.\n"
+                            << "" << TextEffect::bold() << "To address this warning, apply one of these options:\n"
+                            << TextEffect::reset() << "    > Provide a custom render during initialization.\n"
+                            << "    > Explicitly load the default render by enabling the "
+                            << TextEffect::foreground4bits(TextColor4Bits::BRIGHT_CYAN) << "'loadDefaultRender'"
+                            << TextEffect::reset() << " parameter in your ApplicationCreateInfo.";
+
+            CMRCFileSystem fs(cmrc::neon::get_filesystem());
+            AssetLoaderContext context(this, nullptr, &fs);
+            _render = loadAssetFromFile<Render>("render/render.json", context);
+        }
         return _render;
     }
 

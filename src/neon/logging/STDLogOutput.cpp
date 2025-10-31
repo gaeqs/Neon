@@ -4,6 +4,10 @@
 
 #include "STDLogOutput.h"
 
+#ifdef _WIN32
+#include <windows.h>
+#endif
+
 #include <filesystem>
 #include <ranges>
 
@@ -53,14 +57,18 @@ namespace neon
         } else {
             s += 'm';
         }
-        std::cout << part.text; // Reset to default
-        //std::cout << s << part.text << "\033[0m"; // Reset to default
+        std::cout << s << part.text << "\033[0m"; // Reset to default
     }
 
     STDLogOutput::~STDLogOutput() = default;
 
     STDLogOutput::STDLogOutput()
     {
+        #ifdef _WIN32
+    // This tells the console to interpret output as UTF-8
+    SetConsoleOutputCP(CP_UTF8);
+    #endif
+
         const TextEffect textEffect = TextEffect::foregroundRGB(0xFF, 0x88, 0x88);
 
         MessageBuilder builder;
