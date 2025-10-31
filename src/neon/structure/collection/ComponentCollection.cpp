@@ -15,8 +15,6 @@
 namespace neon
 {
     ComponentCollection::ComponentCollection() :
-        _components(),
-        _notStartedComponents()
     {
     }
 
@@ -26,6 +24,10 @@ namespace neon
         auto it = _components.find(type);
         if (it == _components.end()) {
             return;
+        }
+
+        if (component && component->hasStarted() && component->isEnabled()) {
+            component->onDisable();
         }
 
         auto collection = std::reinterpret_pointer_cast<AbstractClusteredLinkedCollection>(it->second.second);
