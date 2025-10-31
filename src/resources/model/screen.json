@@ -1,0 +1,54 @@
+{
+  "name": "neon:screen",
+  "save": true,
+  "use_present": true,
+  "maximum_instances": 1,
+  "auto_flush": true,
+  "custom_instance_sizes": [
+    48
+  ],
+  "meshes": [
+    {
+      "name": "neon:screen",
+      "save": true,
+      "use_present": true,
+      "vertices": [
+        -1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        -1.0,
+        -1.0,
+        -1.0
+      ],
+      "indices": [
+        0,
+        1,
+        2,
+        0,
+        2,
+        3
+      ],
+      "materials": [
+        {
+          "name": "neon:screen",
+          "save": true,
+          "use_present": true,
+          "frame_buffer": "A:neon:frame_buffer_screen",
+          "shader": "/shader/screen.json",
+          "descriptions": {
+            "vertex": {
+              "stride": 8,
+              "attributes": {
+                "size_in_floats": 2,
+                "offset_in_bytes": 0
+              }
+            },
+            "uniform_buffer": "/shader/buffer/screen.json"
+          }
+        }
+      ]
+    }
+  ]
+}

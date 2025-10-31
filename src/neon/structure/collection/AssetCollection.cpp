@@ -6,6 +6,8 @@
 
 #include <ranges>
 
+#include <neon/logging/Logger.h>
+
 namespace neon
 {
 
@@ -33,6 +35,8 @@ namespace neon
             _permanentAssets[asset->getIdentifier()] = asset;
         }
         _assets[asset->getType()][asset->getName()] = asset;
+        neon::debug() << "Storing " << asset->getName() << " of type " << asset->getType().name()
+                      << (mode == AssetStorageMode::PERMANENT ? " as permanent." : " as a weak reference.");
     }
 
     bool AssetCollection::remove(const AssetIdentifier& identifier)

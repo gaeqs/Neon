@@ -1,0 +1,11 @@
+{
+  "name": "neon:point_light",
+  "save": true,
+  "use_present": true,
+  "vertex": {
+    "file": "point_light.vert"
+  },
+  "fragment": {
+    "file": "point_light.frag"
+  }
+}

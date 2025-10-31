@@ -1,11 +1,11 @@
 {
-  "name": "neon:parallax_shader",
+  "name": "neon:deferred_shader",
   "save": true,
   "use_present": true,
   "vertex": {
     "file": "deferred.vert"
   },
   "fragment": {
-    "file": "deferred_parallax.frag"
+    "file": "deferred.frag"
   }
 }

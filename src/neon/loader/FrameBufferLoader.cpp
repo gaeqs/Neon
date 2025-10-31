@@ -53,19 +53,20 @@ namespace neon
             return std::make_shared<SwapChainFrameBuffer>(context.application, name, samples, depth);
         }
         if (type == "simple") {
-            std::vector<std::pair<AssetGeneralProperties<TextureView>, AssetGeneralProperties<TextureView>>> props;
+            std::vector<std::pair<AssetGeneralProperties<SampledTexture>, AssetGeneralProperties<SampledTexture>>>
+                props;
             std::vector<FrameBufferTextureCreateInfo> infos;
 
             auto& textures = json["textures"];
             if (textures.is_object()) {
-                auto original = fetchGeneralProperties<TextureView>(textures, context);
-                auto resolved = fetchGeneralProperties<TextureView>(textures["resolved"], context);
+                auto original = fetchGeneralProperties<SampledTexture>(textures, context);
+                auto resolved = fetchGeneralProperties<SampledTexture>(textures["resolved"], context);
                 props.emplace_back(original, resolved);
                 infos.push_back(loadTexture(textures));
             } else if (textures.is_array()) {
                 for (auto& texture : textures) {
-                    auto original = fetchGeneralProperties<TextureView>(texture, context);
-                    auto resolved = fetchGeneralProperties<TextureView>(texture["resolved"], context);
+                    auto original = fetchGeneralProperties<SampledTexture>(texture, context);
+                    auto resolved = fetchGeneralProperties<SampledTexture>(texture["resolved"], context);
                     props.emplace_back(original, resolved);
                     infos.push_back(loadTexture(texture));
                 }
@@ -73,33 +74,37 @@ namespace neon
 
             auto& depthJson = json["depth_properties"];
 
-            auto depthProps = fetchGeneralProperties<TextureView>(depthJson, context);
+            auto depthProps = fetchGeneralProperties<SampledTexture>(depthJson, context);
             auto depthName = depthProps.error.has_value() ? std::optional<std::string>{} : depthProps.name;
 
             std::optional<FrameBufferDepthCreateInfo> depthInfo = {};
             if (depth) {
-                depthInfo = FrameBufferDepthCreateInfo(depthName);
+                depthInfo = FrameBufferDepthCreateInfo();
+                depthInfo->name = depthName;
             }
 
             auto fb = std::make_shared<SimpleFrameBuffer>(context.application, name, samples, infos, depthInfo);
 
-            if (depth && !depthProps.error.has_value()) {
-                auto& output = fb->getOutputs().back();
-                applyGeneralProperties(output.texture->get(), depthProps, context);
-                if (output.resolvedTexture != nullptr) {
-                }
-            }
-
             auto outputs = fb->getOutputs();
-            for (size_t i = 0; i < props.size(); ++i) {
+            for (size_t i = 0; i < outputs.size(); ++i) {
                 auto& output = outputs[i];
-                auto& prop = props[i];
 
-                if (!prop.first.error.has_value()) {
-                    applyGeneralProperties(output.texture->get(), prop.first, context);
-                }
-                if (!prop.second.error.has_value() && output.texture != output.resolvedTexture) {
-                    applyGeneralProperties(output.resolvedTexture->get(), prop.second, context);
+                if (output.type == FrameBufferOutputType::DEPTH) {
+                    if (!depthProps.error.has_value()) {
+                        applyGeneralProperties(output.sampled, depthProps, context);
+                    }
+                    if (!depthProps.error.has_value() && output.texture != output.resolvedTexture) {
+                        applyGeneralProperties(output.resolvedSampled, depthProps, context);
+                    }
+                } else {
+                    auto& prop = props[i];
+
+                    if (!prop.first.error.has_value()) {
+                        applyGeneralProperties(output.sampled, prop.first, context);
+                    }
+                    if (!prop.second.error.has_value() && output.texture != output.resolvedTexture) {
+                        applyGeneralProperties(output.resolvedSampled, prop.second, context);
+                    }
                 }
             }
 

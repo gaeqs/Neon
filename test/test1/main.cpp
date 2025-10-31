@@ -30,165 +30,27 @@ constexpr float WIDTH = 800;
 constexpr float HEIGHT = 600;
 
 CMRC_DECLARE(resources);
+CMRC_DECLARE(neon);
 
 using namespace neon;
 
-class TestComponent : public Component
-{
-    ImGui::neon::RowLayout _rowLayout;
-    ImGui::neon::RowLayout _rowLayout2;
-
-    size_t _counter = 0;
-
-  public:
-    TestComponent() = default;
-    ~TestComponent() override = default;
-
-    void onPreDraw() override
-    {
-        ImGui::ShowDemoWindow();
-        if (ImGui::Begin("Layout test")) {
-            auto& layout = ImGui::neon::BeginColumnLayout("Test");
-
-            layout.button("Test1");
-            layout.stretchedButton("Text2", 1.0f, 100.0f);
-
-            ImGui::ProgressBar(0.5f, ImVec2(0.0f, layout.popStretchedSize()));
-            layout.next(true, 1.0f, ImGui::GetFrameHeight());
-
-            layout.text("Hello world!");
-
-            _rowLayout.begin();
-            _rowLayout.button("Test3", ImVec2(100.0f, 100.0f));
-            _rowLayout.stretchedButton("Test with a very long label", 10.0f);
-            _rowLayout.stretch(7.0f);
-            _rowLayout.stretchedButton("Test5", 5.0f);
-
-            for (size_t i = 0; i < _counter; ++i) {
-                _rowLayout.stretchedButton(std::format("Element {}", i + 1).c_str());
-            }
-
-            _rowLayout.end();
-            layout.next();
-
-            _rowLayout2.begin();
-            if (_rowLayout2.stretchedButton("Add")) {
-                ++_counter;
-            }
-            if (_rowLayout2.stretchedButton("Remove")) {
-                if (_counter > 0) {
-                    --_counter;
-                }
-            }
-            _rowLayout2.end();
-            layout.next();
-
-            layout.text("The end!");
-
-            layout.end();
-        }
-
-        ImGui::End();
-    }
-};
-
-/**
- * Creates a shader program.
- * @param room the application.
- * @param name the name of the shader.
- * @param vert the vertex shader.
- * @param frag the fragment shader.
- * @return the shader program.
- */
-std::shared_ptr<ShaderProgram> createShader(Application* application, const std::string& name, const std::string& vert,
-                                            const std::string& frag)
-{
-    auto defaultVert = cmrc::resources::get_filesystem().open(vert);
-    auto defaultFrag = cmrc::resources::get_filesystem().open(frag);
-
-    auto result = ShaderProgram::createShader(application, name, defaultVert, defaultFrag);
-    if (!result.isOk()) {
-        error() << result.getError();
-        throw std::runtime_error(result.getError());
-    }
-
-    return result.getResult();
-}
-
-std::shared_ptr<FrameBuffer> initRender(Room* room)
+void initRender(Room* room)
 {
     auto* app = room->getApplication();
-
-    // Bindings for the global uniforms.
-    // In this application, we have a buffer of global parameters
-    // and a skybox.
-    std::vector<ShaderUniformBinding> globalBindings = {ShaderUniformBinding::uniformBuffer(sizeof(Matrices)),
-                                                        ShaderUniformBinding::image()};
-
-    // The description of the global uniforms.
-    auto globalDescriptor = std::make_shared<ShaderUniformDescriptor>(app, "default", globalBindings);
 
     // The render of the application.
     // We should set the render to the application before
     // we do anything else, as some components depend on
     // the application's render.
-    auto render = std::make_shared<Render>(app, "default", globalDescriptor);
-    app->setRender(render);
+    CMRCFileSystem fileSystem(cmrc::neon::get_filesystem());
+    AssetLoaderContext context(app, nullptr, &fileSystem);
+    app->setRender(loadAssetFromFile<Render>("render/render.json", context));
 
-    auto directionalShader = createShader(app, "directional_light", "directional_light.vert", "directional_light.frag");
-    auto pointShader = createShader(app, "point_light", "point_light.vert", "point_light.frag");
-    auto flashShader = createShader(app, "flash_light", "flash_light.vert", "flash_light.frag");
-    auto screenShader = createShader(app, "screen", "screen.vert", "screen.frag");
-
-    std::vector<FrameBufferTextureCreateInfo> frameBufferFormats = {
-        TextureFormat::R8G8B8A8,
-        TextureFormat::R16FG16F, // NORMAL XY
-        TextureFormat::R16FG16F  // NORMAL Z / SPECULAR
-    };
-
-    auto fpFrameBuffer = std::make_shared<SimpleFrameBuffer>(app, "frame_buffer", SamplesPerTexel::COUNT_1,
-                                                             frameBufferFormats, FrameBufferDepthCreateInfo());
-    app->getAssets().store(fpFrameBuffer, AssetStorageMode::PERMANENT);
-
-    render->addRenderPass(std::make_shared<DefaultRenderPassStrategy>("frame_buffer", fpFrameBuffer));
-
-    auto outputs = fpFrameBuffer->getOutputs();
-    std::vector<std::shared_ptr<SampledTexture>> textures;
-    textures.reserve(outputs.size());
-
-    for (auto& output : outputs) {
-        textures.push_back(SampledTexture::create(app, output.resolvedTexture));
-    }
-
-    auto albedo = deferred_utils::createLightSystem(room, render.get(), textures, TextureFormat::R8G8B8A8,
-                                                    directionalShader, pointShader, flashShader);
-
-    std::vector<FrameBufferTextureCreateInfo> screenFormats = {TextureFormat::R8G8B8A8};
-    auto screenFrameBuffer =
-        std::make_shared<SimpleFrameBuffer>(app, "screen", SamplesPerTexel::COUNT_1, screenFormats);
-    app->getAssets().store(screenFrameBuffer, AssetStorageMode::PERMANENT);
-    render->addRenderPass(std::make_shared<DefaultRenderPassStrategy>("screen", screenFrameBuffer));
-
-    textures[0] = SampledTexture::create(app, albedo);
-
-    std::shared_ptr screenMaterial = Material::create(room->getApplication(), "Screen Model", screenFrameBuffer,
-                                                      screenShader, deferred_utils::DeferredVertex::getDescription(),
-                                                      InputDescription(0, InputRate::INSTANCE), {}, textures);
-
-    auto screenModel = deferred_utils::createScreenModel(room->getApplication(), ModelCreateInfo(), "Screen Model");
-
-    screenModel->addMaterial(screenMaterial);
+    auto screenModel = loadAssetFromFile<Model>("model/screen.json", context);
 
     auto screenModelGO = room->newGameObject();
     screenModelGO->setName("Screen Model");
     screenModelGO->newComponent<GraphicComponent>(screenModel);
-
-    auto swapFrameBuffer =
-        std::make_shared<SwapChainFrameBuffer>(app, "swap_chain_frame_buffer", SamplesPerTexel::COUNT_1, false);
-
-    render->addRenderPass(std::make_shared<DefaultRenderPassStrategy>("swap_chain", swapFrameBuffer));
-
-    return fpFrameBuffer;
 }
 
 void sansLoadThread(Application* application)
@@ -249,13 +111,13 @@ void loadModels(Application* application, Room* room, const std::shared_ptr<Fram
 
     application->getAssets().store(materialDescriptor, AssetStorageMode::PERMANENT);
 
-    auto shader = createShader(application, "deferred", "deferred.vert", "deferred.frag");
 
     CMRCFileSystem fileSystem(cmrc::resources::get_filesystem());
     AssetLoaderContext context(application);
     context.fileSystem = &fileSystem;
 
-    auto shaderParallax = neon::loadAssetFromFile<ShaderProgram>("parallax_shader.json", context);
+    auto shader = loadAssetFromFile<ShaderProgram>("deferred_shader.json", context);
+    auto shaderParallax = loadAssetFromFile<ShaderProgram>("parallax_shader.json", context);
     application->getAssets().store(shader, AssetStorageMode::PERMANENT);
 
     MaterialCreateInfo sansMaterialInfo(target, shader);
@@ -337,8 +199,10 @@ std::shared_ptr<Room> getTestRoom(Application* application)
 {
     auto room = std::make_shared<Room>(application);
 
-    auto fpFrameBuffer = initRender(room.get());
-    auto screenFrameBuffer = application->getAssets().get<FrameBuffer>("screen").value();
+    initRender(room.get());
+
+    auto fpFrameBuffer = application->getAssets().get<FrameBuffer>("neon:frame_buffer_front").value();
+    auto screenFrameBuffer = application->getAssets().get<FrameBuffer>("neon:frame_buffer_screen").value();
 
     auto skybox = loadSkybox(room.get());
     application->getRender()->getGlobalUniformBuffer().setTexture(1, skybox);
@@ -346,6 +210,9 @@ std::shared_ptr<Room> getTestRoom(Application* application)
     auto cameraController = room->newGameObject();
     auto cameraMovement = cameraController->newComponent<CameraMovementComponent>();
     cameraMovement->setSpeed(10.0f);
+
+    auto lightGo = room->newGameObject("Light");
+    lightGo->newComponent<LightSystem>();
 
     auto parameterUpdater = room->newGameObject();
     parameterUpdater->newComponent<GlobalParametersUpdaterComponent>();
@@ -357,7 +224,6 @@ std::shared_ptr<Room> getTestRoom(Application* application)
     parameterUpdater->newComponent<DebugOverlayComponent>(false, 100);
     parameterUpdater->newComponent<LogComponent>();
     parameterUpdater->newComponent<vulkan::VulkanInfoCompontent>();
-    parameterUpdater->newComponent<TestComponent>();
 
     dock->addSidebar(DockSidebarPosition::BOTTOM, "BottomBar", 24.0f, [] { ImGui::Text("I'm a bottom bar."); });
 

@@ -4,6 +4,7 @@
 
 #include "VKSimpleFrameBuffer.h"
 
+#include <neon/render/texture/SampledTexture.h>
 #include <vulkan/AbstractVKApplication.h>
 #include <vulkan/render/texture/VKSimpleTexture.h>
 #include <vulkan/render/texture/VKTextureView.h>
@@ -48,7 +49,7 @@ namespace neon::vulkan
         info.layers = 1;
         info.usages = {TextureUsage::COLOR_ATTACHMENT, TextureUsage::SAMPLING, TextureUsage::TRANSFER_SOURCE};
 
-        for (auto output : _outputs) {
+        for (auto& output : _outputs) {
             auto name = output.name.value_or("");
 
             info.format = output.createInfo.format;
@@ -56,16 +57,22 @@ namespace neon::vulkan
             info.viewType = output.createInfo.viewType;
             info.samples = _samplesPerTexel;
 
+            auto sampler = Sampler::create(app, name, output.createInfo.sampler);
+
             auto texture = std::make_shared<VKSimpleTexture>(app, name, info, nullptr);
-            output.texture->emplace<VKTextureView>(app, name, TextureViewCreateInfo(), texture);
+            output.texture->emplace<VKTextureView>(app, name, output.createInfo.imageView, texture);
+            output.sampled = SampledTexture::create(name, output.texture, sampler);
 
             if (_samplesPerTexel != SamplesPerTexel::COUNT_1) {
                 info.samples = SamplesPerTexel::COUNT_1;
                 auto resolved = std::make_shared<VKSimpleTexture>(app, name, info, nullptr);
                 output.resolved->emplace<VKTextureView>(app, name, TextureViewCreateInfo{.aspect = {ViewAspect::COLOR}},
                                                         resolved);
+                output.resolvedSampled = SampledTexture::create(name, output.resolved, sampler);
+
             } else {
                 output.resolved->set(output.texture->get());
+                output.resolvedSampled = output.sampled;
             }
         }
 
@@ -77,11 +84,14 @@ namespace neon::vulkan
             info.samples = _samplesPerTexel;
             info.usages = {TextureUsage::DEPTH_STENCIL_ATTACHMENT, TextureUsage::SAMPLING};
 
+            auto sampler = Sampler::create(app, name, _depth->createInfo.sampler);
+
             auto texture = std::make_shared<VKSimpleTexture>(app, name, info, nullptr);
 
             TextureViewCreateInfo viewCreateInfo{.aspect = {ViewAspect::DEPTH}};
 
             _depth->texture->emplace<VKTextureView>(app, name, viewCreateInfo, texture);
+            _depth->sampled = SampledTexture::create(name, _depth->texture, sampler);
         }
     }
 
@@ -203,10 +213,12 @@ namespace neon::vulkan
         std::vector<FrameBufferOutput> output;
         output.reserve(_outputs.size() + (_depth ? 1 : 0));
         for (const auto& item : _outputs) {
-            output.emplace_back(FrameBufferOutputType::COLOR, item.texture, item.resolved);
+            output.emplace_back(FrameBufferOutputType::COLOR, item.texture, item.resolved, item.sampled,
+                                item.resolvedSampled);
         }
         if (_depth) {
-            output.emplace_back(FrameBufferOutputType::DEPTH, _depth->texture, _depth->texture);
+            output.emplace_back(FrameBufferOutputType::DEPTH, _depth->texture, _depth->texture, _depth->sampled,
+                                _depth->sampled);
         }
         return output;
     }

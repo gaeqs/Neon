@@ -1,9 +1,16 @@
 file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS "${PROJECT_SOURCE_DIR}/src/neon/*.cpp")
 file(GLOB_RECURSE VULKAN_SOURCES CONFIGURE_DEPENDS "${PROJECT_SOURCE_DIR}/src/vulkan/*.cpp")
+file(GLOB_RECURSE RESOURCES CONFIGURE_DEPENDS "${PROJECT_SOURCE_DIR}/src/resources/*")
 
 set(CEF_EXECUTABLE_CPP ${PROJECT_SOURCE_DIR}/src/neon/util/cef/CefExecutable.cpp)
-
 list(REMOVE_ITEM SOURCES ${CEF_EXECUTABLE_CPP})
+
+cmrc_add_resource_library(
+        neon_resources
+        NAMESPACE neon
+        WHENCE resources
+        ${RESOURCES}
+)
 
 add_library(neon STATIC ${SOURCES} ${VULKAN_SOURCES})
 
@@ -16,7 +23,7 @@ target_include_directories(neon PUBLIC
 )
 
 target_link_libraries(neon
-        PUBLIC ${NEON_LIBRARIES} ${CMAKE_DL_LIBS}
+        PUBLIC ${NEON_LIBRARIES} ${CMAKE_DL_LIBS} neon_resources
         PRIVATE cmrc::base
 )
 
@@ -30,7 +37,7 @@ if (NEON_USE_CEF)
     target_compile_definitions(neon PUBLIC USE_CEF)
 endif ()
 
-install(TARGETS neon
+install(TARGETS neon neon_resources
         EXPORT neonTargets
         ARCHIVE DESTINATION lib
         LIBRARY DESTINATION lib

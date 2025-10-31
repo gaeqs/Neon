@@ -9,8 +9,8 @@
         "name": "Sans",
         "save": true,
         "use_present": true,
-        "frame_buffer": "A:frame_buffer",
-        "shader": "A:deferred",
+        "frame_buffer": "A:neon:frame_buffer_front",
+        "shader": "A:neon:deferred_shader",
         "descriptions": {
           "vertex": {
             "stride": 44,

@@ -1,0 +1,11 @@
+{
+  "name": "neon:flash_light",
+  "save": true,
+  "use_present": true,
+  "vertex": {
+    "file": "flash_light.vert"
+  },
+  "fragment": {
+    "file": "flash_light.frag"
+  }
+}

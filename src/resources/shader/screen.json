@@ -1,0 +1,11 @@
+{
+  "name": "neon:screen",
+  "save": true,
+  "use_present": true,
+  "vertex": {
+    "file": "screen.vert"
+  },
+  "fragment": {
+    "file": "screen.frag"
+  }
+}

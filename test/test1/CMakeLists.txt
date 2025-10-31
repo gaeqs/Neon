@@ -28,6 +28,7 @@ cmrc_add_resource_library(
         resources/flash_light.vert
         resources/flash_light.frag
         resources/parallax_shader.json
+        resources/deferred_shader.json
         resources/texture/skybox/skybox.json
         resources/texture/skybox/right.jpg
         resources/texture/skybox/left.jpg

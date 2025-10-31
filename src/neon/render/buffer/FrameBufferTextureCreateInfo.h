@@ -70,6 +70,18 @@ namespace neon
          * The name of the texture.
          */
         std::optional<std::string> name = {};
+
+        /**
+         * The creation information of the sampler.
+         */
+        SamplerCreateInfo sampler = SamplerCreateInfo();
+
+        FrameBufferDepthCreateInfo()
+        {
+            sampler.anisotropy = false;
+            sampler.minificationFilter = TextureFilter::NEAREST;
+            sampler.magnificationFilter = TextureFilter::NEAREST;
+        }
     };
 } // namespace neon
 
