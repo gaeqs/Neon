@@ -14,7 +14,7 @@
 
 namespace neon
 {
-    ComponentCollection::ComponentCollection() :
+    ComponentCollection::ComponentCollection()
     {
     }
 
