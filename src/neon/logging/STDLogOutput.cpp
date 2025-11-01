@@ -5,7 +5,7 @@
 #include "STDLogOutput.h"
 
 #ifdef _WIN32
-#include <windows.h>
+    #include <windows.h>
 #endif
 
 #include <filesystem>
@@ -64,10 +64,10 @@ namespace neon
 
     STDLogOutput::STDLogOutput()
     {
-        #ifdef _WIN32
-    // This tells the console to interpret output as UTF-8
-    SetConsoleOutputCP(CP_UTF8);
-    #endif
+#ifdef _WIN32
+        // This tells the console to interpret output as UTF-8
+        SetConsoleOutputCP(CP_UTF8);
+#endif
 
         const TextEffect textEffect = TextEffect::foregroundRGB(0xFF, 0x88, 0x88);
 
