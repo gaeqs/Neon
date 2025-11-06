@@ -17,8 +17,6 @@ namespace neon
 {
     bool LogComponent::printLocation(const std::source_location& location)
     {
-        SimpleMessage message = _locationMessage;
-
         auto path = std::filesystem::path(location.file_name());
         std::string file = path.filename().string();
         std::string line = std::to_string(location.line());
@@ -125,6 +123,10 @@ namespace neon
                         printPart(part);
                     }
                 }
+            }
+
+            if (ImGui::GetScrollY() >= ImGui::GetScrollMaxY()) {
+                ImGui::SetScrollHereY(1.0f);
             }
         }
         ImGui::End();
