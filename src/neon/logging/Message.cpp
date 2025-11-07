@@ -23,6 +23,13 @@ namespace neon
         parts.push_back(std::move(part));
     }
 
+    Message::Message(SimpleMessage message, std::source_location location) :
+        timePoint(std::chrono::system_clock::now()),
+        sourceLocation(location),
+        parts(std::move(message.parts))
+    {
+    }
+
     SimpleMessage::SimpleMessage() = default;
 
     SimpleMessage::SimpleMessage(std::string message)
@@ -38,7 +45,8 @@ namespace neon
         _stack(other._stack),
         _effectAmount(other._effectAmount),
         _logger(other._logger),
-        _loggerSourceLocation(other._loggerSourceLocation)
+        _loggerSourceLocation(other._loggerSourceLocation),
+        _stringFormatter(other._stringFormatter)
     {
     }
 
@@ -53,6 +61,7 @@ namespace neon
         _effectAmount = other._effectAmount;
         _logger = other._logger;
         _loggerSourceLocation = other._loggerSourceLocation;
+        _stringFormatter = other._stringFormatter;
         return *this;
     }
 
@@ -62,7 +71,8 @@ namespace neon
         _stack(std::move(other._stack)),
         _effectAmount(other._effectAmount),
         _logger(other._logger),
-        _loggerSourceLocation(other._loggerSourceLocation)
+        _loggerSourceLocation(other._loggerSourceLocation),
+        _stringFormatter(std::move(other._stringFormatter))
     {
         other._logger = nullptr;
     }
@@ -79,6 +89,7 @@ namespace neon
         _logger = other._logger;
         _loggerSourceLocation = other._loggerSourceLocation;
         other._logger = nullptr;
+        _stringFormatter = std::move(other._stringFormatter);
         return *this;
     }
 
@@ -95,6 +106,9 @@ namespace neon
         _loggerSourceLocation(loggerSourceLocation)
     {
         _stack.emplace_back();
+        if (logger != nullptr) {
+            _stringFormatter = logger->getStringFormatter();
+        }
     }
 
     MessageBuilder::~MessageBuilder()
@@ -141,28 +155,47 @@ namespace neon
         return *this;
     }
 
-    MessageBuilder& MessageBuilder::print(std::string message)
+    MessageBuilder& MessageBuilder::print(const std::string& message)
     {
-        MessagePart part;
-        part.text = std::move(message);
-        part.effects.reserve(_effectAmount);
-        for (const auto& effects : _stack) {
-            part.effects.insert(part.effects.end(), effects.begin(), effects.end());
+        SimpleMessage msg;
+        if (_stringFormatter == nullptr) {
+            MessagePart part;
+            part.text = message;
+            msg.parts.push_back(std::move(part));
+        } else {
+            msg = _stringFormatter->format(message);
         }
-        _builtMessages.push_back(std::move(part));
+
+        for (auto& part : msg.parts) {
+            part.effects.reserve(part.effects.size() + _effectAmount);
+            for (const auto& effects : _stack) {
+                part.effects.insert(part.effects.end(), effects.begin(), effects.end());
+            }
+            _builtMessages.push_back(std::move(part));
+        }
         return *this;
     }
 
-    MessageBuilder& MessageBuilder::print(std::string message, TextEffect effect)
+    MessageBuilder& MessageBuilder::print(const std::string& message, TextEffect effect)
     {
-        MessagePart part;
-        part.text = std::move(message);
-        part.effects.reserve(_effectAmount);
-        for (const auto& effects : _stack) {
-            part.effects.insert(part.effects.end(), effects.begin(), effects.end());
-            part.effects.push_back(effect);
+        SimpleMessage msg;
+        if (_stringFormatter == nullptr) {
+            MessagePart part;
+            part.text = message;
+            msg.parts.push_back(std::move(part));
+        } else {
+            msg = _stringFormatter->format(message);
         }
-        _builtMessages.push_back(std::move(part));
+
+        for (auto& part : msg.parts) {
+            part.effects.reserve(part.effects.size() + _effectAmount + 1);
+            for (const auto& effects : _stack) {
+                part.effects.insert(part.effects.end(), effects.begin(), effects.end());
+            }
+            part.effects.push_back(effect);
+            _builtMessages.push_back(std::move(part));
+        }
+
         return *this;
     }
 
@@ -259,11 +292,12 @@ namespace neon
         return *this;
     }
 
-    MessageGroup MessageGroupBuilder::build(std::string name) const
+    MessageGroup MessageGroupBuilder::build(std::string name, GroupLevel level) const
     {
         MessageGroup group;
         group.name = std::move(name);
         group.prefix.parts = _builtMessages;
+        group.level = level;
         return group;
     }
 } // namespace neon

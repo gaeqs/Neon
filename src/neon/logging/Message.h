@@ -13,6 +13,8 @@
 
 #include "TextEffect.h"
 
+#include <neon/util/format/Formatter.h>
+
 namespace neon
 {
     class Logger;
@@ -24,39 +26,6 @@ namespace neon
     {
         std::vector<TextEffect> effects;
         std::string text;
-    };
-
-    /**
-     * Represents a message that can be printed
-     * by a Logger.
-     * <p>
-     * Messages contains the time point and the source location
-     * where it was created.
-     * It is recommended send MessageBuilders to loggers instead
-     * of messages.
-     * <p>
-     * A message is split in several part, each one with several
-     * styles that tells the output how to format the part.
-     * <p>
-     * To create a Message in an easier way, use the class MessageBuilder.
-     */
-    struct Message
-    {
-        std::chrono::system_clock::time_point timePoint;
-        std::source_location sourceLocation;
-        std::vector<std::string> groups;
-        std::vector<MessagePart> parts;
-
-        /**
-         * Creates an empty message.
-         */
-        explicit Message(std::source_location location = std::source_location::current());
-
-        /**
-         * Creates a message containing only one part with the given string.
-         * @param message the given string.
-         */
-        explicit Message(std::string message, std::source_location location = std::source_location::current());
     };
 
     /**
@@ -83,12 +52,60 @@ namespace neon
     };
 
     /**
+     * Represents a message that can be printed
+     * by a Logger.
+     * <p>
+     * Messages contain the time point and the source location
+     * where it was created.
+     * It is recommended to send MessageBuilders to loggers instead
+     * of messages.
+     * <p>
+     * A message is split in several parts, each one with several
+     * styles that tell the output how to format the part.
+     * <p>
+     * To create a Message in an easier way, use the class MessageBuilder.
+     */
+    struct Message
+    {
+        std::chrono::system_clock::time_point timePoint;
+        std::source_location sourceLocation;
+        std::vector<std::string> groups;
+        std::vector<MessagePart> parts;
+
+        /**
+         * Creates an empty message.
+         */
+        explicit Message(std::source_location location = std::source_location::current());
+
+        /**
+         * Creates a message containing only one part with the given string.
+         * @param message the given string.
+         */
+        explicit Message(std::string message, std::source_location location = std::source_location::current());
+
+        /**
+         * Creates a message from a given simple message.
+         * @param message the given message.
+         */
+        explicit Message(SimpleMessage message, std::source_location location = std::source_location::current());
+    };
+
+    enum class GroupLevel
+    {
+        LOW,
+        NORMAL,
+        HIGH,
+        URGENT
+    };
+
+    /**
      * Represents a group that can be used to tag messages.
      */
     struct MessageGroup
     {
         std::string name;
         SimpleMessage prefix;
+        GroupLevel level;
     };
 
     /**
@@ -116,6 +133,7 @@ namespace neon
         size_t _effectAmount;
         Logger* _logger;
         std::source_location _loggerSourceLocation;
+        std::shared_ptr<Formatter<std::string, SimpleMessage>> _stringFormatter;
 
       public:
         MessageBuilder(const MessageBuilder& other);
@@ -142,9 +160,9 @@ namespace neon
 
         MessageBuilder& effect(TextEffect effect);
 
-        MessageBuilder& print(std::string message);
+        MessageBuilder& print(const std::string& message);
 
-        MessageBuilder& print(std::string message, TextEffect effect);
+        MessageBuilder& print(const std::string& message, TextEffect effect);
 
         MessageBuilder& println(const std::string& message);
 
@@ -242,7 +260,7 @@ namespace neon
 
         MessageGroupBuilder& println(const std::string& message, TextEffect effect);
 
-        [[nodiscard]] MessageGroup build(std::string name) const;
+        [[nodiscard]] MessageGroup build(std::string name, GroupLevel level = GroupLevel::NORMAL) const;
 
         template<typename T>
             requires(!std::is_convertible_v<T, std::string>)
@@ -282,4 +300,4 @@ namespace neon
     };
 } // namespace neon
 
-#endif //MESSAGE_H
+#endif // MESSAGE_H

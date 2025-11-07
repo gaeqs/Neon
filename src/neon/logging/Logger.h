@@ -13,18 +13,20 @@
 
 #include <neon/logging/LogOutput.h>
 #include <neon/logging/Message.h>
+#include <neon/util/format/Formatter.h>
 
 namespace neon
 {
     /**
      * The main class of the logging system.
-     * This class allows the use to print custom messages,
+     * This class allows the user to print custom messages,
      * propagating them to the registered outputs.
      */
     class Logger
     {
-        std::vector<std::unique_ptr<LogOutput>> _outputs;
+        std::vector<std::shared_ptr<LogOutput>> _outputs;
         std::unordered_map<std::string, MessageGroup> _groups;
+        std::shared_ptr<Formatter<std::string, SimpleMessage>> _stringFormatter;
         mutable std::mutex _mutex;
 
         void addDefaultGroups();
@@ -38,23 +40,23 @@ namespace neon
          * groups "info", "done", "warning", "error" and "debug" by default.
          * @param withDefaultOutput whether the logger should include a
          * STDLogOutput by default.
-         * @param defaultLogger whether this logger should be considered
-         * the default logger. If true, you can access this logger using
-         * Logger::defaultLogger().
+         * @param withDefaultFormatter whether the logger should set its formatter to a default MinecraftColorFormatter.
          */
-        explicit Logger(bool withDefaultGroups = true, bool withDefaultOutput = true);
+        explicit Logger(bool withDefaultGroups = true, bool withDefaultOutput = true, bool withDefaultFormatter = true);
+
+        const std::shared_ptr<Formatter<std::string, SimpleMessage>>& getStringFormatter();
 
         /**
          * Adds a new log output.
          * Log outputs cannot be shared by loggers.
          * @param output the new log output.
          */
-        void addOutput(std::unique_ptr<LogOutput>&& output);
+        void addOutput(const std::shared_ptr<LogOutput>& output);
 
         /**
          * @return the list of outputs inside this logger.
          */
-        [[nodiscard]] const std::vector<std::unique_ptr<LogOutput>>& getOutputs() const;
+        [[nodiscard]] const std::vector<std::shared_ptr<LogOutput>>& getOutputs() const;
 
         /**
          * Removes the output that matches the given id.
@@ -97,35 +99,44 @@ namespace neon
          * @param message the message.
          * @param location the location where this function has been called.
          */
-        void print(std::string message, std::source_location location = std::source_location::current()) const;
+        void print(const std::string& message, std::source_location location = std::source_location::current()) const;
+
+        /**
+         * Prints the given message.
+         * @param message the message.
+         * @param group the name of the group the message belongs to.
+         * @param location the location where this function has been called.
+         */
+        void print(const std::string& message, std::string group,
+                   std::source_location location = std::source_location::current()) const;
 
         /**
          * Prints the given message using the group log "info".
          * @param message the message.
          * @param location the location where this function has been called.
          */
-        void info(std::string message, std::source_location location = std::source_location::current()) const;
+        void info(const std::string& message, std::source_location location = std::source_location::current()) const;
 
         /**
          * Prints the given message using the group log "done".
          * @param message the message.
          * @param location the location where this function has been called.
          */
-        void done(std::string message, std::source_location location = std::source_location::current()) const;
+        void done(const std::string& message, std::source_location location = std::source_location::current()) const;
 
         /**
          * Prints the given message using the group log "debug".
          * @param message the message.
          * @param location the location where this function has been called.
          */
-        void debug(std::string message, std::source_location location = std::source_location::current()) const;
+        void debug(const std::string& message, std::source_location location = std::source_location::current()) const;
 
         /**
          * Prints the given message using the group log "warning".
          * @param message the message.
          * @param location the location where this function has been called.
          */
-        void warning(std::string message, std::source_location location = std::source_location::current()) const;
+        void warning(const std::string& message, std::source_location location = std::source_location::current()) const;
 
         /**
          * Prints the given message using the group log "error".
@@ -295,4 +306,4 @@ namespace neon
     MessageBuilder debug(const std::source_location& location = std::source_location::current());
 } // namespace neon
 
-#endif //LOGGER_H
+#endif // LOGGER_H
