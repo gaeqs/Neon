@@ -1,13 +1,11 @@
-//
-// Created by gaeqs on 9/09/24.
-//
+// LogComponent.cpp
+// (User requested code in English)
 
 #include "LogComponent.h"
 
 #include <filesystem>
-
-#include <imgui.h>
 #include <ranges>
+#include <imgui.h>
 #include <neon/structure/Application.h>
 #include <neon/logging/ImGuiLogOutput.h>
 #include <neon/logging/Logger.h>
@@ -15,20 +13,22 @@
 
 namespace neon
 {
-    bool LogComponent::printLocation(const std::source_location& location)
+    // --- Unchanged methods ---
+
+    float LogComponent::printLocation(const std::source_location& location)
     {
         auto path = std::filesystem::path(location.file_name());
         std::string file = path.filename().string();
         std::string line = std::to_string(location.line());
 
-        bool first = true;
+        ImGui::BeginGroup();
+        bool first = false;
         for (auto part : _locationMessage.parts) {
             if (part.text == "{FILE}") {
                 part.text = file;
             } else if (part.text == "{LINE}") {
                 part.text = line;
             }
-
             if (first) {
                 first = false;
             } else {
@@ -36,8 +36,35 @@ namespace neon
             }
             printPart(part);
         }
+        ImGui::EndGroup();
 
-        return !first;
+        if (!_locationMessage.parts.empty()) {
+            return ImGui::GetItemRectSize().x;
+        }
+
+        return 0.0f;
+    }
+
+    float LogComponent::printGroups(const LogComponentMessage* msg)
+    {
+        ImGui::BeginGroup();
+        float first = true;
+        for (auto& group : msg->groups) {
+            for (auto& prefix : group.prefix.parts) {
+                if (first) {
+                    first = false;
+                } else {
+                    ImGui::SameLine(0, 0);
+                }
+                printPart(prefix);
+            }
+        }
+        ImGui::EndGroup();
+
+        if (!first) {
+            return ImGui::GetItemRectSize().x;
+        }
+        return 0.0f;
     }
 
     void LogComponent::printPart(const MessagePart& part)
@@ -53,9 +80,70 @@ namespace neon
             ImVec4 imColor = {c.x(), c.y(), c.z(), 1.0f};
             ImGui::PushStyleColor(ImGuiCol_Text, imColor);
         }
-        ImGui::Text(part.text.c_str());
+
+        // Use TextUnformatted for a minor performance boost
+        // as we don't need printf-style formatting.
+        ImGui::TextUnformatted(part.text.c_str());
+
         if (color.has_value()) {
             ImGui::PopStyleColor();
+        }
+    }
+
+    void LogComponent::refreshFilteredMessages()
+    {
+        if (!_filter.IsActive()) {
+            return;
+        }
+
+        _filteredMessages.clear();
+        _filteredMessages.reserve(_messages.size());
+
+        for (size_t i = 0; i < _messages.size(); ++i) {
+            bool filtered = false;
+            auto& msg = _messages[i];
+            for (const auto& [_, text] : msg.message.parts) {
+                if (_filter.PassFilter(text.c_str())) {
+                    _filteredMessages.push_back(i);
+                    filtered = true;
+                    break;
+                }
+            }
+
+            if (!filtered) {
+                auto path = std::filesystem::path(msg.message.sourceLocation.file_name());
+                std::string file = path.filename().string();
+                if (_filter.PassFilter(file.c_str())) {
+                    _filteredMessages.push_back(i);
+                    break;
+                }
+
+                for (const auto& group : msg.groups) {
+                    if (_filter.PassFilter(group.name.c_str())) {
+                        _filteredMessages.push_back(i);
+                        break;
+                    }
+                    for (const auto& [_, text] : group.prefix.parts) {
+                        if (_filter.PassFilter(text.c_str())) {
+                            _filteredMessages.push_back(i);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    void LogComponent::filterRecentMessages(size_t start)
+    {
+        for (size_t i = start; i < _messages.size(); ++i) {
+            auto& msg = _messages[i].message;
+            for (const auto& [_, text] : msg.parts) {
+                if (_filter.PassFilter(text.c_str())) {
+                    _filteredMessages.push_back(i);
+                    break;
+                }
+            }
         }
     }
 
@@ -66,6 +154,7 @@ namespace neon
 
     void LogComponent::onStart()
     {
+        // (This method is unchanged)
         const TextEffect textEffect = TextEffect::foregroundRGB(0xFF, 0x88, 0x88);
 
         MessageBuilder builder;
@@ -85,55 +174,93 @@ namespace neon
         logger.addOutput(std::move(output));
     }
 
+    // --- MODIFIED METHODS ---
+
     void LogComponent::onPreDraw()
     {
-        if (ImGui::Begin("Log")) {
+        ImGui::ShowDemoWindow();
+        if (!ImGui::Begin("Log")) {
+            ImGui::End();
+            return;
+        }
+
+        // --- 1. Header Widgets ---
+        if (ImGui::Button("Clear")) {
+            clear();
+        }
+        ImGui::SameLine();
+        ImGui::Checkbox("Auto-scroll", &_autoScroll);
+        ImGui::SameLine();
+        if (_filter.Draw("Filter", -100.0f)) {
+            refreshFilteredMessages();
+        }
+
+        ImGui::Separator();
+
+        {
             std::lock_guard lock(_mutex);
-            ImGuiListClipper clipper;
-            clipper.Begin(static_cast<int>(_messages.size()));
-
-            while (clipper.Step()) {
-                for (int row = clipper.DisplayStart; row < clipper.DisplayEnd; row++) {
-                    auto& [message, groups] = _messages.at(row);
-                    bool first = !printLocation(message.sourceLocation);
-                    for (auto& group : groups) {
-                        for (auto& prefix : group.prefix.parts) {
-                            if (first) {
-                                first = false;
-                            } else {
-                                ImGui::SameLine(0, 0);
-                            }
-                            printPart(prefix);
-                        }
-                    }
-
-                    if (!first) {
-                        if (!message.parts.empty()) {
-                            ImGui::SameLine();
-                        }
-                        first = true;
-                    }
-
-                    for (auto& part : message.parts) {
-                        if (first) {
-                            first = false;
-                        } else {
-                            ImGui::SameLine(0, 0);
-                        }
-                        printPart(part);
-                    }
-                }
-            }
-
-            if (ImGui::GetScrollY() >= ImGui::GetScrollMaxY()) {
-                ImGui::SetScrollHereY(1.0f);
+            if (!_pendingMessages.empty()) {
+                size_t size = _messages.size();
+                _messages.insert(_messages.end(), std::make_move_iterator(_pendingMessages.begin()),
+                                 std::make_move_iterator(_pendingMessages.end()));
+                _pendingMessages.clear();
+                filterRecentMessages(size);
             }
         }
+
+        if (ImGui::BeginChild("ScrollingRegion", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar)) {
+            ImGuiListClipper clipper;
+            clipper.Begin(static_cast<int>(_filter.IsActive() ? _filteredMessages.size() : _messages.size()));
+
+            float maxGroupWidth = 0.0f;
+            float maxLocationWidth = 0.0f;
+            while (clipper.Step()) {
+                for (int row = clipper.DisplayStart; row < clipper.DisplayEnd; row++) {
+                    LogComponentMessage* msg;
+
+                    if (_filter.IsActive()) {
+                        msg = &_messages[_filteredMessages[row]];
+                    } else {
+                        msg = &_messages[row];
+                    }
+
+                    ImGui::Dummy({0.0f, 0.0f});
+                    ImGui::SameLine(0.0f, 0.0f);
+
+                    float groupsWidth = printGroups(msg);
+                    ImGui::SameLine();
+                    ImGui::Dummy({std::max(_cachedGroupsMaxWidth - groupsWidth, 0.0f), 0.0f});
+                    ImGui::SameLine();
+
+                    float locationWidth = printLocation(msg->message.sourceLocation);
+                    ImGui::SameLine();
+                    ImGui::Dummy({std::max(_cachedLocationMaxWidth - locationWidth, 0.0f), 0.0f});
+
+                    for (auto& part : msg->message.parts) {
+                        ImGui::SameLine(0, 0);
+                        printPart(part);
+                    }
+
+                    maxGroupWidth = std::max(maxGroupWidth, groupsWidth);
+                    maxLocationWidth = std::max(maxLocationWidth, locationWidth);
+                }
+            }
+            clipper.End();
+
+            if (_autoScroll && ImGui::GetScrollY() >= ImGui::GetScrollMaxY()) {
+                ImGui::SetScrollHereY(1.0f);
+            }
+
+            _cachedGroupsMaxWidth = maxGroupWidth;
+            _cachedLocationMaxWidth = maxLocationWidth;
+        }
+        ImGui::EndChild();
         ImGui::End();
     }
 
     void LogComponent::addMessage(const Message& message, const std::vector<const MessageGroup*>& groups)
     {
+        // This is now very fast.
         std::lock_guard lock(_mutex);
 
         std::vector<MessageGroup> g;
@@ -143,6 +270,17 @@ namespace neon
             g.emplace_back(*group);
         }
 
-        _messages.emplace_back(message, g);
+        // Add to the pending list, not the main list
+        _pendingMessages.emplace_back(message, std::move(g));
     }
+
+    void LogComponent::clear()
+    {
+        // Must lock to clear both buffers
+        std::lock_guard lock(_mutex);
+        _messages.clear();
+        _filteredMessages.clear();
+        _pendingMessages.clear();
+    }
+
 } // namespace neon
