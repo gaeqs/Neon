@@ -82,6 +82,14 @@ namespace neon
             sampler.minificationFilter = TextureFilter::NEAREST;
             sampler.magnificationFilter = TextureFilter::NEAREST;
         }
+
+        explicit FrameBufferDepthCreateInfo(std::string name_) :
+            name(name_)
+        {
+            sampler.anisotropy = false;
+            sampler.minificationFilter = TextureFilter::NEAREST;
+            sampler.magnificationFilter = TextureFilter::NEAREST;
+        }
     };
 } // namespace neon
 
