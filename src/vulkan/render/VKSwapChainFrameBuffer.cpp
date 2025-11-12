@@ -192,8 +192,8 @@ namespace neon::vulkan
         init_info.DescriptorPool = _vkApplication->getImGuiPool();
         init_info.MinImageCount = 3;
         init_info.ImageCount = 3;
-        init_info.PipelineInfoMain.MSAASamples = conversions::vkSampleCountFlagBits(_samples);
-        init_info.PipelineInfoMain.RenderPass = _renderPass.getRaw();
+        init_info.MSAASamples = conversions::vkSampleCountFlagBits(_samples);
+        init_info.RenderPass = _renderPass.getRaw();
 
         ImGui_ImplVulkan_Init(&init_info);
     }
