@@ -56,8 +56,8 @@ FetchContent_MakeAvailable(rush)
 # ImGui ("docking")
 FetchContent_Declare(
         imgui
-        GIT_REPOSITORY https://github.com/ocornut/imgui.git
-        GIT_TAG 44aa9a4b3a6f27d09a4eb5770d095cbd376dfc4b
+        GIT_REPOSITORY https://github.com/gaeqs/imgui.git
+        GIT_TAG docking
         SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/lib/imgui
 )
 
