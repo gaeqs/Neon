@@ -38,6 +38,12 @@ if (UNIX)
     list(APPEND NEON_LIBRARIES ${LIBNOTIFY_LIBRARIES})
 endif ()
 
+if(UNIX AND NOT APPLE)
+    # New ImGui version requires X11 on Linux
+    find_package(X11 REQUIRED)
+    list(APPEND NEON_LIBRARIES X11::X11)
+endif()
+
 if (MSVC)
     add_compile_definitions(NOMINMAX WIN32_LEAN_AND_MEAN NOGDI)
     add_compile_options(/UNEAR /UFAR)
