@@ -38,12 +38,6 @@ if (UNIX)
     list(APPEND NEON_LIBRARIES ${LIBNOTIFY_LIBRARIES})
 endif ()
 
-if(UNIX AND NOT APPLE)
-    # New ImGui version requires X11 on Linux
-    find_package(X11 REQUIRED)
-    list(APPEND NEON_LIBRARIES X11::X11)
-endif()
-
 if (MSVC)
     add_compile_definitions(NOMINMAX WIN32_LEAN_AND_MEAN NOGDI)
     add_compile_options(/UNEAR /UFAR)
@@ -62,8 +56,8 @@ FetchContent_MakeAvailable(rush)
 # ImGui ("docking")
 FetchContent_Declare(
         imgui
-        GIT_REPOSITORY https://github.com/gaeqs/imgui.git
-        GIT_TAG docking
+        GIT_REPOSITORY https://github.com/ocornut/imgui.git
+        GIT_TAG 44aa9a4b3a6f27d09a4eb5770d095cbd376dfc4b
         SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/lib/imgui
 )
 
