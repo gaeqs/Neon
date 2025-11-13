@@ -8,6 +8,20 @@
 
 namespace neon
 {
+
+    void DockSpaceComponent::renderDockSpaceWindow(ImGuiViewport* viewport, ImVec2 pos, ImVec2 size)
+    {
+        ImGui::SetNextWindowPos(pos);
+        ImGui::SetNextWindowSize(size);
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+        if (ImGui::Begin("##DockingHost", nullptr, _dockFlags)) {
+            ImGuiID dockSpaceId = ImGui::GetID("HUB_DockSpace");
+            ImGui::DockSpace(dockSpaceId, ImVec2(0, 0), ImGuiDockNodeFlags_None);
+        }
+        ImGui::End();
+        ImGui::PopStyleVar();
+    }
+
     DockSpaceComponent::DockSpaceComponent() :
         _firstTime(true)
     {
@@ -64,27 +78,18 @@ namespace neon
         }
 
         // Now that all bars are drawn, we can draw the main dock space!
-        ImGui::SetNextWindowPos(pos);
-        ImGui::SetNextWindowSize(size);
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
-        if (ImGui::Begin("##DockingHost", nullptr, _dockFlags)) {
-            ImGuiID dockSpaceId = ImGui::GetID("HUB_DockSpace");
-            ImGui::DockSpace(dockSpaceId, ImVec2(0, 0), ImGuiDockNodeFlags_None);
-        }
-        ImGui::End();
-        ImGui::PopStyleVar();
+        renderDockSpaceWindow(vp, pos, size);
     }
 
     DockSidebar* DockSpaceComponent::addSidebar(DockSidebarPosition position, std::string name, float size,
-                                                  std::function<void()> compositor)
+                                                std::function<void()> compositor)
     {
         auto bar = std::make_unique<DockSidebar>(position, [name] { return name; }, size, compositor);
         return _bars.emplace_back(std::move(bar)).get();
     }
 
-    DockSidebar* DockSpaceComponent::addSidebar(DockSidebarPosition position,
-                                                  std::function<std::string()> nameProvider, float size,
-                                                  std::function<void()> compositor)
+    DockSidebar* DockSpaceComponent::addSidebar(DockSidebarPosition position, std::function<std::string()> nameProvider,
+                                                float size, std::function<void()> compositor)
     {
         auto bar = std::make_unique<DockSidebar>(position, nameProvider, size, compositor);
         return _bars.emplace_back(std::move(bar)).get();

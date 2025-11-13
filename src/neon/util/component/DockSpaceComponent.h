@@ -6,6 +6,7 @@
 #define NEON_DOCKSPACECOMPONENT_H
 
 #include <functional>
+#include <imgui.h>
 
 #include <neon/structure/Component.h>
 
@@ -48,8 +49,9 @@ namespace neon
 
         std::vector<std::unique_ptr<DockSidebar>> _bars;
 
-      public:
+        virtual void renderDockSpaceWindow(ImGuiViewport* viewport, ImVec2 pos, ImVec2 size);
 
+      public:
         DockSpaceComponent();
 
         void onUpdate(float deltaTime) override;
