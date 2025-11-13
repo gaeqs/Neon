@@ -47,6 +47,7 @@ namespace neon
                     barPos = pos;
                     barSize = ImVec2(size.x, bar->size);
                     pos.y += bar->size;
+                    size.y -= bar->size;
                     break;
                 case DockSidebarPosition::BOTTOM:
                     barPos = ImVec2(pos.x, pos.y + size.y - bar->size);
@@ -57,6 +58,7 @@ namespace neon
                     barPos = pos;
                     barSize = ImVec2(bar->size, size.y);
                     pos.x += bar->size;
+                    size.x -= bar->size;
                     break;
                 case DockSidebarPosition::RIGHT:
                     barPos = ImVec2(pos.x + size.x - bar->size, pos.y);
