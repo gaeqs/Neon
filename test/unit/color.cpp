@@ -15,7 +15,7 @@ using HSLA = Color<HSLColorSpace<true>>;
 using HSV = Color<HSVColorSpace<false>>;
 using HSVA = Color<HSVColorSpace<true>>;
 
-TEST_CASE("Color Construction", "[construction]")
+TEST_CASE("Color Construction", "[color]")
 {
     // Use Catch2's Approx for float comparisons
     using Catch::Approx;
@@ -63,7 +63,7 @@ TEST_CASE("Color Construction", "[construction]")
     }
 }
 
-TEST_CASE("Color Transformations & Comparison", "[transform][compare]")
+TEST_CASE("Color Transformations & Comparison", "[color]")
 {
     using Catch::Approx;
 
@@ -153,7 +153,7 @@ TEST_CASE("Color Transformations & Comparison", "[transform][compare]")
     }
 }
 
-TEST_CASE("Color Operations", "[operations]")
+TEST_CASE("Color Operations", "[color]")
 {
     using Catch::Approx;
 
@@ -180,7 +180,7 @@ TEST_CASE("Color Operations", "[operations]")
         // Test hue rotation (wrap-around)
         auto wrapped = c.rotateHue(0.6f); // 0.5 + 0.6 = 1.1 -> 0.1
         CHECK(wrapped[0] == Approx(0.1f));
-        
+
         // Test hue rotation reverse (wrap-around)
         auto wrappedReversed = c.rotateHue(-0.6f); // 0.5 - 0.6 = -0.1 -> 0.0
         CHECK(wrappedReversed[0] == Approx(0.9f));
@@ -210,7 +210,7 @@ TEST_CASE("Color Operations", "[operations]")
     }
 }
 
-TEST_CASE("Color Export", "[export]")
+TEST_CASE("Color Export", "[color]")
 {
     SECTION("toUInt (ARGB)")
     {
