@@ -237,21 +237,21 @@ TEST_CASE("Color Export", "[color]")
         REQUIRE(green.toUInt() == 0x8000FF00); // 0x80 = 128
     }
 
-    SECTION("toImGuiColor (ABGR)")
+    SECTION("toImGuiUInt (ABGR)")
     {
         // Opaque Red (FF, 00, 00) -> ARGB: 0xFFFF0000
         // ABGR: A=FF, B=00, G=00, R=FF -> 0xFF0000FF
         RGB red(255, 0, 0);
-        REQUIRE(red.toImGuiColor() == 0xFF0000FF);
+        REQUIRE(red.toImGuiUInt() == 0xFF0000FF);
 
         // 50% Transparent Green (00, FF, 00, 80) -> ARGB: 0x8000FF00
         // ABGR: A=80, B=00, G=FF, R=00 -> 0x8000FF00
         RGBA green(0, 255, 0, 128);
-        REQUIRE(green.toImGuiColor() == 0x8000FF00);
+        REQUIRE(green.toImGuiUInt() == 0x8000FF00);
 
         // 50% Transparent Blue (00, 00, FF, 80) -> ARGB: 0x800000FF
         // ABGR: A=80, B=FF, G=00, R=00 -> 0x80FF0000
         RGBA blue(0, 0, 255, 128);
-        REQUIRE(blue.toImGuiColor() == 0x80FF0000);
+        REQUIRE(blue.toImGuiUInt() == 0x80FF0000);
     }
 }

@@ -91,6 +91,10 @@ namespace neon
     {
     }
 
+    void Component::onLatePreDraw()
+    {
+    }
+
     void Component::onKey(const KeyboardEvent& event)
     {
     }

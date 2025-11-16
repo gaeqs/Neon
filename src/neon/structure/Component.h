@@ -184,6 +184,16 @@ namespace neon
         virtual void onPreDraw();
 
         /**
+         * Virtual method invoked before the draw pass starts.
+         * This method is invoked after all "onPreDraw" methods.
+         * from all components have been called.
+         *
+         * Don't use this method to create ImGui windows, as this method
+         * is usually used to modify them!
+         */
+        virtual void onLatePreDraw();
+
+        /**
          * Virtual method invoked when a key is pressed, hold or released.
          * @param event the event.
          */

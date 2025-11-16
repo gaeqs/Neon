@@ -336,7 +336,7 @@ namespace neon
          * It performs the necessary (ARGB -> ABGR) byte-swap.
          * @return The 32-bit ABGR uint32_t.
          */
-        uint32_t toImGuiUint() const
+        uint32_t toImGuiUInt() const
             requires(std::is_same_v<ColorSpace, RGBAColorSpace> || std::is_same_v<ColorSpace, RGBColorSpace<>> ||
                      ColorSpaceHasTransformation<ColorSpace, RGBAColorSpace>)
         {
@@ -344,7 +344,7 @@ namespace neon
                 uint32_t argb = toUInt();
                 return argb & 0xFF00FF00 | (argb & 0x00FF0000) >> 16 | (argb & 0x000000FF) << 16;
             } else {
-                return transformTo<RGBAColorSpace>().toImGuiUint();
+                return transformTo<RGBAColorSpace>().toImGuiUInt();
             }
         }
 

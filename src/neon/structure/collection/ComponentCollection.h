@@ -191,6 +191,15 @@ namespace neon
          * @param profiler the profiler.
          */
         void preDrawComponents(Profiler& profiler);
+
+        /**
+         * THIS METHOD SHOULD ONLY BE USED BY ROOMS!
+         * USERS MUSTN'T USE THIS METHOD.
+         * <p>
+         * Calls onLatePreDraw() on all components.
+         * @param profiler the profiler.
+         */
+        void latePreDrawComponents(Profiler& profiler);
     };
 } // namespace neon
 
