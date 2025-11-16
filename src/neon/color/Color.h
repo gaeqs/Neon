@@ -5,10 +5,10 @@
 #ifndef NEON_COLOR_H
 #define NEON_COLOR_H
 
-#include "ColorSpaceTransformations.h"
-#include "RGBColorSpace.h"
+#include <rush/vector/vec.h>
 
-#include <rush/vector/vec_base.h>
+#include <neon/color/RGBColorSpace.h>
+#include <neon/color/ColorSpaceTransformations.h>
 
 namespace neon
 {

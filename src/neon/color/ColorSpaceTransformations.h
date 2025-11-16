@@ -5,9 +5,9 @@
 #ifndef NEON_COLORSPACETRANSFORMATIONS_H
 #define NEON_COLORSPACETRANSFORMATIONS_H
 
-#include "RGBColorSpace.h"
-#include "HSLColorSpace.h"
-#include "HSVColorSpace.h"
+#include <neon/color/RGBColorSpace.h>
+#include <neon/color/HSLColorSpace.h>
+#include <neon/color/HSVColorSpace.h>
 
 namespace neon
 {
