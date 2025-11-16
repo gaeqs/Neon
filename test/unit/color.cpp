@@ -6,11 +6,6 @@
 #include <catch2/catch_all.hpp>
 #include <neon/color/Color.h>
 #include <neon/color/HSLColorSpace.h>
-#include <neon/logging/Logger.h>
-#include <neon/logging/Message.h>
-
-#include <neon/util/task/Coroutine.h>
-#include <neon/util/task/TaskRunner.h>
 
 using namespace neon;
 using RGB = Color<RGBColorSpace<false>>;
