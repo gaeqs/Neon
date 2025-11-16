@@ -5,6 +5,7 @@
 #ifndef NEON_COLOR_H
 #define NEON_COLOR_H
 
+#include <imgui.h>
 #include <rush/vector/vec.h>
 
 #include <neon/color/RGBColorSpace.h>
@@ -328,15 +329,45 @@ namespace neon
         }
 
         /**
-         * @brief Exports the color to a 32-bit integer in ImGui's format (0xAABBGGRR).
-         * @details Performs a byte-swap on the standard ARGB toUInt() result.
-         * @return The 32-bit ABGR integer.
+         * @brief Exports the color to a 32-bit integer in ImGui's format (ABGR).
+         * @details This method is robust and works for any ColorSpace.
+         * If the color is not already in an RGB-based space, it will be
+         * automatically transformed to RGBA first.
+         * It performs the necessary (ARGB -> ABGR) byte-swap.
+         * @return The 32-bit ABGR uint32_t.
          */
-        uint32_t toImGuiColor() const
-            requires ColorSpaceHasToUInt<ColorSpace>
+        uint32_t toImGuiUint() const
+            requires(std::is_same_v<ColorSpace, RGBAColorSpace> || std::is_same_v<ColorSpace, RGBColorSpace<>> ||
+                     ColorSpaceHasTransformation<ColorSpace, RGBAColorSpace>)
         {
-            uint32_t argb = toUInt();
-            return argb & 0xFF00FF00 | (argb & 0x00FF0000) >> 16 | (argb & 0x000000FF) << 16;
+            if constexpr (std::is_same_v<ColorSpace, RGBAColorSpace> || std::is_same_v<ColorSpace, RGBColorSpace<>>) {
+                uint32_t argb = toUInt();
+                return argb & 0xFF00FF00 | (argb & 0x00FF0000) >> 16 | (argb & 0x000000FF) << 16;
+            } else {
+                return transformTo<RGBAColorSpace>().toImGuiUint();
+            }
+        }
+
+        /**
+         * @brief Exports the color to an ImVec4 (float vector) for ImGui.
+         * @details This method is robust and works for any ColorSpace.
+         * If the color is not already in an RGB-based space, it will be
+         * automatically transformed to RGBA first.
+         * If the color is RGB (no alpha), an alpha of 1.0 (opaque)
+         * will be supplied.
+         * @return An ImVec4 struct {r, g, b, a} with components in [0.0, 1.0].
+         */
+        ImVec4 toImGuiVector() const
+            requires(std::is_same_v<ColorSpace, RGBAColorSpace> || std::is_same_v<ColorSpace, RGBColorSpace<>> ||
+                     ColorSpaceHasTransformation<ColorSpace, RGBAColorSpace>)
+        {
+            if constexpr (std::is_same_v<ColorSpace, RGBAColorSpace>) {
+                return {data[0], data[1], data[2], data[3]};
+            } else if constexpr (std::is_same_v<ColorSpace, RGBColorSpace<>>) {
+                return {data[0], data[1], data[2], 1.0f};
+            } else {
+                return transformTo<RGBAColorSpace>().toImGuiVector();
+            }
         }
 
         /**
@@ -469,6 +500,7 @@ namespace neon
 template<typename ColorSpace>
     requires neon::ColorHasPrint<ColorSpace>
 std::ostream& operator<<(std::ostream& os, const neon::Color<ColorSpace>& v)
+
 {
     ColorSpace::print(os, v.getData());
     return os;
