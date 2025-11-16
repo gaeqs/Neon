@@ -63,6 +63,18 @@ TEST_CASE("Color Construction", "[color]")
         CHECK(c[2] == Approx(0.0f));         // B
         CHECK(c[3] == Approx(128 / 255.0f)); // A
     }
+
+    SECTION("Color from a color in another ColorSpace")
+    {
+        RGB from(0xFF0000);
+
+        HSV to(from);
+        HSV toAssign = from;
+
+        CHECK(to == from);
+        CHECK(to == toAssign);
+        CHECK(toAssign == from);
+    }
 }
 
 TEST_CASE("Color Transformations & Comparison", "[color]")

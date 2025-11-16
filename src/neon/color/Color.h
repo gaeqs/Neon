@@ -190,6 +190,24 @@ namespace neon
         }
 
         /**
+         * @brief Converting constructor from another ColorSpace.
+         *
+         * Allows implicit conversion between color types (for example, HSL to RGB).
+         * This constructor is disabled if 'OtherColorSpace' is the same
+         * as 'ColorSpace' to avoid conflicting with the copy constructor.
+         *
+         * @tparam OtherColorSpace The ColorSpace of the 'other' color.
+         * @param other The Color object to convert from.
+         */
+        template<typename OtherColorSpace>
+            requires ColorSpaceHasTransformation<OtherColorSpace, ColorSpace> &&
+                     (!std::is_same_v<ColorSpace, OtherColorSpace>)
+        Color(const Color<OtherColorSpace>& other) :
+            data(ColorTransformer<OtherColorSpace, ColorSpace>::transform(other.getData()))
+        {
+        }
+
+        /**
          * @brief Returns a mutable reference to the underlying data.
          * @return A reference to the ColorSpace::Data.
          */
