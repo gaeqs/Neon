@@ -185,7 +185,7 @@ namespace neon
 
         /**
          * Virtual method invoked before the draw pass starts.
-         * This method is invoked after all "onPreDraw" methods.
+         * This method is invoked after all "onPreDraw" methods
          * from all components have been called.
          *
          * Don't use this method to create ImGui windows, as this method
