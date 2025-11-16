@@ -5,7 +5,7 @@ include(Catch)
 project(neon-tests)
 set(CMAKE_CXX_STANDARD 20)
 
-add_executable(neon-tests task.cpp coroutine.cpp logging.cpp loader.cpp clustered_linked_collection.cpp files.cpp)
+add_executable(neon-tests task.cpp coroutine.cpp logging.cpp loader.cpp clustered_linked_collection.cpp files.cpp color.cpp)
 
 cmrc_add_resource_library(
         resources_unit
