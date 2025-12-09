@@ -1,0 +1,37 @@
+stages:
+  - build
+  - test
+
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_OPEN_MERGE_REQUESTS
+      when: never
+    - if: $CI_COMMIT_BRANCH
+
+build-linux:
+  stage: build
+  image: ubuntu:22.04
+
+  rules:
+    - when: on_success
+
+  variables:
+    DEBIAN_FRONTEND: noninteractive
+
+  before_script:
+    - apt-get update && apt-get install -y build-essential cmake git
+      libassimp-dev libvulkan-dev libeigen3-dev catch2 libglfw3-dev
+      libglm-dev nlohmann-json3-dev libzip-dev libbz2-dev libnotify-dev
+      wget
+
+  script:
+    - cmake -B build
+      -DNEON_TESTS:BOOL=ON
+      -DSPIRV_WERROR:BOOL=OFF
+      -DCMAKE_BUILD_TYPE=Release
+      -S .
+    - cmake --build build --config Release
+    - cd build
+    - ctest --build-config Release --output-on-failure
