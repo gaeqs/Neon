@@ -44,6 +44,7 @@ namespace neon
 
     CommandPool::~CommandPool()
     {
+        waitForAll();
         _buffers.clear();
     }
 

@@ -13,6 +13,9 @@ namespace neon
 {
     class ShaderUniformBufferLoader : public AssetLoader<ShaderUniformBuffer>
     {
+        void loadData(const std::shared_ptr<ShaderUniformBuffer>& buffer, AssetLoaderContext context,
+                      nlohmann::json& json);
+
       public:
         ~ShaderUniformBufferLoader() override = default;
 

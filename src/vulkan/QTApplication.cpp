@@ -28,6 +28,7 @@
 #ifdef USE_QT
 
     #include "QTApplication.h"
+    #include "QtApplicationUtils.h"
 
     #include <utility>
     #include <qthread.h>
@@ -44,7 +45,6 @@
 
     #include <imgui.h>
     #include <imgui_impl_vulkan.h>
-    #include <imgui_impl_glfw.cpp>
     #include <implot.h>
 
 namespace
@@ -648,7 +648,7 @@ namespace neon::vulkan
 
         int glfwKey = qtToGLFWKey(static_cast<Qt::Key>(event->key()));
         auto& io = ImGui::GetIO();
-        io.AddKeyEvent(ImGui_ImplGlfw_KeyToImGuiKey(glfwKey, event->nativeScanCode()), true);
+        io.AddKeyEvent(glfwKeyToImGuiKey(glfwKey), true);
         if (!io.WantCaptureKeyboard) {
             _application->invokeKeyEvent(glfwKey, event->nativeScanCode(), event->isAutoRepeat() ? 2 : 1, modifier);
         }
@@ -667,13 +667,13 @@ namespace neon::vulkan
         if (qtMod & Qt::AltModifier) {
             modifier |= static_cast<int>(KeyboardModifier::ALT);
         }
-        if (qtMod & Qt::MetaModifier) {
+        if (qtMod & Qt::  MetaModifier) {
             modifier |= static_cast<int>(KeyboardModifier::SUPER);
         }
 
         int glfwKey = qtToGLFWKey((Qt::Key)event->key());
         auto& io = ImGui::GetIO();
-        io.AddKeyEvent(ImGui_ImplGlfw_KeyToImGuiKey(glfwKey, event->nativeScanCode()), false);
+        io.AddKeyEvent(glfwKeyToImGuiKey(glfwKey), false);
         if (!io.WantCaptureKeyboard) {
             _application->invokeKeyEvent(glfwKey, event->nativeScanCode(), 0, modifier);
         }

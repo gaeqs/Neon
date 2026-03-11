@@ -1,0 +1,107 @@
+{
+  "name": "neon:render",
+  "save": true,
+  "use_present": true,
+  "global_uniform_descriptor": {
+    "name": "neon:global_uniforms",
+    "save": true,
+    "bindings": [
+      {
+        "type": "uniform_buffer",
+        "size": 200
+      },
+      {
+        "type": "image"
+      }
+    ]
+  },
+  "render_passes": [
+    {
+      "name": "neon:front_render_pass_strategy",
+      "save": true,
+      "priority": 0,
+      "frame_buffer": {
+        "name": "neon:frame_buffer_front",
+        "save": true,
+        "type": "simple",
+        "samples": "COUNT_1",
+        "depth": true,
+        "textures": [
+          {
+            "name": "neon:front_output_color",
+            "save": true,
+            "format": "r8g8b8a8",
+            "layers": 1
+          },
+          {
+            "name": "neon:front_output_normal_xy",
+            "save": true,
+            "format": "r16fg16f",
+            "layers": 1
+          },
+          {
+            "name": "neon:front_output_normal_z_specular",
+            "save": true,
+            "format": "r16fg16f",
+            "layers": 1
+          }
+        ],
+        "depth_properties": {
+          "name": "neon:front_output_depth",
+          "save": true
+        }
+      }
+    },
+    {
+      "name": "neon:light_render_pass_strategy",
+      "save": true,
+      "priority": 0,
+      "frame_buffer": {
+        "name": "neon:frame_buffer_light",
+        "save": true,
+        "type": "simple",
+        "samples": "COUNT_1",
+        "depth": false,
+        "textures": [
+          {
+            "name": "neon:light_output_color",
+            "save": true,
+            "format": "r8g8b8a8",
+            "layers": 1
+          }
+        ]
+      }
+    },
+    {
+      "name": "neon:screen_render_pass_strategy",
+      "save": true,
+      "priority": 0,
+      "frame_buffer": {
+        "name": "neon:frame_buffer_screen",
+        "save": true,
+        "type": "simple",
+        "samples": "COUNT_1",
+        "depth": false,
+        "textures": [
+          {
+            "name": "neon:screen_output_color",
+            "save": true,
+            "format": "r8g8b8a8",
+            "layers": 1
+          }
+        ]
+      }
+    },
+    {
+      "name": "neon:swap_chain_render_pass_strategy",
+      "save": true,
+      "priority": 0,
+      "frame_buffer": {
+        "name": "neon:frame_buffer_swap_chain",
+        "save": true,
+        "type": "swap_chain",
+        "samples": "COUNT_1"
+      }
+    }
+  ]
+}

@@ -23,6 +23,8 @@ namespace neon::vulkan
         FrameBufferTextureCreateInfo createInfo;
         std::shared_ptr<MutableAsset<TextureView>> texture;
         std::shared_ptr<MutableAsset<TextureView>> resolved;
+        std::shared_ptr<SampledTexture> sampled;
+        std::shared_ptr<SampledTexture> resolvedSampled;
     };
 
     struct SimpleFrameBufferDepth
@@ -30,6 +32,7 @@ namespace neon::vulkan
         std::optional<std::string> name;
         FrameBufferDepthCreateInfo createInfo;
         std::shared_ptr<MutableAsset<TextureView>> texture;
+        std::shared_ptr<SampledTexture> sampled;
     };
 
     class VKSimpleFrameBuffer : public VKFrameBuffer

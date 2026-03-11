@@ -212,6 +212,28 @@ namespace neon
         }
     }
 
+    void ComponentCollection::latePreDrawComponents(Profiler& profiler)
+    {
+        flushNotStartedComponents();
+        for (const auto& [type, data] : _components) {
+            if (!data.first.onLatePreDraw) {
+                continue;
+            }
+
+            auto entry = ComponentRegister::instance().getEntry(type);
+            auto name = entry.has_value() ? entry->name.c_str() : type.name();
+            DEBUG_PROFILE_ID(profiler, type, name);
+
+            auto ptr = std::static_pointer_cast<AbstractClusteredLinkedCollection>(data.second);
+            ptr->forEachRaw([](void* ptr) {
+                auto* component = reinterpret_cast<Component*>(ptr);
+                if (component->isEnabled() && component->hasStarted()) {
+                    component->onLatePreDraw();
+                }
+            });
+        }
+    }
+
     void ComponentCollection::callOnConstruction(void* rawComponent)
     {
         reinterpret_cast<Component*>(rawComponent)->onConstruction();

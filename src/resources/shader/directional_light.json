@@ -1,0 +1,11 @@
+{
+  "name": "neon:directional_light",
+  "save": true,
+  "use_present": true,
+  "vertex": {
+    "file": "directional_light.vert"
+  },
+  "fragment": {
+    "file": "directional_light.frag"
+  }
+}

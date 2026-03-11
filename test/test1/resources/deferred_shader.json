@@ -1,0 +1,11 @@
+{
+  "name": "neon:deferred_shader",
+  "save": true,
+  "use_present": true,
+  "vertex": {
+    "file": "deferred.vert"
+  },
+  "fragment": {
+    "file": "deferred.frag"
+  }
+}

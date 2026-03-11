@@ -1,0 +1,80 @@
+{
+  "name": "neon:directional_light",
+  "save": true,
+  "use_present": true,
+  "maximum_instances": 1,
+  "auto_flush": true,
+  "custom_instance_sizes": [
+    36
+  ],
+  "meshes": [
+    {
+      "name": "neon:directional_light",
+      "save": true,
+      "use_present": true,
+      "vertices": [
+        -1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        -1.0,
+        -1.0,
+        -1.0
+      ],
+      "indices": [
+        0,
+        1,
+        2,
+        0,
+        2,
+        3
+      ],
+      "materials": [
+        {
+          "name": "neon:directional_light",
+          "save": true,
+          "use_present": true,
+          "frame_buffer": "A:neon:frame_buffer_light",
+          "shader": "/shader/directional_light.json",
+          "descriptions": {
+            "vertex": {
+              "stride": 8,
+              "attributes": {
+                "size_in_floats": 2,
+                "offset_in_bytes": 0
+              }
+            },
+            "instance": {
+              "stride": 36,
+              "attributes": [
+                {
+                  "size_in_floats": 3,
+                  "offset_in_bytes": 0
+                },
+                {
+                  "size_in_floats": 3,
+                  "offset_in_bytes": 12
+                },
+                {
+                  "size_in_floats": 3,
+                  "offset_in_bytes": 24
+                }
+              ]
+            },
+            "uniform_buffer": "/shader/buffer/light.json"
+          },
+          "blending": {
+            "attachments": [
+              {
+                "enabled": true,
+                "color_source_blend_factor": "one",
+                "color_destiny_blend_factor": "one"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

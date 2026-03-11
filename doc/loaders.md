@@ -243,7 +243,24 @@ All parameters are optional, but if you don't include them an empty model will b
 
 ```json
 {
-  "descriptor": "A:shader_uniform_descriptor"
+  "descriptor": "A:shader_uniform_descriptor",
+  // Optional array used to set default data
+  // data can also be an object.
+  "data": [
+    {
+      "index": 0,
+      "type": "image|buffer",
+      // Only if type is image.
+      "texture": "A:texture",
+      // Binary data in uint_8 format. Only if type is buffer.
+      "data": [
+        0,
+        1,
+        2,
+        3
+      ]
+    }
+  ]
 }
 ```
 
@@ -337,6 +354,10 @@ If no sources are available, the texture won't be created.
   "textures": [
     {
       // General properties are available here!
+      // These general properties are used to
+      // name the texture, the texture view and
+      // the sampled texture.
+      // Only the sampled texture will be saved.
       "name": "A texture",
       "save": true,
       "format": "r8g8b8a8|...",
@@ -358,7 +379,10 @@ If no sources are available, the texture won't be created.
   "depth_properties": {
     // General properties are available here!
     "name": "Depth texture",
-    "save": true
+    "save": true,
+    "sampler": {
+      // Just like a texture.
+    }
   }
 }
 ```

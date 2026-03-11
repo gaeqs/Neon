@@ -21,10 +21,10 @@ namespace neon
         template<class T>
         static inline ComponentImplementedEvents fromGeneric()
         {
-            return ComponentImplementedEvents(typeid(&T::onConstruction), typeid(&T::onStart), typeid(&T::onUpdate),
-                                              typeid(&T::onLateUpdate), typeid(&T::onPreDraw), typeid(&T::onKey),
-                                              typeid(&T::onChar), typeid(&T::onMouseButton), typeid(&T::onCursorMove),
-                                              typeid(&T::onScroll));
+            return ComponentImplementedEvents(
+                typeid(&T::onConstruction), typeid(&T::onStart), typeid(&T::onUpdate), typeid(&T::onLateUpdate),
+                typeid(&T::onPreDraw), typeid(&T::onLatePreDraw), typeid(&T::onKey), typeid(&T::onChar),
+                typeid(&T::onMouseButton), typeid(&T::onCursorMove), typeid(&T::onScroll));
         }
 
         bool onConstruction;
@@ -32,6 +32,7 @@ namespace neon
         bool onUpdate;
         bool onLateUpdate;
         bool onPreDraw;
+        bool onLatePreDraw;
         bool onKey;
         bool onChar;
         bool onMouseButton;
@@ -40,9 +41,10 @@ namespace neon
 
         ComponentImplementedEvents(std::type_index onConstructionFunction, std::type_index onStartFunction,
                                    std::type_index onUpdateFunction, std::type_index onLateUpdateFunction,
-                                   std::type_index onPreDrawFunction, std::type_index onKeyFunction,
-                                   std::type_index onCharFunction, std::type_index onMouseButtonFunction,
-                                   std::type_index onCursorMoveFunction, std::type_index onScrollFunction);
+                                   std::type_index onPreDrawFunction, std::type_index onLatePreDrawFunction,
+                                   std::type_index onKeyFunction, std::type_index onCharFunction,
+                                   std::type_index onMouseButtonFunction, std::type_index onCursorMoveFunction,
+                                   std::type_index onScrollFunction);
     };
 } // namespace neon
 

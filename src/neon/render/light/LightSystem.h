@@ -23,8 +23,12 @@ namespace neon
         std::shared_ptr<Model> _flashLightModel;
 
       public:
+        LightSystem();
+
         LightSystem(const std::shared_ptr<Model>& directionalLightModel, const std::shared_ptr<Model>& pointLightModel,
                     const std::shared_ptr<Model>& flashLightModel);
+
+        void onStart() override;
 
         [[nodiscard]] const std::shared_ptr<Model>& getDirectionalLightModel() const;
 
@@ -35,4 +39,4 @@ namespace neon
     REGISTER_COMPONENT(LightSystem, "Light System")
 } // namespace neon
 
-#endif //NEON_LIGHTSYSTEM_H
+#endif // NEON_LIGHTSYSTEM_H

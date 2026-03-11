@@ -1,0 +1,46 @@
+{
+  "name": "neon:screen_uniform_buffer",
+  "save": true,
+  "use_present": true,
+  "descriptor": {
+    "name": "neon:screen_uniform_buffer",
+    "save": true,
+    "use_present": true,
+    "bindings": [
+      {
+        "type": "image"
+      },
+      {
+        "type": "image"
+      },
+      {
+        "type": "image"
+      },
+      {
+        "type": "image"
+      }
+    ]
+  },
+  "data": [
+    {
+      "index": 0,
+      "type": "image",
+      "texture": "A:neon:light_output_color"
+    },
+    {
+      "index": 1,
+      "type": "image",
+      "texture": "A:neon:front_output_normal_xy"
+    },
+    {
+      "index": 2,
+      "type": "image",
+      "texture": "A:neon:front_output_normal_z_specular"
+    },
+    {
+      "index": 3,
+      "type": "image",
+      "texture": "A:neon:front_output_depth"
+    }
+  ]
+}

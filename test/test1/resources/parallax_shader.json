@@ -1,5 +1,5 @@
 {
-  "name": "neoneuron:parallax_shader",
+  "name": "neon:parallax_shader",
   "save": true,
   "use_present": true,
   "vertex": {

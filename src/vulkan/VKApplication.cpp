@@ -830,6 +830,7 @@ namespace neon::vulkan
     {
         _imageAvailableSemaphore = nullptr;
 
+        _commandManager->disposeAll();
         _bin.waitAndFlush();
 
         if (ImGui::GetIO().BackendRendererUserData != nullptr) {

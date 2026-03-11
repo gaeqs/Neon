@@ -140,7 +140,7 @@ namespace neon
         return std::filesystem::path(out);
     }
 
-    void sendNotificationLinux(const NotificationInfo& info)
+    inline void sendNotificationLinux(const NotificationInfo& info)
     {
         initNotify();
         auto* n = notify_notification_new(info.title.c_str(), info.message.c_str(),

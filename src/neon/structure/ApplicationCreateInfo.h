@@ -48,6 +48,8 @@ struct ApplicationCreateInfo
      * This path is used to load or save layout settings and other ImGui state-related data.
      */
     std::string imGuiIniPath = "imgui.ini";
+
+    bool loadDefaultRender = false;
 };
 
 #endif // APPLICATIONCREATEINFO_H

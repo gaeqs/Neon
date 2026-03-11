@@ -270,9 +270,17 @@ namespace neon
     {
         auto& p = getApplication()->getProfiler();
         auto* cb = _application->getCurrentCommandBuffer();
+        DEBUG_PROFILE(p, drawing);
+        {
+            DEBUG_PROFILE(p, preDraw);
+            _components.preDrawComponents(p);
+        }
 
-        DEBUG_PROFILE(p, preDraw);
-        _components.preDrawComponents(p);
+        {
+            DEBUG_PROFILE(p, latePreDraw);
+            _components.latePreDrawComponents(p);
+        }
+
         {
             DEBUG_PROFILE(p, models);
             for (const auto& [model, amount] : _usedModels) {

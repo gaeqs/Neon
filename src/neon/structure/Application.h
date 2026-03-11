@@ -285,7 +285,7 @@ namespace neon
          * @brief Returns the render system.
          * @return the render system.
          */
-        [[nodiscard]] const std::shared_ptr<Render>& getRender() const;
+        [[nodiscard]] const std::shared_ptr<Render>& getRender();
 
         /**
          * @brief Sets the render system.
